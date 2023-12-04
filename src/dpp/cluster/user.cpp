@@ -37,7 +37,7 @@ void cluster::current_user_edit(const std::string &nickname, const std::string& 
 			{ i_webp, "image/webp" },
 		};
 		if (image_blob.size() > MAX_EMOJI_SIZE) {
-			throw dpp::length_exception("User icon file exceeds discord limit of 256 kilobytes");
+			throw dpp::length_exception(err_icon_size, "User icon file exceeds discord limit of 256 kilobytes");
 		}
 		j["avatar"] = "data:" + mimetypes.find(type)->second + ";base64," + base64_encode((unsigned char const*)image_blob.data(), (unsigned int)image_blob.length());
 	}
@@ -59,7 +59,7 @@ void cluster::current_user_set_voice_state(snowflake guild_id, snowflake channel
 	});
 	if (request_to_speak_timestamp) {
 		if (request_to_speak_timestamp < time(nullptr)) {
-			throw dpp::logic_exception("Cannot set voice state request to speak timestamp to before current time");
+			throw dpp::logic_exception(err_voice_state_timestamp, "Cannot set voice state request to speak timestamp to before current time");
 		}
 		j["request_to_speak_timestamp"] = ts_to_string(request_to_speak_timestamp);
 	} else {
