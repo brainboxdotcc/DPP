@@ -106,7 +106,7 @@ enum exception_error_code {
 	err_unknown = 37,
 	err_bad_request = 400,
 	err_unauthorized = 401,
-	err_payment_requred = 402,
+	err_payment_required = 402,
 	err_forbidden = 403,
 	err_not_found = 404,
 	err_method_not_allowed = 405,
