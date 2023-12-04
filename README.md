@@ -142,6 +142,7 @@ We love people's support in growing and improving. Be sure to leave a ⭐️ if 
 * [clang](https://clang.llvm.org/) (version 6 or higher)
 * AppleClang (12.0 or higher)
 * Microsoft Visual Studio 2019 or 2022 (16.x/17.x)
+* [clang-cl](https://learn.microsoft.com/en-us/cpp/build/clang-support-msbuild) (version 15 or higher)
 
 Other compilers may work (either newer versions of those listed above, or different compilers entirely) but have not been tested by us.
 
