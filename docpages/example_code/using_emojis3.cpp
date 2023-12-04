@@ -29,16 +29,14 @@ int main() {
 		}
 	});
 
-	bot.on_select_click([](const dpp::select_click_t & event) {
+	bot.on_select_click([](const dpp::select_click_t& event) {
 		event.reply(event.values[0]);
 	});
 
 	bot.on_ready([&bot](const dpp::ready_t& event) {
 		if (dpp::run_once<struct register_bot_commands>()) {
-			/* Create and register a command when the bot is ready */
-			bot.global_command_create(dpp::slashcommand("select", "Select something at random!", bot.me.id), [&bot](const dpp::confirmation_callback_t& callback) {
-				std::cout << callback.http_info.body << std::endl;
-			});
+			dpp::slashcommand select("select", "Send the select menu", bot.me.id);
+			bot.global_command_create(select);
 		}
 	});
 

@@ -12,7 +12,6 @@ int main() {
 
 	bot.on_slashcommand([shocked, mad](const dpp::slashcommand_t& event) {
 		if (event.command.get_command_name() == "send-emojis") {
-
 			/* Here we send our very informative message: three epic emojis. */
 			event.reply(dpp::unicode_emoji::nerd + shocked.get_mention() + mad.get_mention());
 		}
@@ -21,7 +20,7 @@ int main() {
 	bot.on_ready([&bot](const dpp::ready_t& event) {
 		if (dpp::run_once<struct register_bot_commands>()) {
 			dpp::slashcommand send("send-emojis", "Send the emojis", bot.me.id);
-			bot.global_bulk_command_create({ send });
+			bot.global_command_create(send);
 		}
 	});
 
