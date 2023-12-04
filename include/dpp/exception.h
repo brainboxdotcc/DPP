@@ -43,7 +43,7 @@ namespace dpp {
  * here. In this case, or where the code is not specific, refer to `what()`.
  */
 enum exception_error_code {
-	err_this_is_not_an_error = 0,
+	err_no_code_specified = 0,
 	err_zlib_see_errno = -1,
 	err_zlib_init_stream = -2,
 	err_zlib_init_data = -3,
@@ -411,7 +411,7 @@ public:
 	 * 
 	 * @param what reason message
 	 */
-	explicit exception(const char* what) : msg(what), error_code(err_this_is_not_an_error) { }
+	explicit exception(const char* what) : msg(what), error_code(err_no_code_specified) { }
 
 	/**
 	 * @brief Construct a new exception object
@@ -427,14 +427,14 @@ public:
 	 * @param what reason message
 	 * @param len length of reason message
 	 */
-	exception(const char* what, size_t len) : msg(what, len), error_code(err_this_is_not_an_error) { }
+	exception(const char* what, size_t len) : msg(what, len), error_code(err_no_code_specified) { }
 
 	/**
 	 * @brief Construct a new exception object
 	 * 
 	 * @param what reason message
 	 */
-	explicit exception(const std::string& what) : msg(what), error_code(err_this_is_not_an_error) { }
+	explicit exception(const std::string& what) : msg(what), error_code(err_no_code_specified) { }
 	
 	/**
 	 * @brief Construct a new exception object
