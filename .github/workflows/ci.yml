@@ -174,16 +174,20 @@ jobs:
       fail-fast: false # Don't cancel other matrix jobs if one fails
       matrix:
         cfg:
-        - { name: x64,              arch: x64, config: Release, vs: '2019', os: 'windows-2019', vsv: '16', upload: true,  options: '' }
-        - { name: x64,              arch: x64, config: Debug,   vs: '2019', os: 'windows-2019', vsv: '16', upload: true,  options: '' }
-        - { name: x86,              arch: x86, config: Release, vs: '2019', os: 'windows-2019', vsv: '16', upload: true,  options: '-T host=x86 ' }
-        - { name: x86,              arch: x86, config: Debug,   vs: '2019', os: 'windows-2019', vsv: '16', upload: true,  options: '-T host=x86 ' }
-        - { name: x64,              arch: x64, config: Release, vs: '2022', os: 'windows-2022', vsv: '17', upload: true,  options: '' }
-        - { name: x64,              arch: x64, config: Debug,   vs: '2022', os: 'windows-2022', vsv: '17', upload: true,  options: '' }
-        - { name: x86,              arch: x86, config: Release, vs: '2022', os: 'windows-2022', vsv: '17', upload: true,  options: '-T host=x86' }
-        - { name: x86,              arch: x86, config: Debug,   vs: '2022', os: 'windows-2022', vsv: '17', upload: true,  options: '-T host=x86' }
-        - { name: 'Clang-x64',      arch: x64, config: Release, vs: '2022', os: 'windows-2022', vsv: '17', upload: false, options: '-T ClangCL' }
-        - { name: 'Clang-x64-coro', arch: x64, config: Release, vs: '2022', os: 'windows-2022', vsv: '17', upload: false, options: '-T ClangCL -DDPP_CORO=on' }
+        - { name: 'x64',            arch: x64, config: Release, vs: '2019', os: 'windows-2019', vsv: '16', upload: true,  options: '' }
+        - { name: 'x64',            arch: x64, config: Debug,   vs: '2019', os: 'windows-2019', vsv: '16', upload: true,  options: '' }
+        - { name: 'x86',            arch: x86, config: Release, vs: '2019', os: 'windows-2019', vsv: '16', upload: true,  options: '-T host=x86 ' }
+        - { name: 'x86',            arch: x86, config: Debug,   vs: '2019', os: 'windows-2019', vsv: '16', upload: true,  options: '-T host=x86 ' }
+        - { name: 'x64',            arch: x64, config: Release, vs: '2022', os: 'windows-2022', vsv: '17', upload: true,  options: '' }
+        - { name: 'x64',            arch: x64, config: Debug,   vs: '2022', os: 'windows-2022', vsv: '17', upload: true,  options: '' }
+        - { name: 'x86',            arch: x86, config: Release, vs: '2022', os: 'windows-2022', vsv: '17', upload: true,  options: '-T host=x86' }
+        - { name: 'x86',            arch: x86, config: Debug,   vs: '2022', os: 'windows-2022', vsv: '17', upload: true,  options: '-T host=x86' }
+        - { name: 'x64-Coro',       arch: x64, config: Release, vs: '2022', os: 'windows-2022', vsv: '17', upload: true,  options: '-DDPP_CORO=on' }
+        - { name: 'x64-Coro',       arch: x64, config: Debug,   vs: '2022', os: 'windows-2022', vsv: '17', upload: true,  options: '-DDPP_CORO=on' }
+        - { name: 'x86-Coro',       arch: x86, config: Release, vs: '2022', os: 'windows-2022', vsv: '17', upload: true,  options: '-T host=x86 -DDPP_CORO=on' }
+        - { name: 'x86-Coro',       arch: x86, config: Debug,   vs: '2022', os: 'windows-2022', vsv: '17', upload: true,  options: '-T host=x86 -DDPP_CORO=on' }
+        - { name: 'x64-Clang',      arch: x64, config: Debug,   vs: '2022', os: 'windows-2022', vsv: '17', upload: false, options: '-T ClangCL' }
+        - { name: 'x64-Clang-Coro', arch: x64, config: Debug,   vs: '2022', os: 'windows-2022', vsv: '17', upload: false, options: '-T ClangCL -DDPP_CORO=on' }
 
     name: "Windows ${{matrix.cfg.name}}-${{matrix.cfg.config}}-vs${{matrix.cfg.vs}}"
     runs-on: ${{matrix.cfg.os}}
@@ -206,13 +210,13 @@ jobs:
 
       - name: Generate CMake (x64)
         if: ${{ matrix.cfg.arch == 'x64' }}
-        run: mkdir main/build && cd main/build && cmake -G "Visual Studio ${{matrix.cfg.vsv}} ${{matrix.cfg.vs}}" -DDPP_NO_VCPKG=ON -DAVX_TYPE=AVX0 ${{matrix.cfg.options}} ..
+        run: mkdir main/build && cd main/build && cmake -G "Visual Studio ${{matrix.cfg.vsv}} ${{matrix.cfg.vs}}" -DDPP_NO_VCPKG=ON -DAVX_TYPE=AVX0 -DDPP_USE_PCH=on ${{matrix.cfg.options}} ..
         env:
           DONT_RUN_VCPKG: true
 
       - name: Generate CMake (x86)
         if: ${{ matrix.cfg.arch == 'x86' }}
-        run: mkdir main/build && cd main/build && cmake -DCMAKE_TOOLCHAIN_FILE="cmake\Win32Toolchain.cmake" -DDPP_NO_VCPKG=ON -DAVX_TYPE=AVX0 -G "Visual Studio ${{matrix.cfg.vsv}} ${{matrix.cfg.vs}}" -A Win32 ${{matrix.cfg.options}} ..
+        run: mkdir main/build && cd main/build && cmake -DCMAKE_TOOLCHAIN_FILE="cmake\Win32Toolchain.cmake" -DDPP_NO_VCPKG=ON -DAVX_TYPE=AVX0 -DDPP_USE_PCH=on -G "Visual Studio ${{matrix.cfg.vsv}} ${{matrix.cfg.vs}}" -A Win32 ${{matrix.cfg.options}} ..
         env:
           DONT_RUN_VCPKG: true
 
