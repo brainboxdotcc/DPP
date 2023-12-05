@@ -10,6 +10,7 @@ on:
       - '**.cmake'
       - '**ci.yml'
       - '**CMakeLists.txt'
+      - '!**/docpages/**' # Never allow docpages to build CI from doc PRs.
   pull_request:
     paths:
       - '**Dockerfile'
@@ -20,6 +21,7 @@ on:
       - '**.cmake'
       - '**ci.yml'
       - '**CMakeLists.txt'
+      - '!**/docpages/**'
 
 permissions:
   contents: read
