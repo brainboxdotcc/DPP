@@ -4,6 +4,7 @@
 * \subpage thread-model
 * \subpage voice-model
 * \subpage coding-standards
+* \subpage docs-standards
 * \subpage unit-tests
 * \subpage lambdas-and-locals
 * \subpage governance

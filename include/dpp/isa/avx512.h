@@ -28,7 +28,7 @@
 namespace dpp {
 
 	using avx_512_float = __m512;
-	
+
 	/**
 	 * @brief A class for audio mixing operations using AVX512 instructions.
 	 */

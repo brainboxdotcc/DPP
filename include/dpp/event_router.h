@@ -305,7 +305,7 @@ protected:
 				if (std::holds_alternative<regular_handler_t>(listener)) {
 					std::get<regular_handler_t>(listener)(event);
 				} else {
-					throw dpp::logic_exception("cannot handle a coroutine event handler with a library	built without DPP_CORO");
+					throw dpp::logic_exception("cannot handle a coroutine event handler with a library built without DPP_CORO");
 				}
 			}
 		};

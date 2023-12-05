@@ -97,7 +97,7 @@ bool emoji::is_available() const {
 
 emoji& emoji::load_image(std::string_view image_blob, const image_type type) {
 	if (image_blob.size() > MAX_EMOJI_SIZE) {
-		throw dpp::length_exception("Emoji file exceeds discord limit of 256 kilobytes");
+		throw dpp::length_exception(err_icon_size, "Emoji file exceeds discord limit of 256 kilobytes");
 	}
 	image_data = utility::image_data{type, image_blob};
 	return *this;
@@ -105,7 +105,7 @@ emoji& emoji::load_image(std::string_view image_blob, const image_type type) {
 
 emoji& emoji::load_image(const std::byte *data, uint32_t size, const image_type type) {
 	if (size > MAX_EMOJI_SIZE) {
-		throw dpp::length_exception("Emoji file exceeds discord limit of 256 kilobytes");
+		throw dpp::length_exception(err_icon_size, "Emoji file exceeds discord limit of 256 kilobytes");
 	}
 	image_data = utility::image_data{type, data, size};
 	return *this;

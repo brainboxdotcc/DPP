@@ -28,7 +28,7 @@
 namespace dpp {
 
 	using avx_float = __m128;
-	
+
 	/**
 	 * @brief A class for audio mixing operations using AVX instructions.
 	 */

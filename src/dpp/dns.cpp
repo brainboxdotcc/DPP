@@ -83,7 +83,11 @@ namespace dpp
 		hints.ai_protocol = IPPROTO_TCP;
 
 		if ((error = getaddrinfo(hostname.c_str(), port.c_str(), &hints, &addrs))) {
-			throw dpp::connection_exception(std::string("getaddrinfo error: ") + gai_strerror(error));
+			/**
+			 * The -20 makes sure the error codes dont conflict with codes given in the rest of the list
+			 * Because C libraries love to use -1 and below directly as conflicting error codes.
+			 */
+			throw dpp::connection_exception((exception_error_code)(error - 20), std::string("getaddrinfo error: ") + gai_strerror(error));
 		}
 
 		/* Thread safety scope */

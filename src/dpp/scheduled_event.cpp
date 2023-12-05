@@ -77,15 +77,15 @@ scheduled_event& scheduled_event::set_creator_id(snowflake c) {
 
 scheduled_event& scheduled_event::set_status(event_status s) {
 	if (this->status == es_completed || this->status == es_cancelled) {
-		throw dpp::logic_exception("Can't update status of a completed or cancelled event");
+		throw dpp::logic_exception(err_cancelled_event, "Can't update status of a completed or cancelled event");
 	} else {
 		if (this->status == es_scheduled) {
 			if (s != es_active && s != es_cancelled) {
-				throw dpp::logic_exception("Invalid status transition, scheduled can only transition to active or cancelled");
+				throw dpp::logic_exception(err_event_status, "Invalid status transition, scheduled can only transition to active or cancelled");
 			}
 		} else if (this->status == es_active) {
 			if (s != es_completed) {
-				throw dpp::logic_exception("Invalid status transition, active can only transition to completed");
+				throw dpp::logic_exception(err_event_status, "Invalid status transition, active can only transition to completed");
 			}
 		}
 	}
@@ -95,7 +95,7 @@ scheduled_event& scheduled_event::set_status(event_status s) {
 
 scheduled_event& scheduled_event::set_start_time(time_t t) {
 	if (t < time(nullptr)) {
-		throw dpp::length_exception("Start time cannot be before current date and time");
+		throw dpp::length_exception(err_event_start_time, "Start time cannot be before current date and time");
 	}
 	this->scheduled_start_time = t;
 	return *this;
@@ -103,7 +103,7 @@ scheduled_event& scheduled_event::set_start_time(time_t t) {
 
 scheduled_event& scheduled_event::set_end_time(time_t t) {
 	if (t < time(nullptr)) {
-		throw dpp::length_exception("End time cannot be before current date and time");
+		throw dpp::length_exception(err_event_end_time, "End time cannot be before current date and time");
 	}
 	this->scheduled_end_time = t;
 	return *this;

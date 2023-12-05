@@ -142,7 +142,7 @@ request_queue* cluster::get_raw_rest() {
 
 cluster& cluster::set_websocket_protocol(websocket_protocol_t mode) {
 	if (start_time > 0) {
-		throw dpp::logic_exception("Cannot change websocket protocol on a started cluster!");
+		throw dpp::logic_exception(err_websocket_proto_already_set, "Cannot change websocket protocol on a started cluster!");
 	}
 	ws_mode = mode;
 	return *this;
@@ -177,7 +177,7 @@ void cluster::start(bool return_after) {
 		g = dpp::sync<gateway>(this, &cluster::get_gateway_bot);
 		log(ll_debug, "Cluster: " + std::to_string(g.session_start_remaining) + " of " + std::to_string(g.session_start_total) + " session starts remaining");
 		if (g.session_start_remaining < g.shards) {
-			throw dpp::connection_exception("Discord indicates you cannot start enough sessions to boot this cluster! Cluster startup aborted. Try again later.");
+			throw dpp::connection_exception(err_no_sessions_left, "Discord indicates you cannot start enough sessions to boot this cluster! Cluster startup aborted. Try again later.");
 		}
 		if (g.session_start_max_concurrency > 1) {
 			log(ll_debug, "Cluster: Large bot sharding; Using session concurrency: " + std::to_string(g.session_start_max_concurrency));
@@ -186,7 +186,7 @@ void cluster::start(bool return_after) {
 			if (g.shards) {
 				log(ll_info, "Auto Shard: Bot requires " + std::to_string(g.shards) + std::string(" shard") + ((g.shards > 1) ? "s" : ""));
 			} else {
-				throw dpp::connection_exception("Auto Shard: Cannot determine number of shards. Cluster startup aborted. Check your connection.");
+				throw dpp::connection_exception(err_auto_shard, "Auto Shard: Cannot determine number of shards. Cluster startup aborted. Check your connection.");
 			}
 			numshards = g.shards;
 		}
@@ -194,7 +194,7 @@ void cluster::start(bool return_after) {
 	catch (const dpp::rest_exception& e) {
 		if (std::string(e.what()) == "401: Unauthorized") {
 			/* Throw special form of exception for invalid token */
-			throw dpp::invalid_token_exception("Invalid bot token (401: Unauthorized when getting gateway shard count)");
+			throw dpp::invalid_token_exception(err_unauthorized, "Invalid bot token (401: Unauthorized when getting gateway shard count)");
 		} else {
 			/* Rethrow */
 			throw e;

@@ -261,7 +261,7 @@ void discord_voice_client::voice_courier_loop(discord_voice_client& client, cour
 				} else {
 					voice_receive_t& vr = *d.parked_payloads.top().vr;
 					if (vr.audio_data.length() > 0x7FFFFFFF) {
-						throw dpp::length_exception("audio_data > 2GB! This should never happen!");
+						throw dpp::length_exception(err_massive_audio, "audio_data > 2GB! This should never happen!");
 					}
 					if (samples = opus_decode(d.decoder.get(), vr.audio_data.data(),
 						static_cast<opus_int32>(vr.audio_data.length() & 0x7FFFFFFF), pcm, 5760, 0);
@@ -332,18 +332,18 @@ discord_voice_client::discord_voice_client(dpp::cluster* _cluster, snowflake _ch
 #if HAVE_VOICE
 	if (!discord_voice_client::sodium_initialised) {
 		if (sodium_init() < 0) {
-			throw dpp::voice_exception("discord_voice_client::discord_voice_client; sodium_init() failed");
+			throw dpp::voice_exception(err_sodium, "discord_voice_client::discord_voice_client; sodium_init() failed");
 		}
 		discord_voice_client::sodium_initialised = true;
 	}
 	int opusError = 0;
 	encoder = opus_encoder_create(opus_sample_rate_hz, opus_channel_count, OPUS_APPLICATION_VOIP, &opusError);
 	if (opusError) {
-		throw dpp::voice_exception("discord_voice_client::discord_voice_client; opus_encoder_create() failed");
+		throw dpp::voice_exception(err_opus, "discord_voice_client::discord_voice_client; opus_encoder_create() failed");
 	}
 	repacketizer = opus_repacketizer_create();
 	if (!repacketizer) {
-		throw dpp::voice_exception("discord_voice_client::discord_voice_client; opus_repacketizer_create() failed");
+		throw dpp::voice_exception(err_opus, "discord_voice_client::discord_voice_client; opus_repacketizer_create() failed");
 	}
 	try {
 		this->connect();
@@ -353,7 +353,7 @@ discord_voice_client::discord_voice_client(dpp::cluster* _cluster, snowflake _ch
 		throw;
 	}
 #else
-	throw dpp::voice_exception("Voice support not enabled in this build of D++");
+	throw dpp::voice_exception(err_no_voice_support, "Voice support not enabled in this build of D++");
 #endif
 }
 
@@ -621,11 +621,11 @@ bool discord_voice_client::handle_frame(const std::string &data)
 					servaddr.sin_port = htons(0);
 
 					if (bind(newfd, (sockaddr*)&servaddr, sizeof(servaddr)) < 0) {
-						throw dpp::connection_exception("Can't bind() client UDP socket");
+						throw dpp::connection_exception(err_bind_failure, "Can't bind() client UDP socket");
 					}
 					
 					if (!set_nonblocking(newfd, true)) {
-						throw dpp::connection_exception("Can't switch voice UDP socket to non-blocking mode!");
+						throw dpp::connection_exception(err_nonblocking_failure, "Can't switch voice UDP socket to non-blocking mode!");
 					}
 
 					/* Hook poll() in the ssl_client to add a new file descriptor */
@@ -807,7 +807,11 @@ void discord_voice_client::read_ready()
 				decoder.reset(opus_decoder_create(opus_sample_rate_hz, opus_channel_count, &opus_error),
 				              &opus_decoder_destroy);
 				if (opus_error) {
-					throw dpp::voice_exception("discord_voice_client::discord_voice_client; opus_decoder_create() failed");
+					/**
+					 * NOTE: The -10 here makes the opus_error match up with values of exception_error_code,
+					 * which would otherwise conflict as every C library loves to use values from -1 downwards.
+					 */
+					throw dpp::voice_exception((exception_error_code)(opus_error - 10), "discord_voice_client::discord_voice_client; opus_decoder_create() failed");
 				}
 			}
 
@@ -830,7 +834,7 @@ void discord_voice_client::read_ready()
 		}
 	}
 #else
-	throw dpp::voice_exception("Voice support not enabled in this build of D++");
+	throw dpp::voice_exception(err_no_voice_support, "Voice support not enabled in this build of D++");
 #endif
 }
 
@@ -1063,7 +1067,7 @@ const std::vector<std::string> discord_voice_client::get_marker_metadata() {
 void discord_voice_client::one_second_timer()
 {
 	if (terminating) {
-		throw dpp::connection_exception("Terminating voice connection");
+		throw dpp::connection_exception(err_voice_terminating, "Terminating voice connection");
 	}
 	/* Rate limit outbound messages, 1 every odd second, 2 every even second */
 	if (this->get_state() == CONNECTED) {
@@ -1128,10 +1132,10 @@ size_t discord_voice_client::encode(uint8_t *input, size_t inDataSize, uint8_t *
 			}
 		}
 	} else {
-		throw dpp::voice_exception("Invalid input data length: " + std::to_string(inDataSize) + ", must be n times of " + std::to_string(mEncFrameBytes));
+		throw dpp::voice_exception(err_invalid_voice_packet_length, "Invalid input data length: " + std::to_string(inDataSize) + ", must be n times of " + std::to_string(mEncFrameBytes));
 	}
 #else
-	throw dpp::voice_exception("Voice support not enabled in this build of D++");
+	throw dpp::voice_exception(err_no_voice_support, "Voice support not enabled in this build of D++");
 #endif
 	return outDataSize;
 }
@@ -1197,11 +1201,11 @@ discord_voice_client& discord_voice_client::set_send_audio_type(send_audio_type_
 discord_voice_client& discord_voice_client::send_audio_raw(uint16_t* audio_data, const size_t length)  {
 #if HAVE_VOICE
 	if (length < 4) {
-		throw dpp::voice_exception("Raw audio packet size can't be less than 4");
+		throw dpp::voice_exception(err_invalid_voice_packet_length, "Raw audio packet size can't be less than 4");
 	}
 
 	if ((length % 4) != 0) {
-		throw dpp::voice_exception("Raw audio packet size should be divisible by 4");
+		throw dpp::voice_exception(err_invalid_voice_packet_length, "Raw audio packet size should be divisible by 4");
 	}
 
 	if (length > send_audio_raw_max_length) {
@@ -1234,7 +1238,7 @@ discord_voice_client& discord_voice_client::send_audio_raw(uint16_t* audio_data,
 
 	send_audio_opus(encodedAudioData.data(), encodedAudioLength);
 #else
-	throw dpp::voice_exception("Voice support not enabled in this build of D++");
+	throw dpp::voice_exception(err_no_voice_support, "Voice support not enabled in this build of D++");
 #endif
 	return *this;
 }
@@ -1245,7 +1249,7 @@ discord_voice_client& discord_voice_client::send_audio_opus(uint8_t* opus_packet
 	uint64_t duration = (samples / 48) / (timescale / 1000000);
 	send_audio_opus(opus_packet, length, duration);
 #else
-	throw dpp::voice_exception("Voice support not enabled in this build of D++");
+	throw dpp::voice_exception(err_no_voice_support, "Voice support not enabled in this build of D++");
 #endif
 	return *this;
 }
@@ -1279,7 +1283,7 @@ discord_voice_client& discord_voice_client::send_audio_opus(uint8_t* opus_packet
 
 	speak();
 #else
-	throw dpp::voice_exception("Voice support not enabled in this build of D++");
+	throw dpp::voice_exception(err_no_voice_support, "Voice support not enabled in this build of D++");
 #endif
 	return *this;
 }

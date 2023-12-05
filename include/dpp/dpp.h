@@ -43,6 +43,7 @@
 #include <dpp/role.h>
 #include <dpp/user.h>
 #include <dpp/channel.h>
+#include <dpp/thread.h>
 #include <dpp/guild.h>
 #include <dpp/invite.h>
 #include <dpp/dtemplate.h>

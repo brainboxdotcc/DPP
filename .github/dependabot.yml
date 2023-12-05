@@ -3,7 +3,7 @@ updates:
   - package-ecosystem: "gitsubmodule"
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: "monthly"
     target-branch: "dev"
     allow:
       - dependency-name: "doxygen-awesome-css"

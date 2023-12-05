@@ -80,6 +80,7 @@
 		"numbers": "cpp",
 		"semaphore": "cpp",
 		"stop_token": "cpp",
-		"charconv": "cpp"
+		"charconv": "cpp",
+		"any": "cpp"
 	}
 }
