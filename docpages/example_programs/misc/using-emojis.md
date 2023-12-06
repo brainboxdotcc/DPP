@@ -2,7 +2,7 @@
 
 Need your bot to use an emoji? Then you've come to the right place! Here are three examples of using emojis.
 
-\note If your bot isn't in a guild where you want to take the custom emoji from, it won't work. If you're trying to send one, it'll turn into `:name:`, otherwise it won't work at all giving you the Unknown Emoji error.
+\note If your bot isn't in the guild where you want to use the custom emoji from, it won't work, giving you `dpp::exception_error_code::err_unknown_emoji`.
 
 First - Sending emojis. You have to use its mention, which depends on the type. If it's a default emoji, you use the corresponding character. So, for example, if you wanted to send a nerd emoji, you would use the nerd unicode character. Now, custom emoji. There are two types: static and animated. Their mentions are `<:[name]:[id]>` and `<a:[name]:[id]>`, where `[name]` means the emoji name and `[id]` is for its ID. When you send such mention, it automatically gets converted into your emoji. Here's an example of sending emojis:
 
