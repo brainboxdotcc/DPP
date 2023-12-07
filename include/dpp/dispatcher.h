@@ -971,6 +971,16 @@ struct DPP_EXPORT ready_t : public event_dispatch_t {
 	 * @brief shard id
 	 */
 	uint32_t shard_id = {};
+
+	/**
+	 * @brief Array of guild IDs the bot is in, at the time of this event.
+	 */
+	std::vector<snowflake> guilds{};
+
+	/**
+	 * @brief The number of guilds the bot is in, at the time of this event.
+	 */
+	uint32_t guild_count{0};
 };
 
 /**
