@@ -662,6 +662,13 @@ public:
 	 */
 	dpp::utility::uptime get_uptime();
 
+	/**
+	 * @brief The time (in milliseconds) between each interval when parsing audio.
+	 *
+	 * @warning You should only change this if you know what you're doing. It is set to 500ms by default.
+	 */
+	uint16_t iteration_interval{500};
+
 	/** Constructor takes shard id, max shards and token.
 	 * @param _cluster The cluster which owns this voice connection, for related logging, REST requests etc
 	 * @param _channel_id The channel id to identify the voice connection as
@@ -851,6 +858,22 @@ public:
 	 * @return reference to self
 	 */
 	discord_voice_client& stop_audio();
+
+	/**
+	 * @brief Change the iteration interval time.
+	 *
+	 * @param time The time (in milliseconds) between each interval when parsing audio.
+	 *
+	 * @return Reference to self.
+	 */
+	discord_voice_client& set_iteration_interval(uint16_t interval);
+
+	/**
+	 * @brief Get the iteration interval time (in milliseconds).
+	 *
+	 * @return iteration_interval
+	 */
+	uint16_t get_iteration_interval();
 
 	/**
 	 * @brief Returns true if we are playing audio

@@ -164,8 +164,7 @@ void discord_voice_client::voice_courier_loop(discord_voice_client& client, cour
 #ifdef HAVE_VOICE
 	utility::set_thread_name(std::string("vcourier/") + std::to_string(client.server_id));
 	while (true) {
-		constexpr std::chrono::milliseconds iteration_interval(500);
-		std::this_thread::sleep_for(iteration_interval);
+		std::this_thread::sleep_for(std::chrono::milliseconds{client.iteration_interval});
 		
 		struct flush_data_t {
 			snowflake user_id;
@@ -1353,6 +1352,13 @@ std::string discord_voice_client::discover_ip() {
 	return "";
 }
 
+discord_voice_client& discord_voice_client::set_iteration_interval(uint16_t interval) {
+	this->iteration_interval = interval;
+	return *this;
+}
 
+uint16_t discord_voice_client::get_iteration_interval() {
+	return this->iteration_interval;
+}
 
 } // namespace dpp
