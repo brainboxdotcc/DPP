@@ -14,15 +14,7 @@ int main() {
 
 			/* Create a timer that runs every 120 seconds, that sets the status */
 			bot.start_timer([&bot](const dpp::timer& timer) {
-				/*
-				 * Because we need to get an up-to-date count, we can't use what was provided in the ready event.
-				 * So, we get the application from the bot and get the approximate guild count from there.
-				 */
-				bot.current_application_get([&bot](const dpp::confirmation_callback_t& callback) {
-					auto app = callback.get<dpp::application>();
-
-					bot.set_presence(dpp::presence(dpp::presence_status::ps_online, dpp::activity_type::at_game, "with " + std::to_string(app.approximate_guild_count) + " guilds!"));
-				});
+				bot.set_presence(dpp::presence(dpp::presence_status::ps_online, dpp::activity_type::at_game, "with " + std::to_string(dpp::get_guild_cache()->count()) + " guilds!"));
 			}, 120);
 		}
 	});
