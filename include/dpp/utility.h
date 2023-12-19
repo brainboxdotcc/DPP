@@ -738,12 +738,13 @@ uint32_t DPP_EXPORT hsl(int h, int s, int l);
 std::string DPP_EXPORT debug_dump(uint8_t* data, size_t length);
 
 /**
- * @brief Returns the length of a UTF-8 string in codepoints
- * 
+ * @brief Returns the length of a UTF-8 string in codepoints.
+ * @note Result is unspecified for strings that are not valid UTF-8.
+ *
  * @param str string to count length of
- * @return size_t length of string (0 for invalid utf8)
+ * @return size_t Length of string
  */
-size_t DPP_EXPORT utf8len(const std::string &str);
+size_t DPP_EXPORT utf8len(std::string_view str);
 
 /**
  * @brief Return substring of a UTF-8 encoded string in codepoints

@@ -482,43 +482,27 @@ void exec(const std::string& cmd, std::vector<std::string> parameters, cmd_resul
 	t.detach();
 }
 
-size_t utf8len(const std::string &str)
-{
-	size_t i = 0, iBefore = 0, count = 0;
-	const char* s = str.c_str();
-	if (*s == 0) {
-		return 0;
-	}
+size_t utf8len(std::string_view str) {
+	/* Shouldn't rely on signedness of char, better cast to unsigned char */
+	const auto* const s = reinterpret_cast<const unsigned char*>(str.data());
 
-	while (s[i] > 0) {
-ascii:
-		i++;
-	}
+	const size_t raw_len = str.length();
+	size_t pos = 0;
+	size_t code_points = 0;
 
-	count += i - iBefore;
-
-	while (s[i]) {
-		if (s[i] > 0) {
-			iBefore = i;
-			goto ascii;
-		} else {
-			switch (0xF0 & s[i]) {
-			case 0xE0:
-				i += 3;
-				break;
-			case 0xF0:
-				i += 4;
-				break;
-			default:
-				i += 2;
-				break;
-			}
+	while (pos != raw_len) {
+		size_t code_point_len = 1;
+		code_point_len += static_cast<size_t>(s[pos] >= 0b11000000);
+		code_point_len += static_cast<size_t>(s[pos] >= 0b11100000);
+		code_point_len += static_cast<size_t>(s[pos] >= 0b11110000);
+		if (raw_len - pos < code_point_len) {
+			return 0; // invalid utf8, avoid going past the end
 		}
-
-		count++;
+		pos += code_point_len;
+		code_points += 1;
 	}
 
-	return count;
+	return code_points;
 }
 
 std::string utf8substr(const std::string& str, std::string::size_type start, std::string::size_type leng)
