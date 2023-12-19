@@ -34,7 +34,7 @@ int main() {
 	 * a multi-line slash command input type.
 	 */
 	bot.on_message_create([&bot](const auto & event) {
-		if (dpp::utility::utf8substr(event.msg.content, 0, 5) == "!eval") {
+		if (dpp::utility::utf8subview(event.msg.content, 0, 5) == "!eval") {
 
 			/** 
 			 * THIS IS CRITICALLY IMPORTANT!
@@ -63,7 +63,7 @@ int main() {
 				#include <fmt/format.h>\n\
 				#include \"eval.h\"\n\
 				extern \"C\" void so_exec(dpp::cluster& bot, dpp::message_create_t event) {\n\
-					" + dpp::utility::utf8substr(
+					" + dpp::utility::utf8subview(
 						event.msg.content,
 						6,
 						dpp::utility::utf8len(event.msg.content)
