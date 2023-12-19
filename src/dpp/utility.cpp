@@ -483,22 +483,23 @@ void exec(const std::string& cmd, std::vector<std::string> parameters, cmd_resul
 }
 
 size_t utf8len(std::string_view str) {
-	/* Shouldn't rely on signedness of char, better cast to unsigned char */
-	const auto* const s = reinterpret_cast<const unsigned char*>(str.data());
-
 	const size_t raw_len = str.length();
 	size_t pos = 0;
 	size_t code_points = 0;
 
 	while (pos != raw_len) {
+		const unsigned char cur = str[pos];
+
 		size_t code_point_len = 1;
-		code_point_len += static_cast<size_t>(s[pos] >= 0b11000000);
-		code_point_len += static_cast<size_t>(s[pos] >= 0b11100000);
-		code_point_len += static_cast<size_t>(s[pos] >= 0b11110000);
+		code_point_len += static_cast<size_t>(cur >= 0b11000000);
+		code_point_len += static_cast<size_t>(cur >= 0b11100000);
+		code_point_len += static_cast<size_t>(cur >= 0b11110000);
+
 		if (raw_len - pos < code_point_len) {
 			return 0; // invalid utf8, avoid going past the end
 		}
 		pos += code_point_len;
+
 		code_points += 1;
 	}
 
@@ -506,9 +507,6 @@ size_t utf8len(std::string_view str) {
 }
 
 std::string_view utf8subview(std::string_view str, size_t start, size_t length) {
-	/* Shouldn't rely on signedness of char, better cast to unsigned char */
-	const auto* const s = reinterpret_cast<const unsigned char*>(str.data());
-
 	const size_t raw_len = str.length();
 	size_t pos = 0;
 	size_t code_points = 0;
@@ -525,15 +523,18 @@ std::string_view utf8subview(std::string_view str, size_t start, size_t length) 
 			break; // no point in traversing the remainder of the string
 		}
 
+		const unsigned char cur = str[pos];
+
 		size_t code_point_len = 1;
-		code_point_len += static_cast<size_t>(s[pos] >= 0b11000000);
-		code_point_len += static_cast<size_t>(s[pos] >= 0b11100000);
-		code_point_len += static_cast<size_t>(s[pos] >= 0b11110000);
+		code_point_len += static_cast<size_t>(cur >= 0b11000000);
+		code_point_len += static_cast<size_t>(cur >= 0b11100000);
+		code_point_len += static_cast<size_t>(cur >= 0b11110000);
 
 		if (raw_len - pos < code_point_len) {
 			return ""; // invalid utf8, avoid going past the end
 		}
 		pos += code_point_len;
+
 		code_points += 1;
 	}
 
