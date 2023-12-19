@@ -505,7 +505,7 @@ size_t utf8len(std::string_view str) {
 	return code_points;
 }
 
-std::string utf8substr(std::string_view str, size_t start, size_t length) {
+std::string_view utf8subview(std::string_view str, size_t start, size_t length) {
 	/* Shouldn't rely on signedness of char, better cast to unsigned char */
 	const auto* const s = reinterpret_cast<const unsigned char*>(str.data());
 
@@ -537,7 +537,11 @@ std::string utf8substr(std::string_view str, size_t start, size_t length) {
 		code_points += 1;
 	}
 
-	return std::string(str.substr(subview_start, subview_len));
+	return str.substr(subview_start, subview_len);
+}
+
+std::string utf8substr(std::string_view str, size_t start, size_t length) {
+	return std::string(utf8subview(str, start, length));
 }
 
 std::string read_file(const std::string& filename)

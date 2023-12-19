@@ -747,6 +747,18 @@ std::string DPP_EXPORT debug_dump(uint8_t* data, size_t length);
 size_t DPP_EXPORT utf8len(std::string_view str);
 
 /**
+ * @brief Return subview of a UTF-8 encoded string in codepoints.
+ * @note You must ensure that the resulting view is not used after the lifetime of the viewed string has ended.
+ * @note Result is unspecified for strings that are not valid UTF-8.
+ *
+ * @param str string to return substring from
+ * @param start start codepoint offset
+ * @param length length in codepoints
+ * @return std::string_view The requested subview
+ */
+std::string_view DPP_EXPORT utf8subview(std::string_view str, size_t start, size_t length);
+
+/**
  * @brief Return substring of a UTF-8 encoded string in codepoints.
  * @note Result is unspecified for strings that are not valid UTF-8.
  *
