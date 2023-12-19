@@ -505,44 +505,39 @@ size_t utf8len(std::string_view str) {
 	return code_points;
 }
 
-std::string utf8substr(const std::string& str, std::string::size_type start, std::string::size_type leng)
-{
-	if (leng == 0) {
-		return "";
-	}
-	if (start == 0 && leng >= utf8len(str)) {
-		return str;
-	}
-	std::string::size_type i, ix, q, min = std::string::npos, max = std::string::npos;
-	for (q = 0, i = 0, ix = str.length(); i < ix; i++, q++) {
-		if (q == start) {
-			min = i;
+std::string utf8substr(std::string_view str, size_t start, size_t length) {
+	/* Shouldn't rely on signedness of char, better cast to unsigned char */
+	const auto* const s = reinterpret_cast<const unsigned char*>(str.data());
+
+	const size_t raw_len = str.length();
+	size_t pos = 0;
+	size_t code_points = 0;
+
+	size_t subview_start = raw_len;
+	size_t subview_len = std::string_view::npos;
+
+	while (pos != raw_len) {
+		if (code_points == start) {
+			subview_start = pos;
 		}
-		if (q <= start + leng || leng == std::string::npos) {
-			max = i;
+		if (code_points == start + length) {
+			subview_len = pos - subview_start;
+			break; // no point in traversing the remainder of the string
 		}
 
-		unsigned char c = (unsigned char)str[i];
-		if (c < 0x80) {
-			i += 0;
-		} else if ((c & 0xE0) == 0xC0) {
-			i += 1;
-		} else if ((c & 0xF0) == 0xE0) {
-			i += 2;
-		} else if ((c & 0xF8) == 0xF0) {
-			i += 3;
-		} else {
-			return "";	//invalid utf8
+		size_t code_point_len = 1;
+		code_point_len += static_cast<size_t>(s[pos] >= 0b11000000);
+		code_point_len += static_cast<size_t>(s[pos] >= 0b11100000);
+		code_point_len += static_cast<size_t>(s[pos] >= 0b11110000);
+
+		if (raw_len - pos < code_point_len) {
+			return ""; // invalid utf8, avoid going past the end
 		}
-	}
-	if (q <= start + leng || leng == std::string::npos) {
-		max = i;
-	}
-	if (min == std::string::npos || max == std::string::npos) {
-		return "";
+		pos += code_point_len;
+		code_points += 1;
 	}
 
-	return str.substr(min, max);
+	return std::string(str.substr(subview_start, subview_len));
 }
 
 std::string read_file(const std::string& filename)

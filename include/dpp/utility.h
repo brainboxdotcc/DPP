@@ -747,14 +747,15 @@ std::string DPP_EXPORT debug_dump(uint8_t* data, size_t length);
 size_t DPP_EXPORT utf8len(std::string_view str);
 
 /**
- * @brief Return substring of a UTF-8 encoded string in codepoints
- * 
+ * @brief Return substring of a UTF-8 encoded string in codepoints.
+ * @note Result is unspecified for strings that are not valid UTF-8.
+ *
  * @param str string to return substring from
  * @param start start codepoint offset
  * @param length length in codepoints
- * @return std::string Substring in UTF-8 or empty string if invalid UTF-8 passed in
+ * @return std::string The requested substring
  */
-std::string DPP_EXPORT utf8substr(const std::string& str, std::string::size_type start, std::string::size_type length);
+std::string DPP_EXPORT utf8substr(std::string_view str, size_t start, size_t length);
 
 /**
  * @brief Read a whole file into a std::string.
