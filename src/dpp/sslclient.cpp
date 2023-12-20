@@ -650,9 +650,6 @@ void ssl_client::cleanup()
 {
 	this->close();
 	if (!keepalive) {
-		if (ssl != nullptr) {
-			SSL_free(ssl->ssl);
-		}
 		delete ssl;
 	}
 }
