@@ -408,7 +408,7 @@ uint32_t rgb(int red, int green, int blue) {
 uint32_t cmyk(double c, double m, double y, double k) {
 	int r = (int)(255 * (1 - c) * (1 - k));
 	int g = (int)(255 * (1 - m) * (1 - k));
-	int b = (int)(255 * (1 - y) * (1 - m));
+	int b = (int)(255 * (1 - y) * (1 - k));
 	return rgb(r, g, b);
 }
 
