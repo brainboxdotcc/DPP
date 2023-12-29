@@ -100,9 +100,19 @@ struct keepalive_cache_t {
 };
 
 /**
+ * @brief Custom deleter for SSL_CTX
+ */
+class openssl_context_deleter {
+public:
+	void operator()(SSL_CTX* context) const noexcept {
+		SSL_CTX_free(context);
+	}
+};
+
+/**
  * @brief OpenSSL context
  */
-thread_local SSL_CTX* openssl_context = nullptr;
+thread_local std::unique_ptr<SSL_CTX, openssl_context_deleter> openssl_context;
 
 /**
  * @brief Keepalive sessions, per-thread
@@ -273,13 +283,7 @@ ssl_client::ssl_client(const std::string &_hostname, const std::string &_port, b
 		if (plaintext) {
 			ssl = nullptr;
 		} else {
-			try {
-				ssl = new openssl_connection();
-			}
-			catch (std::bad_alloc&) {
-				delete ssl;
-				throw;
-			}
+			ssl = new openssl_connection();
 		}
 	}
 	try {
@@ -321,21 +325,21 @@ void ssl_client::connect()
 				const SSL_METHOD *method = TLS_client_method(); /* Create new client-method instance */
 
 				/* Create SSL context */
-				openssl_context = SSL_CTX_new(method);
-				if (openssl_context == nullptr) {
+				openssl_context.reset(SSL_CTX_new(method));
+				if (!openssl_context) {
 					throw dpp::connection_exception(err_ssl_context, "Failed to create SSL client context!");
 				}
 
 				/* Do not allow SSL 3.0, TLS 1.0 or 1.1
 				* https://www.packetlabs.net/posts/tls-1-1-no-longer-secure/
 				*/
-				if (!SSL_CTX_set_min_proto_version(openssl_context, TLS1_2_VERSION)) {
+				if (!SSL_CTX_set_min_proto_version(openssl_context.get(), TLS1_2_VERSION)) {
 					throw dpp::connection_exception(err_ssl_version, "Failed to set minimum SSL version!");
 				}
 			}
 
 			/* Create SSL session */
-			ssl->ssl = SSL_new(openssl_context);
+			ssl->ssl = SSL_new(openssl_context.get());
 			if (ssl->ssl == nullptr) {
 				throw dpp::connection_exception(err_ssl_new, "SSL_new failed!");
 			}
