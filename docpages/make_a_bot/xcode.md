@@ -4,8 +4,6 @@
 
 To create a bot with Xcode, follow the steps below to create a *working skeleton project you can build upon*.
 
-\note Since the brew package for D++ only supports C++17, you can't use coro with this project. If you wish to use coro, you need to \ref buildosx "build from source". If you do build from source, look to replace the include and library paths in this project to `/usr/local/include` and `/usr/local/lib`.
-
 1. Make sure you have Xcode downloaded, along with the developer command tools (for AppleClang).
 2. Clone the [template project](https://github.com/Jaskowicz1/mac-bot-template/). **Make sure you download the entire project and not just the .cpp file.**
 3. Open Xcode, hit "Open Existing Project" or "File"->"Open", navigate to the template folder and open the .xcodeproj file. You can also double click the file in Finder.
