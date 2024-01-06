@@ -535,26 +535,32 @@ message::message(snowflake _channel_id, const std::string &_content, message_typ
 	type = t;
 }
 
-message& message::add_component(const component& c)
-{
+message& message::add_component(const component& c) {
 	components.emplace_back(c);
 	return *this;
 }
 
-message& message::add_embed(const embed& e)
-{
+message& message::add_embed(const embed& e) {
 	embeds.emplace_back(e);
 	return *this;
 }
 
-message& message::set_flags(uint16_t f)
-{
+message& message::add_sticker(const sticker& s) {
+	stickers.emplace_back(s);
+	return *this;
+}
+
+message& message::add_sticker(const snowflake& id) {
+	stickers.emplace_back().id = id;
+	return *this;
+}
+
+message& message::set_flags(uint16_t f) {
 	flags = f;
 	return *this;
 }
 
-message& message::set_type(message_type t)
-{
+message& message::set_type(message_type t) {
 	type = t;
 	return *this;
 }
