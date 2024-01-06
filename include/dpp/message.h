@@ -1848,7 +1848,7 @@ public:
 	snowflake webhook_id;
 
 	/**
-	 * @brief Stickers.
+	 * @brief Partial stickers. Only id, name and format_type are filled
 	 */
 	std::vector<sticker> stickers;
 
