@@ -942,6 +942,12 @@ json message::to_json(bool with_id, bool is_interaction_response) const {
 		}
 	}
 
+	if (stickers.size()) {
+		auto [it, _] = j.emplace("sticker_ids", json::array());
+		for (const sticker &s : stickers) {
+			it->push_back(std::to_string(s.id));
+		}
+	}
 
 	j["components"] = json::array();
 	for (auto & component : components) {
