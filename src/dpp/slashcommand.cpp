@@ -331,7 +331,7 @@ command_option_choice &command_option_choice::fill_from_json_impl(nlohmann::json
 }
 
 command_option::command_option(command_option_type t, const std::string &n, const std::string &d, bool r) :
-	type(t), name(n), description(d), required(r), autocomplete(false)
+	type(t), name(n), description(d), required(r), focused(false), autocomplete(false)
 {
 	if (std::any_of(n.begin(), n.end(), [](unsigned char c){ return std::isupper(c); })) {
 		throw dpp::logic_exception(err_command_has_caps, "Command options can not contain capital letters in the name of the option.");
