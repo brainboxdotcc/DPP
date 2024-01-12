@@ -98,4 +98,9 @@ void cluster::channels_get(snowflake guild_id, command_completion_event_t callba
 	rest_request_list<channel>(this, API_PATH "/guilds", std::to_string(guild_id), "channels", m_get, "", callback);
 }
 
+void cluster::channel_set_voice_status(snowflake channel_id, const std::string& status, command_completion_event_t callback) {
+	json j({ {"status", status} });
+	rest_request_list<confirmation>(this, API_PATH "/channels", std::to_string(channel_id), "voice-status", m_put, j.dump(), callback);
+}
+
 } // namespace dpp
