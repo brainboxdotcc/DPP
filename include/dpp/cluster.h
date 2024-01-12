@@ -3703,6 +3703,17 @@ public:
 	 */
 	void skus_get(command_completion_event_t callback = utility::log_error());
 
+	/**
+	 * @brief Set the status of a voice channel.
+	 *
+	 * @see https://github.com/discord/discord-api-docs/pull/6400 (please replace soon).
+	 * @param channel_id The channel to update.
+	 * @param status The new status for the channel.
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void channel_set_voice_status(snowflake channel_id, const std::string& status, command_completion_event_t callback = utility::log_error());
+
 #include <dpp/cluster_sync_calls.h>
 #ifdef DPP_CORO
 #include <dpp/cluster_coro_calls.h>

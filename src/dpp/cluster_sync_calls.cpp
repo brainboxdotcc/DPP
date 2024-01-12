@@ -217,6 +217,10 @@ channel_map cluster::channels_get_sync(snowflake guild_id) {
 	return dpp::sync<channel_map>(this, static_cast<void (cluster::*)(snowflake, command_completion_event_t)>(&cluster::channels_get), guild_id);
 }
 
+confirmation cluster::channel_set_voice_status_sync(snowflake channel_id, const std::string& status) {
+	return dpp::sync<confirmation>(this, static_cast<void (cluster::*)(snowflake, const std::string&, command_completion_event_t)>(&cluster::channel_set_voice_status), channel_id, status);
+}
+
 channel cluster::create_dm_channel_sync(snowflake user_id) {
 	return dpp::sync<channel>(this, static_cast<void (cluster::*)(snowflake, command_completion_event_t)>(&cluster::create_dm_channel), user_id);
 }

@@ -219,6 +219,10 @@ async<confirmation_callback_t> cluster::co_channels_get(snowflake guild_id) {
 	return async{ this, static_cast<void (cluster::*)(snowflake, command_completion_event_t)>(&cluster::channels_get), guild_id };
 }
 
+async<confirmation_callback_t> cluster::co_channel_set_voice_status(snowflake channel_id, const std::string& status) {
+	return async{ this, static_cast<void (cluster::*)(snowflake, const std::string&, command_completion_event_t)>(&cluster::channel_set_voice_status), channel_id, status };
+}
+
 async<confirmation_callback_t> cluster::co_create_dm_channel(snowflake user_id) {
 	return async{ this, static_cast<void (cluster::*)(snowflake, command_completion_event_t)>(&cluster::create_dm_channel), user_id };
 }
