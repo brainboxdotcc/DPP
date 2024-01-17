@@ -1172,6 +1172,20 @@ struct DPP_EXPORT attachment {
 	 * @return true if remixed
 	 */
 	bool is_remix() const;
+	
+	/**
+	 * @brief Returns expiration timestamp for attachment's URL
+	 * 
+	 * @return timestamp of URL expiration
+	 */
+	time_t get_expire_time() const;
+	
+	/**
+	 * @brief Returns creation timestamp for attachment's URL
+	 * 
+	 * @return timestamp of URL creation
+	 */
+	time_t get_issued_time() const;
 };
 
 /**

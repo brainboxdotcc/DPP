@@ -882,6 +882,30 @@ bool attachment::is_remix() const {
 	return flags & a_is_remix;
 }
 
+time_t attachment::get_expire_time() const {
+	std::string attributes = url.substr(url.find('?')+1);
+	std::vector<std::string> attr_list = utility::tokenize(attributes,"&");
+	auto ex_attr = std::find_if(attr_list.begin(), attr_list.end(),[](const std::string& s){return s.substr(0,3) == "ex=";});
+	/*Check if discord sent us the 'ex' attribute*/
+	if(attr_list.end() == ex_attr){
+		return 0;
+	}
+	/*Erase 'ex=' prefix before parsing*/
+	return std::stol(ex_attr->substr(3),nullptr,16);
+}
+
+time_t attachment::get_issued_time() const {
+	std::string attributes = url.substr(url.find('?')+1);
+	std::vector<std::string> attr_list = utility::tokenize(attributes,"&");
+	auto is_attr = std::find_if(attr_list.begin(), attr_list.end(),[](const std::string& s){return s.substr(0,3) == "is=";});
+	/*Check if discord sent us the 'is' attribute*/
+	if(attr_list.end() == is_attr){
+		return 0;
+	}
+	/*Erase 'is=' prefix before parsing*/
+	return std::stol(is_attr->substr(3),nullptr,16);
+}
+
 json message::to_json(bool with_id, bool is_interaction_response) const {
 	/* This is the basics. once it works, expand on it. */
 	json j({
