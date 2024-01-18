@@ -883,10 +883,14 @@ bool attachment::is_remix() const {
 }
 
 time_t attachment::get_expire_time() const {
-	std::string attributes = url.substr(url.find('?')+1);
+	size_t attr_position = url.find('?');
+	/*If no attributes were sent in url, we do not need to parse more*/
+	if(url.npos == attr_position){
+		return 0;
+	}
+	std::string attributes = url.substr(attr_position+1);
 	std::vector<std::string> attr_list = utility::tokenize(attributes,"&");
 	auto ex_attr = std::find_if(attr_list.begin(), attr_list.end(),[](const std::string& s){return s.substr(0,3) == "ex=";});
-	/*Check if discord sent us the 'ex' attribute*/
 	if(attr_list.end() == ex_attr){
 		return 0;
 	}
@@ -895,10 +899,14 @@ time_t attachment::get_expire_time() const {
 }
 
 time_t attachment::get_issued_time() const {
-	std::string attributes = url.substr(url.find('?')+1);
+	size_t attr_position = url.find('?');
+	/*No attributes were sent in url, so we do not need to parse more*/
+	if(url.npos == attr_position){
+		return 0;
+	}
+	std::string attributes = url.substr(attr_position+1);
 	std::vector<std::string> attr_list = utility::tokenize(attributes,"&");
 	auto is_attr = std::find_if(attr_list.begin(), attr_list.end(),[](const std::string& s){return s.substr(0,3) == "is=";});
-	/*Check if discord sent us the 'is' attribute*/
 	if(attr_list.end() == is_attr){
 		return 0;
 	}
