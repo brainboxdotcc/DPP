@@ -2,7 +2,7 @@
 
 To add D++ to a Visual Studio project, using **Visual Studio 2019** or **Visual Studio 2022**, follow the steps below. The steps below assume an empty project, if you are adding to an existing project simply skip steps 1 through 4, and step 13.
 
-\note It is possible to skip this entire tutorial, and obtain a [pre-made Visual Studio template containing the latest D++ build (for 32 and 64 bit, release and debug profiles) by clicking here](https://github.com/brainboxdotcc/windows-bot-template/).
+\note It is possible to skip this entire tutorial, and obtain a \ref build-a-discord-bot-windows-visual-studio "pre-made Visual Studio template containing the latest D++ build (for 32 and 64 bit, release and debug profiles) by clicking here".
 
 1. Make sure you have Visual Studio 2019 or 2022. Community, Professional or Enterprise work fine. These instructions are not for Visual Studio Code. You can [download the correct version here](https://visualstudio.microsoft.com/downloads/). Note that older versions of Visual Studio will not work as they do not support enough of the C++17 standard.
 
@@ -50,8 +50,11 @@ To add D++ to a Visual Studio project, using **Visual Studio 2019** or **Visual 
 
 ## Troubleshooting
 
+\note A much easier way of getting a bot running is available \ref build-a-discord-bot-windows-visual-studio "here"! We recommend using that one if this process seems too complex or you run into too many issues.
+
 - If you get an error that a DLL is missing (e.g. `dpp.dll` or `opus.dll`) when starting your bot, then simply copy all DLLs from the **bin** directory of where you extracted the D++ zip file to, into the same directory where your bot's executable is. You only need to do this once. There should be several of these DLL files: `dpp.dll`, `zlib.dll`, `openssl.dll` and `libcrypto.dll` (or similarly named SSL related files), `libsodium.dll` and `opus.dll`.
 - Please note that if you change the architecture (step 13) you must reconfigure all of steps 7 through 12 again as these configurations are specific to each architecture. This is to allow for different sets of precompiled libs, e.g. for `x86`, `x64`, etc.
+- If you get an error that says "Debug/Release mismatch", **you are using the wrong configuration of the D++ dll**. Your bot's executable and the dpp.dll file should both be built in either Release or Debug, you get this error if they are different. We recommend using \ref build-a-discord-bot-windows-visual-studio "the bot template", it has all those things already set up.
 - You should run your bot from a command prompt. If you do not, and it exits, you will not be able to see any output as the window will immediately close.
 - If you need to update the `opus.dll` or `zlib.dll` (or any other prebuilt dll) these can be obtained by requesting them to be installed via `vcpkg` then copying the dlls, libraries and headers from the vcpkg `install` folder.
 - Stuck? You can find us on the [official discord server](https://discord.gg/dpp) - ask away! We don't bite!

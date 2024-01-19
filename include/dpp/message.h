@@ -1848,7 +1848,7 @@ public:
 	snowflake webhook_id;
 
 	/**
-	 * @brief Stickers.
+	 * @brief Partial stickers. Only id, name and format_type are filled
 	 */
 	std::vector<sticker> stickers;
 
@@ -2180,6 +2180,24 @@ public:
 	 * @return message& reference to self
 	 */
 	message& add_embed(const embed& e);
+
+	/**
+	 * @brief Add a sticker to this message
+	 *
+	 * As of writing this, a message can only contain up to 3 stickers
+	 * @param s sticker to add
+	 * @return message& reference to self
+	 */
+	message& add_sticker(const sticker& s);
+
+	/**
+	 * @brief Add a sticker to this message
+	 *
+	 * As of writing this, a message can only contain up to 3 stickers
+	 * @param id id of the sticker to add
+	 * @return message& reference to self
+	 */
+	message& add_sticker(const snowflake& id);
 
 	/**
 	 * @brief Set the flags

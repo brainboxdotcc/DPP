@@ -168,7 +168,7 @@ bool commandhandler::string_has_prefix(std::string &str)
 {
 	for (auto& p : prefixes) {
 		size_t prefix_length = utility::utf8len(p);
-		if (utility::utf8substr(str, 0, prefix_length) == p) {
+		if (utility::utf8subview(str, 0, prefix_length) == p) {
 			str.erase(str.begin(), str.begin() + prefix_length);
 			return true;
 		}
