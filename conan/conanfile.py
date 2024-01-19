@@ -17,11 +17,11 @@ class DPPConan(ConanFile):
     default_options = {"shared": False, "fPIC": True}
 
     def build_requirements(self):
-            self.tool_requires("nlohmann_json/3.11.2")
-            self.test_requires("openssl/3.1.2")
-            self.tool_requires("zlib/1.3")
-            self.test_requires("libsodium/cci.20220430")
-            self.test_requires("opus/1.4")
+            self.requires("nlohmann_json/3.11.2", headers=True, libs=True)
+            self.requires("openssl/3.1.2", headers=True, libs=True)
+            self.requires("zlib/1.3", headers=True, libs=True)
+            self.requires("libsodium/cci.20220430", headers=True, libs=True)
+            self.requires("opus/1.4", headers=True, libs=True)
 
     def config_options(self):
         if self.settings.os == "Windows":
