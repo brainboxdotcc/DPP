@@ -61,4 +61,4 @@ class DPPConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-            self.cpp_info.libs = ["libdpp"]
+            self.cpp_info.libs = ["dpp"]
