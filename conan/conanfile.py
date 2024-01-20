@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
 from conan.tools.scm import Git
 from conan.tools.files import load, update_conandata
-1
+
 class DPPConan(ConanFile):
     name = "dpp"
     version = "0.1"
@@ -17,11 +17,11 @@ class DPPConan(ConanFile):
     default_options = {"shared": False, "fPIC": True}
 
     def build_requirements(self):
-            self.requires("nlohmann_json/3.11.2", headers=True, libs=True)
-            self.requires("openssl/3.1.2", headers=True, libs=True)
-            self.requires("zlib/1.3", headers=True, libs=True)
-            self.requires("libsodium/cci.20220430", headers=True, libs=True)
-            self.requires("opus/1.4", headers=True, libs=True)
+        self.requires("nlohmann_json/3.11.2", headers=True, libs=True)
+        self.requires("openssl/3.1.2", headers=True, libs=True)
+        self.requires("zlib/1.3", headers=True, libs=True)
+        self.requires("libsodium/cci.20220430", headers=True, libs=True)
+        self.requires("opus/1.4", headers=True, libs=True)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -62,4 +62,4 @@ class DPPConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-            self.cpp_info.libs = ["dpp"]
+        self.cpp_info.libs = ["dpp"]
