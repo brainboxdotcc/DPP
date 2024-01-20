@@ -3,7 +3,7 @@ find_package(OpenSSL REQUIRED COMPONENTS SSL Crypto)
 find_package(ZLIB REQUIRED)
 find_package(libsodium REQUIRED)
 find_package(Opus)
-
+message(STATUS "Opus_FOUND: ${Opus_FOUND}")
 
 # Check for various C functions
 

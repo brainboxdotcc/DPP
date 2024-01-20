@@ -109,6 +109,7 @@ else()
 		add_subdirectory(library-conan)
 	else()
 		add_subdirectory(library)
+	endif()
 endif()
 
 if(DPP_USE_EXTERNAL_JSON)
