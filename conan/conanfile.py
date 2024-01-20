@@ -49,6 +49,7 @@ class DPPConan(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
         tc = CMakeToolchain(self)
+        tc.cache_variables["CONAN_EXPORTED"] = True
         tc.generate()
 
     def build(self):
