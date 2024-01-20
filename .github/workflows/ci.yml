@@ -67,7 +67,7 @@ jobs:
         run: sudo sed -i 's/azure\.//' /etc/apt/sources.list && sudo apt update && sudo apt-get install -y ${{ matrix.cfg.package }} pkg-config libsodium-dev libopus-dev zlib1g-dev rpm
 
       - name: Generate CMake
-        run: mkdir build && cd build && cmake -DDPP_NO_VCPKG=ON -DDPP_NO_CONAN=ON -DAVX_TYPE=AVX0 -DCMAKE_BUILD_TYPE=Release ${{matrix.cfg.cmake-flags}} ..
+        run: mkdir build && cd build && cmake -DDPP_NO_VCPKG=ON -DAVX_TYPE=AVX0 -DCMAKE_BUILD_TYPE=Release ${{matrix.cfg.cmake-flags}} ..
         env:
           CXX: ${{matrix.cfg.cpp-version}}
 
@@ -128,7 +128,7 @@ jobs:
         run: brew install cmake make libsodium opus openssl pkg-config
 
       - name: Generate CMake
-        run: mkdir build && cd build && cmake -DDPP_NO_VCPKG=ON -DDPP_NO_CONAN=ON -DCMAKE_BUILD_TYPE=Release -DDPP_CORO=ON -DAVX_TYPE=AVX0 ..
+        run: mkdir build && cd build && cmake -DDPP_NO_VCPKG=ON -DCMAKE_BUILD_TYPE=Release -DDPP_CORO=ON -DAVX_TYPE=AVX0 ..
         env:
           DONT_RUN_VCPKG: true
 
@@ -183,13 +183,13 @@ jobs:
 
       - name: Generate CMake (x64)
         if: ${{ matrix.cfg.arch == 'x64' }}
-        run: mkdir main/build && cd main/build && cmake -G "Visual Studio ${{matrix.cfg.vsv}} ${{matrix.cfg.vs}}" -DDPP_NO_VCPKG=ON -DDPP_NO_CONAN=ON -DAVX_TYPE=AVX0 -DDPP_USE_PCH=on ${{matrix.cfg.options}} ..
+        run: mkdir main/build && cd main/build && cmake -G "Visual Studio ${{matrix.cfg.vsv}} ${{matrix.cfg.vs}}" -DDPP_NO_VCPKG=ON -DAVX_TYPE=AVX0 -DDPP_USE_PCH=on ${{matrix.cfg.options}} ..
         env:
           DONT_RUN_VCPKG: true
 
       - name: Generate CMake (x86)
         if: ${{ matrix.cfg.arch == 'x86' }}
-        run: mkdir main/build && cd main/build && cmake -DCMAKE_TOOLCHAIN_FILE="cmake\Win32Toolchain.cmake" -DDPP_NO_VCPKG=ON -DDPP_NO_CONAN=ON -DAVX_TYPE=AVX0 -DDPP_USE_PCH=on -G "Visual Studio ${{matrix.cfg.vsv}} ${{matrix.cfg.vs}}" -A Win32 ${{matrix.cfg.options}} ..
+        run: mkdir main/build && cd main/build && cmake -DCMAKE_TOOLCHAIN_FILE="cmake\Win32Toolchain.cmake" -DDPP_NO_VCPKG=ON -DAVX_TYPE=AVX0 -DDPP_USE_PCH=on -G "Visual Studio ${{matrix.cfg.vsv}} ${{matrix.cfg.vs}}" -A Win32 ${{matrix.cfg.options}} ..
         env:
           DONT_RUN_VCPKG: true
 
@@ -242,7 +242,7 @@ jobs:
         run: sudo sed -i 's/azure\.//' /etc/apt/sources.list && sudo apt update && sudo apt-get install -y cmake rpm
 
       - name: Generate CMakeFiles
-        run: mkdir build && cd build && sudo cmake ${{matrix.cfg.cmake-options}} -DDPP_NO_VCPKG=ON -DDPP_NO_CONAN=ON -DCMAKE_BUILD_TYPE=Release -DAVX_TYPE=AVX0 ..
+        run: mkdir build && cd build && sudo cmake ${{matrix.cfg.cmake-options}} -DDPP_NO_VCPKG=ON -DCMAKE_BUILD_TYPE=Release -DAVX_TYPE=AVX0 ..
 
       - name: Compile Source
         run: cd build && sudo make -j2
