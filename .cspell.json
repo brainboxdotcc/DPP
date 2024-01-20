@@ -99,6 +99,7 @@
 		"stringified",
 		"disdppgloss",
 		"awaiter",
+		"awaiters",
 		"resumer",
 		"checkered",
 		"ramen",
@@ -136,7 +137,8 @@
 		"NOMINMAX",
 		"sku",
 		"skus",
-		"Codecademy"
+		"Codecademy",
+		"tparam"
 	],
 	"flagWords": [
 		"hte"

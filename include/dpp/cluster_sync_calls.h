@@ -715,6 +715,21 @@ confirmation channel_typing_sync(snowflake cid);
 channel_map channels_get_sync(snowflake guild_id);
 
 /**
+ * @brief Set the status of a voice channel.
+ *
+ * @see dpp::cluster::channel_set_voice_status
+ * @see https://github.com/discord/discord-api-docs/pull/6400 (please replace soon).
+ * @param channel_id The channel to update.
+ * @param status The new status for the channel.
+ * @return confirmation returned object on completion
+ * \memberof dpp::cluster
+ * @throw dpp::rest_exception upon failure to execute REST function
+ * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
+ * Avoid direct use of this function inside an event handler.
+ */
+confirmation channel_set_voice_status_sync(snowflake channel_id, const std::string& status);
+
+/**
  * @brief Create a dm channel
  * @see dpp::cluster::create_dm_channel
  * @see https://discord.com/developers/docs/resources/user#create-dm
