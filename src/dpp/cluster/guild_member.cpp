@@ -96,6 +96,10 @@ void cluster::guild_member_timeout(snowflake guild_id, snowflake user_id, time_t
 	rest_request<confirmation>(this, API_PATH "/guilds", std::to_string(guild_id), "members/" + std::to_string(user_id), m_patch, j.dump(), callback);
 }
 
+void cluster::guild_member_timeout_remove(snowflake guild_id, snowflake user_id, command_completion_event_t callback) {
+	guild_member_timeout(guild_id, user_id, 0, callback);
+}
+
 
 void cluster::guild_member_delete_role(snowflake guild_id, snowflake user_id, snowflake role_id, command_completion_event_t callback) {
 	rest_request<confirmation>(this, API_PATH "/guilds", std::to_string(guild_id), "members/" + std::to_string(user_id) + "/roles/" + std::to_string(role_id), m_delete, "", callback);
