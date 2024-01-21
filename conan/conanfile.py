@@ -1,8 +1,9 @@
+import os
 from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
 from conan.tools.scm import Git
 from conan.tools.files import load, update_conandata
- 
+
 class DPPConan(ConanFile):
     name = "dpp"
     version = "0.1"
@@ -35,7 +36,7 @@ class DPPConan(ConanFile):
         cmake_layout(self)
 
     def export(self):
-        git = Git(self, self.recipe_folder)
+        git = Git(self, os.path.dirname(self.recipe_folder))
         scm_url, scm_commit = git.get_url_and_commit()
         update_conandata(self, {"sources": {"commit": scm_commit, "url": scm_url}})
 
@@ -50,6 +51,7 @@ class DPPConan(ConanFile):
         deps.generate()
         tc = CMakeToolchain(self)
         tc.cache_variables["CONAN_EXPORTED"] = True
+        tc.cache_variables["BUILD_VOICE_SUPPORT"] = True
         tc.generate()
 
     def build(self):
