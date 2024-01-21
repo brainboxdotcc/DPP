@@ -3,7 +3,6 @@ find_package(OpenSSL REQUIRED COMPONENTS SSL Crypto)
 find_package(ZLIB REQUIRED)
 find_package(libsodium REQUIRED)
 find_package(Opus)
-message(STATUS "Opus_FOUND: ${Opus_FOUND}")
 
 # Check for various C functions
 
@@ -96,17 +95,12 @@ if(NOT BUILD_SHARED_LIBS)
 endif()
 
 include("${CMAKE_CURRENT_SOURCE_DIR}/../cmake/colour.cmake")
-
  if (BUILD_VOICE_SUPPORT)
- 	if(Opus_FOUND)
- 		message("-- Found Opus ${Green}${OPUS_LIBRARIES}${ColourReset}")
- 		if((WIN32 OR PKG_CONFIG_FOUND) AND DEFINED sodium_VERSION_STRING AND DEFINED sodium_LIBRARY_RELEASE)
- 			add_compile_definitions(HAVE_VOICE)
-		
- 			message("-- Sodium ${Green}${sodium_VERSION_STRING}${ColourReset}")
-		
-			set(HAVE_VOICE 1)
- 		endif()
+ 	if(Opus_FOUND AND libsodium_FOUND)
+ 		message("-- Found Opus ${Green}${Opus_VERSION}${ColourReset}")
+		add_compile_definitions(HAVE_VOICE)
+		message("-- Sodium ${Green}${libsodium_VERSION}${ColourReset}")
+		set(HAVE_VOICE 1)
 	endif()
 
  	if(HAVE_VOICE)
