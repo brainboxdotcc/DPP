@@ -411,7 +411,7 @@ async<confirmation_callback_t> cluster::co_guild_member_timeout(snowflake guild_
 	return async{ this, static_cast<void (cluster::*)(snowflake, snowflake, time_t, command_completion_event_t)>(&cluster::guild_member_timeout), guild_id, user_id, communication_disabled_until };
 }
 
-async<confirmation_callback_t> cluster::co_guild_member_timeout(snowflake guild_id, snowflake user_id) {
+async<confirmation_callback_t> cluster::co_guild_member_timeout_remove(snowflake guild_id, snowflake user_id) {
 	return co_guild_member_timeout(guild_id, user_id, 0);
 }
 
