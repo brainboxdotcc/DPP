@@ -412,7 +412,7 @@ async<confirmation_callback_t> cluster::co_guild_member_timeout(snowflake guild_
 }
 
 async<confirmation_callback_t> cluster::co_guild_member_timeout(snowflake guild_id, snowflake user_id) {
-	return co_guild_member_timeout_remove(guild_id, user_id, 0);
+	return co_guild_member_timeout(guild_id, user_id, 0);
 }
 
 async<confirmation_callback_t> cluster::co_guild_member_delete_role(snowflake guild_id, snowflake user_id, snowflake role_id) {
