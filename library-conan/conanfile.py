@@ -2,7 +2,7 @@ import os
 from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
 from conan.tools.scm import Git
-from conan.tools.files import load, update_conandata
+from conan.tools.files import update_conandata
 
 class DPPConan(ConanFile):
     name = "dpp"
