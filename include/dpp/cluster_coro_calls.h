@@ -1237,20 +1237,6 @@
 [[nodiscard]] async<confirmation_callback_t> co_guild_member_timeout(snowflake guild_id, snowflake user_id, time_t communication_disabled_until);
 
 /**
- * @brief Remove the timeout of a guild member
- * Shortcut to co_guild_member_timeout(guild_id, user_id, 0)
- * Fires a `Guild Member Update` Gateway event.
- * @see dpp::cluster::guild_member_timeout
- * @see https://discord.com/developers/docs/resources/guild#modify-guild-member
- * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
- * @param guild_id Guild ID remove the member timeout from
- * @param user_id User ID to remove the timeout for
- * @return confirmation returned object on completion
- * \memberof dpp::cluster
- */
- [[nodiscard]] async<confirmation_callback_t> co_guild_member_timeout_remove(snowflake guild_id, snowflake user_id);
-
-/**
  * @brief Remove role from guild member
  * 
  * Removes a role from a guild member. Requires the `MANAGE_ROLES` permission.
