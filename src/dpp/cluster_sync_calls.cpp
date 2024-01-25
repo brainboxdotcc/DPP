@@ -409,6 +409,10 @@ confirmation cluster::guild_member_timeout_sync(snowflake guild_id, snowflake us
 	return dpp::sync<confirmation>(this, static_cast<void (cluster::*)(snowflake, snowflake, time_t, command_completion_event_t)>(&cluster::guild_member_timeout), guild_id, user_id, communication_disabled_until);
 }
 
+confirmation cluster::guild_member_timeout_remove_sync(snowflake guild_id, snowflake user_id) {
+	return dpp::sync<confirmation>(this, static_cast<void (cluster::*)(snowflake, snowflake, command_completion_event_t)>(&cluster::guild_member_timeout_remove), guild_id, user_id);
+}
+
 confirmation cluster::guild_member_delete_role_sync(snowflake guild_id, snowflake user_id, snowflake role_id) {
 	return dpp::sync<confirmation>(this, static_cast<void (cluster::*)(snowflake, snowflake, snowflake, command_completion_event_t)>(&cluster::guild_member_delete_role), guild_id, user_id, role_id);
 }

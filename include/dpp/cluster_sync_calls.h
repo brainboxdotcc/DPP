@@ -1513,6 +1513,23 @@ confirmation guild_member_kick_sync(snowflake guild_id, snowflake user_id);
 confirmation guild_member_timeout_sync(snowflake guild_id, snowflake user_id, time_t communication_disabled_until);
 
 /**
+ * @brief Remove the timeout of a guild member.
+ * A shortcut for guild_member_timeout(guild_id, user_id, 0, callback)
+ * Fires a `Guild Member Update` Gateway event.
+ * @see dpp::cluster::guild_member_timeout_remove
+ * @see https://discord.com/developers/docs/resources/guild#modify-guild-member
+ * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+ * @param guild_id Guild ID to remove the member timeout from
+ * @param user_id User ID to remove the timeout for
+ * @return confirmation returned object on completion
+ * \memberof dpp::cluster
+ * @throw dpp::rest_exception upon failure to execute REST function
+ * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
+ * Avoid direct use of this function inside an event handler.
+ */
+confirmation guild_member_timeout_remove_sync(snowflake guild_id, snowflake user_id);
+
+/**
  * @brief Remove role from guild member
  * 
  * Removes a role from a guild member. Requires the `MANAGE_ROLES` permission.
