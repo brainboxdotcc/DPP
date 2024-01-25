@@ -6,7 +6,7 @@ from conan.tools.files import update_conandata
 
 class DPPConan(ConanFile):
     name = "dpp"
-    version = "0.1"
+    version = "10.0.29"
     default_user = "brainboxdotcc"
     default_channel = "testing"
     license = "https://github.com/brainboxdotcc/DPP/blob/master/LICENSE"
