@@ -411,6 +411,10 @@ async<confirmation_callback_t> cluster::co_guild_member_timeout(snowflake guild_
 	return async{ this, static_cast<void (cluster::*)(snowflake, snowflake, time_t, command_completion_event_t)>(&cluster::guild_member_timeout), guild_id, user_id, communication_disabled_until };
 }
 
+async<confirmation_callback_t> cluster::co_guild_member_timeout_remove(snowflake guild_id, snowflake user_id) {
+	return async{ this, static_cast<void (cluster::*)(snowflake, snowflake, command_completion_event_t)>(&cluster::guild_member_timeout_remove), guild_id, user_id };
+}
+
 async<confirmation_callback_t> cluster::co_guild_member_delete_role(snowflake guild_id, snowflake user_id, snowflake role_id) {
 	return async{ this, static_cast<void (cluster::*)(snowflake, snowflake, snowflake, command_completion_event_t)>(&cluster::guild_member_delete_role), guild_id, user_id, role_id };
 }

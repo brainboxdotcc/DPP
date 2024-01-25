@@ -2390,6 +2390,19 @@ public:
 	void guild_member_timeout(snowflake guild_id, snowflake user_id, time_t communication_disabled_until, command_completion_event_t callback = utility::log_error());
 
 	/**
+	 * @brief Remove the timeout of a guild member.
+	 * A shortcut for guild_member_timeout(guild_id, user_id, 0, callback)
+	 * Fires a `Guild Member Update` Gateway event.
+	 * @see https://discord.com/developers/docs/resources/guild#modify-guild-member
+	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+	 * @param guild_id Guild ID to remove the member timeout from
+	 * @param user_id User ID to remove the timeout for
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void guild_member_timeout_remove(snowflake guild_id, snowflake user_id, command_completion_event_t callback = utility::log_error());
+
+	/**
 	 * @brief Add guild ban
 	 *
 	 * Create a guild ban, and optionally delete previous messages sent by the banned user.
