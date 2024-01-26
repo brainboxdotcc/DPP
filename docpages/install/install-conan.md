@@ -1,13 +1,13 @@
-\page install-conan Installing with Conan 2.0
+\page install-conan Installing with Conan
 
 To install D++ into a project using conan 2.0 and cmake:
 
-- Ensure conan is correctly installed the most popular method is with pip.
+- Ensure conan is correctly installed, the most popular method is with pip.
 - Create a conanfile.txt in the root of the project.
 
-```conanfile.txt
+```conanfile
 [requires]
-dpp/0.1
+dpp/10.0.29
 
 [generators]
 CMakeDeps
