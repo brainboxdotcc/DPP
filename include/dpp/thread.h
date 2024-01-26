@@ -166,6 +166,12 @@ public:
 	uint8_t member_count = 0;
 
 	/**
+	 * @brief Was this thread newly created?
+	 * @note This will only show in dpp::cluster::on_thread_create if the thread was just made.
+	 */
+	bool newly_created{false};
+
+	/**
 	 * @brief Returns true if the thread is within an announcement channel
 	 *
 	 * @return true if announcement thread
