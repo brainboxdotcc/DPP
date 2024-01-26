@@ -3,6 +3,8 @@ find_package(OpenSSL REQUIRED COMPONENTS SSL Crypto)
 find_package(ZLIB REQUIRED)
 find_package(libsodium REQUIRED)
 find_package(Opus)
+find_package(Threads REQUIRED)
+find_package(Git QUIET)
 
 # Check for various C functions
 
@@ -115,28 +117,6 @@ include("${CMAKE_CURRENT_SOURCE_DIR}/../cmake/colour.cmake")
 string(ASCII 27 Esc)
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
-
-find_package(Threads REQUIRED)
-if(MINGW OR NOT WIN32)
-	find_package(ZLIB REQUIRED)
-endif(MINGW OR NOT WIN32)
-
-if(APPLE)
-	if(CMAKE_APPLE_SILICON_PROCESSOR EQUAL arm64)
-		set(OPENSSL_ROOT_DIR "/opt/homebrew/opt/openssl")
-	else()
-		set(OPENSSL_ROOT_DIR "/usr/local/opt/openssl")
-	endif()
-	find_package(OpenSSL REQUIRED)
-else()
-	if(MINGW OR NOT WIN32)
-		find_package(OpenSSL REQUIRED)
-	endif()
-endif()
-
-include_directories(${OPENSSL_INCLUDE_DIR} ${ZLIB_INCLUDE_DIRS})
-
-find_package(Git QUIET)
 
 if(NOT GIT_FOUND AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../.git")
 	message(FATAL_ERROR "You are using a git version of D++ but do not have git installed. Install git (not 'gh') and try again.")
