@@ -7,7 +7,7 @@ permissions:
   contents: read
 
 jobs:
-  triage:
+  labeler:
     permissions:
       pull-requests: write # Labeler needs to be able to add labels to PRs.
     runs-on: ubuntu-latest

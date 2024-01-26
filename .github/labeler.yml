@@ -1,35 +1,52 @@
 documentation:
-- '**Doxyfile'
-- '**docpages/**'
-- '**/*.h'
-- '**/documentation.yml'
-- '**.cspell.json'
-- '**README.md'
-- '**SECURITY.md'
-- '**CONTRIBUTING.md'
-- '**CODE_OF_CONDUCT.md'
+- changed-files:
+  - any-glob-to-any-file:
+    - '**Doxyfile'
+    - '**docpages/**'
+    - '**/*.h'
+    - '**/documentation.yml'
+    - '**.cspell.json'
+    - '**README.md'
+    - '**SECURITY.md'
+    - '**CONTRIBUTING.md'
+    - '**CODE_OF_CONDUCT.md'
+
 build:
-- '**buildtools/**'
-- '**cmake/**'
-- '**library-vcpkg/**'
-- '**library/**'
-- '**win32/**'
-- '**CMakeLists.txt'
-- '**CMakeSettings.json'
-- '**settings.json'
-- '**dpp.pc.in'
+- changed-files:
+  - any-glob-to-any-file:
+    - '**buildtools/**'
+    - '**cmake/**'
+    - '**library-vcpkg/**'
+    - '**library/**'
+    - '**win32/**'
+    - '**CMakeLists.txt'
+    - '**CMakeSettings.json'
+    - '**settings.json'
+    - '**dpp.pc.in'
+
 packaging:
-- '**vcpkg/**'
-- '**makerelease.sh'
-- '**sign.sh'
-- '**Dockerfile'
+- changed-files:
+  - any-glob-to-any-file:
+    - '**vcpkg/**'
+    - '**makerelease.sh'
+    - '**sign.sh'
+    - '**Dockerfile'
+
 submodules:
-- '**.gitmodules'
-- '**doxygen-awesome-css/**' # Ideally, nobody should be touching this, but it's here just in-case.
+- changed-files:
+  - any-glob-to-any-file:
+    - '**.gitmodules'
+    - '**doxygen-awesome-css/**' # Ideally, nobody should be touching this, but it's here just in-case.
+
 github_actions:
-- '**.github/labeler.yml'
-- '**.github/dependabot.yml'
-- '**.github/workflows/**'
+- changed-files:
+  - any-glob-to-any-file:
+    - '**.github/labeler.yml'
+    - '**.github/dependabot.yml'
+    - '**.github/workflows/**'
+
 code:
-- '**src/**'
-- '**include/**'
+- changed-files:
+  - any-glob-to-any-file:
+    - '**src/**'
+    - '**include/**'
