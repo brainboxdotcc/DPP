@@ -42,10 +42,7 @@ add_compile_options(${AVX_FLAG})
 
 if(WIN32 AND NOT MINGW)
 	if (NOT WINDOWS_32_BIT)
-		message("-- Building for windows with precompiled packaged dependencies")
-		set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
-		add_compile_options("/bigobj")
-		add_compile_definitions(OPENSSL_SYS_WIN32)
+		message("-- Setting Windows flags")
 		add_compile_definitions(_WINSOCK_DEPRECATED_NO_WARNINGS)
 		add_compile_definitions(WIN32_LEAN_AND_MEAN)
 		add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
@@ -78,22 +75,6 @@ if (UNIX)
 	else()
 		message("-- Autogeneration is not available")
  	endif()
-endif()
-
-if(NOT BUILD_SHARED_LIBS)
-	if(UNIX)
-		message("-- Building static library.")
-		
-		if(UNIX AND NOT APPLE)
-			set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
-		endif()
-		
-		set(OPENSSL_USE_STATIC_LIBS ON)
-		set(sodium_USE_STATIC_LIBS ON)
-		set(OPUS_USE_STATIC_LIBS TRUE)
-	else()
-		message(WARNING "-- Building of static library not supported on non UNIX systems.")
-	endif()
 endif()
 
 include("${CMAKE_CURRENT_SOURCE_DIR}/../cmake/colour.cmake")
@@ -164,7 +145,7 @@ foreach (fullmodname ${subdirlist})
     set (modsrc "")
 	
 	file(GLOB modsrc "${modules_dir}/dpp/*.cpp" "${modules_dir}/dpp/events/*.cpp" "${modules_dir}/dpp/cluster/*.cpp" "${modules_dir}/dpp/*.rc")
-
+	
 	if(BUILD_SHARED_LIBS)
 		add_library(${modname} SHARED ${modsrc})
 	else()
