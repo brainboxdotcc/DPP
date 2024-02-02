@@ -32,7 +32,8 @@ struct coroutine_dummy {
 
 #ifdef DPP_CORO
 
-#include "coro.h"
+#include <dpp/coro/coro.h>
+#include <dpp/coro/awaitable.h>
 
 #include <optional>
 #include <type_traits>
