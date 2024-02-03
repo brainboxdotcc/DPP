@@ -91,14 +91,14 @@ jobs:
 
       - name: Upload Binary (DEB)
         if: ${{ matrix.cfg.cpack == 'yes' }}
-        uses: actions/upload-artifact@c7d193f32edcb7bfad88892161225aeda64e9392 # v4.0.0
+        uses: actions/upload-artifact@26f96dfa697d77e81fd5907df203aa23a56210a8 # v4.3.0
         with:
           name: "libdpp - Debian Package ${{matrix.cfg.arch}}"
           path: '${{github.workspace}}/build/*.deb'
 
       - name: Upload Binary (RPM)
         if: ${{ matrix.cfg.cpack == 'yes' }}
-        uses: actions/upload-artifact@c7d193f32edcb7bfad88892161225aeda64e9392 # v4.0.0
+        uses: actions/upload-artifact@26f96dfa697d77e81fd5907df203aa23a56210a8 # v4.3.0
         with:
           name: "libdpp - RPM Package ${{matrix.cfg.arch}}"
           path: '${{github.workspace}}/build/*.rpm'
@@ -209,7 +209,7 @@ jobs:
 
       - name: Upload Binary
         if: ${{ matrix.cfg.upload }}
-        uses: actions/upload-artifact@c7d193f32edcb7bfad88892161225aeda64e9392 # v4.0.0
+        uses: actions/upload-artifact@26f96dfa697d77e81fd5907df203aa23a56210a8 # v4.3.0
         with:
           name: "libdpp - Windows ${{matrix.cfg.name}}-${{matrix.cfg.config}}-vs${{matrix.cfg.vs}}"
           path: '${{github.workspace}}/main/build/*.zip'
@@ -251,13 +251,13 @@ jobs:
         run: cd build && sudo cpack --verbose || cat /home/runner/work/DPP/DPP/build/_CPack_Packages/Linux/DEB/PreinstallOutput.log
 
       - name: Upload Binaries (DEB)
-        uses: actions/upload-artifact@c7d193f32edcb7bfad88892161225aeda64e9392 # v4.0.0
+        uses: actions/upload-artifact@26f96dfa697d77e81fd5907df203aa23a56210a8 # v4.3.0
         with:
           name: "libdpp - Debian Package ${{matrix.cfg.name}}"
           path: "${{github.workspace}}/build/*.deb"
 
       - name: Upload Binaries (RPM)
-        uses: actions/upload-artifact@c7d193f32edcb7bfad88892161225aeda64e9392 # v4.0.0
+        uses: actions/upload-artifact@26f96dfa697d77e81fd5907df203aa23a56210a8 # v4.3.0
         with:
           name: "libdpp - RPM Package ${{matrix.cfg.name}}"
           path: "${{github.workspace}}/build/*.rpm"
