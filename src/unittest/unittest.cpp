@@ -147,7 +147,7 @@ std::vector<uint8_t> load_test_audio() {
 	return testaudio;
 }
 
-std::vector<std::byte> load_data(const std::string& file) {
+std::vector<std::byte> load_test_data(const std::string& file) {
 	std::vector<std::byte> testimage;
 	std::string dir = get_testdata_dir();
 	std::ifstream input (dir + file, std::ios::in|std::ios::binary|std::ios::ate);

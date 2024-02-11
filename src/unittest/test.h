@@ -3,7 +3,7 @@
  * D++, A Lightweight C++ library for Discord
  *
  * SPDX-License-Identifier: Apache-2.0
- * Copyright 2021 Craig Edwards and D++ contributors 
+ * Copyright 2021 Craig Edwards and D++ contributors
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -31,8 +31,6 @@ _Pragma("warning( disable : 5105 )"); // 4251 warns when we export classes or st
 
 #ifdef _WIN32
 #define SHARED_OBJECT "dpp.dll"
-#elif __APPLE__
-#define SHARED_OBJECT "libdpp.dylib"
 #else
 #define SHARED_OBJECT "libdpp.so"
 #endif
@@ -64,7 +62,7 @@ enum test_status_t {
 
 struct test_t;
 
-inline std::vector<test_t *> tests = {};
+inline std::vector<test_t*> tests = {};
 
 /* Represents a test case */
 struct test_t {
@@ -150,7 +148,6 @@ DPP_TEST(FORUM_CHANNEL_GET, "retrieve the created forum channel", tf_online);
 DPP_TEST(FORUM_CHANNEL_DELETE, "delete the created forum channel", tf_online);
 DPP_TEST(ERRORS, "Human readable error translation", tf_offline);
 
-DPP_TEST(GUILD_EDIT, "cluster::guild_edit", tf_online);
 DPP_TEST(GUILD_BAN_CREATE, "cluster::guild_ban_add ban three deleted discord accounts", tf_online);
 DPP_TEST(GUILD_BAN_GET, "cluster::guild_get_ban getting one of the banned accounts", tf_online);
 DPP_TEST(GUILD_BANS_GET, "cluster::guild_get_bans get bans using the after-parameter", tf_online);
@@ -181,7 +178,7 @@ DPP_TEST(USER_GET_AVATAR_URL, "user::get_avatar_url", tf_offline);
 DPP_TEST(CHANNEL_SET_TYPE, "channel::set_type", tf_offline);
 DPP_TEST(CHANNEL_GET_MENTION, "channel::get_mention", tf_offline);
 DPP_TEST(CHANNEL_GET_URL, "channel::get_url", tf_offline);
-DPP_TEST(MESSAGE_GET_URL,"message::get_url",tf_offline);
+DPP_TEST(MESSAGE_GET_URL, "message::get_url", tf_offline);
 DPP_TEST(UTILITY_GUILD_NAVIGATION, "utility::guild_navigation", tf_offline);
 DPP_TEST(UTILITY_ICONHASH, "utility::iconhash", tf_offline);
 DPP_TEST(UTILITY_MAKE_URL_PARAMETERS, "utility::make_url_parameters", tf_offline);
@@ -257,7 +254,7 @@ DPP_TEST(CORO_API_CALLS, "coro: online api calls", tf_online | tf_coro);
 DPP_TEST(CORO_MUMBO_JUMBO, "coro: online mumbo jumbo in event handler", tf_online | tf_coro | tf_extended);
 
 void coro_offline_tests();
-void coro_online_tests(dpp::cluster *bot);
+void coro_online_tests(dpp::cluster* bot);
 
 class test_cached_object_t : public dpp::managed {
 public:
@@ -310,9 +307,9 @@ inline constexpr bool coro = false;
 		}); \
 	}
 
-/**
- * @brief Perform a test of a REST base API call with one parameter
- */
+ /**
+  * @brief Perform a test of a REST base API call with one parameter
+  */
 #define twoparam_api_test(func_name, param1, param2, return_type, testname) \
 	set_test(testname, false); \
 	if (!offline) { \
@@ -332,9 +329,9 @@ inline constexpr bool coro = false;
 		}); \
 	}
 
-/**
- * @brief Perform a test of a REST base API call with one parameter that returns a list
- */
+  /**
+   * @brief Perform a test of a REST base API call with one parameter that returns a list
+   */
 #define singleparam_api_test_list(func_name, param, return_type, testname) \
 	set_test(testname, false); \
 	if (!offline) { \
@@ -354,9 +351,9 @@ inline constexpr bool coro = false;
 		}); \
 	}
 
-/**
- * @brief Perform a test of a REST base API call with one parameter that returns a list
- */
+   /**
+	* @brief Perform a test of a REST base API call with one parameter that returns a list
+	*/
 #define multiparam_api_test_list(func_name, param, return_type, testname) \
 	set_test(testname, false); \
 	if (!offline) { \
@@ -376,9 +373,9 @@ inline constexpr bool coro = false;
 		}); \
 	}
 
-/**
- * @brief Perform a test of a REST base API call with two parameters
- */
+	/**
+	 * @brief Perform a test of a REST base API call with two parameters
+	 */
 #define twoparam_api_test_list(func_name, param1, param2, return_type, testname) \
 	set_test(testname, false); \
 	if (!offline) { \
@@ -399,9 +396,9 @@ inline constexpr bool coro = false;
 	}
 
 
-/**
- * @brief Perform a test of a REST base API call with no parameters
- */
+	 /**
+	  * @brief Perform a test of a REST base API call with no parameters
+	  */
 #define noparam_api_test(func_name, return_type, testname) \
 	set_test(testname, false); \
 	if (!offline) { \
@@ -416,17 +413,17 @@ inline constexpr bool coro = false;
 		}); \
 	}
 
-/**
- * @brief Sets a test's status (legacy)
- *
- * @param test The test to set the status of
- * @param success If set to true, sets success to true, if set to false and called
- * once, sets executed to true, if called twice, also sets success to false.
- * This means that before you run the test you should call this function once
- * with success set to false, then if/wen the test completes call it again with true.
- * If the test fails, call it a second time with false, or not at all.
- */
-void set_test(test_t &test, bool success = false);
+	  /**
+	   * @brief Sets a test's status (legacy)
+	   *
+	   * @param test The test to set the status of
+	   * @param success If set to true, sets success to true, if set to false and called
+	   * once, sets executed to true, if called twice, also sets success to false.
+	   * This means that before you run the test you should call this function once
+	   * with success set to false, then if/wen the test completes call it again with true.
+	   * If the test fails, call it a second time with false, or not at all.
+	   */
+void set_test(test_t& test, bool success = false);
 
 /**
  * @brief Sets a test's status
@@ -434,33 +431,33 @@ void set_test(test_t &test, bool success = false);
  * @param test The test to set the status of
  * @param status Status to set the test to
  */
-void set_status(test_t &test, test_status_t status, std::string_view message = {});
+void set_status(test_t& test, test_status_t status, std::string_view message = {});
 
 /**
  * @brief Sets a test's status to ts_skipped
  *
  * @param test The test to set the status of
  */
-void skip_test(test_t &test);
+void skip_test(test_t& test);
 
 /**
  * @brief Sets a test's status to ts_started
  *
  * @param test The test to set the status of
  */
-void start_test(test_t &test);
+void start_test(test_t& test);
 
 /**
  * @brief Check if a test is/should be skipped
  *
  * @return bool Whether the test is/should be skipped
  */
-bool is_skipped(const test_t &test);
+bool is_skipped(const test_t& test);
 
 /**
  * @brief Prints a summary of all tests executed
  * @param tests List of tests executed
- * 
+ *
  * @return int Returns number of failed tests, for use as a return value from the main() function
  */
 int test_summary();
@@ -468,21 +465,21 @@ int test_summary();
 
 /**
  * @brief Load test audio for the voice channel tests
- * 
+ *
  * @return std::vector<uint8_t> data and size for test audio
  */
 std::vector<uint8_t> load_test_audio();
 
 /**
  * @brief Load bytes from file
- * 
+ *
  * @return std::vector<std::byte> File data
  */
-std::vector<std::byte> load_data(const std::string& file);
+std::vector<std::byte> load_test_data(const std::string& file);
 
 /**
  * @brief Get the token from the environment variable DPP_UNIT_TEST_TOKEN
- * 
+ *
  * @return std::string token
  * @note If the environment variable does not exist, this will exit the program.
  */
@@ -495,14 +492,14 @@ void wait_for_tests();
 
 /**
  * @brief Get the start time of tests
- * 
+ *
  * @return double start time in fractional seconds
  */
 double get_start_time();
 
 /**
  * @brief Get the current execution time in seconds
- * 
+ *
  * @return double fractional seconds
  */
 double get_time();
@@ -523,11 +520,11 @@ public:
  * @brief Convenience functor to get the snowflake of a certain type
  */
 struct user_project_id_t {
-	dpp::snowflake operator()(const dpp::user &user) const noexcept {
+	dpp::snowflake operator()(const dpp::user& user) const noexcept {
 		return user.id;
 	}
 
-	dpp::snowflake operator()(const dpp::guild_member &user) const noexcept {
+	dpp::snowflake operator()(const dpp::guild_member& user) const noexcept {
 		return user.user_id;
 	}
 
@@ -535,7 +532,7 @@ struct user_project_id_t {
 		return user;
 	}
 
-	dpp::snowflake operator()(const dpp::thread_member &user) const noexcept {
+	dpp::snowflake operator()(const dpp::thread_member& user) const noexcept {
 		return user.user_id;
 	}
 };
@@ -552,9 +549,9 @@ inline constexpr user_project_id_t get_user_snowflake;
  *
  * @return bool whether the user is the test bot owner
  */
-inline constexpr auto is_owner = [](auto &&user) noexcept {
+inline constexpr auto is_owner = [](auto&& user) noexcept {
 	return get_user_snowflake(user) == TEST_USER_ID;
-};
+	};
 
 #define DPP_RUNTIME_CHECK(test, check, var) if (!check) { var = false; set_status(test, ts_failed, "check failed: " #check); }
 #define DPP_COMPILETIME_CHECK(test, check, var) static_assert(check, #test ": " #check)
@@ -572,3 +569,33 @@ inline constexpr auto is_owner = [](auto &&user) noexcept {
   DPP_CHECK(test, std::is_copy_assignable_v<type>, var); \
 	DPP_CHECK(test, std::is_move_assignable_v<type>, var); \
   } while(0)
+
+/**
+ * @brief Unit tests for Human readable error translation
+ */
+void errors_test();
+
+/**
+* @brief Unit tests for HTTPS client
+*/
+void http_client_tests(const std::string&);
+
+/**
+* @brief Unit tests for Discord objects (webhook, interaction, user etc.)
+*/
+void discord_objects_tests();
+
+/**
+ * @brief Unit tests for Gateway events
+ */
+void gateway_events_tests(const std::string&, dpp::cluster&);
+
+/**
+* @brief Unit tests for Cache
+*/
+void cache_tests(dpp::cluster&);
+
+/**
+* @brief Unit tests for Utilities
+*/
+void utility_tests();
