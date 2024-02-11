@@ -31,6 +31,8 @@ _Pragma("warning( disable : 5105 )"); // 4251 warns when we export classes or st
 
 #ifdef _WIN32
 #define SHARED_OBJECT "dpp.dll"
+#elif __APPLE__
+#define SHARED_OBJECT "libdpp.dylib"
 #else
 #define SHARED_OBJECT "libdpp.so"
 #endif
@@ -148,6 +150,7 @@ DPP_TEST(FORUM_CHANNEL_GET, "retrieve the created forum channel", tf_online);
 DPP_TEST(FORUM_CHANNEL_DELETE, "delete the created forum channel", tf_online);
 DPP_TEST(ERRORS, "Human readable error translation", tf_offline);
 
+DPP_TEST(GUILD_EDIT, "cluster::guild_edit", tf_online);
 DPP_TEST(GUILD_BAN_CREATE, "cluster::guild_ban_add ban three deleted discord accounts", tf_online);
 DPP_TEST(GUILD_BAN_GET, "cluster::guild_get_ban getting one of the banned accounts", tf_online);
 DPP_TEST(GUILD_BANS_GET, "cluster::guild_get_bans get bans using the after-parameter", tf_online);
@@ -307,9 +310,9 @@ inline constexpr bool coro = false;
 		}); \
 	}
 
- /**
-  * @brief Perform a test of a REST base API call with one parameter
-  */
+/**
+ * @brief Perform a test of a REST base API call with one parameter
+ */
 #define twoparam_api_test(func_name, param1, param2, return_type, testname) \
 	set_test(testname, false); \
 	if (!offline) { \
@@ -329,9 +332,9 @@ inline constexpr bool coro = false;
 		}); \
 	}
 
-  /**
-   * @brief Perform a test of a REST base API call with one parameter that returns a list
-   */
+/**
+ * @brief Perform a test of a REST base API call with one parameter that returns a list
+ */
 #define singleparam_api_test_list(func_name, param, return_type, testname) \
 	set_test(testname, false); \
 	if (!offline) { \
@@ -351,9 +354,9 @@ inline constexpr bool coro = false;
 		}); \
 	}
 
-   /**
-	* @brief Perform a test of a REST base API call with one parameter that returns a list
-	*/
+/**
+ * @brief Perform a test of a REST base API call with one parameter that returns a list
+ */
 #define multiparam_api_test_list(func_name, param, return_type, testname) \
 	set_test(testname, false); \
 	if (!offline) { \
@@ -373,9 +376,9 @@ inline constexpr bool coro = false;
 		}); \
 	}
 
-	/**
-	 * @brief Perform a test of a REST base API call with two parameters
-	 */
+/**
+ * @brief Perform a test of a REST base API call with two parameters
+ */
 #define twoparam_api_test_list(func_name, param1, param2, return_type, testname) \
 	set_test(testname, false); \
 	if (!offline) { \
@@ -396,9 +399,9 @@ inline constexpr bool coro = false;
 	}
 
 
-	 /**
-	  * @brief Perform a test of a REST base API call with no parameters
-	  */
+/**
+ * @brief Perform a test of a REST base API call with no parameters
+ */
 #define noparam_api_test(func_name, return_type, testname) \
 	set_test(testname, false); \
 	if (!offline) { \
@@ -413,16 +416,16 @@ inline constexpr bool coro = false;
 		}); \
 	}
 
-	  /**
-	   * @brief Sets a test's status (legacy)
-	   *
-	   * @param test The test to set the status of
-	   * @param success If set to true, sets success to true, if set to false and called
-	   * once, sets executed to true, if called twice, also sets success to false.
-	   * This means that before you run the test you should call this function once
-	   * with success set to false, then if/wen the test completes call it again with true.
-	   * If the test fails, call it a second time with false, or not at all.
-	   */
+/**
+ * @brief Sets a test's status (legacy)
+ *
+ * @param test The test to set the status of
+ * @param success If set to true, sets success to true, if set to false and called
+ * once, sets executed to true, if called twice, also sets success to false.
+ * This means that before you run the test you should call this function once
+ * with success set to false, then if/wen the test completes call it again with true.
+ * If the test fails, call it a second time with false, or not at all.
+ */
 void set_test(test_t& test, bool success = false);
 
 /**

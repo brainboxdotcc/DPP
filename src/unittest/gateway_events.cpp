@@ -73,6 +73,40 @@ void gateway_events_tests(const std::string& token, dpp::cluster& bot) {
 		bot.on_voice_receive_combined([&](const auto& event) {
 		});
 
+		bot.on_guild_create([&](const dpp::guild_create_t& event) {
+			dpp::guild* g = event.created;
+
+			if (g->id == TEST_GUILD_ID) {
+				start_test(GUILD_EDIT);
+				g->set_icon(dpp::i_png, test_image.data(), static_cast<uint32_t>(test_image.size()));
+				bot.guild_edit(*g, [&bot](const dpp::confirmation_callback_t& result) {
+					if (result.is_error()) {
+						set_status(GUILD_EDIT, ts_failed, "guild_edit 1 errored:\n" + result.get_error().human_readable);
+						return;
+					}
+					dpp::guild g = result.get<dpp::guild>();
+
+					if (g.get_icon_url().empty()) {
+						set_status(GUILD_EDIT, ts_failed, "icon not set or not retrieved");
+						return;
+					}
+					g.remove_icon();
+					bot.guild_edit(g, [&bot](const dpp::confirmation_callback_t& result) {
+						if (result.is_error()) {
+							set_status(GUILD_EDIT, ts_failed, "guild_edit 2 errored:\n" + result.get_error().human_readable);
+							return;
+						}
+						const dpp::guild& g = result.get<dpp::guild>();
+						if (!g.get_icon_url().empty()) {
+							set_status(GUILD_EDIT, ts_failed, "icon not removed");
+							return;
+						}
+						set_status(GUILD_EDIT, ts_success);
+						});
+					});
+			}
+			});
+
 		std::promise<void> ready_promise;
 		std::future ready_future = ready_promise.get_future();
 		bot.on_ready([&](const dpp::ready_t & event) {
