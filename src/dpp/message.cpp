@@ -357,7 +357,7 @@ void to_json(json& j, const component& cp) {
 					o["type"] = "channel";
 				} else if (v.type == dpp::cdt_user) {
 					o["type"] = "user";
-				}				
+				}
 				j["default_values"].push_back(o);
 			}
 		}
@@ -841,7 +841,7 @@ reaction::reaction(json* j) {
 	}
 }
 
-attachment::attachment(struct message* o) 
+attachment::attachment(struct message* o)
 	: id(0)
 	, size(0)
 	, width(0)
@@ -1034,6 +1034,15 @@ bool message::is_dm() const {
 
 bool message::suppress_embeds() const {
 	return flags & m_suppress_embeds;
+}
+
+message& message::suppress_embeds(bool suppress) {
+	if (suppress) {
+		flags |= m_suppress_embeds;
+	} else {
+		flags &= ~m_suppress_embeds;
+	}
+	return *this;
 }
 
 bool message::is_source_message_deleted() const {

@@ -1770,6 +1770,15 @@ public:
 	void message_edit(const struct message &m, command_completion_event_t callback = utility::log_error());
 
 	/**
+	 * @brief Edit the flags of a message on a channel. The callback function is called when the message has been edited
+	 *
+	 * @param m Message to edit the flags of
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::message object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void message_edit_flags(const struct message &m, command_completion_event_t callback = utility::log_error());
+
+	/**
 	 * @brief Add a reaction to a message. The reaction string must be either an `emojiname:id` or a unicode character.
 	 *
 	 * @see https://discord.com/developers/docs/resources/channel#create-reaction
