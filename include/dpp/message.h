@@ -2112,7 +2112,7 @@ public:
 	/**
 	 * @brief Set whether embeds should be suppressed
 	 *
-	 * @param f whether embeds should be suppressed
+	 * @param suppress whether embeds should be suppressed
 	 * @return message& reference to self
 	 */
 	message& suppress_embeds(bool suppress);
