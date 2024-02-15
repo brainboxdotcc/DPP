@@ -72,6 +72,36 @@ bool confirmation_callback_t::is_error() const {
 	}
 }
 
+namespace {
+
+std::vector<error_detail> find_errors_in_array(const std::string& obj, size_t index, const std::string& current_field, json::iterator begin, json::iterator end) {
+	std::vector<error_detail> ret;
+
+	for (auto it = begin; it != end; ++it) {
+		if (auto errors = it->find("_errors"); errors != it->end()) {
+			for (auto errordetails = errors->begin(); errordetails != errors->end(); ++errordetails) {
+				error_detail detail;
+				detail.code = (*errordetails)["code"].get<std::string>();
+				detail.reason = (*errordetails)["message"].get<std::string>();
+				detail.field = current_field + it.key();
+				detail.object = obj;
+				detail.index = index;
+				ret.emplace_back(detail);
+			}
+		} else { // subobject has errors
+			auto sub_errors = find_errors_in_array(obj, index, current_field + it.key() + ".", it->begin(), it->end());
+
+			if (!sub_errors.empty()) {
+				ret.reserve(ret.capacity() + sub_errors.size());
+				std::move(sub_errors.begin(), sub_errors.end(), std::back_inserter(ret));
+			}
+		}
+	}
+	return ret;
+}
+
+}
+
 error_info confirmation_callback_t::get_error() const {
 	if (is_error()) {
 		json j = json::parse(this->http_info.body);
@@ -145,19 +175,11 @@ error_info confirmation_callback_t::get_error() const {
 				/* An object that has a subobject with errors */
 				for (auto index = obj->begin(); index != obj->end(); ++index) {
 					int array_index = std::atoll(index.key().c_str());
-					for (auto index2 = index->begin(); index2 != index->end(); ++index2) {
-						if (index2->find("_errors") != index2->end()) {
-							/* A single object where one or more fields generated an error */
-							for (auto errordetails = (*index2)["_errors"].begin(); errordetails != (*index2)["_errors"].end(); ++errordetails) {
-								error_detail detail;
-								detail.code = (*errordetails)["code"].get<std::string>();
-								detail.reason = (*errordetails)["message"].get<std::string>();
-								detail.object = obj.key();
-								detail.field = index2.key();
-								detail.index = array_index;
-								e.errors.emplace_back(detail);
-							}
-						}
+					auto sub_errors = find_errors_in_array(obj.key(), array_index, {}, index->begin(), index->end());
+
+					if (!sub_errors.empty()) {
+						e.errors.reserve(e.errors.capacity() + sub_errors.size());
+						std::move(sub_errors.begin(), sub_errors.end(), std::back_inserter(e.errors));
 					}
 				}
 			}
