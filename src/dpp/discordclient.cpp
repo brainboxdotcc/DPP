@@ -634,6 +634,36 @@ discord_client& discord_client::connect_voice(snowflake guild_id, snowflake chan
 	return *this;
 }
 
+discord_client& discord_client::change_voice_channel(snowflake guild_id, snowflake channel_id, bool self_mute, bool self_deaf) {
+#ifdef HAVE_VOICE
+	std::unique_lock lock(voice_mutex);
+	if (connecting_voice_channels.find(guild_id) != connecting_voice_channels.end()) {
+		if (connecting_voice_channels[guild_id]->channel_id != channel_id) {
+			connecting_voice_channels[guild_id] = std::make_unique<voiceconn>(this, channel_id);
+			/* Once sent, this expects two events (in any order) on the websocket:
+			* VOICE_SERVER_UPDATE and VOICE_STATUS_UPDATE
+			*/
+			log(ll_debug, "Sending op 4 to change VC channel, guild " + std::to_string(guild_id) + " channel  " + std::to_string(channel_id));
+			queue_message(jsonobj_to_string(json({
+				{ "op", 4 },
+				{ "d", {
+						{ "guild_id", std::to_string(guild_id) },
+						{ "channel_id", std::to_string(channel_id) },
+						{ "self_mute", self_mute },
+						{ "self_deaf", self_deaf },
+					}
+				}
+			})), false);
+		} else {
+			log(ll_debug, "Requested the bot switch to voice channel " + std::to_string(channel_id) + " on guild " + std::to_string(guild_id) + ", but it seems we are already in this VC");
+		}
+	} else {
+		log(ll_debug, "Requested the bot switch to voice channel " + std::to_string(channel_id) + " on guild " + std::to_string(guild_id) + ", but we aren't connected to a VC");
+	}
+#endif
+	return *this;
+}
+
 std::string discord_client::jsonobj_to_string(const nlohmann::json& json) {
 	if (protocol == ws_json) {
 		return json.dump();
