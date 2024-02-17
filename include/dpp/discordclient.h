@@ -505,6 +505,20 @@ public:
 	discord_client& connect_voice(snowflake guild_id, snowflake channel_id, bool self_mute = false, bool self_deaf = false);
 
 	/**
+	 * @brief Change voice channel
+	 * 
+	 * @param guild_id Guild where the voice channel is
+	 * @param channel_id Channel ID of the voice channel
+	 * @param self_mute True if the bot should mute itself
+	 * @param self_deaf True if the bot should deafen itself
+	 * @return reference to self
+	 * @note This is NOT a synchronous blocking call! The bot isn't instantly ready to send or listen for audio,
+	 * as we have to wait for the connection to the voice server to be established!
+	 * e.g. wait for dpp::cluster::on_voice_ready event, and then send the audio within that event.
+	 */
+	discord_client& change_voice_channel(snowflake guild_id, snowflake channel_id, bool self_mute = false, bool self_deaf = false);
+
+	/**
 	 * @brief Disconnect from the connected voice channel on a guild
 	 * 
 	 * @param guild_id The guild who's voice channel you wish to disconnect from
