@@ -81,6 +81,8 @@
 		"semaphore": "cpp",
 		"stop_token": "cpp",
 		"charconv": "cpp",
-		"any": "cpp"
+		"any": "cpp",
+		"ranges": "cpp",
+		"span": "cpp"
 	}
 }
