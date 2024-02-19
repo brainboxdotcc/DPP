@@ -286,10 +286,18 @@ time_t ts_not_null(const json* j, const char* keyname)
 			}
 			crossplatform_strptime(timedate.substr(0, 19).c_str(), "%Y-%m-%dT%T", &timestamp);
 			timestamp.tm_isdst = 0;
-			retval = mktime(&timestamp);
+			#ifndef _WIN32
+				retval = timegm(&timestamp);
+			#else
+				retval = _mkgmtime(&timestamp);
+			#endif
 		} else {
 			crossplatform_strptime(timedate.substr(0, 19).c_str(), "%Y-%m-%d %T", &timestamp);
-			retval = mktime(&timestamp);
+			#ifndef _WIN32
+				retval = timegm(&timestamp);
+			#else
+				retval = _mkgmtime(&timestamp);
+			#endif
 		}
 	}
 	return retval;
