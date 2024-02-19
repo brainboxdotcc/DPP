@@ -79,15 +79,6 @@ int main(int argc, char *argv[])
 		std::cout << "Running offline and " << (extended ? "extended" : "limited") << " online unit tests. Guild ID: " << TEST_GUILD_ID << " Text Channel ID: " << TEST_TEXT_CHANNEL_ID << " VC ID: " << TEST_VC_ID << " User ID: " << TEST_USER_ID << " Event ID: " << TEST_EVENT_ID << "\n";
 	}
 
-	std::string test_to_escape = "*** _This is a test_ ***\n```cpp\n\
-int main() {\n\
-    /* Comment */\n\
-    int answer = 42;\n\
-    return answer; // ___\n\
-};\n\
-```\n\
-Markdown lol ||spoiler|| ~~strikethrough~~ `small *code* block`\n";
-
 	set_test(COMPARISON, false);
 	dpp::user u1;
 	dpp::user u2;
@@ -190,29 +181,6 @@ Markdown lol ||spoiler|| ~~strikethrough~~ `small *code* block`\n";
 
 	set_test(ERRORS, error_message_success);
 
-	set_test(MD_ESC_1, false);
-	set_test(MD_ESC_2, false);
-	std::string escaped1 = dpp::utility::markdown_escape(test_to_escape);
-	std::string escaped2 = dpp::utility::markdown_escape(test_to_escape, true);
-	set_test(MD_ESC_1, escaped1 == "\\*\\*\\* \\_This is a test\\_ \\*\\*\\*\n\
-```cpp\n\
-int main() {\n\
-    /* Comment */\n\
-    int answer = 42;\n\
-    return answer; // ___\n\
-};\n\
-```\n\
-Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ `small *code* block`\n");
-	set_test(MD_ESC_2, escaped2 == "\\*\\*\\* \\_This is a test\\_ \\*\\*\\*\n\
-\\`\\`\\`cpp\n\
-int main\\(\\) {\n\
-    /\\* Comment \\*/\n\
-    int answer = 42;\n\
-    return answer; // \\_\\_\\_\n\
-};\n\
-\\`\\`\\`\n\
-Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* block\\`\n");
-
 	http_unit_tests(token);
 
 	utilities_unit_tests();
@@ -226,9 +194,6 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 	size_t off = (size_t)ftell(fp);
 	fclose(fp);
 	set_test(READFILE, off == rf_test.length());
-
-	set_test(TIMESTAMPTOSTRING, false);
-	set_test(TIMESTAMPTOSTRING, dpp::ts_to_string(1642611864) == "2022-01-19T17:04:24Z");
 
 	set_test(ROLE_COMPARE, false);
 	dpp::role role_1, role_2;
@@ -810,17 +775,6 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 				 dpp::utility::thread_url(0,0) == "" 
 		);
 	}
-
-#ifndef _WIN32
-	set_test(TIMESTRINGTOTIMESTAMP, false);
-	json tj;
-	tj["t1"] = "2022-01-19T17:18:14.506000+00:00";
-	tj["t2"] = "2022-01-19T17:18:14+00:00";
-	uint32_t inTimestamp = 1642612694;
-	set_test(TIMESTRINGTOTIMESTAMP, (uint64_t)dpp::ts_not_null(&tj, "t1") == inTimestamp && (uint64_t)dpp::ts_not_null(&tj, "t2") == inTimestamp);
-#else
-	set_test(TIMESTRINGTOTIMESTAMP, true);
-#endif
 
 	{
 		set_test(TS, false);

@@ -507,8 +507,25 @@ double get_start_time();
  */
 double get_time();
 
+/**
+ * @brief This unit test covers the following:
+ * - get_host_info
+ * - HTTPS request
+ * - HTTP request
+ * - multiheader cookie test
+ *
+ * @param token
+ */
 void http_unit_tests(const std::string& token);
 
+/**
+ * @brief This unit test covers the following:
+ * - Markdown escaping
+ * - URL encoding
+ * - Base 64 encoding
+ * - ts_to_string
+ * - ts_not_null
+ */
 void utilities_unit_tests();
 
 /**
