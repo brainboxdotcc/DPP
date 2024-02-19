@@ -525,8 +525,16 @@ void http_unit_tests(const std::string& token);
  * - Base 64 encoding
  * - ts_to_string
  * - ts_not_null
+ * - All Utility tests
+ * - manged object comparison
  */
 void utilities_unit_tests();
+
+/**
+ * @brief This unit test covers the following:
+ * - Human readable error translation
+ */
+void errors_unit_tests();
 
 /**
  * @brief A test version of the message collector for use in unit tests
