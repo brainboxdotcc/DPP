@@ -107,7 +107,7 @@ void cluster::tick_timers() {
 		 */
 		bool not_deleted = ([handle, this]() -> bool {
 			std::lock_guard<std::mutex> l(timer_guard);
-			return timer_list.contains(handle);
+			return timer_list.find(handle) != timer_list.end();
 		}());
 		if (not_deleted) {
 			timer_reschedule(t);
