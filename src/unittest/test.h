@@ -3,7 +3,7 @@
  * D++, A Lightweight C++ library for Discord
  *
  * SPDX-License-Identifier: Apache-2.0
- * Copyright 2021 Craig Edwards and D++ contributors 
+ * Copyright 2021 Craig Edwards and D++ contributors
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -181,7 +181,7 @@ DPP_TEST(USER_GET_AVATAR_URL, "user::get_avatar_url", tf_offline);
 DPP_TEST(CHANNEL_SET_TYPE, "channel::set_type", tf_offline);
 DPP_TEST(CHANNEL_GET_MENTION, "channel::get_mention", tf_offline);
 DPP_TEST(CHANNEL_GET_URL, "channel::get_url", tf_offline);
-DPP_TEST(MESSAGE_GET_URL,"message::get_url",tf_offline);
+DPP_TEST(MESSAGE_GET_URL, "message::get_url", tf_offline);
 DPP_TEST(UTILITY_GUILD_NAVIGATION, "utility::guild_navigation", tf_offline);
 DPP_TEST(UTILITY_ICONHASH, "utility::iconhash", tf_offline);
 DPP_TEST(UTILITY_MAKE_URL_PARAMETERS, "utility::make_url_parameters", tf_offline);
@@ -506,6 +506,10 @@ double get_start_time();
  * @return double fractional seconds
  */
 double get_time();
+
+void http_unit_tests(const std::string& token);
+
+void utilities_unit_tests();
 
 /**
  * @brief A test version of the message collector for use in unit tests
