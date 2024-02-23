@@ -8,3 +8,4 @@ Interactions are a unified way provided by Discord to handle \ref slashcommands 
 * \subpage components-menu
 * \subpage modal-dialog-interactions
 * \subpage context-menu
+* \subpage thinking
