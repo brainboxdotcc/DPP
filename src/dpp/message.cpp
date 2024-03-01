@@ -622,9 +622,12 @@ message::message(const std::string &_content, message_type t) : message() {
 	type = t;
 }
 
-message::message(snowflake _channel_id, const embed& _embed) : message() {
-	channel_id = _channel_id;
+message::message(const embed& _embed) : message() {
 	embeds.emplace_back(_embed);
+}
+
+message::message(snowflake _channel_id, const embed& _embed) : message(_embed) {
+	channel_id = _channel_id;
 }
 
 embed::embed(json* j) : embed() {
