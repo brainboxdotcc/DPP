@@ -258,7 +258,7 @@ foreach (fullmodname ${subdirlist})
 		endif()
 
 	else()
-		target_link_libraries(${modname} PUBLIC ${OPENSSL_CRYPTO_LIBRARY} ${OPENSSL_SSL_LIBRARY} ${ZLIB_LIBRARIES})
+		target_link_libraries(${modname} PUBLIC ${OPENSSL_SSL_LIBRARY} ${OPENSSL_CRYPTO_LIBRARY} ${ZLIB_LIBRARIES})
 		if (MINGW)
 			target_link_libraries(${modname} PUBLIC wsock32 ws2_32 crypt32)
 		endif ()
