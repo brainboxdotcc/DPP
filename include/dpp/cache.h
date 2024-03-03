@@ -250,7 +250,7 @@ public:
 	 */
 	size_t bytes() {
 		std::shared_lock l(cache_mutex);
-		return sizeof(this) + (cache_map->bucket_count() * sizeof(size_t));
+		return sizeof(*this) + (cache_map->bucket_count() * sizeof(size_t));
 	}
 
 };
