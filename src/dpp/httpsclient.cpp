@@ -103,7 +103,7 @@ multipart_content https_client::build_multipart(const std::string &json, const s
 			/* Multiple files */
 			for (size_t i = 0; i < filenames.size(); ++i) {
 				content += part_start + "name=\"files[" + std::to_string(i) + "]\"; filename=\"" + filenames[i] + "\"";
-				content += "\r\nContent-Type: " + (mimetypes.size() < i || mimetypes[i].empty() ? default_mime_type : mimetypes[i]) + two_cr;
+				content += "\r\nContent-Type: " + (mimetypes.size() <= i || mimetypes[i].empty() ? default_mime_type : mimetypes[i]) + two_cr;
 				content += contents[i];
 				content += "\r\n";
 			}
