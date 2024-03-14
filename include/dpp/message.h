@@ -1172,6 +1172,20 @@ struct DPP_EXPORT attachment {
 	 * @return true if remixed
 	 */
 	bool is_remix() const;
+	
+	/**
+	 * @brief Returns expiration timestamp for attachment's URL
+	 * 
+	 * @return timestamp of URL expiration
+	 */
+	time_t get_expire_time() const;
+	
+	/**
+	 * @brief Returns creation timestamp for attachment's URL
+	 * 
+	 * @return timestamp of URL creation
+	 */
+	time_t get_issued_time() const;
 };
 
 /**
@@ -2010,12 +2024,19 @@ public:
 	message(snowflake channel_id, const std::string &content, message_type type = mt_default);
 
 	/**
+	 * @brief Construct a new message object with content
+	 *
+	 * @param _embed An embed to send
+	 */
+	message(const embed& _embed);
+
+	/**
 	 * @brief Construct a new message object with a channel and content
 	 *
 	 * @param channel_id The channel to send the message to
 	 * @param _embed An embed to send
 	 */
-	message(snowflake channel_id, const embed & _embed);
+	message(snowflake channel_id, const embed& _embed);
 
 	/**
 	 * @brief Construct a new message object with content
@@ -2060,15 +2081,15 @@ public:
 	/**
 	 * @brief Set the allowed mentions object for pings on the message
 	 * 
-	 * @param _parse_users whether or not to parse users in the message content or embeds
-	 * @param _parse_roles whether or not to parse roles in the message content or embeds
-	 * @param _parse_everyone whether or not to parse everyone/here in the message content or embeds 
-	 * @param _replied_user if set to true and this is a reply, then ping the user we reply to
-	 * @param users list of user ids to allow pings for
-	 * @param roles list of role ids to allow pings for
+	 * @param _parse_users whether or not to parse users in the message content or embeds, default false
+	 * @param _parse_roles whether or not to parse roles in the message content or embeds, default false
+	 * @param _parse_everyone whether or not to parse everyone/here in the message content or embeds, default false
+	 * @param _replied_user if set to true and this is a reply, then ping the user we reply to, default false
+	 * @param users list of user ids to allow pings for, default an empty vector
+	 * @param roles list of role ids to allow pings for, default an empty vector
 	 * @return message& reference to self
 	 */
-	message& set_allowed_mentions(bool _parse_users, bool _parse_roles, bool _parse_everyone, bool _replied_user, const std::vector<snowflake> &users, const std::vector<snowflake> &roles);
+	message& set_allowed_mentions(bool _parse_users = false, bool _parse_roles = false, bool _parse_everyone = false, bool _replied_user = false, const std::vector<snowflake> &users = {}, const std::vector<snowflake> &roles = {});
 
 	using json_interface<message>::fill_from_json;
 	using json_interface<message>::to_json;

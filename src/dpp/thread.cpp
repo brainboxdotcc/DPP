@@ -44,6 +44,8 @@ thread& thread::fill_from_json_impl(json* j) {
 	set_int32_not_null(j, "total_message_sent", this->total_messages_sent);
 	set_int8_not_null(j, "message_count", this->message_count);
 	set_int8_not_null(j, "member_count", this->member_count);
+	set_bool_not_null(j, "newly_created", this->newly_created);
+
 	auto json_metadata = (*j)["thread_metadata"];
 	metadata.archived = bool_not_null(&json_metadata, "archived");
 	metadata.archive_timestamp = ts_not_null(&json_metadata, "archive_timestamp");

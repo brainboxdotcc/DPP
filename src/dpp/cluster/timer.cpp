@@ -97,10 +97,21 @@ void cluster::tick_timers() {
 		}
 	}
 	for (auto & t : scheduled) {
+		timer handle = t->handle;
 		/* Call handler */
 		t->on_tick(t->handle);
-		/* Reschedule for next tick */
-		timer_reschedule(t);
+		/* Reschedule if it wasn't deleted.
+		 * Note: We wrap the .contains() check in a lambda as it needs locking
+		 * for thread safety, but timer_rescheudle also locks the container, so this
+		 * is the cleanest way to do it.
+		 */
+		bool not_deleted = ([handle, this]() -> bool {
+			std::lock_guard<std::mutex> l(timer_guard);
+			return timer_list.find(handle) != timer_list.end();
+		}());
+		if (not_deleted) {
+			timer_reschedule(t);
+		}
 	}
 }
 

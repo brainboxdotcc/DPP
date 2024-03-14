@@ -116,7 +116,7 @@ EOT;
      */
     public function saveHeader(string $content): void
     {
-        $content .= "[[nodiscard]] async<http_request_completion_t> co_request(const std::string &url, http_method method, const std::string &postdata = \"\", const std::string &mimetype = \"text/plain\", const std::multimap<std::string, std::string> &headers = {});\n\n";
+        $content .= "[[nodiscard]] async<http_request_completion_t> co_request(const std::string &url, http_method method, const std::string &postdata = \"\", const std::string &mimetype = \"text/plain\", const std::multimap<std::string, std::string> &headers = {}, const std::string &protocol = \"1.1\");\n\n";
         file_put_contents('include/dpp/cluster_coro_calls.h', $content);
     }
 
@@ -125,7 +125,7 @@ EOT;
      */
     public function saveCpp(string $cppcontent): void
     {
-        $cppcontent .= "dpp::async<dpp::http_request_completion_t> dpp::cluster::co_request(const std::string &url, http_method method, const std::string &postdata, const std::string &mimetype, const std::multimap<std::string, std::string> &headers) {\n\treturn async<http_request_completion_t>{ [&, this] <typename C> (C &&cc) { return this->request(url, method, std::forward<C>(cc), postdata, mimetype, headers); }};\n}
+        $cppcontent .= "dpp::async<dpp::http_request_completion_t> dpp::cluster::co_request(const std::string &url, http_method method, const std::string &postdata, const std::string &mimetype, const std::multimap<std::string, std::string> &headers, const std::string &protocol) {\n\treturn async<http_request_completion_t>{ [&, this] <typename C> (C &&cc) { return this->request(url, method, std::forward<C>(cc), postdata, mimetype, headers, protocol); }};\n}
 
 #endif
 ";

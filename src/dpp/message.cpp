@@ -622,9 +622,12 @@ message::message(const std::string &_content, message_type t) : message() {
 	type = t;
 }
 
-message::message(snowflake _channel_id, const embed& _embed) : message() {
-	channel_id = _channel_id;
+message::message(const embed& _embed) : message() {
 	embeds.emplace_back(_embed);
+}
+
+message::message(snowflake _channel_id, const embed& _embed) : message(_embed) {
+	channel_id = _channel_id;
 }
 
 embed::embed(json* j) : embed() {
@@ -880,6 +883,38 @@ void attachment::download(http_completion_event callback) const {
 
 bool attachment::is_remix() const {
 	return flags & a_is_remix;
+}
+
+time_t attachment::get_expire_time() const {
+	size_t attr_position = url.find('?');
+	/* If no attributes were sent in url, we do not need to parse more */
+	if(url.npos == attr_position){
+		return 0;
+	}
+	std::string attributes = url.substr(attr_position + 1);
+	std::vector<std::string> attr_list = utility::tokenize(attributes, "&");
+	auto ex_attr = std::find_if(attr_list.begin(), attr_list.end(), [](const std::string& s){return s.substr(0, 3) == "ex=";});
+	if(attr_list.end() == ex_attr){
+		return 0;
+	}
+	/* Erase 'ex=' prefix before parsing */
+	return std::stol(ex_attr->substr(3), nullptr, 16);
+}
+
+time_t attachment::get_issued_time() const {
+	size_t attr_position = url.find('?');
+	/* No attributes were sent in url, so we do not need to parse more */
+	if(url.npos == attr_position){
+		return 0;
+	}
+	std::string attributes = url.substr(attr_position + 1);
+	std::vector<std::string> attr_list = utility::tokenize(attributes, "&");
+	auto is_attr = std::find_if(attr_list.begin(), attr_list.end(), [](const std::string& s){return s.substr(0, 3) == "is=";});
+	if(attr_list.end() == is_attr){
+		return 0;
+	}
+	/* Erase 'is=' prefix before parsing */
+	return std::stol(is_attr->substr(3), nullptr, 16);
 }
 
 json message::to_json(bool with_id, bool is_interaction_response) const {

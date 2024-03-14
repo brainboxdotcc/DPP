@@ -103,7 +103,7 @@ multipart_content https_client::build_multipart(const std::string &json, const s
 			/* Multiple files */
 			for (size_t i = 0; i < filenames.size(); ++i) {
 				content += part_start + "name=\"files[" + std::to_string(i) + "]\"; filename=\"" + filenames[i] + "\"";
-				content += "\r\nContent-Type: " + (mimetypes.size() < i || mimetypes[i].empty() ? default_mime_type : mimetypes[i]) + two_cr;
+				content += "\r\nContent-Type: " + (mimetypes.size() <= i || mimetypes[i].empty() ? default_mime_type : mimetypes[i]) + two_cr;
 				content += contents[i];
 				content += "\r\n";
 			}
@@ -175,7 +175,7 @@ bool https_client::handle_buffer(std::string &buffer)
 						h.erase(h.begin());
 						/* HTTP/1.1 200 OK */
 						std::vector<std::string> req_status = utility::tokenize(status_line, " ");
-						if (req_status.size() >= 3 && (req_status[0] == "HTTP/1.1" || req_status[0] == "HTTP/1.0") && atoi(req_status[1].c_str())) {
+						if (req_status.size() >= 2 && (req_status[0] == "HTTP/1.1" || req_status[0] == "HTTP/1.0") && atoi(req_status[1].c_str())) {
 							for(auto &hd : h) {
 								std::string::size_type sep = hd.find(": ");
 								if (sep != std::string::npos) {
