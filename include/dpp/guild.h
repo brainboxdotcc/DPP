@@ -521,6 +521,13 @@ public:
 	bool has_rejoined() const;
 
 	/**
+	 * @brief Returns true if the user is the guild owner.
+	 * @return true if the user is the guild owner.
+	 * @return false if the user is not the guild owner or the guild is not in the cache.
+	 */
+	bool is_guild_owner() const;
+
+	/**
 	 * @brief Returns true if the user has completed onboarding
 	 *
 	 * @return true user has completed onboarding
