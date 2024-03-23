@@ -2131,6 +2131,14 @@ public:
 	bool suppress_embeds() const;
 
 	/**
+	 * @brief Set whether embeds should be suppressed
+	 *
+	 * @param suppress whether embeds should be suppressed
+	 * @return message& reference to self
+	 */
+	message& suppress_embeds(bool suppress);
+
+	/**
 	 * @brief True if source message was deleted
 	 * 
 	 * @return true if source message deleted
