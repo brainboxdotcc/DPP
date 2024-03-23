@@ -524,6 +524,7 @@ public:
 	 * @brief Returns true if the user is the guild owner.
 	 * @return true if the user is the guild owner.
 	 * @return false if the user is not the guild owner or the guild is not in the cache.
+	 * @note If dpp cache is disabled (which should be enabled by default) this function will always return false.
 	 */
 	bool is_guild_owner() const;
 

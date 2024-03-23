@@ -348,7 +348,7 @@ bool guild_member::has_rejoined() const {
 }
 
 bool guild_member::is_guild_owner() const {
-	auto* _guild = find_guild(user_id);
+	auto* _guild = find_guild(guild_id);
 	return _guild != nullptr && _guild->owner_id == this->user_id;
 }
 
