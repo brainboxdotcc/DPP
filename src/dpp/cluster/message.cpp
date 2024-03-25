@@ -119,6 +119,16 @@ void cluster::message_edit(const message &m, command_completion_event_t callback
 	}, m.file_data);
 }
 
+void cluster::message_edit_flags(const message &m, command_completion_event_t callback) {
+	this->post_rest_multipart(API_PATH "/channels", std::to_string(m.channel_id), "messages/" + std::to_string(m.id), m_patch, nlohmann::json{
+		{"flags", m.flags},
+	}.dump(), [this, callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t(this, message(this).fill_from_json(&j), http));
+		}
+	}, m.file_data);
+}
+
 
 void cluster::message_get(snowflake message_id, snowflake channel_id, command_completion_event_t callback) {
 	rest_request<message>(this, API_PATH "/channels", std::to_string(channel_id), "messages/" + std::to_string(message_id), m_get, "", callback);
