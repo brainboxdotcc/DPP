@@ -501,6 +501,10 @@ message cluster::message_edit_sync(const message &m) {
 	return dpp::sync<message>(this, static_cast<void (cluster::*)(const message &, command_completion_event_t)>(&cluster::message_edit), m);
 }
 
+message cluster::message_edit_flags_sync(const message &m) {
+	return dpp::sync<message>(this, static_cast<void (cluster::*)(const message &, command_completion_event_t)>(&cluster::message_edit_flags), m);
+}
+
 message cluster::message_get_sync(snowflake message_id, snowflake channel_id) {
 	return dpp::sync<message>(this, static_cast<void (cluster::*)(snowflake, snowflake, command_completion_event_t)>(&cluster::message_get), message_id, channel_id);
 }

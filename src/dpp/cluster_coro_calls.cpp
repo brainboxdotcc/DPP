@@ -503,6 +503,10 @@ async<confirmation_callback_t> cluster::co_message_edit(const message &m) {
 	return async{ this, static_cast<void (cluster::*)(const message &, command_completion_event_t)>(&cluster::message_edit), m };
 }
 
+async<confirmation_callback_t> cluster::co_message_edit_flags(const message &m) {
+	return async{ this, static_cast<void (cluster::*)(const message &, command_completion_event_t)>(&cluster::message_edit_flags), m };
+}
+
 async<confirmation_callback_t> cluster::co_message_get(snowflake message_id, snowflake channel_id) {
 	return async{ this, static_cast<void (cluster::*)(snowflake, snowflake, command_completion_event_t)>(&cluster::message_get), message_id, channel_id };
 }

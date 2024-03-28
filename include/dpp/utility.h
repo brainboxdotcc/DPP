@@ -365,13 +365,13 @@ struct DPP_EXPORT image_data {
 	 *
 	 * @param rhs Image to copy
 	 */
-	image_data(image_data&&) noexcept = default;
+	image_data(image_data&& rhs) noexcept = default;
 
 	/**
 	 * @brief Construct from string buffer
 	 *
 	 * @param format Image format
-	 * @param str Data in a string
+	 * @param bytes Data in a string
 	 * @see image_type
 	 */
 	image_data(image_type format, std::string_view bytes);
@@ -380,8 +380,8 @@ struct DPP_EXPORT image_data {
 	 * @brief Construct from byte buffer
 	 *
 	 * @param format Image format
-	 * @param buf Byte buffer
-	 * @param size_t Image size in bytes
+	 * @param bytes Data of the image
+	 * @param byte_size Image size in bytes
 	 * @see image_type
 	 */
 	image_data(image_type format, const std::byte* bytes, uint32_t byte_size);
@@ -405,8 +405,8 @@ struct DPP_EXPORT image_data {
 	/**
 	 * @brief Set image data.
 	 *
-	 * @param format Format of the image
-	 * @param data Data of the image
+	 * @param format Image format
+	 * @param bytes Data of the image
 	 */
 	void set(image_type format, std::string_view bytes);
 
@@ -414,7 +414,8 @@ struct DPP_EXPORT image_data {
 	 * @brief Set image data.
 	 *
 	 * @param format Format of the image
-	 * @param data Data of the image
+	 * @param bytes Data of the image
+	 * @param byte_size Image size in bytes
 	 */
 	void set(image_type format, const std::byte* bytes, uint32_t byte_size);
 
@@ -507,7 +508,7 @@ struct icon {
 	/**
 	 * @brief Get as icon hash.
 	 *
-	 * @warn The behavior is undefined if `is_iconhash() == false`
+	 * @warning The behavior is undefined if `is_iconhash() == false`
 	 * @return iconhash& This iconhash
 	 */
 	iconhash& as_iconhash() &;
@@ -515,7 +516,7 @@ struct icon {
 	/**
 	 * @brief Get as icon hash.
 	 *
-	 * @warn The behavior is undefined if `is_iconhash() == false`
+	 * @warning The behavior is undefined if `is_iconhash() == false`
 	 * @return iconhash& This iconhash
 	 */
 	const iconhash& as_iconhash() const&;
@@ -523,7 +524,7 @@ struct icon {
 	/**
 	 * @brief Get as icon hash.
 	 *
-	 * @warn The behavior is undefined if `is_iconhash() == false`
+	 * @warning The behavior is undefined if `is_iconhash() == false`
 	 * @return iconhash& This iconhash
 	 */
 	iconhash&& as_iconhash() &&;
@@ -539,7 +540,7 @@ struct icon {
 	/**
 	 * @brief Get as image data.
 	 *
-	 * @warn The behavior is undefined if `is_image_data() == false`
+	 * @warning The behavior is undefined if `is_image_data() == false`
 	 * @return image_data& This image
 	 */
 	image_data& as_image_data() &;
@@ -547,7 +548,7 @@ struct icon {
 	/**
 	 * @brief Get as image.
 	 *
-	 * @warn The behavior is undefined if `is_image_data() == false`
+	 * @warning The behavior is undefined if `is_image_data() == false`
 	 * @return image_data& This image
 	 */
 	const image_data& as_image_data() const&;
@@ -555,7 +556,7 @@ struct icon {
 	/**
 	 * @brief Get as image.
 	 *
-	 * @warn The behavior is undefined if `is_image_data() == false`
+	 * @warning The behavior is undefined if `is_image_data() == false`
 	 * @return image_data& This image
 	 */
 	image_data&& as_image_data() &&;
