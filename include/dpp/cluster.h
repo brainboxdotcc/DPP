@@ -2804,7 +2804,7 @@ public:
 	 * @brief Get the guild's onboarding configuration
 	 *
 	 * @see https://discord.com/developers/docs/resources/guild#get-guild-onboarding
-	 * @param o The onboarding object
+	 * @param guild_id The guild to pull the onboarding configuration from.
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::onboarding object in confirmation_callback_t::value filled to match the vanity url. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */

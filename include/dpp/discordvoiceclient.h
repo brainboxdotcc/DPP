@@ -862,7 +862,7 @@ public:
 	/**
 	 * @brief Change the iteration interval time.
 	 *
-	 * @param time The time (in milliseconds) between each interval when parsing audio.
+	 * @param interval The time (in milliseconds) between each interval when parsing audio.
 	 *
 	 * @return Reference to self.
 	 */
