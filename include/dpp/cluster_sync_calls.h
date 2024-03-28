@@ -1303,7 +1303,7 @@ confirmation guild_sync_integration_sync(snowflake guild_id, snowflake integrati
  *
  * @see dpp::cluster::guild_get_onboarding
  * @see https://discord.com/developers/docs/resources/guild#get-guild-onboarding
- * @param o The onboarding object
+ * @param guild_id The guild to pull the onboarding configuration from.
  * @return onboarding returned object on completion
  * \memberof dpp::cluster
  * @throw dpp::rest_exception upon failure to execute REST function
@@ -1869,6 +1869,18 @@ confirmation message_delete_reaction_emoji_sync(snowflake message_id, snowflake 
  * Avoid direct use of this function inside an event handler.
  */
 message message_edit_sync(const struct message &m);
+
+/**
+ * @brief Edit the flags of a message on a channel. The callback function is called when the message has been edited
+ *
+ * @param m Message to edit the flags of
+ * @return message returned object on completion
+ * \memberof dpp::cluster
+ * @throw dpp::rest_exception upon failure to execute REST function
+ * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
+ * Avoid direct use of this function inside an event handler.
+ */
+message message_edit_flags_sync(const struct message &m);
 
 /**
  * @brief Get a message

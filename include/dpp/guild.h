@@ -1990,7 +1990,7 @@ public:
 	/**
 	 * @brief Set guild_id of this onboarding object
 	 *
-	 * @param guild_id Guild ID to set
+	 * @param id Guild ID to set
 	 * @return Reference to self, so these method calls may be chained
 	 */
 	onboarding& set_guild_id(const snowflake id);
