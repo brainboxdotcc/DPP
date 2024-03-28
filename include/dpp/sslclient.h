@@ -58,6 +58,7 @@ bool close_socket(dpp::socket sfd);
  * @brief Set a socket to blocking or non-blocking IO
  *
  * @param sockfd socket to act upon
+ * @param non_blocking should socket be non-blocking?
  * @return false on error, true on success
  */
 bool set_nonblocking(dpp::socket sockfd, bool non_blocking);

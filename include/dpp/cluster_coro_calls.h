@@ -1063,7 +1063,7 @@
  *
  * @see dpp::cluster::guild_get_onboarding
  * @see https://discord.com/developers/docs/resources/guild#get-guild-onboarding
- * @param o The onboarding object
+ * @param guild_id The guild to pull the onboarding configuration from.
  * @return onboarding returned object on completion
  * \memberof dpp::cluster
  */
@@ -1527,6 +1527,15 @@
  * \memberof dpp::cluster
  */
 [[nodiscard]] async<confirmation_callback_t> co_message_edit(const struct message &m);
+
+/**
+ * @brief Edit the flags of a message on a channel. The callback function is called when the message has been edited
+ *
+ * @param m Message to edit the flags of
+ * @return message returned object on completion
+ * \memberof dpp::cluster
+ */
+[[nodiscard]] async<confirmation_callback_t> co_message_edit_flags(const struct message &m);
 
 /**
  * @brief Get a message

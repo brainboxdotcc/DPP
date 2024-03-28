@@ -690,7 +690,7 @@ public:
 	 * @brief Attach a callable to the event, adding a listener.
 	 * The callable should be of the form `void(const T&)`
 	 * where T is the event type for this event router.
-	 *
+	 *f
 	 * @warning You cannot call this within an event handler.
 	 *
 	 * @param fun Callable to attach to event

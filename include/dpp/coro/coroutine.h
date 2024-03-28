@@ -58,7 +58,7 @@ using handle_t = std_coroutine::coroutine_handle<promise_t<R>>;
 /**
  * @brief Base class of dpp::coroutine<R>.
  *
- * @warn This class should not be used directly by a user, use dpp::coroutine<R> instead.
+ * @warning This class should not be used directly by a user, use dpp::coroutine<R> instead.
  * @note This class contains all the functions used internally by co_await. It is intentionally opaque and a private base of dpp::coroutine<R> so a user cannot call await_suspend and await_resume directly.
  */
 template <typename R>

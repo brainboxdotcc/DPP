@@ -208,7 +208,8 @@ public:
 	/**
 	 * @brief Load an image into the object
 	 *
-	 * @param image_blob Image binary data
+	 * @param data Image binary data
+	 * @param size Size of the image.
 	 * @param type Type of image. It can be one of `i_gif`, `i_jpg` or `i_png`.
 	 * @return emoji& Reference to self
 	 * @throw dpp::length_exception Image content exceeds discord maximum of 256 kilobytes

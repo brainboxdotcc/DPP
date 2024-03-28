@@ -71,7 +71,7 @@ public:
 	/**
 	 * @brief Build JSON from this object.
 	 *
-	 * @param with_prune_count True if the prune count boolean is to be set in the built JSON
+	 * @param with_id True if the prune count boolean is to be set in the built JSON
 	 * @return The JSON of the prune object
 	 */
 	json to_json(bool with_id = false) const; // Intentional shadow of json_interface, mostly present for documentation

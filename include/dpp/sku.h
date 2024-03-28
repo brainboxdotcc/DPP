@@ -121,7 +121,13 @@ public:
 	/**
 	 * @brief Construct a new SKU object with all data required.
 	 *
-	 * @param id SKU id.
+	 * @param id ID of the SKU.
+	 * @param type Type of SKU (sku_type).
+	 * @param application_id ID of the parent application.
+	 * @param name Customer-facing name of your premium offering.
+	 * @param slug System-generated URL slug based on the SKU's name.
+	 * @param flags Flags bitmap from dpp::sku_flags.
+	 *
 	 */
 	sku(const snowflake id, const sku_type type, const snowflake application_id, const std::string name, const std::string slug, const uint16_t flags);
 
