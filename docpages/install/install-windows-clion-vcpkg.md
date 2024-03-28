@@ -4,7 +4,7 @@
 
 ## Changing Toolchains
 
-\note If you have already configured your toolchain to use anything **but** MinGW64, then you can skip to the next section. Otherwise, it is **critical** that you follow along with this section.
+\note If you have already configured your toolchain to use anything **but** MinGW64, then you can skip to the next section. Otherwise, it is **critical** that you follow along with this section. It should also be noted that you **need** Visual Studio for this.
 
 Head on over to `File > Settings` (Ctrl+Alt+S), then navigate to `Build, Execution, Deployment > Toolchains`.
 
