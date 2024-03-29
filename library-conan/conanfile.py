@@ -52,6 +52,8 @@ class DPPConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.cache_variables["CONAN_EXPORTED"] = True
         tc.cache_variables["BUILD_VOICE_SUPPORT"] = True
+        tc.cache_variables["DPP_BUILD_TEST"] = False
+        tc.cache_variables["BUILD_SHARED_LIBS"] = False
         tc.generate()
 
     def build(self):
