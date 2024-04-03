@@ -12,4 +12,4 @@ This section lists examples that do not fit neatly into any of the categories ab
 * \subpage checking-member-permissions
 * \subpage setting_status
 * \subpage using-emojis
-* \subpage making_timers
+* \subpage using_timers
