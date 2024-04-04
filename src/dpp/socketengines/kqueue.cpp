@@ -89,16 +89,16 @@ struct socket_engine_kqueue : public socket_engine_base {
 
 			const short filter = kev.filter;
 			if (kev.flags & EV_EOF) {
-				eh->on_error(kev.ident, kev.fflags);
+				eh->on_error(kev.ident, *eh, kev.fflags);
 				continue;
 			}
 			if (filter == EVFILT_WRITE) {
 				const int bits_to_clr = FD_WANT_WRITE;
 				eh->flags &= ~bits_to_clr;
-				eh->on_write(kev.ident, eh);
+				eh->on_write(kev.ident, *eh);
 			}
 			else if (filter == EVFILT_READ) {
-				eh->on_read(kev.ident, eh);
+				eh->on_read(kev.ident, *eh);
 			}
 		}
 	}
