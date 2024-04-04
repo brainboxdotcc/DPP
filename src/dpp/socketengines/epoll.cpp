@@ -38,7 +38,7 @@ struct socket_engine_epoll : public socket_engine_base {
 	socket_engine_epoll& operator=(socket_engine_epoll&&) = default;
 
 	socket_engine_epoll() : epoll_handle(epoll_create(socket_engine_epoll::epoll_hint)) {
-		events.resize(16);
+		events.resize(socket_engine_epoll::epoll_hint);
 		if (epoll_handle == -1) {
 			throw dpp::connection_exception("Failed to initialise epoll()");
 		}
