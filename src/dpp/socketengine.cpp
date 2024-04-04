@@ -25,8 +25,7 @@
 
 bool socket_engine_base::register_socket(dpp::socket fd, const socket_events &e) {
 	if (fd > INVALID_SOCKET && fds.find(fd) == fds.end()) {
-		auto se = std::make_unique<socket_events>();
-		*se = e;
+		fds.emplace(fd, std::make_unique<socket_events>(e));
 		return true;
 	}
 	return false;

@@ -31,9 +31,9 @@ enum socket_event_flags : uint8_t {
 	WANT_ERROR = 4,
 };
 
-using socket_read_event = auto (*)(const struct socket_event&) -> void;
-using socket_write_event = auto (*)(const struct socket_event&) -> void;
-using socket_error_event = auto (*)(const struct socket_event&, int error_code) -> void;
+using socket_read_event = auto (*)(dpp::socket fd, const struct socket_events&) -> void;
+using socket_write_event = auto (*)(dpp::socket fd, const struct socket_events&) -> void;
+using socket_error_event = auto (*)(dpp::socket fd, const struct socket_events&, int error_code) -> void;
 
 struct socket_events {
 	uint8_t flags{0};
@@ -48,9 +48,14 @@ struct socket_engine_base {
 	socket_container fds;
 
 	socket_engine_base();
+	socket_engine_base(const socket_engine_base&) = default;
+	socket_engine_base(socket_engine_base&&) = default;
+	socket_engine_base& operator=(const socket_engine_base&) = default;
+	socket_engine_base& operator=(socket_engine_base&&) = default;
+
 	virtual ~socket_engine_base() = default;
 
-	virtual void run() = 0;
+	virtual void process_events() = 0;
 	virtual bool register_socket(dpp::socket fd, const socket_events& e);
 	virtual bool update_socket(dpp::socket fd, const socket_events& e);
 	virtual bool remove_socket(dpp::socket fd);

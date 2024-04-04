@@ -50,7 +50,7 @@ struct socket_engine_poll : public socket_engine_base {
 	 */
 	std::vector<pollfd> poll_set;
 
-	void run() override {
+	void process_events() final {
 		// TODO: event routing loop for poll() goes here
 	}
 
