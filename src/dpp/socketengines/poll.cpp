@@ -57,9 +57,8 @@ struct socket_engine_poll : public socket_engine_base {
 		int processed = 0;
 
 		for (size_t index = 0; index < poll_set.size() && processed < i; index++) {
-			struct pollfd& pfd = poll_set[index];
-			const int fd = pfd.fd;
-			const short revents = pfd.revents;
+			const int fd = poll_set[index].fd;
+			const short revents = poll_set[index].revents;
 
 			if (revents > 0) {
 				processed++;
