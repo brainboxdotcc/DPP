@@ -79,7 +79,7 @@ struct socket_engine_poll : public socket_engine_base {
 			if ((revents & POLLERR) != 0) {
 				socklen_t codesize = sizeof(int);
 				int errcode{};
-				if (getsockopt(fd, SOL_SOCKET, SO_ERROR, &errcode, &codesize) < 0) {
+				if (getsockopt(fd, SOL_SOCKET, SO_ERROR, (char*)&errcode, &codesize) < 0) {
 					errcode = errno;
 				}
 				eh->on_error(fd, *eh, errcode);
