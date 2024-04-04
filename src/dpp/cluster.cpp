@@ -388,6 +388,11 @@ gateway::gateway(nlohmann::json* j) {
 }
 
 void cluster::set_presence(const dpp::presence &p) {
+	if(p.activities.empty()) {
+		log(ll_warning, "An empty presence was passed to set_presence.");
+		return;
+	}
+
 	json pres = p.to_json();
 	for (auto& s : shards) {
 		if (s.second->is_connected()) {
