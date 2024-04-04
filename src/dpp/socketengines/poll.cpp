@@ -42,6 +42,8 @@
 #endif
 #include <memory>
 
+namespace dpp {
+
 struct socket_engine_poll : public socket_engine_base {
 
 	/* We store the pollfds as a vector. This means that insertion, deletion and updating
@@ -160,3 +162,6 @@ struct socket_engine_poll : public socket_engine_base {
 std::unique_ptr<socket_engine_base> create_socket_engine() {
 	return std::make_unique<socket_engine_poll>();
 }
+
+};
+
