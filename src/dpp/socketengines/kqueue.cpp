@@ -93,7 +93,7 @@ struct socket_engine_kqueue : public socket_engine_base {
 				continue;
 			}
 			if (filter == EVFILT_WRITE) {
-				const int bits_to_clr = FD_WANT_WRITE;
+				const int bits_to_clr = WANT_WRITE;
 				eh->flags &= ~bits_to_clr;
 				eh->on_write(kev.ident, *eh);
 			}
