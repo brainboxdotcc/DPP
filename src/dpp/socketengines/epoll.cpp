@@ -24,6 +24,7 @@
 #include <memory>
 #include <sys/epoll.h>
 #include <sys/socket.h>
+#include <unistd.h>
 #include <vector>
 
 struct socket_engine_epoll : public socket_engine_base {

@@ -38,6 +38,7 @@
 /* Anything other than Windows (e.g. sane OSes) */
 	#include <poll.h>
 	#include <sys/socket.h>
+	#include <unistd.h>
 #endif
 #include <memory>
 

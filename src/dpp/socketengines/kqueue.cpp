@@ -26,6 +26,7 @@
 #include <sys/types.h>
 #include <sys/event.h>
 #include <sys/sysctl.h>
+#include <unistd.h>
 
 #if defined __NetBSD__ && __NetBSD_Version__ <= 999001400
 	#define CAST_TYPE intptr_t
