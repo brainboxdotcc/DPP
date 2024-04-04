@@ -27,6 +27,8 @@
 #include <unistd.h>
 #include <vector>
 
+namespace dpp {
+
 struct socket_engine_epoll : public socket_engine_base {
 
 	int epoll_handle{INVALID_SOCKET};
@@ -163,3 +165,5 @@ struct socket_engine_epoll : public socket_engine_base {
 std::unique_ptr<socket_engine_base> create_socket_engine() {
 	return std::make_unique<socket_engine_epoll>();
 }
+
+};

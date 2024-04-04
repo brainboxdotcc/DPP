@@ -20,8 +20,11 @@
  ************************************************************************************/
 
 #include <dpp/socketengine.h>
+#include <dpp/exception.h>
 #include <csignal>
 #include <memory>
+
+namespace dpp {
 
 bool socket_engine_base::register_socket(dpp::socket fd, const socket_events &e) {
 	if (fd > INVALID_SOCKET && fds.find(fd) == fds.end()) {
@@ -64,3 +67,5 @@ socket_engine_base::socket_engine_base() {
 		}
 	#endif
 }
+
+};

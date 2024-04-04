@@ -25,6 +25,8 @@
 #include <unordered_map>
 #include <memory>
 
+namespace dpp {
+
 enum socket_event_flags : uint8_t {
 	WANT_READ = 1,
 	WANT_WRITE = 2,
@@ -63,3 +65,5 @@ struct socket_engine_base {
 
 /* This is implemented by whatever derived form socket_engine takes */
 std::unique_ptr<socket_engine_base> create_socket_engine();
+
+};

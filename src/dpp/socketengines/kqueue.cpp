@@ -34,6 +34,7 @@
 	#define CAST_TYPE void*
 #endif
 
+namespace dpp {
 
 struct socket_engine_kqueue : public socket_engine_base {
 
@@ -166,3 +167,6 @@ struct socket_engine_kqueue : public socket_engine_base {
 std::unique_ptr<socket_engine_base> create_socket_engine() {
 	return std::make_unique<socket_engine_kqueue>();
 }
+
+};
+
