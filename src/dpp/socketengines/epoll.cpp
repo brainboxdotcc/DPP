@@ -23,7 +23,6 @@
 #include <dpp/exception.h>
 #include <memory>
 #include <sys/epoll.h>
-#include <socket.h>
 #include <sys/socket.h>
 #include <vector>
 

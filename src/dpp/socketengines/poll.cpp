@@ -37,6 +37,7 @@
 #else
 /* Anything other than Windows (e.g. sane OSes) */
 	#include <poll.h>
+	#include <sys/socket.h>
 #endif
 #include <memory>
 
@@ -51,7 +52,51 @@ struct socket_engine_poll : public socket_engine_base {
 	std::vector<pollfd> poll_set;
 
 	void process_events() final {
-		// TODO: event routing loop for poll() goes here
+		const int poll_delay = 1000;
+		int i = poll(poll_set.data(), static_cast<unsigned int>(poll_set.size()), poll_delay);
+		int processed = 0;
+
+		for (size_t index = 0; index < poll_set.size() && processed < i; index++) {
+			struct pollfd& pfd = poll_set[index];
+			const int fd = pfd.fd;
+			const short revents = pfd.revents;
+
+			if (revents > 0) {
+				processed++;
+			}
+
+			auto iter = fds.find(fd);
+			if (iter == fds.end()) {
+				continue;
+			}
+			socket_events* eh = iter->second.get();
+
+			if ((revents & POLLHUP) != 0) {
+				eh->on_error(fd, *eh, 0);
+				continue;
+			}
+
+			if ((revents & POLLERR) != 0) {
+				socklen_t codesize = sizeof(int);
+				int errcode{};
+				if (getsockopt(fd, SOL_SOCKET, SO_ERROR, &errcode, &codesize) < 0) {
+					errcode = errno;
+				}
+				eh->on_error(fd, *eh, errcode);
+				continue;
+			}
+
+			if ((revents & POLLIN) != 0) {
+				eh->on_read(fd, *eh);
+			}
+
+			if ((revents & POLLOUT) != 0) {
+				int mask = eh->flags;
+				mask &= ~WANT_WRITE;
+				eh->flags = mask;
+				eh->on_write(fd, *eh);
+			}
+		}
 	}
 
 	bool register_socket(dpp::socket fd, const socket_events& e) final {
