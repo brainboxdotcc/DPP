@@ -61,7 +61,7 @@ int main() {
 			dpp::slashcommand stop_timer("stop_timer", "Stop your 10 second timer!", bot.me.id);
 
 			/* Register the commands. */
-			bot.global_bulk_command_create({start_timer, stop_timer});
+			bot.global_bulk_command_create({ start_timer, stop_timer });
 		}
 	});
 
