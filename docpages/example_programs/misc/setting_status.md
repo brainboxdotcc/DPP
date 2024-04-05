@@ -17,6 +17,8 @@ You can also play around with dpp::at_game, changing it to something like dpp::a
 
 Now, let's cover setting the bot status to say `Playing with x guilds!` every two minutes.
 
+\note This example uses timers to update the status every 2 minutes. If you aren't familiar with D++'s own timers, please read \ref using_timers "this page on timers" before you continue.
+
 \include{cpp} setting_status2.cpp
 
 If you followed that well, your bot should now say this on members list!
