@@ -228,8 +228,7 @@ void set_signal_handler(int signal)
 {
 	struct sigaction sa;
 	sigaction(signal, nullptr, &sa);
-	if (sa.sa_flags == 0 && sa.sa_handler == nullptr)
-	{
+	if (sa.sa_flags == 0 && sa.sa_handler == nullptr) {
 		memset(&sa, 0, sizeof(sa));
 		sigaction(signal, &sa, nullptr);
 	}
