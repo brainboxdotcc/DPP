@@ -237,11 +237,51 @@ ssl_client::ssl_client(const std::string &_hostname, const std::string &_port, b
 	keepalive(reuse)
 {
 #ifndef WIN32
-	signal(SIGALRM, SIG_IGN);
-	signal(SIGHUP, SIG_IGN);
-	signal(SIGPIPE, SIG_IGN);
-	signal(SIGCHLD, SIG_IGN);
-	signal(SIGXFSZ, SIG_IGN);
+	struct sigaction sa;
+	sigaction(SIGALRM, nullptr, &sa);
+	if (sa.sa_flags == 0 && sa.sa_handler == nullptr)
+	{
+		memset(&sa, 0, sizeof(sa));
+		sa.sa_handler = SIG_IGN;
+		sa.sa_flags = SA_RESTART;
+		sigaction(SIGALRM, &sa, nullptr);
+	}
+
+	sigaction(SIGHUP, nullptr, &sa);
+	if (sa.sa_flags == 0 && sa.sa_handler == nullptr)
+	{
+		memset(&sa, 0, sizeof(sa));
+		sa.sa_handler = SIG_IGN;
+		sa.sa_flags = SA_RESTART;
+		sigaction(SIGHUP, &sa, nullptr);
+	}
+
+	sigaction(SIGPIPE, nullptr, &sa);
+	if (sa.sa_flags == 0 && sa.sa_handler == nullptr)
+	{
+		memset(&sa, 0, sizeof(sa));
+		sa.sa_handler = SIG_IGN;
+		sa.sa_flags = SA_RESTART;
+		sigaction(SIGPIPE, &sa, nullptr);
+	}
+
+	sigaction(SIGCHLD, nullptr, &sa);
+	if (sa.sa_flags == 0 && sa.sa_handler == nullptr)
+	{
+		memset(&sa, 0, sizeof(sa));
+		sa.sa_handler = SIG_IGN;
+		sa.sa_flags = SA_RESTART;
+		sigaction(SIGCHLD, &sa, nullptr);
+	}
+
+	sigaction(SIGXFSZ, nullptr, &sa);
+	if (sa.sa_flags == 0 && sa.sa_handler == nullptr)
+	{
+		memset(&sa, 0, sizeof(sa));
+		sa.sa_handler = SIG_IGN;
+		sa.sa_flags = SA_RESTART;
+		sigaction(SIGXFSZ, &sa, nullptr);
+	}
 #else
 	// Set up winsock.
 	WSADATA wsadata;
