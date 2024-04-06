@@ -223,6 +223,19 @@ int connect_with_timeout(dpp::socket sockfd, const struct sockaddr *addr, sockle
 #endif
 }
 
+#ifndef _WIN32
+void set_signal_handler(int signal)
+{
+	struct sigaction sa;
+	sigaction(signal, nullptr, &sa);
+	if (sa.sa_flags == 0 && sa.sa_handler == nullptr)
+	{
+		memset(&sa, 0, sizeof(sa));
+		sigaction(signal, &sa, nullptr);
+	}
+}
+#endif
+
 ssl_client::ssl_client(const std::string &_hostname, const std::string &_port, bool plaintext_downgrade, bool reuse) :
 	nonblocking(false),
 	sfd(INVALID_SOCKET),
@@ -237,36 +250,11 @@ ssl_client::ssl_client(const std::string &_hostname, const std::string &_port, b
 	keepalive(reuse)
 {
 #ifndef WIN32
-	struct sigaction sa;
-	struct sigaction action;
-	memset(&action, 0, sizeof(action));
-	action.sa_handler = SIG_IGN;
-	action.sa_flags = SA_RESTART;
-
-	sigaction(SIGALRM, nullptr, &sa);
-	if (sa.sa_flags == 0 && sa.sa_handler == nullptr) {
-		sigaction(SIGALRM, &action, nullptr);
-	}
-
-	sigaction(SIGHUP, nullptr, &sa);
-	if (sa.sa_flags == 0 && sa.sa_handler == nullptr) {
-		sigaction(SIGHUP, &action, nullptr);
-	}
-
-	sigaction(SIGPIPE, nullptr, &sa);
-	if (sa.sa_flags == 0 && sa.sa_handler == nullptr) {
-		sigaction(SIGPIPE, &action, nullptr);
-	}
-
-	sigaction(SIGCHLD, nullptr, &sa);
-	if (sa.sa_flags == 0 && sa.sa_handler == nullptr) {
-		sigaction(SIGCHLD, &action, nullptr);
-	}
-
-	sigaction(SIGXFSZ, nullptr, &sa);
-	if (sa.sa_flags == 0 && sa.sa_handler == nullptr) {
-		sigaction(SIGXFSZ, &action, nullptr);
-	}
+	set_signal_handler(SIGALRM);
+	set_signal_handler(SIGHUP);
+	set_signal_handler(SIGXFSZ);
+	set_signal_handler(SIGCHLD);
+	signal(SIGPIPE, SIG_IGN);
 #else
 	// Set up winsock.
 	WSADATA wsadata;
