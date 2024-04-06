@@ -238,49 +238,34 @@ ssl_client::ssl_client(const std::string &_hostname, const std::string &_port, b
 {
 #ifndef WIN32
 	struct sigaction sa;
+	struct sigaction action;
+	memset(&action, 0, sizeof(action));
+	action.sa_handler = SIG_IGN;
+	action.sa_flags = SA_RESTART;
+
 	sigaction(SIGALRM, nullptr, &sa);
-	if (sa.sa_flags == 0 && sa.sa_handler == nullptr)
-	{
-		memset(&sa, 0, sizeof(sa));
-		sa.sa_handler = SIG_IGN;
-		sa.sa_flags = SA_RESTART;
-		sigaction(SIGALRM, &sa, nullptr);
+	if (sa.sa_flags == 0 && sa.sa_handler == nullptr) {
+		sigaction(SIGALRM, &action, nullptr);
 	}
 
 	sigaction(SIGHUP, nullptr, &sa);
-	if (sa.sa_flags == 0 && sa.sa_handler == nullptr)
-	{
-		memset(&sa, 0, sizeof(sa));
-		sa.sa_handler = SIG_IGN;
-		sa.sa_flags = SA_RESTART;
-		sigaction(SIGHUP, &sa, nullptr);
+	if (sa.sa_flags == 0 && sa.sa_handler == nullptr) {
+		sigaction(SIGHUP, &action, nullptr);
 	}
 
 	sigaction(SIGPIPE, nullptr, &sa);
-	if (sa.sa_flags == 0 && sa.sa_handler == nullptr)
-	{
-		memset(&sa, 0, sizeof(sa));
-		sa.sa_handler = SIG_IGN;
-		sa.sa_flags = SA_RESTART;
-		sigaction(SIGPIPE, &sa, nullptr);
+	if (sa.sa_flags == 0 && sa.sa_handler == nullptr) {
+		sigaction(SIGPIPE, &action, nullptr);
 	}
 
 	sigaction(SIGCHLD, nullptr, &sa);
-	if (sa.sa_flags == 0 && sa.sa_handler == nullptr)
-	{
-		memset(&sa, 0, sizeof(sa));
-		sa.sa_handler = SIG_IGN;
-		sa.sa_flags = SA_RESTART;
-		sigaction(SIGCHLD, &sa, nullptr);
+	if (sa.sa_flags == 0 && sa.sa_handler == nullptr) {
+		sigaction(SIGCHLD, &action, nullptr);
 	}
 
 	sigaction(SIGXFSZ, nullptr, &sa);
-	if (sa.sa_flags == 0 && sa.sa_handler == nullptr)
-	{
-		memset(&sa, 0, sizeof(sa));
-		sa.sa_handler = SIG_IGN;
-		sa.sa_flags = SA_RESTART;
-		sigaction(SIGXFSZ, &sa, nullptr);
+	if (sa.sa_flags == 0 && sa.sa_handler == nullptr) {
+		sigaction(SIGXFSZ, &action, nullptr);
 	}
 #else
 	// Set up winsock.
