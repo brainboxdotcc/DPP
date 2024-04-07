@@ -250,9 +250,9 @@ ssl_client::ssl_client(const std::string &_hostname, const std::string &_port, b
 {
 #ifndef WIN32
 	set_signal_handler(SIGALRM);
-	set_signal_handler(SIGHUP);
 	set_signal_handler(SIGXFSZ);
 	set_signal_handler(SIGCHLD);
+	signal(SIGHUP, SIG_IGN);
 	signal(SIGPIPE, SIG_IGN);
 #else
 	// Set up winsock.
