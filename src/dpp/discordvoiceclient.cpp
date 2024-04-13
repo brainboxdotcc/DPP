@@ -1174,8 +1174,10 @@ discord_voice_client& discord_voice_client::skip_to_next_marker() {
 				});
 
 		if (i != outbuf.end()) {
-			/* Skip queued packets until including found marker */
-			outbuf.erase(outbuf.begin(), i);
+			if (i != outbuf.begin()) {
+				/* Skip queued packets up to found marker */
+				outbuf.erase(outbuf.begin(), i-1);
+			}
 		} else {
 			/* No market found, skip the whole queue */
 			outbuf.clear();
