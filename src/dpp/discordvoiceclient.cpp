@@ -1184,14 +1184,6 @@ discord_voice_client& discord_voice_client::skip_to_next_marker() {
 		}
 	}
 
-	if (tracks > 0) {
-		tracks--;
-	}
-
-	if (!track_meta.empty()) {
-		track_meta.erase(track_meta.begin());
-	}
-
 	return *this;
 }
 
