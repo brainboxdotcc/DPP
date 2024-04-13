@@ -849,7 +849,7 @@ void discord_voice_client::write_ready()
 		std::lock_guard<std::mutex> lock(this->stream_mutex);
 		if (!this->paused && outbuf.size()) {
 			type = send_audio_type;
-			if (outbuf[0].packet.size() == 2 && (*((uint16_t*)(outbuf[0].packet.data()))) == AUDIO_TRACK_MARKER) {
+			if (outbuf[0].packet.size() == sizeof(uint16_t) && (*((uint16_t*)(outbuf[0].packet.data()))) == AUDIO_TRACK_MARKER) {
 				outbuf.erase(outbuf.begin());
 				track_marker_found = true;
 				if (tracks > 0) {
