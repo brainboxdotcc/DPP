@@ -692,6 +692,8 @@ dpp::utility::uptime discord_voice_client::get_remaining() {
 discord_voice_client& discord_voice_client::stop_audio() {
 	std::lock_guard<std::mutex> lock(this->stream_mutex);
 	outbuf.clear();
+	track_meta.clear();
+	tracks = 0;
 	return *this;
 }
 
