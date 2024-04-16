@@ -977,7 +977,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 						return;
 					}
 					g.remove_icon();
-					bot.guild_edit(g, [&bot](const dpp::confirmation_callback_t &result) {
+					bot.guild_edit(g, [](const dpp::confirmation_callback_t &result) {
 						if (result.is_error()) {
 							set_status(GUILD_EDIT, ts_failed, "guild_edit 2 errored:\n" + result.get_error().human_readable);
 							return;
