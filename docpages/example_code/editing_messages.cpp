@@ -68,7 +68,8 @@ int main() {
 				auto& embeds = message.embeds;
 
 				/* change the embed description and edit the message itself.
-				since we're using a reference, what changes in embeds changes in message.embeds */
+				 * since we're using a reference, what changes in embeds changes in message.embeds
+				 */
 				embeds[0].set_description(description);
 
 				bot.message_edit(message);
