@@ -1,8 +1,8 @@
 #include <dpp/dpp.h>
 
 int main() {
-	dpp::cluster bot("Token", dpp::i_default_intents | dpp::i_message_content);
 	/* the second argument is a bitmask of intents - i_message_content is needed to get messages */
+	dpp::cluster bot("Token", dpp::i_default_intents | dpp::i_message_content);
 
 	bot.on_log(dpp::utility::cout_logger());
 
@@ -13,9 +13,8 @@ int main() {
 		} else if (event.command.get_command_name() == "msg-edit") {
 			const auto content = std::get<std::string>(event.get_parameter("content"));
 
-			/* get message to edit it after */
+			/* get the message to edit it after. here string will automatically be converted to snowflake */
 			const dpp::snowflake msg_id = std::get<std::string>(event.get_parameter("msg-id"));
-			/* here string will automatically be converted to snowflake */
 
 			bot.message_get(msg_id, event.command.channel_id, [&bot, content, event](const dpp::confirmation_callback_t& callback) {
 				if (callback.is_error()) {
@@ -57,9 +56,8 @@ int main() {
 		} else if (event.command.get_command_name() == "embed-edit") {
 			const auto description = std::get<std::string>(event.get_parameter("desc"));
 
-			/* get message to edit its embed after */
+			/* get the message to edit its embed after. here string will automatically be converted to snowflake */
 			const dpp::snowflake msg_id = std::get<std::string>(event.get_parameter("msg-id"));
-			/* here string will automatically be converted to snowflake */
 
 			bot.message_get(msg_id, event.command.channel_id, [&bot, description, event](const dpp::confirmation_callback_t& callback) {
 				if (callback.is_error()) {
@@ -68,10 +66,10 @@ int main() {
 				}
 				auto message = callback.get<dpp::message>();
 				auto& embeds = message.embeds;
-				/* change the embed description and edit the message itself */
 
+				/* change the embed description and edit the message itself.
+				since we're using a reference, what changes in embeds changes in message.embeds */
 				embeds[0].set_description(description);
-				/* since we're using a reference, what changes in embeds changes in message.embeds */
 
 				bot.message_edit(message);
 				event.reply("Embed description is now `" + description + "`.");
