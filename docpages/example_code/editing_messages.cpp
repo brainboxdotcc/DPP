@@ -61,21 +61,22 @@ int main() {
             const dpp::snowflake msg_id = std::get<std::string>(event.get_parameter("msg-id"));
             /* here string will automatically be converted to snowflake */
 
-            bot.message_get(msg_id, event.command.channel_id, [&bot, content, event](const dpp::confirmation_callback_t& callback) {
+            bot.message_get(msg_id, event.command.channel_id, [&bot, description, event](const dpp::confirmation_callback_t& callback) {
                 if (callback.is_error()) {
                     event.reply("error");
                     return;
                 }
                 auto message = callback.get<dpp::message>();
-                auto embeds& = message.embeds;
-
+                auto& embeds = message.embeds;
                 /* change the embed description and edit the message itself */
-                /* I'm gonna test it this actually works tomorrow */
 
                 embeds[0].set_description(description);
+                /* since we're using a reference, what changes in embeds changes in message.embeds */
+
                 bot.message_edit(message);
-                event.reply("Message content is now `" + content + "`.");
+                event.reply("Embed description is now `" + description + "`.");
             });
+		}
     });
 
     bot.on_ready([&bot](const dpp::ready_t& event) {
