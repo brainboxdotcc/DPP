@@ -1171,7 +1171,7 @@ discord_voice_client& discord_voice_client::skip_to_next_marker() {
 		/* Find the first marker to skip to */
 		auto i = std::find_if(outbuf.begin(), outbuf.end(), [](const voice_out_packet &v){
 				return v.packet.size() == sizeof(uint16_t) && (*((uint16_t*)(v.packet.data()))) == AUDIO_TRACK_MARKER;
-				});
+			 });
 
 		if (i != outbuf.end()) {
 			/* Skip queued packets until including found marker */
