@@ -74,28 +74,61 @@ bool confirmation_callback_t::is_error() const {
 
 namespace {
 
-std::vector<error_detail> find_errors_in_array(const std::string& obj, size_t index, const std::string& current_field, json::iterator begin, json::iterator end) {
+std::vector<error_detail> find_errors_in_array(const std::string& obj, int index, const std::string& current_field, const json &j);
+
+std::vector<error_detail> find_errors_in_object(const std::string& obj, int index, const std::string& current_field, const json &j) {
 	std::vector<error_detail> ret;
 
-	for (auto it = begin; it != end; ++it) {
-		if (auto errors = it->find("_errors"); errors != it->end()) {
-			for (auto errordetails = errors->begin(); errordetails != errors->end(); ++errordetails) {
-				error_detail detail;
-				detail.code = (*errordetails)["code"].get<std::string>();
-				detail.reason = (*errordetails)["message"].get<std::string>();
-				detail.field = current_field + it.key();
-				detail.object = obj;
-				detail.index = index;
-				ret.emplace_back(detail);
+	if (auto errors = j.find("_errors"); errors != j.end()) {
+		for (auto errordetails = errors->begin(); errordetails != errors->end(); ++errordetails) {
+			error_detail detail;
+			detail.code = (*errordetails)["code"].get<std::string>();
+			detail.reason = (*errordetails)["message"].get<std::string>();
+			detail.field = current_field;
+			detail.object = obj;
+			detail.index = index;
+			ret.emplace_back(detail);
+		}
+	} else {
+		for (auto it = j.begin(); it != j.end(); ++it) {
+			std::vector<error_detail> sub_errors;
+			std::string               field = obj.empty() ? current_field : obj + '.' + current_field;
+
+			if (it->is_array()) {
+				sub_errors = find_errors_in_array(field, index, it.key(), *it);
+			} else {
+				sub_errors = find_errors_in_object(field, index, it.key(), *it);
 			}
-		} else { // subobject has errors
-			auto sub_errors = find_errors_in_array(obj, index, current_field + it.key() + ".", it->begin(), it->end());
 
 			if (!sub_errors.empty()) {
 				ret.reserve(ret.capacity() + sub_errors.size());
 				std::move(sub_errors.begin(), sub_errors.end(), std::back_inserter(ret));
 			}
 		}
+	}
+	return ret;
+}
+
+std::vector<error_detail> find_errors_in_array(const std::string& obj, int index, const std::string& current_field, const json &j) {
+	std::vector<error_detail> ret;
+	int idx = 0;
+
+	for (auto it = j.begin(); it != j.end(); ++it) {
+		std::vector<error_detail> sub_errors;
+		std::string key = '[' + std::to_string(idx) + ']';
+		std::string field = obj.empty() ? current_field : obj + '.' + current_field;
+
+		if (it->is_array()) {
+			sub_errors = find_errors_in_array(field, index, key, *it);
+		} else {
+			sub_errors = find_errors_in_object(field, index, key, *it);
+		}
+
+		if (!sub_errors.empty()) {
+			ret.reserve(ret.capacity() + sub_errors.size());
+			std::move(sub_errors.begin(), sub_errors.end(), std::back_inserter(ret));
+		}
+		++idx;
 	}
 	return ret;
 }
@@ -158,29 +191,18 @@ error_info confirmation_callback_t::get_error() const {
 						}
 					}
 				}
-
-			} else if (obj->find("_errors") != obj->end()) {
-				/* An object of error messages (rare) */
-				e.errors.reserve((*obj)["_errors"].size());
-				for (auto errordetails = (*obj)["_errors"].begin(); errordetails != (*obj)["_errors"].end(); ++errordetails) {
-					error_detail detail;
-					detail.code = (*errordetails)["code"].get<std::string>();
-					detail.reason = (*errordetails)["message"].get<std::string>();
-					detail.object.clear();
-					detail.field = obj.key();
-					detail.index = 0;
-					e.errors.emplace_back(detail);
-				}
 			} else {
-				/* An object that has a subobject with errors */
-				for (auto index = obj->begin(); index != obj->end(); ++index) {
-					int array_index = std::atoll(index.key().c_str());
-					auto sub_errors = find_errors_in_array(obj.key(), array_index, {}, index->begin(), index->end());
+				std::vector<error_detail> sub_errors;
 
-					if (!sub_errors.empty()) {
-						e.errors.reserve(e.errors.capacity() + sub_errors.size());
-						std::move(sub_errors.begin(), sub_errors.end(), std::back_inserter(e.errors));
-					}
+				if (obj->is_array()) {
+					sub_errors = find_errors_in_array({}, -1, obj.key(), *obj);
+				} else {
+					sub_errors = find_errors_in_object({}, -1, obj.key(), *obj);
+				}
+
+				if (!sub_errors.empty()) {
+					e.errors.reserve(e.errors.capacity() + sub_errors.size());
+					std::move(sub_errors.begin(), sub_errors.end(), std::back_inserter(e.errors));
 				}
 			}
 		}
@@ -194,6 +216,9 @@ error_info confirmation_callback_t::get_error() const {
 			} else if (isdigit(*(error.object.c_str()))) {
 				/* An unnamed array of objects where one or more generated an error, e.g. slash command bulk registration */
 				e.human_readable += prefix + "- <array>[" + error.object + "]." + error.field + ": " + error.reason + " (" + error.code + ")";
+			} else if (error.index < 0) {
+				/* An object field that caused an error */
+				e.human_readable += prefix + "- " + error.object + '.' + error.field + ": " + error.reason + " (" + error.code + ")";
 			} else {
 				/* A named array of objects whre a field in the object has an error */
 				e.human_readable += prefix + "- " + error.object + "[" + std::to_string(error.index) + "]." + error.field + ": " + error.reason + " (" + error.code + ")";
