@@ -1615,7 +1615,7 @@ struct DPP_EXPORT poll {
 	 *
 	 * @return question.text
 	 */
-	const std::string& get_question_text() const noexcept;
+	[[nodiscard]] const std::string& get_question_text() const noexcept;
 
 	/**
 	 * @brief Helper to find an answer by ID
@@ -1623,16 +1623,16 @@ struct DPP_EXPORT poll {
 	 * @param id ID to find
 	 * @return Pointer to the answer with the matching ID, or nullptr if not found
 	 */
-	const poll_media* find_answer(uint32_t id) const noexcept;
+	[[nodiscard]] const poll_media* find_answer(uint32_t id) const noexcept;
 
 	/**
 	 * @brief Helper to find the vote count in the results
 	 *
 	 * @param answer_id ID of the answer to find
-	 * @return Optional count of votes. An empty optional mean Discord did not send the results, it does not mean 0. It can also mean the poll does not have an answer with this ID
+	 * @return std::optional<uint32_t> Optional count of votes. An empty optional means Discord did not send the results, it does not mean 0. It can also mean the poll does not have an answer with this ID
 	 * @see https://discord.com/developers/docs/resources/poll#poll-results-object
 	 */
-	std::optional<uint32_t> get_vote_count(uint32_t answer_id) const noexcept;
+	[[nodiscard]] std::optional<uint32_t> get_vote_count(uint32_t answer_id) const noexcept;
 };
 
 /**
@@ -2565,19 +2565,19 @@ public:
 	message& set_poll(const poll& p);
 
 	/**
-	 * @brief Convenience method to get the poll
+	 * @brief Convenience method to get the poll attached to this message
 	 *
 	 * @throw std::bad_optional_access if has_poll() == false
 	 * @return const poll& Poll attached to this object
 	 */
-	const poll& get_poll() const;
+	[[nodiscard]] const poll& get_poll() const;
 
 	/**
 	 * @brief Method to check if the message has a poll
 	 *
 	 * @return bool Whether the message has a poll
 	 */
-	bool has_poll() const noexcept;
+	[[nodiscard]] bool has_poll() const noexcept;
 };
 
 /**
