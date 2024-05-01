@@ -92,7 +92,15 @@ std::vector<error_detail> find_errors_in_object(const std::string& obj, int inde
 	} else {
 		for (auto it = j.begin(); it != j.end(); ++it) {
 			std::vector<error_detail> sub_errors;
-			std::string               field = obj.empty() ? current_field : obj + '.' + current_field;
+			std::string               field;
+
+			if (obj.empty()) {
+				field = current_field;
+			} else if (isdigit(*current_field.c_str())) {
+				field = obj + '[' + current_field + ']';
+			} else {
+				field = obj + '.' + current_field;
+			}
 
 			if (it->is_array()) {
 				sub_errors = find_errors_in_array(field, index, it.key(), *it);
