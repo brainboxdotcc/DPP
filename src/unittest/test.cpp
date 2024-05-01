@@ -188,6 +188,23 @@ Markdown lol ||spoiler|| ~~strikethrough~~ `small *code* block`\n";
 	}";
 	error_message_success = (error_message_success && error_test.get_error().human_readable == "50035: Invalid Form Body - <array>[1].options[1].description: Must be between 1 and 100 in length. (BASE_TYPE_BAD_LENGTH)");
 
+	error_test.http_info.body = "{\
+  	\"message\": \"Invalid Form Body\",\
+  	\"code\": 50035,\
+  	\"errors\": {\
+  	  \"data\": {\
+  	    \"poll\": {\
+  	      \"_errors\": [\
+  	        {\
+							\"code\": \"POLL_TYPE_QUESTION_ALLOWS_TEXT_ONLY\",\
+ 							\"message\": \"This poll type cannot include attachments, emoji or stickers with the question\"}\
+  	      ]\
+  	    }\
+  	  }\
+  	}\
+	}";
+	error_message_success = (error_message_success && error_test.get_error().human_readable == "50035: Invalid Form Body - data.poll: This poll type cannot include attachments, emoji or stickers with the question (POLL_TYPE_QUESTION_ALLOWS_TEXT_ONLY)");
+
 	set_test(ERRORS, error_message_success);
 
 	set_test(MD_ESC_1, false);
