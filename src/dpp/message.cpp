@@ -485,6 +485,155 @@ component &component::add_default_value(const snowflake id, const component_defa
 	return *this;
 }
 
+namespace {
+
+poll_media get_poll_media(const nlohmann::json& obj, std::string_view key) {
+	poll_media retval{};
+
+	if (auto it = obj.find(key); it != obj.end()) {
+		const json& media_json = *it;
+
+		retval.text = string_not_null(&media_json, "text");
+		if (it = media_json.find("emoji"); it != media_json.end()) {
+			const json& emoji_json = *it;
+
+			retval.emoji.animated = bool_not_null(&emoji_json, "animated");
+			retval.emoji.name = string_not_null(&emoji_json, "name");
+			retval.emoji.id = snowflake_not_null(&emoji_json, "id");
+		}
+	}
+	return retval;
+};
+
+json make_json(const poll_media &media) {
+	json retval{};
+
+	if (media.emoji.id != 0) {
+		json& emoji_json = retval["emoji"];
+		emoji_json["id"] = media.emoji.id;
+		emoji_json["animated"] = media.emoji.animated;
+	} else if (!media.emoji.name.empty()) {
+		json& emoji_json = retval["emoji"];
+		emoji_json["name"] = media.emoji.name;
+		emoji_json["animated"] = media.emoji.animated;
+	}
+	retval["text"] = media.text;
+	return retval;
+}
+
+}
+
+void from_json(const nlohmann::json& j, poll& p) {
+	p.question = get_poll_media(j, "question");
+	if (auto it = j.find("answers"); it != j.end() && it->is_array()) {
+		for (const json& element : *it) {
+			auto id = int32_not_null(&element, "answer_id");
+			p.answers.emplace(id, poll_answer{
+				id,
+				get_poll_media(element, "poll_media")
+			});
+		}
+	}
+	p.expiry = double_not_null(&j, "expiry");
+	p.allow_multiselect = bool_not_null(&j, "allow_multiselect");
+	p.layout_type = static_cast<poll_layout_type>(int32_not_null(&j, "layout_type"));
+	if (auto it = j.find("results"); it != j.end()) {
+		const json& results_json = *it;
+		poll_results p_results{};
+
+		p_results.is_finalized = bool_not_null(&results_json, "is_finalized");
+		if (it = results_json.find("answer_counts"); it != results_json.end() && it->is_array()) {
+			for (const json& answer_count_json : *it) {
+				auto id = int32_not_null(&answer_count_json, "id");
+				p_results.answer_counts.emplace(id, poll_results::answer_count{
+					id,
+					int32_not_null(&answer_count_json, "count"),
+					bool_not_null(&answer_count_json, "me_voted")
+				});
+			}
+		}
+		p.results = std::move(p_results);
+	}
+}
+
+void to_json(json& j, const poll &p) {
+	j["question"] = make_json(p.question);
+
+	json& answers_json = j["answers"];
+	for (const auto& [_, answer] : p.answers) {
+		answers_json.emplace_back()["poll_media"] = make_json(answer.media);
+	}
+	/* When sending a poll object expiry is a duration in hours so we clamp it to positive and round */
+	j["duration"] = (p.expiry < 0.0 ? uint32_t{0} : static_cast<uint32_t>(p.expiry + 0.5));
+	j["allow_multiselect"] = p.allow_multiselect;
+	j["layout_type"] = static_cast<uint32_t>(p.layout_type);
+}
+
+poll& poll::set_question(const std::string& text) {
+	question.text = text;
+	return *this;
+}
+
+poll& poll::set_duration(uint32_t hours) noexcept {
+	expiry = static_cast<double>(hours);
+	return *this;
+}
+
+poll& poll::set_allow_multiselect(bool allow) noexcept {
+	allow_multiselect = allow;
+	return *this;
+}
+
+poll& poll::add_answer(const poll_media& media) {
+	uint32_t max = 0;
+	for (const auto &pair : answers) {
+		if (pair.first > max) {
+			max = pair.first;
+		}
+	}
+	answers.emplace(max + 1, poll_answer{max + 1, media});
+	return *this;
+}
+
+poll& poll::add_answer(const std::string& text, snowflake emoji_id, bool is_animated) {
+	return add_answer(poll_media{text, partial_emoji({}, emoji_id, is_animated)});
+}
+
+poll& poll::add_answer(const std::string& text, const std::string& emoji) {
+	return add_answer(poll_media{text, partial_emoji(emoji, {}, false)});
+}
+
+poll& poll::add_answer(const std::string& text, const emoji& e) {
+	return add_answer(poll_media{text, partial_emoji(e.name, e.id, e.is_animated())});
+}
+
+const std::string& poll::get_question_text() const noexcept {
+	return question.text;
+}
+
+const poll_media *poll::find_answer(uint32_t id) const noexcept {
+	if (auto it = answers.find(id); it != answers.end()) {
+		return &it->second.media;
+	}
+	return nullptr;
+}
+
+std::optional<uint32_t> poll::get_vote_count(uint32_t answer_id) const noexcept {
+	if (!results.has_value()) {
+		return std::nullopt;
+	}
+	if (auto it = results->answer_counts.find(answer_id); it != results->answer_counts.end()) {
+		return it->second.count;
+	}
+	/* Answers not present can mean 0 */
+	if (find_answer(answer_id) == nullptr) {
+		return std::nullopt;
+	}
+	return 0;
+}
+
+
+
 embed::~embed() = default;
 
 embed::embed() : timestamp(0) {
@@ -615,6 +764,19 @@ message& message::set_channel_id(snowflake _channel_id) {
 message& message::set_guild_id(snowflake _guild_id) {
 	guild_id = _guild_id;
 	return *this;
+}
+
+message& message::set_poll(const poll& p) {
+	attached_poll = p;
+	return *this;
+}
+
+const poll &message::get_poll() const {
+	return attached_poll.value();
+}
+
+bool message::has_poll() const noexcept {
+	return attached_poll.has_value();
 }
 
 message::message(const std::string &_content, message_type t) : message() {
@@ -1052,6 +1214,10 @@ json message::to_json(bool with_id, bool is_interaction_response) const {
 		j["embeds"].push_back(e);
 	}
 
+	if (attached_poll.has_value()) {
+		dpp::to_json(j["poll"], *attached_poll);
+	}
+
 	return j;
 }
 
@@ -1230,6 +1396,9 @@ message& message::fill_from_json(json* d, cache_policy_t cp) {
 		message_reference.message_id = snowflake_not_null(&mr, "message_id");
 		message_reference.fail_if_not_exists = bool_not_null(&mr, "fail_if_not_exists");
 	}
+	if (auto it = d->find("poll"); it != d->end()) {
+		from_json(*it, attached_poll.emplace());
+	}
 	return *this;
 }
 
@@ -1292,9 +1461,6 @@ json sticker::to_json_impl(bool with_id) const {
 	j["sort_value"] = this->sort_value;
 
 	return j;
-}
-
-sticker_pack::sticker_pack() : managed(0), sku_id(0), cover_sticker_id(0), banner_asset_id(0) {
 }
 
 sticker_pack& sticker_pack::fill_from_json_impl(nlohmann::json* j) {

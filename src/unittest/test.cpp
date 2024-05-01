@@ -2076,7 +2076,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 					}
 				});
 			}
-			
+
 			set_test(THREAD_CREATE, false);
 			if (!offline) {
 				bot.thread_create("thread test", TEST_TEXT_CHANNEL_ID, 60, dpp::channel_type::CHANNEL_PUBLIC_THREAD, true, 60, [&](const dpp::confirmation_callback_t &event) {
@@ -2085,6 +2085,99 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 						set_test(THREAD_CREATE, true);
 					}
 					// the thread tests are in the on_thread_create event handler
+				});
+			}
+
+			start_test(POLL_CREATE);
+			if (!offline) {
+				dpp::message poll_msg{};
+
+				poll_msg.set_poll(dpp::poll{}
+					.set_question("hello!")
+					.add_answer("one", dpp::unicode_emoji::one)
+					.add_answer("two", dpp::unicode_emoji::two)
+					.add_answer("three", dpp::unicode_emoji::three)
+					.add_answer("four")
+					.set_duration(48)
+					.set_allow_multiselect(true)
+				).set_channel_id(TEST_TEXT_CHANNEL_ID);
+
+				bot.message_create(poll_msg, [&bot, poll_msg](const dpp::confirmation_callback_t& result) {
+					if (result.is_error()) {
+						set_status(POLL_CREATE, ts_failed, result.get_error().human_readable);
+						return;
+					}
+
+					const dpp::message& m = std::get<dpp::message>(result.value);
+
+					if (!m.attached_poll.has_value()) {
+						set_status(POLL_CREATE, ts_failed, "poll missing in received message");
+						return;
+					}
+
+					if (m.attached_poll->find_answer(std::numeric_limits<uint32_t>::max()) != nullptr) {
+						set_status(POLL_CREATE, ts_failed, "poll::find_answer failed to return nullptr");
+						return;
+					}
+
+					std::array<bool, 4> correct = {false, false, false, false};
+					int i = 0;
+					for (const auto& [_, answer] : m.attached_poll->answers) {
+						if (m.attached_poll->find_answer(answer.id) != &answer.media) {
+							set_status(POLL_CREATE, ts_failed, "poll::find_answer failed to return valid answer");
+							return;
+						}
+						if (answer.media.text == "one" && answer.media.emoji.name == dpp::unicode_emoji::one) {
+							if (correct[i]) {
+								set_status(POLL_CREATE, ts_failed, "poll answer found twice");
+								return;
+							}
+							correct[i] = true;
+						}
+						if (answer.media.text == "two" && answer.media.emoji.name == dpp::unicode_emoji::two) {
+							if (correct[i]) {
+								set_status(POLL_CREATE, ts_failed, "poll answer found twice");
+								return;
+							}
+							correct[i] = true;
+						}
+						if (answer.media.text == "three" && answer.media.emoji.name == dpp::unicode_emoji::three) {
+							if (correct[i]) {
+								set_status(POLL_CREATE, ts_failed, "poll answer found twice");
+								return;
+							}
+							correct[i] = true;
+						}
+						if (answer.media.text == "four" && answer.media.emoji.name.empty()) {
+							if (correct[i]) {
+								set_status(POLL_CREATE, ts_failed, "poll answer found twice");
+								return;
+							}
+							correct[i] = true;
+							bot.poll_get_answer_voters(m, answer.id, 0, 100, [m, &bot](const dpp::confirmation_callback_t& result) {
+								if (result.is_error()) {
+									set_status(POLL_CREATE, ts_failed, "poll_get_answer_voters: " + result.get_error().human_readable);
+									return;
+								}
+
+								start_test(POLL_END);
+								bot.poll_end(m, [message_id = m.id, channel_id = m.channel_id, &bot](const dpp::confirmation_callback_t& result) {
+									if (result.is_error()) {
+										set_status(POLL_END, ts_failed, result.get_error().human_readable);
+										return;
+									}
+									set_status(POLL_END, ts_success);
+									bot.message_delete(message_id, channel_id);
+								});
+							});
+						}
+						++i;
+					}
+					if (correct == std::array<bool, 4>{true, true, true, true}) {
+						set_status(POLL_CREATE, ts_success);
+					} else {
+						set_status(POLL_CREATE, ts_failed, "failed to find the submitted answers");
+					}
 				});
 			}
 
