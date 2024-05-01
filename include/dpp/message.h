@@ -79,14 +79,14 @@ enum component_type : uint8_t {
 };
 
 /**
- * @brief An emoji for a component (select menus included).
+ * @brief An emoji reference for a component (select menus included) or a poll.
  *
- * To set an emoji on your button, you must set one of either the name or id fields.
- * The easiest way is to use the dpp::component::set_emoji method.
+ * To set an emoji on your button or poll answer, you must set one of either the name or id fields.
+ * The easiest way for buttons is to use the dpp::component::set_emoji method.
  *
  * @note This is a **very** scaled down version of dpp::emoji, we advise that you refrain from using this.
  */
-struct component_emoji {
+struct partial_emoji {
 	/**
 	 * @brief The name of the emoji.
 	 *
@@ -94,7 +94,7 @@ struct component_emoji {
 	 * actual unicode value of the emoji e.g. "😄"
 	 * and not for example ":smile:"
 	 */
-	std::string name{""};
+	std::string name{};
 
 	/**
 	 * @brief The emoji ID value for emojis that are custom
@@ -114,6 +114,13 @@ struct component_emoji {
 	 */
 	bool animated{false};
 };
+
+/**
+ * @brief An emoji for a component. Alias to partial_emoji, for backwards compatibility.
+ *
+ * @see partial_emoji
+ */
+using component_emoji = partial_emoji;
 
 /**
  * @brief The data for a file attached to a message.
@@ -247,7 +254,7 @@ public:
 	/**
 	 * @brief The emoji for the select option.
 	 */
-	component_emoji emoji;
+	partial_emoji emoji;
 
 	/**
 	 * @brief Construct a new select option object
@@ -449,7 +456,7 @@ public:
 	/**
 	 * @brief The emoji for this component.
 	 */
-	component_emoji emoji;
+	partial_emoji emoji;
 
 	/**
 	 * @brief Constructor
@@ -1365,39 +1372,267 @@ public:
 	/**
 	 * @brief The stickers in the pack.
 	 */
-	std::map<snowflake, sticker> stickers;
+	std::map<snowflake, sticker> stickers{};
 
 	/**
 	 * @brief Name of the sticker pack.
 	 */
-	std::string name;
+	std::string name{};
 
 	/**
 	 * @brief ID of the pack's SKU.
 	 */
-	snowflake sku_id;
+	snowflake sku_id{0};
 
 	/**
 	 * @brief Optional: ID of a sticker in the pack which is shown as the pack's icon.
 	 */
-	snowflake cover_sticker_id;
+	snowflake cover_sticker_id{0};
 
 	/**
 	 * @brief Description of the sticker pack.
 	 */
-	std::string description;
+	std::string description{};
 
 	/**
 	 * @brief ID of the sticker pack's banner image.
 	 */
-	snowflake banner_asset_id;
+	snowflake banner_asset_id{};
+};
+
+/**
+ * @brief Poll layout types
+ *
+ * @note At the time of writing Discord only has 1, "The, uhm, default layout type."
+ * @see https://discord.com/developers/docs/resources/poll#layout-type
+ */
+enum poll_layout_type {
+	/**
+	 * @brief According to Discord, quote, "The, uhm, default layout type."
+	 */
+	pl_default = 1
+};
+
+/**
+ * @brief Structure representing a poll media, for example the poll question or a possible poll answer.
+ *
+ * @see https://discord.com/developers/docs/resources/poll#poll-media-object-poll-media-object-structure
+ */
+struct poll_media {
+	/**
+	 * @brief Text of the media
+	 */
+	std::string text{};
 
 	/**
-	 * @brief Construct a new sticker pack object
+	 * @brief Emoji of the media.
 	 */
-	sticker_pack();
+	partial_emoji emoji{};
+};
 
-	virtual ~sticker_pack() = default;
+/**
+ * @brief Represents an answer in a poll.
+ *
+ * @see https://discord.com/developers/docs/resources/poll#poll-answer-object-poll-answer-object-structure
+ */
+struct poll_answer {
+	/**
+	 * @brief ID of the answer. Only sent by the Discord API, this is a dead field when creating a poll.
+	 *
+	 * @warn At the time of writing the Discord API warns users not to rely on anything regarding sequence or "first value" of this field.
+	 */
+	uint32_t id{0};
+
+	/**
+	 * @brief Data of the answer.
+	 *
+	 * @see poll_media
+	 */
+	poll_media media{};
+};
+
+/**
+ * @brief Represents the results of a poll
+ *
+ * @see https://discord.com/developers/docs/resources/poll#poll-results-object-poll-results-object-structure
+ */
+struct poll_results {
+	/**
+	 * @brief Represents a reference to an answer and its count of votes
+	 *
+	 * @see https://discord.com/developers/docs/resources/poll#poll-results-object-poll-answer-count-object-structure
+	 */
+	struct answer_count {
+		/**
+		 * @brief ID of the answer. Relates to an answer in the answers field
+		 *
+		 * @see poll_answer::answer_id
+		 */
+		uint32_t answer_id{0};
+
+		/**
+		 * @brief Number of votes for this answer
+		 */
+		uint32_t count{0};
+
+		/**
+		 * @brief Whether the current user voted
+		 */
+		bool me_voted{false};
+	};
+
+	/**
+	 * @brief Whether the poll has finalized, and the answers are precisely counted
+	 *
+	 * @note Discord states that due to the way they count and cache answers,
+	 * while a poll is running the count of answers might not be accurate.
+	 */
+	bool is_finalized{false};
+
+	/**
+	 * @brief Count of votes for each answer. If an answer is not present in this list,
+	 * then its vote count is 0
+	 */
+	std::map<uint32_t, answer_count> answer_counts;
+};
+
+/**
+ * @brief Represents a poll.
+ *
+ * @see https://discord.com/developers/docs/resources/poll
+ */
+struct DPP_EXPORT poll {
+	/**
+	 * @brief Poll question. At the time of writing only the text field is supported by Discord
+	 *
+	 * @see media
+	 */
+	poll_media question{};
+
+	/**
+	 * @brief List of answers of the poll.
+	 *
+	 * @note At the time of writing this can contain up to 10 answers
+	 * @see answer
+	 */
+	std::map<uint32_t, poll_answer> answers{};
+
+	/**
+	 * @brief When retriving a poll from the API, this is the timestamp at which the poll will expire.
+	 * When creating a poll, this is the number of hours the poll should be up for, up to 7 days (168 hours), and this field will be rounded.
+	 */
+	double expiry{24.0};
+
+	/**
+	 * @brief Whether a user can select multiple answers
+	 */
+	bool allow_multiselect{false};
+
+	/**
+	 * @brief Layout type of the poll. Defaults to, well, pl_default
+	 *
+	 * @see poll_layout_type
+	 */
+	poll_layout_type layout_type{pl_default};
+
+	/**
+	 * @brief The (optional) results of the poll. This field may or may not be present, and its absence means "unknown results", not "no results".
+	 *
+	 * @note Quote from Discord: "The results field may be not present in certain responses where, as an implementation detail,
+	 * we do not fetch the poll results in our backend. This should be treated as "unknown results",
+	 * as opposed to "no results". You can keep using the results if you have previously received them through other means."
+	 *
+	 * @see https://discord.com/developers/docs/resources/poll#poll-results-object
+	 */
+	std::optional<poll_results> results{std::nullopt};
+
+	/**
+	 * @brief Set the question for this poll
+	 *
+	 * @param text Text for the question
+	 * @return self for method chaining
+	 */
+	poll& set_question(const std::string& text);
+
+	/**
+	 * @brief Set the duration of the poll in hours
+	 *
+	 * @param hours Duration of the poll in hours, max 7 days (168 hours) at the time of writing
+	 * @return self for method chaining
+	 */
+	poll& set_duration(uint32_t hours) noexcept;
+
+	/**
+	 * @brief Set the duration of the poll in hours
+	 *
+	 * @param hours Duration of the poll in hours
+	 * @return self for method chaining
+	 */
+	poll& set_allow_multiselect(bool allow) noexcept;
+
+	/**
+	 * @brief Add an answer to this poll
+	 *
+	 * @note At the time of writing this, a poll can have up to 10 answers
+	 * @param media Data of the answer
+	 * @return self for method chaining
+	 */
+	poll& add_answer(const poll_media& media);
+
+	/**
+	 * @brief Add an answer to this poll
+	 *
+	 * @note At the time of writing this, a poll can have up to 10 answers
+	 * @param text Text for the answer
+	 * @param emoji_id Optional emoji
+	 * @param is_animated Whether the emoji is animated
+	 * @return self for method chaining
+	 */
+	poll& add_answer(const std::string& text, snowflake emoji_id = 0, bool is_animated = false);
+
+	/**
+	 * @brief Add an answer to this poll
+	 *
+	 * @note At the time of writing this, a poll can have up to 10 answers
+	 * @param text Text for the answer
+	 * @param emoji Optional emoji
+	 * @return self for method chaining
+	 */
+	poll& add_answer(const std::string& text, const std::string& emoji);
+
+	/**
+	 * @brief Add an answer to this poll
+	 *
+	 * @note At the time of writing this, a poll can have up to 10 answers
+	 * @param text Text for the answer
+	 * @param e Optional emoji
+	 * @return self for method chaining
+	 */
+	poll& add_answer(const std::string& text, const emoji& e);
+
+	/**
+	 * @brief Helper to get the question text
+	 *
+	 * @return question.text
+	 */
+	[[nodiscard]] const std::string& get_question_text() const noexcept;
+
+	/**
+	 * @brief Helper to find an answer by ID
+	 *
+	 * @param id ID to find
+	 * @return Pointer to the answer with the matching ID, or nullptr if not found
+	 */
+	[[nodiscard]] const poll_media* find_answer(uint32_t id) const noexcept;
+
+	/**
+	 * @brief Helper to find the vote count in the results
+	 *
+	 * @param answer_id ID of the answer to find
+	 * @return std::optional<uint32_t> Optional count of votes. An empty optional means Discord did not send the results, it does not mean 0. It can also mean the poll does not have an answer with this ID
+	 * @see https://discord.com/developers/docs/resources/poll#poll-results-object
+	 */
+	[[nodiscard]] std::optional<uint32_t> get_vote_count(uint32_t answer_id) const noexcept;
 };
 
 /**
@@ -1990,6 +2225,11 @@ public:
 	bool mention_everyone;
 
 	/**
+	 * @brief Optional poll attached to this message
+	 */
+	std::optional<poll> attached_poll;
+
+	/**
 	 * @brief Construct a new message object
 	 */
 	message();
@@ -2316,6 +2556,28 @@ public:
 	 * @return string of URL to message
 	 */
 	std::string get_url() const;
+
+	/**
+	 * @brief Convenience method to set the poll
+	 *
+	 * @return message& Self reference for method chaining
+	 */
+	message& set_poll(const poll& p);
+
+	/**
+	 * @brief Convenience method to get the poll attached to this message
+	 *
+	 * @throw std::bad_optional_access if has_poll() == false
+	 * @return const poll& Poll attached to this object
+	 */
+	[[nodiscard]] const poll& get_poll() const;
+
+	/**
+	 * @brief Method to check if the message has a poll
+	 *
+	 * @return bool Whether the message has a poll
+	 */
+	[[nodiscard]] bool has_poll() const noexcept;
 };
 
 /**

@@ -363,6 +363,8 @@ static const std::map<std::string, dpp::events::event*> event_map = {
 	{ "MESSAGE_REACTION_REMOVE", make_static_event<dpp::events::message_reaction_remove>() },
 	{ "MESSAGE_REACTION_REMOVE_ALL", make_static_event<dpp::events::message_reaction_remove_all>() },
 	{ "MESSAGE_REACTION_REMOVE_EMOJI", make_static_event<dpp::events::message_reaction_remove_emoji>() },
+	{ "MESSAGE_POLL_VOTE_ADD", make_static_event<dpp::events::message_poll_vote_add>() },
+	{ "MESSAGE_POLL_VOTE_REMOVE", make_static_event<dpp::events::message_poll_vote_remove>() },
 	{ "CHANNEL_PINS_UPDATE", make_static_event<dpp::events::channel_pins_update>() },
 	{ "GUILD_BAN_ADD", make_static_event<dpp::events::guild_ban_add>() },
 	{ "GUILD_BAN_REMOVE", make_static_event<dpp::events::guild_ban_remove>() },

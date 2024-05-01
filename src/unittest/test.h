@@ -233,6 +233,9 @@ DPP_TEST(VOICESEND, "Send audio to voice channel", tf_online | tf_extended); // 
 DPP_TEST(MESSAGEPIN, "Pinning a channel message", tf_online | tf_extended);
 DPP_TEST(MESSAGEUNPIN, "Unpinning a channel message", tf_online | tf_extended);
 
+DPP_TEST(POLL_CREATE, "Creating a poll", tf_online);
+DPP_TEST(POLL_END, "Ending a poll", tf_online);
+
 DPP_TEST(THREAD_MEMBER_ADD, "cluster::thread_member_add", tf_online | tf_extended);
 DPP_TEST(THREAD_MEMBER_GET, "cluster::thread_member_get", tf_online | tf_extended);
 DPP_TEST(THREAD_MEMBERS_GET, "cluster::thread_members_get", tf_online | tf_extended);
