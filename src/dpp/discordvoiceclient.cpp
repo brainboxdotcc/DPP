@@ -692,6 +692,8 @@ dpp::utility::uptime discord_voice_client::get_remaining() {
 discord_voice_client& discord_voice_client::stop_audio() {
 	std::lock_guard<std::mutex> lock(this->stream_mutex);
 	outbuf.clear();
+	track_meta.clear();
+	tracks = 0;
 	return *this;
 }
 
@@ -847,7 +849,7 @@ void discord_voice_client::write_ready()
 		std::lock_guard<std::mutex> lock(this->stream_mutex);
 		if (!this->paused && outbuf.size()) {
 			type = send_audio_type;
-			if (outbuf[0].packet.size() == 2 && (*((uint16_t*)(outbuf[0].packet.data()))) == AUDIO_TRACK_MARKER) {
+			if (outbuf[0].packet.size() == sizeof(uint16_t) && (*((uint16_t*)(outbuf[0].packet.data()))) == AUDIO_TRACK_MARKER) {
 				outbuf.erase(outbuf.begin());
 				track_marker_found = true;
 				if (tracks > 0) {
@@ -1165,20 +1167,29 @@ uint32_t discord_voice_client::get_tracks_remaining() {
 
 discord_voice_client& discord_voice_client::skip_to_next_marker() {
 	std::lock_guard<std::mutex> lock(this->stream_mutex);
-	/* Keep popping the first entry off the outbuf until the first entry is a track marker */
-	while (!outbuf.empty() && outbuf[0].packet.size() != sizeof(uint16_t) && (*((uint16_t*)(outbuf[0].packet.data()))) != AUDIO_TRACK_MARKER) {
-		outbuf.erase(outbuf.begin());
+	if (!outbuf.empty()) {
+		/* Find the first marker to skip to */
+		auto i = std::find_if(outbuf.begin(), outbuf.end(), [](const voice_out_packet &v){
+			return v.packet.size() == sizeof(uint16_t) && (*((uint16_t*)(v.packet.data()))) == AUDIO_TRACK_MARKER;
+		});
+
+		if (i != outbuf.end()) {
+			/* Skip queued packets until including found marker */
+			outbuf.erase(outbuf.begin(), i+1);
+		} else {
+			/* No market found, skip the whole queue */
+			outbuf.clear();
+		}
 	}
-	if (outbuf.size()) {
-		/* Remove the actual track marker out of the buffer */
-		outbuf.erase(outbuf.begin());
-	}
+
 	if (tracks > 0) {
 		tracks--;
 	}
+
 	if (!track_meta.empty()) {
 		track_meta.erase(track_meta.begin());
 	}
+
 	return *this;
 }
 
