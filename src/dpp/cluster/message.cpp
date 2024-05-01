@@ -172,6 +172,38 @@ void cluster::message_unpin(snowflake channel_id, snowflake message_id, command_
 }
 
 
+void cluster::poll_get_answer_voters(const message& m, uint32_t answer_id, snowflake after, uint64_t limit, command_completion_event_t callback) {
+	std::map<std::string, std::string> parameters {
+		{"limit", std::to_string(limit > 100 ? 100 : limit)}
+	};
+
+	if (after > 0) {
+		parameters["after"] = after;
+	}
+	rest_request_list<user>(this, API_PATH "/channels", std::to_string(m.channel_id), "polls/" + std::to_string(m.id) + "/answers/" + std::to_string(answer_id) + utility::make_url_parameters(parameters), m_get, "", std::move(callback), "id", "users");
+}
+
+void cluster::poll_get_answer_voters(snowflake message_id, snowflake channel_id, uint32_t answer_id, snowflake after, uint64_t limit, command_completion_event_t callback) {
+	std::map<std::string, std::string> parameters {
+		{"limit", std::to_string(limit > 100 ? 100 : limit)}
+	};
+
+	if (after > 0) {
+		parameters["after"] = after;
+	}
+	rest_request_list<user>(this, API_PATH "/channels", std::to_string(channel_id), "polls/" + std::to_string(message_id) + "/answers/" + std::to_string(answer_id) + utility::make_url_parameters(parameters), m_get, "", std::move(callback), "id", "users");
+}
+
+
+void cluster::poll_end(const message &m, command_completion_event_t callback) {
+	rest_request<message>(this, API_PATH "/channels", std::to_string(m.channel_id), "polls/" + std::to_string(m.id) + "/expire", m_post, "", std::move(callback));
+}
+
+void cluster::poll_end(snowflake message_id, snowflake channel_id, command_completion_event_t callback) {
+	rest_request<message>(this, API_PATH "/channels", std::to_string(channel_id), "polls/" + std::to_string(message_id) + "/expire", m_post, "", std::move(callback));
+}
+
+
 void cluster::channel_pins_get(snowflake channel_id, command_completion_event_t callback) {
 	rest_request_list<message>(this, API_PATH "/channels", std::to_string(channel_id), "pins", m_get, "", callback);
 }

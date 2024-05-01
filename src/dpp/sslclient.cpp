@@ -223,6 +223,18 @@ int connect_with_timeout(dpp::socket sockfd, const struct sockaddr *addr, sockle
 #endif
 }
 
+#ifndef _WIN32
+void set_signal_handler(int signal)
+{
+	struct sigaction sa;
+	sigaction(signal, nullptr, &sa);
+	if (sa.sa_flags == 0 && sa.sa_handler == nullptr) {
+		sa = {};
+		sigaction(signal, &sa, nullptr);
+	}
+}
+#endif
+
 ssl_client::ssl_client(const std::string &_hostname, const std::string &_port, bool plaintext_downgrade, bool reuse) :
 	nonblocking(false),
 	sfd(INVALID_SOCKET),
@@ -237,11 +249,11 @@ ssl_client::ssl_client(const std::string &_hostname, const std::string &_port, b
 	keepalive(reuse)
 {
 #ifndef WIN32
-	signal(SIGALRM, SIG_IGN);
+	set_signal_handler(SIGALRM);
+	set_signal_handler(SIGXFSZ);
+	set_signal_handler(SIGCHLD);
 	signal(SIGHUP, SIG_IGN);
 	signal(SIGPIPE, SIG_IGN);
-	signal(SIGCHLD, SIG_IGN);
-	signal(SIGXFSZ, SIG_IGN);
 #else
 	// Set up winsock.
 	WSADATA wsadata;

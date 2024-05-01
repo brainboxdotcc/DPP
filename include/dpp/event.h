@@ -100,6 +100,8 @@ event_decl(message_create,MESSAGE_CREATE);
 event_decl(message_update,MESSAGE_UPDATE);
 event_decl(message_delete,MESSAGE_DELETE);
 event_decl(message_delete_bulk,MESSAGE_DELETE_BULK);
+event_decl(message_poll_vote_add,MESSAGE_POLL_VOTE_ADD);
+event_decl(message_poll_vote_remove,MESSAGE_POLL_VOTE_REMOVE);
 
 /* Presence/typing */
 event_decl(presence_update,PRESENCE_UPDATE);
