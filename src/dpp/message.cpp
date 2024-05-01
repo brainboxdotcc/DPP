@@ -596,15 +596,15 @@ poll& poll::add_answer(const poll_media& media) {
 }
 
 poll& poll::add_answer(const std::string& text, snowflake emoji_id, bool is_animated) {
-	return add_answer(poll_media{text, partial_emoji({}, emoji_id, is_animated)});
+	return add_answer(poll_media{text, partial_emoji{{}, emoji_id, is_animated}});
 }
 
 poll& poll::add_answer(const std::string& text, const std::string& emoji) {
-	return add_answer(poll_media{text, partial_emoji(emoji, {}, false)});
+	return add_answer(poll_media{text, partial_emoji{emoji, {}, false}});
 }
 
 poll& poll::add_answer(const std::string& text, const emoji& e) {
-	return add_answer(poll_media{text, partial_emoji(e.name, e.id, e.is_animated())});
+	return add_answer(poll_media{text, partial_emoji{e.name, e.id, e.is_animated()}});
 }
 
 const std::string& poll::get_question_text() const noexcept {
