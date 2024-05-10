@@ -110,7 +110,7 @@ json integration::to_json_impl(bool with_id) const {
 			    { "expire_behavior", (flags & if_expire_kick) ? 1 : 0 },
 			    { "expire_grace_period", expire_grace_period },
 			    { "enable_emoticons", emoticons_enabled() }
-		    }).dump();
+		    }).dump(-1, ' ', false, json::error_handler_t::ignore);
 }
 
 bool integration::emoticons_enabled() const {

@@ -1497,7 +1497,12 @@ json sticker_pack::to_json_impl(bool with_id) const {
 	j["description"] = description;
 	j["stickers"] = json::array();
 	for (auto& s : stickers) {
-		j["stickers"].push_back(json::parse(s.second.build_json(with_id)));
+		try {
+			j["stickers"].push_back(json::parse(s.second.build_json(with_id)));
+		}
+		catch (const std::exception &e) {
+			/* Protection against malformed json in sticker */
+		}
 	}
 	return j;
 }
