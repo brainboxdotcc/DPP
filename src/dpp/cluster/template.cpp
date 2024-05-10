@@ -25,13 +25,13 @@ namespace dpp {
 
 void cluster::guild_create_from_template(const std::string &code, const std::string &name, command_completion_event_t callback) {
 	json params({{"name", name}});
-	rest_request<guild>(this, API_PATH "/guilds", "templates", code, m_post, params.dump(), callback);
+	rest_request<guild>(this, API_PATH "/guilds", "templates", code, m_post, params.dump(-1, ' ', false, json::error_handler_t::replace), callback);
 }
 
 
 void cluster::guild_template_create(snowflake guild_id, const std::string &name, const std::string &description, command_completion_event_t callback) {
 	json params({{"name", name}, {"description", description}});
-	rest_request<dtemplate>(this, API_PATH "/guilds", std::to_string(guild_id), "templates", m_post, params.dump(), callback);
+	rest_request<dtemplate>(this, API_PATH "/guilds", std::to_string(guild_id), "templates", m_post, params.dump(-1, ' ', false, json::error_handler_t::replace), callback);
 }
 
 
@@ -42,7 +42,7 @@ void cluster::guild_template_delete(snowflake guild_id, const std::string &code,
 
 void cluster::guild_template_modify(snowflake guild_id, const std::string &code, const std::string &name, const std::string &description, command_completion_event_t callback) {
 	json params({{"name", name}, {"description", description}});
-	rest_request<dtemplate>(this, API_PATH "/guilds", std::to_string(guild_id), "templates/" + code, m_patch, params.dump(), callback);
+	rest_request<dtemplate>(this, API_PATH "/guilds", std::to_string(guild_id), "templates/" + code, m_patch, params.dump(-1, ' ', false, json::error_handler_t::replace), callback);
 }
 
 

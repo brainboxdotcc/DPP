@@ -41,7 +41,7 @@ void cluster::current_user_edit(const std::string &nickname, const std::string& 
 		}
 		j["avatar"] = "data:" + mimetypes.find(type)->second + ";base64," + base64_encode((unsigned char const*)image_blob.data(), (unsigned int)image_blob.length());
 	}
-	rest_request<user>(this, API_PATH "/users", "@me", "", m_patch, j.dump(), callback);
+	rest_request<user>(this, API_PATH "/users", "@me", "", m_patch, j.dump(-1, ' ', false, json::error_handler_t::replace), callback);
 }
 
 void cluster::current_application_get(command_completion_event_t callback) {
@@ -65,7 +65,7 @@ void cluster::current_user_set_voice_state(snowflake guild_id, snowflake channel
 	} else {
 		j["request_to_speak_timestamp"] = json::value_t::null;
 	}
-	rest_request<confirmation>(this, API_PATH "/guilds", std::to_string(guild_id), "/voice-states/@me", m_patch, j.dump(), callback);
+	rest_request<confirmation>(this, API_PATH "/guilds", std::to_string(guild_id), "/voice-states/@me", m_patch, j.dump(-1, ' ', false, json::error_handler_t::replace), callback);
 }
 
 void cluster::user_set_voice_state(snowflake user_id, snowflake guild_id, snowflake channel_id, bool suppress, command_completion_event_t callback) {
@@ -73,7 +73,7 @@ void cluster::user_set_voice_state(snowflake user_id, snowflake guild_id, snowfl
 		{"channel_id", channel_id},
 		{"suppress", suppress}
 	});
-	rest_request<confirmation>(this, API_PATH "/guilds", std::to_string(guild_id), "/voice-states/" + std::to_string(user_id), m_patch, j.dump(), callback);
+	rest_request<confirmation>(this, API_PATH "/guilds", std::to_string(guild_id), "/voice-states/" + std::to_string(user_id), m_patch, j.dump(-1, ' ', false, json::error_handler_t::replace), callback);
 }
 
 void cluster::current_user_connections_get(command_completion_event_t callback) {

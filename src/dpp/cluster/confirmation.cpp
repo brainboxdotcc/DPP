@@ -121,39 +121,44 @@ std::vector<error_detail> find_errors_in_object(const std::string& obj, const st
 
 error_info confirmation_callback_t::get_error() const {
 	if (is_error()) {
-		json j = json::parse(this->http_info.body);
-		error_info e;
+		try {
+			json j = json::parse(this->http_info.body);
+			error_info e;
 
-		set_int32_not_null(&j, "code", e.code);
-		set_string_not_null(&j, "message", e.message);
-		json& errors = j["errors"];
-		for (auto obj = errors.begin(); obj != errors.end(); ++obj) {
-			std::vector<error_detail> sub_errors;
-			std::string field = isdigit(*obj.key().c_str()) ? "<array>[" + obj.key() + "]" : obj.key();
+			set_int32_not_null(&j, "code", e.code);
+			set_string_not_null(&j, "message", e.message);
+			json &errors = j["errors"];
+			for (auto obj = errors.begin(); obj != errors.end(); ++obj) {
+				std::vector<error_detail> sub_errors;
+				std::string field = isdigit(*obj.key().c_str()) ? "<array>[" + obj.key() + "]" : obj.key();
 
-			sub_errors = find_errors_in_object({}, field, *obj);
+				sub_errors = find_errors_in_object({}, field, *obj);
 
-			if (!sub_errors.empty()) {
-				e.errors.reserve(e.errors.capacity() + sub_errors.size());
-				std::move(sub_errors.begin(), sub_errors.end(), std::back_inserter(e.errors));
+				if (!sub_errors.empty()) {
+					e.errors.reserve(e.errors.capacity() + sub_errors.size());
+					std::move(sub_errors.begin(), sub_errors.end(), std::back_inserter(e.errors));
+				}
 			}
-		}
 
-		e.human_readable = std::to_string(e.code) + ": " + e.message;
-		std::string prefix = e.errors.size() == 1 ? " " : "\n\t";
-		for (const auto& error : e.errors) {
-			if (error.object.empty()) {
-				/* A singular field with an error in an unnamed object */
-				e.human_readable += prefix + "- " + error.field + ": " + error.reason + " (" + error.code + ")";
-			} else {
-				/* An object field that caused an error */
-				e.human_readable += prefix + "- " + error.object + '.' + error.field + ": " + error.reason + " (" + error.code + ")";
+			e.human_readable = std::to_string(e.code) + ": " + e.message;
+			std::string prefix = e.errors.size() == 1 ? " " : "\n\t";
+			for (const auto &error: e.errors) {
+				if (error.object.empty()) {
+					/* A singular field with an error in an unnamed object */
+					e.human_readable += prefix + "- " + error.field + ": " + error.reason + " (" + error.code + ")";
+				} else {
+					/* An object field that caused an error */
+					e.human_readable += prefix + "- " + error.object + '.' + error.field + ": " + error.reason + " (" + error.code + ")";
+				}
 			}
-		}
 
-		return e;
+			return e;
+		}
+		catch (const std::exception &e) {
+			return {};
+		}
 	}
-	return error_info();
+	return {};
 }
 
 } // namespace dpp

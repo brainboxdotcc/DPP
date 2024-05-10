@@ -431,7 +431,7 @@ void discord_client::handle_event(const std::string &event, json &j, const std::
 			ev_iter->second->handle(this, j, raw);
 		}
 	} else {
-		log(dpp::ll_debug, "Unhandled event: " + event + ", " + j.dump());
+		log(dpp::ll_debug, "Unhandled event: " + event + ", " + j.dump(-1, ' ', false, json::error_handler_t::replace));
 	}
 }
 

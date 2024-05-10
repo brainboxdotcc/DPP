@@ -24300,7 +24300,7 @@ class basic_json // NOLINT(cppcoreguidelines-special-member-functions,hicpp-spec
 NLOHMANN_BASIC_JSON_TPL_DECLARATION
 std::string to_string(const NLOHMANN_BASIC_JSON_TPL& j)
 {
-    return j.dump();
+    return j.dump(-1, ' ', false, json::error_handler_t::ignore);
 }
 
 inline namespace literals

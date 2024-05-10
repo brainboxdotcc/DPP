@@ -550,7 +550,7 @@ bool discord_voice_client::handle_frame(const std::string &data)
 							}
 						}
 					};
-					this->write(obj.dump());
+					this->write(obj.dump(-1, ' ', false, json::error_handler_t::replace));
 				} else {
 					log(dpp::ll_debug, "Connecting new voice session...");
 						json obj = {
@@ -565,7 +565,7 @@ bool discord_voice_client::handle_frame(const std::string &data)
 							}
 						}
 					};
-					this->write(obj.dump());
+					this->write(obj.dump(-1, ' ', false, json::error_handler_t::replace));
 				}
 				this->connect_time = time(nullptr);
 			}
@@ -655,7 +655,7 @@ bool discord_voice_client::handle_frame(const std::string &data)
 								}
 							}
 						}
-					}).dump());
+					}).dump(-1, ' ', false, json::error_handler_t::replace));
 				}
 			}
 			break;
@@ -1084,7 +1084,7 @@ void discord_voice_client::one_second_timer()
 		if (this->heartbeat_interval) {
 			/* Check if we're due to emit a heartbeat */
 			if (time(nullptr) > last_heartbeat + ((heartbeat_interval / 1000.0) * 0.75)) {
-				queue_message(json({{"op", 3}, {"d", rand()}}).dump(), true);
+				queue_message(json({{"op", 3}, {"d", rand()}}).dump(-1, ' ', false, json::error_handler_t::replace), true);
 				last_heartbeat = time(nullptr);
 			}
 		}
@@ -1307,7 +1307,7 @@ discord_voice_client& discord_voice_client::speak() {
 			{"delay", 0},
 			{"ssrc", ssrc}
 		}}
-		}).dump(), true);
+		}).dump(-1, ' ', false, json::error_handler_t::replace), true);
 		sending = true;
 	}
 	return *this;

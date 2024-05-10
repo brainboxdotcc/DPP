@@ -781,7 +781,7 @@ guild_widget& guild_widget::fill_from_json_impl(nlohmann::json* j) {
 }
 
 json guild_widget::to_json_impl(bool with_id) const {
-	return json({{"channel_id", channel_id}, {"enabled", enabled}}).dump();
+	return json({{"channel_id", channel_id}, {"enabled", enabled}}).dump(-1, ' ', false, json::error_handler_t::replace);
 }
 
 
