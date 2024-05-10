@@ -66,7 +66,7 @@ void cluster::message_delete_bulk(const std::vector<snowflake>& message_ids, sno
 	for (auto & m : message_ids) {
 		j["messages"].push_back(std::to_string(m));
 	}
-	rest_request<confirmation>(this, API_PATH "/channels", std::to_string(channel_id), "messages/bulk-delete", m_post, j.dump(-1, ' ', false, json::error_handler_t::ignore), callback);
+	rest_request<confirmation>(this, API_PATH "/channels", std::to_string(channel_id), "messages/bulk-delete", m_post, j.dump(-1, ' ', false, json::error_handler_t::replace), callback);
 }
 
 
@@ -122,7 +122,7 @@ void cluster::message_edit(const message &m, command_completion_event_t callback
 void cluster::message_edit_flags(const message &m, command_completion_event_t callback) {
 	this->post_rest_multipart(API_PATH "/channels", std::to_string(m.channel_id), "messages/" + std::to_string(m.id), m_patch, nlohmann::json{
 		{"flags", m.flags},
-	}.dump(-1, ' ', false, json::error_handler_t::ignore), [this, callback](json &j, const http_request_completion_t& http) {
+	}.dump(-1, ' ', false, json::error_handler_t::replace), [this, callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t(this, message(this).fill_from_json(&j), http));
 		}

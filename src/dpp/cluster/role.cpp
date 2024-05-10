@@ -43,7 +43,7 @@ void cluster::roles_edit_position(snowflake guild_id, const std::vector<role> &r
 	for (auto & r : roles) {
 		j.push_back({ {"id", r.id}, {"position", r.position} });
 	}
-	rest_request_list<role>(this, API_PATH "/guilds", std::to_string(guild_id), "roles", m_patch, j.dump(-1, ' ', false, json::error_handler_t::ignore), callback);
+	rest_request_list<role>(this, API_PATH "/guilds", std::to_string(guild_id), "roles", m_patch, j.dump(-1, ' ', false, json::error_handler_t::replace), callback);
 }
 
 void cluster::roles_get(snowflake guild_id, command_completion_event_t callback) {
@@ -59,7 +59,7 @@ void cluster::application_role_connection_update(snowflake application_id, const
 	for (const auto &conn_metadata : connection_metadata) {
 		j.push_back(conn_metadata.to_json());
 	}
-	rest_request_vector<application_role_connection_metadata>(this, API_PATH "/applications", std::to_string(application_id), "role-connections/metadata", m_put, j.dump(-1, ' ', false, json::error_handler_t::ignore), callback);
+	rest_request_vector<application_role_connection_metadata>(this, API_PATH "/applications", std::to_string(application_id), "role-connections/metadata", m_put, j.dump(-1, ' ', false, json::error_handler_t::replace), callback);
 }
 
 void cluster::user_application_role_connection_get(snowflake application_id, command_completion_event_t callback) {

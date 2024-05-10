@@ -63,7 +63,7 @@ void cluster::edit_webhook_with_token(const class webhook& wh, command_completio
 	if (jwh.find("channel_id") != jwh.end()) {
 		jwh.erase(jwh.find("channel_id"));
 	}
-	rest_request<webhook>(this, API_PATH "/webhooks", std::to_string(wh.id), utility::url_encode(wh.token), m_patch, jwh.dump(-1, ' ', false, json::error_handler_t::ignore), callback);
+	rest_request<webhook>(this, API_PATH "/webhooks", std::to_string(wh.id), utility::url_encode(wh.token), m_patch, jwh.dump(-1, ' ', false, json::error_handler_t::replace), callback);
 }
 
 void cluster::execute_webhook(const class webhook &wh, const struct message& m, bool wait, snowflake thread_id, const std::string& thread_name, command_completion_event_t callback) {
@@ -83,7 +83,7 @@ void cluster::execute_webhook(const class webhook &wh, const struct message& m, 
 		if (!wh.name.empty()) {
 			j["username"] = wh.name;
 		}
-		body = j.dump(-1, ' ', false, json::error_handler_t::ignore);
+		body = j.dump(-1, ' ', false, json::error_handler_t::replace);
 	}
 
 	this->post_rest_multipart(API_PATH "/webhooks", std::to_string(wh.id), utility::url_encode(!wh.token.empty() ? wh.token : token) + parameters, m_post, !body.empty() ? body : m.build_json(false), [this, callback](json &j, const http_request_completion_t& http) {

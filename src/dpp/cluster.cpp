@@ -317,7 +317,7 @@ json error_response(const std::string& message, http_request_completion_t& rv)
 		}},
 		{"message", message}
 	});
-	rv.body = j.dump(-1, ' ', false, json::error_handler_t::ignore);
+	rv.body = j.dump(-1, ' ', false, json::error_handler_t::replace);
 	return j;
 }
 
