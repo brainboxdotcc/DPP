@@ -957,6 +957,15 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 			}
 		});
 
+		if (!offline) {
+			start_test(INVALIDUTF8);
+			bot.message_create(dpp::message(TEST_TEXT_CHANNEL_ID, "ä\xA9ü"), [](const auto &cc) {
+				set_status(INVALIDUTF8, ts_success);
+			});
+		} else {
+			set_status(INVALIDUTF8, ts_skipped);
+		}
+
 		dpp::utility::iconhash i;
 		std::string dummyval("fcffffffffffff55acaaaaaaaaaaaa66");
 		i = dummyval;

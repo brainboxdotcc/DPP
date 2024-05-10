@@ -529,6 +529,22 @@ confirmation cluster::message_unpin_sync(snowflake channel_id, snowflake message
 	return dpp::sync<confirmation>(this, static_cast<void (cluster::*)(snowflake, snowflake, command_completion_event_t)>(&cluster::message_unpin), channel_id, message_id);
 }
 
+user_map cluster::poll_get_answer_voters_sync(const message& m, uint32_t answer_id, snowflake after, uint64_t limit) {
+	return dpp::sync<user_map>(this, static_cast<void (cluster::*)(const message&, uint32_t, snowflake, uint64_t, command_completion_event_t)>(&cluster::poll_get_answer_voters), m, answer_id, after, limit);
+}
+
+user_map cluster::poll_get_answer_voters_sync(snowflake message_id, snowflake channel_id, uint32_t answer_id, snowflake after, uint64_t limit) {
+	return dpp::sync<user_map>(this, static_cast<void (cluster::*)(snowflake, snowflake, uint32_t, snowflake, uint64_t, command_completion_event_t)>(&cluster::poll_get_answer_voters), message_id, channel_id, answer_id, after, limit);
+}
+
+message cluster::poll_end_sync(const message &m) {
+	return dpp::sync<message>(this, static_cast<void (cluster::*)(const message &, command_completion_event_t)>(&cluster::poll_end), m);
+}
+
+message cluster::poll_end_sync(snowflake message_id, snowflake channel_id) {
+	return dpp::sync<message>(this, static_cast<void (cluster::*)(snowflake, snowflake, command_completion_event_t)>(&cluster::poll_end), message_id, channel_id);
+}
+
 message_map cluster::channel_pins_get_sync(snowflake channel_id) {
 	return dpp::sync<message_map>(this, static_cast<void (cluster::*)(snowflake, command_completion_event_t)>(&cluster::channel_pins_get), channel_id);
 }
