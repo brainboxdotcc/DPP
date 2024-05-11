@@ -32,7 +32,7 @@ After editing the channel:
 \image html stuff_edit4.png
 
 ## Editing embeds
-Now let's send an embed and edit it. It's close but a bit more different than before. Say if a message has one `content` field, it can have a few `embed` fields, up to 10 to be precise. So we first get the embed we want and edit and change its description.
+Now let's send an embed and edit it. If a message has one `content` field, it can have a few `embed` fields, up to 10 to be precise. So we first get the embed we want and edit and change its description.
 
 \include{cpp} editing_messages3.cpp
 
