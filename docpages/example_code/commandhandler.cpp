@@ -8,7 +8,7 @@ int main() {
 
 	/* Create command handler, and specify prefixes */
 	dpp::commandhandler command_handler(&bot);
-	/* Specifying a prefix of "/" tells the command handler it should also expect slash commands. Remove the .add_prefix(".") if you wish to only make it a slash command */
+	/* Specifying a prefix of "/" tells the command handler it should also accept slash commands. Remove the .add_prefix(".") if you wish to only make it a slash command */
 	command_handler.add_prefix(".")
 		.add_prefix("/");
 
