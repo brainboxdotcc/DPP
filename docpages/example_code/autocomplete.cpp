@@ -50,10 +50,10 @@ int main()
 				 */
 				std::string uservalue = std::get<std::string>(opt.value);
 				bot.interaction_response_create(event.command.id, event.command.token, dpp::interaction_response(dpp::ir_autocomplete_reply)
-					.add_autocomplete_choice(dpp::command_option_choice("squids", "lots of squids"))
-					.add_autocomplete_choice(dpp::command_option_choice("cats", "a few cats"))
-					.add_autocomplete_choice(dpp::command_option_choice("dogs", "bucket of dogs"))
-					.add_autocomplete_choice(dpp::command_option_choice("elephants", "bottle of elephants"))
+					.add_autocomplete_choice(dpp::command_option_choice("squids", std::string("lots of squids")))
+					.add_autocomplete_choice(dpp::command_option_choice("cats", std::string("a few cats")))
+					.add_autocomplete_choice(dpp::command_option_choice("dogs", std::string("bucket of dogs")))
+					.add_autocomplete_choice(dpp::command_option_choice("elephants", std::string("bottle of elephants")))
 				);
 				bot.log(dpp::ll_debug, "Autocomplete " + opt.name + " with value '" + uservalue + "' in field " + event.name);
 				break;
