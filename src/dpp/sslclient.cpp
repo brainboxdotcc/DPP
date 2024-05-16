@@ -208,7 +208,7 @@ int connect_with_timeout(dpp::socket sockfd, const struct sockaddr *addr, sockle
 			pollfd pfd = {};
 			pfd.fd = sockfd;
 			pfd.events = POLLOUT;
-			int r = poll(&pfd, 1, 10);
+			int r = ::poll(&pfd, 1, 10);
 			if (r > 0 && pfd.revents & POLLOUT) {
 				rc = 0;
 			} else if (r != 0 || pfd.revents & POLLERR) {
@@ -269,7 +269,7 @@ ssl_client::ssl_client(const std::string &_hostname, const std::string &_port, b
 			pollfd pfd = {};
 			pfd.fd = iter->second.sfd;
 			pfd.events = POLLOUT;
-			int r = poll(&pfd, 1, 1);
+			int r = ::poll(&pfd, 1, 1);
 			if (time(nullptr) > (iter->second.created + 60) || r < 0 || pfd.revents & POLLERR) {
 				make_new = true;
 				/* This connection is dead, free its resources and make a new one */
@@ -480,7 +480,7 @@ void ssl_client::read_loop()
 			const int64_t now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 			int poll_time = 1000 - (now % 1000);
 			poll_time = poll_time > 400 ? 1000 : poll_time + poll_time / 3 + 1;
-			r = poll(pfd, sockets, now / 1000 == (int64_t)last_tick ? poll_time : 0);
+			r = ::poll(pfd, sockets, now / 1000 == (int64_t)last_tick ? poll_time : 0);
 
 			if (r == 0) {
 				continue;
