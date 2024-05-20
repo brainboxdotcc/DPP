@@ -325,7 +325,7 @@ public:
 	 *
 	 * @return cluster& Reference to self for chaining.
 	 */
-	cluster& set_default_gateway(std::string& default_gateway);
+	cluster& set_default_gateway(const std::string& default_gateway);
 
 	/**
 	 * @brief Log a message to whatever log the user is using.

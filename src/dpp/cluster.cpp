@@ -411,7 +411,7 @@ cluster& cluster::clear_audit_reason() {
 	return *this;
 }
 
-cluster& cluster::set_default_gateway(std::string &default_gateway_new) {
+cluster& cluster::set_default_gateway(const std::string &default_gateway_new) {
 	default_gateway = default_gateway_new;
 	return *this;
 }
