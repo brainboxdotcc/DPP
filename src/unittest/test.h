@@ -149,6 +149,7 @@ DPP_TEST(FORUM_CREATION, "create a forum channel", tf_online);
 DPP_TEST(FORUM_CHANNEL_GET, "retrieve the created forum channel", tf_online);
 DPP_TEST(FORUM_CHANNEL_DELETE, "delete the created forum channel", tf_online);
 DPP_TEST(ERRORS, "Human readable error translation", tf_offline);
+DPP_TEST(INVALIDUTF8, "Invalid UTF-8 handling", tf_online);
 
 DPP_TEST(GUILD_EDIT, "cluster::guild_edit", tf_online);
 DPP_TEST(GUILD_BAN_CREATE, "cluster::guild_ban_add ban three deleted discord accounts", tf_online);
@@ -232,6 +233,9 @@ DPP_TEST(VOICECONN, "Connect to voice channel", tf_online | tf_extended);
 DPP_TEST(VOICESEND, "Send audio to voice channel", tf_online | tf_extended); // udp unreliable on gitbub
 DPP_TEST(MESSAGEPIN, "Pinning a channel message", tf_online | tf_extended);
 DPP_TEST(MESSAGEUNPIN, "Unpinning a channel message", tf_online | tf_extended);
+
+DPP_TEST(POLL_CREATE, "Creating a poll", tf_online);
+DPP_TEST(POLL_END, "Ending a poll", tf_online);
 
 DPP_TEST(THREAD_MEMBER_ADD, "cluster::thread_member_add", tf_online | tf_extended);
 DPP_TEST(THREAD_MEMBER_GET, "cluster::thread_member_get", tf_online | tf_extended);

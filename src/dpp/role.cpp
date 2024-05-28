@@ -474,7 +474,12 @@ json application_role_connection::to_json_impl(bool with_id) const {
 		j["platform_username"] = platform_username;
 	}
 	if (std::holds_alternative<application_role_connection_metadata>(metadata)) {
-		j["metadata"] = json::parse(std::get<application_role_connection_metadata>(metadata).build_json());
+		try {
+			j["metadata"] = json::parse(std::get<application_role_connection_metadata>(metadata).build_json());
+		}
+		catch (const std::exception &e) {
+			/* Protection against malformed json in metadata */
+		}
 	}
 	return j;
 }

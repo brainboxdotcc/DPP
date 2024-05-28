@@ -70,7 +70,20 @@ void cluster::threads_get_private_archived(snowflake channel_id, time_t before_t
 		{"before", before_timestamp},
 		{"limit", limit},
 	});
-	rest_request_list<thread>(this, API_PATH "/channels", std::to_string(channel_id), "/threads/archived/private" + parameters, m_get, "", callback);
+	this->post_rest(API_PATH "/channels", std::to_string(channel_id), "/threads/archived/private" + parameters, m_get, "", [this, callback](json &j, const http_request_completion_t& http) {
+		std::unordered_map<snowflake, thread> list;
+		confirmation_callback_t e(this, confirmation(), http);
+		if (!e.is_error()) {
+			if (j.contains("threads")) {
+				for (auto &curr_item: j["threads"]) {
+					list[snowflake_not_null(&curr_item, "id")].fill_from_json(&curr_item);
+				}
+			}
+		}
+		if (callback) {
+			callback(confirmation_callback_t(this, list, http));
+		}
+	});	
 }
 
 void cluster::threads_get_public_archived(snowflake channel_id, time_t before_timestamp, uint16_t limit, command_completion_event_t callback) {
@@ -78,7 +91,20 @@ void cluster::threads_get_public_archived(snowflake channel_id, time_t before_ti
 		{"before", before_timestamp},
 		{"limit", limit},
 	});
-	rest_request_list<thread>(this, API_PATH "/channels", std::to_string(channel_id), "/threads/archived/public" + parameters, m_get, "", callback);
+	this->post_rest(API_PATH "/channels", std::to_string(channel_id), "/threads/archived/public" + parameters, m_get, "", [this, callback](json &j, const http_request_completion_t& http) {
+		std::unordered_map<snowflake, thread> list;
+		confirmation_callback_t e(this, confirmation(), http);
+		if (!e.is_error()) {
+			if (j.contains("threads")) {
+				for (auto &curr_item: j["threads"]) {
+					list[snowflake_not_null(&curr_item, "id")].fill_from_json(&curr_item);
+				}
+			}
+		}
+		if (callback) {
+			callback(confirmation_callback_t(this, list, http));
+		}
+	});
 }
 
 void cluster::thread_member_get(const snowflake thread_id, const snowflake user_id, command_completion_event_t callback) {
@@ -112,7 +138,7 @@ void cluster::thread_create_in_forum(const std::string& thread_name, snowflake c
 			break;
 	}
 
-	this->post_rest_multipart(API_PATH "/channels", std::to_string(channel_id), "threads", m_post, j.dump(), [this, callback](json &j, const http_request_completion_t& http) {
+	this->post_rest_multipart(API_PATH "/channels", std::to_string(channel_id), "threads", m_post, j.dump(-1, ' ', false, json::error_handler_t::replace), [this, callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			auto t = thread().fill_from_json(&j);
 			confirmation_callback_t e(this, confirmation(), http);
@@ -135,7 +161,7 @@ void cluster::thread_create(const std::string& thread_name, snowflake channel_id
 		{"invitable", invitable},
 		{"rate_limit_per_user", rate_limit_per_user}
 	});
-	rest_request<thread>(this, API_PATH "/channels", std::to_string(channel_id), "threads", m_post, j.dump(), callback);
+	rest_request<thread>(this, API_PATH "/channels", std::to_string(channel_id), "threads", m_post, j.dump(-1, ' ', false, json::error_handler_t::replace), callback);
 }
 
 void cluster::thread_edit(const thread &t, command_completion_event_t callback)
@@ -150,7 +176,7 @@ void cluster::thread_create_with_message(const std::string& thread_name, snowfla
 		{"auto_archive_duration", auto_archive_duration},
 		{"rate_limit_per_user", rate_limit_per_user}
 	});
-	rest_request<thread>(this, API_PATH "/channels", std::to_string(channel_id), "messages/" + std::to_string(message_id) + "/threads", m_post, j.dump(), callback);
+	rest_request<thread>(this, API_PATH "/channels", std::to_string(channel_id), "messages/" + std::to_string(message_id) + "/threads", m_post, j.dump(-1, ' ', false, json::error_handler_t::replace), callback);
 }
 
 void cluster::thread_member_add(snowflake thread_id, snowflake user_id, command_completion_event_t callback) {

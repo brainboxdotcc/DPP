@@ -434,9 +434,9 @@ private:
 	std::map<std::string, bucket_t> buckets;
 
 	/**
-	 * @brief Queue of requests to be made.
+	 * @brief Queue of requests to be made. Sorted by http_request::endpoint.
 	 */
-	std::map<std::string, std::vector<http_request*>> requests_in;
+	std::vector<std::unique_ptr<http_request>> requests_in;
 
 	/**
 	 * @brief Inbound queue thread loop.
@@ -465,7 +465,7 @@ public:
 	 * @param req http_request to post. The pointer will be freed when it has
 	 * been executed.
 	 */
-	void post_request(http_request* req);
+	void post_request(std::unique_ptr<http_request> req);
 };
 
 /**
@@ -517,9 +517,24 @@ protected:
 	std::condition_variable out_ready;
 
 	/**
+	 * @brief A completed request. Contains both the request and the response
+	 */
+	struct completed_request {
+		/**
+		 * @brief Request sent
+		 */
+		std::unique_ptr<http_request> request;
+
+		/**
+		 * @brief Response to the request
+		 */
+		std::unique_ptr<http_request_completion_t> response;
+	};
+
+	/**
 	 * @brief Completed requests queue
 	 */
-	std::queue<std::pair<http_request_completion_t*, http_request*>> responses_out;
+	std::queue<completed_request> responses_out;
 
 	/**
 	 * @brief A vector of inbound request threads forming a pool.
@@ -533,9 +548,38 @@ protected:
 	std::vector<in_thread*> requests_in;
 
 	/**
-	 * @brief Completed requests to delete
+	 * @brief A request queued for deletion in the queue.
 	 */
-	std::multimap<time_t, std::pair<http_request_completion_t*, http_request*>> responses_to_delete;
+	struct queued_deleting_request {
+		/**
+		 * @brief Time to delete the request
+		 */
+		time_t time_to_delete;
+
+		/**
+		 * @brief The request to delete
+		 */
+		completed_request request;
+
+		/**
+		 * @brief Comparator for sorting purposes
+		 * @param other Other queued request to compare the deletion time with
+		 * @return bool Whether this request comes before another in strict ordering
+		 */
+		bool operator<(const queued_deleting_request& other) const noexcept;
+
+		/**
+		 * @brief Comparator for sorting purposes
+		 * @param time Time to compare with
+		 * @return bool Whether this request's deletion time is lower than the time given, for strict ordering
+		 */
+		bool operator<(time_t time) const noexcept;
+	};
+
+	/**
+	 * @brief Completed requests to delete. Sorted by deletion time
+	 */
+	std::vector<queued_deleting_request> responses_to_delete;
 
 	/**
 	 * @brief Set to true if the threads should terminate
@@ -597,14 +641,13 @@ public:
 	~request_queue();
 
 	/**
-	 * @brief Put a http_request into the request queue. You should ALWAYS "new" an object
-	 * to pass to here -- don't submit an object that's on the stack!
+	 * @brief Put a http_request into the request queue.
 	 * @note Will use a simple hash function to determine which of the 'in queues' to place
 	 * this request onto.
 	 * @param req request to add
 	 * @return reference to self
 	 */
-	request_queue& post_request(http_request *req);
+	request_queue& post_request(std::unique_ptr<http_request> req);
 
 	/**
 	 * @brief Returns true if the bot is currently globally rate limited

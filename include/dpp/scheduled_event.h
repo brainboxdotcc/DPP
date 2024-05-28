@@ -317,7 +317,8 @@ public:
 	/**
 	 * @brief Load an image for the event cover.
 	 *
-	 * @param image_blob Image binary data
+	 * @param data Image binary data
+	 * @param size Size of the image.
 	 * @param type Type of image. It can be one of `i_gif`, `i_jpg` or `i_png`.
 	 * @return emoji& Reference to self
 	 */

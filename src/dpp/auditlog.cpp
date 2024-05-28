@@ -42,10 +42,10 @@ audit_entry &audit_entry::fill_from_json_impl(nlohmann::json *j) {
 			audit_change ac;
 			ac.key = string_not_null(&change, "key");
 			if (change.find("new_value") != change.end()) {
-				ac.new_value = change["new_value"].dump();
+				ac.new_value = change["new_value"].dump(-1, ' ', false, json::error_handler_t::replace);
 			}
 			if (change.find("old_value") != change.end()) {
-				ac.old_value = change["old_value"].dump();
+				ac.old_value = change["old_value"].dump(-1, ' ', false, json::error_handler_t::replace);
 			}
 			this->changes.push_back(ac);
 		}

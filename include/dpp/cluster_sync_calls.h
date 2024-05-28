@@ -715,6 +715,21 @@ confirmation channel_typing_sync(snowflake cid);
 channel_map channels_get_sync(snowflake guild_id);
 
 /**
+ * @brief Set the status of a voice channel.
+ *
+ * @see dpp::cluster::channel_set_voice_status
+ * @see https://github.com/discord/discord-api-docs/pull/6400 (please replace soon).
+ * @param channel_id The channel to update.
+ * @param status The new status for the channel.
+ * @return confirmation returned object on completion
+ * \memberof dpp::cluster
+ * @throw dpp::rest_exception upon failure to execute REST function
+ * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
+ * Avoid direct use of this function inside an event handler.
+ */
+confirmation channel_set_voice_status_sync(snowflake channel_id, const std::string& status);
+
+/**
  * @brief Create a dm channel
  * @see dpp::cluster::create_dm_channel
  * @see https://discord.com/developers/docs/resources/user#create-dm
@@ -1288,7 +1303,7 @@ confirmation guild_sync_integration_sync(snowflake guild_id, snowflake integrati
  *
  * @see dpp::cluster::guild_get_onboarding
  * @see https://discord.com/developers/docs/resources/guild#get-guild-onboarding
- * @param o The onboarding object
+ * @param guild_id The guild to pull the onboarding configuration from.
  * @return onboarding returned object on completion
  * \memberof dpp::cluster
  * @throw dpp::rest_exception upon failure to execute REST function
@@ -1496,6 +1511,23 @@ confirmation guild_member_kick_sync(snowflake guild_id, snowflake user_id);
  * Avoid direct use of this function inside an event handler.
  */
 confirmation guild_member_timeout_sync(snowflake guild_id, snowflake user_id, time_t communication_disabled_until);
+
+/**
+ * @brief Remove the timeout of a guild member.
+ * A shortcut for guild_member_timeout(guild_id, user_id, 0, callback)
+ * Fires a `Guild Member Update` Gateway event.
+ * @see dpp::cluster::guild_member_timeout_remove
+ * @see https://discord.com/developers/docs/resources/guild#modify-guild-member
+ * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+ * @param guild_id Guild ID to remove the member timeout from
+ * @param user_id User ID to remove the timeout for
+ * @return confirmation returned object on completion
+ * \memberof dpp::cluster
+ * @throw dpp::rest_exception upon failure to execute REST function
+ * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
+ * Avoid direct use of this function inside an event handler.
+ */
+confirmation guild_member_timeout_remove_sync(snowflake guild_id, snowflake user_id);
 
 /**
  * @brief Remove role from guild member
@@ -1839,6 +1871,18 @@ confirmation message_delete_reaction_emoji_sync(snowflake message_id, snowflake 
 message message_edit_sync(const struct message &m);
 
 /**
+ * @brief Edit the flags of a message on a channel. The callback function is called when the message has been edited
+ *
+ * @param m Message to edit the flags of
+ * @return message returned object on completion
+ * \memberof dpp::cluster
+ * @throw dpp::rest_exception upon failure to execute REST function
+ * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
+ * Avoid direct use of this function inside an event handler.
+ */
+message message_edit_flags_sync(const struct message &m);
+
+/**
  * @brief Get a message
  *
  * @see dpp::cluster::message_get
@@ -1939,6 +1983,70 @@ message_map messages_get_sync(snowflake channel_id, snowflake around, snowflake 
  * Avoid direct use of this function inside an event handler.
  */
 confirmation message_unpin_sync(snowflake channel_id, snowflake message_id);
+
+/**
+ * @brief Get a list of users that voted for this specific answer.
+ *
+ * @param m Message that contains the poll to retrieve the answers from
+ * @param answer_id ID of the answer to retrieve votes from (see poll_answer::answer_id)
+ * @param after Users after this ID should be retrieved if this is set to non-zero
+ * @param limit This number of users maximum should be returned, up to 100
+ * @return user_map returned object on completion
+ * @see dpp::cluster::poll_get_answer_voters
+ * @see https://discord.com/developers/docs/resources/poll#get-answer-voters
+ * \memberof dpp::cluster
+ * @throw dpp::rest_exception upon failure to execute REST function
+ * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
+ * Avoid direct use of this function inside an event handler.
+ */
+user_map poll_get_answer_voters_sync(const message& m, uint32_t answer_id, snowflake after, uint64_t limit);
+
+/**
+ * @brief Get a list of users that voted for this specific answer.
+ *
+ * @param message_id ID of the message with the poll to retrieve the answers from
+ * @param channel_id ID of the channel with the poll to retrieve the answers from
+ * @param answer_id ID of the answer to retrieve votes from (see poll_answer::answer_id)
+ * @param after Users after this ID should be retrieved if this is set to non-zero
+ * @param limit This number of users maximum should be returned, up to 100
+ * @return user_map returned object on completion
+ * @see dpp::cluster::poll_get_answer_voters
+ * @see https://discord.com/developers/docs/resources/poll#get-answer-voters
+ * \memberof dpp::cluster
+ * @throw dpp::rest_exception upon failure to execute REST function
+ * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
+ * Avoid direct use of this function inside an event handler.
+ */
+user_map poll_get_answer_voters_sync(snowflake message_id, snowflake channel_id, uint32_t answer_id, snowflake after, uint64_t limit);
+
+/**
+ * @brief Immediately end a poll.
+ *
+ * @param m Message that contains the poll
+ * @return message returned object on completion
+ * @see dpp::cluster::poll_end
+ * @see https://discord.com/developers/docs/resources/poll#end-poll
+ * \memberof dpp::cluster
+ * @throw dpp::rest_exception upon failure to execute REST function
+ * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
+ * Avoid direct use of this function inside an event handler.
+ */
+message poll_end_sync(const message &m);
+
+/**
+ * @brief Immediately end a poll.
+ *
+ * @param message_id ID of the message with the poll to end
+ * @param channel_id ID of the channel with the poll to end
+ * @return message returned object on completion
+ * @see dpp::cluster::poll_end
+ * @see https://discord.com/developers/docs/resources/poll#end-poll
+ * \memberof dpp::cluster
+ * @throw dpp::rest_exception upon failure to execute REST function
+ * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
+ * Avoid direct use of this function inside an event handler.
+ */
+message poll_end_sync(snowflake message_id, snowflake channel_id);
 
 /**
  * @brief Get a channel's pins

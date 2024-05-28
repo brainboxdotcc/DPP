@@ -611,32 +611,34 @@ uint64_t discord_client::get_channel_count() {
 discord_client& discord_client::connect_voice(snowflake guild_id, snowflake channel_id, bool self_mute, bool self_deaf) {
 #ifdef HAVE_VOICE
 	std::unique_lock lock(voice_mutex);
-	if (connecting_voice_channels.find(guild_id) == connecting_voice_channels.end()) {
-		connecting_voice_channels[guild_id] = std::make_unique<voiceconn>(this, channel_id);
-		/* Once sent, this expects two events (in any order) on the websocket:
-		* VOICE_SERVER_UPDATE and VOICE_STATUS_UPDATE
-		*/
-		log(ll_debug, "Sending op 4 to join VC, guild " + std::to_string(guild_id) + " channel  " + std::to_string(channel_id));
-		queue_message(jsonobj_to_string(json({
-			{ "op", 4 },
-			{ "d", {
-					{ "guild_id", std::to_string(guild_id) },
-					{ "channel_id", std::to_string(channel_id) },
-					{ "self_mute", self_mute },
-					{ "self_deaf", self_deaf },
-				}
-			}
-		})), false);
-	} else {
-		log(ll_debug, "Requested the bot connect to voice channel " + std::to_string(channel_id) + " on guild " + std::to_string(guild_id) + ", but it seems we are already on this VC");
+	if (connecting_voice_channels.find(guild_id) != connecting_voice_channels.end()) {
+		if (connecting_voice_channels[guild_id]->channel_id == channel_id) {
+			log(ll_debug, "Requested the bot connect to voice channel " + std::to_string(channel_id) + " on guild " + std::to_string(guild_id) + ", but it seems we are already on this VC");
+			return *this;
+		}
 	}
+	connecting_voice_channels[guild_id] = std::make_unique<voiceconn>(this, channel_id);
+	/* Once sent, this expects two events (in any order) on the websocket:
+	* VOICE_SERVER_UPDATE and VOICE_STATUS_UPDATE
+	*/
+	log(ll_debug, "Sending op 4 to join VC, guild " + std::to_string(guild_id) + " channel " + std::to_string(channel_id));
+	queue_message(jsonobj_to_string(json({
+		{ "op", 4 },
+		{ "d", {
+				{ "guild_id", std::to_string(guild_id) },
+				{ "channel_id", std::to_string(channel_id) },
+				{ "self_mute", self_mute },
+				{ "self_deaf", self_deaf },
+			}
+		}
+	})), false);
 #endif
 	return *this;
 }
 
 std::string discord_client::jsonobj_to_string(const nlohmann::json& json) {
 	if (protocol == ws_json) {
-		return json.dump();
+		return json.dump(-1, ' ', false, json::error_handler_t::replace);
 	} else {
 		return etf->build(json);
 	}

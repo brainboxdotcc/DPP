@@ -100,9 +100,19 @@ struct keepalive_cache_t {
 };
 
 /**
+ * @brief Custom deleter for SSL_CTX
+ */
+class openssl_context_deleter {
+public:
+	void operator()(SSL_CTX* context) const noexcept {
+		SSL_CTX_free(context);
+	}
+};
+
+/**
  * @brief OpenSSL context
  */
-thread_local SSL_CTX* openssl_context = nullptr;
+thread_local std::unique_ptr<SSL_CTX, openssl_context_deleter> openssl_context;
 
 /**
  * @brief Keepalive sessions, per-thread
@@ -198,7 +208,7 @@ int connect_with_timeout(dpp::socket sockfd, const struct sockaddr *addr, sockle
 			pollfd pfd = {};
 			pfd.fd = sockfd;
 			pfd.events = POLLOUT;
-			int r = poll(&pfd, 1, 10);
+			int r = ::poll(&pfd, 1, 10);
 			if (r > 0 && pfd.revents & POLLOUT) {
 				rc = 0;
 			} else if (r != 0 || pfd.revents & POLLERR) {
@@ -212,6 +222,18 @@ int connect_with_timeout(dpp::socket sockfd, const struct sockaddr *addr, sockle
 	return rc;
 #endif
 }
+
+#ifndef _WIN32
+void set_signal_handler(int signal)
+{
+	struct sigaction sa;
+	sigaction(signal, nullptr, &sa);
+	if (sa.sa_flags == 0 && sa.sa_handler == nullptr) {
+		sa = {};
+		sigaction(signal, &sa, nullptr);
+	}
+}
+#endif
 
 ssl_client::ssl_client(const std::string &_hostname, const std::string &_port, bool plaintext_downgrade, bool reuse) :
 	nonblocking(false),
@@ -227,11 +249,11 @@ ssl_client::ssl_client(const std::string &_hostname, const std::string &_port, b
 	keepalive(reuse)
 {
 #ifndef WIN32
-	signal(SIGALRM, SIG_IGN);
+	set_signal_handler(SIGALRM);
+	set_signal_handler(SIGXFSZ);
+	set_signal_handler(SIGCHLD);
 	signal(SIGHUP, SIG_IGN);
 	signal(SIGPIPE, SIG_IGN);
-	signal(SIGCHLD, SIG_IGN);
-	signal(SIGXFSZ, SIG_IGN);
 #else
 	// Set up winsock.
 	WSADATA wsadata;
@@ -247,7 +269,7 @@ ssl_client::ssl_client(const std::string &_hostname, const std::string &_port, b
 			pollfd pfd = {};
 			pfd.fd = iter->second.sfd;
 			pfd.events = POLLOUT;
-			int r = poll(&pfd, 1, 1);
+			int r = ::poll(&pfd, 1, 1);
 			if (time(nullptr) > (iter->second.created + 60) || r < 0 || pfd.revents & POLLERR) {
 				make_new = true;
 				/* This connection is dead, free its resources and make a new one */
@@ -273,13 +295,7 @@ ssl_client::ssl_client(const std::string &_hostname, const std::string &_port, b
 		if (plaintext) {
 			ssl = nullptr;
 		} else {
-			try {
-				ssl = new openssl_connection();
-			}
-			catch (std::bad_alloc&) {
-				delete ssl;
-				throw;
-			}
+			ssl = new openssl_connection();
 		}
 	}
 	try {
@@ -321,21 +337,21 @@ void ssl_client::connect()
 				const SSL_METHOD *method = TLS_client_method(); /* Create new client-method instance */
 
 				/* Create SSL context */
-				openssl_context = SSL_CTX_new(method);
-				if (openssl_context == nullptr) {
+				openssl_context.reset(SSL_CTX_new(method));
+				if (!openssl_context) {
 					throw dpp::connection_exception(err_ssl_context, "Failed to create SSL client context!");
 				}
 
 				/* Do not allow SSL 3.0, TLS 1.0 or 1.1
 				* https://www.packetlabs.net/posts/tls-1-1-no-longer-secure/
 				*/
-				if (!SSL_CTX_set_min_proto_version(openssl_context, TLS1_2_VERSION)) {
+				if (!SSL_CTX_set_min_proto_version(openssl_context.get(), TLS1_2_VERSION)) {
 					throw dpp::connection_exception(err_ssl_version, "Failed to set minimum SSL version!");
 				}
 			}
 
 			/* Create SSL session */
-			ssl->ssl = SSL_new(openssl_context);
+			ssl->ssl = SSL_new(openssl_context.get());
 			if (ssl->ssl == nullptr) {
 				throw dpp::connection_exception(err_ssl_new, "SSL_new failed!");
 			}
@@ -464,7 +480,7 @@ void ssl_client::read_loop()
 			const int64_t now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 			int poll_time = 1000 - (now % 1000);
 			poll_time = poll_time > 400 ? 1000 : poll_time + poll_time / 3 + 1;
-			r = poll(pfd, sockets, now / 1000 == (int64_t)last_tick ? poll_time : 0);
+			r = ::poll(pfd, sockets, now / 1000 == (int64_t)last_tick ? poll_time : 0);
 
 			if (r == 0) {
 				continue;

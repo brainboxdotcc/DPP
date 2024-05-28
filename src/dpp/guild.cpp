@@ -347,6 +347,11 @@ bool guild_member::has_rejoined() const {
 	return flags & dpp::gm_did_rejoin;
 }
 
+bool guild_member::is_guild_owner() const {
+	auto* _guild = find_guild(guild_id);
+	return _guild != nullptr && _guild->owner_id == this->user_id;
+}
+
 bool guild_member::has_completed_onboarding() const {
 	return flags & dpp::gm_completed_onboarding;
 }
@@ -776,7 +781,7 @@ guild_widget& guild_widget::fill_from_json_impl(nlohmann::json* j) {
 }
 
 json guild_widget::to_json_impl(bool with_id) const {
-	return json({{"channel_id", channel_id}, {"enabled", enabled}}).dump();
+	return json({{"channel_id", channel_id}, {"enabled", enabled}}).dump(-1, ' ', false, json::error_handler_t::replace);
 }
 
 

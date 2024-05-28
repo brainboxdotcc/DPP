@@ -25,7 +25,7 @@ namespace dpp {
 void cluster::guild_add_member(const guild_member& gm, const std::string &access_token, command_completion_event_t callback) {
 	json j = gm.to_json();
 	j["access_token"] = access_token;
-	rest_request<confirmation>(this, API_PATH "/guilds", std::to_string(gm.guild_id), "members/" + std::to_string(gm.user_id), m_put, j.dump(), callback);
+	rest_request<confirmation>(this, API_PATH "/guilds", std::to_string(gm.guild_id), "members/" + std::to_string(gm.user_id), m_put, j.dump(-1, ' ', false, json::error_handler_t::replace), callback);
 }
 
 
@@ -93,7 +93,13 @@ void cluster::guild_member_timeout(snowflake guild_id, snowflake user_id, time_t
 		j["communication_disabled_until"] = json::value_t::null;
 	}
 
-	rest_request<confirmation>(this, API_PATH "/guilds", std::to_string(guild_id), "members/" + std::to_string(user_id), m_patch, j.dump(), callback);
+	rest_request<confirmation>(this, API_PATH "/guilds", std::to_string(guild_id), "members/" + std::to_string(user_id), m_patch, j.dump(-1, ' ', false, json::error_handler_t::replace), callback);
+}
+
+void cluster::guild_member_timeout_remove(snowflake guild_id, snowflake user_id, command_completion_event_t callback) {
+	json j;
+	j["communication_disabled_until"] = json::value_t::null;
+	rest_request<confirmation>(this, API_PATH "/guilds", std::to_string(guild_id), "members/" + std::to_string(user_id), m_patch, j.dump(-1, ' ', false, json::error_handler_t::replace), callback);
 }
 
 
@@ -116,7 +122,7 @@ void cluster::guild_member_move(const snowflake channel_id, const snowflake guil
         j["channel_id"] = json::value_t::null;
     }
 
-    this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "members/" + std::to_string(user_id), m_patch, j.dump(), [this, guild_id, user_id, callback](json &j, const http_request_completion_t& http) {
+    this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "members/" + std::to_string(user_id), m_patch, j.dump(-1, ' ', false, json::error_handler_t::replace), [this, guild_id, user_id, callback](json &j, const http_request_completion_t& http) {
 	if (callback) {
 	    callback(confirmation_callback_t(this, guild_member().fill_from_json(&j, guild_id, user_id), http));
 	}

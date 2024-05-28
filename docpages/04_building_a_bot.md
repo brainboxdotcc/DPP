@@ -7,6 +7,7 @@ Click on a link below for a guide specifically for your system:
 * \subpage creating-a-bot-application
 * \subpage build-a-discord-bot-windows-visual-studio
 * \subpage build-a-discord-bot-windows-wsl
+* \subpage install-windows-clion-vcpkg
 * \subpage build-a-discord-bot-linux-clion
 * \subpage buildcmake
 * \subpage buildmeson

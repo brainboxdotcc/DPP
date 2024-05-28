@@ -365,13 +365,13 @@ struct DPP_EXPORT image_data {
 	 *
 	 * @param rhs Image to copy
 	 */
-	image_data(image_data&&) noexcept = default;
+	image_data(image_data&& rhs) noexcept = default;
 
 	/**
 	 * @brief Construct from string buffer
 	 *
 	 * @param format Image format
-	 * @param str Data in a string
+	 * @param bytes Data in a string
 	 * @see image_type
 	 */
 	image_data(image_type format, std::string_view bytes);
@@ -380,8 +380,8 @@ struct DPP_EXPORT image_data {
 	 * @brief Construct from byte buffer
 	 *
 	 * @param format Image format
-	 * @param buf Byte buffer
-	 * @param size_t Image size in bytes
+	 * @param bytes Data of the image
+	 * @param byte_size Image size in bytes
 	 * @see image_type
 	 */
 	image_data(image_type format, const std::byte* bytes, uint32_t byte_size);
@@ -405,8 +405,8 @@ struct DPP_EXPORT image_data {
 	/**
 	 * @brief Set image data.
 	 *
-	 * @param format Format of the image
-	 * @param data Data of the image
+	 * @param format Image format
+	 * @param bytes Data of the image
 	 */
 	void set(image_type format, std::string_view bytes);
 
@@ -414,7 +414,8 @@ struct DPP_EXPORT image_data {
 	 * @brief Set image data.
 	 *
 	 * @param format Format of the image
-	 * @param data Data of the image
+	 * @param bytes Data of the image
+	 * @param byte_size Image size in bytes
 	 */
 	void set(image_type format, const std::byte* bytes, uint32_t byte_size);
 
@@ -507,7 +508,7 @@ struct icon {
 	/**
 	 * @brief Get as icon hash.
 	 *
-	 * @warn The behavior is undefined if `is_iconhash() == false`
+	 * @warning The behavior is undefined if `is_iconhash() == false`
 	 * @return iconhash& This iconhash
 	 */
 	iconhash& as_iconhash() &;
@@ -515,7 +516,7 @@ struct icon {
 	/**
 	 * @brief Get as icon hash.
 	 *
-	 * @warn The behavior is undefined if `is_iconhash() == false`
+	 * @warning The behavior is undefined if `is_iconhash() == false`
 	 * @return iconhash& This iconhash
 	 */
 	const iconhash& as_iconhash() const&;
@@ -523,7 +524,7 @@ struct icon {
 	/**
 	 * @brief Get as icon hash.
 	 *
-	 * @warn The behavior is undefined if `is_iconhash() == false`
+	 * @warning The behavior is undefined if `is_iconhash() == false`
 	 * @return iconhash& This iconhash
 	 */
 	iconhash&& as_iconhash() &&;
@@ -539,7 +540,7 @@ struct icon {
 	/**
 	 * @brief Get as image data.
 	 *
-	 * @warn The behavior is undefined if `is_image_data() == false`
+	 * @warning The behavior is undefined if `is_image_data() == false`
 	 * @return image_data& This image
 	 */
 	image_data& as_image_data() &;
@@ -547,7 +548,7 @@ struct icon {
 	/**
 	 * @brief Get as image.
 	 *
-	 * @warn The behavior is undefined if `is_image_data() == false`
+	 * @warning The behavior is undefined if `is_image_data() == false`
 	 * @return image_data& This image
 	 */
 	const image_data& as_image_data() const&;
@@ -555,7 +556,7 @@ struct icon {
 	/**
 	 * @brief Get as image.
 	 *
-	 * @warn The behavior is undefined if `is_image_data() == false`
+	 * @warning The behavior is undefined if `is_image_data() == false`
 	 * @return image_data& This image
 	 */
 	image_data&& as_image_data() &&;
@@ -738,22 +739,36 @@ uint32_t DPP_EXPORT hsl(int h, int s, int l);
 std::string DPP_EXPORT debug_dump(uint8_t* data, size_t length);
 
 /**
- * @brief Returns the length of a UTF-8 string in codepoints
- * 
+ * @brief Returns the length of a UTF-8 string in codepoints.
+ * @note Result is unspecified for strings that are not valid UTF-8.
+ *
  * @param str string to count length of
- * @return size_t length of string (0 for invalid utf8)
+ * @return size_t Length of string
  */
-size_t DPP_EXPORT utf8len(const std::string &str);
+size_t DPP_EXPORT utf8len(std::string_view str);
 
 /**
- * @brief Return substring of a UTF-8 encoded string in codepoints
- * 
+ * @brief Return subview of a UTF-8 encoded string in codepoints.
+ * @note You must ensure that the resulting view is not used after the lifetime of the viewed string has ended.
+ * @note Result is unspecified for strings that are not valid UTF-8.
+ *
  * @param str string to return substring from
  * @param start start codepoint offset
  * @param length length in codepoints
- * @return std::string Substring in UTF-8 or empty string if invalid UTF-8 passed in
+ * @return std::string_view The requested subview
  */
-std::string DPP_EXPORT utf8substr(const std::string& str, std::string::size_type start, std::string::size_type length);
+std::string_view DPP_EXPORT utf8subview(std::string_view str, size_t start, size_t length);
+
+/**
+ * @brief Return substring of a UTF-8 encoded string in codepoints.
+ * @note Result is unspecified for strings that are not valid UTF-8.
+ *
+ * @param str string to return substring from
+ * @param start start codepoint offset
+ * @param length length in codepoints
+ * @return std::string The requested substring
+ */
+std::string DPP_EXPORT utf8substr(std::string_view str, size_t start, size_t length);
 
 /**
  * @brief Read a whole file into a std::string.

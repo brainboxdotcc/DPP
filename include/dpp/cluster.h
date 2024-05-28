@@ -325,7 +325,7 @@ public:
 	 *
 	 * @return cluster& Reference to self for chaining.
 	 */
-	cluster& set_default_gateway(std::string& default_gateway);
+	cluster& set_default_gateway(const std::string& default_gateway);
 
 	/**
 	 * @brief Log a message to whatever log the user is using.
@@ -993,6 +993,24 @@ public:
 	event_router_t<message_create_t> on_message_create;
 
 	/**
+	 * @brief Called when a vote is added to a message poll.
+	 *
+	 * @see https://discord.com/developers/docs/topics/gateway-events#message-poll-vote-add
+	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
+	 * The function signature for this event takes a single `const` reference of type message_poll_vote_add_t&, and returns void.
+	 */
+	event_router_t<message_poll_vote_add_t> on_message_poll_vote_add;
+
+	/**
+	 * @brief Called when a vote is removed from a message poll.
+	 *
+	 * @see https://discord.com/developers/docs/topics/gateway-events#message-poll-vote-remove
+	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
+	 * The function signature for this event takes a single `const` reference of type message_poll_vote_remove_t&, and returns void.
+	 */
+	event_router_t<message_poll_vote_remove_t> on_message_poll_vote_remove;
+
+	/**
 	 * @brief Called when a guild audit log entry is created.
 	 *
 	 * @see https://discord.com/developers/docs/topics/gateway-events#guild-audit-log-entry-create
@@ -1427,7 +1445,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void interaction_followup_create(const std::string &token, const message &m, command_completion_event_t callback);
+	void interaction_followup_create(const std::string &token, const message &m, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Edit original followup message to a slash command
@@ -1770,6 +1788,15 @@ public:
 	void message_edit(const struct message &m, command_completion_event_t callback = utility::log_error());
 
 	/**
+	 * @brief Edit the flags of a message on a channel. The callback function is called when the message has been edited
+	 *
+	 * @param m Message to edit the flags of
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::message object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void message_edit_flags(const struct message &m, command_completion_event_t callback = utility::log_error());
+
+	/**
 	 * @brief Add a reaction to a message. The reaction string must be either an `emojiname:id` or a unicode character.
 	 *
 	 * @see https://discord.com/developers/docs/resources/channel#create-reaction
@@ -1938,6 +1965,54 @@ public:
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void message_delete_bulk(const std::vector<snowflake> &message_ids, snowflake channel_id, command_completion_event_t callback = utility::log_error());
+
+	/**
+	 * @brief Get a list of users that voted for this specific answer.
+	 *
+	 * @param m Message that contains the poll to retrieve the answers from
+	 * @param answer_id ID of the answer to retrieve votes from (see poll_answer::answer_id)
+	 * @param after Users after this ID should be retrieved if this is set to non-zero
+	 * @param limit This number of users maximum should be returned, up to 100
+	 * @param callback Function to call when the API call completes.
+	 * @see https://discord.com/developers/docs/resources/poll#get-answer-voters
+	 * On success the callback will contain a dpp::user_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void poll_get_answer_voters(const message& m, uint32_t answer_id, snowflake after, uint64_t limit, command_completion_event_t callback = utility::log_error());
+
+	/**
+	 * @brief Get a list of users that voted for this specific answer.
+	 *
+	 * @param message_id ID of the message with the poll to retrieve the answers from
+	 * @param channel_id ID of the channel with the poll to retrieve the answers from
+	 * @param answer_id ID of the answer to retrieve votes from (see poll_answer::answer_id)
+	 * @param after Users after this ID should be retrieved if this is set to non-zero
+	 * @param limit This number of users maximum should be returned, up to 100
+	 * @param callback Function to call when the API call completes.
+	 * @see https://discord.com/developers/docs/resources/poll#get-answer-voters
+	 * On success the callback will contain a dpp::user_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void poll_get_answer_voters(snowflake message_id, snowflake channel_id, uint32_t answer_id, snowflake after, uint64_t limit, command_completion_event_t callback = utility::log_error());
+
+	/**
+	 * @brief Immediately end a poll.
+	 *
+	 * @param m Message that contains the poll
+	 * @param callback Function to call when the API call completes.
+	 * @see https://discord.com/developers/docs/resources/poll#end-poll
+	 * On success the callback will contain a dpp::message object representing the message containing the poll in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void poll_end(const message &m, command_completion_event_t callback = utility::log_error());
+
+	/**
+	 * @brief Immediately end a poll.
+	 *
+	 * @param message_id ID of the message with the poll to end
+	 * @param channel_id ID of the channel with the poll to end
+	 * @param callback Function to call when the API call completes.
+	 * @see https://discord.com/developers/docs/resources/poll#end-poll
+	 * On success the callback will contain a dpp::message object representing the message containing the poll in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void poll_end(snowflake message_id, snowflake channel_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get a channel
@@ -2390,6 +2465,19 @@ public:
 	void guild_member_timeout(snowflake guild_id, snowflake user_id, time_t communication_disabled_until, command_completion_event_t callback = utility::log_error());
 
 	/**
+	 * @brief Remove the timeout of a guild member.
+	 * A shortcut for guild_member_timeout(guild_id, user_id, 0, callback)
+	 * Fires a `Guild Member Update` Gateway event.
+	 * @see https://discord.com/developers/docs/resources/guild#modify-guild-member
+	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+	 * @param guild_id Guild ID to remove the member timeout from
+	 * @param user_id User ID to remove the timeout for
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void guild_member_timeout_remove(snowflake guild_id, snowflake user_id, command_completion_event_t callback = utility::log_error());
+
+	/**
 	 * @brief Add guild ban
 	 *
 	 * Create a guild ban, and optionally delete previous messages sent by the banned user.
@@ -2485,7 +2573,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::dtemplate object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_template_create(snowflake guild_id, const std::string &name, const std::string &description, command_completion_event_t callback);
+	void guild_template_create(snowflake guild_id, const std::string &name, const std::string &description, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Syncs the template to the guild's current state.
@@ -2782,7 +2870,7 @@ public:
 	 * @brief Get the guild's onboarding configuration
 	 *
 	 * @see https://discord.com/developers/docs/resources/guild#get-guild-onboarding
-	 * @param o The onboarding object
+	 * @param guild_id The guild to pull the onboarding configuration from.
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::onboarding object in confirmation_callback_t::value filled to match the vanity url. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
@@ -3702,6 +3790,17 @@ public:
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void skus_get(command_completion_event_t callback = utility::log_error());
+
+	/**
+	 * @brief Set the status of a voice channel.
+	 *
+	 * @see https://github.com/discord/discord-api-docs/pull/6400 (please replace soon).
+	 * @param channel_id The channel to update.
+	 * @param status The new status for the channel.
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void channel_set_voice_status(snowflake channel_id, const std::string& status, command_completion_event_t callback = utility::log_error());
 
 #include <dpp/cluster_sync_calls.h>
 #ifdef DPP_CORO

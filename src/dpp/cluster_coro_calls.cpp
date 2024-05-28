@@ -219,6 +219,10 @@ async<confirmation_callback_t> cluster::co_channels_get(snowflake guild_id) {
 	return async{ this, static_cast<void (cluster::*)(snowflake, command_completion_event_t)>(&cluster::channels_get), guild_id };
 }
 
+async<confirmation_callback_t> cluster::co_channel_set_voice_status(snowflake channel_id, const std::string& status) {
+	return async{ this, static_cast<void (cluster::*)(snowflake, const std::string&, command_completion_event_t)>(&cluster::channel_set_voice_status), channel_id, status };
+}
+
 async<confirmation_callback_t> cluster::co_create_dm_channel(snowflake user_id) {
 	return async{ this, static_cast<void (cluster::*)(snowflake, command_completion_event_t)>(&cluster::create_dm_channel), user_id };
 }
@@ -407,6 +411,10 @@ async<confirmation_callback_t> cluster::co_guild_member_timeout(snowflake guild_
 	return async{ this, static_cast<void (cluster::*)(snowflake, snowflake, time_t, command_completion_event_t)>(&cluster::guild_member_timeout), guild_id, user_id, communication_disabled_until };
 }
 
+async<confirmation_callback_t> cluster::co_guild_member_timeout_remove(snowflake guild_id, snowflake user_id) {
+	return async{ this, static_cast<void (cluster::*)(snowflake, snowflake, command_completion_event_t)>(&cluster::guild_member_timeout_remove), guild_id, user_id };
+}
+
 async<confirmation_callback_t> cluster::co_guild_member_delete_role(snowflake guild_id, snowflake user_id, snowflake role_id) {
 	return async{ this, static_cast<void (cluster::*)(snowflake, snowflake, snowflake, command_completion_event_t)>(&cluster::guild_member_delete_role), guild_id, user_id, role_id };
 }
@@ -495,6 +503,10 @@ async<confirmation_callback_t> cluster::co_message_edit(const message &m) {
 	return async{ this, static_cast<void (cluster::*)(const message &, command_completion_event_t)>(&cluster::message_edit), m };
 }
 
+async<confirmation_callback_t> cluster::co_message_edit_flags(const message &m) {
+	return async{ this, static_cast<void (cluster::*)(const message &, command_completion_event_t)>(&cluster::message_edit_flags), m };
+}
+
 async<confirmation_callback_t> cluster::co_message_get(snowflake message_id, snowflake channel_id) {
 	return async{ this, static_cast<void (cluster::*)(snowflake, snowflake, command_completion_event_t)>(&cluster::message_get), message_id, channel_id };
 }
@@ -517,6 +529,22 @@ async<confirmation_callback_t> cluster::co_messages_get(snowflake channel_id, sn
 
 async<confirmation_callback_t> cluster::co_message_unpin(snowflake channel_id, snowflake message_id) {
 	return async{ this, static_cast<void (cluster::*)(snowflake, snowflake, command_completion_event_t)>(&cluster::message_unpin), channel_id, message_id };
+}
+
+async<confirmation_callback_t> cluster::co_poll_get_answer_voters(const message& m, uint32_t answer_id, snowflake after, uint64_t limit) {
+	return async{ this, static_cast<void (cluster::*)(const message&, uint32_t, snowflake, uint64_t, command_completion_event_t)>(&cluster::poll_get_answer_voters), m, answer_id, after, limit };
+}
+
+async<confirmation_callback_t> cluster::co_poll_get_answer_voters(snowflake message_id, snowflake channel_id, uint32_t answer_id, snowflake after, uint64_t limit) {
+	return async{ this, static_cast<void (cluster::*)(snowflake, snowflake, uint32_t, snowflake, uint64_t, command_completion_event_t)>(&cluster::poll_get_answer_voters), message_id, channel_id, answer_id, after, limit };
+}
+
+async<confirmation_callback_t> cluster::co_poll_end(const message &m) {
+	return async{ this, static_cast<void (cluster::*)(const message &, command_completion_event_t)>(&cluster::poll_end), m };
+}
+
+async<confirmation_callback_t> cluster::co_poll_end(snowflake message_id, snowflake channel_id) {
+	return async{ this, static_cast<void (cluster::*)(snowflake, snowflake, command_completion_event_t)>(&cluster::poll_end), message_id, channel_id };
 }
 
 async<confirmation_callback_t> cluster::co_channel_pins_get(snowflake channel_id) {
@@ -819,8 +847,8 @@ async<confirmation_callback_t> cluster::co_get_webhook_with_token(snowflake webh
 };
 
 /* End of auto-generated definitions */
-dpp::async<dpp::http_request_completion_t> dpp::cluster::co_request(const std::string &url, http_method method, const std::string &postdata, const std::string &mimetype, const std::multimap<std::string, std::string> &headers) {
-	return async<http_request_completion_t>{ [&, this] <typename C> (C &&cc) { return this->request(url, method, std::forward<C>(cc), postdata, mimetype, headers); }};
+dpp::async<dpp::http_request_completion_t> dpp::cluster::co_request(const std::string &url, http_method method, const std::string &postdata, const std::string &mimetype, const std::multimap<std::string, std::string> &headers, const std::string &protocol) {
+	return async<http_request_completion_t>{ [&, this] <typename C> (C &&cc) { return this->request(url, method, std::forward<C>(cc), postdata, mimetype, headers, protocol); }};
 }
 
 #endif
