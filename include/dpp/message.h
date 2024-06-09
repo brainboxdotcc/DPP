@@ -1563,9 +1563,9 @@ struct DPP_EXPORT poll {
 	poll& set_duration(uint32_t hours) noexcept;
 
 	/**
-	 * @brief Set the duration of the poll in hours
+	 * @brief Set if the poll should allow multi-selecting
 	 *
-	 * @param hours Duration of the poll in hours
+	 * @param allow Should allow multi-select?
 	 * @return self for method chaining
 	 */
 	poll& set_allow_multiselect(bool allow) noexcept;
