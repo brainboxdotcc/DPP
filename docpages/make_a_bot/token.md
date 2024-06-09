@@ -18,7 +18,7 @@ In this panel, you can get your bot token by clicking "Reset Token". A bot token
 
 \warning **Do not share this token** with anybody! If you ever somehow compromise your current bot token or see your bot in danger, you can regenerate the token in the panel.
 
-\note This token can only be seen once (when you generate a new one). We highly recommend that, if you're going to be reusing your token, you store it in a VERY safe place (something like a password manager).
+\note This token can only be seen once. We highly recommend that, if you're going to be reusing your token, you store it in a VERY safe place (like a password manager).
 
 ## Adding the Bot to Your Server
 
@@ -33,7 +33,7 @@ That's because you've created a bot application, but it's not on any server righ
 \image html create_application_navigate_to_url_generator.png
 3. Select the `bot` scope.
 
-\note For bots, you ONLY need the `bot` scope, nearly all of the other scopes are related to applications (external programs that communicate with Discord). Whilst you could also select `applications.commands`, the `bot` scope will include this silently. You can read more about scopes and which you need for your application [here](https://discord.com/developers/docs/topics/oauth2#shared-resources-oauth2-scopes).
+\note For bots, you ONLY need the `bot` scope, nearly all of the other scopes are related to non-bot applications (external programs that communicate with Discord, such as Logitech G Hub). Whilst you can also select the `applications.commands` scope, the `bot` scope will automatically include this silently. You can read more about scopes and which ones you might need for your application [here](https://discord.com/developers/docs/topics/oauth2#shared-resources-oauth2-scopes).
 
 4. Choose the permissions required for your bot to function in the "Bot Permissions" section.
 5. Copy and paste the resulting URL in your browser. Choose a server to invite the bot to, and click "Authorize".
