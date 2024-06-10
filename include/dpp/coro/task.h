@@ -293,11 +293,6 @@ class task : private detail::task::task_base<R> {
 	friend class detail::task::task_base<R>;
 
 	/**
- 	 * @brief The type of the result produced by this task.
-   	 */
-	using result_type = R;
-
-	/**
 	 * @brief Function called by the standard library when the coroutine is resumed.
 	 *
 	 * @throw Throws any exception thrown or uncaught by the coroutine
@@ -340,6 +335,10 @@ class task : private detail::task::task_base<R> {
 	}
 
 public:
+	/**
+	 * @brief The type of the result produced by this task.
+	 */
+	using result_type = R;
 #ifdef _DOXYGEN_ // :)
 	/**
 	 * @brief Default constructor, creates a task not bound to a coroutine.
@@ -456,11 +455,6 @@ class task<void> : private detail::task::task_base<void> {
 	friend class detail::task::task_base<void>;
 
 	/**
- 	 * @brief The type of the result produced by this task.
-   	 */
-	using result_type = void;
-
-	/**
 	 * @brief Function called by the standard library when the coroutine is resumed.
 	 *
 	 * @remark Do not call this manually, use the co_await keyword instead.
@@ -474,6 +468,11 @@ public:
 	using detail::task::task_base<void>::done; // expose done() as public
 	using detail::task::task_base<void>::cancel; // expose cancel() as public
 	using detail::task::task_base<void>::await_ready; // expose await_ready as public
+
+	/**
+	 * @brief The type of the result produced by this task
+	 */
+	using result_type = void;
 
 	/**
 	 * @brief Suspend the current coroutine until the task completes.

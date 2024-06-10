@@ -415,6 +415,11 @@ public:
 	using detail::async::async_base<R>::await_ready; // expose await_ready as public
 
 	/**
+	 * @brief The return type of the API call. Defaults to confirmation_callback_t
+	 */
+	using result_type = R;
+
+	/**
 	 * @brief Construct an async object wrapping an object method, the call is made immediately by forwarding to <a href="https://en.cppreference.com/w/cpp/utility/functional/invoke">std::invoke</a> and can be awaited later to retrieve the result.
 	 *
 	 * @param obj The object to call the method on
