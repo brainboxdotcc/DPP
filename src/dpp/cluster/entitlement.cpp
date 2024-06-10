@@ -26,11 +26,11 @@ namespace dpp {
 void cluster::entitlements_get(snowflake user_id, const std::vector<snowflake>& sku_ids, snowflake before_id, snowflake after_id, uint8_t limit, snowflake guild_id, bool exclude_ended, command_completion_event_t callback) {
 	json j;
 
-	if(user_id) {
+	if (!user_id.empty()) {
 		j["user_id"] = user_id.str();
 	}
 
-	if(!sku_ids.empty()) {
+	if (!sku_ids.empty()) {
 		/* Why can't Discord just be consistent and accept an array of ids????
 		 * Why just out of nowhere introduce a "comma-delimited set of snowflakes", like what.
 		 * Just allow an array like you normally do!!!!!!!!!!!!
@@ -46,17 +46,17 @@ void cluster::entitlements_get(snowflake user_id, const std::vector<snowflake>& 
 		j["sku_ids"] = ids;
 	}
 
-	if(before_id) {
+	if (!before_id.empty()) {
 		j["before_id"] = before_id.str();
 	}
 
-	if(after_id) {
+	if (!after_id.empty()) {
 		j["after_id"] = after_id.str();
 	}
 
 	j["limit"] = limit;
 
-	if(guild_id) {
+	if (!guild_id.empty()) {
 		j["guild_id"] = guild_id.str();
 	}
 
@@ -68,7 +68,7 @@ void cluster::entitlements_get(snowflake user_id, const std::vector<snowflake>& 
 void cluster::entitlement_test_create(const class entitlement& new_entitlement, command_completion_event_t callback) {
 	json j;
 	j["sku_id"] = new_entitlement.sku_id.str();
-	j["owner_id"] = new_entitlement.owner_id.str();
+	j["owner_id"] = new_entitlement.guild_id.empty() ? new_entitlement.guild_id.str() : new_entitlement.user_id.str();
 	j["owner_type"] = new_entitlement.type;
 	rest_request<entitlement>(this, API_PATH "/applications", me.id.str(), "entitlements", m_post, j, callback);
 }

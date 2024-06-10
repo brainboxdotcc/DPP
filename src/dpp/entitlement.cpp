@@ -34,12 +34,17 @@ entitlement& entitlement::fill_from_json_impl(nlohmann::json* j) {
 	set_snowflake_not_null(j, "id", id);
 	set_snowflake_not_null(j, "sku_id", sku_id);
 	set_snowflake_not_null(j, "application_id", application_id);
+	set_snowflake_not_null(j, "promotion_id", promotion_id);
+	set_int8_not_null(j, "gift_code_flags", gift_code_flags);
 
-	/* Discord does separate these values, but asks for them as "owner_id" in the create event, just makes sense to make them as one as only one is ever set. */
-	if(snowflake_not_null(j, "user_id")) {
-		set_snowflake_not_null(j, "user_id", owner_id);
-	} else if(snowflake_not_null(j, "guild_id")) {
-		set_snowflake_not_null(j, "guild_id", owner_id);
+	if (snowflake_not_null(j, "subscription_id")) {
+		set_snowflake_not_null(j, "subscription_id", subscription_id);
+	}
+	if (snowflake_not_null(j, "user_id")) {
+		set_snowflake_not_null(j, "user_id", user_id);
+	}
+	if (snowflake_not_null(j, "guild_id")) {
+		set_snowflake_not_null(j, "guild_id", guild_id);
 	}
 
 	type = static_cast<entitlement_type>(int8_not_null(j, "type"));
@@ -47,13 +52,12 @@ entitlement& entitlement::fill_from_json_impl(nlohmann::json* j) {
 	if (bool_not_null(j, "deleted")) {
 		flags |= ent_deleted;
 	}
+	if (bool_not_null(j, "consumed")) {
+		flags |= ent_consumed;
+	}
 
 	set_ts_not_null(j, "starts_at", starts_at);
 	set_ts_not_null(j, "ends_at", ends_at);
-
-	/*
-	 * TODO: Look at the entitlement example on docs and see what we're missing, add it here after. Discord seems to be missing information in their structure as their example shows more data.
-	 */
 
 	return *this;
 }
@@ -73,6 +77,10 @@ entitlement_type entitlement::get_type() const {
 
 bool entitlement::is_deleted() const {
 	return flags & entitlement_flags::ent_deleted;
+}
+
+bool entitlement::is_consumed() const {
+	return flags & entitlement_flags::ent_consumed;
 }
 
 } // namespace dpp

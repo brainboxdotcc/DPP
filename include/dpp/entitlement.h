@@ -55,15 +55,29 @@ enum entitlement_type : uint8_t {
 /**
  * @brief Entitlement flags.
  */
-enum entitlement_flags : uint16_t {
+enum entitlement_flags : uint8_t {
 	/**
 	 * @brief Entitlement was deleted
+	 *
+	 * @note Only discord staff can delete an entitlement via
+	 * their internal tooling. It should rarely happen except in cases
+	 * of fraud or chargeback.
 	 */
-	ent_deleted =		0b000000000000001,
+	ent_deleted =		0b0000001,
+
+	/**
+	 * @brief Entitlement was consumed.
+	 *
+	 * @note A consumed entitlement is a used-up one-off purchase.
+	 */
+	ent_consumed = 		0b0000010,
 };
 
 /**
  * @brief A definition of a discord entitlement.
+ *
+ * An entitlement is a user's connection to an SKU, basically a subscription
+ * or a one-off purchase.
  */
 class DPP_EXPORT entitlement : public managed, public json_interface<entitlement> {
 protected:
@@ -85,7 +99,11 @@ protected:
 
 public:
 	/**
-	 * @brief ID of the SKU
+	 * @brief ID of the entitlement event
+	 *
+	 * Not sure if this remains constant, it does not relate to the SKU,
+	 * user, guild or subscription. Do not use it for anything except state
+	 * tracking.
 	 */
 	snowflake sku_id{0};
 
@@ -95,9 +113,40 @@ public:
 	snowflake application_id{0};
 
 	/**
-	 * @brief Optional: ID of the user/guild that is granted access to the entitlement's SKU
+	 * @brief Subscription ID
+	 *
+	 * This is a unique identifier of the user or guilds subscription to the SKU.
+	 * It won't ever change.
 	 */
-	snowflake owner_id{0};
+	snowflake subscription_id{0};
+
+	/**
+ 	 * @brief Promotion id
+ 	 *
+ 	 * These are undocumented but given in examples in the docs.
+ 	 */
+	snowflake promotion_id{0};
+
+	/**
+ 	 * @brief Gift Code Flags (undocumented)
+ 	 *
+ 	 * Undocumented, but given in examples in the docs.
+ 	 */
+	uint8_t gift_code_flags{0};
+
+	/**
+	 * @brief Optional: ID of the user that is granted access to the entitlement's SKU
+	 */
+	snowflake user_id{0};
+
+	/**
+	 * @brief Optional: ID of the user that is granted access to the entitlement's SKU
+	 *
+	 * If a guild is provided, according to the examples the user who triggered the
+	 * purchase will also be passed in the user ID. The presence of a non-zero guild
+	 * id snowflake is indication it is a guild subscription.
+	 */
+	snowflake guild_id{0};
 
 	/**
 	 * @brief The type of entitlement.
@@ -144,14 +193,26 @@ public:
 	 *
 	 * @return entitlement_type Entitlement type
 	 */
-	entitlement_type get_type() const;
+	[[nodiscard]] entitlement_type get_type() const;
+
+	/**
+	 * @brief Was the entitlement consumed?
+	 *
+	 * A consumed entitlement is a one off purchase which
+	 * has been claimed as used by the application. for example
+	 * in-app purchases.
+	 *
+	 * @return true if the entitlement was consumed.
+	 */
+	[[nodiscard]] bool is_consumed() const;
 
 	/**
 	 * @brief Was the entitlement deleted?
 	 *
 	 * @return true if the entitlement was deleted.
 	 */
-	bool is_deleted() const;
+	[[nodiscard]] bool is_deleted() const;
+
 };
 
 /**
