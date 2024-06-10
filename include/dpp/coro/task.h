@@ -293,6 +293,11 @@ class task : private detail::task::task_base<R> {
 	friend class detail::task::task_base<R>;
 
 	/**
+ 	 * @brief The type of the result produced by this task.
+   	 */
+	using result_type = R;
+
+	/**
 	 * @brief Function called by the standard library when the coroutine is resumed.
 	 *
 	 * @throw Throws any exception thrown or uncaught by the coroutine
@@ -449,6 +454,11 @@ class task<void> : private detail::task::task_base<void> {
 	 * @see operator co_await()
 	 */
 	friend class detail::task::task_base<void>;
+
+	/**
+ 	 * @brief The type of the result produced by this task.
+   	 */
+	using result_type = void;
 
 	/**
 	 * @brief Function called by the standard library when the coroutine is resumed.
