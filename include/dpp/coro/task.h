@@ -335,6 +335,10 @@ class task : private detail::task::task_base<R> {
 	}
 
 public:
+	/**
+	 * @brief The type of the result produced by this task.
+	 */
+	using result_type = R;
 #ifdef _DOXYGEN_ // :)
 	/**
 	 * @brief Default constructor, creates a task not bound to a coroutine.
@@ -464,6 +468,11 @@ public:
 	using detail::task::task_base<void>::done; // expose done() as public
 	using detail::task::task_base<void>::cancel; // expose cancel() as public
 	using detail::task::task_base<void>::await_ready; // expose await_ready as public
+
+	/**
+	 * @brief The type of the result produced by this task
+	 */
+	using result_type = void;
 
 	/**
 	 * @brief Suspend the current coroutine until the task completes.
