@@ -35,21 +35,44 @@ namespace dpp {
  * */
 enum entitlement_type : uint8_t {
 	/**
-	 * @brief A subscription for a guild.
-	 * @warning This can only be used when creating a test entitlement.
+	 * @brief Entitlement was purchased by user
 	 */
-	GUILD_SUBSCRIPTION = 1,
+	PURCHASE = 1,
 
 	/**
-	 * @brief A subscription for a user.
-	 * @warning This can only be used when creating a test entitlement.
+	 * @brief Entitlement for Discord Nitro subscription
 	 */
-	USER_SUBSCRIPTION = 2,
+	PREMIUM_SUBSCRIPTION = 2,
 
 	/**
-	 * @brief Entitlement was purchased as an app subscription.
+	 * @brief Entitlement was gifted by developer
 	 */
-	APPLICATION_SUBSCRIPTION = 8
+	DEVELOPER_GIFT = 3,
+
+	/**
+	 * @brief Entitlement was purchased by a dev in application test mode
+	 */
+	TEST_MODE_PURCHASE = 4,
+
+	/**
+	 * @brief Entitlement was granted when the SKU was free
+	 */
+	FREE_PURCHASE = 5,
+
+	/**
+	 * @brief Entitlement was gifted by another user
+	 */
+	USER_GIFT = 6,
+
+	/**
+	 * @brief Entitlement was claimed by user for free as a Nitro Subscriber
+	 */
+	PREMIUM_PURCHASE = 7,
+
+	/**
+	 * @brief Entitlement was purchased as an app subscription
+	 */
+	APPLICATION_SUBSCRIPTION = 8,
 };
 
 /**
