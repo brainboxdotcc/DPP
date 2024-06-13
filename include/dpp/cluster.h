@@ -3781,6 +3781,16 @@ public:
 	void entitlement_test_delete(snowflake entitlement_id, command_completion_event_t callback = utility::log_error());
 
 	/**
+	 * @brief For One-Time Purchase consumable SKUs, marks a given entitlement for the user as consumed.
+	 *
+	 * @see https://discord.com/developers/docs/monetization/entitlements#consume-an-entitlement
+	 * @param entitlement_id The entitlement to mark as consumed.
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void entitlement_consume(snowflake entitlement_id, command_completion_event_t callback = utility::log_error());
+
+	/**
 	 * @brief Returns all SKUs for a given application.
 	 * @note Because of how Discord's SKU and subscription systems work, you will see two SKUs for your premium offering.
 	 * For integration and testing entitlements, you should use the SKU with type: 5.

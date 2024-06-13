@@ -77,4 +77,8 @@ void cluster::entitlement_test_delete(const class snowflake entitlement_id, comm
 	rest_request<confirmation>(this, API_PATH "/applications", me.id.str(), "entitlements/" + entitlement_id.str(), m_delete, "", callback);
 }
 
+void cluster::entitlement_consume(const class snowflake entitlement_id, command_completion_event_t callback) {
+	rest_request<confirmation>(this, API_PATH "/applications", me.id.str(), "entitlements/" + entitlement_id.str() + "/consume", m_post, "", callback);
+}
+
 } // namespace dpp
