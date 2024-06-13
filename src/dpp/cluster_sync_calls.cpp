@@ -273,6 +273,10 @@ confirmation cluster::entitlement_test_delete_sync(const class snowflake entitle
 	return dpp::sync<confirmation>(this, static_cast<void (cluster::*)(const class snowflake, command_completion_event_t)>(&cluster::entitlement_test_delete), entitlement_id);
 }
 
+confirmation cluster::entitlement_consume_sync(const class snowflake entitlement_id) {
+	return dpp::sync<confirmation>(this, static_cast<void (cluster::*)(const class snowflake, command_completion_event_t)>(&cluster::entitlement_consume), entitlement_id);
+}
+
 gateway cluster::get_gateway_bot_sync() {
 	return dpp::sync<gateway>(this, static_cast<void (cluster::*)(command_completion_event_t)>(&cluster::get_gateway_bot));
 }

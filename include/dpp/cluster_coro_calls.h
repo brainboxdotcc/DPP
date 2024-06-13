@@ -752,6 +752,17 @@
 [[nodiscard]] async<confirmation_callback_t> co_entitlement_test_delete(snowflake entitlement_id);
 
 /**
+ * @brief For One-Time Purchase consumable SKUs, marks a given entitlement for the user as consumed.
+ *
+ * @see dpp::cluster::entitlement_consume
+ * @see https://discord.com/developers/docs/monetization/entitlements#consume-an-entitlement
+ * @param entitlement_id The entitlement to mark as consumed.
+ * @return confirmation returned object on completion
+ * \memberof dpp::cluster
+ */
+[[nodiscard]] async<confirmation_callback_t> co_entitlement_consume(snowflake entitlement_id);
+
+/**
  * @brief Get the gateway information for the bot using the token
  * @see dpp::cluster::get_gateway_bot
  * @see https://discord.com/developers/docs/topics/gateway#get-gateway-bot
