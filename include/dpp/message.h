@@ -639,7 +639,8 @@ public:
 
 	/**
 	 * @brief Set the emoji of the current sub-component.
-	 * Only valid for buttons. 
+	 * 
+	 * @warning Only valid for buttons.
 	 * 
 	 * @note Adding an emoji to a component will 
 	 * automatically set this components type to
