@@ -50,18 +50,22 @@ bignumber::bignumber(const std::string& number_string) {
 	}
 }
 
+inline uint64_t flip_bytes(uint64_t bytes) {
+	return ((((bytes) & 0xff00000000000000ull) >> 56)
+	       | (((bytes) & 0x00ff000000000000ull) >> 40)
+	       | (((bytes) & 0x0000ff0000000000ull) >> 24)
+	       | (((bytes) & 0x000000ff00000000ull) >> 8)
+	       | (((bytes) & 0x00000000ff000000ull) << 8)
+	       | (((bytes) & 0x0000000000ff0000ull) << 24)
+	       | (((bytes) & 0x000000000000ff00ull) << 40)
+	       | (((bytes) & 0x00000000000000ffull) << 56));
+}
+
 bignumber::bignumber(std::vector<uint64_t> bits) {
 	ssl_bn = std::make_shared<openssl_bignum>();
 	std::reverse(bits.begin(), bits.end());
 	for (auto& chunk : bits) {
-		chunk = ((((chunk) & 0xff00000000000000ull) >> 56)
-		   | (((chunk) & 0x00ff000000000000ull) >> 40)
-		   | (((chunk) & 0x0000ff0000000000ull) >> 24)
-		   | (((chunk) & 0x000000ff00000000ull) >> 8)
-		   | (((chunk) & 0x00000000ff000000ull) << 8)
-		   | (((chunk) & 0x0000000000ff0000ull) << 24)
-		   | (((chunk) & 0x000000000000ff00ull) << 40)
-		   | (((chunk) & 0x00000000000000ffull) << 56));
+		chunk = flip_bytes(chunk);
 	}
 	BN_bin2bn((unsigned char *)bits.data(), bits.size() * sizeof(uint64_t), ssl_bn->bn);
 }
@@ -77,9 +81,12 @@ std::vector<uint64_t> bignumber::get_binary() const {
 	std::size_t size = BN_num_bytes(ssl_bn->bn);
 	auto size_64_bit = (std::size_t)ceil((double)size / sizeof(uint64_t));
 	std::vector<uint64_t> returned;
-	returned.reserve(size_64_bit);
+	returned.resize(size_64_bit);
 	BN_bn2binpad(ssl_bn->bn, (unsigned char*)returned.data(), returned.size() * sizeof(uint64_t));
 	std::reverse(returned.begin(), returned.end());
+	for (auto& chunk : returned) {
+		chunk = flip_bytes(chunk);
+	}
 	return returned;
 }
 

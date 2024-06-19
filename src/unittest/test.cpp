@@ -108,6 +108,10 @@ Markdown lol ||spoiler|| ~~strikethrough~~ `small *code* block`\n";
 	returned = big2.get_number(true);
 	set_test(BIGNUM2, dpp::lowercase(returned) == "1122334455667788ff00ff00ff00ff00");
 
+	set_test(BIGNUM3, false);
+	std::vector<uint64_t> ret_bin = big2.get_binary();
+	set_test(BIGNUM3, ret_bin.size() == 2 && ret_bin[0] == 0xff00ff00ff00ff00 && ret_bin[1] == 0x1122334455667788);
+
 	set_test(ERRORS, false);
 
 	/* Prepare a confirmation_callback_t in error state (400) */
