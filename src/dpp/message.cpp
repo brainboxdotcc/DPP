@@ -20,17 +20,10 @@
  ************************************************************************************/
 #include <algorithm>
 #include <dpp/message.h>
-#include <dpp/user.h>
-#include <dpp/channel.h>
-#include <dpp/guild.h>
 #include <dpp/cache.h>
 #include <dpp/json.h>
 #include <dpp/discordevents.h>
-#include <dpp/stringops.h>
-#include <dpp/exception.h>
 #include <dpp/cluster.h>
-
-
 
 namespace dpp {
 
