@@ -21,8 +21,6 @@
 #include <dpp/channel.h>
 #include <dpp/restrequest.h>
 
-#include <utility>
-
 namespace dpp {
 
 void cluster::channel_create(const class channel &c, command_completion_event_t callback) {

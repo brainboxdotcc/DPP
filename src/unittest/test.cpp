@@ -96,6 +96,17 @@ Markdown lol ||spoiler|| ~~strikethrough~~ `small *code* block`\n";
 	u3.id = 777;
 	set_test(COMPARISON, u1 == u2 && u1 != u3);
 
+	set_test(BIGNUM, false);
+	std::string big_in{"1234567890123456789012345678901234567890"};
+	dpp::bignumber big(big_in);
+	std::string returned = big.get_number();
+	set_test(BIGNUM, big_in == returned);
+
+	set_test(BIGNUM2, false);
+	std::vector<uint64_t> vec{0xff00ff00ff00ff00, 0x1122334455667788};
+	dpp::bignumber big2(vec);
+	returned = big2.get_number(true);
+	set_test(BIGNUM2, dpp::lowercase(returned) == "1122334455667788ff00ff00ff00ff00");
 
 	set_test(ERRORS, false);
 
