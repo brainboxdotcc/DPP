@@ -166,32 +166,34 @@ enum text_style_type : uint8_t {
  */
 enum component_style : uint8_t {
 	/**
-	 * @brief Blurple
+	 * @brief Blurple; Primary
 	 */
 	cos_primary = 1,
 
 	/**
-	 * @brief Grey
+	 * @brief Grey; Secondary
 	 */
 	cos_secondary,
 
 	/**
-	 * @brief Green
+	 * @brief Green; Success
 	 */
 	cos_success,
 
 	/**
-	 * @brief Red
+	 * @brief Red; danger
 	 */
 	cos_danger,
 
 	/**
-	 * @brief An external hyperlink to a website
+	 * @brief An external hyperlink to a website, requires url to be set
+	 * @note Will not work unless url is set
 	 */
 	cos_link,
 
 	/**
-	 * @brief Premium upsell button, requires set_sku
+	 * @brief Premium upsell button, requires sku_id to be set
+	 * @note Will not work unless sku is set
 	 */
 	cos_premium,
 };
