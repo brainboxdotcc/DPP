@@ -166,29 +166,36 @@ enum text_style_type : uint8_t {
  */
 enum component_style : uint8_t {
 	/**
-	 * @brief Blurple
+	 * @brief Blurple; Primary
 	 */
 	cos_primary = 1,
 
 	/**
-	 * @brief Grey
+	 * @brief Grey; Secondary
 	 */
 	cos_secondary,
 
 	/**
-	 * @brief Green
+	 * @brief Green; Success
 	 */
 	cos_success,
 
 	/**
-	 * @brief Red
+	 * @brief Red; danger
 	 */
 	cos_danger,
 
 	/**
-	 * @brief An external hyperlink to a website
+	 * @brief An external hyperlink to a website, requires url to be set
+	 * @note Will not work unless url is set
 	 */
-	cos_link
+	cos_link,
+
+	/**
+	 * @brief Premium upsell button, requires sku_id to be set
+	 * @note Will not work unless sku is set
+	 */
+	cos_premium,
 };
 
 /**
@@ -388,6 +395,11 @@ public:
 	std::string url;
 
 	/**
+	 * @brief The SKU ID for premium upsell buttons
+	 */
+	dpp::snowflake sku_id;
+
+	/**
 	 * @brief Placeholder text for select menus and text inputs (max 150 characters)
 	 */
 	std::string placeholder;
@@ -488,6 +500,17 @@ public:
 	 * @return component& reference to self
 	 */
 	component& set_type(component_type ct);
+
+	/**
+	 * @brief Set the SKU ID for a premium upsell button
+	 * This is only valid for premium upsell buttons of type
+	 * cos_premium. It indicates which premium package to
+	 * link to when the button is clicked.
+	 *
+	 * @param sku The SKU ID
+	 * @return component& reference to self
+	 */
+	component& set_sku_id(dpp::snowflake sku);
 
 	/**
 	 * @brief Set the text style of a text component
@@ -1869,6 +1892,8 @@ enum message_type {
 
 	/**
 	 * @brief Interaction premium upsell
+	 * @depreciated Replaced with buttons with a style of cos_premium
+	 * This message type may stop working at any point
 	 */
 	mt_interaction_premium_upsell = 26,
 

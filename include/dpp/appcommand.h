@@ -443,6 +443,9 @@ enum interaction_response_type {
 	 * @see https://discord.com/developers/docs/monetization/entitlements#premiumrequired-interaction-response
 	 * @note Not available for autocomplete and ping interactions.
 	 * @warning This response does not support using `content`, `embeds`, or `attachments`, so reply with no data when using this!
+	 *
+	 * @depreciated Replaced with buttons with a style of cos_premium
+	 * This interaction type may stop working at any point
 	 */
 	ir_premium_required = 10,
 };
