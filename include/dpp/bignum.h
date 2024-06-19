@@ -29,7 +29,7 @@ namespace dpp {
 
 /**
  * @brief This contains the OpenSSL structs. It is not public,
- * so that the public interface doesnt depend on OpenSSL directly.
+ * so that the public interface doesn't depend on OpenSSL directly.
  */
 struct openssl_bignum;
 
