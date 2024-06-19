@@ -24,25 +24,30 @@
 #include <dpp/stringops.h>
 #include <openssl/bn.h>
 #include <cmath>
-#include <sys/types.h>
-#include <netinet/in.h>
-#include <inttypes.h>
 
 namespace dpp {
 
 struct openssl_bignum {
+	/**
+	 * @brief OpenSSL BIGNUM pointer
+	 */
 	BIGNUM* bn{nullptr};
 
+	/**
+	 * @brief Construct BIGNUM using RAII
+	 */
 	openssl_bignum() : bn(BN_new()) {
 	}
 
+	/**
+	 * @brief Destruct BIGNUM using RAII
+	 */
 	~openssl_bignum() {
 		BN_free(bn);
 	}
 };
 
-bignumber::bignumber(const std::string& number_string) {
-	ssl_bn = std::make_shared<openssl_bignum>();
+bignumber::bignumber(const std::string& number_string) : ssl_bn(std::make_shared<openssl_bignum>()) {
 	if (dpp::lowercase(number_string.substr(0, 2)) == "0x") {
 		BN_hex2bn(&ssl_bn->bn, number_string.substr(2, number_string.length() - 2).c_str());
 	} else {
@@ -50,6 +55,11 @@ bignumber::bignumber(const std::string& number_string) {
 	}
 }
 
+/**
+ * Flip (reverse) bytes in a uint64_t
+ * @param bytes 64 bit value
+ * @return flipped 64 bit value
+ */
 inline uint64_t flip_bytes(uint64_t bytes) {
 	return ((((bytes) & 0xff00000000000000ull) >> 56)
 	       | (((bytes) & 0x00ff000000000000ull) >> 40)
@@ -61,8 +71,7 @@ inline uint64_t flip_bytes(uint64_t bytes) {
 	       | (((bytes) & 0x00000000000000ffull) << 56));
 }
 
-bignumber::bignumber(std::vector<uint64_t> bits) {
-	ssl_bn = std::make_shared<openssl_bignum>();
+bignumber::bignumber(std::vector<uint64_t> bits): ssl_bn(std::make_shared<openssl_bignum>()) {
 	std::reverse(bits.begin(), bits.end());
 	for (auto& chunk : bits) {
 		chunk = flip_bytes(chunk);
