@@ -76,7 +76,7 @@ bignumber::bignumber(std::vector<uint64_t> bits): ssl_bn(std::make_shared<openss
 	for (auto& chunk : bits) {
 		chunk = flip_bytes(chunk);
 	}
-	BN_bin2bn((unsigned char *)bits.data(), bits.size() * sizeof(uint64_t), ssl_bn->bn);
+	BN_bin2bn(reinterpret_cast<unsigned char*>(bits.data()), bits.size() * sizeof(uint64_t), ssl_bn->bn);
 }
 
 std::string bignumber::get_number(bool hex) const {
@@ -88,10 +88,10 @@ std::string bignumber::get_number(bool hex) const {
 
 std::vector<uint64_t> bignumber::get_binary() const {
 	std::size_t size = BN_num_bytes(ssl_bn->bn);
-	auto size_64_bit = (std::size_t)ceil((double)size / sizeof(uint64_t));
+	auto size_64_bit = static_cast<std::size_t>(ceil(static_cast<double>(size) / sizeof(uint64_t)));
 	std::vector<uint64_t> returned;
 	returned.resize(size_64_bit);
-	BN_bn2binpad(ssl_bn->bn, (unsigned char*)returned.data(), returned.size() * sizeof(uint64_t));
+	BN_bn2binpad(ssl_bn->bn, reinterpret_cast<unsigned char*>(returned.data()), returned.size() * sizeof(uint64_t));
 	std::reverse(returned.begin(), returned.end());
 	for (auto& chunk : returned) {
 		chunk = flip_bytes(chunk);
