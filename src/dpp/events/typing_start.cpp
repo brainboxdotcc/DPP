@@ -34,7 +34,7 @@ namespace dpp::events {
  * @param j JSON data for the event
  * @param raw Raw JSON string
  */
-void typing_start::handle(discord_client* client, json &j, const std::string &raw) {
+void typing_start::handle(discord_client* client, json &j, std::string_view raw) {
 	if (!client->creator->on_typing_start.empty()) {
 		json& d = j["d"];
 		dpp::typing_start_t ts(client, raw);

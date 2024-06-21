@@ -37,7 +37,7 @@ namespace dpp::events {
  * @param j JSON data for the event
  * @param raw Raw JSON string
  */
-void guild_members_chunk::handle(discord_client* client, json &j, const std::string &raw) {
+void guild_members_chunk::handle(discord_client* client, json &j, std::string_view raw) {
 	json &d = j["d"];
 	dpp::guild_member_map um;
 	dpp::guild* g = dpp::find_guild(snowflake_not_null(&d, "guild_id"));

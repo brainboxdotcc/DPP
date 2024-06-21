@@ -82,7 +82,7 @@ void fill_options(dpp::json option_json, std::vector<dpp::command_option>& optio
  * @param j JSON data for the event
  * @param raw Raw JSON string
  */
-void interaction_create::handle(discord_client* client, json &j, const std::string &raw) {
+void interaction_create::handle(discord_client* client, json &j, std::string_view raw) {
 	json& d = j["d"];
 	dpp::interaction i;
 	/* We must set here because we cant pass it through the nlohmann from_json() */

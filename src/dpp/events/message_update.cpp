@@ -36,7 +36,7 @@ namespace dpp::events {
  * @param j JSON data for the event
  * @param raw Raw JSON string
  */
-void message_update::handle(discord_client* client, json &j, const std::string &raw) {
+void message_update::handle(discord_client* client, json &j, std::string_view raw) {
 	if (!client->creator->on_message_update.empty()) {
 		json d = j["d"];
 		dpp::message_update_t msg(client, raw);

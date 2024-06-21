@@ -37,7 +37,7 @@ namespace dpp::events {
  * @param j JSON data for the event
  * @param raw Raw JSON string
  */
-void guild_stickers_update::handle(discord_client* client, json &j, const std::string &raw) {
+void guild_stickers_update::handle(discord_client* client, json &j, std::string_view raw) {
 	json& d = j["d"];
 	if (!client->creator->on_guild_stickers_update.empty()) {
 		dpp::snowflake guild_id = snowflake_not_null(&d, "guild_id");

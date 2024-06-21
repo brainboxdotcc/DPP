@@ -52,7 +52,7 @@ thread_local std::string audit_reason;
  * @param message Message to display
  * @return std::function<void(const T&)> Returned lambda
  */
-template<typename T> std::function<void(const T&)> make_intent_warning(cluster* cl, const intents required_intent, const std::string& message) {
+template<typename T> std::function<void(const T&)> make_intent_warning(cluster* cl, const intents required_intent, std::string_view message) {
 	return [cl, required_intent, message](const T& event) {
 		if (!(cl->intents & required_intent) && event.msg.guild_id) {
 			cl->log(ll_warning, message);
@@ -92,7 +92,7 @@ template bool DPP_EXPORT validate_configuration<build_type::release>();
 
 template bool DPP_EXPORT validate_configuration<build_type::universal>();
 
-cluster::cluster(const std::string &_token, uint32_t _intents, uint32_t _shards, uint32_t _cluster_id, uint32_t _maxclusters, bool comp, cache_policy_t policy, uint32_t request_threads, uint32_t request_threads_raw)
+cluster::cluster(std::string_view _token, uint32_t _intents, uint32_t _shards, uint32_t _cluster_id, uint32_t _maxclusters, bool comp, cache_policy_t policy, uint32_t request_threads, uint32_t request_threads_raw)
 	: default_gateway("gateway.discord.gg"), rest(nullptr), raw_rest(nullptr), compressed(comp), start_time(0), token(_token), last_identify(time(nullptr) - 5), intents(_intents),
 	numshards(_shards), cluster_id(_cluster_id), maxclusters(_maxclusters), rest_ping(0.0), cache_policy(policy), ws_mode(ws_json)
 {
@@ -148,10 +148,10 @@ cluster& cluster::set_websocket_protocol(websocket_protocol_t mode) {
 	return *this;
 }
 
-void cluster::log(dpp::loglevel severity, const std::string &msg) const {
+void cluster::log(dpp::loglevel severity, std::string_view msg) const {
 	if (!on_log.empty()) {
 		/* Pass to user if they've hooked the event */
-		dpp::log_t logmsg(nullptr, msg);
+        dpp::log_t logmsg(nullptr, msg);
 		logmsg.severity = severity;
 		logmsg.message = msg;
 		on_log.call(logmsg);
@@ -299,7 +299,7 @@ void cluster::set_dm_channel(snowflake user_id, snowflake channel_id) {
  * @param rv Request completion data
  * @return json
  */
-json error_response(const std::string& message, http_request_completion_t& rv)
+json error_response(std::string_view message, http_request_completion_t& rv)
 {
 	json j({
 		{"code", rv.status},
@@ -321,8 +321,8 @@ json error_response(const std::string& message, http_request_completion_t& rv)
 	return j;
 }
 
-void cluster::post_rest(const std::string &endpoint, const std::string &major_parameters, const std::string &parameters, http_method method, const std::string &postdata, json_encode_t callback, const std::string &filename, const std::string &filecontent, const std::string &filemimetype, const std::string &protocol) {
-	rest->post_request(std::make_unique<http_request>(endpoint + (!major_parameters.empty() ? "/" : "") + major_parameters, parameters, [endpoint, callback](http_request_completion_t rv) {
+void cluster::post_rest(std::string_view endpoint, std::string_view major_parameters, std::string_view parameters, http_method method, std::string_view postdata, json_encode_t callback, std::string_view filename, std::string_view filecontent, std::string_view filemimetype, std::string_view protocol) {
+    rest->post_request(std::make_unique<http_request>(std::string(endpoint) + (!major_parameters.empty() ? "/" : "") + std::string(major_parameters), parameters, [callback](http_request_completion_t rv) {
 		json j;
 		if (rv.error == h_success && !rv.body.empty()) {
 			try {
@@ -338,7 +338,7 @@ void cluster::post_rest(const std::string &endpoint, const std::string &major_pa
 	}, postdata, method, get_audit_reason(), filename, filecontent, filemimetype, protocol));
 }
 
-void cluster::post_rest_multipart(const std::string &endpoint, const std::string &major_parameters, const std::string &parameters, http_method method, const std::string &postdata, json_encode_t callback, const std::vector<message_file_data> &file_data) {
+void cluster::post_rest_multipart(std::string_view endpoint, std::string_view major_parameters, std::string_view parameters, http_method method, std::string_view postdata, json_encode_t callback, const std::vector<message_file_data> &file_data) {
 	std::vector<std::string> file_names{};
 	std::vector<std::string> file_contents{};
 	std::vector<std::string> file_mimetypes{};
@@ -349,7 +349,7 @@ void cluster::post_rest_multipart(const std::string &endpoint, const std::string
 		file_mimetypes.push_back(data.mimetype);
 	}
 
-	rest->post_request(std::make_unique<http_request>(endpoint + (!major_parameters.empty() ? "/" : "") + major_parameters, parameters, [endpoint, callback](http_request_completion_t rv) {
+    rest->post_request(std::make_unique<http_request>(std::string(endpoint) + (!major_parameters.empty() ? "/" : "") + std::string(major_parameters), parameters, [callback](http_request_completion_t rv) {
 		json j;
 		if (rv.error == h_success && !rv.body.empty()) {
 			try {
@@ -366,7 +366,7 @@ void cluster::post_rest_multipart(const std::string &endpoint, const std::string
 }
 
 
-void cluster::request(const std::string &url, http_method method, http_completion_event callback, const std::string &postdata, const std::string &mimetype, const std::multimap<std::string, std::string> &headers, const std::string &protocol) {
+void cluster::request(std::string_view url, http_method method, http_completion_event callback, std::string_view postdata, std::string_view mimetype, const std::multimap<std::string, std::string> &headers, std::string_view protocol) {
 	raw_rest->post_request(std::make_unique<http_request>(url, callback, method, postdata, mimetype, headers, protocol));
 }
 
@@ -401,7 +401,7 @@ void cluster::set_presence(const dpp::presence &p) {
 	}
 }
 
-cluster& cluster::set_audit_reason(const std::string &reason) {
+cluster& cluster::set_audit_reason(std::string_view reason) {
 	audit_reason = reason;
 	return *this;
 }
@@ -411,7 +411,7 @@ cluster& cluster::clear_audit_reason() {
 	return *this;
 }
 
-cluster& cluster::set_default_gateway(const std::string &default_gateway_new) {
+cluster& cluster::set_default_gateway(std::string_view default_gateway_new) {
 	default_gateway = default_gateway_new;
 	return *this;
 }

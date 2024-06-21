@@ -216,7 +216,7 @@ public:
 	 * connection to non-Discord addresses such as within dpp::cluster::request().
 	 * @throw dpp::exception Failed to initialise connection
 	 */
-	ssl_client(const std::string &_hostname, const std::string &_port = "443", bool plaintext_downgrade = false, bool reuse = false);
+    ssl_client(std::string_view _hostname, std::string_view _port = "443", bool plaintext_downgrade = false, bool reuse = false);
 
 	/**
 	 * @brief Nonblocking I/O loop
@@ -242,7 +242,7 @@ public:
 	 * @param data Data to be written to the buffer
 	 * @note The data may not be written immediately and may be written at a later time to the socket.
 	 */
-	virtual void write(const std::string &data);
+    virtual void write(std::string_view data);
 
 	/**
 	 * @brief Close socket connection
@@ -254,7 +254,7 @@ public:
 	 * @param severity severity of log message
 	 * @param msg Log message to send
 	 */
-	virtual void log(dpp::loglevel severity, const std::string &msg) const;
+    virtual void log(dpp::loglevel severity, std::string_view msg) const;
 };
 
 } // namespace dpp

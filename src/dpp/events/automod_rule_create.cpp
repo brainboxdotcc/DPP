@@ -36,7 +36,7 @@ namespace dpp::events {
  * @param j JSON data for the event
  * @param raw Raw JSON string
  */
-void automod_rule_create::handle(discord_client* client, json &j, const std::string &raw) {
+void automod_rule_create::handle(discord_client* client, json &j, std::string_view raw) {
 	if (!client->creator->on_automod_rule_create.empty()) {
 		json& d = j["d"];
 		automod_rule_create_t arc(client, raw);

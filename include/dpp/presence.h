@@ -480,7 +480,7 @@ public:
 	 * @param stat State of the activity
 	 * @param url_ url of the activity, only works for certain sites, such as YouTube
 	 */
-	activity(const activity_type typ, const std::string& nam, const std::string& stat, const std::string& url_);
+    activity(const activity_type typ, std::string_view nam, std::string_view stat, std::string_view url_);
 };
 
 /**
@@ -540,7 +540,7 @@ public:
 	 * @param type Type of activity
 	 * @param activity_description Description of the activity
 	 */
-	presence(presence_status status, activity_type type, const std::string& activity_description);
+    presence(presence_status status, activity_type type, std::string_view activity_description);
 
 	/**
 	 * @brief Construct a new presence object with some parameters for sending to a websocket.

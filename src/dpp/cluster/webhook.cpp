@@ -38,7 +38,7 @@ void cluster::delete_webhook_message(const class webhook &wh, snowflake message_
 	rest_request<confirmation>(this, API_PATH "/webhooks", std::to_string(wh.id), utility::url_encode(!wh.token.empty() ? wh.token: token) + "/messages/" + std::to_string(message_id) + parameters, m_delete, "", callback);
 }
 
-void cluster::delete_webhook_with_token(snowflake webhook_id, const std::string &token, command_completion_event_t callback) {
+void cluster::delete_webhook_with_token(snowflake webhook_id, std::string_view token, command_completion_event_t callback) {
 	rest_request<confirmation>(this, API_PATH "/webhooks", std::to_string(webhook_id), utility::url_encode(token), m_delete, "", callback);
 }
 
@@ -66,7 +66,7 @@ void cluster::edit_webhook_with_token(const class webhook& wh, command_completio
 	rest_request<webhook>(this, API_PATH "/webhooks", std::to_string(wh.id), utility::url_encode(wh.token), m_patch, jwh.dump(-1, ' ', false, json::error_handler_t::replace), callback);
 }
 
-void cluster::execute_webhook(const class webhook &wh, const struct message& m, bool wait, snowflake thread_id, const std::string& thread_name, command_completion_event_t callback) {
+void cluster::execute_webhook(const class webhook &wh, const struct message& m, bool wait, snowflake thread_id, std::string_view thread_name, command_completion_event_t callback) {
 	std::string parameters = utility::make_url_parameters({
 		{"wait", wait},
 		{"thread_id", thread_id},
@@ -113,7 +113,7 @@ void cluster::get_webhook_message(const class webhook &wh, snowflake message_id,
 	rest_request<message>(this, API_PATH "/webhooks", std::to_string(wh.id), utility::url_encode(!wh.token.empty() ? wh.token: token) + "/messages/" + std::to_string(message_id) + parameters, m_get, "", callback);
 }
 
-void cluster::get_webhook_with_token(snowflake webhook_id, const std::string &token, command_completion_event_t callback) {
+void cluster::get_webhook_with_token(snowflake webhook_id, std::string_view token, command_completion_event_t callback) {
 	rest_request<webhook>(this, API_PATH "/webhooks", std::to_string(webhook_id), utility::url_encode(token), m_get, "", callback);
 }
 

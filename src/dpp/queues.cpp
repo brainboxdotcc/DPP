@@ -32,27 +32,27 @@
 
 namespace dpp {
 
-http_request::http_request(const std::string &_endpoint, const std::string &_parameters, http_completion_event completion, const std::string &_postdata, http_method _method, const std::string &audit_reason, const std::string &filename, const std::string &filecontent, const std::string &filemimetype, const std::string &http_protocol)
+http_request::http_request(std::string_view _endpoint, std::string_view _parameters, http_completion_event completion, std::string_view _postdata, http_method _method, std::string_view audit_reason, std::string_view filename, std::string_view filecontent, std::string_view filemimetype, std::string_view http_protocol)
  : complete_handler(completion), completed(false), non_discord(false), endpoint(_endpoint), parameters(_parameters), postdata(_postdata),  method(_method), reason(audit_reason), mimetype("application/json"), waiting(false), protocol(http_protocol)
 {
 	if (!filename.empty()) {
-		file_name.push_back(filename);
+        file_name.emplace_back(filename);
 	}
 	if (!filecontent.empty()) {
-		file_content.push_back(filecontent);
+        file_content.emplace_back(filecontent);
 	}
 	if (!filemimetype.empty()) {
-		file_mimetypes.push_back(filemimetype);
+        file_mimetypes.emplace_back(filemimetype);
 	}
 }
 
-http_request::http_request(const std::string &_endpoint, const std::string &_parameters, http_completion_event completion, const std::string &_postdata, http_method method, const std::string &audit_reason, const std::vector<std::string> &filename, const std::vector<std::string> &filecontent, const std::vector<std::string> &filemimetypes, const std::string &http_protocol)
+http_request::http_request(std::string_view _endpoint, std::string_view _parameters, http_completion_event completion, std::string_view _postdata, http_method method, std::string_view audit_reason, const std::vector<std::string> &filename, const std::vector<std::string> &filecontent, const std::vector<std::string> &filemimetypes, std::string_view http_protocol)
  : complete_handler(completion), completed(false), non_discord(false), endpoint(_endpoint), parameters(_parameters), postdata(_postdata),  method(method), reason(audit_reason), file_name(filename), file_content(filecontent), file_mimetypes(filemimetypes), mimetype("application/json"), waiting(false), protocol(http_protocol)
 {
 }
 
 
-http_request::http_request(const std::string &_url, http_completion_event completion, http_method _method, const std::string &_postdata, const std::string &_mimetype, const std::multimap<std::string, std::string> &_headers, const std::string &http_protocol)
+http_request::http_request(std::string_view _url, http_completion_event completion, http_method _method, std::string_view _postdata, std::string_view _mimetype, const std::multimap<std::string, std::string> &_headers, std::string_view http_protocol)
  : complete_handler(completion), completed(false), non_discord(true), endpoint(_url), postdata(_postdata), method(_method), mimetype(_mimetype), req_headers(_headers), waiting(false), protocol(http_protocol)
 {
 }
@@ -67,7 +67,7 @@ void http_request::complete(const http_request_completion_t &c) {
 }
 
 /* Fill a http_request_completion_t from a HTTP result */
-void populate_result(const std::string &url, cluster* owner, http_request_completion_t& rv, const https_client &res) {
+void populate_result(std::string_view url, cluster* owner, http_request_completion_t& rv, const https_client &res) {
 	rv.status = res.get_status();
 	rv.body = res.get_content();
 	for (auto &v : res.get_headers()) {
@@ -86,14 +86,15 @@ void populate_result(const std::string &url, cluster* owner, http_request_comple
 		rv.ratelimit_retry_after = from_string<uint64_t>(res.get_header("x-ratelimit-retry-after"));
 	}
 	uint64_t rl_timer = rv.ratelimit_retry_after ? rv.ratelimit_retry_after : rv.ratelimit_reset_after;
+    std::string url_string(url);
 	if (rv.status == 429) {
-		owner->log(ll_warning, "Rate limited on endpoint " + url + ", reset after " + std::to_string(rl_timer) + "s!");
+        owner->log(ll_warning, "Rate limited on endpoint " + url_string + ", reset after " + std::to_string(rl_timer) + "s!");
 	}
 	if (url != "/api/v" DISCORD_API_VERSION "/gateway/bot") {	// Squelch this particular api endpoint or it generates a warning the minute we boot a cluster
 		if (rv.ratelimit_global) {
-			owner->log(ll_warning, "At global rate limit on endpoint " + url + ", reset after " + std::to_string(rl_timer) + "s!");
+            owner->log(ll_warning, "At global rate limit on endpoint " + url_string + ", reset after " + std::to_string(rl_timer) + "s!");
 		} else if (rv.ratelimit_remaining == 0 && rl_timer > 0) {
-			owner->log(ll_debug, "Waiting for endpoint " + url + " rate limit, next request in " + std::to_string(rl_timer) + "s");
+            owner->log(ll_debug, "Waiting for endpoint " + url_string + " rate limit, next request in " + std::to_string(rl_timer) + "s");
 		}
 	}
 }

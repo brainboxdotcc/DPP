@@ -62,7 +62,7 @@ public:
 	 * @note Prefixing number_string with 0x will parse it as hexadecimal.
 	 * This is not case sensitive.
 	 */
-	bignumber(const std::string& number_string);
+    bignumber(std::string_view number_string);
 
 	/**
 	 * @brief Build a bignumber from a vector of 64 bit values.

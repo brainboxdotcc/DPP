@@ -35,7 +35,7 @@ namespace dpp::events {
  * @param j JSON data for the event
  * @param raw Raw JSON string
  */
-void channel_pins_update::handle(discord_client* client, json &j, const std::string &raw) {
+void channel_pins_update::handle(discord_client* client, json &j, std::string_view raw) {
 
 	if (!client->creator->on_channel_pins_update.empty()) {
 		json& d = j["d"];

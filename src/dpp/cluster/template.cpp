@@ -23,26 +23,26 @@
 
 namespace dpp {
 
-void cluster::guild_create_from_template(const std::string &code, const std::string &name, command_completion_event_t callback) {
+void cluster::guild_create_from_template(std::string_view code, std::string_view name, command_completion_event_t callback) {
 	json params({{"name", name}});
 	rest_request<guild>(this, API_PATH "/guilds", "templates", code, m_post, params.dump(-1, ' ', false, json::error_handler_t::replace), callback);
 }
 
 
-void cluster::guild_template_create(snowflake guild_id, const std::string &name, const std::string &description, command_completion_event_t callback) {
+void cluster::guild_template_create(snowflake guild_id, std::string_view name, std::string_view description, command_completion_event_t callback) {
 	json params({{"name", name}, {"description", description}});
 	rest_request<dtemplate>(this, API_PATH "/guilds", std::to_string(guild_id), "templates", m_post, params.dump(-1, ' ', false, json::error_handler_t::replace), callback);
 }
 
 
-void cluster::guild_template_delete(snowflake guild_id, const std::string &code, command_completion_event_t callback) {
-	rest_request<confirmation>(this, API_PATH "/guilds", std::to_string(guild_id), "templates/" + code, m_delete, "", callback);
+void cluster::guild_template_delete(snowflake guild_id, std::string_view code, command_completion_event_t callback) {
+    rest_request<confirmation>(this, API_PATH "/guilds", std::to_string(guild_id), "templates/" + std::string(code), m_delete, "", callback);
 }
 
 
-void cluster::guild_template_modify(snowflake guild_id, const std::string &code, const std::string &name, const std::string &description, command_completion_event_t callback) {
+void cluster::guild_template_modify(snowflake guild_id, std::string_view code, std::string_view name, std::string_view description, command_completion_event_t callback) {
 	json params({{"name", name}, {"description", description}});
-	rest_request<dtemplate>(this, API_PATH "/guilds", std::to_string(guild_id), "templates/" + code, m_patch, params.dump(-1, ' ', false, json::error_handler_t::replace), callback);
+    rest_request<dtemplate>(this, API_PATH "/guilds", std::to_string(guild_id), "templates/" + std::string(code), m_patch, params.dump(-1, ' ', false, json::error_handler_t::replace), callback);
 }
 
 
@@ -51,12 +51,12 @@ void cluster::guild_templates_get(snowflake guild_id, command_completion_event_t
 }
 
 
-void cluster::guild_template_sync(snowflake guild_id, const std::string &code, command_completion_event_t callback) {
-	rest_request<dtemplate>(this, API_PATH "/guilds", std::to_string(guild_id), "templates/" + code, m_put, "", callback);
+void cluster::guild_template_sync(snowflake guild_id, std::string_view code, command_completion_event_t callback) {
+    rest_request<dtemplate>(this, API_PATH "/guilds", std::to_string(guild_id), "templates/" + std::string(code), m_put, "", callback);
 }
 
 
-void cluster::template_get(const std::string &code, command_completion_event_t callback) {
+void cluster::template_get(std::string_view code, command_completion_event_t callback) {
 	rest_request<dtemplate>(this, API_PATH "/guilds", "templates", code, m_get, "", callback);
 }
 

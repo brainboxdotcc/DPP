@@ -28,7 +28,7 @@
 
 
 namespace dpp::events {
-void thread_update::handle(discord_client* client, json& j, const std::string& raw) {
+void thread_update::handle(discord_client* client, json& j, std::string_view raw) {
 	json& d = j["d"];
 
 	dpp::thread t;

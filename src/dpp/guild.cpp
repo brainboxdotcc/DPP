@@ -110,7 +110,7 @@ std::string guild_member::get_mention() const {
 	return "<@" + std::to_string(user_id) + ">";
 }
 
-guild_member& guild_member::set_nickname(const std::string& nick) {
+guild_member& guild_member::set_nickname(std::string_view nick) {
 	this->nickname = nick;
 	this->flags |= gm_nickname_action;
 	return *this;
@@ -262,7 +262,7 @@ json guild_member::to_json_impl(bool with_id) const {
 	return j;
 }
 
-guild& guild::set_name(const std::string& n) {
+guild& guild::set_name(std::string_view n) {
 	this->name = utility::validate(trim(n), 2, 100, "Guild names cannot be less than 2 characters");
 	return *this;
 }
@@ -394,7 +394,7 @@ welcome_channel &welcome_channel::set_channel_id(const snowflake _channel_id) {
 	return *this;
 }
 
-welcome_channel &welcome_channel::set_description(const std::string &_description) {
+welcome_channel &welcome_channel::set_description(std::string_view _description) {
 	this->description = _description;
 	return *this;
 }
@@ -422,7 +422,7 @@ json welcome_screen::to_json_impl(bool with_id) const {
 	return j;
 }
 
-welcome_screen &welcome_screen::set_description(const std::string &s){
+welcome_screen &welcome_screen::set_description(std::string_view s){
 	this->description = s;
 	return *this;
 }
@@ -663,11 +663,11 @@ guild& guild::fill_from_json(discord_client* shard, nlohmann::json* d) {
 				_icon = _icon.substr(2, _icon.length());
 				this->flags |= g_has_animated_icon;
 			}
-			this->icon = _icon;
+            this->icon = utility::iconhash(_icon);
 		}
 		std::string _dsplash = string_not_null(d, "discovery_splash");
 		if (!_dsplash.empty()) {
-			this->discovery_splash = _dsplash;
+            this->discovery_splash = utility::iconhash(_dsplash);
 		}
 		set_snowflake_not_null(d, "owner_id", this->owner_id);
 
@@ -747,7 +747,7 @@ guild& guild::fill_from_json(discord_client* shard, nlohmann::json* d) {
 			if (_banner.length() > 2 && _banner.substr(0, 2) == "a_") {
 				this->flags |= dpp::g_has_animated_banner;
 			}
-			this->banner = _banner;
+            this->banner = utility::iconhash(_banner);
 		}
 		this->premium_tier = (guild_premium_tier_t)int8_not_null(d, "premium_tier");
 		set_int16_not_null(d, "premium_subscription_count", this->premium_subscription_count);
@@ -1084,12 +1084,12 @@ onboarding_prompt_option &onboarding_prompt_option::set_emoji(const dpp::emoji &
 	return *this;
 }
 
-onboarding_prompt_option &onboarding_prompt_option::set_title(const std::string &_title) {
+onboarding_prompt_option &onboarding_prompt_option::set_title(std::string_view _title) {
 	this->title = _title;
 	return *this;
 }
 
-onboarding_prompt_option &onboarding_prompt_option::set_description(const std::string &_description) {
+onboarding_prompt_option &onboarding_prompt_option::set_description(std::string_view _description) {
 	this->description = _description;
 	return *this;
 }
@@ -1142,7 +1142,7 @@ onboarding_prompt &onboarding_prompt::set_type(const onboarding_prompt_type _typ
 	return *this;
 }
 
-onboarding_prompt &onboarding_prompt::set_title(const std::string& _title) {
+onboarding_prompt &onboarding_prompt::set_title(std::string_view _title) {
 	this->title = _title;
 	return *this;
 }

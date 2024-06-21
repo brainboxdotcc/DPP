@@ -316,7 +316,7 @@ public:
 	 *
 	 * @param name The name of the tag. It will be truncated to the maximum length of 20 UTF-8 characters.
 	 */
-	forum_tag(const std::string& name);
+    forum_tag(std::string_view name);
 
 	/** Destructor */
 	virtual ~forum_tag() = default;
@@ -329,7 +329,7 @@ public:
 	 *
 	 * @note name will be truncated to 20 chars, if longer
 	 */
-	forum_tag& set_name(const std::string& name);
+    forum_tag& set_name(std::string_view name);
 };
 
 /**
@@ -499,7 +499,7 @@ public:
 	 * @note name will be truncated to 100 chars, if longer
 	 * @throw dpp::length_exception if length < 1
 	 */
-	channel& set_name(const std::string& name);
+    channel& set_name(std::string_view name);
 
 	/**
 	 * @brief Set topic of this channel object
@@ -509,7 +509,7 @@ public:
 	 *
 	 * @note topic will be truncated to 1024 chars, if longer
 	 */
-	channel& set_topic(const std::string& topic);
+    channel& set_topic(std::string_view topic);
 
 	/**
 	 * @brief Set type of this channel object

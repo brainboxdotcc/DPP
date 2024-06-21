@@ -23,7 +23,7 @@
 
 namespace dpp {
 
-void cluster::guild_current_member_edit(snowflake guild_id, const std::string &nickname, command_completion_event_t callback) {
+void cluster::guild_current_member_edit(snowflake guild_id, std::string_view nickname, command_completion_event_t callback) {
 	std::string o = (nickname.empty() ? json({{"nick", json::value_t::null }}) : json({{"nick", nickname }})).dump(-1, ' ', false, json::error_handler_t::replace);
 	rest_request<confirmation>(this, API_PATH "/guilds", std::to_string(guild_id), "members/@me", m_patch, o, callback);
 }
@@ -139,7 +139,7 @@ void cluster::guild_begin_prune(snowflake guild_id, const struct prune& pruneinf
 }
 
 
-void cluster::guild_set_nickname(snowflake guild_id, const std::string &nickname, command_completion_event_t callback) {
+void cluster::guild_set_nickname(snowflake guild_id, std::string_view nickname, command_completion_event_t callback) {
 	std::string o = (nickname.empty() ? json({{"nick", json::value_t::null }}) : json({{"nick", nickname }})).dump(-1, ' ', false, json::error_handler_t::replace);
 	rest_request<confirmation>(this, API_PATH "/guilds", std::to_string(guild_id), "members/@me/nick", m_patch, o, callback);
 }

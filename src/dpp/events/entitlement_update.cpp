@@ -32,7 +32,7 @@ namespace dpp::events {
  * @param j JSON data for the event
  * @param raw Raw JSON string
  */
-void entitlement_update::handle(discord_client* client, json &j, const std::string &raw) {
+void entitlement_update::handle(discord_client* client, json &j, std::string_view raw) {
 	if (!client->creator->on_entitlement_update.empty()) {
 		dpp::entitlement ent;
 		json& d = j["d"];

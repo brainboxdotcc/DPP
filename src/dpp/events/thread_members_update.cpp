@@ -29,7 +29,7 @@
 namespace dpp::events {
 
 
-void thread_members_update::handle(discord_client* client, json& j, const std::string& raw) {
+void thread_members_update::handle(discord_client* client, json& j, std::string_view raw) {
 	json& d = j["d"];
 
 	dpp::guild* g = dpp::find_guild(snowflake_not_null(&d, "guild_id"));

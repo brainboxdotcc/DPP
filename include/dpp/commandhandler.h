@@ -143,7 +143,7 @@ struct DPP_EXPORT param_info {
 	 * @param description The parameter description
 	 * @param opts The options for a multiple choice parameter
 	 */
-	param_info(parameter_type t, bool o, const std::string &description, const std::map<command_value, std::string> &opts = {});
+    param_info(parameter_type t, bool o, std::string_view description, const std::map<command_value, std::string> &opts = {});
 };
 
 /**
@@ -343,7 +343,7 @@ public:
 	 * @param prefix Prefix to be handled by the command handler
 	 * @return commandhandler& reference to self
 	 */
-	commandhandler& add_prefix(const std::string &prefix);
+    commandhandler& add_prefix(std::string_view prefix);
 
 	/**
 	 * @brief Add a command to the command handler
@@ -359,7 +359,7 @@ public:
 	 * @return commandhandler& reference to self
 	 * @throw dpp::logic_exception if application ID cannot be determined
 	 */
-	commandhandler& add_command(const std::string &command, const parameter_registration_t &parameters, command_handler handler, const std::string &description = "", snowflake guild_id = 0);
+    commandhandler& add_command(std::string_view command, const parameter_registration_t &parameters, command_handler handler, std::string_view description = "", snowflake guild_id = 0);
 
 	/**
 	 * @brief Register all slash commands with Discord

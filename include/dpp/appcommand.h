@@ -165,7 +165,7 @@ public:
 	 * @param _name name of command option choice in the specified language
 	 * @return command_option_choice& reference to self for fluent chaining
 	 */
-	command_option_choice& add_localization(const std::string& language, const std::string& _name);
+    command_option_choice& add_localization(std::string_view language, std::string_view _name);
 
 	/**
 	 * @brief Construct a new command option choice object
@@ -173,7 +173,7 @@ public:
 	 * @param n name to initialise with
 	 * @param v value to initialise with
 	 */
-	command_option_choice(const std::string &n, command_value v);
+    command_option_choice(std::string_view n, command_value v);
 };
 
 /**
@@ -305,7 +305,7 @@ public:
 	 * @param _description description of slash command option in the specified language (optional)
 	 * @return command_option& reference to self for fluent chaining
 	 */
-	command_option& add_localization(const std::string& language, const std::string& _name, const std::string& _description = "");
+    command_option& add_localization(std::string_view language, std::string_view _name, std::string_view _description = "");
 
 	/**
 	 * @brief Construct a new command option object
@@ -315,7 +315,7 @@ public:
 	 * @param description Option description
 	 * @param required True if this is a mandatory parameter
 	 */
-	command_option(command_option_type t, const std::string &name, const std::string &description, bool required = false);
+    command_option(command_option_type t, std::string_view name, std::string_view description, bool required = false);
 
 	/**
 	 * @brief Add a multiple choice option
@@ -602,7 +602,7 @@ public:
 	 * @param _title Title of the modal form. It will be truncated to the maximum length of 45 UTF-8 characters.
 	 * @param _components Components to add to the modal form
 	 */
-	interaction_modal_response(const std::string& _custom_id, const std::string& _title, const std::vector<component> _components = {});
+    interaction_modal_response(std::string_view _custom_id, std::string_view _title, const std::vector<component> _components = {});
 
 	/**
 	 * @brief Set the custom id
@@ -610,7 +610,7 @@ public:
 	 * @param _custom_id custom id to set
 	 * @return interaction_modal_response& Reference to self
 	 */
-	interaction_modal_response& set_custom_id(const std::string& _custom_id);
+    interaction_modal_response& set_custom_id(std::string_view _custom_id);
 
 	/**
 	 * @brief Set the title 
@@ -618,7 +618,7 @@ public:
 	 * @param _title title to set
 	 * @return interaction_modal_response& Reference to self
 	 */
-	interaction_modal_response& set_title(const std::string& _title);
+    interaction_modal_response& set_title(std::string_view _title);
 
 	/**
 	 * @brief Add a component to an interaction modal response
@@ -1445,7 +1445,7 @@ public:
 	 * @param _description Command description
 	 * @param _application_id Application id (usually the bot's user id)
 	 */
-	slashcommand(const std::string &_name, const std::string &_description, const dpp::snowflake _application_id);
+    slashcommand(std::string_view _name, std::string_view _description, const dpp::snowflake _application_id);
 
 	/**
 	 * @brief Construct a new slashcommand object
@@ -1454,7 +1454,7 @@ public:
 	 * @param _type Context menu type
 	 * @param _application_id Application id (usually the bot's user id)
 	 */
-	slashcommand(const std::string &_name, const slashcommand_contextmenu_type _type, const dpp::snowflake _application_id);
+    slashcommand(std::string_view _name, const slashcommand_contextmenu_type _type, const dpp::snowflake _application_id);
 
 	/**
 	 * @brief Destroy the slashcommand object
@@ -1469,7 +1469,7 @@ public:
 	 * @param _description description of slash command in the specified language (optional)
 	 * @return slashcommand& reference to self for chaining of calls
 	 */
-	slashcommand& add_localization(const std::string& language, const std::string& _name, const std::string& _description = "");
+    slashcommand& add_localization(std::string_view language, std::string_view _name, std::string_view _description = "");
 
 	/**
 	 * @brief Set the dm permission for the command
@@ -1523,7 +1523,7 @@ public:
 	 * The command name will be set to lowercase when the type is the default dpp::ctxm_chat_input.
 	 * @return slashcommand& reference to self for chaining of calls
 	 */
-	slashcommand& set_name(const std::string &n);
+    slashcommand& set_name(std::string_view n);
 
 	/**
 	 * @brief Set the description of the command
@@ -1533,7 +1533,7 @@ public:
 	 * If your command description is longer than this, it will be truncated.
 	 * @return slashcommand& reference to self for chaining of calls
 	 */
-	slashcommand& set_description(const std::string &d);
+    slashcommand& set_description(std::string_view d);
 
 	/**
 	 * @brief Set the application id of the command

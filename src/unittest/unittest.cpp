@@ -147,10 +147,11 @@ std::vector<uint8_t> load_test_audio() {
 	return testaudio;
 }
 
-std::vector<std::byte> load_data(const std::string& file) {
+std::vector<std::byte> load_data(std::string_view file) {
 	std::vector<std::byte> testimage;
-	std::string dir = get_testdata_dir();
-	std::ifstream input (dir + file, std::ios::in|std::ios::binary|std::ios::ate);
+    std::string path = get_testdata_dir();
+    path += file;
+    std::ifstream input (path, std::ios::in|std::ios::binary|std::ios::ate);
 	if (input.is_open()) {
 		size_t testimage_size = input.tellg();
 		testimage.resize(testimage_size);
@@ -159,7 +160,7 @@ std::vector<std::byte> load_data(const std::string& file) {
 		input.close();
 	}
 	else {
-		std::cout << "ERROR: Can't load " + dir + file + "\n";
+        std::cout << "ERROR: Can't load " + path + "\n";
 		exit(1);
 	}
 	return testimage;

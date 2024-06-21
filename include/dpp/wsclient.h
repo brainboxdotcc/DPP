@@ -155,7 +155,7 @@ class DPP_EXPORT websocket_client : public ssl_client {
 	 * @param ping True if this is a ping, false if it is a pong 
 	 * @param payload The ping payload, to be returned as-is for a ping
 	 */
-	void handle_ping_pong(bool ping, const std::string &payload);
+    void handle_ping_pong(bool ping, std::string_view payload);
 
 protected:
 
@@ -181,7 +181,7 @@ public:
 	 * @note Voice websockets only support OP_TEXT, and other websockets must be
 	 * OP_BINARY if you are going to send ETF.
 	 */
-        websocket_client(const std::string &hostname, const std::string &port = "443", const std::string &urlpath = "", ws_opcode opcode = OP_BINARY);
+        websocket_client(std::string_view hostname, std::string_view port = "443", std::string_view urlpath = "", ws_opcode opcode = OP_BINARY);
 
 	/**
 	 * @brief Destroy the websocket client object
@@ -192,7 +192,7 @@ public:
 	 * @brief Write to websocket. Encapsulates data in frames if the status is CONNECTED.
 	 * @param data The data to send.
 	 */
-        virtual void write(const std::string &data);
+        virtual void write(std::string_view data);
 
 	/**
 	 * @brief Processes incoming frames from the SSL socket input buffer.
@@ -211,7 +211,7 @@ public:
 	 * @param buffer The buffer contents
 	 * @return True if the frame was successfully handled. False if no valid frame is in the buffer.
 	 */
-	virtual bool handle_frame(const std::string &buffer);
+    virtual bool handle_frame(std::string_view buffer);
 
 	/**
 	 * @brief Called upon error frame.

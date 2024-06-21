@@ -36,7 +36,7 @@ namespace dpp::events {
  * @param j JSON data for the event
  * @param raw Raw JSON string
  */
-void guild_scheduled_event_user_add::handle(discord_client* client, json &j, const std::string &raw) {
+void guild_scheduled_event_user_add::handle(discord_client* client, json &j, std::string_view raw) {
 	json& d = j["d"];
 	if (!client->creator->on_guild_scheduled_event_user_add.empty()) {
 		dpp::guild_scheduled_event_user_add_t eua(client, raw);

@@ -29,7 +29,7 @@
 namespace dpp::events {
 
 
-void thread_member_update::handle(discord_client* client, json& j, const std::string& raw) {
+void thread_member_update::handle(discord_client* client, json& j, std::string_view raw) {
 	if (!client->creator->on_thread_member_update.empty()) {
 		json& d = j["d"];
 		dpp::thread_member_update_t tm(client, raw);

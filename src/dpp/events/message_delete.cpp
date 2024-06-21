@@ -36,7 +36,7 @@ namespace dpp::events {
  * @param j JSON data for the event
  * @param raw Raw JSON string
  */
-void message_delete::handle(discord_client* client, json &j, const std::string &raw) {
+void message_delete::handle(discord_client* client, json &j, std::string_view raw) {
 	if (!client->creator->on_message_delete.empty()) {
 		json d = j["d"];
 		dpp::message_delete_t msg(client, raw);

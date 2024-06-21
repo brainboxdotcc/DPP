@@ -24,7 +24,7 @@
 
 namespace dpp {
 
-void cluster::current_user_edit(const std::string &nickname, const std::string& image_blob, const image_type type, command_completion_event_t callback) {
+void cluster::current_user_edit(std::string_view nickname, std::string_view image_blob, const image_type type, command_completion_event_t callback) {
 	json j = json::parse("{\"nickname\": null}");
 	if (!nickname.empty()) {
 		j["nickname"] = nickname;

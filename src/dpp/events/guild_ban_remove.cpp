@@ -38,7 +38,7 @@ namespace dpp::events {
  * @param j JSON data for the event
  * @param raw Raw JSON string
  */
-void guild_ban_remove::handle(discord_client* client, json &j, const std::string &raw) {
+void guild_ban_remove::handle(discord_client* client, json &j, std::string_view raw) {
 	if (!client->creator->on_guild_ban_remove.empty()) {
 		json &d = j["d"];
 		dpp::guild_ban_remove_t gbr(client, raw);

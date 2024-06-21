@@ -28,7 +28,7 @@ namespace dpp {
 
 using json = nlohmann::json;
 
-emoji::emoji(const std::string_view n, const snowflake i, const uint8_t f) : managed(i), name(n), flags(f) {}
+emoji::emoji(std::string_view n, const snowflake i, const uint8_t f) : managed(i), name(n), flags(f) {}
 
 std::string emoji::get_mention(std::string_view name, snowflake id, bool is_animated) {
 	return utility::emoji_mention(name,id,is_animated);

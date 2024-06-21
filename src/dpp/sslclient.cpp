@@ -235,7 +235,7 @@ void set_signal_handler(int signal)
 }
 #endif
 
-ssl_client::ssl_client(const std::string &_hostname, const std::string &_port, bool plaintext_downgrade, bool reuse) :
+ssl_client::ssl_client(std::string_view _hostname, std::string_view _port, bool plaintext_downgrade, bool reuse) :
 	nonblocking(false),
 	sfd(INVALID_SOCKET),
 	ssl(nullptr),
@@ -378,7 +378,7 @@ void ssl_client::connect()
 	}
 }
 
-void ssl_client::write(const std::string &data)
+void ssl_client::write(std::string_view data)
 {
 	/* If we are in nonblocking mode, append to the buffer,
 	 * otherwise just use SSL_write directly. The only time we
@@ -410,7 +410,7 @@ std::string ssl_client::get_cipher() {
 	return cipher;
 }
 
-void ssl_client::log(dpp::loglevel severity, const std::string &msg) const
+void ssl_client::log(dpp::loglevel severity, std::string_view msg) const
 {
 }
 

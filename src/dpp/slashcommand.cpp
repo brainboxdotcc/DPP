@@ -33,13 +33,13 @@ using json = nlohmann::json;
 slashcommand::slashcommand() : managed(), application_id(0), type(ctxm_chat_input), default_permission(true), version(1), default_member_permissions(p_use_application_commands), dm_permission(false), nsfw(false) {
 }
 
-slashcommand::slashcommand(const std::string &_name, const std::string &_description, const dpp::snowflake _application_id) : slashcommand() {
+slashcommand::slashcommand(std::string_view _name, std::string_view _description, const dpp::snowflake _application_id) : slashcommand() {
 	set_name(_name);
 	set_description(_description);
 	set_application_id(_application_id);
 }
 
-slashcommand::slashcommand(const std::string &_name, const slashcommand_contextmenu_type _type, const dpp::snowflake _application_id): slashcommand() {
+slashcommand::slashcommand(std::string_view _name, const slashcommand_contextmenu_type _type, const dpp::snowflake _application_id): slashcommand() {
 	set_name(_name);
 	set_type(_type);
 	set_application_id(_application_id);
@@ -275,7 +275,7 @@ slashcommand& slashcommand::set_type(slashcommand_contextmenu_type t) {
 	return *this;
 }
 
-slashcommand& slashcommand::set_name(const std::string &n) {
+slashcommand& slashcommand::set_name(std::string_view n) {
 	if (type == ctxm_chat_input) {
 		name = lowercase(utility::utf8substr(n, 0, 32));
 	} else {
@@ -284,7 +284,7 @@ slashcommand& slashcommand::set_name(const std::string &n) {
 	return *this;
 }
 
-slashcommand& slashcommand::set_description(const std::string &d) {
+slashcommand& slashcommand::set_description(std::string_view d) {
 	description = utility::utf8substr(d, 0, 100);
 	return *this;
 }
@@ -304,7 +304,7 @@ slashcommand& slashcommand::disable_default_permissions() {
 	return *this;
 }
 
-command_option_choice::command_option_choice(const std::string &n, command_value v) : name(n), value(v)
+command_option_choice::command_option_choice(std::string_view n, command_value v) : name(n), value(v)
 {
 }
 
@@ -330,7 +330,7 @@ command_option_choice &command_option_choice::fill_from_json_impl(nlohmann::json
 	return *this;
 }
 
-command_option::command_option(command_option_type t, const std::string &n, const std::string &d, bool r) :
+command_option::command_option(command_option_type t, std::string_view n, std::string_view d, bool r) :
 	type(t), name(n), description(d), required(r), focused(false), autocomplete(false)
 {
 	if (std::any_of(n.begin(), n.end(), [](unsigned char c){ return std::isupper(c); })) {
@@ -484,24 +484,24 @@ json interaction::to_json_impl(bool with_id) const {
 	return "";
 }
 
-slashcommand& slashcommand::add_localization(const std::string& language, const std::string& _name, const std::string& _description) {
-	name_localizations[language] = _name;
-	if (! _description.empty()) {
-		description_localizations[language] = _description;
+slashcommand& slashcommand::add_localization(std::string_view language, std::string_view _name, std::string_view _description) {
+    utility::emplace_or_assign(name_localizations, language, _name);
+    if (! _description.empty()) {
+        utility::emplace_or_assign(description_localizations, language, _description);
 	}
 	return *this;
 }
 
-command_option_choice& command_option_choice::add_localization(const std::string& language, const std::string& _name) {
-	name_localizations[language] = _name;
+command_option_choice& command_option_choice::add_localization(std::string_view language, std::string_view _name) {
+    utility::emplace_or_assign(name_localizations, language, _name);
 	return *this;
 }
 
-command_option& command_option::add_localization(const std::string& language, const std::string& _name, const std::string& _description) {
-	name_localizations[language] = _name;
-	if (! _description.empty()) {
-		description_localizations[language] = _description;
-	}
+command_option& command_option::add_localization(std::string_view language, std::string_view _name, std::string_view _description) {
+    utility::emplace_or_assign(name_localizations, language, _name);
+    if (! _description.empty()) {
+        utility::emplace_or_assign(description_localizations, language, _description);
+    }
 	return *this;
 }
 
@@ -805,7 +805,7 @@ interaction_modal_response::interaction_modal_response() : interaction_response(
 	components.push_back({});
 }
 
-interaction_modal_response::interaction_modal_response(const std::string& _custom_id, const std::string& _title, const std::vector<component> _components) : 
+interaction_modal_response::interaction_modal_response(std::string_view _custom_id, std::string_view _title, const std::vector<component> _components) :
 	interaction_response(ir_modal_dialog),
 	current_row(0), custom_id(_custom_id),
 	title(dpp::utility::utf8substr(_title, 0, 45)) {
@@ -848,12 +848,12 @@ interaction_modal_response& interaction_modal_response::add_row() {
 	return *this;
 }
 
-interaction_modal_response& interaction_modal_response::set_custom_id(const std::string& _custom_id) {
+interaction_modal_response& interaction_modal_response::set_custom_id(std::string_view _custom_id) {
 	custom_id = _custom_id;
 	return *this;
 }
 
-interaction_modal_response& interaction_modal_response::set_title(const std::string& _title) {
+interaction_modal_response& interaction_modal_response::set_title(std::string_view _title) {
 	title = _title;
 	return *this;
 }

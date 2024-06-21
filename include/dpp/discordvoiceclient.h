@@ -461,7 +461,7 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	 * (this is for urgent messages such as heartbeat, presence, so they can take precedence over
 	 * chunk requests etc)
 	 */
-	void queue_message(const std::string &j, bool to_front = false);
+    void queue_message(std::string_view j, bool to_front = false);
 
 	/**
 	 * @brief Clear the outbound message queue
@@ -632,7 +632,7 @@ public:
 	 * @param severity The log level from dpp::loglevel
 	 * @param msg The log message to output
 	 */
-	virtual void log(dpp::loglevel severity, const std::string &msg) const;
+    virtual void log(dpp::loglevel severity, std::string_view msg) const;
 
 	/**
 	 * @brief Fires every second from the underlying socket I/O loop, used for sending heartbeats
@@ -678,7 +678,7 @@ public:
 	 * @param _host The voice server hostname to connect to (hostname:port format)
 	 * @throw dpp::voice_exception Sodium or Opus failed to initialise, or D++ is not compiled with voice support
 	 */
-	discord_voice_client(dpp::cluster* _cluster, snowflake _channel_id, snowflake _server_id, const std::string &_token, const std::string &_session_id, const std::string &_host);
+    discord_voice_client(dpp::cluster* _cluster, snowflake _channel_id, snowflake _server_id, std::string_view _token, std::string_view _session_id, std::string_view _host);
 
 	/**
 	 * @brief Destroy the discord voice client object
@@ -691,7 +691,7 @@ public:
 	 * @return bool True if a frame has been handled
 	 * @throw dpp::exception If there was an error processing the frame, or connection to UDP socket failed
 	 */
-	virtual bool handle_frame(const std::string &buffer);
+    virtual bool handle_frame(std::string_view buffer);
 
 	/**
 	 * @brief Handle a websocket error.
@@ -924,7 +924,7 @@ public:
 	 * track
 	 * @return reference to self
 	 */
-	discord_voice_client& insert_marker(const std::string& metadata = "");
+    discord_voice_client& insert_marker(std::string_view metadata = "");
 
 	/**
 	 * @brief Skip tp the next track marker,

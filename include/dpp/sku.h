@@ -137,7 +137,7 @@ public:
 	 * @param flags Flags bitmap from dpp::sku_flags.
 	 *
 	 */
-	sku(const snowflake id, const sku_type type, const snowflake application_id, const std::string name, const std::string slug, const uint16_t flags);
+    sku(const snowflake id, const sku_type type, const snowflake application_id, std::string_view name, std::string_view slug, const uint16_t flags);
 
 	/**
 	 * @brief Get the type of SKU.

@@ -280,7 +280,7 @@ public:
 	 * @param value Value of option
 	 * @param description Description of option
 	 */
-	select_option(const std::string &label, const std::string &value, const std::string &description = "");
+    select_option(std::string_view label, std::string_view value, std::string_view description = "");
 
 	/**
 	 * @brief Set the label
@@ -288,7 +288,7 @@ public:
 	 * @param l the user-facing name of the option. It will be truncated to the maximum length of 100 UTF-8 characters.
 	 * @return select_option& reference to self for chaining
 	 */
-	select_option& set_label(const std::string &l);
+    select_option& set_label(std::string_view l);
 
 	/**
 	 * @brief Set the value
@@ -296,7 +296,7 @@ public:
 	 * @param v value to set. It will be truncated to the maximum length of 100 UTF-8 characters.
 	 * @return select_option& reference to self for chaining
 	 */
-	select_option& set_value(const std::string &v);
+    select_option& set_value(std::string_view v);
 
 	/**
 	 * @brief Set the description
@@ -304,7 +304,7 @@ public:
 	 * @param d description to set. It will be truncated to the maximum length of 100 UTF-8 characters.
 	 * @return select_option& reference to self for chaining
 	 */
-	select_option& set_description(const std::string &d);
+    select_option& set_description(std::string_view d);
 
 	/**
 	 * @brief Set the emoji
@@ -314,7 +314,7 @@ public:
 	 * @param animated true if animated emoji
 	 * @return select_option& reference to self for chaining
 	 */
-	select_option& set_emoji(const std::string &n, dpp::snowflake id = 0, bool animated = false);
+    select_option& set_emoji(std::string_view n, dpp::snowflake id = 0, bool animated = false);
 
 	/**
 	 * @brief Set the option as default
@@ -529,7 +529,7 @@ public:
 	 * @param label Label text to set. It will be truncated to the maximum length of 80 UTF-8 characters.
 	 * @return component& Reference to self
 	 */
-	component& set_label(const std::string &label);
+    component& set_label(std::string_view label);
 
 	/**
 	 * @brief Set the default value of the text input component.
@@ -539,7 +539,7 @@ public:
 	 * @param val Value text to set. It will be truncated to the maximum length of 4000 UTF-8 characters.
 	 * @return component& Reference to self
 	 */
-	component& set_default_value(const std::string &val);
+    component& set_default_value(std::string_view val);
 
 	/**
 	 * @brief Set the url for dpp::cos_link types.
@@ -549,7 +549,7 @@ public:
 	 * @param url URL to set. It will be truncated to the maximum length of 512 UTF-8 characters.
 	 * @return component& reference to self.
 	 */
-	component& set_url(const std::string &url);
+    component& set_url(std::string_view url);
 
 	/**
 	 * @brief Set the style of the component, e.g. button colour.
@@ -572,7 +572,7 @@ public:
 	 * If your Custom ID is longer than this, it will be truncated.
 	 * @return component& Reference to self
 	 */
-	component& set_id(const std::string &id);
+    component& set_id(std::string_view id);
 
 	/**
 	 * @brief Set the component to disabled.
@@ -600,7 +600,7 @@ public:
 	 * characters for modals.
 	 * @return component& Reference to self
 	 */
-	component& set_placeholder(const std::string &placeholder);
+    component& set_placeholder(std::string_view placeholder);
 
 	/**
 	 * @brief Set the minimum number of items that must be chosen for a select menu
@@ -677,7 +677,7 @@ public:
 	 * @param animated True if the custom emoji is animated.
 	 * @return component& Reference to self
 	 */
-	component& set_emoji(const std::string& name, dpp::snowflake id = 0, bool animated = false);
+    component& set_emoji(std::string_view name, dpp::snowflake id = 0, bool animated = false);
 };
 
 /**
@@ -706,21 +706,21 @@ struct DPP_EXPORT embed_footer {
 	 * @param t string to set as footer text. It will be truncated to the maximum length of 2048 UTF-8 characters.
 	 * @return A reference to self so this method may be "chained".
 	 */
-	embed_footer& set_text(const std::string& t);
+    embed_footer& set_text(std::string_view t);
 
 	/**
 	 * @brief Set footer's icon url.
 	 * @param i url to set as footer icon url
 	 * @return A reference to self so this method may be "chained".
 	 */
-	embed_footer& set_icon(const std::string& i);
+    embed_footer& set_icon(std::string_view i);
 
 	/**
 	 * @brief Set footer's proxied icon url.
 	 * @param p url to set as footer proxied icon url
 	 * @return A reference to self so this method may be "chained".
 	 */
-	embed_footer& set_proxy(const std::string& p);
+    embed_footer& set_proxy(std::string_view p);
 };
 
 /**
@@ -908,14 +908,14 @@ struct DPP_EXPORT embed {
 	 * @param text The text of the title. It will be truncated to the maximum length of 256 UTF-8 characters.
 	 * @return A reference to self so this method may be "chained".
 	 */
-	embed& set_title(const std::string &text);
+    embed& set_title(std::string_view text);
 
 	/**
 	 * @brief Set embed description.
 	 * @param text The text of the title. It will be truncated to the maximum length of 4096 UTF-8 characters.
 	 * @return A reference to self so this method may be "chained".
 	 */
-	embed& set_description(const std::string &text);
+    embed& set_description(std::string_view text);
 
 	/**
 	 * @brief Set the footer of the embed.
@@ -930,7 +930,7 @@ struct DPP_EXPORT embed {
 	 * @param icon_url an url to set as footer icon url (only supports http(s) and attachments)
 	 * @return A reference to self so this method may be "chained".
 	 */
-	embed& set_footer(const std::string& text, const std::string& icon_url);
+    embed& set_footer(std::string_view text, std::string_view icon_url);
 
 	/**
 	 * @brief Set embed colour.
@@ -958,7 +958,7 @@ struct DPP_EXPORT embed {
 	 * @param url the url of the embed
 	 * @return A reference to self so this method may be "chained".
 	 */
-	embed& set_url(const std::string &url);
+    embed& set_url(std::string_view url);
 
 	/**
 	 * @brief Add an embed field.
@@ -967,7 +967,7 @@ struct DPP_EXPORT embed {
 	 * @param is_inline Whether or not to display the field 'inline' or on its own line
 	 * @return A reference to self so this method may be "chained".
 	 */
-	embed& add_field(const std::string& name, const std::string &value, bool is_inline = false);
+    embed& add_field(std::string_view name, std::string_view value, bool is_inline = false);
 
 	/**
 	 * @brief Set embed author.
@@ -983,7 +983,7 @@ struct DPP_EXPORT embed {
 	 * @param icon_url The icon URL of the author (only supports http(s) and attachments)
 	 * @return A reference to self so this method may be "chained".
 	 */
-	embed& set_author(const std::string& name, const std::string& url, const std::string& icon_url);
+    embed& set_author(std::string_view name, std::string_view url, std::string_view icon_url);
 
 	/**
 	 * @brief Set embed provider.
@@ -991,28 +991,28 @@ struct DPP_EXPORT embed {
 	 * @param url The provider url
 	 * @return A reference to self so this method may be "chained".
 	 */
-	embed& set_provider(const std::string& name, const std::string& url);
+    embed& set_provider(std::string_view name, std::string_view url);
 
 	/**
 	 * @brief Set embed image.
 	 * @param url The embed image URL (only supports http(s) and attachments)
 	 * @return A reference to self so this method may be "chained".
 	 */
-	embed& set_image(const std::string& url);
+    embed& set_image(std::string_view url);
 
 	/**
 	 * @brief Set embed video.
 	 * @param url The embed video url
 	 * @return A reference to self so this method may be "chained".
 	 */
-	embed& set_video(const std::string& url);
+    embed& set_video(std::string_view url);
 
 	/**
 	 * @brief Set embed thumbnail.
 	 * @param url The embed thumbnail url (only supports http(s) and attachments)
 	 * @return A reference to self so this method may be "chained".
 	 */
-	embed& set_thumbnail(const std::string& url);
+    embed& set_thumbnail(std::string_view url);
 };
 
 /**
@@ -1360,7 +1360,7 @@ public:
 	 * @param fn filename
 	 * @return message& reference to self
 	 */
-	sticker& set_filename(const std::string &fn);
+    sticker& set_filename(std::string_view fn);
 
 	/**
 	 * @brief Set the file content
@@ -1368,7 +1368,7 @@ public:
 	 * @param fc raw file content contained in std::string
 	 * @return message& reference to self
 	 */
-	sticker& set_file_content(const std::string &fc);
+    sticker& set_file_content(std::string_view fc);
 
 };
 
@@ -1575,7 +1575,7 @@ struct DPP_EXPORT poll {
 	 * @param text Text for the question
 	 * @return self for method chaining
 	 */
-	poll& set_question(const std::string& text);
+    poll& set_question(std::string_view text);
 
 	/**
 	 * @brief Set the duration of the poll in hours
@@ -1611,7 +1611,7 @@ struct DPP_EXPORT poll {
 	 * @param is_animated Whether the emoji is animated
 	 * @return self for method chaining
 	 */
-	poll& add_answer(const std::string& text, snowflake emoji_id = 0, bool is_animated = false);
+    poll& add_answer(std::string_view text, snowflake emoji_id = 0, bool is_animated = false);
 
 	/**
 	 * @brief Add an answer to this poll
@@ -1621,7 +1621,7 @@ struct DPP_EXPORT poll {
 	 * @param emoji Optional emoji
 	 * @return self for method chaining
 	 */
-	poll& add_answer(const std::string& text, const std::string& emoji);
+    poll& add_answer(std::string_view text, std::string_view emoji);
 
 	/**
 	 * @brief Add an answer to this poll
@@ -1631,7 +1631,7 @@ struct DPP_EXPORT poll {
 	 * @param e Optional emoji
 	 * @return self for method chaining
 	 */
-	poll& add_answer(const std::string& text, const emoji& e);
+    poll& add_answer(std::string_view text, const emoji& e);
 
 	/**
 	 * @brief Helper to get the question text
@@ -1728,37 +1728,37 @@ namespace embed_type {
 	/**
 	 * @brief Rich text
 	 */
-	const std::string emt_rich = "rich";
+    constexpr std::string_view emt_rich = "rich";
 
 	/**
 	 * @brief Image
 	 */
-	const std::string emt_image = "image";
+    constexpr std::string_view emt_image = "image";
 
 	/**
 	 * @brief Video link
 	 */
-	const std::string emt_video = "video";
+    constexpr std::string_view emt_video = "video";
 
 	/**
 	 * @brief Animated gif
 	 */
-	const std::string emt_gifv = "gifv";
+    constexpr std::string_view emt_gifv = "gifv";
 
 	/**
 	 * @brief Article
 	 */
-	const std::string emt_article = "article";
+    constexpr std::string_view emt_article = "article";
 
 	/**
 	 * @brief Link URL
 	 */
-	const std::string emt_link = "link";
+    constexpr std::string_view emt_link = "link";
 
 	/**
 	 * @brief Auto moderation filter
 	 */
-	const std::string emt_automod = "auto_moderation_message";
+    constexpr std::string_view emt_automod = "auto_moderation_message";
 } // namespace embed_type
 
 /**
@@ -2286,7 +2286,7 @@ public:
 	 * @param content The content of the message. It will be truncated to the maximum length of 4000 UTF-8 characters.
 	 * @param type The message type to create
 	 */
-	message(snowflake channel_id, const std::string &content, message_type type = mt_default);
+    message(snowflake channel_id, std::string_view content, message_type type = mt_default);
 
 	/**
 	 * @brief Construct a new message object with content
@@ -2309,7 +2309,7 @@ public:
 	 * @param content The content of the message. It will be truncated to the maximum length of 4000 UTF-8 characters.
 	 * @param type The message type to create
 	 */
-	message(const std::string &content, message_type type = mt_default);
+    message(std::string_view content, message_type type = mt_default);
 
 	/**
 	 * @brief Destroy the message object
@@ -2516,7 +2516,7 @@ public:
 	 * @return message& reference to self
 	 * @deprecated Use message::add_file instead
 	 */
-	message& set_filename(const std::string &fn);
+    message& set_filename(std::string_view fn);
 
 	/**
 	 * @brief Set the file content of the last file in list
@@ -2525,7 +2525,7 @@ public:
 	 * @return message& reference to self
 	 * @deprecated Use message::add_file instead
 	 */
-	message& set_file_content(const std::string &fc);
+    message& set_file_content(std::string_view fc);
 
 	/**
 	 * @brief Add a file to the message
@@ -2535,7 +2535,7 @@ public:
 	 * @param filemimetype optional mime type of the file
 	 * @return message& reference to self
 	 */
-	message& add_file(const std::string &filename, const std::string &filecontent, const std::string &filemimetype = "");
+    message& add_file(std::string_view filename, std::string_view filecontent, std::string_view filemimetype = "");
 
 	/**
 	 * @brief Set the message content
@@ -2543,7 +2543,7 @@ public:
 	 * @param c message content. It will be truncated to the maximum length of 4000 UTF-8 characters.
 	 * @return message& reference to self
 	 */
-	message& set_content(const std::string &c);
+    message& set_content(std::string_view c);
 	
 	/**
 	 * @brief Set the channel id

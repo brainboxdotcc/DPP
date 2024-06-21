@@ -27,7 +27,7 @@ namespace dpp {
 
 using json = nlohmann::json;
 
-sku::sku(const snowflake _id, const sku_type _type, const snowflake _application_id, const std::string _name, const std::string _slug, const uint16_t _flags)
+sku::sku(const snowflake _id, const sku_type _type, const snowflake _application_id, std::string_view _name, std::string_view _slug, const uint16_t _flags)
 	: managed(_id), type(_type), application_id(_application_id), name(_name), slug(_slug), flags(_flags) {}
 
 sku& sku::fill_from_json_impl(nlohmann::json* j) {

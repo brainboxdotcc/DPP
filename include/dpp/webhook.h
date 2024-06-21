@@ -169,7 +169,7 @@ public:
 	 * @param webhook_url a fully qualified web address of an existing webhook
 	 * @throw logic_exception if the webhook url could not be parsed
 	 */
-	webhook(const std::string& webhook_url);
+    webhook(std::string_view webhook_url);
 
 	/**
 	 * @brief Construct a new webhook object using the webhook ID and the webhook token
@@ -177,7 +177,7 @@ public:
 	 * @param webhook_id id taken from a link of an existing webhook
 	 * @param webhook_token token taken from a link of an existing webhook
 	 */
-	webhook(const snowflake webhook_id, const std::string& webhook_token);
+    webhook(const snowflake webhook_id, std::string_view webhook_token);
 
 	/**
 	 * @brief Base64 encode image data and allocate it to image_data
@@ -188,7 +188,7 @@ public:
 	 * @return webhook& Reference to self
 	 * @throw dpp::length_exception Image data is larger than the maximum size of 256 kilobytes
 	 */
-	webhook& load_image(const std::string &image_blob, const image_type type, bool is_base64_encoded = false);
+    webhook& load_image(std::string_view image_blob, const image_type type, bool is_base64_encoded = false);
 };
 
 /**

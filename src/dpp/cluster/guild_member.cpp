@@ -22,7 +22,7 @@
 
 namespace dpp {
 
-void cluster::guild_add_member(const guild_member& gm, const std::string &access_token, command_completion_event_t callback) {
+void cluster::guild_add_member(const guild_member& gm, std::string_view access_token, command_completion_event_t callback) {
 	json j = gm.to_json();
 	j["access_token"] = access_token;
 	rest_request<confirmation>(this, API_PATH "/guilds", std::to_string(gm.guild_id), "members/" + std::to_string(gm.user_id), m_put, j.dump(-1, ' ', false, json::error_handler_t::replace), callback);
@@ -130,9 +130,9 @@ void cluster::guild_member_move(const snowflake channel_id, const snowflake guil
 }
 
 
-void cluster::guild_search_members(snowflake guild_id, const std::string& query, uint16_t limit, command_completion_event_t callback) {
+void cluster::guild_search_members(snowflake guild_id, std::string_view query, uint16_t limit, command_completion_event_t callback) {
 	std::string parameters = utility::make_url_parameters({
-		{"query", query},
+        {"query", std::string(query)},
 		{"limit", std::to_string(limit)},
 	});
 	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "members/search" + parameters, m_get, "", [this, callback, guild_id] (json &j, const http_request_completion_t& http) {

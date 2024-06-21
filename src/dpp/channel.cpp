@@ -47,7 +47,7 @@ permission_overwrite::permission_overwrite(snowflake id, uint64_t allow, uint64_
 
 forum_tag::forum_tag() : managed(), moderated(false) {}
 
-forum_tag::forum_tag(const std::string& name) : forum_tag() {
+forum_tag::forum_tag(std::string_view name) : forum_tag() {
 	this->set_name(name);
 }
 
@@ -80,7 +80,7 @@ json forum_tag::to_json_impl(bool with_id) const {
 	return j;
 }
 
-forum_tag &forum_tag::set_name(const std::string &name) {
+forum_tag &forum_tag::set_name(std::string_view name) {
 	this->name = utility::utf8substr(name, 0, 20);
 	return *this;
 }
@@ -124,12 +124,12 @@ std::string channel::get_mention() const {
 	return utility::channel_mention(id);
 }
 
-channel& channel::set_name(const std::string& name) {
+channel& channel::set_name(std::string_view name) {
 	this->name = utility::validate(name, 1, 100, "name must be at least 1 character");
 	return *this;
 }
 
-channel& channel::set_topic(const std::string& topic) {
+channel& channel::set_topic(std::string_view topic) {
 	this->topic = utility::utf8substr(topic, 0, 1024);
 	return *this;
 }

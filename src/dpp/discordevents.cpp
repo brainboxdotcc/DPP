@@ -422,9 +422,10 @@ static const std::map<std::string, dpp::events::event*> event_map = {
 	{ "ENTITLEMENT_DELETE", make_static_event<dpp::events::entitlement_delete>() },
 };
 
-void discord_client::handle_event(const std::string &event, json &j, const std::string &raw)
+void discord_client::handle_event(std::string_view event, json &j, std::string_view raw)
 {
-	auto ev_iter = event_map.find(event);
+    std::string event_str(event);
+    auto ev_iter = event_map.find(event_str);
 	if (ev_iter != event_map.end()) {
 		/* A handler with nullptr is silently ignored. We don't plan to make a handler for it
 		 * so this usually some user-only thing that's crept into the API and shown to bots
@@ -434,7 +435,7 @@ void discord_client::handle_event(const std::string &event, json &j, const std::
 			ev_iter->second->handle(this, j, raw);
 		}
 	} else {
-		log(dpp::ll_debug, "Unhandled event: " + event + ", " + j.dump(-1, ' ', false, json::error_handler_t::replace));
+        log(dpp::ll_debug, "Unhandled event: " + event_str + ", " + j.dump(-1, ' ', false, json::error_handler_t::replace));
 	}
 }
 

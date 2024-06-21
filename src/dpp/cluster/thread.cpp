@@ -115,7 +115,7 @@ void cluster::thread_members_get(snowflake thread_id, command_completion_event_t
 	rest_request_list<thread_member>(this, API_PATH "/channels", std::to_string(thread_id), "/thread-members", m_get, "", callback, "user_id");
 }
 
-void cluster::thread_create_in_forum(const std::string& thread_name, snowflake channel_id, const message& msg, auto_archive_duration_t auto_archive_duration, uint16_t rate_limit_per_user, std::vector<snowflake> applied_tags, command_completion_event_t callback)
+void cluster::thread_create_in_forum(std::string_view thread_name, snowflake channel_id, const message& msg, auto_archive_duration_t auto_archive_duration, uint16_t rate_limit_per_user, std::vector<snowflake> applied_tags, command_completion_event_t callback)
 {
 	json j({
 		{"name",                  thread_name},
@@ -152,7 +152,7 @@ void cluster::thread_create_in_forum(const std::string& thread_name, snowflake c
 	}, msg.file_data);
 }
 
-void cluster::thread_create(const std::string& thread_name, snowflake channel_id, uint16_t auto_archive_duration, channel_type thread_type, bool invitable, uint16_t rate_limit_per_user, command_completion_event_t callback)
+void cluster::thread_create(std::string_view thread_name, snowflake channel_id, uint16_t auto_archive_duration, channel_type thread_type, bool invitable, uint16_t rate_limit_per_user, command_completion_event_t callback)
 {
 	json j({
 		{"name", thread_name},
@@ -169,7 +169,7 @@ void cluster::thread_edit(const thread &t, command_completion_event_t callback)
 	rest_request<thread>(this, API_PATH "/channels", std::to_string(t.id), "", m_patch, t.build_json(), callback);
 }
 
-void cluster::thread_create_with_message(const std::string& thread_name, snowflake channel_id, snowflake message_id, uint16_t auto_archive_duration, uint16_t rate_limit_per_user, command_completion_event_t callback)
+void cluster::thread_create_with_message(std::string_view thread_name, snowflake channel_id, snowflake message_id, uint16_t auto_archive_duration, uint16_t rate_limit_per_user, command_completion_event_t callback)
 {
 	json j({
 		{"name", thread_name},

@@ -76,7 +76,7 @@ public:
  */
 thread_local static std::string last_ping_message;
 
-discord_client::discord_client(dpp::cluster* _cluster, uint32_t _shard_id, uint32_t _max_shards, const std::string &_token, uint32_t _intents, bool comp, websocket_protocol_t ws_proto)
+discord_client::discord_client(dpp::cluster* _cluster, uint32_t _shard_id, uint32_t _max_shards, std::string_view _token, uint32_t _intents, bool comp, websocket_protocol_t ws_proto)
        : websocket_client(_cluster->default_gateway, "443", comp ? (ws_proto == ws_json ? PATH_COMPRESSED_JSON : PATH_COMPRESSED_ETF) : (ws_proto == ws_json ? PATH_UNCOMPRESSED_JSON : PATH_UNCOMPRESSED_ETF)),
         terminating(false),
         runner(nullptr),
@@ -220,9 +220,9 @@ void discord_client::run()
 	this->thread_id = runner->native_handle();
 }
 
-bool discord_client::handle_frame(const std::string &buffer)
+bool discord_client::handle_frame(std::string_view buffer)
 {
-	std::string& data = (std::string&)buffer;
+    std::string_view data(buffer);
 
 	/* gzip compression is a special case */
 	if (compressed) {
@@ -231,7 +231,7 @@ bool discord_client::handle_frame(const std::string &buffer)
 		&& (uint8_t)buffer[buffer.size() - 1] == 0xFF) {
 			/* Decompress buffer */
 			decompressed.clear();
-			zlib->d_stream.next_in = (Bytef *)buffer.c_str();
+            zlib->d_stream.next_in = (Bytef *)buffer.data();
 			zlib->d_stream.avail_in = (uInt)buffer.size();
 			do {
 				int have = 0;
@@ -289,7 +289,12 @@ bool discord_client::handle_frame(const std::string &buffer)
 				j = json::parse(data);
 			}
 			catch (const std::exception &e) {
-				log(dpp::ll_error, "discord_client::handle_frame(JSON): " + std::string(e.what()) + " [" + data + "]");
+                std::string log_msg = "discord_client::handle_frame(JSON): ";
+                log_msg += e.what();
+                log_msg += " [";
+                log_msg += data;
+                log_msg += ']';
+                log(dpp::ll_error, log_msg);
 				return true;
 			}
 		break;
@@ -452,7 +457,7 @@ void discord_client::error(uint32_t errorcode)
 	log(dpp::ll_warning, "OOF! Error from underlying websocket: " + std::to_string(errorcode) + ": " + error);
 }
 
-void discord_client::log(dpp::loglevel severity, const std::string &msg) const
+void discord_client::log(dpp::loglevel severity, std::string_view msg) const
 {
 	if (!creator->on_log.empty()) {
 		/* Pass to user if they've hooked the event */
@@ -463,7 +468,7 @@ void discord_client::log(dpp::loglevel severity, const std::string &msg) const
 	}
 }
 
-void discord_client::queue_message(const std::string &j, bool to_front)
+void discord_client::queue_message(std::string_view j, bool to_front)
 {
 	std::unique_lock locker(queue_mutex);
 	if (to_front) {

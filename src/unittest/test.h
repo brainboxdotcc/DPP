@@ -485,7 +485,7 @@ std::vector<uint8_t> load_test_audio();
  * 
  * @return std::vector<std::byte> File data
  */
-std::vector<std::byte> load_data(const std::string& file);
+std::vector<std::byte> load_data(std::string_view file);
 
 /**
  * @brief Get the token from the environment variable DPP_UNIT_TEST_TOKEN

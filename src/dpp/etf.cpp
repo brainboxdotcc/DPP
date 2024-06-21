@@ -630,7 +630,7 @@ json etf_parser::inner_parse() {
 	}
 }
 
-json etf_parser::parse(const std::string& in) {
+json etf_parser::parse(std::string_view in) {
 	/* Recursively decode multiple values from ETF to JSON */
 	offset = 0;
 	size = in.size();

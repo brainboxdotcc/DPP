@@ -119,15 +119,7 @@ public:
 	 * @param client The shard the event originated on. May be a nullptr, e.g. for voice events
 	 * @param raw Raw event data as JSON or ETF
 	 */
-	event_dispatch_t(discord_client* client, const std::string& raw);
-
-	/**
-	 * @brief Construct a new event_dispatch_t object
-	 *
-	 * @param client The shard the event originated on. May be a nullptr, e.g. for voice events
-	 * @param raw Raw event data as JSON or ETF
-	 */
-	event_dispatch_t(discord_client* client, std::string&& raw);
+    event_dispatch_t(discord_client* client, std::string_view raw);
 
 	/**
 	 * @brief Copy another event_dispatch_t object
@@ -489,7 +481,7 @@ struct DPP_EXPORT interaction_create_t : public event_dispatch_t {
 	 * @param callback User function to execute when the api call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void reply(interaction_response_type t, const std::string& mt, command_completion_event_t callback = utility::log_error()) const;
+    void reply(interaction_response_type t, std::string_view mt, command_completion_event_t callback = utility::log_error()) const;
 
 	/**
 	 * @brief Send a reply for this interaction.
@@ -509,7 +501,7 @@ struct DPP_EXPORT interaction_create_t : public event_dispatch_t {
 	 * @param callback User function to execute when the api call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void reply(const std::string& mt, command_completion_event_t callback = utility::log_error()) const;
+    void reply(std::string_view mt, command_completion_event_t callback = utility::log_error()) const;
 
 	/**
 	 * @brief Reply to interaction with a dialog box
@@ -536,7 +528,7 @@ struct DPP_EXPORT interaction_create_t : public event_dispatch_t {
 	 * @param callback User function to execute when the api call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void edit_response(const std::string& mt, command_completion_event_t callback = utility::log_error()) const;
+    void edit_response(std::string_view mt, command_completion_event_t callback = utility::log_error()) const;
 
 	/**
 	 * @brief Set the bot to 'thinking' state where you have up to 15 minutes to respond
@@ -597,7 +589,7 @@ struct DPP_EXPORT interaction_create_t : public event_dispatch_t {
 	 * @param mt The string value to send, for simple text only messages
 	 * On success the result will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	dpp::async<dpp::confirmation_callback_t> co_reply(interaction_response_type t, const std::string& mt) const;
+    dpp::async<dpp::confirmation_callback_t> co_reply(interaction_response_type t, std::string_view mt) const;
 
 	/**
 	 * @brief Send a reply for this interaction.
@@ -615,7 +607,7 @@ struct DPP_EXPORT interaction_create_t : public event_dispatch_t {
 	 * @param mt The string value to send, for simple text only messages
 	 * On success the result will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	dpp::async<dpp::confirmation_callback_t> co_reply(const std::string& mt) const;
+    dpp::async<dpp::confirmation_callback_t> co_reply(std::string_view mt) const;
 
 	/**
 	 * @brief Reply to interaction with a dialog box
@@ -639,7 +631,7 @@ struct DPP_EXPORT interaction_create_t : public event_dispatch_t {
 	 * @param mt The string value to send, for simple text only messages
 	 * On success the result will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	dpp::async<dpp::confirmation_callback_t> co_edit_response(const std::string& mt) const;
+    dpp::async<dpp::confirmation_callback_t> co_edit_response(std::string_view mt) const;
 
 	/**
 	 * @brief Set the bot to 'thinking' state where you have up to 15 minutes to respond
@@ -686,7 +678,7 @@ struct DPP_EXPORT interaction_create_t : public event_dispatch_t {
 	 *
 	 * @throw dpp::logic_exception if the interaction is not for a command
 	 */
-	virtual command_value get_parameter(const std::string& name) const;
+    virtual command_value get_parameter(std::string_view name) const;
 };
 
 /**
@@ -1646,7 +1638,7 @@ struct DPP_EXPORT message_create_t : public event_dispatch_t {
 	 * @param callback User function to execute once the API call completes.
 	 * @note confirmation_callback_t::value contains a message object on success. On failure, value is undefined and confirmation_callback_t::is_error() is true.
 	 */
-	void send(const std::string& m, command_completion_event_t callback = utility::log_error()) const;
+    void send(std::string_view m, command_completion_event_t callback = utility::log_error()) const;
 	/**
 	 * @brief Send a message to the same channel as the channel_id in received event.
 	 * @param msg Message to send
@@ -1668,7 +1660,7 @@ struct DPP_EXPORT message_create_t : public event_dispatch_t {
 	 * @param callback User function to execute once the API call completes.
 	 * @note confirmation_callback_t::value contains a message object on success. On failure, value is undefined and confirmation_callback_t::is_error() is true.
 	 */
-	void reply(const std::string& m, bool mention_replied_user = false, command_completion_event_t callback = utility::log_error()) const;
+    void reply(std::string_view m, bool mention_replied_user = false, command_completion_event_t callback = utility::log_error()) const;
 	/**
 	 * @brief Reply to the message received in the event.
 	 * @param msg Message to send as a reply.
@@ -2044,20 +2036,7 @@ struct DPP_EXPORT voice_receive_t : public event_dispatch_t {
 	 * @param pcm user audio to set
 	 * @param length length of user audio in bytes
 	 */
-	voice_receive_t(discord_client* client, const std::string& raw, class discord_voice_client* vc, snowflake _user_id, const uint8_t* pcm, size_t length);
-
-	/**
-	 * @brief Construct a new voice receive t object
-	 *
-	 * @param client The shard the event originated on.
-	 * WILL ALWAYS be NULL.
-	 * @param raw Raw event text as UDP packet.
-	 * @param vc owning voice client pointer
-	 * @param _user_id user id who is speaking, 0 for a mix of all user audio
-	 * @param pcm user audio to set
-	 * @param length length of user audio in bytes
-	 */
-	voice_receive_t(discord_client* client, std::string&& raw, class discord_voice_client* vc, snowflake _user_id, const uint8_t* pcm, size_t length);
+    voice_receive_t(discord_client* client, std::string_view raw, class discord_voice_client* vc, snowflake _user_id, const uint8_t* pcm, size_t length);
 
 	/**
 	 * @brief Voice client

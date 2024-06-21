@@ -57,7 +57,7 @@ activity_party::activity_party() : id(0), current_size(0), maximum_size(0)
 {
 }
 
-activity::activity(const activity_type typ, const std::string& nam, const std::string& stat, const std::string& url_) :
+activity::activity(const activity_type typ, std::string_view nam, std::string_view stat, std::string_view url_) :
 	 name(nam), state(stat), url(url_), type(typ), created_at(0), start(0), end(0), application_id(0), flags(0), is_instance(false)
 {
 }
@@ -70,7 +70,7 @@ presence::presence() : user_id(0), guild_id(0), flags(0)
 {
 }
 
-presence::presence(presence_status status, activity_type type, const std::string& activity_description) {
+presence::presence(presence_status status, activity_type type, std::string_view activity_description) {
 	dpp::activity a;
 
 	/* Even if type is custom, a name is still required.

@@ -72,5 +72,5 @@ namespace dpp {
 	 * @return dns_cache_entry* First IP address associated with the hostname DNS record
 	 * @throw dpp::connection_exception On failure to resolve hostname
 	 */
-	const dns_cache_entry* resolve_hostname(const std::string& hostname, const std::string& port);
+    const dns_cache_entry* resolve_hostname(std::string_view hostname, std::string_view port);
 } // namespace dpp

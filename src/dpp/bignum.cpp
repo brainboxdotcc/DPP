@@ -47,11 +47,11 @@ struct openssl_bignum {
 	}
 };
 
-bignumber::bignumber(const std::string& number_string) : ssl_bn(std::make_shared<openssl_bignum>()) {
+bignumber::bignumber(std::string_view number_string) : ssl_bn(std::make_shared<openssl_bignum>()) {
 	if (dpp::lowercase(number_string.substr(0, 2)) == "0x") {
-		BN_hex2bn(&ssl_bn->bn, number_string.substr(2, number_string.length() - 2).c_str());
+        BN_hex2bn(&ssl_bn->bn, std::string(number_string.substr(2)).c_str());
 	} else {
-		BN_dec2bn(&ssl_bn->bn, number_string.c_str());
+        BN_dec2bn(&ssl_bn->bn, std::string(number_string).c_str());
 	}
 }
 

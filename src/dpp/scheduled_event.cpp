@@ -43,12 +43,12 @@ scheduled_event::scheduled_event() :
 {
 }
 
-scheduled_event& scheduled_event::set_name(const std::string& n) {
+scheduled_event& scheduled_event::set_name(std::string_view n) {
 	this->name = utility::validate(n, 1, 100, "Name too short");
 	return *this;
 }
 
-scheduled_event& scheduled_event::set_description(const std::string& d) {
+scheduled_event& scheduled_event::set_description(std::string_view d) {
 	this->description = utility::validate(d, 1, 1000, "Description too short");
 	return *this;
 }
@@ -58,7 +58,7 @@ scheduled_event& scheduled_event::clear_description() {
 	return *this;
 }
 
-scheduled_event& scheduled_event::set_location(const std::string& l) {
+scheduled_event& scheduled_event::set_location(std::string_view l) {
 	this->entity_metadata.location = utility::validate(l, 1, 100, "Location too short");
 	this->channel_id = 0;
 	return *this;

@@ -25,7 +25,7 @@
 #include <dpp/json_fwd.h>
 
 #define event_decl(x,wstype) /** @brief Internal event handler for wstype websocket events. Called for each websocket message of this type. @internal */ \
-	class x : public event { public: virtual void handle(class dpp::discord_client* client, nlohmann::json &j, const std::string &raw); };
+    class x : public event { public: virtual void handle(class dpp::discord_client* client, nlohmann::json &j, std::string_view raw); };
 
 /**
  * @brief The events namespace holds the internal event handlers for each websocket event.
@@ -44,7 +44,7 @@ public:
 	 * @param j The json data of the event
 	 * @param raw The raw event json
 	 */
-	virtual void handle(class discord_client* client, nlohmann::json &j, const std::string &raw) = 0;
+    virtual void handle(class discord_client* client, nlohmann::json &j, std::string_view raw) = 0;
 };
 
 /* Internal logger */

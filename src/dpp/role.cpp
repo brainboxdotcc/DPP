@@ -345,7 +345,7 @@ bool role::has_use_clyde_ai() const {
 	return has_administrator() || permissions.has(p_use_clyde_ai);
 }
 
-role& role::set_name(const std::string& n) {
+role& role::set_name(std::string_view n) {
 	name = utility::validate(n, 1, 100, "Role name too short");
 	return *this;
 }

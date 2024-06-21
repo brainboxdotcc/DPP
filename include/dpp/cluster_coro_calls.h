@@ -254,7 +254,7 @@
  * @return confirmation returned object on completion
  * \memberof dpp::cluster
  */
-[[nodiscard]] async<confirmation_callback_t> co_interaction_response_create(snowflake interaction_id, const std::string &token, const interaction_response &r);
+[[nodiscard]] async<confirmation_callback_t> co_interaction_response_create(snowflake interaction_id, std::string_view token, const interaction_response &r);
 
 /**
  * @brief Edit response to a slash command
@@ -266,7 +266,7 @@
  * @return confirmation returned object on completion
  * \memberof dpp::cluster
  */
-[[nodiscard]] async<confirmation_callback_t> co_interaction_response_edit(const std::string &token, const message &m);
+[[nodiscard]] async<confirmation_callback_t> co_interaction_response_edit(std::string_view token, const message &m);
 
 /**
  * @brief Get the original response to a slash command
@@ -277,7 +277,7 @@
  * @return message returned object on completion
  * \memberof dpp::cluster
  */
-[[nodiscard]] async<confirmation_callback_t> co_interaction_response_get_original(const std::string &token);
+[[nodiscard]] async<confirmation_callback_t> co_interaction_response_get_original(std::string_view token);
 
 /**
  * @brief Create a followup message to a slash command
@@ -289,7 +289,7 @@
  * @return confirmation returned object on completion
  * \memberof dpp::cluster
  */
-[[nodiscard]] async<confirmation_callback_t> co_interaction_followup_create(const std::string &token, const message &m);
+[[nodiscard]] async<confirmation_callback_t> co_interaction_followup_create(std::string_view token, const message &m);
 
 /**
  * @brief Edit original followup message to a slash command
@@ -302,7 +302,7 @@
  * @return confirmation returned object on completion
  * \memberof dpp::cluster
  */
-[[nodiscard]] async<confirmation_callback_t> co_interaction_followup_edit_original(const std::string &token, const message &m);
+[[nodiscard]] async<confirmation_callback_t> co_interaction_followup_edit_original(std::string_view token, const message &m);
 
 /**
  * @brief Delete the initial interaction response
@@ -313,7 +313,7 @@
  * @return confirmation returned object on completion
  * \memberof dpp::cluster
  */
-[[nodiscard]] async<confirmation_callback_t> co_interaction_followup_delete(const std::string &token);
+[[nodiscard]] async<confirmation_callback_t> co_interaction_followup_delete(std::string_view token);
 
 /**
  * @brief Edit followup message to a slash command
@@ -326,7 +326,7 @@
  * @return confirmation returned object on completion
  * \memberof dpp::cluster
  */
-[[nodiscard]] async<confirmation_callback_t> co_interaction_followup_edit(const std::string &token, const message &m);
+[[nodiscard]] async<confirmation_callback_t> co_interaction_followup_edit(std::string_view token, const message &m);
 
 /**
  * @brief Get the followup message to a slash command
@@ -338,7 +338,7 @@
  * @return message returned object on completion
  * \memberof dpp::cluster
  */
-[[nodiscard]] async<confirmation_callback_t> co_interaction_followup_get(const std::string &token, snowflake message_id);
+[[nodiscard]] async<confirmation_callback_t> co_interaction_followup_get(std::string_view token, snowflake message_id);
 
 /**
  * @brief Get the original followup message to a slash command
@@ -350,7 +350,7 @@
  * @return message returned object on completion
  * \memberof dpp::cluster
  */
-[[nodiscard]] async<confirmation_callback_t> co_interaction_followup_get_original(const std::string &token);
+[[nodiscard]] async<confirmation_callback_t> co_interaction_followup_get_original(std::string_view token);
 
 /**
  * @brief Get all auto moderation rules for a guild
@@ -586,7 +586,7 @@
  * @return confirmation returned object on completion
  * \memberof dpp::cluster
  */
-[[nodiscard]] async<confirmation_callback_t> co_channel_set_voice_status(snowflake channel_id, const std::string& status);
+[[nodiscard]] async<confirmation_callback_t> co_channel_set_voice_status(snowflake channel_id, std::string_view status);
 
 /**
  * @brief Create a dm channel
@@ -631,7 +631,7 @@
  * @return confirmation returned object on completion
  * \memberof dpp::cluster
  */
-[[nodiscard]] async<confirmation_callback_t> co_gdm_add(snowflake channel_id, snowflake user_id, const std::string &access_token, const std::string &nick);
+[[nodiscard]] async<confirmation_callback_t> co_gdm_add(snowflake channel_id, snowflake user_id, std::string_view access_token, std::string_view nick);
 
 /**
  * @brief Removes a recipient from a Group DM
@@ -785,7 +785,7 @@
  * @return confirmation returned object on completion
  * \memberof dpp::cluster
  */
-[[nodiscard]] async<confirmation_callback_t> co_guild_current_member_edit(snowflake guild_id, const std::string &nickname);
+[[nodiscard]] async<confirmation_callback_t> co_guild_current_member_edit(snowflake guild_id, std::string_view nickname);
 
 /**
  * @brief Get the audit log for a guild
@@ -1055,7 +1055,7 @@
  * @return confirmation returned object on completion
  * \memberof dpp::cluster
  */
-[[nodiscard]] async<confirmation_callback_t> co_guild_set_nickname(snowflake guild_id, const std::string &nickname);
+[[nodiscard]] async<confirmation_callback_t> co_guild_set_nickname(snowflake guild_id, std::string_view nickname);
 
 /**
  * @brief Sync guild integration
@@ -1142,7 +1142,7 @@
  * @return confirmation returned object on completion
  * \memberof dpp::cluster
  */
-[[nodiscard]] async<confirmation_callback_t> co_guild_add_member(const guild_member& gm, const std::string &access_token);
+[[nodiscard]] async<confirmation_callback_t> co_guild_add_member(const guild_member& gm, std::string_view access_token);
 
 /**
  * @brief Edit the properties of an existing guild member
@@ -1323,7 +1323,7 @@
  * @return guild_member_map returned object on completion
  * \memberof dpp::cluster
  */
-[[nodiscard]] async<confirmation_callback_t> co_guild_search_members(snowflake guild_id, const std::string& query, uint16_t limit);
+[[nodiscard]] async<confirmation_callback_t> co_guild_search_members(snowflake guild_id, std::string_view query, uint16_t limit);
 
 /**
  * @brief Get guild invites
@@ -1339,7 +1339,7 @@
 [[nodiscard]] async<confirmation_callback_t> co_guild_get_invites(snowflake guild_id);
 
 
-[[nodiscard]] async<confirmation_callback_t> co_invite_delete(const std::string &invitecode);
+[[nodiscard]] async<confirmation_callback_t> co_invite_delete(std::string_view invitecode);
 
 /**
  * @brief Get details about an invite
@@ -1350,7 +1350,7 @@
  * @return invite returned object on completion
  * \memberof dpp::cluster
  */
-[[nodiscard]] async<confirmation_callback_t> co_invite_get(const std::string &invite_code);
+[[nodiscard]] async<confirmation_callback_t> co_invite_get(std::string_view invite_code);
 
 /**
  * @brief Add a reaction to a message. The reaction string must be either an `emojiname:id` or a unicode character.
@@ -1362,7 +1362,7 @@
  * @return confirmation returned object on completion
  * \memberof dpp::cluster
  */
-[[nodiscard]] async<confirmation_callback_t> co_message_add_reaction(const struct message &m, const std::string &reaction);
+[[nodiscard]] async<confirmation_callback_t> co_message_add_reaction(const struct message &m, std::string_view reaction);
 
 /**
  * @brief Add a reaction to a message by id. The reaction string must be either an `emojiname:id` or a unicode character.
@@ -1375,7 +1375,7 @@
  * @return confirmation returned object on completion
  * \memberof dpp::cluster
  */
-[[nodiscard]] async<confirmation_callback_t> co_message_add_reaction(snowflake message_id, snowflake channel_id, const std::string &reaction);
+[[nodiscard]] async<confirmation_callback_t> co_message_add_reaction(snowflake message_id, snowflake channel_id, std::string_view reaction);
 
 /**
  * @brief Send a message to a channel. The callback function is called when the message has been sent
@@ -1461,7 +1461,7 @@
  * @return confirmation returned object on completion
  * \memberof dpp::cluster
  */
-[[nodiscard]] async<confirmation_callback_t> co_message_delete_own_reaction(const struct message &m, const std::string &reaction);
+[[nodiscard]] async<confirmation_callback_t> co_message_delete_own_reaction(const struct message &m, std::string_view reaction);
 
 /**
  * @brief Delete own reaction from a message by id. The reaction string must be either an `emojiname:id` or a unicode character.
@@ -1474,7 +1474,7 @@
  * @return confirmation returned object on completion
  * \memberof dpp::cluster
  */
-[[nodiscard]] async<confirmation_callback_t> co_message_delete_own_reaction(snowflake message_id, snowflake channel_id, const std::string &reaction);
+[[nodiscard]] async<confirmation_callback_t> co_message_delete_own_reaction(snowflake message_id, snowflake channel_id, std::string_view reaction);
 
 /**
  * @brief Delete a user's reaction from a message. The reaction string must be either an `emojiname:id` or a unicode character
@@ -1487,7 +1487,7 @@
  * @return confirmation returned object on completion
  * \memberof dpp::cluster
  */
-[[nodiscard]] async<confirmation_callback_t> co_message_delete_reaction(const struct message &m, snowflake user_id, const std::string &reaction);
+[[nodiscard]] async<confirmation_callback_t> co_message_delete_reaction(const struct message &m, snowflake user_id, std::string_view reaction);
 
 /**
  * @brief Delete a user's reaction from a message by id. The reaction string must be either an `emojiname:id` or a unicode character
@@ -1501,7 +1501,7 @@
  * @return confirmation returned object on completion
  * \memberof dpp::cluster
  */
-[[nodiscard]] async<confirmation_callback_t> co_message_delete_reaction(snowflake message_id, snowflake channel_id, snowflake user_id, const std::string &reaction);
+[[nodiscard]] async<confirmation_callback_t> co_message_delete_reaction(snowflake message_id, snowflake channel_id, snowflake user_id, std::string_view reaction);
 
 /**
  * @brief Delete all reactions on a message using a particular emoji. The reaction string must be either an `emojiname:id` or a unicode character
@@ -1513,7 +1513,7 @@
  * @return confirmation returned object on completion
  * \memberof dpp::cluster
  */
-[[nodiscard]] async<confirmation_callback_t> co_message_delete_reaction_emoji(const struct message &m, const std::string &reaction);
+[[nodiscard]] async<confirmation_callback_t> co_message_delete_reaction_emoji(const struct message &m, std::string_view reaction);
 
 /**
  * @brief Delete all reactions on a message using a particular emoji by id. The reaction string must be either an `emojiname:id` or a unicode character
@@ -1526,7 +1526,7 @@
  * @return confirmation returned object on completion
  * \memberof dpp::cluster
  */
-[[nodiscard]] async<confirmation_callback_t> co_message_delete_reaction_emoji(snowflake message_id, snowflake channel_id, const std::string &reaction);
+[[nodiscard]] async<confirmation_callback_t> co_message_delete_reaction_emoji(snowflake message_id, snowflake channel_id, std::string_view reaction);
 
 /**
  * @brief Edit a message on a channel. The callback function is called when the message has been edited
@@ -1573,7 +1573,7 @@
  * @return user_map returned object on completion
  * \memberof dpp::cluster
  */
-[[nodiscard]] async<confirmation_callback_t> co_message_get_reactions(const struct message &m, const std::string &reaction, snowflake before, snowflake after, snowflake limit);
+[[nodiscard]] async<confirmation_callback_t> co_message_get_reactions(const struct message &m, std::string_view reaction, snowflake before, snowflake after, snowflake limit);
 
 /**
  * @brief Get reactions on a message for a particular emoji by id. The reaction string must be either an `emojiname:id` or a unicode character
@@ -1589,7 +1589,7 @@
  * @return emoji_map returned object on completion
  * \memberof dpp::cluster
  */
-[[nodiscard]] async<confirmation_callback_t> co_message_get_reactions(snowflake message_id, snowflake channel_id, const std::string &reaction, snowflake before, snowflake after, snowflake limit);
+[[nodiscard]] async<confirmation_callback_t> co_message_get_reactions(snowflake message_id, snowflake channel_id, std::string_view reaction, snowflake before, snowflake after, snowflake limit);
 
 /**
  * @brief Pin a message
@@ -1991,7 +1991,7 @@
  * @return guild returned object on completion
  * \memberof dpp::cluster
  */
-[[nodiscard]] async<confirmation_callback_t> co_guild_create_from_template(const std::string &code, const std::string &name);
+[[nodiscard]] async<confirmation_callback_t> co_guild_create_from_template(std::string_view code, std::string_view name);
 
 /**
  * @brief Creates a template for the guild
@@ -2004,7 +2004,7 @@
  * @return dtemplate returned object on completion
  * \memberof dpp::cluster
  */
-[[nodiscard]] async<confirmation_callback_t> co_guild_template_create(snowflake guild_id, const std::string &name, const std::string &description);
+[[nodiscard]] async<confirmation_callback_t> co_guild_template_create(snowflake guild_id, std::string_view name, std::string_view description);
 
 /**
  * @brief Deletes the template
@@ -2016,7 +2016,7 @@
  * @return confirmation returned object on completion
  * \memberof dpp::cluster
  */
-[[nodiscard]] async<confirmation_callback_t> co_guild_template_delete(snowflake guild_id, const std::string &code);
+[[nodiscard]] async<confirmation_callback_t> co_guild_template_delete(snowflake guild_id, std::string_view code);
 
 /**
  * @brief Modifies the template's metadata.
@@ -2030,7 +2030,7 @@
  * @return dtemplate returned object on completion
  * \memberof dpp::cluster
  */
-[[nodiscard]] async<confirmation_callback_t> co_guild_template_modify(snowflake guild_id, const std::string &code, const std::string &name, const std::string &description);
+[[nodiscard]] async<confirmation_callback_t> co_guild_template_modify(snowflake guild_id, std::string_view code, std::string_view name, std::string_view description);
 
 /**
  * @brief Get guild templates
@@ -2053,7 +2053,7 @@
  * @return dtemplate returned object on completion
  * \memberof dpp::cluster
  */
-[[nodiscard]] async<confirmation_callback_t> co_guild_template_sync(snowflake guild_id, const std::string &code);
+[[nodiscard]] async<confirmation_callback_t> co_guild_template_sync(snowflake guild_id, std::string_view code);
 
 /**
  * @brief Get a template
@@ -2063,7 +2063,7 @@
  * @return dtemplate returned object on completion
  * \memberof dpp::cluster
  */
-[[nodiscard]] async<confirmation_callback_t> co_template_get(const std::string &code);
+[[nodiscard]] async<confirmation_callback_t> co_template_get(std::string_view code);
 
 /**
  * @brief Join a thread
@@ -2167,7 +2167,7 @@
  * @return thread returned object on completion
  * \memberof dpp::cluster
  */
-[[nodiscard]] async<confirmation_callback_t> co_thread_create_in_forum(const std::string& thread_name, snowflake channel_id, const message& msg, auto_archive_duration_t auto_archive_duration, uint16_t rate_limit_per_user, std::vector<snowflake> applied_tags = {});
+[[nodiscard]] async<confirmation_callback_t> co_thread_create_in_forum(std::string_view thread_name, snowflake channel_id, const message& msg, auto_archive_duration_t auto_archive_duration, uint16_t rate_limit_per_user, std::vector<snowflake> applied_tags = {});
 
 /**
  * @brief Create a thread
@@ -2184,7 +2184,7 @@
  * @return thread returned object on completion
  * \memberof dpp::cluster
  */
-[[nodiscard]] async<confirmation_callback_t> co_thread_create(const std::string& thread_name, snowflake channel_id, uint16_t auto_archive_duration, channel_type thread_type, bool invitable, uint16_t rate_limit_per_user);
+[[nodiscard]] async<confirmation_callback_t> co_thread_create(std::string_view thread_name, snowflake channel_id, uint16_t auto_archive_duration, channel_type thread_type, bool invitable, uint16_t rate_limit_per_user);
 
 /**
  * @brief Edit a thread
@@ -2211,7 +2211,7 @@
  * @return thread returned object on completion
  * \memberof dpp::cluster
  */
-[[nodiscard]] async<confirmation_callback_t> co_thread_create_with_message(const std::string& thread_name, snowflake channel_id, snowflake message_id, uint16_t auto_archive_duration, uint16_t rate_limit_per_user);
+[[nodiscard]] async<confirmation_callback_t> co_thread_create_with_message(std::string_view thread_name, snowflake channel_id, snowflake message_id, uint16_t auto_archive_duration, uint16_t rate_limit_per_user);
 
 /**
  * @brief Add a member to a thread
@@ -2259,7 +2259,7 @@
  	 * @throw dpp::length_exception Image data is larger than the maximum size of 256 kilobytes
  * \memberof dpp::cluster
  */
-[[nodiscard]] async<confirmation_callback_t> co_current_user_edit(const std::string &nickname, const std::string& image_blob = "", const image_type type = i_png);
+[[nodiscard]] async<confirmation_callback_t> co_current_user_edit(std::string_view nickname, std::string_view image_blob = "", const image_type type = i_png);
 
 /**
  * @brief Get current (bot) application
@@ -2452,7 +2452,7 @@
  * @return confirmation returned object on completion
  * \memberof dpp::cluster
  */
-[[nodiscard]] async<confirmation_callback_t> co_delete_webhook_with_token(snowflake webhook_id, const std::string &token);
+[[nodiscard]] async<confirmation_callback_t> co_delete_webhook_with_token(snowflake webhook_id, std::string_view token);
 
 /**
  * @brief Edit webhook
@@ -2508,7 +2508,7 @@
  * @note If the webhook channel is a forum channel, you must provide either `thread_id` or `thread_name`. If `thread_id` is provided, the message will send in that thread. If `thread_name` is provided, a thread with that name will be created in the forum channel.
  * \memberof dpp::cluster
  */
-[[nodiscard]] async<confirmation_callback_t> co_execute_webhook(const class webhook &wh, const struct message &m, bool wait = false, snowflake thread_id = 0, const std::string& thread_name = "");
+[[nodiscard]] async<confirmation_callback_t> co_execute_webhook(const class webhook &wh, const struct message &m, bool wait = false, snowflake thread_id = 0, std::string_view thread_name = "");
 
 /**
  * @brief Get channel webhooks
@@ -2562,7 +2562,7 @@
  * @return webhook returned object on completion
  * \memberof dpp::cluster
  */
-[[nodiscard]] async<confirmation_callback_t> co_get_webhook_with_token(snowflake webhook_id, const std::string &token);
+[[nodiscard]] async<confirmation_callback_t> co_get_webhook_with_token(snowflake webhook_id, std::string_view token);
 
 
 /* End of auto-generated definitions */

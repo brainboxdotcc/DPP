@@ -37,7 +37,7 @@ constexpr size_t WS_MAX_PAYLOAD_LENGTH_SMALL = 125;
 constexpr size_t WS_MAX_PAYLOAD_LENGTH_LARGE = 65535;
 constexpr size_t MAXHEADERSIZE = sizeof(uint64_t) + 2;
 
-websocket_client::websocket_client(const std::string &hostname, const std::string &port, const std::string &urlpath, ws_opcode opcode)
+websocket_client::websocket_client(std::string_view hostname, std::string_view port, std::string_view urlpath, ws_opcode opcode)
 	: ssl_client(hostname, port),
 	state(HTTP_HEADERS),
 	path(urlpath),
@@ -73,7 +73,7 @@ void websocket_client::connect()
 	);
 }
 
-bool websocket_client::handle_frame(const std::string &buffer)
+bool websocket_client::handle_frame(std::string_view buffer)
 {
 	/* This is a stub for classes that derive the websocket client */
 	return true;
@@ -111,7 +111,7 @@ size_t websocket_client::fill_header(unsigned char* outbuf, size_t sendlength, w
 }
 
 
-void websocket_client::write(const std::string &data)
+void websocket_client::write(std::string_view data)
 {
 	if (state == HTTP_HEADERS) {
 		/* Simple write */
@@ -282,7 +282,7 @@ void websocket_client::one_second_timer()
 	}
 }
 
-void websocket_client::handle_ping_pong(bool ping, const std::string &payload)
+void websocket_client::handle_ping_pong(bool ping, std::string_view payload)
 {
 	if (ping) {
 		/* For receiving pings we echo back their payload with the type OP_PONG */

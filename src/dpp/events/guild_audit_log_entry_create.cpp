@@ -32,7 +32,7 @@ namespace dpp::events {
  * @param j JSON data for the event
  * @param raw Raw JSON string
  */
-void guild_audit_log_entry_create::handle(discord_client* client, json &j, const std::string &raw) {
+void guild_audit_log_entry_create::handle(discord_client* client, json &j, std::string_view raw) {
 	json& d = j["d"];
 	if (!client->creator->on_guild_audit_log_entry_create.empty()) {
 		dpp::guild_audit_log_entry_create_t ec(client, raw);

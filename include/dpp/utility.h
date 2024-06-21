@@ -67,7 +67,7 @@ namespace utility {
  * @param is_animated Whether the image is actually animated or not
  * @return std::string endpoint url or empty string
  */
-std::string DPP_EXPORT cdn_endpoint_url(const std::vector<image_type> &allowed_formats, const std::string &path_without_extension, const dpp::image_type format, uint16_t size, bool prefer_animated = false, bool is_animated = false);
+std::string DPP_EXPORT cdn_endpoint_url(const std::vector<image_type> &allowed_formats, std::string_view path_without_extension, const dpp::image_type format, uint16_t size, bool prefer_animated = false, bool is_animated = false);
 
 /**
  * @brief Helper function to easily create discord's cdn endpoint urls.
@@ -85,7 +85,7 @@ std::string DPP_EXPORT cdn_endpoint_url(const std::vector<image_type> &allowed_f
  * @param is_animated Whether the image is actually animated or not
  * @return std::string endpoint url or empty string
  */
-std::string DPP_EXPORT cdn_endpoint_url_hash(const std::vector<image_type> &allowed_formats, const std::string &path_without_extension, const std::string &hash, const dpp::image_type format, uint16_t size, bool prefer_animated = false, bool is_animated = false);
+std::string DPP_EXPORT cdn_endpoint_url_hash(const std::vector<image_type> &allowed_formats, std::string_view path_without_extension, std::string_view hash, const dpp::image_type format, uint16_t size, bool prefer_animated = false, bool is_animated = false);
 
 /**
  * @brief Helper function to easily create discord's cdn endpoint urls (specialised for stickers)
@@ -190,12 +190,12 @@ enum guild_navigation_type {
 /**
  * @brief The base URL for CDN content such as profile pictures and guild icons.
  */
-inline const std::string cdn_host = "https://cdn.discordapp.com"; 
+inline const std::string cdn_host = "https://cdn.discordapp.com";
 
 /**
  * @brief The base URL for message/user/channel links.
  */
-inline const std::string url_host = "https://discord.com"; 
+inline const std::string url_host = "https://discord.com";
 
 /**
  * @brief Callback for the results of a command executed via dpp::utility::exec
@@ -216,7 +216,7 @@ typedef std::function<void(const std::string& output)> cmd_result_t;
  * @param parameters Command line parameters. Each will be escaped using `std::quoted`.
  * @param callback The callback to call on completion.
  */
-void DPP_EXPORT exec(const std::string& cmd, std::vector<std::string> parameters = {}, cmd_result_t callback = {});
+void DPP_EXPORT exec(std::string_view cmd, std::vector<std::string> parameters = {}, cmd_result_t callback = {});
 
 /**
  * @brief Return a mentionable timestamp (used in a message). These timestamps will display the given timestamp in the user's timezone and locale.
@@ -272,7 +272,7 @@ struct DPP_EXPORT iconhash {
 	 * @param _first Leftmost portion of the hash value
 	 * @param _second Rightmost portion of the hash value
 	 */
-	iconhash(uint64_t _first = 0, uint64_t _second = 0) noexcept;
+    iconhash(uint64_t _first = 0, uint64_t _second = 0) noexcept;
 
 	/**
 	 * @brief Construct a new iconhash object
@@ -283,17 +283,17 @@ struct DPP_EXPORT iconhash {
 	 * @throws std::length_error if the provided
 	 * string is not exactly 32 characters long.
 	 */
-	iconhash(const std::string &hash);
+    iconhash(std::string_view hash);
 
 	/**
-	 * @brief Assign from std::string
+     * @brief Assign from std::string
 	 *
 	 * @param assignment string to assign from.
 	 *
 	 * @throws std::length_error if the provided
 	 * string is not exactly 32 characters long.
 	 */
-	iconhash& operator=(const std::string &assignment);
+    iconhash& operator=(std::string_view assignment);
 
 	/**
 	 * @brief Check if one iconhash is equal to another
@@ -312,7 +312,7 @@ struct DPP_EXPORT iconhash {
 	 * @throws std::length_error if the provided
 	 * string is not exactly 32 characters long.
 	 */
-	void set(const std::string &hash);
+    void set(std::string_view hash);
 
 	/**
 	 * @brief Convert iconhash back to 32 character
@@ -778,7 +778,7 @@ std::string DPP_EXPORT utf8substr(std::string_view str, size_t start, size_t len
  * @return std::string The file contents
  * @throw dpp::file_exception on failure to read the entire file
  */
-std::string DPP_EXPORT read_file(const std::string& filename);
+std::string DPP_EXPORT read_file(std::string_view filename);
 
 /**
  * @brief Validate a string value
@@ -792,7 +792,7 @@ std::string DPP_EXPORT read_file(const std::string& filename);
  * @return std::string Validated string, truncated if necessary.
  * @throw dpp::length_exception if value UTF8 length < _min
  */
-std::string DPP_EXPORT validate(const std::string& value, size_t _min, size_t _max, const std::string& exception_message);
+std::string DPP_EXPORT validate(std::string_view value, size_t _min, size_t _max, std::string_view exception_message);
 
 /**
  * @brief Get the url query parameter for the cdn endpoint. Internally used to build url getters.
@@ -809,7 +809,7 @@ std::string DPP_EXPORT avatar_size(uint32_t size);
  * @param sep Separator characters
  * @return std::vector<std::string> Tokenized strings 
  */
-std::vector<std::string> DPP_EXPORT tokenize(std::string const &in, const char* sep = "\r\n");
+std::vector<std::string> DPP_EXPORT tokenize(std::string_view in, const char* sep = "\r\n");
 
 /**
  * @brief Create a bot invite
@@ -831,7 +831,7 @@ std::string DPP_EXPORT bot_invite_url(const snowflake bot_id, const uint64_t per
  * character.
  * @return std::string The text with the markdown special characters escaped with a backslash
  */
-std::string DPP_EXPORT markdown_escape(const std::string& text, bool escape_code_blocks = false);
+std::string DPP_EXPORT markdown_escape(std::string_view text, bool escape_code_blocks = false);
 
 /**
  * @brief Encodes a url parameter similar to [php urlencode()](https://www.php.net/manual/en/function.urlencode.php)
@@ -839,7 +839,7 @@ std::string DPP_EXPORT markdown_escape(const std::string& text, bool escape_code
  * @param value String to encode
  * @return std::string URL encoded string
  */
-std::string DPP_EXPORT url_encode(const std::string &value);
+std::string DPP_EXPORT url_encode(std::string_view value);
 
 /**
  * @brief Create a mentionable slashcommand (used in a message).
@@ -848,7 +848,7 @@ std::string DPP_EXPORT url_encode(const std::string &value);
  * @param subcommand Optional: The subcommand name (for mentioning a subcommand)
  * @return std::string The formatted mention
  */
-std::string DPP_EXPORT slashcommand_mention(snowflake command_id, const std::string &command_name, const std::string &subcommand = "");
+std::string DPP_EXPORT slashcommand_mention(snowflake command_id, std::string_view command_name, std::string_view subcommand = "");
 
 /**
  * @brief Create a mentionable slashcommand (used in a message).
@@ -858,7 +858,7 @@ std::string DPP_EXPORT slashcommand_mention(snowflake command_id, const std::str
  * @param subcommand The subcommand name
  * @return std::string The formatted mention of the slashcommand with its subcommand
  */
-std::string DPP_EXPORT slashcommand_mention(snowflake command_id, const std::string &command_name, const std::string &subcommand_group, const std::string &subcommand);
+std::string DPP_EXPORT slashcommand_mention(snowflake command_id, std::string_view command_name, std::string_view subcommand_group, std::string_view subcommand);
 
 /**
  * @brief Create a mentionable user.
@@ -922,7 +922,14 @@ std::string DPP_EXPORT thread_url(const snowflake& guild_id, const snowflake& th
 */
 std::string DPP_EXPORT user_url(const snowflake& user_id);
 
-
+template<typename Map, typename K, typename M>
+std::pair<typename Map::iterator, bool> emplace_or_assign(Map& m, K&& k, M&& obj)
+{
+    auto res = m.emplace(std::forward<K>(k), std::forward<M>(obj));
+    if (!res.second)
+        res.first->second = std::forward<M>(obj);
+    return res;
+}
 
 #ifdef _DOXYGEN_
 /**
@@ -1016,7 +1023,7 @@ std::string DPP_EXPORT make_url_parameters(const std::map<std::string, uint64_t>
  * 
  * @param name New name to set
  */
-void DPP_EXPORT set_thread_name(const std::string& name);
+void DPP_EXPORT set_thread_name(std::string_view name);
 
 #ifdef __cpp_concepts // if c++20
 /**

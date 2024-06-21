@@ -36,7 +36,7 @@ namespace dpp::events {
  * @param j JSON data for the event
  * @param raw Raw JSON string
  */
-void channel_delete::handle(discord_client* client, json &j, const std::string &raw) {
+void channel_delete::handle(discord_client* client, json &j, std::string_view raw) {
 	json& d = j["d"];
 	const channel c = channel().fill_from_json(&d);
 	guild* g = find_guild(c.guild_id);

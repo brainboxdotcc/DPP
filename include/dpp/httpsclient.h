@@ -251,7 +251,7 @@ public:
 	 * @param request_timeout How many seconds before the connection is considered failed if not finished
 	 * @param protocol Request HTTP protocol (default: 1.1)
 	 */
-        https_client(const std::string &hostname, uint16_t port = 443, const std::string &urlpath = "/", const std::string &verb = "GET", const std::string &req_body = "", const http_headers& extra_headers = {}, bool plaintext_connection = false, uint16_t request_timeout = 5, const std::string &protocol = "1.1");
+        https_client(std::string_view hostname, uint16_t port = 443, std::string_view urlpath = "/", std::string_view verb = "GET", std::string_view req_body = "", const http_headers& extra_headers = {}, bool plaintext_connection = false, uint16_t request_timeout = 5, std::string_view protocol = "1.1");
 
 	/**
 	 * @brief Destroy the https client object
@@ -267,7 +267,7 @@ public:
 	 * @param mimetypes MIME types of each of the files to send
 	 * @return multipart mime content and headers
 	 */
-	static multipart_content build_multipart(const std::string &json, const std::vector<std::string>& filenames = {}, const std::vector<std::string>& contents = {}, const std::vector<std::string>& mimetypes = {});
+        static multipart_content build_multipart(std::string_view json, const std::vector<std::string>& filenames = {}, const std::vector<std::string>& contents = {}, const std::vector<std::string>& mimetypes = {});
 
 	/**
 	 * @brief Processes incoming data from the SSL socket input buffer.
@@ -295,7 +295,7 @@ public:
 	 * @see get_header_count to determine if multiple are present
 	 * @see get_header_list to retrieve all entries of the same header_name
 	 */
-	const std::string get_header(std::string header_name) const;
+    const std::string get_header(std::string_view header_name) const;
 
 	/**
 	 * @brief Get the number of headers with the same header name
@@ -303,7 +303,7 @@ public:
 	 * @param header_name
 	 * @return the number of headers with this count
 	 */
-	size_t get_header_count(std::string header_name) const;
+    size_t get_header_count(std::string_view header_name) const;
 
 
 	/**
@@ -312,7 +312,7 @@ public:
 	 * @param header_name
 	 * @return A list of headers with the same name, or an empty list if not found
 	 */
-	const std::list<std::string> get_header_list(std::string header_name) const;
+    const std::list<std::string> get_header_list(std::string_view header_name) const;
 
 	/**
 	 * @brief Get all HTTP response headers
@@ -347,7 +347,7 @@ public:
 	 * @param url URL to break down
 	 * @return Split URL
 	 */
-	static http_connect_info get_host_info(std::string url);
+    static http_connect_info get_host_info(std::string_view url);
 
 };
 

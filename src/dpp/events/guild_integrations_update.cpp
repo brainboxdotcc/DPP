@@ -36,7 +36,7 @@ namespace dpp::events {
  * @param j JSON data for the event
  * @param raw Raw JSON string
  */
-void guild_integrations_update::handle(class discord_client* client, json &j, const std::string &raw) {
+void guild_integrations_update::handle(class discord_client* client, json &j, std::string_view raw) {
 	if (!client->creator->on_guild_integrations_update.empty()) {
 		json& d = j["d"];
 		dpp::guild_integrations_update_t giu(client, raw);

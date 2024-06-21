@@ -56,11 +56,11 @@ namespace dpp::utility {
 constexpr int max_cdn_image_size{4096};
 constexpr int min_cdn_image_size{16};
 
-std::string cdn_endpoint_url(const std::vector<image_type> &allowed_formats, const std::string &path_without_extension, const dpp::image_type format, uint16_t size, bool prefer_animated, bool is_animated) {
+std::string cdn_endpoint_url(const std::vector<image_type> &allowed_formats, std::string_view path_without_extension, const dpp::image_type format, uint16_t size, bool prefer_animated, bool is_animated) {
 	return cdn_endpoint_url_hash(allowed_formats, path_without_extension, "", format, size, prefer_animated, is_animated);
 }
 
-std::string cdn_endpoint_url_hash(const std::vector<image_type> &allowed_formats, const std::string &path_without_extension, const std::string &hash, const dpp::image_type format, uint16_t size, bool prefer_animated, bool is_animated) {
+std::string cdn_endpoint_url_hash(const std::vector<image_type> &allowed_formats, std::string_view path_without_extension, std::string_view hash, const dpp::image_type format, uint16_t size, bool prefer_animated, bool is_animated) {
 
 	if (std::find(allowed_formats.begin(), allowed_formats.end(), format) == allowed_formats.end()) {
 		return std::string(); // if the given format is not allowed for this endpoint
@@ -79,9 +79,9 @@ std::string cdn_endpoint_url_hash(const std::vector<image_type> &allowed_formats
 		return std::string();
 	}
 
-	std::string suffix = (hash.empty() ? "" : (is_animated ? "/a_" : "/") + hash); // > In the case of endpoints that support GIFs, the hash will begin with a_ if it is available in GIF format.
+    std::string suffix = (hash.empty() ? "" : (is_animated ? "/a_" : "/") + std::string(hash)); // > In the case of endpoints that support GIFs, the hash will begin with a_ if it is available in GIF format.
 
-	return cdn_host + '/' + path_without_extension + suffix + extension + utility::avatar_size(size);
+    return cdn_host + '/' + std::string(path_without_extension) + suffix + extension + utility::avatar_size(size);
 }
 
 std::string cdn_endpoint_url_sticker(snowflake sticker_id, sticker_format format) {
@@ -196,8 +196,8 @@ uint64_t uptime::to_msecs() const {
 iconhash::iconhash(uint64_t _first, uint64_t _second) noexcept : first(_first), second(_second) {
 }
 
-void iconhash::set(const std::string &hash) {
-	std::string clean_hash(hash);
+void iconhash::set(std::string_view hash) {
+    std::string_view clean_hash(hash);
 	if (hash.empty()) {	// Clear values if empty hash
 		first = second = 0;
 		return;
@@ -209,17 +209,17 @@ void iconhash::set(const std::string &hash) {
 		clean_hash = hash.substr(2);
 	}
 	if (clean_hash.length() != 32) {
-		throw std::length_error("iconhash must be exactly 32 characters in length, passed value is: '" + clean_hash + "'");
+        throw std::length_error("iconhash must be exactly 32 characters in length, passed value is: '" + std::string(clean_hash) + "'");
 	}
 	this->first = from_string<uint64_t>(clean_hash.substr(0, 16), std::hex);
 	this->second = from_string<uint64_t>(clean_hash.substr(16, 16), std::hex);
 }
 
-iconhash::iconhash(const std::string &hash) {
+iconhash::iconhash(std::string_view hash) {
 	set(hash);
 }
 
-iconhash& iconhash::operator=(const std::string &assignment) {
+iconhash& iconhash::operator=(std::string_view assignment) {
 	set(assignment);
 	return *this;
 }
@@ -455,7 +455,7 @@ uint32_t hsl(double h, double s, double l) {
 	return rgb(r, g, b);
 }
 
-void exec(const std::string& cmd, std::vector<std::string> parameters, cmd_result_t callback) {
+void exec(std::string_view cmd, std::vector<std::string> parameters, cmd_result_t callback) {
 	auto t = std::thread([cmd, parameters, callback]() {
 		utility::set_thread_name("async_exec");
 		std::array<char, 128> buffer;
@@ -545,10 +545,10 @@ std::string utf8substr(std::string_view str, size_t start, size_t length) {
 	return std::string(utf8subview(str, start, length));
 }
 
-std::string read_file(const std::string& filename)
+std::string read_file(std::string_view filename)
 {
 	try {
-		std::ifstream ifs(filename, std::ios::binary);
+        std::ifstream ifs(std::string(filename), std::ios::binary);
 		return std::string((std::istreambuf_iterator<char>(ifs)), (std::istreambuf_iterator<char>()));
 	}
 	catch (const std::exception& e) {
@@ -557,13 +557,13 @@ std::string read_file(const std::string& filename)
 	}
 }
 
-std::string validate(const std::string& value, size_t _min, size_t _max, const std::string& exception_message) {
+std::string validate(std::string_view value, size_t _min, size_t _max, std::string_view exception_message) {
 	if (utf8len(value) < _min) {
 		throw dpp::length_exception(exception_message);
 	} else if (utf8len(value) > _max) {
 		return utf8substr(value, 0, _max);
 	}
-	return value;
+    return std::string(value);
 }
 
 
@@ -603,13 +603,13 @@ std::string avatar_size(uint32_t size) {
 	return std::string();
 }
 
-std::vector<std::string> tokenize(std::string const &in, const char* sep) {
+std::vector<std::string> tokenize(std::string_view in, const char* sep) {
 	std::string::size_type b = 0;
 	std::vector<std::string> result;
 
 	while ((b = in.find_first_not_of(sep, b)) != std::string::npos) {
 		auto e = in.find(sep, b);
-		result.push_back(in.substr(b, e-b));
+        result.emplace_back(in.substr(b, e-b));
 		b = e;
 	}
 	return result;
@@ -659,7 +659,7 @@ std::function<void(const dpp::confirmation_callback_t& detail)> log_error() {
 /* Hexadecimal sequence for URL encoding */
 static const char* hex = "0123456789ABCDEF";
 
-std::string url_encode(const std::string &value) {
+std::string url_encode(std::string_view value) {
 	// Reserve worst-case encoded length of string, input length * 3
 	std::string escaped(value.length() * 3, '\0');
 	char* data = escaped.data();
@@ -682,12 +682,27 @@ std::string url_encode(const std::string &value) {
 	return escaped;
 }
 
-std::string slashcommand_mention(snowflake command_id, const std::string &command_name, const std::string &subcommand) {
-	return "</" + command_name + (!subcommand.empty() ? (" " + subcommand) : "") + ":" + std::to_string(command_id) + ">";
+std::string slashcommand_mention(snowflake command_id, std::string_view command_name, std::string_view subcommand) {
+    std::string out = "</";
+    out += command_name;
+    if (!subcommand.empty())
+    {
+        out += ' ';
+        out += subcommand;
+    }
+    out += ':' + std::to_string(command_id) + '>';
+    return out;
 }
 
-std::string slashcommand_mention(snowflake command_id, const std::string &command_name, const std::string &subcommand_group, const std::string &subcommand) {
-	return "</" + command_name + " " + subcommand_group + " " + subcommand + ":" + std::to_string(command_id) + ">";
+std::string slashcommand_mention(snowflake command_id, std::string_view command_name, std::string_view subcommand_group, std::string_view subcommand) {
+    std::string out = "</";
+    out += command_name;
+    out += ' ';
+    out += subcommand_group;
+    out += ' ';
+    out += subcommand;
+    out += ':' + std::to_string(command_id) + '>';
+    return out;
 }
 
 std::string user_mention(const snowflake& id) {
@@ -867,7 +882,7 @@ std::string make_url_parameters(const std::map<std::string, uint64_t>& parameter
 	return make_url_parameters(params);
 }
 
-std::string markdown_escape(const std::string& text, bool escape_code_blocks) {
+std::string markdown_escape(std::string_view text, bool escape_code_blocks) {
 	/**
 	 * @brief Represents the current state of the finite state machine
 	 * for the markdown_escape function.
@@ -891,7 +906,7 @@ std::string markdown_escape(const std::string& text, bool escape_code_blocks) {
 
 	md_state state = md_normal;
 	std::string output;
-	const std::string markdown_chars("\\*_|~[]()>");
+    constexpr std::string_view markdown_chars("\\*_|~[]()>");
 
 	for (size_t n = 0; n < text.length(); ++n) {
 		if (text.substr(n, 3) == "```") {
@@ -921,16 +936,17 @@ std::string version() {
 	return DPP_VERSION_TEXT;
 }
 
-void set_thread_name(const std::string& name) {
+void set_thread_name(std::string_view name) {
+    std::string name_capped(name.substr(0, 15));
 	#ifdef HAVE_PRCTL
-		prctl(PR_SET_NAME, reinterpret_cast<unsigned long>(name.substr(0, 15).c_str()), NULL, NULL, NULL);
+        prctl(PR_SET_NAME, reinterpret_cast<unsigned long>(name_capped.c_str()), NULL, NULL, NULL);
 	#else
 		#if HAVE_PTHREAD_SETNAME_NP
 			#if HAVE_SINGLE_PARAMETER_SETNAME_NP
-				pthread_setname_np(name.substr(0, 15).c_str());
+                pthread_setname_np(name_capped.c_str());
 			#endif
 			#if HAVE_TWO_PARAMETER_SETNAME_NP
-				pthread_setname_np(pthread_self(), name.substr(0, 15).c_str());
+                pthread_setname_np(pthread_self(), name_capped.c_str());
 			#endif
 		#endif
 	#endif

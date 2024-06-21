@@ -306,7 +306,7 @@ public:
 	 * @param filemimetype The MIME type of any uploaded file for the request
 	 * @param http_protocol HTTP protocol
 	 */
-	http_request(const std::string &_endpoint, const std::string &_parameters, http_completion_event completion, const std::string &_postdata = "", http_method method = m_get, const std::string &audit_reason = "", const std::string &filename = "", const std::string &filecontent = "", const std::string &filemimetype = "", const std::string &http_protocol = "1.1");
+    http_request(std::string_view _endpoint, std::string_view _parameters, http_completion_event completion, std::string_view _postdata = "", http_method method = m_get, std::string_view audit_reason = "", std::string_view filename = "", std::string_view filecontent = "", std::string_view filemimetype = "", std::string_view http_protocol = "1.1");
 
 	/**
 	 * @brief Constructor. When constructing one of these objects it should be passed to request_queue::post_request().
@@ -321,7 +321,7 @@ public:
 	 * @param filemimetypes The MIME type of any uploaded file for the request
 	 * @param http_protocol HTTP protocol
 	 */
-	http_request(const std::string &_endpoint, const std::string &_parameters, http_completion_event completion, const std::string &_postdata = "", http_method method = m_get, const std::string &audit_reason = "", const std::vector<std::string> &filename = {}, const std::vector<std::string> &filecontent = {}, const std::vector<std::string> &filemimetypes = {}, const std::string &http_protocol = "1.1");
+    http_request(std::string_view _endpoint, std::string_view _parameters, http_completion_event completion, std::string_view _postdata = "", http_method method = m_get, std::string_view audit_reason = "", const std::vector<std::string> &filename = {}, const std::vector<std::string> &filecontent = {}, const std::vector<std::string> &filemimetypes = {}, std::string_view http_protocol = "1.1");
 
 	/**
 	 * @brief Constructor. When constructing one of these objects it should be passed to request_queue::post_request().
@@ -333,7 +333,7 @@ public:
 	 * @param _headers HTTP headers to send
 	 * @param http_protocol HTTP protocol
 	 */
-	http_request(const std::string &_url, http_completion_event completion, http_method method = m_get, const std::string &_postdata = "", const std::string &_mimetype = "text/plain", const std::multimap<std::string, std::string> &_headers = {}, const std::string &http_protocol = "1.1");
+    http_request(std::string_view _url, http_completion_event completion, http_method method = m_get, std::string_view _postdata = "", std::string_view _mimetype = "text/plain", const std::multimap<std::string, std::string> &_headers = {}, std::string_view http_protocol = "1.1");
 
 	/**
 	 * @brief Destroy the http request object

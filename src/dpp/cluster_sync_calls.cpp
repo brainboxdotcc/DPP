@@ -105,40 +105,40 @@ slashcommand_map cluster::guild_commands_get_sync(snowflake guild_id) {
 	return dpp::sync<slashcommand_map>(this, static_cast<void (cluster::*)(snowflake, command_completion_event_t)>(&cluster::guild_commands_get), guild_id);
 }
 
-confirmation cluster::interaction_response_create_sync(snowflake interaction_id, const std::string &token, const interaction_response &r) {
-	return dpp::sync<confirmation>(this, static_cast<void (cluster::*)(snowflake, const std::string &, const interaction_response &, command_completion_event_t)>(&cluster::interaction_response_create), interaction_id, token, r);
+confirmation cluster::interaction_response_create_sync(snowflake interaction_id, std::string_view token, const interaction_response &r) {
+	return dpp::sync<confirmation>(this, static_cast<void (cluster::*)(snowflake, std::string_view, const interaction_response &, command_completion_event_t)>(&cluster::interaction_response_create), interaction_id, token, r);
 }
 
-confirmation cluster::interaction_response_edit_sync(const std::string &token, const message &m) {
-	return dpp::sync<confirmation>(this, static_cast<void (cluster::*)(const std::string &, const message &, command_completion_event_t)>(&cluster::interaction_response_edit), token, m);
+confirmation cluster::interaction_response_edit_sync(std::string_view token, const message &m) {
+	return dpp::sync<confirmation>(this, static_cast<void (cluster::*)(std::string_view, const message &, command_completion_event_t)>(&cluster::interaction_response_edit), token, m);
 }
 
-message cluster::interaction_response_get_original_sync(const std::string &token) {
-	return dpp::sync<message>(this, static_cast<void (cluster::*)(const std::string &, command_completion_event_t)>(&cluster::interaction_response_get_original), token);
+message cluster::interaction_response_get_original_sync(std::string_view token) {
+	return dpp::sync<message>(this, static_cast<void (cluster::*)(std::string_view, command_completion_event_t)>(&cluster::interaction_response_get_original), token);
 }
 
-confirmation cluster::interaction_followup_create_sync(const std::string &token, const message &m) {
-	return dpp::sync<confirmation>(this, static_cast<void (cluster::*)(const std::string &, const message &, command_completion_event_t)>(&cluster::interaction_followup_create), token, m);
+confirmation cluster::interaction_followup_create_sync(std::string_view token, const message &m) {
+	return dpp::sync<confirmation>(this, static_cast<void (cluster::*)(std::string_view, const message &, command_completion_event_t)>(&cluster::interaction_followup_create), token, m);
 }
 
-confirmation cluster::interaction_followup_edit_original_sync(const std::string &token, const message &m) {
-	return dpp::sync<confirmation>(this, static_cast<void (cluster::*)(const std::string &, const message &, command_completion_event_t)>(&cluster::interaction_followup_edit_original), token, m);
+confirmation cluster::interaction_followup_edit_original_sync(std::string_view token, const message &m) {
+	return dpp::sync<confirmation>(this, static_cast<void (cluster::*)(std::string_view, const message &, command_completion_event_t)>(&cluster::interaction_followup_edit_original), token, m);
 }
 
-confirmation cluster::interaction_followup_delete_sync(const std::string &token) {
-	return dpp::sync<confirmation>(this, static_cast<void (cluster::*)(const std::string &, command_completion_event_t)>(&cluster::interaction_followup_delete), token);
+confirmation cluster::interaction_followup_delete_sync(std::string_view token) {
+	return dpp::sync<confirmation>(this, static_cast<void (cluster::*)(std::string_view, command_completion_event_t)>(&cluster::interaction_followup_delete), token);
 }
 
-confirmation cluster::interaction_followup_edit_sync(const std::string &token, const message &m) {
-	return dpp::sync<confirmation>(this, static_cast<void (cluster::*)(const std::string &, const message &, command_completion_event_t)>(&cluster::interaction_followup_edit), token, m);
+confirmation cluster::interaction_followup_edit_sync(std::string_view token, const message &m) {
+	return dpp::sync<confirmation>(this, static_cast<void (cluster::*)(std::string_view, const message &, command_completion_event_t)>(&cluster::interaction_followup_edit), token, m);
 }
 
-message cluster::interaction_followup_get_sync(const std::string &token, snowflake message_id) {
-	return dpp::sync<message>(this, static_cast<void (cluster::*)(const std::string &, snowflake, command_completion_event_t)>(&cluster::interaction_followup_get), token, message_id);
+message cluster::interaction_followup_get_sync(std::string_view token, snowflake message_id) {
+	return dpp::sync<message>(this, static_cast<void (cluster::*)(std::string_view, snowflake, command_completion_event_t)>(&cluster::interaction_followup_get), token, message_id);
 }
 
-message cluster::interaction_followup_get_original_sync(const std::string &token) {
-	return dpp::sync<message>(this, static_cast<void (cluster::*)(const std::string &, command_completion_event_t)>(&cluster::interaction_followup_get_original), token);
+message cluster::interaction_followup_get_original_sync(std::string_view token) {
+	return dpp::sync<message>(this, static_cast<void (cluster::*)(std::string_view, command_completion_event_t)>(&cluster::interaction_followup_get_original), token);
 }
 
 automod_rule_map cluster::automod_rules_get_sync(snowflake guild_id) {
@@ -217,8 +217,8 @@ channel_map cluster::channels_get_sync(snowflake guild_id) {
 	return dpp::sync<channel_map>(this, static_cast<void (cluster::*)(snowflake, command_completion_event_t)>(&cluster::channels_get), guild_id);
 }
 
-confirmation cluster::channel_set_voice_status_sync(snowflake channel_id, const std::string& status) {
-	return dpp::sync<confirmation>(this, static_cast<void (cluster::*)(snowflake, const std::string&, command_completion_event_t)>(&cluster::channel_set_voice_status), channel_id, status);
+confirmation cluster::channel_set_voice_status_sync(snowflake channel_id, std::string_view status) {
+	return dpp::sync<confirmation>(this, static_cast<void (cluster::*)(snowflake, std::string_view, command_completion_event_t)>(&cluster::channel_set_voice_status), channel_id, status);
 }
 
 channel cluster::create_dm_channel_sync(snowflake user_id) {
@@ -233,8 +233,8 @@ message cluster::direct_message_create_sync(snowflake user_id, const message &m)
 	return dpp::sync<message>(this, static_cast<void (cluster::*)(snowflake, const message &, command_completion_event_t)>(&cluster::direct_message_create), user_id, m);
 }
 
-confirmation cluster::gdm_add_sync(snowflake channel_id, snowflake user_id, const std::string &access_token, const std::string &nick) {
-	return dpp::sync<confirmation>(this, static_cast<void (cluster::*)(snowflake, snowflake, const std::string &, const std::string &, command_completion_event_t)>(&cluster::gdm_add), channel_id, user_id, access_token, nick);
+confirmation cluster::gdm_add_sync(snowflake channel_id, snowflake user_id, std::string_view access_token, std::string_view nick) {
+	return dpp::sync<confirmation>(this, static_cast<void (cluster::*)(snowflake, snowflake, std::string_view, std::string_view, command_completion_event_t)>(&cluster::gdm_add), channel_id, user_id, access_token, nick);
 }
 
 confirmation cluster::gdm_remove_sync(snowflake channel_id, snowflake user_id) {
@@ -281,8 +281,8 @@ gateway cluster::get_gateway_bot_sync() {
 	return dpp::sync<gateway>(this, static_cast<void (cluster::*)(command_completion_event_t)>(&cluster::get_gateway_bot));
 }
 
-confirmation cluster::guild_current_member_edit_sync(snowflake guild_id, const std::string &nickname) {
-	return dpp::sync<confirmation>(this, static_cast<void (cluster::*)(snowflake, const std::string &, command_completion_event_t)>(&cluster::guild_current_member_edit), guild_id, nickname);
+confirmation cluster::guild_current_member_edit_sync(snowflake guild_id, std::string_view nickname) {
+	return dpp::sync<confirmation>(this, static_cast<void (cluster::*)(snowflake, std::string_view, command_completion_event_t)>(&cluster::guild_current_member_edit), guild_id, nickname);
 }
 
 auditlog cluster::guild_auditlog_get_sync(snowflake guild_id, snowflake user_id, uint32_t action_type, snowflake before, snowflake after, uint32_t limit) {
@@ -357,8 +357,8 @@ prune cluster::guild_begin_prune_sync(snowflake guild_id, const struct prune& pr
 	return dpp::sync<prune>(this, static_cast<void (cluster::*)(snowflake, const struct prune&, command_completion_event_t)>(&cluster::guild_begin_prune), guild_id, pruneinfo);
 }
 
-confirmation cluster::guild_set_nickname_sync(snowflake guild_id, const std::string &nickname) {
-	return dpp::sync<confirmation>(this, static_cast<void (cluster::*)(snowflake, const std::string &, command_completion_event_t)>(&cluster::guild_set_nickname), guild_id, nickname);
+confirmation cluster::guild_set_nickname_sync(snowflake guild_id, std::string_view nickname) {
+	return dpp::sync<confirmation>(this, static_cast<void (cluster::*)(snowflake, std::string_view, command_completion_event_t)>(&cluster::guild_set_nickname), guild_id, nickname);
 }
 
 confirmation cluster::guild_sync_integration_sync(snowflake guild_id, snowflake integration_id) {
@@ -381,8 +381,8 @@ dpp::welcome_screen cluster::guild_edit_welcome_screen_sync(snowflake guild_id, 
 	return dpp::sync<dpp::welcome_screen>(this, static_cast<void (cluster::*)(snowflake, const struct welcome_screen&, bool, command_completion_event_t)>(&cluster::guild_edit_welcome_screen), guild_id, welcome_screen, enabled);
 }
 
-confirmation cluster::guild_add_member_sync(const guild_member& gm, const std::string &access_token) {
-	return dpp::sync<confirmation>(this, static_cast<void (cluster::*)(const guild_member&, const std::string &, command_completion_event_t)>(&cluster::guild_add_member), gm, access_token);
+confirmation cluster::guild_add_member_sync(const guild_member& gm, std::string_view access_token) {
+	return dpp::sync<confirmation>(this, static_cast<void (cluster::*)(const guild_member&, std::string_view, command_completion_event_t)>(&cluster::guild_add_member), gm, access_token);
 }
 
 guild_member cluster::guild_edit_member_sync(const guild_member& gm) {
@@ -429,28 +429,28 @@ guild_member cluster::guild_member_move_sync(const snowflake channel_id, const s
 	return dpp::sync<guild_member>(this, static_cast<void (cluster::*)(const snowflake, const snowflake, const snowflake, command_completion_event_t)>(&cluster::guild_member_move), channel_id, guild_id, user_id);
 }
 
-guild_member_map cluster::guild_search_members_sync(snowflake guild_id, const std::string& query, uint16_t limit) {
-	return dpp::sync<guild_member_map>(this, static_cast<void (cluster::*)(snowflake, const std::string&, uint16_t, command_completion_event_t)>(&cluster::guild_search_members), guild_id, query, limit);
+guild_member_map cluster::guild_search_members_sync(snowflake guild_id, std::string_view query, uint16_t limit) {
+	return dpp::sync<guild_member_map>(this, static_cast<void (cluster::*)(snowflake, std::string_view, uint16_t, command_completion_event_t)>(&cluster::guild_search_members), guild_id, query, limit);
 }
 
 invite_map cluster::guild_get_invites_sync(snowflake guild_id) {
 	return dpp::sync<invite_map>(this, static_cast<void (cluster::*)(snowflake, command_completion_event_t)>(&cluster::guild_get_invites), guild_id);
 }
 
-invite cluster::invite_delete_sync(const std::string &invitecode) {
-	return dpp::sync<invite>(this, static_cast<void (cluster::*)(const std::string &, command_completion_event_t)>(&cluster::invite_delete), invitecode);
+invite cluster::invite_delete_sync(std::string_view invitecode) {
+	return dpp::sync<invite>(this, static_cast<void (cluster::*)(std::string_view, command_completion_event_t)>(&cluster::invite_delete), invitecode);
 }
 
-invite cluster::invite_get_sync(const std::string &invite_code) {
-	return dpp::sync<invite>(this, static_cast<void (cluster::*)(const std::string &, command_completion_event_t)>(&cluster::invite_get), invite_code);
+invite cluster::invite_get_sync(std::string_view invite_code) {
+	return dpp::sync<invite>(this, static_cast<void (cluster::*)(std::string_view, command_completion_event_t)>(&cluster::invite_get), invite_code);
 }
 
-confirmation cluster::message_add_reaction_sync(const struct message &m, const std::string &reaction) {
-	return dpp::sync<confirmation>(this, static_cast<void (cluster::*)(const struct message &, const std::string &, command_completion_event_t)>(&cluster::message_add_reaction), m, reaction);
+confirmation cluster::message_add_reaction_sync(const struct message &m, std::string_view reaction) {
+	return dpp::sync<confirmation>(this, static_cast<void (cluster::*)(const struct message &, std::string_view, command_completion_event_t)>(&cluster::message_add_reaction), m, reaction);
 }
 
-confirmation cluster::message_add_reaction_sync(snowflake message_id, snowflake channel_id, const std::string &reaction) {
-	return dpp::sync<confirmation>(this, static_cast<void (cluster::*)(snowflake, snowflake, const std::string &, command_completion_event_t)>(&cluster::message_add_reaction), message_id, channel_id, reaction);
+confirmation cluster::message_add_reaction_sync(snowflake message_id, snowflake channel_id, std::string_view reaction) {
+	return dpp::sync<confirmation>(this, static_cast<void (cluster::*)(snowflake, snowflake, std::string_view, command_completion_event_t)>(&cluster::message_add_reaction), message_id, channel_id, reaction);
 }
 
 message cluster::message_create_sync(const message &m) {
@@ -477,28 +477,28 @@ confirmation cluster::message_delete_sync(snowflake message_id, snowflake channe
 	return dpp::sync<confirmation>(this, static_cast<void (cluster::*)(snowflake, snowflake, command_completion_event_t)>(&cluster::message_delete), message_id, channel_id);
 }
 
-confirmation cluster::message_delete_own_reaction_sync(const struct message &m, const std::string &reaction) {
-	return dpp::sync<confirmation>(this, static_cast<void (cluster::*)(const struct message &, const std::string &, command_completion_event_t)>(&cluster::message_delete_own_reaction), m, reaction);
+confirmation cluster::message_delete_own_reaction_sync(const struct message &m, std::string_view reaction) {
+	return dpp::sync<confirmation>(this, static_cast<void (cluster::*)(const struct message &, std::string_view, command_completion_event_t)>(&cluster::message_delete_own_reaction), m, reaction);
 }
 
-confirmation cluster::message_delete_own_reaction_sync(snowflake message_id, snowflake channel_id, const std::string &reaction) {
-	return dpp::sync<confirmation>(this, static_cast<void (cluster::*)(snowflake, snowflake, const std::string &, command_completion_event_t)>(&cluster::message_delete_own_reaction), message_id, channel_id, reaction);
+confirmation cluster::message_delete_own_reaction_sync(snowflake message_id, snowflake channel_id, std::string_view reaction) {
+	return dpp::sync<confirmation>(this, static_cast<void (cluster::*)(snowflake, snowflake, std::string_view, command_completion_event_t)>(&cluster::message_delete_own_reaction), message_id, channel_id, reaction);
 }
 
-confirmation cluster::message_delete_reaction_sync(const struct message &m, snowflake user_id, const std::string &reaction) {
-	return dpp::sync<confirmation>(this, static_cast<void (cluster::*)(const struct message &, snowflake, const std::string &, command_completion_event_t)>(&cluster::message_delete_reaction), m, user_id, reaction);
+confirmation cluster::message_delete_reaction_sync(const struct message &m, snowflake user_id, std::string_view reaction) {
+	return dpp::sync<confirmation>(this, static_cast<void (cluster::*)(const struct message &, snowflake, std::string_view, command_completion_event_t)>(&cluster::message_delete_reaction), m, user_id, reaction);
 }
 
-confirmation cluster::message_delete_reaction_sync(snowflake message_id, snowflake channel_id, snowflake user_id, const std::string &reaction) {
-	return dpp::sync<confirmation>(this, static_cast<void (cluster::*)(snowflake, snowflake, snowflake, const std::string &, command_completion_event_t)>(&cluster::message_delete_reaction), message_id, channel_id, user_id, reaction);
+confirmation cluster::message_delete_reaction_sync(snowflake message_id, snowflake channel_id, snowflake user_id, std::string_view reaction) {
+	return dpp::sync<confirmation>(this, static_cast<void (cluster::*)(snowflake, snowflake, snowflake, std::string_view, command_completion_event_t)>(&cluster::message_delete_reaction), message_id, channel_id, user_id, reaction);
 }
 
-confirmation cluster::message_delete_reaction_emoji_sync(const struct message &m, const std::string &reaction) {
-	return dpp::sync<confirmation>(this, static_cast<void (cluster::*)(const struct message &, const std::string &, command_completion_event_t)>(&cluster::message_delete_reaction_emoji), m, reaction);
+confirmation cluster::message_delete_reaction_emoji_sync(const struct message &m, std::string_view reaction) {
+	return dpp::sync<confirmation>(this, static_cast<void (cluster::*)(const struct message &, std::string_view, command_completion_event_t)>(&cluster::message_delete_reaction_emoji), m, reaction);
 }
 
-confirmation cluster::message_delete_reaction_emoji_sync(snowflake message_id, snowflake channel_id, const std::string &reaction) {
-	return dpp::sync<confirmation>(this, static_cast<void (cluster::*)(snowflake, snowflake, const std::string &, command_completion_event_t)>(&cluster::message_delete_reaction_emoji), message_id, channel_id, reaction);
+confirmation cluster::message_delete_reaction_emoji_sync(snowflake message_id, snowflake channel_id, std::string_view reaction) {
+	return dpp::sync<confirmation>(this, static_cast<void (cluster::*)(snowflake, snowflake, std::string_view, command_completion_event_t)>(&cluster::message_delete_reaction_emoji), message_id, channel_id, reaction);
 }
 
 message cluster::message_edit_sync(const message &m) {
@@ -513,12 +513,12 @@ message cluster::message_get_sync(snowflake message_id, snowflake channel_id) {
 	return dpp::sync<message>(this, static_cast<void (cluster::*)(snowflake, snowflake, command_completion_event_t)>(&cluster::message_get), message_id, channel_id);
 }
 
-user_map cluster::message_get_reactions_sync(const struct message &m, const std::string &reaction, snowflake before, snowflake after, snowflake limit) {
-	return dpp::sync<user_map>(this, static_cast<void (cluster::*)(const struct message &, const std::string &, snowflake, snowflake, snowflake, command_completion_event_t)>(&cluster::message_get_reactions), m, reaction, before, after, limit);
+user_map cluster::message_get_reactions_sync(const struct message &m, std::string_view reaction, snowflake before, snowflake after, snowflake limit) {
+	return dpp::sync<user_map>(this, static_cast<void (cluster::*)(const struct message &, std::string_view, snowflake, snowflake, snowflake, command_completion_event_t)>(&cluster::message_get_reactions), m, reaction, before, after, limit);
 }
 
-emoji_map cluster::message_get_reactions_sync(snowflake message_id, snowflake channel_id, const std::string &reaction, snowflake before, snowflake after, snowflake limit) {
-	return dpp::sync<emoji_map>(this, static_cast<void (cluster::*)(snowflake, snowflake, const std::string &, snowflake, snowflake, snowflake, command_completion_event_t)>(&cluster::message_get_reactions), message_id, channel_id, reaction, before, after, limit);
+emoji_map cluster::message_get_reactions_sync(snowflake message_id, snowflake channel_id, std::string_view reaction, snowflake before, snowflake after, snowflake limit) {
+	return dpp::sync<emoji_map>(this, static_cast<void (cluster::*)(snowflake, snowflake, std::string_view, snowflake, snowflake, snowflake, command_completion_event_t)>(&cluster::message_get_reactions), message_id, channel_id, reaction, before, after, limit);
 }
 
 confirmation cluster::message_pin_sync(snowflake channel_id, snowflake message_id) {
@@ -657,32 +657,32 @@ sticker_pack_map cluster::sticker_packs_get_sync() {
 	return dpp::sync<sticker_pack_map>(this, static_cast<void (cluster::*)(command_completion_event_t)>(&cluster::sticker_packs_get));
 }
 
-guild cluster::guild_create_from_template_sync(const std::string &code, const std::string &name) {
-	return dpp::sync<guild>(this, static_cast<void (cluster::*)(const std::string &, const std::string &, command_completion_event_t)>(&cluster::guild_create_from_template), code, name);
+guild cluster::guild_create_from_template_sync(std::string_view code, std::string_view name) {
+	return dpp::sync<guild>(this, static_cast<void (cluster::*)(std::string_view, std::string_view, command_completion_event_t)>(&cluster::guild_create_from_template), code, name);
 }
 
-dtemplate cluster::guild_template_create_sync(snowflake guild_id, const std::string &name, const std::string &description) {
-	return dpp::sync<dtemplate>(this, static_cast<void (cluster::*)(snowflake, const std::string &, const std::string &, command_completion_event_t)>(&cluster::guild_template_create), guild_id, name, description);
+dtemplate cluster::guild_template_create_sync(snowflake guild_id, std::string_view name, std::string_view description) {
+	return dpp::sync<dtemplate>(this, static_cast<void (cluster::*)(snowflake, std::string_view, std::string_view, command_completion_event_t)>(&cluster::guild_template_create), guild_id, name, description);
 }
 
-confirmation cluster::guild_template_delete_sync(snowflake guild_id, const std::string &code) {
-	return dpp::sync<confirmation>(this, static_cast<void (cluster::*)(snowflake, const std::string &, command_completion_event_t)>(&cluster::guild_template_delete), guild_id, code);
+confirmation cluster::guild_template_delete_sync(snowflake guild_id, std::string_view code) {
+	return dpp::sync<confirmation>(this, static_cast<void (cluster::*)(snowflake, std::string_view, command_completion_event_t)>(&cluster::guild_template_delete), guild_id, code);
 }
 
-dtemplate cluster::guild_template_modify_sync(snowflake guild_id, const std::string &code, const std::string &name, const std::string &description) {
-	return dpp::sync<dtemplate>(this, static_cast<void (cluster::*)(snowflake, const std::string &, const std::string &, const std::string &, command_completion_event_t)>(&cluster::guild_template_modify), guild_id, code, name, description);
+dtemplate cluster::guild_template_modify_sync(snowflake guild_id, std::string_view code, std::string_view name, std::string_view description) {
+	return dpp::sync<dtemplate>(this, static_cast<void (cluster::*)(snowflake, std::string_view, std::string_view, std::string_view, command_completion_event_t)>(&cluster::guild_template_modify), guild_id, code, name, description);
 }
 
 dtemplate_map cluster::guild_templates_get_sync(snowflake guild_id) {
 	return dpp::sync<dtemplate_map>(this, static_cast<void (cluster::*)(snowflake, command_completion_event_t)>(&cluster::guild_templates_get), guild_id);
 }
 
-dtemplate cluster::guild_template_sync_sync(snowflake guild_id, const std::string &code) {
-	return dpp::sync<dtemplate>(this, static_cast<void (cluster::*)(snowflake, const std::string &, command_completion_event_t)>(&cluster::guild_template_sync), guild_id, code);
+dtemplate cluster::guild_template_sync_sync(snowflake guild_id, std::string_view code) {
+	return dpp::sync<dtemplate>(this, static_cast<void (cluster::*)(snowflake, std::string_view, command_completion_event_t)>(&cluster::guild_template_sync), guild_id, code);
 }
 
-dtemplate cluster::template_get_sync(const std::string &code) {
-	return dpp::sync<dtemplate>(this, static_cast<void (cluster::*)(const std::string &, command_completion_event_t)>(&cluster::template_get), code);
+dtemplate cluster::template_get_sync(std::string_view code) {
+	return dpp::sync<dtemplate>(this, static_cast<void (cluster::*)(std::string_view, command_completion_event_t)>(&cluster::template_get), code);
 }
 
 confirmation cluster::current_user_join_thread_sync(snowflake thread_id) {
@@ -717,20 +717,20 @@ thread_member_map cluster::thread_members_get_sync(snowflake thread_id) {
 	return dpp::sync<thread_member_map>(this, static_cast<void (cluster::*)(snowflake, command_completion_event_t)>(&cluster::thread_members_get), thread_id);
 }
 
-thread cluster::thread_create_in_forum_sync(const std::string& thread_name, snowflake channel_id, const message& msg, auto_archive_duration_t auto_archive_duration, uint16_t rate_limit_per_user, std::vector<snowflake> applied_tags) {
-	return dpp::sync<thread>(this, static_cast<void (cluster::*)(const std::string&, snowflake, const message&, auto_archive_duration_t, uint16_t, std::vector<snowflake>, command_completion_event_t)>(&cluster::thread_create_in_forum), thread_name, channel_id, msg, auto_archive_duration, rate_limit_per_user, applied_tags);
+thread cluster::thread_create_in_forum_sync(std::string_view thread_name, snowflake channel_id, const message& msg, auto_archive_duration_t auto_archive_duration, uint16_t rate_limit_per_user, std::vector<snowflake> applied_tags) {
+	return dpp::sync<thread>(this, static_cast<void (cluster::*)(std::string_view, snowflake, const message&, auto_archive_duration_t, uint16_t, std::vector<snowflake>, command_completion_event_t)>(&cluster::thread_create_in_forum), thread_name, channel_id, msg, auto_archive_duration, rate_limit_per_user, applied_tags);
 }
 
-thread cluster::thread_create_sync(const std::string& thread_name, snowflake channel_id, uint16_t auto_archive_duration, channel_type thread_type, bool invitable, uint16_t rate_limit_per_user) {
-	return dpp::sync<thread>(this, static_cast<void (cluster::*)(const std::string&, snowflake, uint16_t, channel_type, bool, uint16_t, command_completion_event_t)>(&cluster::thread_create), thread_name, channel_id, auto_archive_duration, thread_type, invitable, rate_limit_per_user);
+thread cluster::thread_create_sync(std::string_view thread_name, snowflake channel_id, uint16_t auto_archive_duration, channel_type thread_type, bool invitable, uint16_t rate_limit_per_user) {
+	return dpp::sync<thread>(this, static_cast<void (cluster::*)(std::string_view, snowflake, uint16_t, channel_type, bool, uint16_t, command_completion_event_t)>(&cluster::thread_create), thread_name, channel_id, auto_archive_duration, thread_type, invitable, rate_limit_per_user);
 }
 
 thread cluster::thread_edit_sync(const thread &t) {
 	return dpp::sync<thread>(this, static_cast<void (cluster::*)(const thread &, command_completion_event_t)>(&cluster::thread_edit), t);
 }
 
-thread cluster::thread_create_with_message_sync(const std::string& thread_name, snowflake channel_id, snowflake message_id, uint16_t auto_archive_duration, uint16_t rate_limit_per_user) {
-	return dpp::sync<thread>(this, static_cast<void (cluster::*)(const std::string&, snowflake, snowflake, uint16_t, uint16_t, command_completion_event_t)>(&cluster::thread_create_with_message), thread_name, channel_id, message_id, auto_archive_duration, rate_limit_per_user);
+thread cluster::thread_create_with_message_sync(std::string_view thread_name, snowflake channel_id, snowflake message_id, uint16_t auto_archive_duration, uint16_t rate_limit_per_user) {
+	return dpp::sync<thread>(this, static_cast<void (cluster::*)(std::string_view, snowflake, snowflake, uint16_t, uint16_t, command_completion_event_t)>(&cluster::thread_create_with_message), thread_name, channel_id, message_id, auto_archive_duration, rate_limit_per_user);
 }
 
 confirmation cluster::thread_member_add_sync(snowflake thread_id, snowflake user_id) {
@@ -745,8 +745,8 @@ thread cluster::thread_get_sync(snowflake thread_id) {
 	return dpp::sync<thread>(this, static_cast<void (cluster::*)(snowflake, command_completion_event_t)>(&cluster::thread_get), thread_id);
 }
 
-user cluster::current_user_edit_sync(const std::string &nickname, const std::string& image_blob, const image_type type) {
-	return dpp::sync<user>(this, static_cast<void (cluster::*)(const std::string &, const std::string&, const image_type, command_completion_event_t)>(&cluster::current_user_edit), nickname, image_blob, type);
+user cluster::current_user_edit_sync(std::string_view nickname, std::string_view image_blob, const image_type type) {
+	return dpp::sync<user>(this, static_cast<void (cluster::*)(std::string_view, std::string_view, const image_type, command_completion_event_t)>(&cluster::current_user_edit), nickname, image_blob, type);
 }
 
 application cluster::current_application_get_sync() {
@@ -805,8 +805,8 @@ confirmation cluster::delete_webhook_message_sync(const class webhook &wh, snowf
 	return dpp::sync<confirmation>(this, static_cast<void (cluster::*)(const class webhook &, snowflake, snowflake, command_completion_event_t)>(&cluster::delete_webhook_message), wh, message_id, thread_id);
 }
 
-confirmation cluster::delete_webhook_with_token_sync(snowflake webhook_id, const std::string &token) {
-	return dpp::sync<confirmation>(this, static_cast<void (cluster::*)(snowflake, const std::string &, command_completion_event_t)>(&cluster::delete_webhook_with_token), webhook_id, token);
+confirmation cluster::delete_webhook_with_token_sync(snowflake webhook_id, std::string_view token) {
+	return dpp::sync<confirmation>(this, static_cast<void (cluster::*)(snowflake, std::string_view, command_completion_event_t)>(&cluster::delete_webhook_with_token), webhook_id, token);
 }
 
 webhook cluster::edit_webhook_sync(const class webhook& wh) {
@@ -821,8 +821,8 @@ webhook cluster::edit_webhook_with_token_sync(const class webhook& wh) {
 	return dpp::sync<webhook>(this, static_cast<void (cluster::*)(const class webhook&, command_completion_event_t)>(&cluster::edit_webhook_with_token), wh);
 }
 
-message cluster::execute_webhook_sync(const class webhook &wh, const struct message& m, bool wait, snowflake thread_id, const std::string& thread_name) {
-	return dpp::sync<message>(this, static_cast<void (cluster::*)(const class webhook &, const struct message&, bool, snowflake, const std::string&, command_completion_event_t)>(&cluster::execute_webhook), wh, m, wait, thread_id, thread_name);
+message cluster::execute_webhook_sync(const class webhook &wh, const struct message& m, bool wait, snowflake thread_id, std::string_view thread_name) {
+	return dpp::sync<message>(this, static_cast<void (cluster::*)(const class webhook &, const struct message&, bool, snowflake, std::string_view, command_completion_event_t)>(&cluster::execute_webhook), wh, m, wait, thread_id, thread_name);
 }
 
 webhook_map cluster::get_channel_webhooks_sync(snowflake channel_id) {
@@ -841,8 +841,8 @@ message cluster::get_webhook_message_sync(const class webhook &wh, snowflake mes
 	return dpp::sync<message>(this, static_cast<void (cluster::*)(const class webhook &, snowflake, snowflake, command_completion_event_t)>(&cluster::get_webhook_message), wh, message_id, thread_id);
 }
 
-webhook cluster::get_webhook_with_token_sync(snowflake webhook_id, const std::string &token) {
-	return dpp::sync<webhook>(this, static_cast<void (cluster::*)(snowflake, const std::string &, command_completion_event_t)>(&cluster::get_webhook_with_token), webhook_id, token);
+webhook cluster::get_webhook_with_token_sync(snowflake webhook_id, std::string_view token) {
+	return dpp::sync<webhook>(this, static_cast<void (cluster::*)(snowflake, std::string_view, command_completion_event_t)>(&cluster::get_webhook_with_token), webhook_id, token);
 }
 
 

@@ -39,19 +39,20 @@ namespace dpp
 	/* Cache container */
 	dns_cache_t dns_cache;
 
-	const dns_cache_entry* resolve_hostname(const std::string& hostname, const std::string& port)
+    const dns_cache_entry* resolve_hostname(std::string_view hostname, std::string_view port)
 	{
 		addrinfo hints, *addrs;
 		dns_cache_t::const_iterator iter;
 		time_t now = time(nullptr);
 		int error;
 		bool exists = false;
+        std::string hostname_str(hostname);
 
 		/* Thread safety scope */
 		{
 			/* Check cache for existing DNS record. This can use a shared lock. */
 			std::shared_lock dns_cache_lock(dns_cache_mutex);
-			iter = dns_cache.find(hostname);
+            iter = dns_cache.find(hostname_str);
 			if (iter != dns_cache.end()) {
 				exists = true;
 				if (now < iter->second->expire_timestamp) {
@@ -66,7 +67,7 @@ namespace dpp
 			 * We must use a unique lock here as we modify the cache.
 			 */
 			std::unique_lock dns_cache_lock(dns_cache_mutex);
-			iter = dns_cache.find(hostname);
+            iter = dns_cache.find(hostname_str);
 			if (iter != dns_cache.end()) { /* re-validate iter */
 				delete iter->second;
 				dns_cache.erase(iter);
@@ -82,7 +83,7 @@ namespace dpp
 		hints.ai_socktype = SOCK_STREAM;
 		hints.ai_protocol = IPPROTO_TCP;
 
-		if ((error = getaddrinfo(hostname.c_str(), port.c_str(), &hints, &addrs))) {
+        if ((error = getaddrinfo(hostname_str.c_str(), std::string(port).c_str(), &hints, &addrs))) {
 			/**
 			 * The -20 makes sure the error codes dont conflict with codes given in the rest of the list
 			 * Because C libraries love to use -1 and below directly as conflicting error codes.
@@ -103,7 +104,7 @@ namespace dpp
 			memcpy(&cache_entry->addr, addrs, sizeof(addrinfo));
 			memcpy(&cache_entry->ai_addr, addrs->ai_addr, addrs->ai_addrlen);
 			cache_entry->expire_timestamp = now + one_hour;
-			dns_cache[hostname] = cache_entry;
+            dns_cache[hostname_str] = cache_entry;
 
 			/* Now we're done with this horrible struct, free it and return */
 			freeaddrinfo(addrs);

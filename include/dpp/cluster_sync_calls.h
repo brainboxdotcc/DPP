@@ -311,7 +311,7 @@ slashcommand_map guild_commands_get_sync(snowflake guild_id);
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-confirmation interaction_response_create_sync(snowflake interaction_id, const std::string &token, const interaction_response &r);
+confirmation interaction_response_create_sync(snowflake interaction_id, std::string_view token, const interaction_response &r);
 
 /**
  * @brief Edit response to a slash command
@@ -326,7 +326,7 @@ confirmation interaction_response_create_sync(snowflake interaction_id, const st
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-confirmation interaction_response_edit_sync(const std::string &token, const message &m);
+confirmation interaction_response_edit_sync(std::string_view token, const message &m);
 
 /**
  * @brief Get the original response to a slash command
@@ -340,7 +340,7 @@ confirmation interaction_response_edit_sync(const std::string &token, const mess
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-message interaction_response_get_original_sync(const std::string &token);
+message interaction_response_get_original_sync(std::string_view token);
 
 /**
  * @brief Create a followup message to a slash command
@@ -355,7 +355,7 @@ message interaction_response_get_original_sync(const std::string &token);
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-confirmation interaction_followup_create_sync(const std::string &token, const message &m);
+confirmation interaction_followup_create_sync(std::string_view token, const message &m);
 
 /**
  * @brief Edit original followup message to a slash command
@@ -371,7 +371,7 @@ confirmation interaction_followup_create_sync(const std::string &token, const me
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-confirmation interaction_followup_edit_original_sync(const std::string &token, const message &m);
+confirmation interaction_followup_edit_original_sync(std::string_view token, const message &m);
 
 /**
  * @brief Delete the initial interaction response
@@ -385,7 +385,7 @@ confirmation interaction_followup_edit_original_sync(const std::string &token, c
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-confirmation interaction_followup_delete_sync(const std::string &token);
+confirmation interaction_followup_delete_sync(std::string_view token);
 
 /**
  * @brief Edit followup message to a slash command
@@ -401,7 +401,7 @@ confirmation interaction_followup_delete_sync(const std::string &token);
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-confirmation interaction_followup_edit_sync(const std::string &token, const message &m);
+confirmation interaction_followup_edit_sync(std::string_view token, const message &m);
 
 /**
  * @brief Get the followup message to a slash command
@@ -416,7 +416,7 @@ confirmation interaction_followup_edit_sync(const std::string &token, const mess
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-message interaction_followup_get_sync(const std::string &token, snowflake message_id);
+message interaction_followup_get_sync(std::string_view token, snowflake message_id);
 
 /**
  * @brief Get the original followup message to a slash command
@@ -431,7 +431,7 @@ message interaction_followup_get_sync(const std::string &token, snowflake messag
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-message interaction_followup_get_original_sync(const std::string &token);
+message interaction_followup_get_original_sync(std::string_view token);
 
 /**
  * @brief Get all auto moderation rules for a guild
@@ -727,7 +727,7 @@ channel_map channels_get_sync(snowflake guild_id);
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-confirmation channel_set_voice_status_sync(snowflake channel_id, const std::string& status);
+confirmation channel_set_voice_status_sync(snowflake channel_id, std::string_view status);
 
 /**
  * @brief Create a dm channel
@@ -784,7 +784,7 @@ message direct_message_create_sync(snowflake user_id, const message &m);
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-confirmation gdm_add_sync(snowflake channel_id, snowflake user_id, const std::string &access_token, const std::string &nick);
+confirmation gdm_add_sync(snowflake channel_id, snowflake user_id, std::string_view access_token, std::string_view nick);
 
 /**
  * @brief Removes a recipient from a Group DM
@@ -974,7 +974,7 @@ gateway get_gateway_bot_sync();
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-confirmation guild_current_member_edit_sync(snowflake guild_id, const std::string &nickname);
+confirmation guild_current_member_edit_sync(snowflake guild_id, std::string_view nickname);
 
 /**
  * @brief Get the audit log for a guild
@@ -1295,7 +1295,7 @@ prune guild_begin_prune_sync(snowflake guild_id, const struct prune& pruneinfo);
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-confirmation guild_set_nickname_sync(snowflake guild_id, const std::string &nickname);
+confirmation guild_set_nickname_sync(snowflake guild_id, std::string_view nickname);
 
 /**
  * @brief Sync guild integration
@@ -1400,7 +1400,7 @@ dpp::welcome_screen guild_edit_welcome_screen_sync(snowflake guild_id, const str
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-confirmation guild_add_member_sync(const guild_member& gm, const std::string &access_token);
+confirmation guild_add_member_sync(const guild_member& gm, std::string_view access_token);
 
 /**
  * @brief Edit the properties of an existing guild member
@@ -1617,7 +1617,7 @@ guild_member guild_member_move_sync(const snowflake channel_id, const snowflake 
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-guild_member_map guild_search_members_sync(snowflake guild_id, const std::string& query, uint16_t limit);
+guild_member_map guild_search_members_sync(snowflake guild_id, std::string_view query, uint16_t limit);
 
 /**
  * @brief Get guild invites
@@ -1636,7 +1636,7 @@ guild_member_map guild_search_members_sync(snowflake guild_id, const std::string
 invite_map guild_get_invites_sync(snowflake guild_id);
 
 
-invite invite_delete_sync(const std::string &invitecode);
+invite invite_delete_sync(std::string_view invitecode);
 
 /**
  * @brief Get details about an invite
@@ -1650,7 +1650,7 @@ invite invite_delete_sync(const std::string &invitecode);
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-invite invite_get_sync(const std::string &invite_code);
+invite invite_get_sync(std::string_view invite_code);
 
 /**
  * @brief Add a reaction to a message. The reaction string must be either an `emojiname:id` or a unicode character.
@@ -1665,7 +1665,7 @@ invite invite_get_sync(const std::string &invite_code);
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-confirmation message_add_reaction_sync(const struct message &m, const std::string &reaction);
+confirmation message_add_reaction_sync(const struct message &m, std::string_view reaction);
 
 /**
  * @brief Add a reaction to a message by id. The reaction string must be either an `emojiname:id` or a unicode character.
@@ -1681,7 +1681,7 @@ confirmation message_add_reaction_sync(const struct message &m, const std::strin
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-confirmation message_add_reaction_sync(snowflake message_id, snowflake channel_id, const std::string &reaction);
+confirmation message_add_reaction_sync(snowflake message_id, snowflake channel_id, std::string_view reaction);
 
 /**
  * @brief Send a message to a channel. The callback function is called when the message has been sent
@@ -1788,7 +1788,7 @@ confirmation message_delete_sync(snowflake message_id, snowflake channel_id);
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-confirmation message_delete_own_reaction_sync(const struct message &m, const std::string &reaction);
+confirmation message_delete_own_reaction_sync(const struct message &m, std::string_view reaction);
 
 /**
  * @brief Delete own reaction from a message by id. The reaction string must be either an `emojiname:id` or a unicode character.
@@ -1804,7 +1804,7 @@ confirmation message_delete_own_reaction_sync(const struct message &m, const std
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-confirmation message_delete_own_reaction_sync(snowflake message_id, snowflake channel_id, const std::string &reaction);
+confirmation message_delete_own_reaction_sync(snowflake message_id, snowflake channel_id, std::string_view reaction);
 
 /**
  * @brief Delete a user's reaction from a message. The reaction string must be either an `emojiname:id` or a unicode character
@@ -1820,7 +1820,7 @@ confirmation message_delete_own_reaction_sync(snowflake message_id, snowflake ch
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-confirmation message_delete_reaction_sync(const struct message &m, snowflake user_id, const std::string &reaction);
+confirmation message_delete_reaction_sync(const struct message &m, snowflake user_id, std::string_view reaction);
 
 /**
  * @brief Delete a user's reaction from a message by id. The reaction string must be either an `emojiname:id` or a unicode character
@@ -1837,7 +1837,7 @@ confirmation message_delete_reaction_sync(const struct message &m, snowflake use
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-confirmation message_delete_reaction_sync(snowflake message_id, snowflake channel_id, snowflake user_id, const std::string &reaction);
+confirmation message_delete_reaction_sync(snowflake message_id, snowflake channel_id, snowflake user_id, std::string_view reaction);
 
 /**
  * @brief Delete all reactions on a message using a particular emoji. The reaction string must be either an `emojiname:id` or a unicode character
@@ -1852,7 +1852,7 @@ confirmation message_delete_reaction_sync(snowflake message_id, snowflake channe
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-confirmation message_delete_reaction_emoji_sync(const struct message &m, const std::string &reaction);
+confirmation message_delete_reaction_emoji_sync(const struct message &m, std::string_view reaction);
 
 /**
  * @brief Delete all reactions on a message using a particular emoji by id. The reaction string must be either an `emojiname:id` or a unicode character
@@ -1868,7 +1868,7 @@ confirmation message_delete_reaction_emoji_sync(const struct message &m, const s
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-confirmation message_delete_reaction_emoji_sync(snowflake message_id, snowflake channel_id, const std::string &reaction);
+confirmation message_delete_reaction_emoji_sync(snowflake message_id, snowflake channel_id, std::string_view reaction);
 
 /**
  * @brief Edit a message on a channel. The callback function is called when the message has been edited
@@ -1927,7 +1927,7 @@ message message_get_sync(snowflake message_id, snowflake channel_id);
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-user_map message_get_reactions_sync(const struct message &m, const std::string &reaction, snowflake before, snowflake after, snowflake limit);
+user_map message_get_reactions_sync(const struct message &m, std::string_view reaction, snowflake before, snowflake after, snowflake limit);
 
 /**
  * @brief Get reactions on a message for a particular emoji by id. The reaction string must be either an `emojiname:id` or a unicode character
@@ -1946,7 +1946,7 @@ user_map message_get_reactions_sync(const struct message &m, const std::string &
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-emoji_map message_get_reactions_sync(snowflake message_id, snowflake channel_id, const std::string &reaction, snowflake before, snowflake after, snowflake limit);
+emoji_map message_get_reactions_sync(snowflake message_id, snowflake channel_id, std::string_view reaction, snowflake before, snowflake after, snowflake limit);
 
 /**
  * @brief Pin a message
@@ -2447,7 +2447,7 @@ sticker_pack_map sticker_packs_get_sync();
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-guild guild_create_from_template_sync(const std::string &code, const std::string &name);
+guild guild_create_from_template_sync(std::string_view code, std::string_view name);
 
 /**
  * @brief Creates a template for the guild
@@ -2463,7 +2463,7 @@ guild guild_create_from_template_sync(const std::string &code, const std::string
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-dtemplate guild_template_create_sync(snowflake guild_id, const std::string &name, const std::string &description);
+dtemplate guild_template_create_sync(snowflake guild_id, std::string_view name, std::string_view description);
 
 /**
  * @brief Deletes the template
@@ -2478,7 +2478,7 @@ dtemplate guild_template_create_sync(snowflake guild_id, const std::string &name
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-confirmation guild_template_delete_sync(snowflake guild_id, const std::string &code);
+confirmation guild_template_delete_sync(snowflake guild_id, std::string_view code);
 
 /**
  * @brief Modifies the template's metadata.
@@ -2495,7 +2495,7 @@ confirmation guild_template_delete_sync(snowflake guild_id, const std::string &c
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-dtemplate guild_template_modify_sync(snowflake guild_id, const std::string &code, const std::string &name, const std::string &description);
+dtemplate guild_template_modify_sync(snowflake guild_id, std::string_view code, std::string_view name, std::string_view description);
 
 /**
  * @brief Get guild templates
@@ -2524,7 +2524,7 @@ dtemplate_map guild_templates_get_sync(snowflake guild_id);
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-dtemplate guild_template_sync_sync(snowflake guild_id, const std::string &code);
+dtemplate guild_template_sync_sync(snowflake guild_id, std::string_view code);
 
 /**
  * @brief Get a template
@@ -2537,7 +2537,7 @@ dtemplate guild_template_sync_sync(snowflake guild_id, const std::string &code);
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-dtemplate template_get_sync(const std::string &code);
+dtemplate template_get_sync(std::string_view code);
 
 /**
  * @brief Join a thread
@@ -2668,7 +2668,7 @@ thread_member_map thread_members_get_sync(snowflake thread_id);
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-thread thread_create_in_forum_sync(const std::string& thread_name, snowflake channel_id, const message& msg, auto_archive_duration_t auto_archive_duration, uint16_t rate_limit_per_user, std::vector<snowflake> applied_tags = {});
+thread thread_create_in_forum_sync(std::string_view thread_name, snowflake channel_id, const message& msg, auto_archive_duration_t auto_archive_duration, uint16_t rate_limit_per_user, std::vector<snowflake> applied_tags = {});
 
 /**
  * @brief Create a thread
@@ -2688,7 +2688,7 @@ thread thread_create_in_forum_sync(const std::string& thread_name, snowflake cha
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-thread thread_create_sync(const std::string& thread_name, snowflake channel_id, uint16_t auto_archive_duration, channel_type thread_type, bool invitable, uint16_t rate_limit_per_user);
+thread thread_create_sync(std::string_view thread_name, snowflake channel_id, uint16_t auto_archive_duration, channel_type thread_type, bool invitable, uint16_t rate_limit_per_user);
 
 /**
  * @brief Edit a thread
@@ -2721,7 +2721,7 @@ thread thread_edit_sync(const thread &t);
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-thread thread_create_with_message_sync(const std::string& thread_name, snowflake channel_id, snowflake message_id, uint16_t auto_archive_duration, uint16_t rate_limit_per_user);
+thread thread_create_with_message_sync(std::string_view thread_name, snowflake channel_id, snowflake message_id, uint16_t auto_archive_duration, uint16_t rate_limit_per_user);
 
 /**
  * @brief Add a member to a thread
@@ -2781,7 +2781,7 @@ thread thread_get_sync(snowflake thread_id);
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-user current_user_edit_sync(const std::string &nickname, const std::string& image_blob = "", const image_type type = i_png);
+user current_user_edit_sync(std::string_view nickname, std::string_view image_blob = "", const image_type type = i_png);
 
 /**
  * @brief Get current (bot) application
@@ -3016,7 +3016,7 @@ confirmation delete_webhook_message_sync(const class webhook &wh, snowflake mess
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-confirmation delete_webhook_with_token_sync(snowflake webhook_id, const std::string &token);
+confirmation delete_webhook_with_token_sync(snowflake webhook_id, std::string_view token);
 
 /**
  * @brief Edit webhook
@@ -3084,7 +3084,7 @@ webhook edit_webhook_with_token_sync(const class webhook& wh);
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-message execute_webhook_sync(const class webhook &wh, const struct message &m, bool wait = false, snowflake thread_id = 0, const std::string& thread_name = "");
+message execute_webhook_sync(const class webhook &wh, const struct message &m, bool wait = false, snowflake thread_id = 0, std::string_view thread_name = "");
 
 /**
  * @brief Get channel webhooks
@@ -3153,7 +3153,7 @@ message get_webhook_message_sync(const class webhook &wh, snowflake message_id, 
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-webhook get_webhook_with_token_sync(snowflake webhook_id, const std::string &token);
+webhook get_webhook_with_token_sync(snowflake webhook_id, std::string_view token);
 
 
 /* End of auto-generated definitions */

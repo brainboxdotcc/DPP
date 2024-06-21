@@ -35,7 +35,7 @@ namespace dpp::events {
  * @param j JSON data for the event
  * @param raw Raw JSON string
  */
-void guild_join_request_delete::handle(class discord_client* client, json &j, const std::string &raw) {
+void guild_join_request_delete::handle(class discord_client* client, json &j, std::string_view raw) {
 	if (!client->creator->on_guild_join_request_delete.empty()) {
 		json& d = j["d"];
 		dpp::guild_join_request_delete_t grd(client, raw);

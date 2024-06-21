@@ -27,7 +27,7 @@
 
 namespace dpp {
 
-param_info::param_info(parameter_type t, bool o, const std::string &d, const std::map<command_value, std::string> &opts) : type(t), optional(o), description(d), choices(opts)
+param_info::param_info(parameter_type t, bool o, std::string_view d, const std::map<command_value, std::string> &opts) : type(t), optional(o), description(d), choices(opts)
 {
 }
 
@@ -71,7 +71,7 @@ commandhandler::~commandhandler()
 	}
 }
 
-commandhandler& commandhandler::add_prefix(const std::string &prefix)
+commandhandler& commandhandler::add_prefix(std::string_view prefix)
 {
 	prefixes.emplace_back(prefix);
 	if (prefix == "/") {
@@ -81,13 +81,15 @@ commandhandler& commandhandler::add_prefix(const std::string &prefix)
 	return *this;
 }
 
-commandhandler& commandhandler::add_command(const std::string &command, const parameter_registration_t &parameters, command_handler handler, const std::string &description, snowflake guild_id)
+commandhandler& commandhandler::add_command(std::string_view command, const parameter_registration_t &parameters, command_handler handler, std::string_view description, snowflake guild_id)
 {
 	command_info_t i;
 	i.func = std::move(handler);
 	i.guild_id = guild_id;
 	i.parameters = parameters;
-	commands[lowercase(command)] = i;
+
+    std::string command_lower = lowercase(command);
+    commands[command_lower] = i;
 	if (slash_commands_enabled) {
 		if (this->app_id.empty()) {
 			if (owner->me.id.empty()) {
@@ -98,7 +100,7 @@ commandhandler& commandhandler::add_command(const std::string &command, const pa
 		}
 		dpp::slashcommand newcommand;
 		/* Create a new global command on ready event */
-		newcommand.set_name(lowercase(command)).set_description(description).set_application_id(this->app_id);
+        newcommand.set_name(command_lower).set_description(description).set_application_id(this->app_id);
 
 		for (auto& parameter : parameters) {
 			command_option_type cot = co_string;

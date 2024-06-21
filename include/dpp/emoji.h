@@ -119,7 +119,7 @@ public:
 	 * @param id ID, if it has one (unicode does not)
 	 * @param flags Emoji flags (emoji_flags)
 	 */
-	emoji(const std::string_view name, const snowflake id = 0, const uint8_t flags = 0);
+    emoji(std::string_view name, const snowflake id = 0, const uint8_t flags = 0);
 
 	/**
 	 * @brief Copy constructor, copies another emoji's data

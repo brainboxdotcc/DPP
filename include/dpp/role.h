@@ -215,7 +215,7 @@ public:
 	 * @return role& reference to self
 	 * @throw dpp::exception thrown if role length is less than 1 character
 	 */
-	role& set_name(const std::string& n);
+    role& set_name(std::string_view n);
 
 	/**
 	 * @brief Set the colour.

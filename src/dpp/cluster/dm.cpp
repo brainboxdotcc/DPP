@@ -52,7 +52,7 @@ void cluster::direct_message_create(snowflake user_id, const message &m, command
 	}
 }
 
-void cluster::gdm_add(snowflake channel_id, snowflake user_id, const std::string &access_token, const std::string &nick, command_completion_event_t callback) {
+void cluster::gdm_add(snowflake channel_id, snowflake user_id, std::string_view access_token, std::string_view nick, command_completion_event_t callback) {
 	json params;
 	params["access_token"] = access_token;
 	params["nick"] = nick;

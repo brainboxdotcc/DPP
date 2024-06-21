@@ -31,9 +31,7 @@
 
 namespace dpp {
 
-event_dispatch_t::event_dispatch_t(discord_client* client, const std::string& raw) : raw_event(raw), from(client) {}
-
-event_dispatch_t::event_dispatch_t(discord_client* client, std::string&& raw) : raw_event(std::move(raw)), from(client) {}
+event_dispatch_t::event_dispatch_t(discord_client* client, std::string_view raw) : raw_event(raw), from(client) {}
 
 const event_dispatch_t& event_dispatch_t::cancel_event() const {
 	cancelled = true;
@@ -68,7 +66,7 @@ user_context_menu_t& user_context_menu_t::set_user(const user& u) {
 }
 
 
-void message_create_t::send(const std::string& m, command_completion_event_t callback) const {
+void message_create_t::send(std::string_view m, command_completion_event_t callback) const {
 	this->send(dpp::message(m), std::move(callback));
 }
 
@@ -81,7 +79,7 @@ void message_create_t::send(message&& msg, command_completion_event_t callback) 
 	this->from->creator->message_create(std::move(msg), std::move(callback));
 }
 
-void message_create_t::reply(const std::string& m, bool mention_replied_user, command_completion_event_t callback) const {
+void message_create_t::reply(std::string_view m, bool mention_replied_user, command_completion_event_t callback) const {
 	this->reply(dpp::message{m}, mention_replied_user, std::move(callback));
 }
 
@@ -137,11 +135,11 @@ void interaction_create_t::dialog(const interaction_modal_response& mr, command_
 	from->creator->interaction_response_create(this->command.id, this->command.token, mr, std::move(callback));
 }
 
-void interaction_create_t::reply(interaction_response_type t, const std::string& mt, command_completion_event_t callback) const {
+void interaction_create_t::reply(interaction_response_type t, std::string_view mt, command_completion_event_t callback) const {
 	this->reply(t, dpp::message(this->command.channel_id, mt, mt_application_command), std::move(callback));
 }
 
-void interaction_create_t::reply(const std::string& mt, command_completion_event_t callback) const {
+void interaction_create_t::reply(std::string_view mt, command_completion_event_t callback) const {
 	this->reply(ir_channel_message_with_source, dpp::message(this->command.channel_id, mt, mt_application_command), callback);
 }
 
@@ -149,7 +147,7 @@ void interaction_create_t::edit_response(const message& m, command_completion_ev
 	from->creator->interaction_response_edit(this->command.token, m, std::move(callback));
 }
 
-void interaction_create_t::edit_response(const std::string& mt, command_completion_event_t callback) const {
+void interaction_create_t::edit_response(std::string_view mt, command_completion_event_t callback) const {
 	this->edit_response(dpp::message(this->command.channel_id, mt, mt_application_command), std::move(callback));
 }
 
@@ -197,7 +195,7 @@ async<confirmation_callback_t> interaction_create_t::co_reply(interaction_respon
 	return dpp::async{[&, this] <typename T> (T&& cb) { this->reply(t, m, std::forward<T>(cb)); }};
 }
 
-async<confirmation_callback_t> interaction_create_t::co_reply(interaction_response_type t, const std::string& mt) const {
+async<confirmation_callback_t> interaction_create_t::co_reply(interaction_response_type t, std::string_view mt) const {
 	return dpp::async{[&, this] <typename T> (T&& cb) { this->reply(t, mt, std::forward<T>(cb)); }};
 }
 
@@ -205,7 +203,7 @@ async<confirmation_callback_t> interaction_create_t::co_reply(const message& m) 
 	return dpp::async{[&, this] <typename T> (T&& cb) { this->reply(m, std::forward<T>(cb)); }};
 }
 
-async<confirmation_callback_t> interaction_create_t::co_reply(const std::string& mt) const {
+async<confirmation_callback_t> interaction_create_t::co_reply(std::string_view mt) const {
 	return dpp::async{[&, this] <typename T> (T&& cb) { this->reply(mt, std::forward<T>(cb)); }};
 }
 
@@ -217,7 +215,7 @@ async<confirmation_callback_t> interaction_create_t::co_edit_response(const mess
 	return dpp::async{[&, this] <typename T> (T&& cb) { this->edit_response(m, std::forward<T>(cb)); }};
 }
 
-async<confirmation_callback_t> interaction_create_t::co_edit_response(const std::string& mt) const {
+async<confirmation_callback_t> interaction_create_t::co_edit_response(std::string_view mt) const {
 	return dpp::async{[&, this] <typename T> (T&& cb) { this->edit_response(mt, std::forward<T>(cb)); }};
 }
 
@@ -238,7 +236,7 @@ async<confirmation_callback_t> interaction_create_t::co_delete_original_response
 }
 #endif /* DPP_CORO */
 
-command_value interaction_create_t::get_parameter(const std::string& name) const {
+command_value interaction_create_t::get_parameter(std::string_view name) const {
 	const command_interaction ci = command.get_command_interaction();
 
 	for (const auto &option : ci.options) {
@@ -267,11 +265,7 @@ command_value interaction_create_t::get_parameter(const std::string& name) const
 	return {};
 }
 
-voice_receive_t::voice_receive_t(discord_client* client, const std::string& raw, discord_voice_client* vc, snowflake _user_id, const uint8_t* pcm, size_t length) : event_dispatch_t(client, raw), voice_client(vc), user_id(_user_id) {
-	reassign(vc, _user_id, pcm, length);
-}
-
-voice_receive_t::voice_receive_t(discord_client* client, std::string&& raw, discord_voice_client* vc, snowflake _user_id, const uint8_t* pcm, size_t length) : event_dispatch_t(client, std::move(raw)), voice_client(vc), user_id(_user_id) {
+voice_receive_t::voice_receive_t(discord_client* client, std::string_view raw, discord_voice_client* vc, snowflake _user_id, const uint8_t* pcm, size_t length) : event_dispatch_t(client, raw), voice_client(vc), user_id(_user_id) {
 	reassign(vc, _user_id, pcm, length);
 }
 

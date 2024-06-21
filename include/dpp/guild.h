@@ -582,7 +582,7 @@ public:
 	 * 
 	 * @return guild_member& reference to self
 	 */
-	guild_member& set_nickname(const std::string& nick);
+    guild_member& set_nickname(std::string_view nick);
 
 	/**
 	 * @brief Get the nickname 
@@ -760,7 +760,7 @@ public:
 	 * @param _description The description to set
 	 * @return Reference to self, so these method calls may be chained
 	 */
-	welcome_channel& set_description(const std::string& _description);
+    welcome_channel& set_description(std::string_view _description);
 };
 
 
@@ -814,7 +814,7 @@ public:
 	 * @param s string The server description
 	 * @return Reference to self, so these method calls may be chained
 	 */
-	welcome_screen& set_description(const std::string& s);
+    welcome_screen& set_description(std::string_view s);
 };
 
 /**
@@ -1348,7 +1348,7 @@ public:
 	 * @return guild& reference to self
 	 * @throw dpp::length_exception if guild name is too short
 	 */
-	guild& set_name(const std::string& n);
+    guild& set_name(std::string_view n);
 
 	/**
 	 * @brief Remove the guild banner.
@@ -1836,7 +1836,7 @@ public:
 	 * @param _title The title to set
 	 * @return Reference to self, so these method calls may be chained
 	 */
-	onboarding_prompt_option& set_title(const std::string& _title);
+    onboarding_prompt_option& set_title(std::string_view _title);
 
 	/**
 	 * @brief Set the description of this onboarding prompt option object
@@ -1844,7 +1844,7 @@ public:
 	 * @param _description The description to set
 	 * @return Reference to self, so these method calls may be chained
 	 */
-	onboarding_prompt_option& set_description(const std::string& _description);
+    onboarding_prompt_option& set_description(std::string_view _description);
 };
 
 /**
@@ -1915,7 +1915,7 @@ public:
 	 * @param _title The title to set
 	 * @return Reference to self, so these method calls may be chained
 	 */
-	onboarding_prompt& set_title(const std::string& _title);
+    onboarding_prompt& set_title(std::string_view _title);
 
 	/**
 	 * @brief Indicates whether users are limited to selecting one option for the prompt

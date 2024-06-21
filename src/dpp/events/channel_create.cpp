@@ -34,7 +34,7 @@ namespace dpp::events {
  * @param j JSON data for the event
  * @param raw Raw JSON string
  */
-void channel_create::handle(discord_client* client, json &j, const std::string &raw) {
+void channel_create::handle(discord_client* client, json &j, std::string_view raw) {
 	json& d = j["d"];
 	dpp::channel newchannel;
 	dpp::channel* c = nullptr;

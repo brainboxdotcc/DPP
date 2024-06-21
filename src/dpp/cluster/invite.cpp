@@ -26,12 +26,12 @@ void cluster::guild_get_invites(snowflake guild_id, command_completion_event_t c
 	rest_request_list<invite>(this, API_PATH "/guilds", std::to_string(guild_id), "invites", m_get, "", callback, "code");
 }
 
-void cluster::invite_delete(const std::string &invitecode, command_completion_event_t callback) {
+void cluster::invite_delete(std::string_view invitecode, command_completion_event_t callback) {
 	rest_request<invite>(this, API_PATH "/invites", utility::url_encode(invitecode), "", m_delete, "", callback);
 }
 
 
-void cluster::invite_get(const std::string &invite_code, command_completion_event_t callback) {
+void cluster::invite_get(std::string_view invite_code, command_completion_event_t callback) {
 	rest_request<invite>(this, API_PATH "/invites", utility::url_encode(invite_code) + "?with_counts=true&with_expiration=true", "", m_get, "", callback);
 }
 

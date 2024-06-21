@@ -31,7 +31,37 @@
 #include <iostream>
 #include <charconv>
 
+#ifdef __cpp_lib_spanstream
+#include <spanstream>
+#endif
+
 namespace dpp {
+
+#ifndef __cpp_lib_spanstream
+/**
+ * @brief streambuf for imemstream
+ * @note From https://stackoverflow.com/a/13059195
+ */
+struct membuf : std::streambuf
+{
+    membuf(const char* base, size_t size)
+    {
+        char* p(const_cast<char*>(base));
+        this->setg(p, p, p + size);
+    }
+};
+
+/**
+ * @brief An input stream over a raw character array. Superseded by std::ispanstream in C++23
+ * @note From https://stackoverflow.com/a/13059195
+ */
+struct imemstream : virtual membuf, std::istream
+{
+    imemstream(const char* base, size_t size)
+        : membuf(base, size), std::istream(static_cast<std::streambuf*>(this)) {}
+};
+#endif
+
 /**
  * @brief Convert a string to lowercase using tolower()
  * 
@@ -41,9 +71,23 @@ namespace dpp {
  */
 template <typename T> std::basic_string<T> lowercase(const std::basic_string<T>& s)
 {
-	std::basic_string<T> s2 = s;
+    std::basic_string<T> s2(s);
 	std::transform(s2.begin(), s2.end(), s2.begin(), tolower);
 	return s2;
+}
+
+/**
+ * @brief Convert a string to lowercase using tolower()
+ *
+ * @tparam T type of string
+ * @param s String_view to lowercase
+ * @return std::basic_string<T> lowercased string
+ */
+template <typename T> std::basic_string<T> lowercase(std::basic_string_view<T> s)
+{
+    std::basic_string<T> s2(s);
+    std::transform(s2.begin(), s2.end(), s2.begin(), tolower);
+    return s2;
 }
 
 /**
@@ -55,9 +99,23 @@ template <typename T> std::basic_string<T> lowercase(const std::basic_string<T>&
  */
 template <typename T> std::basic_string<T> uppercase(const std::basic_string<T>& s)
 {
-	std::basic_string<T> s2 = s;
+    std::basic_string<T> s2(s);
 	std::transform(s2.begin(), s2.end(), s2.begin(), toupper);
 	return s2;
+}
+
+/**
+ * @brief Convert a string to uppercase using toupper()
+ *
+ * @tparam T type of string
+ * @param s String_view to uppercase
+ * @return std::basic_string<T> uppercased string
+ */
+template <typename T> std::basic_string<T> uppercase(std::basic_string_view<T> s)
+{
+    std::basic_string<T> s2(s);
+    std::transform(s2.begin(), s2.end(), s2.begin(), toupper);
+    return s2;
 }
 
 /**
@@ -66,10 +124,11 @@ template <typename T> std::basic_string<T> uppercase(const std::basic_string<T>&
  * @param s String to trim
  * @return std::string trimmed string
  */
-inline std::string rtrim(std::string s)
+inline std::string rtrim(std::string_view s)
 {
-	s.erase(s.find_last_not_of(" \t\n\r\f\v") + 1);
-	return s;
+    std::string s_cpy(s);
+    s_cpy.erase(s_cpy.find_last_not_of(" \t\n\r\f\v") + 1);
+    return s_cpy;
 }
 
 /**
@@ -78,10 +137,11 @@ inline std::string rtrim(std::string s)
  * @param s string to trim
  * @return std::string trimmed string
  */
-inline std::string ltrim(std::string s)
+inline std::string ltrim(std::string_view s)
 {
-	s.erase(0, s.find_first_not_of(" \t\n\r\f\v"));
-	return s;
+    std::string s_cpy(s);
+    s_cpy.erase(0, s_cpy.find_first_not_of(" \t\n\r\f\v"));
+    return s_cpy;
 }
 
 /**
@@ -90,7 +150,7 @@ inline std::string ltrim(std::string s)
  * @param s string to trim 
  * @return std::string trimmed string
  */
-inline std::string trim(std::string s)
+inline std::string trim(std::string_view s)
 {
 	return ltrim(rtrim(s));
 }
@@ -120,11 +180,19 @@ template<class T> std::string comma(T value)
  * @param f Numeric base, e.g. `std::dec` or `std::hex`
  * @return T Returned numeric value
  */
-template <typename T> T from_string(const std::string &s, std::ios_base & (*f)(std::ios_base&))
+template <typename T> T from_string(std::string_view s, std::ios_base & (*f)(std::ios_base&))
 {
 	T t;
-	std::istringstream iss(s);
-	iss >> f, iss >> t;
+
+#ifdef __cpp_lib_spanstream
+    std::span<const char> span(s.begin(), s.end());
+    std::ispanstream iss(span);
+    iss >> f, iss >> t;
+#else
+    imemstream ims(s.data(), s.size());
+    ims >> f, ims >> t;
+#endif
+
 	return t;
 }
 
@@ -137,14 +205,23 @@ template <typename T> T from_string(const std::string &s, std::ios_base & (*f)(s
  *
  * @note Base 10 for numeric conversions.
  */
-template <typename T> T from_string(const std::string &s)
+template <typename T> T from_string(std::string_view s)
 {
 	if (s.empty()) {
 		return static_cast<T>(0);
 	}
+
 	T t;
-	std::istringstream iss(s);
-	iss >> t;
+
+#ifdef __cpp_lib_spanstream
+    std::span<const char> span(s.begin(), s.end());
+    std::ispanstream iss(span);
+    iss >> t;
+#else
+    imemstream ims(s.data(), s.size());
+    ims >> t;
+#endif
+
 	return t;
 }
 
@@ -155,9 +232,11 @@ template <typename T> T from_string(const std::string &s)
  * @param s string to convert 
  * @return uint64_t return value
  */
-template <uint64_t> uint64_t from_string(const std::string &s)
+template <uint64_t> uint64_t from_string(std::string_view s)
 {
-	return std::stoull(s, 0, 10);
+    uint64_t value{};
+    std::from_chars(s.data(), s.data() + s.size(), value);
+    return value;
 }
 
 /**
@@ -167,9 +246,11 @@ template <uint64_t> uint64_t from_string(const std::string &s)
  * @param s string to convert
  * @return uint32_t return value
  */
-template <uint32_t> uint32_t from_string(const std::string &s)
+template <uint32_t> uint32_t from_string(std::string_view s)
 {
-	return (uint32_t) std::stoul(s, 0, 10);
+    uint32_t value{};
+    std::from_chars(s.data(), s.data() + s.size(), value);
+    return value;
 }
 
 /**
@@ -179,9 +260,11 @@ template <uint32_t> uint32_t from_string(const std::string &s)
  * @param s string to convert
  * @return int return value
  */
-template <int> int from_string(const std::string &s)
+template <int> int from_string(std::string_view s)
 {
-	return std::stoi(s, 0, 10);
+    int value{};
+    std::from_chars(s.data(), s.data() + s.size(), value);
+    return value;
 }
 
 /**

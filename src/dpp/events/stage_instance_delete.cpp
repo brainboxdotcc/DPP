@@ -34,7 +34,7 @@ namespace dpp::events {
  * @param j JSON data for the event
  * @param raw Raw JSON string
  */
-void stage_instance_delete::handle(discord_client* client, json &j, const std::string &raw) {
+void stage_instance_delete::handle(discord_client* client, json &j, std::string_view raw) {
 	if (!client->creator->on_stage_instance_delete.empty()) {
 		json& d = j["d"];
 		dpp::stage_instance_delete_t sid(client, raw);

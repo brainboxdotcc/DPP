@@ -434,7 +434,7 @@ public:
 	 * 
 	 * @param what reason message
 	 */
-	explicit exception(const std::string& what) : msg(what), error_code(err_no_code_specified) { }
+    explicit exception(std::string_view what) : msg(what), error_code(err_no_code_specified) { }
 	
 	/**
 	 * @brief Construct a new exception object
@@ -442,7 +442,7 @@ public:
 	 * @param what reason message
 	 * @param code Exception code
 	 */
-	explicit exception(exception_error_code code, const std::string& what) : msg(what), error_code(code) { }
+    explicit exception(exception_error_code code, std::string_view what) : msg(what), error_code(code) { }
 	
 	/**
 	 * @brief Construct a new exception object
@@ -512,8 +512,8 @@ public:
 		explicit name(const char* what) : ancestor(what) { } \
 		explicit name(exception_error_code code, const char* what) : ancestor(code, what) { } \
 		name(const char* what, size_t len) : ancestor(what, len) { } \
-		explicit name(const std::string& what) : ancestor(what) { } \
-		explicit name(exception_error_code code, const std::string& what) : ancestor(code, what) { } \
+        explicit name(std::string_view what) : ancestor(what) { } \
+        explicit name(exception_error_code code, std::string_view what) : ancestor(code, what) { } \
 		explicit name(std::string&& what) : ancestor(what) { } \
 		explicit name(exception_error_code code, std::string&& what) : ancestor(code, what) { } \
 		name(const name&) = default; \

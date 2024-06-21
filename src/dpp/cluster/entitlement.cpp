@@ -62,7 +62,7 @@ void cluster::entitlements_get(snowflake user_id, const std::vector<snowflake>& 
 
 	j["exclude_ended"] = exclude_ended;
 
-	rest_request_list<entitlement>(this, API_PATH "/applications", me.id.str(), "entitlements", m_get, j, callback);
+    rest_request_list<entitlement>(this, API_PATH "/applications", me.id.str(), "entitlements", m_get, std::string(j), callback);
 }
 
 void cluster::entitlement_test_create(const class entitlement& new_entitlement, command_completion_event_t callback) {
@@ -70,7 +70,7 @@ void cluster::entitlement_test_create(const class entitlement& new_entitlement, 
 	j["sku_id"] = new_entitlement.sku_id.str();
 	j["owner_id"] = new_entitlement.guild_id.empty() ? new_entitlement.guild_id.str() : new_entitlement.user_id.str();
 	j["owner_type"] = new_entitlement.type;
-	rest_request<entitlement>(this, API_PATH "/applications", me.id.str(), "entitlements", m_post, j, callback);
+    rest_request<entitlement>(this, API_PATH "/applications", me.id.str(), "entitlements", m_post, std::string(j), callback);
 }
 
 void cluster::entitlement_test_delete(const class snowflake entitlement_id, command_completion_event_t callback) {

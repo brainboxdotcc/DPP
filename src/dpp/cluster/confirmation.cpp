@@ -74,7 +74,7 @@ bool confirmation_callback_t::is_error() const {
 
 namespace {
 
-std::vector<error_detail> find_errors_in_object(const std::string& obj, const std::string& current_field, const json &j) {
+std::vector<error_detail> find_errors_in_object(std::string_view obj, std::string_view current_field, const json &j) {
 	std::vector<error_detail> ret;
 
 	if (auto errors = j.find("_errors"); errors != j.end()) {
@@ -93,7 +93,7 @@ std::vector<error_detail> find_errors_in_object(const std::string& obj, const st
 
 			if (obj.empty()) {
 				field = current_field;
-			} else if (isdigit(*current_field.c_str())) {
+            } else if (isdigit(current_field.front())) {
 				/* An element of an array, e.g. an element of a slash command vector for global_bulk_slash_command_create */
 				field = obj;
 				field += '[';

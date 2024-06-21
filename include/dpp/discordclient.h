@@ -373,7 +373,7 @@ public:
 	 * @param severity The log level from dpp::loglevel
 	 * @param msg The log message to output
 	 */
-	virtual void log(dpp::loglevel severity, const std::string &msg) const;
+    virtual void log(dpp::loglevel severity, std::string_view msg) const;
 
 	/**
 	 * @brief Handle an event (opcode 0)
@@ -381,7 +381,7 @@ public:
 	 * @param j JSON object for the event content
 	 * @param raw Raw JSON event string
 	 */
-	virtual void handle_event(const std::string &event, json &j, const std::string &raw);
+    virtual void handle_event(std::string_view event, json &j, std::string_view raw);
 
 	/**
 	 * @brief Get the Guild Count for this shard
@@ -415,7 +415,7 @@ public:
 	 * (this is for urgent messages such as heartbeat, presence, so they can take precedence over
 	 * chunk requests etc)
 	 */
-	void queue_message(const std::string &j, bool to_front = false);
+    void queue_message(std::string_view j, bool to_front = false);
 
 	/**
 	 * @brief Clear the outbound message queue
@@ -457,7 +457,7 @@ public:
 	 * 
 	 * @throws std::bad_alloc Passed up to the caller if any internal objects fail to allocate, after cleanup has completed
 	 */
-	discord_client(dpp::cluster* _cluster, uint32_t _shard_id, uint32_t _max_shards, const std::string &_token, uint32_t intents = 0, bool compressed = true, websocket_protocol_t ws_protocol = ws_json);
+    discord_client(dpp::cluster* _cluster, uint32_t _shard_id, uint32_t _max_shards, std::string_view _token, uint32_t intents = 0, bool compressed = true, websocket_protocol_t ws_protocol = ws_json);
 
 	/**
 	 * @brief Destroy the discord client object
@@ -475,7 +475,7 @@ public:
 	 * @param buffer The entire buffer content from the websocket client
 	 * @returns True if a frame has been handled
 	 */
-	virtual bool handle_frame(const std::string &buffer);
+    virtual bool handle_frame(std::string_view buffer);
 
 	/**
 	 * @brief Handle a websocket error.

@@ -34,7 +34,7 @@ namespace dpp::events {
  * @param j JSON data for the event
  * @param raw Raw JSON string
  */
-void automod_rule_update::handle(discord_client* client, json &j, const std::string &raw) {
+void automod_rule_update::handle(discord_client* client, json &j, std::string_view raw) {
 	if (!client->creator->on_automod_rule_update.empty()) {
 		json& d = j["d"];
 		automod_rule_update_t aru(client, raw);

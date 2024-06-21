@@ -37,7 +37,7 @@ using json = nlohmann::json;
  * @param j JSON data for the event
  * @param raw Raw JSON string
  */
-void guild_role_delete::handle(discord_client* client, json &j, const std::string &raw) {
+void guild_role_delete::handle(discord_client* client, json &j, std::string_view raw) {
 	json &d = j["d"];
 	dpp::snowflake guild_id = snowflake_not_null(&d, "guild_id");
 	dpp::snowflake role_id = snowflake_not_null(&d, "role_id");

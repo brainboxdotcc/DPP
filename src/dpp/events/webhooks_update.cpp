@@ -35,7 +35,7 @@ namespace dpp::events {
  * @param j JSON data for the event
  * @param raw Raw JSON string
  */
-void webhooks_update::handle(discord_client* client, json &j, const std::string &raw) {
+void webhooks_update::handle(discord_client* client, json &j, std::string_view raw) {
 	if (!client->creator->on_webhooks_update.empty()) {
 		json& d = j["d"];
 		dpp::webhooks_update_t wu(client, raw);

@@ -216,7 +216,7 @@ public:
 	 * @param request_threads_raw The number of threads to allocate for making HTTP requests to sites outside of Discord. This defaults to 1. You can increase this at runtime via the object returned from get_raw_rest().
 	 * @throw dpp::exception Thrown on windows, if WinSock fails to initialise, or on any other system if a dpp::request_queue fails to construct
 	 */
-	cluster(const std::string& token, uint32_t intents = i_default_intents, uint32_t shards = 0, uint32_t cluster_id = 0, uint32_t maxclusters = 1, bool compressed = true, cache_policy_t policy = cache_policy::cpol_default, uint32_t request_threads = 12, uint32_t request_threads_raw = 1);
+    cluster(std::string_view token, uint32_t intents = i_default_intents, uint32_t shards = 0, uint32_t cluster_id = 0, uint32_t maxclusters = 1, bool compressed = true, cache_policy_t policy = cache_policy::cpol_default, uint32_t request_threads = 12, uint32_t request_threads_raw = 1);
 
 	/**
 	 * @brief dpp::cluster is non-copyable
@@ -288,7 +288,7 @@ public:
 	 * @param reason The reason to set for the next REST call on this thread
 	 * @return cluster& Reference to self for chaining.
 	 */
-	cluster& set_audit_reason(const std::string &reason);
+    cluster& set_audit_reason(std::string_view reason);
 
 	/**
 	 * @brief Clear the audit log reason for the next REST call to be made.
@@ -325,7 +325,7 @@ public:
 	 *
 	 * @return cluster& Reference to self for chaining.
 	 */
-	cluster& set_default_gateway(const std::string& default_gateway);
+    cluster& set_default_gateway(std::string_view default_gateway);
 
 	/**
 	 * @brief Log a message to whatever log the user is using.
@@ -334,7 +334,7 @@ public:
 	 * @param severity The log level from dpp::loglevel
 	 * @param msg The log message to output
 	 */
-	void log(dpp::loglevel severity, const std::string &msg) const;
+    void log(dpp::loglevel severity, std::string_view msg) const;
 
 	/**
 	 * @brief Start a timer. Every `frequency` seconds, the callback is called.
@@ -1375,7 +1375,7 @@ public:
 	 * @param filemimetype File content to post for POST requests (for uploading files)
 	 * @param protocol HTTP protocol to use (1.0 and 1.1 are supported)
 	 */
-	void post_rest(const std::string &endpoint, const std::string &major_parameters, const std::string &parameters, http_method method, const std::string &postdata, json_encode_t callback, const std::string &filename = "", const std::string &filecontent = "", const std::string &filemimetype = "", const std::string& protocol = "1.1");
+    void post_rest(std::string_view endpoint, std::string_view major_parameters, std::string_view parameters, http_method method, std::string_view postdata, json_encode_t callback, std::string_view filename = "", std::string_view filecontent = "", std::string_view filemimetype = "", std::string_view protocol = "1.1");
 
 	/**
 	 * @brief Post a multipart REST request. Where possible use a helper method instead like message_create
@@ -1388,7 +1388,7 @@ public:
 	 * @param callback Function to call when the HTTP call completes. The callback parameter will contain amongst other things, the decoded json.
 	 * @param file_data List of files to post for POST requests (for uploading files)
 	 */
-	void post_rest_multipart(const std::string &endpoint, const std::string &major_parameters, const std::string &parameters, http_method method, const std::string &postdata, json_encode_t callback, const std::vector<message_file_data> &file_data = {});
+    void post_rest_multipart(std::string_view endpoint, std::string_view major_parameters, std::string_view parameters, http_method method, std::string_view postdata, json_encode_t callback, const std::vector<message_file_data> &file_data = {});
 
 	/**
 	 * @brief Make a HTTP(S) request. For use when wanting asynchronous access to HTTP APIs outside of Discord.
@@ -1401,7 +1401,7 @@ public:
 	 * @param headers Headers to send with the request
 	 * @param protocol HTTP protocol to use (1.1 and 1.0 are supported)
 	 */
-	void request(const std::string &url, http_method method, http_completion_event callback, const std::string &postdata = "", const std::string &mimetype = "text/plain", const std::multimap<std::string, std::string> &headers = {}, const std::string &protocol = "1.1");
+    void request(std::string_view url, http_method method, http_completion_event callback, std::string_view postdata = "", std::string_view mimetype = "text/plain", const std::multimap<std::string, std::string> &headers = {}, std::string_view protocol = "1.1");
 
 	/**
 	 * @brief Respond to a slash command
@@ -1413,7 +1413,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void interaction_response_create(snowflake interaction_id, const std::string &token, const interaction_response &r, command_completion_event_t callback = utility::log_error());
+    void interaction_response_create(snowflake interaction_id, std::string_view token, const interaction_response &r, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Edit response to a slash command
@@ -1424,7 +1424,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void interaction_response_edit(const std::string &token, const message &m, command_completion_event_t callback = utility::log_error());
+    void interaction_response_edit(std::string_view token, const message &m, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get the original response to a slash command
@@ -1434,7 +1434,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::message object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void interaction_response_get_original(const std::string &token, command_completion_event_t callback = utility::log_error());
+    void interaction_response_get_original(std::string_view token, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Create a followup message to a slash command
@@ -1445,7 +1445,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void interaction_followup_create(const std::string &token, const message &m, command_completion_event_t callback = utility::log_error());
+    void interaction_followup_create(std::string_view token, const message &m, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Edit original followup message to a slash command
@@ -1457,7 +1457,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void interaction_followup_edit_original(const std::string &token, const message &m, command_completion_event_t callback = utility::log_error());
+    void interaction_followup_edit_original(std::string_view token, const message &m, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Delete the initial interaction response
@@ -1467,7 +1467,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void interaction_followup_delete(const std::string &token, command_completion_event_t callback = utility::log_error());
+    void interaction_followup_delete(std::string_view token, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Edit followup message to a slash command
@@ -1479,7 +1479,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void interaction_followup_edit(const std::string &token, const message &m, command_completion_event_t callback = utility::log_error());
+    void interaction_followup_edit(std::string_view token, const message &m, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get the followup message to a slash command
@@ -1490,7 +1490,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::message object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void interaction_followup_get(const std::string &token, snowflake message_id, command_completion_event_t callback);
+    void interaction_followup_get(std::string_view token, snowflake message_id, command_completion_event_t callback);
 	
 	/**
 	 * @brief Get the original followup message to a slash command
@@ -1501,7 +1501,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::message object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void interaction_followup_get_original(const std::string &token, command_completion_event_t callback = utility::log_error());
+    void interaction_followup_get_original(std::string_view token, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Create a global slash command (a bot can have a maximum of 100 of these).
@@ -1805,7 +1805,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void message_add_reaction(const struct message &m, const std::string &reaction, command_completion_event_t callback = utility::log_error());
+    void message_add_reaction(const struct message &m, std::string_view reaction, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Delete own reaction from a message. The reaction string must be either an `emojiname:id` or a unicode character.
@@ -1816,7 +1816,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void message_delete_own_reaction(const struct message &m, const std::string &reaction, command_completion_event_t callback = utility::log_error());
+    void message_delete_own_reaction(const struct message &m, std::string_view reaction, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Delete a user's reaction from a message. The reaction string must be either an `emojiname:id` or a unicode character
@@ -1828,7 +1828,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void message_delete_reaction(const struct message &m, snowflake user_id, const std::string &reaction, command_completion_event_t callback = utility::log_error());
+    void message_delete_reaction(const struct message &m, snowflake user_id, std::string_view reaction, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get reactions on a message for a particular emoji. The reaction string must be either an `emojiname:id` or a unicode character
@@ -1842,7 +1842,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::user_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void message_get_reactions(const struct message &m, const std::string &reaction, snowflake before, snowflake after, snowflake limit, command_completion_event_t callback);
+    void message_get_reactions(const struct message &m, std::string_view reaction, snowflake before, snowflake after, snowflake limit, command_completion_event_t callback);
 
 	/**
 	 * @brief Delete all reactions on a message
@@ -1863,7 +1863,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void message_delete_reaction_emoji(const struct message &m, const std::string &reaction, command_completion_event_t callback = utility::log_error());
+    void message_delete_reaction_emoji(const struct message &m, std::string_view reaction, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Add a reaction to a message by id. The reaction string must be either an `emojiname:id` or a unicode character.
@@ -1875,7 +1875,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void message_add_reaction(snowflake message_id, snowflake channel_id, const std::string &reaction, command_completion_event_t callback = utility::log_error());
+    void message_add_reaction(snowflake message_id, snowflake channel_id, std::string_view reaction, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Delete own reaction from a message by id. The reaction string must be either an `emojiname:id` or a unicode character.
@@ -1887,7 +1887,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void message_delete_own_reaction(snowflake message_id, snowflake channel_id, const std::string &reaction, command_completion_event_t callback = utility::log_error());
+    void message_delete_own_reaction(snowflake message_id, snowflake channel_id, std::string_view reaction, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Delete a user's reaction from a message by id. The reaction string must be either an `emojiname:id` or a unicode character
@@ -1900,7 +1900,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void message_delete_reaction(snowflake message_id, snowflake channel_id, snowflake user_id, const std::string &reaction, command_completion_event_t callback = utility::log_error());
+    void message_delete_reaction(snowflake message_id, snowflake channel_id, snowflake user_id, std::string_view reaction, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get reactions on a message for a particular emoji by id. The reaction string must be either an `emojiname:id` or a unicode character
@@ -1915,7 +1915,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::user_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void message_get_reactions(snowflake message_id, snowflake channel_id, const std::string &reaction, snowflake before, snowflake after, snowflake limit, command_completion_event_t callback);
+    void message_get_reactions(snowflake message_id, snowflake channel_id, std::string_view reaction, snowflake before, snowflake after, snowflake limit, command_completion_event_t callback);
 
 	/**
 	 * @brief Delete all reactions on a message by id
@@ -1938,7 +1938,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void message_delete_reaction_emoji(snowflake message_id, snowflake channel_id, const std::string &reaction, command_completion_event_t callback = utility::log_error());
+    void message_delete_reaction_emoji(snowflake message_id, snowflake channel_id, std::string_view reaction, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Delete a message from a channel. The callback function is called when the message has been edited
@@ -2123,7 +2123,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::invite object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void invite_get(const std::string &invite_code, command_completion_event_t callback);
+    void invite_get(std::string_view invite_code, command_completion_event_t callback);
 
 	/**
 	 * @brief Delete an invite
@@ -2134,7 +2134,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::invite object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void invite_delete(const std::string &invite, command_completion_event_t callback = utility::log_error());
+    void invite_delete(std::string_view invite, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get invites for a channel
@@ -2176,7 +2176,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void gdm_add(snowflake channel_id, snowflake user_id, const std::string &access_token, const std::string &nick, command_completion_event_t callback = utility::log_error());
+    void gdm_add(snowflake channel_id, snowflake user_id, std::string_view access_token, std::string_view nick, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Removes a recipient from a Group DM
@@ -2294,7 +2294,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::guild_member_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_search_members(snowflake guild_id, const std::string& query, uint16_t limit, command_completion_event_t callback);
+    void guild_search_members(snowflake guild_id, std::string_view query, uint16_t limit, command_completion_event_t callback);
 
 	/**
 	 * @brief Get all guild members
@@ -2326,7 +2326,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::guild_member object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_add_member(const guild_member& gm, const std::string &access_token, command_completion_event_t callback = utility::log_error());
+    void guild_add_member(const guild_member& gm, std::string_view access_token, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Edit the properties of an existing guild member
@@ -2373,7 +2373,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_set_nickname(snowflake guild_id, const std::string &nickname, command_completion_event_t callback = utility::log_error());
+    void guild_set_nickname(snowflake guild_id, std::string_view nickname, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Add role to guild member
@@ -2540,7 +2540,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::dtemplate object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void template_get(const std::string &code, command_completion_event_t callback);
+    void template_get(std::string_view code, command_completion_event_t callback);
 
 	/**
 	 * @brief Create a new guild based on a template.
@@ -2551,7 +2551,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::guild object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_create_from_template(const std::string &code, const std::string &name, command_completion_event_t callback = utility::log_error());
+    void guild_create_from_template(std::string_view code, std::string_view name, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get guild templates
@@ -2573,7 +2573,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::dtemplate object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_template_create(snowflake guild_id, const std::string &name, const std::string &description, command_completion_event_t callback = utility::log_error());
+    void guild_template_create(snowflake guild_id, std::string_view name, std::string_view description, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Syncs the template to the guild's current state.
@@ -2584,7 +2584,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::dtemplate object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_template_sync(snowflake guild_id, const std::string &code, command_completion_event_t callback = utility::log_error());
+    void guild_template_sync(snowflake guild_id, std::string_view code, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Modifies the template's metadata.
@@ -2597,7 +2597,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::dtemplate object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_template_modify(snowflake guild_id, const std::string &code, const std::string &name, const std::string &description, command_completion_event_t callback = utility::log_error());
+    void guild_template_modify(snowflake guild_id, std::string_view code, std::string_view name, std::string_view description, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Deletes the template
@@ -2608,7 +2608,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_template_delete(snowflake guild_id, const std::string &code, command_completion_event_t callback = utility::log_error());
+    void guild_template_delete(snowflake guild_id, std::string_view code, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Create a guild
@@ -2962,7 +2962,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::webhook object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void get_webhook_with_token(snowflake webhook_id, const std::string &token, command_completion_event_t callback);
+    void get_webhook_with_token(snowflake webhook_id, std::string_view token, command_completion_event_t callback);
 
 	/**
 	 * @brief Edit webhook
@@ -3001,7 +3001,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void delete_webhook_with_token(snowflake webhook_id, const std::string &token, command_completion_event_t callback = utility::log_error());
+    void delete_webhook_with_token(snowflake webhook_id, std::string_view token, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Execute webhook
@@ -3016,7 +3016,7 @@ public:
 	 * @note If the webhook channel is a forum channel, you must provide either `thread_id` or `thread_name`. If `thread_id` is provided, the message will send in that thread. If `thread_name` is provided, a thread with that name will be created in the forum channel.
 	 * On success the callback will contain a dpp::message object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void execute_webhook(const class webhook &wh, const struct message &m, bool wait = false, snowflake thread_id = 0, const std::string& thread_name = "", command_completion_event_t callback = utility::log_error());
+    void execute_webhook(const class webhook &wh, const struct message &m, bool wait = false, snowflake thread_id = 0, std::string_view thread_name = "", command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get webhook message
@@ -3231,7 +3231,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_current_member_edit(snowflake guild_id, const std::string &nickname, command_completion_event_t callback = utility::log_error());
+    void guild_current_member_edit(snowflake guild_id, std::string_view nickname, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get current user's connections (linked accounts, e.g. steam, xbox).
@@ -3264,7 +3264,7 @@ public:
 	 * On success the callback will contain a dpp::user object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
  	 * @throw dpp::length_exception Image data is larger than the maximum size of 256 kilobytes
 	 */
-	void current_user_edit(const std::string &nickname, const std::string& image_blob = "", const image_type type = i_png, command_completion_event_t callback = utility::log_error());
+    void current_user_edit(std::string_view nickname, std::string_view image_blob = "", const image_type type = i_png, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get current user DM channels
@@ -3306,7 +3306,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::thread object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void thread_create_in_forum(const std::string& thread_name, snowflake channel_id, const message& msg, auto_archive_duration_t auto_archive_duration, uint16_t rate_limit_per_user, std::vector<snowflake> applied_tags = {}, command_completion_event_t callback = utility::log_error());
+    void thread_create_in_forum(std::string_view thread_name, snowflake channel_id, const message& msg, auto_archive_duration_t auto_archive_duration, uint16_t rate_limit_per_user, std::vector<snowflake> applied_tags = {}, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Create a thread
@@ -3322,7 +3322,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::thread object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void thread_create(const std::string& thread_name, snowflake channel_id, uint16_t auto_archive_duration, channel_type thread_type, bool invitable, uint16_t rate_limit_per_user, command_completion_event_t callback = utility::log_error());
+    void thread_create(std::string_view thread_name, snowflake channel_id, uint16_t auto_archive_duration, channel_type thread_type, bool invitable, uint16_t rate_limit_per_user, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Edit a thread
@@ -3347,7 +3347,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::thread object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void thread_create_with_message(const std::string& thread_name, snowflake channel_id, snowflake message_id, uint16_t auto_archive_duration, uint16_t rate_limit_per_user, command_completion_event_t callback = utility::log_error());
+    void thread_create_with_message(std::string_view thread_name, snowflake channel_id, snowflake message_id, uint16_t auto_archive_duration, uint16_t rate_limit_per_user, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Join a thread
@@ -3810,7 +3810,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void channel_set_voice_status(snowflake channel_id, const std::string& status, command_completion_event_t callback = utility::log_error());
+    void channel_set_voice_status(snowflake channel_id, std::string_view status, command_completion_event_t callback = utility::log_error());
 
 #include <dpp/cluster_sync_calls.h>
 #ifdef DPP_CORO

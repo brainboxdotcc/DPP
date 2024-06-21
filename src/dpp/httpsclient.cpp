@@ -32,7 +32,7 @@
 
 namespace dpp {
 
-https_client::https_client(const std::string &hostname, uint16_t port,  const std::string &urlpath, const std::string &verb, const std::string &req_body, const http_headers& extra_headers, bool plaintext_connection, uint16_t request_timeout, const std::string &protocol)
+https_client::https_client(std::string_view hostname, uint16_t port, std::string_view urlpath, std::string_view verb, std::string_view req_body, const http_headers& extra_headers, bool plaintext_connection, uint16_t request_timeout, std::string_view protocol)
 	: ssl_client(hostname, std::to_string(port), plaintext_connection, false),
 	state(HTTPS_HEADERS),
 	request_type(verb),
@@ -73,37 +73,43 @@ void https_client::connect()
 	}
 }
 
-multipart_content https_client::build_multipart(const std::string &json, const std::vector<std::string>& filenames, const std::vector<std::string>& contents, const std::vector<std::string>& mimetypes) {
+multipart_content https_client::build_multipart(std::string_view json, const std::vector<std::string>& filenames, const std::vector<std::string>& contents, const std::vector<std::string>& mimetypes) {
 	if (filenames.empty() && contents.empty()) {
-		if (!json.empty()) {
-			return { json, "application/json" };
+        if (!json.empty()) {
+            return { std::string(json), "application/json" };
 		} else {
-			return {json, ""};
+            return { std::string(json), "" };
 		}
 	} else {
 		/* Note: loss of upper 32 bits on this value is INTENTIONAL */
 		uint32_t dummy1 = (uint32_t)time(nullptr) + (uint32_t)time(nullptr);
 		time_t dummy2 = time(nullptr) * time(nullptr);
-		const std::string two_cr("\r\n\r\n");
+        constexpr std::string_view two_cr("\r\n\r\n");
 		const std::string boundary("-------------" + to_hex(dummy1) + to_hex(dummy2));
 		const std::string part_start("--" + boundary + "\r\nContent-Disposition: form-data; ");
-		const std::string mime_type_start("\r\nContent-Type: ");
-		const std::string default_mime_type("application/octet-stream");
+        constexpr std::string_view mime_type_start("\r\nContent-Type: ");
+        constexpr std::string_view default_mime_type("application/octet-stream");
 		
 		std::string content("--" + boundary);
 
 		/* Special case, single file */
-		content += "\r\nContent-Type: application/json\r\nContent-Disposition: form-data; name=\"payload_json\"" + two_cr;
-		content += json + "\r\n";
+        content += "\r\nContent-Type: application/json\r\nContent-Disposition: form-data; name=\"payload_json\"";
+        content += two_cr;
+        content += json;
+        content += "\r\n";
 		if (filenames.size() == 1 && contents.size() == 1) {
 			content += part_start + "name=\"file\"; filename=\"" + filenames[0] + "\"";
-			content += mime_type_start + (mimetypes.empty() || mimetypes[0].empty() ? default_mime_type : mimetypes[0]) + two_cr;
+            content += mime_type_start;
+            content += (mimetypes.empty() || mimetypes[0].empty() ? default_mime_type : mimetypes[0]);
+            content += two_cr;
 			content += contents[0];
 		} else {
 			/* Multiple files */
 			for (size_t i = 0; i < filenames.size(); ++i) {
 				content += part_start + "name=\"files[" + std::to_string(i) + "]\"; filename=\"" + filenames[i] + "\"";
-				content += "\r\nContent-Type: " + (mimetypes.size() <= i || mimetypes[i].empty() ? default_mime_type : mimetypes[i]) + two_cr;
+                content += "\r\nContent-Type: ";
+                content += (mimetypes.size() <= i || mimetypes[i].empty() ? default_mime_type : mimetypes[i]);
+                content += two_cr;
 				content += contents[i];
 				content += "\r\n";
 			}
@@ -113,29 +119,32 @@ multipart_content https_client::build_multipart(const std::string &json, const s
 	}
 }
 
-const std::string https_client::get_header(std::string header_name) const {
-	std::transform(header_name.begin(), header_name.end(), header_name.begin(), [](unsigned char c){
+const std::string https_client::get_header(std::string_view header_name) const {
+    std::string header_name_str(header_name);
+    std::transform(header_name_str.begin(), header_name_str.end(), header_name_str.begin(), [](unsigned char c){
 		return std::tolower(c);
 	});
-	auto hdrs = response_headers.find(header_name);
+    auto hdrs = response_headers.find(header_name_str);
 	if (hdrs != response_headers.end()) {
 		return hdrs->second;
 	}
 	return std::string();
 }
 
-size_t https_client::get_header_count(std::string header_name) const {
-	std::transform(header_name.begin(), header_name.end(), header_name.begin(), [](unsigned char c){
+size_t https_client::get_header_count(std::string_view header_name) const {
+    std::string header_name_str(header_name);
+    std::transform(header_name_str.begin(), header_name_str.end(), header_name_str.begin(), [](unsigned char c){
 		return std::tolower(c);
 	});
-	return response_headers.count(header_name);
+    return response_headers.count(header_name_str);
 }
 
-const std::list<std::string> https_client::get_header_list(std::string header_name) const {
-	std::transform(header_name.begin(), header_name.end(), header_name.begin(), [](unsigned char c){
+const std::list<std::string> https_client::get_header_list(std::string_view header_name) const {
+    std::string header_name_str(header_name);
+    std::transform(header_name_str.begin(), header_name_str.end(), header_name_str.begin(), [](unsigned char c){
 		return std::tolower(c);
 	});
-	auto hdrs = response_headers.equal_range(header_name);
+    auto hdrs = response_headers.equal_range(header_name_str);
 	if (hdrs.first != response_headers.end()) {
 		std::list<std::string> data;
 		for ( auto i = hdrs.first; i != hdrs.second; ++i ) {
@@ -325,7 +334,7 @@ void https_client::close() {
 	}
 }
 
-http_connect_info https_client::get_host_info(std::string url) {
+http_connect_info https_client::get_host_info(std::string_view url) {
 	http_connect_info hci = { false, "http", "", 80};
 	if (url.substr(0, 8) == "https://") {
 		hci.port = 443;
@@ -342,11 +351,13 @@ http_connect_info https_client::get_host_info(std::string url) {
 	}
 	size_t colon_pos = url.find(':');
 	if (colon_pos != std::string::npos) {
-		hci.hostname = url.substr(0, colon_pos);
-		hci.port = atoi(url.substr(colon_pos + 1, url.length()).c_str());
-		if (hci.port == 0) {
-			hci.port = 80;
-		}
+        hci.hostname = url.substr(0, colon_pos);
+
+        std::string_view port_str = url.substr(colon_pos + 1, url.length());
+        auto [_, err] = std::from_chars(port_str.data(), port_str.data() + port_str.size(), hci.port);
+        if (err != std::errc{}) {
+            hci.port = 80;
+        }
 	} else {
 		hci.hostname = url;
 	}

@@ -36,7 +36,7 @@ namespace dpp::events {
  * @param j JSON data for the event
  * @param raw Raw JSON string
  */
-void guild_delete::handle(discord_client* client, json &j, const std::string &raw) {
+void guild_delete::handle(discord_client* client, json &j, std::string_view raw) {
 	json& d = j["d"];
 	dpp::guild* g = dpp::find_guild(snowflake_not_null(&d, "id"));
 	dpp::guild guild_del;

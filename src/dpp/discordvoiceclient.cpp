@@ -301,7 +301,7 @@ void discord_voice_client::voice_courier_loop(discord_voice_client& client, cour
 #endif
 }
 
-discord_voice_client::discord_voice_client(dpp::cluster* _cluster, snowflake _channel_id, snowflake _server_id, const std::string &_token, const std::string &_session_id, const std::string &_host)
+discord_voice_client::discord_voice_client(dpp::cluster* _cluster, snowflake _channel_id, snowflake _server_id, std::string_view _token, std::string_view _session_id, std::string_view _host)
 	   : websocket_client(_host.substr(0, _host.find(":")), _host.substr(_host.find(":") + 1, _host.length()), "/?v=4", OP_TEXT),
 	runner(nullptr),
 	connect_time(0),
@@ -469,16 +469,17 @@ int discord_voice_client::udp_recv(char* data, size_t max_length)
 	return (int) recv(this->fd, data, (int)max_length, 0);
 }
 
-bool discord_voice_client::handle_frame(const std::string &data)
+bool discord_voice_client::handle_frame(std::string_view data)
 {
-	log(dpp::ll_trace, std::string("R: ") + data);
+    std::string data_str(data);
+    log(dpp::ll_trace, "R: " + data_str);
 	json j;
 	
 	try {
 		j = json::parse(data);
 	}
 	catch (const std::exception &e) {
-		log(dpp::ll_error, std::string("discord_voice_client::handle_frame ") + e.what() + ": " + data);
+        log(dpp::ll_error, std::string("discord_voice_client::handle_frame ") + e.what() + ": " + data_str);
 		return true;
 	}
 
@@ -1033,12 +1034,12 @@ void discord_voice_client::set_user_gain(snowflake user_id, float factor)
 #endif
 }
 
-void discord_voice_client::log(dpp::loglevel severity, const std::string &msg) const
+void discord_voice_client::log(dpp::loglevel severity, std::string_view msg) const
 {
 	creator->log(severity, msg);
 }
 
-void discord_voice_client::queue_message(const std::string &j, bool to_front)
+void discord_voice_client::queue_message(std::string_view j, bool to_front)
 {
 	std::unique_lock locker(queue_mutex);
 	if (to_front) {
@@ -1141,7 +1142,7 @@ size_t discord_voice_client::encode(uint8_t *input, size_t inDataSize, uint8_t *
 	return outDataSize;
 }
 
-discord_voice_client& discord_voice_client::insert_marker(const std::string& metadata) {
+discord_voice_client& discord_voice_client::insert_marker(std::string_view metadata) {
 	/* Insert a track marker. A track marker is a single 16 bit value of 0xFFFF.
 	 * This is too small to be a valid RTP packet so the send function knows not
 	 * to actually send it, and instead to skip it
@@ -1150,7 +1151,7 @@ discord_voice_client& discord_voice_client::insert_marker(const std::string& met
 	this->send((const char*)&tm, sizeof(uint16_t), 0);
 	{
 		std::lock_guard<std::mutex> lock(this->stream_mutex);
-		track_meta.push_back(metadata);
+        track_meta.emplace_back(metadata);
 		tracks++;
 	}
 	return *this;
