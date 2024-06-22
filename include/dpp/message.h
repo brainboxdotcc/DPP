@@ -578,7 +578,7 @@ public:
 	 * @brief Set the component to disabled.
 	 * Defaults to false on all created components.
 	 *
-	 * @param disable True to disable, false to disable.
+	 * @param disable True to disable the component, False to enable the component.
 	 * @return component& Reference to self
 	 */
 	component& set_disabled(bool disable);
@@ -662,9 +662,12 @@ public:
 
 	/**
 	 * @brief Set the emoji of the current sub-component.
-	 * Only valid for buttons. Adding an emoji to a component
-	 * will automatically set this components type to
-	 * dpp::cot_button. One or both of name and id must be set.
+	 * 
+	 * @warning Only valid for buttons.
+	 * 
+	 * @note Adding an emoji to a component will 
+	 * automatically set this components type to
+	 * dpp::cot_button. **One or both of name and id must be set**.
 	 * For a built in unicode emoji, you only need set name,
 	 * and should set it to a unicode character e.g. "😄".
 	 * For custom emojis, set the name to the name of the emoji
