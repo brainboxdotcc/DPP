@@ -20,17 +20,10 @@
  ************************************************************************************/
 #include <algorithm>
 #include <dpp/message.h>
-#include <dpp/user.h>
-#include <dpp/channel.h>
-#include <dpp/guild.h>
 #include <dpp/cache.h>
 #include <dpp/json.h>
 #include <dpp/discordevents.h>
-#include <dpp/stringops.h>
-#include <dpp/exception.h>
 #include <dpp/cluster.h>
-
-
 
 namespace dpp {
 
@@ -235,6 +228,12 @@ component& component::set_max_length(uint32_t max_l)
 	return *this;
 }
 
+component& component::set_sku_id(dpp::snowflake sku)
+{
+	sku_id = sku;
+	return *this;
+}
+
 void to_json(json& j, const attachment& a) {
 	if (a.id) {
 		j["id"] = a.id;
@@ -274,14 +273,19 @@ void to_json(json& j, const component& cp) {
 		}
 	}
 	if (cp.type == cot_button) {
-		j["label"] = cp.label;
+		if (!cp.label.empty()) {
+			j["label"] = cp.label;
+		}
 		j["style"] = int(cp.style);
-		if (cp.type == cot_button && cp.style != cos_link && !cp.custom_id.empty()) {
-			/* Links cannot have a custom id */
+		if (cp.style != cos_link && cp.style != cos_premium && !cp.custom_id.empty()) {
+			/* Links and premium upsell cannot have a custom id */
 			j["custom_id"] = cp.custom_id;
 		}
-		if (cp.type == cot_button && cp.style == cos_link && !cp.url.empty()) {
+		if (cp.style == cos_link && !cp.url.empty()) {
 			j["url"] = cp.url;
+		}
+		if (cp.style == cos_premium && !cp.sku_id.empty()) {
+			j["sku_id"] = cp.sku_id;
 		}
 		j["disabled"] = cp.disabled;
 

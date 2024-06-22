@@ -232,6 +232,10 @@ class coroutine : private detail::coroutine::coroutine_base<R> {
 	}
 
 public:
+	/**
+	 * @brief The type of the result produced by this coroutine.
+	 */
+	using result_type = R;
 #ifdef _DOXYGEN_ // :))))
 	/**
 	 * @brief Default constructor, creates an empty coroutine.
@@ -333,6 +337,11 @@ public:
 	using detail::coroutine::coroutine_base<void>::coroutine_base; // use coroutine_base's constructors
 	using detail::coroutine::coroutine_base<void>::operator=; // use coroutine_base's assignment operators
 	using detail::coroutine::coroutine_base<void>::await_ready; // expose await_ready as public
+
+	/**
+	 * @brief The type of the result produced by this coroutine.
+	 */
+	using result_type = void;
 
 	/**
 	 * @brief Suspend the current coroutine until the coroutine completes.

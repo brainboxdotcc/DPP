@@ -35,7 +35,8 @@ namespace dpp::events {
 void entitlement_create::handle(discord_client* client, json &j, const std::string &raw) {
 	if (!client->creator->on_entitlement_create.empty()) {
 		dpp::entitlement ent;
-		ent.fill_from_json(&j);
+		json& d = j["d"];
+		ent.fill_from_json(&d);
 
 		dpp::entitlement_create_t entitlement_event(client, raw);
 		entitlement_event.created = ent;

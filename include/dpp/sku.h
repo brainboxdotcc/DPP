@@ -35,6 +35,14 @@ namespace dpp {
  * */
 enum sku_type : uint8_t {
 	/**
+	 * @brief Represents a durable one-time purchase
+	 */
+	DURABLE = 2,
+	/**
+	 * @brief Consumable one-time purchase
+	 */
+	CONSUMABLE = 3,
+	/**
 	 * @brief Represents a recurring subscription
 	 */
 	SUBSCRIPTION = 5,
