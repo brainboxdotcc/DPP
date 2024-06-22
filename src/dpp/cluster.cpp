@@ -171,6 +171,22 @@ void cluster::start(bool return_after) {
 		this->terminating.wait(thread_lock);
 	};
 
+	if (on_guild_member_add && !(intents & dpp::i_guild_members)) {
+		log(ll_warning, "You have attached an event to cluster::on_guild_member_add() but have not specified the privileged intent dpp::i_guild_members. This event will not fire.");
+	}
+
+	if (on_guild_member_remove && !(intents & dpp::i_guild_members)) {
+		log(ll_warning, "You have attached an event to cluster::on_guild_member_remove() but have not specified the privileged intent dpp::i_guild_members. This event will not fire.");
+	}
+
+	if (on_guild_member_update && !(intents & dpp::i_guild_members)) {
+		log(ll_warning, "You have attached an event to cluster::on_guild_member_update() but have not specified the privileged intent dpp::i_guild_members. This event will not fire.");
+	}
+
+	if (on_presence_update && !(intents & dpp::i_guild_presences)) {
+		log(ll_warning, "You have attached an event to cluster::on_presence_update() but have not specified the privileged intent dpp::i_guild_presences. This event will not fire.");
+	}
+
 	/* Start up all shards */
 	gateway g;
 	try {
