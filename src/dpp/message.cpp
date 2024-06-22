@@ -132,7 +132,7 @@ component& component::set_type(component_type ct)
 	return *this;
 }
 
-component& component::set_label(const std::string &l)
+component& component::set_label(std::string_view l)
 {
 	if (type == cot_action_row) {
 		set_type(cot_button);
@@ -147,7 +147,7 @@ component& component::set_label(const std::string &l)
 	return *this;
 }
 
-component& component::set_default_value(const std::string &val)
+component& component::set_default_value(std::string_view val)
 {
 	if (type == cot_action_row) {
 		set_type(cot_text);
@@ -170,7 +170,7 @@ component& component::set_text_style(text_style_type ts)
 	return *this;
 }
 
-component& component::set_url(const std::string& u)
+component& component::set_url(std::string_view u)
 {
 	set_type(cot_button);
 	set_style(cos_link);
@@ -178,7 +178,7 @@ component& component::set_url(const std::string& u)
 	return *this;
 }
 
-component& component::set_id(const std::string &id)
+component& component::set_id(std::string_view id)
 {
 	if (type == cot_action_row) {
 		set_type(cot_button);
@@ -205,7 +205,7 @@ component& component::set_required(bool require)
 	return *this;
 }
 
-component& component::set_emoji(const std::string& name, dpp::snowflake id, bool animated)
+component& component::set_emoji(std::string_view name, dpp::snowflake id, bool animated)
 {
 	if (type == cot_action_row) {
 		set_type(cot_button);
@@ -404,10 +404,10 @@ void to_json(json& j, const component& cp) {
 select_option::select_option() : is_default(false) {
 }
 
-select_option::select_option(const std::string &_label, const std::string &_value, const std::string &_description) : label(_label), value(_value), description(_description), is_default(false) {
+select_option::select_option(std::string_view _label, std::string_view _value, std::string_view _description) : label(_label), value(_value), description(_description), is_default(false) {
 }
 
-select_option& select_option::set_label(const std::string &l) {
+select_option& select_option::set_label(std::string_view l) {
 	label = dpp::utility::utf8substr(l, 0, 100);
 	return *this;
 }
@@ -417,17 +417,17 @@ select_option& select_option::set_default(bool def) {
 	return *this;
 }
 
-select_option& select_option::set_value(const std::string &v) {
+select_option& select_option::set_value(std::string_view v) {
 	value = dpp::utility::utf8substr(v, 0, 100);
 	return *this;
 }
 
-select_option& select_option::set_description(const std::string &d) {
+select_option& select_option::set_description(std::string_view d) {
 	description = dpp::utility::utf8substr(d, 0, 100);
 	return *this;
 }
 
-select_option& select_option::set_emoji(const std::string &n, dpp::snowflake id, bool animated) {
+select_option& select_option::set_emoji(std::string_view n, dpp::snowflake id, bool animated) {
 	emoji.name = n;
 	emoji.id = id;
 	emoji.animated = animated;
@@ -453,7 +453,7 @@ select_option& select_option::fill_from_json_impl(nlohmann::json* j) {
 	return *this;
 }
 
-component& component::set_placeholder(const std::string &_placeholder) {
+component& component::set_placeholder(std::string_view _placeholder) {
 	if (type == cot_text) {
 		placeholder = dpp::utility::utf8substr(_placeholder, 0, 100);
 	} else if (type == cot_selectmenu || type == cot_user_selectmenu || type == cot_role_selectmenu || type == cot_mentionable_selectmenu || type == cot_channel_selectmenu) {
@@ -573,7 +573,7 @@ void to_json(json& j, const poll &p) {
 	j["layout_type"] = static_cast<uint32_t>(p.layout_type);
 }
 
-poll& poll::set_question(const std::string& text) {
+poll& poll::set_question(std::string_view text) {
 	question.text = text;
 	return *this;
 }
@@ -599,16 +599,29 @@ poll& poll::add_answer(const poll_media& media) {
 	return *this;
 }
 
-poll& poll::add_answer(const std::string& text, snowflake emoji_id, bool is_animated) {
-	return add_answer(poll_media{text, partial_emoji{{}, emoji_id, is_animated}});
+poll& poll::add_answer(std::string_view text, snowflake emoji_id, bool is_animated) {
+	poll_media pm;
+	pm.emoji = partial_emoji { {}, emoji_id, is_animated };
+	pm.text = text;
+	return add_answer(pm);
 }
 
-poll& poll::add_answer(const std::string& text, const std::string& emoji) {
-	return add_answer(poll_media{text, partial_emoji{emoji, {}, false}});
+poll& poll::add_answer(std::string_view text, std::string_view emoji) {
+	poll_media pm;
+	pm.text = text;
+
+	partial_emoji pe;
+	pe.name = emoji;
+	pm.emoji = pe;
+
+	return add_answer(pm);
 }
 
-poll& poll::add_answer(const std::string& text, const emoji& e) {
-	return add_answer(poll_media{text, partial_emoji{e.name, e.id, e.is_animated()}});
+poll& poll::add_answer(std::string_view text, const emoji& e) {
+	poll_media pm;
+	pm.emoji = partial_emoji { e.name, e.id, e.is_animated() };
+	pm.text = text;
+	return add_answer(pm);
 }
 
 const std::string& poll::get_question_text() const noexcept {
@@ -682,7 +695,7 @@ message& message::set_allowed_mentions(bool _parse_users, bool _parse_roles, boo
 	return *this;
 }
 
-message::message(snowflake _channel_id, const std::string &_content, message_type t) : message() {
+message::message(snowflake _channel_id, std::string_view _content, message_type t) : message() {
 	channel_id = _channel_id;
 	content = utility::utf8substr(_content, 0, 4000);
 	type = t;
@@ -718,7 +731,7 @@ message& message::set_type(message_type t) {
 	return *this;
 }
 
-message& message::set_filename(const std::string &fn) {
+message& message::set_filename(std::string_view fn) {
 	if (file_data.empty()) {
 		message_file_data data;
 		data.name = fn;
@@ -731,7 +744,7 @@ message& message::set_filename(const std::string &fn) {
 	return *this;
 }
 
-message& message::set_file_content(const std::string &fc) {
+message& message::set_file_content(std::string_view fc) {
 	if (file_data.empty()) {
 		message_file_data data;
 		data.content = fc;
@@ -744,7 +757,7 @@ message& message::set_file_content(const std::string &fc) {
 	return *this;
 }
 
-message& message::add_file(const std::string &fn, const std::string &fc, const std::string &fm) {
+message& message::add_file(std::string_view fn, std::string_view fc, std::string_view fm) {
 	message_file_data data;
 	data.name = fn;
 	data.content = fc;
@@ -754,7 +767,7 @@ message& message::add_file(const std::string &fn, const std::string &fc, const s
 	return *this;
 }
 
-message& message::set_content(const std::string &c)
+message& message::set_content(std::string_view c)
 {
 	content = utility::utf8substr(c, 0, 4000);
 	return *this;
@@ -783,7 +796,7 @@ bool message::has_poll() const noexcept {
 	return attached_poll.has_value();
 }
 
-message::message(const std::string &_content, message_type t) : message() {
+message::message(std::string_view _content, message_type t) : message() {
 	content = utility::utf8substr(_content, 0, 4000);
 	type = t;
 }
@@ -859,7 +872,7 @@ embed::embed(json* j) : embed() {
 	}
 }
 
-embed& embed::add_field(const std::string& name, const std::string &value, bool is_inline) {
+embed& embed::add_field(std::string_view name, std::string_view value, bool is_inline) {
 	if (fields.size() < 25) {
 		embed_field f;
 		f.name = utility::utf8substr(name, 0, 256);
@@ -882,7 +895,7 @@ embed& embed::set_timestamp(time_t tstamp)
 	return *this;
 }
 
-embed& embed::set_author(const std::string& name, const std::string& url, const std::string& icon_url) {
+embed& embed::set_author(std::string_view name, std::string_view url, std::string_view icon_url) {
 	dpp::embed_author a;
 	a.name = utility::utf8substr(name, 0, 256);
 	a.url = url;
@@ -896,7 +909,7 @@ embed& embed::set_footer(const embed_footer& f) {
 	return *this;
 }
 
-embed& embed::set_footer(const std::string& text, const std::string& icon_url) {
+embed& embed::set_footer(std::string_view text, std::string_view icon_url) {
 	dpp::embed_footer f;
 	f.set_text(text);
 	f.set_icon(icon_url);
@@ -904,7 +917,7 @@ embed& embed::set_footer(const std::string& text, const std::string& icon_url) {
 	return *this;
 }
 
-embed& embed::set_provider(const std::string& name, const std::string& url) {
+embed& embed::set_provider(std::string_view name, std::string_view url) {
 	dpp::embed_provider p;
 	p.name = utility::utf8substr(name, 0, 256);
 	p.url = url;
@@ -912,33 +925,33 @@ embed& embed::set_provider(const std::string& name, const std::string& url) {
 	return *this;
 }
 
-embed& embed::set_image(const std::string& url) {
+embed& embed::set_image(std::string_view url) {
 	dpp::embed_image i;
 	i.url = url;
 	image = i;
 	return *this;
 }
 
-embed& embed::set_video(const std::string& url) {
+embed& embed::set_video(std::string_view url) {
 	dpp::embed_image v;
 	v.url = url;
 	video = v;
 	return *this;
 }
 
-embed& embed::set_thumbnail(const std::string& url) {
+embed& embed::set_thumbnail(std::string_view url) {
 	dpp::embed_image t;
 	t.url = url;
 	thumbnail = t;
 	return *this;
 }
 
-embed& embed::set_title(const std::string &text) {
+embed& embed::set_title(std::string_view text) {
 	title = utility::utf8substr(text, 0, 256);
 	return *this;
 }
 
-embed& embed::set_description(const std::string &text) {
+embed& embed::set_description(std::string_view text) {
 	description = utility::utf8substr(text, 0, 4096);
 	return *this;
 }
@@ -953,22 +966,22 @@ embed& embed::set_colour(uint32_t col) {
 	return this->set_color(col);
 }
 
-embed& embed::set_url(const std::string &u) {
+embed& embed::set_url(std::string_view u) {
 	url = u;
 	return *this;
 }
 
-embed_footer& embed_footer::set_text(const std::string& t){
+embed_footer& embed_footer::set_text(std::string_view t){
 	text = utility::utf8substr(t, 0, 2048);
 	return *this;
 }
 
-embed_footer& embed_footer::set_icon(const std::string& i){
+embed_footer& embed_footer::set_icon(std::string_view i){
 	icon_url = i;
 	return *this;
 }
 
-embed_footer& embed_footer::set_proxy(const std::string& p){
+embed_footer& embed_footer::set_proxy(std::string_view p){
 	proxy_url = p;
 	return *this;
 }
@@ -1515,12 +1528,12 @@ std::string sticker::get_url() const {
 	return utility::cdn_endpoint_url_sticker(this->id, this->format_type);
 }
 
-sticker& sticker::set_filename(const std::string &fn) {
+sticker& sticker::set_filename(std::string_view fn) {
 	filename = fn;
 	return *this;
 }
 
-sticker& sticker::set_file_content(const std::string &fc) {
+sticker& sticker::set_file_content(std::string_view fc) {
 	filecontent = fc;
 	return *this;
 }
