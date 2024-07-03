@@ -294,6 +294,11 @@ public:
 	std::string protocol;
 
 	/**
+	 * @brief How many seconds before the connection is considered failed if not finished
+	 */
+	time_t request_timeout;
+
+	/**
 	 * @brief Constructor. When constructing one of these objects it should be passed to request_queue::post_request().
 	 * @param _endpoint The API endpoint, e.g. /api/guilds
 	 * @param _parameters Major and minor parameters for the endpoint e.g. a user id or guild id
@@ -332,8 +337,9 @@ public:
 	 * @param _mimetype POST data mime type
 	 * @param _headers HTTP headers to send
 	 * @param http_protocol HTTP protocol
+	 * @param _request_timeout How many seconds before the connection is considered failed if not finished
 	 */
-	http_request(const std::string &_url, http_completion_event completion, http_method method = m_get, const std::string &_postdata = "", const std::string &_mimetype = "text/plain", const std::multimap<std::string, std::string> &_headers = {}, const std::string &http_protocol = "1.1");
+	http_request(const std::string &_url, http_completion_event completion, http_method method = m_get, const std::string &_postdata = "", const std::string &_mimetype = "text/plain", const std::multimap<std::string, std::string> &_headers = {}, const std::string &http_protocol = "1.1", time_t _request_timeout = 5);
 
 	/**
 	 * @brief Destroy the http request object
