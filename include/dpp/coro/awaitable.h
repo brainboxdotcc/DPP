@@ -417,7 +417,7 @@ public:
 	void set_exception(std::exception_ptr ptr) {
 		throw_if_not_empty();
 		value.template emplace<2>(std::move(ptr));
-		[[maybe_unused]] auto previous_value = this->state.fetch_or(sf_ready);
+		[[maybe_unused]] auto previous_value = this->state.fetch_or(sf_ready, std::memory_order::acq_rel);
 		if constexpr (Notify) {
 			if (previous_value & sf_awaited) {
 				this->awaiter.resume();
@@ -429,7 +429,7 @@ public:
 	 * @brief Notify a currently awaiting coroutine that the result is ready.
 	 */
 	void notify_awaiter() {
-		if (state.load() & sf_awaited) {
+		if (state.load(std::memory_order::acquire) & sf_awaited) {
 			awaiter.resume();
 		}
 	}
@@ -441,7 +441,7 @@ public:
 	 * @return awaitable<T> An object that can be co_await-ed to retrieve the value of this promise.
 	 */
 	awaitable<T> get_awaitable() {
-		uint8_t previous_flags = state.fetch_or(sf_has_awaitable);
+		uint8_t previous_flags = state.fetch_or(sf_has_awaitable, std::memory_order::relaxed);
 		if (previous_flags & sf_has_awaitable) [[unlikely]] {
 			throw dpp::logic_exception{"an awaitable was already created from this promise"};
 		}
@@ -479,7 +479,7 @@ public:
 		} catch (...) {
 			this->value.template emplace<2>(std::current_exception());
 		}
-		[[maybe_unused]] auto previous_value = this->state.fetch_or(sf_ready);
+		[[maybe_unused]] auto previous_value = this->state.fetch_or(sf_ready, std::memory_order::acq_rel);
 		if constexpr (Notify) {
 			if (previous_value & sf_awaited) {
 				this->awaiter.resume();
@@ -525,7 +525,7 @@ public:
 	void set_value() {
 		throw_if_not_empty();
 		this->value.emplace<1>();
-		[[maybe_unused]] auto previous_value = this->state.fetch_or(sf_ready);
+		[[maybe_unused]] auto previous_value = this->state.fetch_or(sf_ready, std::memory_order::acq_rel);
 		if constexpr (Notify) {
 			if (previous_value & sf_awaited) {
 				this->awaiter.resume();
@@ -638,7 +638,7 @@ using promise = moveable_promise<T>;
 
 template <typename T>
 auto awaitable<T>::abandon() -> uint8_t {
-	auto previous_state = state_ptr->state.fetch_or(state_flags::sf_broken);
+	auto previous_state = state_ptr->state.fetch_or(state_flags::sf_broken, std::memory_order::acq_rel);
 	state_ptr = nullptr;
 	return previous_state;
 }
@@ -646,7 +646,7 @@ auto awaitable<T>::abandon() -> uint8_t {
 template <typename T>
 awaitable<T>::~awaitable() {
 	if (state_ptr) {
-		state_ptr->state.fetch_or(state_flags::sf_broken);
+		state_ptr->state.fetch_or(state_flags::sf_broken, std::memory_order::acq_rel);
 	}
 }
 
@@ -660,7 +660,7 @@ bool awaitable<T>::await_ready() const {
 	if (!this->valid()) {
 		throw dpp::logic_exception("cannot co_await an empty awaitable");
 	}
-	uint8_t state = this->state_ptr->state.load(std::memory_order_relaxed);
+	uint8_t state = this->state_ptr->state.load(std::memory_order::relaxed);
 	return state & detail::promise::sf_ready;
 }
 
@@ -670,7 +670,7 @@ bool awaitable<T>::awaiter<Derived>::await_suspend(detail::std_coroutine::corout
 	auto &promise = *awaitable_obj.state_ptr;
 
 	promise.awaiter = handle;
-	auto previous_flags = promise.state.fetch_or(detail::promise::sf_awaited);
+	auto previous_flags = promise.state.fetch_or(detail::promise::sf_awaited, std::memory_order::relaxed);
 	if (previous_flags & detail::promise::sf_awaited) {
 		throw dpp::logic_exception("awaitable is already being awaited");
 	}
@@ -682,7 +682,7 @@ template <typename Derived>
 T awaitable<T>::awaiter<Derived>::await_resume() {
 	auto &promise = *std::exchange(awaitable_obj.state_ptr, nullptr);
 
-	promise.state.fetch_and(~detail::promise::sf_awaited);
+	promise.state.fetch_and(~detail::promise::sf_awaited, std::memory_order::acq_rel);
 	if (std::holds_alternative<std::exception_ptr>(promise.value)) {
 		std::rethrow_exception(std::get<2>(promise.value));
 	}
