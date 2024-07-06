@@ -1400,8 +1400,9 @@ public:
 	 * @param mimetype MIME type of POST data
 	 * @param headers Headers to send with the request
 	 * @param protocol HTTP protocol to use (1.1 and 1.0 are supported)
+	 * @param request_timeout How many seconds before the connection is considered failed if not finished
 	 */
-	void request(const std::string &url, http_method method, http_completion_event callback, const std::string &postdata = "", const std::string &mimetype = "text/plain", const std::multimap<std::string, std::string> &headers = {}, const std::string &protocol = "1.1");
+	void request(const std::string &url, http_method method, http_completion_event callback, const std::string &postdata = "", const std::string &mimetype = "text/plain", const std::multimap<std::string, std::string> &headers = {}, const std::string &protocol = "1.1", time_t request_timeout = 5);
 
 	/**
 	 * @brief Respond to a slash command
