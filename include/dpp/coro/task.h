@@ -92,7 +92,7 @@ template <typename R>
 #ifndef _DOXYGEN_
 requires (!std::is_reference_v<R>)
 #endif
-class task : public awaitable<R> {
+class [[nodiscard("dpp::task cancels itself on destruction. use co_await on it, or its sync_wait method")]] task : public awaitable<R> {
 	friend struct detail::task::promise_t<R>;
 
 	using handle_t = detail::task::handle_t<R>;

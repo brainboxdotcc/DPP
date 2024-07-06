@@ -70,7 +70,7 @@ using handle_t = std_coroutine::coroutine_handle<promise_t<R>>;
  * @tparam R Return type of the coroutine. Can be void, or a complete object that supports move construction and move assignment.
  */
 template <typename R>
-class coroutine : public basic_awaitable<coroutine<R>> {
+class [[nodiscard("dpp::coroutine only starts when it is awaited, it will do nothing if discarded")]] coroutine : public basic_awaitable<coroutine<R>> {
 	/**
 	 * @brief Promise has friend access for the constructor
 	 */
