@@ -134,6 +134,16 @@ public:
 	explicit async(Fun &&fun, Args&&... args) : async{std::make_shared<basic_promise<R>>()} {
 		std::invoke(std::forward<Fun>(fun), std::forward<Args>(args)..., api_callback);
 	}
+
+	async(const async&) = delete;
+	async(async&&) = default;
+
+	async& operator=(const async&) = delete;
+	async& operator=(async&&) = default;
+
+	~async() {
+		this->abandon();
+	}
 };
 
 DPP_CHECK_ABI_COMPAT(async<>, async_dummy);

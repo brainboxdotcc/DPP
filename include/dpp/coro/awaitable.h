@@ -638,8 +638,11 @@ using promise = moveable_promise<T>;
 
 template <typename T>
 auto awaitable<T>::abandon() -> uint8_t {
-	auto previous_state = state_ptr->state.fetch_or(state_flags::sf_broken, std::memory_order::acq_rel);
-	state_ptr = nullptr;
+	uint8_t previous_state = state_flags::sf_broken;
+	if (state_ptr) {
+		previous_state = state_ptr->state.fetch_or(state_flags::sf_broken, std::memory_order::acq_rel);
+		state_ptr = nullptr;
+	}
 	return previous_state;
 }
 
