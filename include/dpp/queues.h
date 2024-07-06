@@ -30,6 +30,7 @@
 #include <vector>
 #include <functional>
 #include <condition_variable>
+#include <atomic>
 
 namespace dpp {
 
@@ -401,7 +402,7 @@ private:
 	/**
 	 * @brief True if ending.
 	 */
-	bool terminating;
+	std::atomic<bool> terminating;
 
 	/**
 	 * @brief Request queue that owns this in_thread.
@@ -458,6 +459,12 @@ public:
 	 * This will end the thread that is owned by this object by joining it.
 	 */
 	~in_thread();
+
+	/**
+	 * @brief Terminates the thread
+	 * This will end the thread that is owned by this object, but will not join it.
+	 */
+	void terminate();
 
 	/**
 	 * @brief Post a http_request to this thread.
@@ -545,7 +552,7 @@ protected:
 	 * 2) Requests for different endpoints go into different buckets, so that they may be requested in parallel
 	 * A global ratelimit event pauses all threads in the pool. These are few and far between.
 	 */
-	std::vector<in_thread*> requests_in;
+	std::vector<std::unique_ptr<in_thread>> requests_in;
 
 	/**
 	 * @brief A request queued for deletion in the queue.
@@ -584,7 +591,7 @@ protected:
 	/**
 	 * @brief Set to true if the threads should terminate
 	 */
-	bool terminating;
+	std::atomic<bool> terminating;
 
 	/**
 	 * @brief True if globally rate limited - makes the entire request thread wait
