@@ -1140,7 +1140,13 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		});
 
 		bot.on_voice_buffer_send([&](const dpp::voice_buffer_send_t & event) {
-			if (event.buffer_size == 0) {
+			static bool sent_some_data = false;
+
+			if (event.buffer_size > 0) {
+			   sent_some_data = true;
+			}
+
+			if (sent_some_data && event.packets_left == 0) {
 				set_test(VOICESEND, true);
 			}
 		});
