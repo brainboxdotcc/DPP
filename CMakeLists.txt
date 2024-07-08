@@ -24,7 +24,7 @@ option(RUN_LDCONFIG "Run ldconfig after installation" ON)
 option(DPP_INSTALL "Generate the install target" ON)
 option(DPP_BUILD_TEST "Build the test program" ON)
 option(DPP_NO_VCPKG "No VCPKG" OFF)
-option(DPP_CORO "Experimental support for C++20 coroutines" OFF)
+option(DPP_CORO "Experimental support for C++20 coroutines" ON)
 option(DPP_USE_EXTERNAL_JSON "Use an external installation of nlohmann::json" OFF)
 option(DPP_USE_PCH "Use precompiled headers to speed up compilation" OFF)
 option(AVX_TYPE "Force AVX type for speeding up audio mixing" OFF)
@@ -32,6 +32,14 @@ option(AVX_TYPE "Force AVX type for speeding up audio mixing" OFF)
 include(CheckCXXSymbolExists)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 add_compile_definitions(DPP_BUILD)
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -nostdinc++ -I/usr/lib/llvm-19/include/c++/v1/")
+add_link_options(
+		-stdlib=libc++
+		-L/usr/lib/llvm-19/lib
+		-Wl,-rpath,/usr/lib/llvm-19/lib
+		-Wdocumentation
+)
 
 set(DPP_ROOT_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 

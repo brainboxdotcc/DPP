@@ -2079,7 +2079,7 @@ struct DPP_EXPORT voice_receive_t : public event_dispatch_t {
 	/**
 	 * @brief Audio data, encoded as 48kHz stereo PCM or Opus,
 	 */
-	std::basic_string<uint8_t> audio_data = {};
+	std::vector<uint8_t> audio_data = {};
 
 	/**
 	 * @brief User ID of speaker (zero if unknown)
