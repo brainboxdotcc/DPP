@@ -791,7 +791,7 @@ void discord_voice_client::read_ready()
 		 * We're left with the decrypted, opus-encoded data.
 		 * Park the payload and decode on the voice courier thread.
 		 */
-		vp.vr->audio_data.assign(buffer,buffer + packet_size);
+		vp.vr->audio_data.assign(decrypted_data,decrypted_data + decrypted_data_len);
 
 		{
 			std::lock_guard lk(voice_courier_shared_state.mtx);
