@@ -111,8 +111,6 @@ if(NOT BUILD_SHARED_LIBS)
 	endif()
 endif()
 
-include("${CMAKE_CURRENT_SOURCE_DIR}/../cmake/colour.cmake")
-
 if (BUILD_VOICE_SUPPORT)
 	if (MINGW OR NOT WIN32)
 		find_package(PkgConfig QUIET)
@@ -343,7 +341,7 @@ if(DPP_CORO)
 					COMMAND php buildtools/make_struct.php "\\Dpp\\Generator\\CoroGenerator")
 endif()
 
-if (DPP_BUILD_TEST AND BUILD_SHARED_LIBS)
+if (DPP_BUILD_TEST)
 	enable_testing(${CMAKE_CURRENT_SOURCE_DIR}/..)
 	file(GLOB testnamelist "${CMAKE_CURRENT_SOURCE_DIR}/../src/*")
 	foreach (fulltestname ${testnamelist})

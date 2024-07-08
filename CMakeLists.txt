@@ -29,6 +29,13 @@ option(DPP_USE_EXTERNAL_JSON "Use an external installation of nlohmann::json" OF
 option(DPP_USE_PCH "Use precompiled headers to speed up compilation" OFF)
 option(AVX_TYPE "Force AVX type for speeding up audio mixing" OFF)
 
+include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/colour.cmake")
+
+if (DPP_BUILD_TEST AND NOT BUILD_SHARED_LIBS)
+	set(DPP_BUILD_TEST OFF)
+	message("-- ${Yellow}Note - Unit Tests have been forcibly disabled since you are building statically.${ColourReset}")
+endif()
+
 include(CheckCXXSymbolExists)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 add_compile_definitions(DPP_BUILD)
