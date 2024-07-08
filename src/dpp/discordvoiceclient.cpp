@@ -771,8 +771,8 @@ void discord_voice_client::read_ready()
 			return;
 		}
 
-        const uint8_t* decrypted_data = encrypted_data;
-        size_t decrypted_data_len = encrypted_data_len - crypto_box_MACBYTES;
+                const uint8_t* decrypted_data = encrypted_data;
+                size_t decrypted_data_len = encrypted_data_len - crypto_box_MACBYTES;
 		if (const bool uses_extension [[maybe_unused]] = (buffer[0] >> 4) & 0b0001) {
 			/* Skip the RTP Extensions */
 			size_t ext_len = 0;
@@ -783,8 +783,8 @@ void discord_voice_client::read_ready()
 				ext_len = sizeof(uint32_t) * ext_len_in_words;
 			}
 			constexpr size_t ext_header_len = sizeof(uint16_t) * 2;
-            decrypted_data += ext_header_len + ext_len;
-            decrypted_data_len -= ext_header_len + ext_len;
+                        decrypted_data += ext_header_len + ext_len;
+                        decrypted_data_len -= ext_header_len + ext_len;
 		}
 
 		/*
