@@ -773,7 +773,7 @@ void discord_voice_client::read_ready()
 
                 const uint8_t* decrypted_data = encrypted_data;
                 size_t decrypted_data_len = encrypted_data_len - crypto_box_MACBYTES;
-		if (const bool uses_extension [[maybe_unused]] = (buffer[0] >> 4) & 0b0001) {
+		if ([[maybe_unused]] const bool uses_extension = (buffer[0] >> 4) & 0b0001) {
 			/* Skip the RTP Extensions */
 			size_t ext_len = 0;
 			{
