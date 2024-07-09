@@ -900,7 +900,8 @@ void discord_voice_client::write_ready()
 		last_timestamp = std::chrono::high_resolution_clock::now();
 		if (!creator->on_voice_buffer_send.empty()) {
 			voice_buffer_send_t snd(nullptr, "");
-			snd.buffer_size = (int)bufsize;
+			snd.buffer_size = bufsize;
+			snd.packets_left = outbuf.size();
 			snd.voice_client = this;
 			creator->on_voice_buffer_send.call(snd);
 		}
