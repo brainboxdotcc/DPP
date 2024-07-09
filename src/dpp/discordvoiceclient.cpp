@@ -259,11 +259,11 @@ void discord_voice_client::voice_courier_loop(discord_voice_client& client, cour
 					}
 				} else {
 					voice_receive_t& vr = *d.parked_payloads.top().vr;
-					if (vr.audio_data.length() > 0x7FFFFFFF) {
+					if (vr.audio_data.size() > 0x7FFFFFFF) {
 						throw dpp::length_exception(err_massive_audio, "audio_data > 2GB! This should never happen!");
 					}
 					if (samples = opus_decode(d.decoder.get(), vr.audio_data.data(),
-						static_cast<opus_int32>(vr.audio_data.length() & 0x7FFFFFFF), pcm, 5760, 0);
+						static_cast<opus_int32>(vr.audio_data.size() & 0x7FFFFFFF), pcm, 5760, 0);
 					    samples >= 0) {
 						vr.reassign(&client, d.user_id, reinterpret_cast<uint8_t*>(pcm),
 							samples * opus_channel_count * sizeof(opus_int16));
@@ -709,22 +709,21 @@ void discord_voice_client::read_ready()
 {
 #ifdef HAVE_VOICE
 	uint8_t buffer[65535];
-	int r = this->udp_recv((char*)buffer, sizeof(buffer));
+	int packet_size = this->udp_recv((char*)buffer, sizeof(buffer));
 
-	if (r > 0 && (!creator->on_voice_receive.empty() || !creator->on_voice_receive_combined.empty())) {
-		const std::basic_string_view<uint8_t> packet{buffer, static_cast<size_t>(r)};
+	if (packet_size > 0 && (!creator->on_voice_receive.empty() || !creator->on_voice_receive_combined.empty())) {
 		constexpr size_t header_size = 12;
-		if (static_cast<size_t>(r) < header_size) {
+		if (static_cast<size_t>(packet_size) < header_size) {
 			/* Invalid RTP payload */
 			return;
 		}
 
 		/* It's a "silence packet" - throw it away. */
-		if (packet.size() < 44) {
+		if (packet_size < 44) {
 			return;
 		}
 
-		if (uint8_t payload_type = packet[1] & 0b0111'1111;
+		if (uint8_t payload_type = buffer[1] & 0b0111'1111;
 		    72 <= payload_type && payload_type <= 76) {
 			/*
 			 * This is an RTCP payload. Discord is known to send
@@ -737,34 +736,34 @@ void discord_voice_client::read_ready()
 
 		voice_payload vp{0, // seq, populate later
 		                 0, // timestamp, populate later
-		                 std::make_unique<voice_receive_t>(nullptr, std::string((char*)buffer, r))};
+		                 std::make_unique<voice_receive_t>(nullptr, std::string((char*)buffer, packet_size))};
 
 		vp.vr->voice_client = this;
 
 		{	/* Get the User ID of the speaker */
 			uint32_t speaker_ssrc;
-			std::memcpy(&speaker_ssrc, &packet[8], sizeof(uint32_t));
+			std::memcpy(&speaker_ssrc, &buffer[8], sizeof(uint32_t));
 			speaker_ssrc = ntohl(speaker_ssrc);
 			vp.vr->user_id = ssrc_map[speaker_ssrc];
 		}
 
 		/* Get the sequence number of the voice UDP packet */
-		std::memcpy(&vp.seq, &packet[2], sizeof(rtp_seq_t));
+		std::memcpy(&vp.seq, &buffer[2], sizeof(rtp_seq_t));
 		vp.seq = ntohs(vp.seq);
 		/* Get the timestamp of the voice UDP packet */
-		std::memcpy(&vp.timestamp, &packet[4], sizeof(rtp_timestamp_t));
+		std::memcpy(&vp.timestamp, &buffer[4], sizeof(rtp_timestamp_t));
 		vp.timestamp = ntohl(vp.timestamp);
 
 		/* Nonce is the RTP Header with zero padding */
 		uint8_t nonce[24] = { 0 };
-		std::memcpy(nonce, &packet[0], header_size);
+		std::memcpy(nonce, &buffer[0], header_size);
 
 		/* Get the number of CSRC in header */
-		const size_t csrc_count = packet[0] & 0b0000'1111;
+		const size_t csrc_count = buffer[0] & 0b0000'1111;
 		/* Skip to the encrypted voice data */
 		const ptrdiff_t offset_to_data = header_size + sizeof(uint32_t) * csrc_count;
 		uint8_t* encrypted_data = buffer + offset_to_data;
-		const size_t encrypted_data_len = r - offset_to_data;
+		const size_t encrypted_data_len = packet_size - offset_to_data;
 
 		if (crypto_secretbox_open_easy(encrypted_data, encrypted_data,
 		                               encrypted_data_len, nonce, secret_key)) {
@@ -772,8 +771,9 @@ void discord_voice_client::read_ready()
 			return;
 		}
 
-		std::basic_string_view<uint8_t> decrypted_data{encrypted_data, encrypted_data_len - crypto_box_MACBYTES};
-		if (const bool uses_extension [[maybe_unused]] = (packet[0] >> 4) & 0b0001) {
+                const uint8_t* decrypted_data = encrypted_data;
+                size_t decrypted_data_len = encrypted_data_len - crypto_box_MACBYTES;
+		if ([[maybe_unused]] const bool uses_extension = (buffer[0] >> 4) & 0b0001) {
 			/* Skip the RTP Extensions */
 			size_t ext_len = 0;
 			{
@@ -783,14 +783,15 @@ void discord_voice_client::read_ready()
 				ext_len = sizeof(uint32_t) * ext_len_in_words;
 			}
 			constexpr size_t ext_header_len = sizeof(uint16_t) * 2;
-			decrypted_data = decrypted_data.substr(ext_header_len + ext_len);
+                        decrypted_data += ext_header_len + ext_len;
+                        decrypted_data_len -= ext_header_len + ext_len;
 		}
 
 		/*
 		 * We're left with the decrypted, opus-encoded data.
 		 * Park the payload and decode on the voice courier thread.
 		 */
-		vp.vr->audio_data.assign(decrypted_data);
+		vp.vr->audio_data.assign(decrypted_data, decrypted_data + decrypted_data_len);
 
 		{
 			std::lock_guard lk(voice_courier_shared_state.mtx);

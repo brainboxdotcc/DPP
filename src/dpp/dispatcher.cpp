@@ -279,11 +279,11 @@ void voice_receive_t::reassign(discord_voice_client* vc, snowflake _user_id, con
 	voice_client = vc;
 	user_id = _user_id;
 
-	audio_data.assign(pcm, length);
+	audio_data.assign(pcm, pcm + length);
 
 	// for backwards compatibility; remove soon
 	audio = audio_data.data();
-	audio_size = audio_data.length();
+	audio_size = audio_data.size();
 }
 
 } // namespace dpp
