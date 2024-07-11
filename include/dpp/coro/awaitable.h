@@ -116,7 +116,6 @@ protected:
 	template <bool Timed>
 	auto sync_wait_impl(auto&& do_wait) {
 		using result_type = decltype(detail::co_await_resolve(std::declval<Derived>()).await_resume());
-		using storage_type = std::conditional_t<std::is_void_v<result_type>, detail::promise::empty, result_type>;
 		using variant_type = detail::promise::result_t<result_type>;
 		variant_type result;
 		std::condition_variable cv;
