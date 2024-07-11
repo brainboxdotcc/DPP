@@ -60,15 +60,21 @@ struct callback {
 
 	/**
 	 * @brief Call operator, sets the value in the promise and notifies any awaiter
+	 * 
+	 * @param v Callback value
 	 */
-	void operator()(const detail::argument<R>& v) const requires (detail::is_copy_constructible<R>) {
+	template <typename U = R>
+	void operator()(const U& v) const requires (std::convertible_to<const U&, R>) {
 		promise->set_value(v);
 	}
 	
 	/**
 	 * @brief Call operator, sets the value in the promise and notifies any awaiter
+	 *
+	 * @param v Callback value
 	 */
-	void operator()(detail::argument<R>&& v) const requires (detail::is_move_constructible<R>) {
+	template <typename U = R>
+	void operator()(U&& v) const requires (std::convertible_to<U&&, R>) {
 		promise->set_value(std::move(v));
 	}
 	

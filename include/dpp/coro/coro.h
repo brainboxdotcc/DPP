@@ -113,37 +113,6 @@ decltype(auto) co_await_resolve(T&& expr) noexcept {
 	return static_cast<T&&>(expr);
 }
 
-/**
- * @brief Helper for when we need to pass an argument that may be void at parsing
- * e.g. `void set_value(const detail::argument<T>& v) requires (std::copy_constructible<T>)`) would break without this
- */
-template <typename T>
-using argument = std::conditional_t<std::is_void_v<T>, std::monostate, std::type_identity_t<T>>;
-
-/**
- * @brief Helper because clang15 chokes on std::copy_constructible<void>
- */
-template <typename T>
-inline constexpr bool is_copy_constructible = std::copy_constructible<T>;
-
-/**
- * @brief Helper because clang15 chokes on std::copy_constructible<void>
- */
-template <>
-inline constexpr bool is_copy_constructible<void> = false;
-
-/**
- * @brief Helper because clang15 chokes on std::move_constructible<void>
- */
-template <typename T>
-inline constexpr bool is_move_constructible = std::move_constructible<T>;
-
-/**
- * @brief Helper because clang15 chokes on std::move_constructible<void>
- */
-template <>
-inline constexpr bool is_move_constructible<void> = false;
-
 #else
 
 /**
