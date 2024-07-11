@@ -47,7 +47,7 @@ namespace detail {
 
 namespace coroutine {
 
-	template <typename R>
+template <typename R>
 struct promise_t;
 
 template <typename R>
@@ -87,6 +87,9 @@ class [[nodiscard("dpp::coroutine only starts when it is awaited, it will do not
 	coroutine(detail::coroutine::handle_t<R> h) : handle{h} {}
 
 	struct awaiter {
+		/**
+		 * @brief Reference to the coroutine object being awaited.
+		 */
 		coroutine &coro;
 
 		/**
@@ -117,6 +120,12 @@ class [[nodiscard("dpp::coroutine only starts when it is awaited, it will do not
 			return coro.handle;
 		}
 
+		/**
+		 * @brief Final function called by the standard library when the coroutine is co_await-ed.
+		 *
+		 * Pops the coroutine's result and returns it.
+		 * @remark Do not call this manually, use the co_await keyword instead.
+		 */
 		R await_resume() {
 			detail::coroutine::promise_t<R> &promise = coro.handle.promise();
 			if (promise.exception) {

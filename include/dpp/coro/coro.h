@@ -19,8 +19,8 @@
  *
  ************************************************************************************/
 
-#ifdef DPP_CORO
 #pragma once
+#ifdef DPP_CORO
 
 #if (defined(_LIBCPP_VERSION) and !defined(__cpp_impl_coroutine)) // if libc++ experimental implementation (LLVM < 14)
 #  define STDCORO_EXPERIMENTAL_HEADER
@@ -112,6 +112,37 @@ requires (!has_co_await_member<T> && !has_free_co_await<T>)
 decltype(auto) co_await_resolve(T&& expr) noexcept {
 	return static_cast<T&&>(expr);
 }
+
+/**
+ * @brief Helper for when we need to pass an argument that may be void at parsing
+ * e.g. `void set_value(const detail::argument<T>& v) requires (std::copy_constructible<T>)`) would break without this
+ */
+template <typename T>
+using argument = std::conditional_t<std::is_void_v<T>, std::monostate, std::type_identity_t<T>>;
+
+/**
+ * @brief Helper because clang15 chokes on std::copy_constructible<void>
+ */
+template <typename T>
+inline constexpr bool is_copy_constructible = std::copy_constructible<T>;
+
+/**
+ * @brief Helper because clang15 chokes on std::copy_constructible<void>
+ */
+template <>
+inline constexpr bool is_copy_constructible<void> = false;
+
+/**
+ * @brief Helper because clang15 chokes on std::move_constructible<void>
+ */
+template <typename T>
+inline constexpr bool is_move_constructible = std::move_constructible<T>;
+
+/**
+ * @brief Helper because clang15 chokes on std::move_constructible<void>
+ */
+template <>
+inline constexpr bool is_move_constructible<void> = false;
 
 #else
 

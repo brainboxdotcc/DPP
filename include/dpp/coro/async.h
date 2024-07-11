@@ -53,22 +53,30 @@ namespace async {
  */
 template <typename R>
 struct callback {
+	/**
+	 * @brief Promise object to set the result into
+	 */
 	std::shared_ptr<basic_promise<R>> promise{nullptr};
 
-	void operator()(const R& v) const {
+	/**
+	 * @brief Call operator, sets the value in the promise and notifies any awaiter
+	 */
+	void operator()(const detail::argument<R>& v) const requires (detail::is_copy_constructible<R>) {
 		promise->set_value(v);
 	}
-
-	void operator()(R&& v) const {
+	
+	/**
+	 * @brief Call operator, sets the value in the promise and notifies any awaiter
+	 */
+	void operator()(detail::argument<R>&& v) const requires (detail::is_move_constructible<R>) {
 		promise->set_value(std::move(v));
 	}
-};
-
-template <>
-struct callback<void> {
-	std::shared_ptr<basic_promise<void>> promise{nullptr};
-
-	void operator()() const {
+	
+	/**
+	 * @brief Call operator, sets the value in the promise and notifies any awaiter
+	 */
+	void operator()() const requires (std::is_void_v<R>)
+	{
 		promise->set_value();
 	}
 };
@@ -91,9 +99,14 @@ struct confirmation_callback_t;
  */
 template <typename R>
 class async : public awaitable<R> {
-
+	/**
+	 * @brief Callable object to pass to API calls
+	 */
 	detail::async::callback<R> api_callback{};
 
+	/**
+	 * @brief Internal promise constructor, grabs a promise object for the callback to use
+	 */
 	explicit async(std::shared_ptr<basic_promise<R>> &&promise) : awaitable<R>{promise.get()}, api_callback{std::move(promise)} {}
 
 public:
@@ -135,12 +148,29 @@ public:
 		std::invoke(std::forward<Fun>(fun), std::forward<Args>(args)..., api_callback);
 	}
 
+	/**
+	 * @brief Copy constructor is disabled.
+	 */
 	async(const async&) = delete;
-	async(async&&) = default;
 
+	/**
+	 * @brief Move constructor, moves the awaitable async object
+	 */
+	async(async&&) = default;
+	
+	/**
+	 * @brief Copy assignment operator is disabled.
+	 */
 	async& operator=(const async&) = delete;
+	
+	/**
+	 * @brief Move assignment operator, moves the awaitable async object
+	 */
 	async& operator=(async&&) = default;
 
+	/**
+	 * @brief Destructor, signals to the callback that the async object is gone and shouldn't be notified of the result 
+	 */
 	~async() {
 		this->abandon();
 	}

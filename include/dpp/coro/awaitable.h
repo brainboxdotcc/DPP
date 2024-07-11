@@ -123,6 +123,9 @@ protected:
 
 		detail::promise::spawn_sync_wait_job<result_type>(static_cast<Derived*>(this), cv, result);
 		do_wait(cv, result);
+		/*
+		 * Note: we use .index() here to support dpp::promise<std::exception_ptr> & dpp::promise<std::monostate> :D
+		 */
 		if (result.index() == 2) {
 			std::rethrow_exception(std::get<2>(result));
 		}
@@ -365,12 +368,14 @@ protected:
 	/**
 	 * @brief Variant representing one of either 3 states of the result value : empty, result, exception.
 	 */
-	using storage_type = std::variant<std::monostate, std::conditional_t<std::is_void_v<T>, empty, T>, std::exception_ptr>;
+	using storage_type = result_t<T>;
 
 	/**
 	 * @brief State of the result value.
 	 *
 	 * @see storage_type
+	 *
+	 * @note use .index() instead of std::holds_alternative to support promise_base<std::exception_ptr> and promise_base<std::monostate> :)
 	 */
 	storage_type value = std::monostate{};
 
@@ -526,7 +531,8 @@ public:
 	 * @throws dpp::logic_exception if the promise is not empty.
 	 */
 	template <bool Notify = true>
-	void set_value(const T& v) requires (std::copy_constructible<T>) {
+	requires (detail::is_copy_constructible<T>)
+	void set_value(const detail::argument<T>& v) {
 		emplace_value<Notify>(v);
 	}
 
@@ -537,35 +543,22 @@ public:
 	 * @throws dpp::logic_exception if the promise is not empty.
 	 */
 	template <bool Notify = true>
-	void set_value(T&& v) requires (std::move_constructible<T>) {
+	requires (detail::is_move_constructible<T>)
+	void set_value(detail::argument<T>&& v) {
 		emplace_value<Notify>(std::move(v));
 	}
-};
-
-
-/**
- * @brief Generic promise class, represents the owning potion of an asynchronous value.
- *
- * This class is roughly equivalent to std::promise, with the crucial distinction that the promise *IS* the shared state.
- * As such, the promise needs to be kept alive for the entire time a value can be retrieved.
- *
- * @see awaitable
- */
-template <>
-class basic_promise<void> : public detail::promise::promise_base<void> {
-public:
-	using detail::promise::promise_base<void>::promise_base;
-	using detail::promise::promise_base<void>::operator=;
 
 	/**
-	 * @brief Set the promise to completed, and resume any awaiter.
+	 * @brief Construct the result by move, and resume any awaiter.
 	 *
+	 * @tparam Notify Whether to resume any awaiter or not.
 	 * @throws dpp::logic_exception if the promise is not empty.
 	 */
 	template <bool Notify = true>
+	requires (std::is_void_v<T>)
 	void set_value() {
-		throw_if_not_empty();
-		this->value.emplace<1>();
+		this->throw_if_not_empty();
+		this->value.template emplace<1>();
 		[[maybe_unused]] auto previous_value = this->state.fetch_or(detail::promise::sf_ready, std::memory_order::acq_rel);
 		if constexpr (Notify) {
 			if (previous_value & detail::promise::sf_awaited) {
@@ -606,7 +599,7 @@ public:
 	 * @copydoc basic_promise<T>::set_value(const T&)
 	 */
 	template <bool Notify = true>
-	void set_value(const T& v) requires (std::copy_constructible<T>) {
+	void set_value(const detail::argument<T>& v) requires (detail::is_copy_constructible<T>) {
 		shared_state->template set_value<Notify>(v);
 	}
 
@@ -614,8 +607,16 @@ public:
 	 * @copydoc basic_promise<T>::set_value(T&&)
 	 */
 	template <bool Notify = true>
-	void set_value(T&& v) requires (std::move_constructible<T>) {
+	void set_value(detail::argument<T>&& v) requires (detail::is_move_constructible<T>) {
 		shared_state->template set_value<Notify>(std::move(v));
+	}
+
+	/**
+	 * @copydoc basic_promise<T>::set_value()
+	 */
+	template <bool Notify = true>
+	void set_value() requires (std::is_void_v<T>) {
+		shared_state->template set_value<Notify>();
 	}
 
 	/**
@@ -637,42 +638,6 @@ public:
 	 * @copydoc basic_promise<T>::get_awaitable
 	 */
 	awaitable<T> get_awaitable() {
-		return shared_state->get_awaitable();
-	}
-};
-
-template <>
-class moveable_promise<void> {
-	std::unique_ptr<basic_promise<void>> shared_state = std::make_unique<basic_promise<void>>();
-
-public:
-	/**
-	 * @copydoc basic_promise<void>::set_value
-	 */
-	template <bool Notify = true>
-	void set_value() {
-		shared_state->set_value<Notify>();
-	}
-
-	/**
-	 * @copydoc basic_promise<T>::set_exception
-	 */
-	template <bool Notify = true>
-	void set_exception(std::exception_ptr ptr) {
-		shared_state->set_exception<Notify>(std::move(ptr));
-	}
-
-	/**
-	 * @copydoc basic_promise<T>::notify_awaiter
-	 */
-	void notify_awaiter() {
-		shared_state->notify_awaiter();
-	}
-
-	/**
-	 * @copydoc basic_promise<T>::get_awaitable
-	 */
-	awaitable<void> get_awaitable() {
 		return shared_state->get_awaitable();
 	}
 };

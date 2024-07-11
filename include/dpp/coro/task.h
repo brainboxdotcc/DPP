@@ -375,7 +375,7 @@ struct promise_t<void> : promise_base<void> {
 	/**
 	 * @brief Function called by the standard library when the coroutine co_returns
 	 *
-	 * Does nothing but is required by the standard library.
+	 * Sets the promise state to finished.
 	 */
 	void return_void() noexcept {
 		set_value<false>();
