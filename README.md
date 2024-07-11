@@ -8,6 +8,7 @@
 [![D++ CI](https://github.com/brainboxdotcc/DPP/actions/workflows/ci.yml/badge.svg)](https://github.com/brainboxdotcc/DPP/actions/workflows/ci.yml)
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/brainboxdotcc/DPP/badge)](https://securityscorecards.dev/viewer/?uri=github.com/brainboxdotcc/DPP)
 [![AUR version](https://img.shields.io/aur/version/dpp)](https://aur.archlinux.org/packages/dpp)
+[![XBPS version](https://repology.org/badge/version-for-repo/void_x86_64/dpp-discord.svg?header=xbps)](https://github.com/void-linux/void-packages/blob/master/srcpkgs/dpp/template)
 ![vcpkg version](https://img.shields.io/vcpkg/v/dpp)
 [![Homebrew version](https://img.shields.io/homebrew/v/libdpp)](https://formulae.brew.sh/formula/libdpp#default)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md)

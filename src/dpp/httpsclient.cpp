@@ -42,7 +42,8 @@ https_client::https_client(const std::string &hostname, uint16_t port,  const st
 	request_headers(extra_headers),
 	status(0),
 	http_protocol(protocol),
-	timeout(request_timeout)
+	timeout(request_timeout),
+	timed_out(false)
 {
 	nonblocking = false;
 	timeout = time(nullptr) + request_timeout;
@@ -313,6 +314,10 @@ http_state https_client::get_state() {
 
 void https_client::one_second_timer() {
 	if ((this->sfd == SOCKET_ERROR || time(nullptr) >= timeout) && this->state != HTTPS_DONE) {
+		/* if and only if response is timed out */
+		if (this->sfd != SOCKET_ERROR) {
+			timed_out = true;
+		}
 		keepalive = false;
 		this->close();
 	}

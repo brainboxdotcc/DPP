@@ -231,6 +231,11 @@ protected:
 
 public:
 	/**
+	 * @brief If true the response timed out while waiting
+	 */
+	bool timed_out;	
+	
+	/**
 	 * @brief Connect to a specific HTTP(S) server and complete a request.
 	 * 
 	 * The constructor will attempt the connection, and return the content.
