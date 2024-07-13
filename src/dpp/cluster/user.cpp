@@ -24,23 +24,32 @@
 
 namespace dpp {
 
-void cluster::current_user_edit(const std::string &nickname, const std::string& image_blob, const image_type type, command_completion_event_t callback) {
+void cluster::current_user_edit(const std::string &nickname, const std::string& avatar_blob, const image_type avatar_type, const std::string& banner_blob, const image_type banner_type, command_completion_event_t callback) {
 	json j = json::parse("{\"nickname\": null}");
 	if (!nickname.empty()) {
 		j["nickname"] = nickname;
 	}
-	if (!image_blob.empty()) {
-		static const std::map<image_type, std::string> mimetypes = {
-			{ i_gif, "image/gif" },
-			{ i_jpg, "image/jpeg" },
-			{ i_png, "image/png" },
-			{ i_webp, "image/webp" },
-		};
-		if (image_blob.size() > MAX_EMOJI_SIZE) {
+
+	static const std::map<image_type, std::string> mimetypes = {
+		{ i_gif, "image/gif" },
+		{ i_jpg, "image/jpeg" },
+		{ i_png, "image/png" },
+	};
+
+	if (!avatar_blob.empty()) {
+		if (avatar_blob.size() > MAX_EMOJI_SIZE) {
 			throw dpp::length_exception(err_icon_size, "User icon file exceeds discord limit of 256 kilobytes");
 		}
-		j["avatar"] = "data:" + mimetypes.find(type)->second + ";base64," + base64_encode((unsigned char const*)image_blob.data(), (unsigned int)image_blob.length());
+		j["avatar"] = "data:" + mimetypes.find(avatar_type)->second + ";base64," + base64_encode((unsigned char const*)avatar_blob.data(), static_cast<unsigned int>(avatar_blob.length()));
 	}
+
+	if (!banner_blob.empty()) {
+		if (avatar_blob.size() > MAX_EMOJI_SIZE) {
+			throw dpp::length_exception(err_icon_size, "User banner file exceeds discord limit of 256 kilobytes");
+		}
+		j["banner"] = "data:" + mimetypes.find(banner_type)->second + ";base64," + base64_encode((unsigned char const*)banner_blob.data(), static_cast<unsigned int>(banner_blob.length()));
+	}
+
 	rest_request<user>(this, API_PATH "/users", "@me", "", m_patch, j.dump(-1, ' ', false, json::error_handler_t::replace), callback);
 }
 
