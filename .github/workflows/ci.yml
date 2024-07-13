@@ -71,7 +71,7 @@ jobs:
         uses: rui314/setup-mold@2e332a0b602c2fc65d2d3995941b1b29a5f554a0
 
       - name: Generate CMake
-        run: mkdir build && cd build && cmake -DDPP_NO_VCPKG=ON -DAVX_TYPE=AVX0 -DCMAKE_BUILD_TYPE=Release ${{matrix.cfg.cmake-flags}} ..
+        run: cmake -B build -DDPP_NO_VCPKG=ON -DAVX_TYPE=AVX0 -DCMAKE_BUILD_TYPE=Release ${{matrix.cfg.cmake-flags}}
         env:
           CXX: ${{matrix.cfg.cpp-version}}
 
