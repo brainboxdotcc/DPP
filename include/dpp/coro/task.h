@@ -297,7 +297,7 @@ struct promise_base : basic_promise<R> {
 	 *
 	 * @return @ref proxy_awaiter Returns a proxy awaiter that will check for cancellation on resumption
 	 */
-	template <typename T>
+	template <awaitable_type T>
 	[[nodiscard]] auto await_transform(T&& expr) const noexcept(noexcept(co_await_resolve(std::forward<T>(expr)))) {
 		using awaitable_t = decltype(co_await_resolve(std::forward<T>(expr)));
 		return proxy_awaiter<awaitable_t>{*this, co_await_resolve(std::forward<T>(expr))};

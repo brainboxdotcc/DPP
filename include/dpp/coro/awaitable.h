@@ -102,7 +102,7 @@ void spawn_sync_wait_job(auto* awaitable, std::condition_variable &cv, auto&& re
 
 } /* namespace detail::promise */
 
-template <awaitable_type Derived>
+template <typename Derived>
 class basic_awaitable {
 protected:
 	/**

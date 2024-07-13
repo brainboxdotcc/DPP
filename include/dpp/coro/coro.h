@@ -168,7 +168,7 @@ using awaitable_result = decltype(co_await_resolve(std::declval<T>()).await_resu
  * @brief Concept to check if a type can be used with co_await
  */
 template <typename T>
-concept awaitable_type = requires (T expr) { detail::co_await_resolve(expr); };
+concept awaitable_type = requires (T expr) { detail::co_await_resolve(expr).await_ready(); };
 
 struct confirmation_callback_t;
 
