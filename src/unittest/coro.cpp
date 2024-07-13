@@ -147,6 +147,11 @@ dpp::task<void> task_offline_test() {
 	if (int ret = co_await simple_awaitable{test, 42}; ret != 42) {
 		set_status(test, ts_failed, "failed simple awaitable");
 	}
+
+	if (int ret = co_await []() -> dpp::task<int> { co_return 42; }(); ret != 42) {
+		set_status(test, ts_failed, "failed simple task");
+	}
+	
 	std::array<dpp::task<int>, 10> tasks;
 	auto start = clock::now();
 	for (int i = 0; i < 10; ++i) {
@@ -408,9 +413,9 @@ dpp::job coro_awaitable_test() {
 		{
 			dpp::promise<int> test;
 			dpp::awaitable     awaitable{test.get_awaitable()};
-			std::thread        th{[p = std::move(test)]() mutable {
+			std::thread        th{[&test]() mutable {
 				std::this_thread::sleep_for(std::chrono::seconds(2));
-				p.set_value(69);
+				test.set_value(69);
 			}};
 			th.detach();
 			if (std::optional<int> res = awaitable.sync_wait_for(std::chrono::seconds(5)); !res || *res != 69) {
@@ -450,9 +455,9 @@ dpp::job coro_awaitable_test() {
 		{
 			dpp::promise<void> test;
 			dpp::awaitable     awaitable{test.get_awaitable()};
-			std::thread        th{[p = std::move(test)]() mutable {
+			std::thread        th{[&test]() mutable {
 				std::this_thread::sleep_for(std::chrono::seconds(2));
-				p.set_exception(std::make_exception_ptr(dpp::voice_exception("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")));
+				test.set_exception(std::make_exception_ptr(dpp::voice_exception("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")));
 			}};
 			th.detach();
 			bool success = false;

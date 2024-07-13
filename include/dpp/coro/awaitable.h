@@ -295,6 +295,15 @@ public:
 	}
 
 	/**
+	 * @brief Title :)
+	 *
+	 * We use this in the destructor
+	 */
+	void if_this_causes_an_invalid_read_your_promise_was_destroyed_before_your_awaitable____check_your_promise_lifetime() {
+		abandon();
+	}
+
+	/**
 	 * @brief Destructor.
 	 *
 	 * May signal to the promise that it was destroyed.
@@ -656,9 +665,7 @@ auto awaitable<T>::abandon() -> uint8_t {
 
 template <typename T>
 awaitable<T>::~awaitable() {
-	if (state_ptr) {
-		state_ptr->state.fetch_or(state_flags::sf_broken, std::memory_order::acq_rel);
-	}
+	if_this_causes_an_invalid_read_your_promise_was_destroyed_before_your_awaitable____check_your_promise_lifetime();
 }
 
 template <typename T>
@@ -691,7 +698,7 @@ bool awaitable<T>::awaiter<Derived>::await_suspend(detail::std_coroutine::corout
 template <typename T>
 template <typename Derived>
 T awaitable<T>::awaiter<Derived>::await_resume() {
-	auto &promise = *std::exchange(awaitable_obj.state_ptr, nullptr);
+	auto &promise = *awaitable_obj.state_ptr;
 
 	promise.state.fetch_and(~detail::promise::sf_awaited, std::memory_order::acq_rel);
 	if (std::holds_alternative<std::exception_ptr>(promise.value)) {

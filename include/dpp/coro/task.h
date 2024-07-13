@@ -247,7 +247,7 @@ struct promise_base : basic_promise<R> {
 	 * Stores the exception pointer to rethrow on co_await. If the task object is destroyed and was not cancelled, throw instead
 	 */
 	void unhandled_exception() {
-		if ((this->state.load() == promise::state_flags::sf_broken) && !cancelled) {
+		if ((this->state.load() & promise::state_flags::sf_broken) && !cancelled) {
 			throw;
 		}
 		this->template set_exception<false>(std::current_exception());
