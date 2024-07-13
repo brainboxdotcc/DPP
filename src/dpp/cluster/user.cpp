@@ -34,6 +34,7 @@ void cluster::current_user_edit(const std::string &nickname, const std::string& 
 		{ i_gif, "image/gif" },
 		{ i_jpg, "image/jpeg" },
 		{ i_png, "image/png" },
+		{ i_webp, "image/webp" }, /* Whilst webp isn't supported (as of 13/07/24, UK date), best to keep this here for when Discord support webp */
 	};
 
 	if (!avatar_blob.empty()) {
@@ -44,7 +45,7 @@ void cluster::current_user_edit(const std::string &nickname, const std::string& 
 	}
 
 	if (!banner_blob.empty()) {
-		if (avatar_blob.size() > MAX_EMOJI_SIZE) {
+		if (banner_blob.size() > MAX_EMOJI_SIZE) {
 			throw dpp::length_exception(err_icon_size, "User banner file exceeds discord limit of 256 kilobytes");
 		}
 		j["banner"] = "data:" + mimetypes.find(banner_type)->second + ";base64," + base64_encode((unsigned char const*)banner_blob.data(), static_cast<unsigned int>(banner_blob.length()));

@@ -2772,8 +2772,10 @@ thread thread_get_sync(snowflake thread_id);
  * @see dpp::cluster::current_user_edit
  * @see https://discord.com/developers/docs/resources/user#modify-current-user
  * @param nickname Nickname to set
- * @param image_blob Avatar data to upload (NOTE: Very heavily rate limited!)
- * @param type Type of image for avatar. It can be one of `i_gif`, `i_jpg` or `i_png`.
+ * @param avatar_blob Avatar data to upload (NOTE: Very heavily rate limited!)
+ * @param avatar_type Type of image for avatar. It can be one of `i_gif`, `i_jpg` or `i_png`.
+ * @param banner_blob Banner data to upload (NOTE: Very heavily rate limited!)
+ * @param banner_type Type of image for Banner. It can be one of `i_gif`, `i_jpg` or `i_png`.
  * @return user returned object on completion
  	 * @throw dpp::length_exception Image data is larger than the maximum size of 256 kilobytes
  * \memberof dpp::cluster
@@ -2781,7 +2783,7 @@ thread thread_get_sync(snowflake thread_id);
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-user current_user_edit_sync(const std::string &nickname, const std::string& image_blob = "", const image_type type = i_png);
+user current_user_edit_sync(const std::string &nickname, const std::string& avatar_blob = "", const image_type avatar_type = i_png, const std::string& banner_blob = "", const image_type banner_type = i_png);
 
 /**
  * @brief Get current (bot) application
