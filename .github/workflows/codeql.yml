@@ -61,7 +61,7 @@ jobs:
         uses: rui314/setup-mold@2e332a0b602c2fc65d2d3995941b1b29a5f554a0
 
       - name: Build
-        run: cmake -B build -DDPP_NO_VCPKG=ON -DAVX_TYPE=AVX0 -DCMAKE_BUILD_TYPE=Release && cmake --build build -j3
+        run: cmake -B build -DDPP_NO_VCPKG=ON -DAVX_TYPE=AVX0 -DCMAKE_BUILD_TYPE=Release && cmake --build build -j4
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@b611370bb5703a7efb587f9d136a52ea24c5c38c # v3.25.11
