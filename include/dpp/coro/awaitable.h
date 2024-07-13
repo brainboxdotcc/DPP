@@ -459,7 +459,7 @@ public:
 		value.template emplace<2>(std::move(ptr));
 		[[maybe_unused]] auto previous_value = this->state.fetch_or(sf_ready, std::memory_order::acq_rel);
 		if constexpr (Notify) {
-			if (previous_value & sf_awaited) {
+			if ((previous_value & sf_awaited) != 0) {
 				this->awaiter.resume();
 			}
 		}

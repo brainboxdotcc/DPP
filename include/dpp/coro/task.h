@@ -106,6 +106,20 @@ protected:
 	 */
 	explicit task(handle_t handle_) : awaitable<R>(&handle_.promise()), handle(handle_) {}
 
+	/**
+	 * @brief Clean up our handle, cancelling any running task
+	 */
+	void cleanup() {
+		if (handle && this->valid()) {
+			if (this->abandon() & state_flags::sf_done) {
+				handle.destroy();
+			} else {
+				cancel();
+			}
+			handle = nullptr;
+		}
+	}
+
 public:
 	/**
 	 * @brief Default constructor, creates a task not bound to a coroutine.
@@ -136,6 +150,7 @@ public:
 	 */
 	task &operator=(task &&other) noexcept {
 		awaitable<R>::operator=(std::move(other));
+		cleanup();
 		handle = std::exchange(other.handle, nullptr);
 		return *this;
 	}
@@ -146,13 +161,7 @@ public:
 	 * Destroys the handle. If the task is still running, it will be cancelled.
 	 */
 	~task() {
-		if (handle && this->valid()) {
-			if (this->abandon() & state_flags::sf_done) {
-				handle.destroy();
-			} else {
-				cancel();
-			}
-		}
+		cleanup();
 	}
 
 	/**
@@ -406,14 +415,14 @@ std_coroutine::coroutine_handle<> final_awaiter<R>::await_suspend(handle_t<R> ha
 	promise_t<R> &promise = handle.promise();
 	uint8_t previous_state = promise.state.fetch_or(state_flags::sf_done);
 
-	if (previous_state & state_flags::sf_awaited) { // co_await-ed, resume parent
-		if (previous_state & state_flags::sf_broken) { // major bug, these should never be set together
+	if ((previous_state & state_flags::sf_awaited) != 0) { // co_await-ed, resume parent
+		if ((previous_state & state_flags::sf_broken) != 0) { // major bug, these should never be set together
 			// we don't have a cluster so just log it on cerr
 			std::cerr << "dpp: task promise ended in both an awaited and dangling state. this is a bug and a memory leak, please report it to us!" << std::endl;
 		}
 		return promise.release_awaiter();
 	}
-	if (previous_state & state_flags::sf_broken) { // task object is gone, free the handle
+	if ((previous_state & state_flags::sf_broken) != 0) { // task object is gone, free the handle
 		handle.destroy();
 	}
 	return std_coroutine::noop_coroutine();
