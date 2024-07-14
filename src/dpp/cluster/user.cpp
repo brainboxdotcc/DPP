@@ -38,16 +38,10 @@ void cluster::current_user_edit(const std::string &nickname, const std::string& 
 	};
 
 	if (!avatar_blob.empty()) {
-		if (avatar_blob.size() > MAX_EMOJI_SIZE) {
-			throw dpp::length_exception(err_icon_size, "User icon file exceeds discord limit of 256 kilobytes");
-		}
 		j["avatar"] = "data:" + mimetypes.find(avatar_type)->second + ";base64," + base64_encode((unsigned char const*)avatar_blob.data(), static_cast<unsigned int>(avatar_blob.length()));
 	}
 
 	if (!banner_blob.empty()) {
-		if (banner_blob.size() > MAX_EMOJI_SIZE) {
-			throw dpp::length_exception(err_icon_size, "User banner file exceeds discord limit of 256 kilobytes");
-		}
 		j["banner"] = "data:" + mimetypes.find(banner_type)->second + ";base64," + base64_encode((unsigned char const*)banner_blob.data(), static_cast<unsigned int>(banner_blob.length()));
 	}
 

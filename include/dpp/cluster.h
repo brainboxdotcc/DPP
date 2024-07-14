@@ -3253,15 +3253,18 @@ public:
 	void current_user_get_guilds(command_completion_event_t callback);
 
 	/**
-	 * @brief Edit current (bot) user
+	 * @brief Edit current (bot) user.
 	 *
-	 * Modifies the current member in a guild. Returns the updated guild_member object on success.
-	 * Fires a `Guild Member Update` Gateway event.
+	 * Modify the requester's user account settings. Returns a dpp::user object on success.
+	 * Fires a User Update Gateway event.
+	 *
+	 * @note There appears to be no limit to the image size, however, if your image cannot be processed/uploaded in time, you will receive a malformed http request.
+	 *
 	 * @see https://discord.com/developers/docs/resources/user#modify-current-user
 	 * @param nickname Nickname to set
-	 * @param avatar_blob Avatar data to upload (NOTE: Very heavily rate limited!)
+	 * @param avatar_blob Avatar data to upload
 	 * @param avatar_type Type of image for avatar. It can be one of `i_gif`, `i_jpg` or `i_png`.
-	 * @param banner_blob Banner data to upload (NOTE: Very heavily rate limited!)
+	 * @param banner_blob Banner data to upload
 	 * @param banner_type Type of image for Banner. It can be one of `i_gif`, `i_jpg` or `i_png`.
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::user object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
