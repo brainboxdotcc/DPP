@@ -190,7 +190,12 @@ void cluster::start(bool return_after) {
 	/* Start up all shards */
 	gateway g;
 	try {
+#ifdef DPP_CORO
+		confirmation_callback_t cc = co_get_gateway_bot().sync_wait();
+		g = std::get<gateway>(cc.value);
+#else
 		g = dpp::sync<gateway>(this, &cluster::get_gateway_bot);
+#endif
 		log(ll_debug, "Cluster: " + std::to_string(g.session_start_remaining) + " of " + std::to_string(g.session_start_total) + " session starts remaining");
 		if (g.session_start_remaining < g.shards) {
 			throw dpp::connection_exception(err_no_sessions_left, "Discord indicates you cannot start enough sessions to boot this cluster! Cluster startup aborted. Try again later.");
