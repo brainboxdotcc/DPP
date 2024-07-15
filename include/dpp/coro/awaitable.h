@@ -322,6 +322,7 @@ public:
 	 * @return *this
 	 */
 	awaitable& operator=(awaitable&& rhs) noexcept {
+		abandon();
 		state_ptr = std::exchange(rhs.state_ptr, nullptr);
 		return *this;
 	}

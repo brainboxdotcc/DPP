@@ -149,9 +149,9 @@ public:
 	 * @param other Task to move the handle from
 	 */
 	task &operator=(task &&other) noexcept {
-		awaitable<R>::operator=(std::move(other));
 		cleanup();
 		handle = std::exchange(other.handle, nullptr);
+		awaitable<R>::operator=(std::move(other));
 		return *this;
 	}
 
