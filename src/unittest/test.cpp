@@ -1763,28 +1763,31 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 								return;
 							}
 							set_test(GUILD_BAN_CREATE, true);
-							// when created, continue with getting and deleting
 
 							// get ban
 							bot.guild_get_ban(TEST_GUILD_ID, deadUser1, [&bot, deadUser1, deadUser2, deadUser3](const dpp::confirmation_callback_t &event) {
 								if (!event.is_error()) {
 									dpp::ban ban = event.get<dpp::ban>();
+									// Check the audit reason was set correctly
 									if (ban.user_id == deadUser1 && ban.reason == "ban reason one") {
 										set_test(GUILD_BAN_GET, true);
 									} else {
 										set_test(GUILD_BAN_GET, false);
 									}
-									// get multiple bans
+									// get all bans after deadUser1
 									bot.guild_get_bans(TEST_GUILD_ID, 0, deadUser1, 50, [&bot, deadUser1, deadUser2, deadUser3](const dpp::confirmation_callback_t &event) {
 										if (!event.is_error()) {
 											auto bans = event.get<dpp::ban_map>();
+											// The ban set should contain at least two bans, two of which should be deadUser2 and deadUser3,
+											// but never deadUser1. Take into account that *other bans* might exist in the list so we can't
+											// just assume there are three or set a limit of 3 above.
 											set_test(
 												GUILD_BANS_GET,
 												bans.find(deadUser1) == bans.end()
 												&& bans.find(deadUser2) != bans.end()
 												&& bans.find(deadUser3) != bans.end()
 											);
-											// unban them
+											// unban all three
 											bot.guild_ban_delete(TEST_GUILD_ID, deadUser1, [&bot, deadUser1, deadUser2, deadUser3](const dpp::confirmation_callback_t &event) {
 												if (!event.is_error()) {
 													bot.guild_ban_delete(TEST_GUILD_ID, deadUser2, [&bot, deadUser3](const dpp::confirmation_callback_t &event) {
@@ -1805,11 +1808,16 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 												}
 											});
 										} else {
+											/* An error in this test cascades to others failing immediately */
 											set_test(GUILD_BANS_GET, false);
+											set_test(GUILD_BAN_DELETE, false);
 										}
 									});
 								} else {
+									/* An error in the parent test cascades to the others failing immediately */
 									set_test(GUILD_BAN_GET, false);
+									set_test(GUILD_BANS_GET, false);
+									set_test(GUILD_BAN_DELETE, false);
 								}
 							});
 						});
