@@ -14,6 +14,6 @@ However, if you're going to take longer than 3 seconds to respond, you need to t
 
 Instead, you want to do `event.reply(dpp::ir_deferred_channel_message_with_source, "");` to tell Discord that you intend on editing the message that the button click came from, but you need time. The user will be informed that you've processed the button click (as required) via a loading state and then you have 15 minutes to do everything you need. To then edit the message, you need to do `event.edit_response("new message!");`, like so:
 
-\note If you want to silently acknowledge the button click (no thinking message), replace `dpp::ir_deferred_channel_message_with_source` with `dpp::ir_deferred_update_message`. You will still have 15 minutes to make a response.
+\note If you want to silently acknowledge the button click (no thinking message), replace dpp::ir_deferred_channel_message_with_source with dpp::ir_deferred_update_message. You will still have 15 minutes to make a response.
 
 \include{cpp} editing_message_after_click2.cpp
