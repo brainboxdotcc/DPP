@@ -34,15 +34,15 @@ int main() {
 	 * containing the custom_id you defined in your button.
 	 */
 	bot.on_button_click([&bot](const dpp::button_click_t& event) {
-		/* Instead of replying to the button click itself, 
-         * we want to update the message that had the buttons on it.
-         */
+		/* Instead of replying to the button click itself,
+		 * we want to update the message that had the buttons on it.
+		 */
 		event.reply(dpp::ir_deferred_channel_message_with_source, "");
 
-        /* Pretend you're doing long calls here that may take longer than 3 seconds. */
+        	/* Pretend you're doing long calls here that may take longer than 3 seconds. */
 
-        /* Now, edit the response! */
-        event.edit_response("After a while, I can confirm you clicked: " + event.custom_id);
+        	/* Now, edit the response! */
+        	event.edit_response("After a while, I can confirm you clicked: " + event.custom_id);
 	});
 
 	bot.on_ready([&bot](const dpp::ready_t& event) {

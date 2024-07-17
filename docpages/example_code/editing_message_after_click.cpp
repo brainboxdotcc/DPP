@@ -34,9 +34,9 @@ int main() {
 	 * containing the custom_id you defined in your button.
 	 */
 	bot.on_button_click([&bot](const dpp::button_click_t& event) {
-		/* Instead of replying to the button click itself, 
-         * we want to update the message that had the buttons on it.
-         */
+		/* Instead of replying to the button click itself,
+		 * we want to update the message that had the buttons on it.
+		 */
 		event.reply(dpp::ir_update_message, "You clicked: " + event.custom_id);
 	});
 
