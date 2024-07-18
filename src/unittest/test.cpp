@@ -379,12 +379,12 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		set_test(SNOWFLAKE, success);
 	}
 
-        { // test snowlfake: std::format support
+        { // test snowflake: std::format support
 
                 #if __cplusplus >= 202002L
                 #if defined(__cpp_lib_format) || __has_include(<format>) //fix for https://github.com/llvm/llvm-project/issues/77773
-                        start_test(SNOWLAKE_STD_FORMAT);
-                        set_test(SNOWLAKE_STD_FORMAT,
+                        start_test(SNOWFLAKE_STD_FORMAT);
+                        set_test(SNOWFLAKE_STD_FORMAT,
                             std::format("{}",dpp::snowflake{}) == "0" &&
                             std::format("{}",dpp::snowflake{12345}) == "12345" &&
                             std::format("{} hello {}", dpp::snowflake{12345}, dpp::snowflake{54321}) == "12345 hello 54321"
