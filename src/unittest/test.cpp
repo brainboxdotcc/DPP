@@ -1751,10 +1751,10 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 			set_test(GUILD_BANS_GET, false);
 			set_test(GUILD_BAN_DELETE, false);
 			if (!offline) {
-				// some deleted discord accounts to test the ban stuff with...
-				dpp::snowflake deadUser1(802670069523415057);
-				dpp::snowflake deadUser2(875302419335094292);
-				dpp::snowflake deadUser3(1048247361903792198);
+				// some discord accounts to test the ban stuff with...
+				dpp::snowflake deadUser1(155149108183695360); // Dyno
+				dpp::snowflake deadUser2(159985870458322944); // MEE6
+				dpp::snowflake deadUser3(936929561302675456); // MidJourney Bot
 
 				bot.set_audit_reason("ban reason one").guild_ban_add(TEST_GUILD_ID, deadUser1, 0, [deadUser1, deadUser2, deadUser3, &bot](const dpp::confirmation_callback_t &event) {
 					if (!event.is_error()) bot.guild_ban_add(TEST_GUILD_ID, deadUser2, 0, [deadUser1, deadUser2, deadUser3, &bot](const dpp::confirmation_callback_t &event) {
@@ -1763,50 +1763,61 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 								return;
 							}
 							set_test(GUILD_BAN_CREATE, true);
-							// when created, continue with getting and deleting
 
 							// get ban
-							bot.guild_get_ban(TEST_GUILD_ID, deadUser1, [deadUser1](const dpp::confirmation_callback_t &event) {
+							bot.guild_get_ban(TEST_GUILD_ID, deadUser1, [&bot, deadUser1, deadUser2, deadUser3](const dpp::confirmation_callback_t &event) {
 								if (!event.is_error()) {
 									dpp::ban ban = event.get<dpp::ban>();
+									// Check the audit reason was set correctly
 									if (ban.user_id == deadUser1 && ban.reason == "ban reason one") {
 										set_test(GUILD_BAN_GET, true);
+									} else {
+										set_test(GUILD_BAN_GET, false);
 									}
-								}
-							});
-
-							// get multiple bans
-							bot.guild_get_bans(TEST_GUILD_ID, 0, deadUser1, 3, [deadUser2, deadUser3](const dpp::confirmation_callback_t &event) {
-								if (!event.is_error()) {
-									dpp::ban_map bans = event.get<dpp::ban_map>();
-									int successCount = 0;
-									for (auto &ban: bans) {
-										if (ban.first == ban.second.user_id) { // the key should match the ban's user_id
-											if (ban.first == deadUser2 && ban.second.reason.empty()) {
-												successCount++;
-											} else if (ban.first == deadUser3 && ban.second.reason == "ban reason three") {
-												successCount++;
-											}
-										}
-									}
-									if (successCount == 2) {
-										set_test(GUILD_BANS_GET, true);
-									}
-								}
-							});
-
-							// unban them
-							bot.guild_ban_delete(TEST_GUILD_ID, deadUser1, [&bot, deadUser2, deadUser3](const dpp::confirmation_callback_t &event) {
-								if (!event.is_error()) {
-									bot.guild_ban_delete(TEST_GUILD_ID, deadUser2, [&bot, deadUser3](const dpp::confirmation_callback_t &event) {
+									// get all bans after deadUser1
+									bot.guild_get_bans(TEST_GUILD_ID, 0, deadUser1, 50, [&bot, deadUser1, deadUser2, deadUser3](const dpp::confirmation_callback_t &event) {
 										if (!event.is_error()) {
-											bot.guild_ban_delete(TEST_GUILD_ID, deadUser3, [](const dpp::confirmation_callback_t &event) {
+											auto bans = event.get<dpp::ban_map>();
+											// The ban set should contain at least two bans, two of which should be deadUser2 and deadUser3,
+											// but never deadUser1. Take into account that *other bans* might exist in the list so we can't
+											// just assume there are three or set a limit of 3 above.
+											set_test(
+												GUILD_BANS_GET,
+												bans.find(deadUser1) == bans.end()
+												&& bans.find(deadUser2) != bans.end()
+												&& bans.find(deadUser3) != bans.end()
+											);
+											// unban all three
+											bot.guild_ban_delete(TEST_GUILD_ID, deadUser1, [&bot, deadUser1, deadUser2, deadUser3](const dpp::confirmation_callback_t &event) {
 												if (!event.is_error()) {
-													set_test(GUILD_BAN_DELETE, true);
+													bot.guild_ban_delete(TEST_GUILD_ID, deadUser2, [&bot, deadUser3](const dpp::confirmation_callback_t &event) {
+														if (!event.is_error()) {
+															bot.guild_ban_delete(TEST_GUILD_ID, deadUser3, [](const dpp::confirmation_callback_t &event) {
+																if (!event.is_error()) {
+																	set_test(GUILD_BAN_DELETE, true);
+																} else {
+																	set_test(GUILD_BAN_DELETE, false);
+																}
+															});
+														} else {
+															set_test(GUILD_BAN_DELETE, false);
+														}
+													});
+												} else {
+													set_test(GUILD_BAN_DELETE, false);
 												}
 											});
+										} else {
+											/* An error in this test cascades to others failing immediately */
+											set_test(GUILD_BANS_GET, false);
+											set_test(GUILD_BAN_DELETE, false);
 										}
 									});
+								} else {
+									/* An error in the parent test cascades to the others failing immediately */
+									set_test(GUILD_BAN_GET, false);
+									set_test(GUILD_BANS_GET, false);
+									set_test(GUILD_BAN_DELETE, false);
 								}
 							});
 						});

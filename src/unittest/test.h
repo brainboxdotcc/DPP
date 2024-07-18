@@ -155,7 +155,7 @@ DPP_TEST(ERRORS, "Human readable error translation", tf_offline);
 DPP_TEST(INVALIDUTF8, "Invalid UTF-8 handling", tf_online);
 
 DPP_TEST(GUILD_EDIT, "cluster::guild_edit", tf_online);
-DPP_TEST(GUILD_BAN_CREATE, "cluster::guild_ban_add ban three deleted discord accounts", tf_online);
+DPP_TEST(GUILD_BAN_CREATE, "cluster::guild_ban_add ban three well-known discord accounts", tf_online);
 DPP_TEST(GUILD_BAN_GET, "cluster::guild_get_ban getting one of the banned accounts", tf_online);
 DPP_TEST(GUILD_BANS_GET, "cluster::guild_get_bans get bans using the after-parameter", tf_online);
 DPP_TEST(GUILD_BAN_DELETE, "cluster::guild_ban_delete unban the banned discord accounts", tf_online);
