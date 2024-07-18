@@ -281,3 +281,26 @@ struct std::hash<dpp::snowflake>
 		return std::hash<uint64_t>{}(s.value);
 	}
 };
+
+#if __cplusplus >= 202002L
+#if defined(__cpp_lib_format) || __has_include(<format>) //fix for https://github.com/llvm/llvm-project/issues/77773
+#include <format>
+
+/*
+ * @brief implementation of formater for dpp::snowlfake for std::format support
+ * https://en.cppreference.com/w/cpp/utility/format/formatter
+ */
+template <>
+struct std::formatter<dpp::snowflake>
+{
+        constexpr auto parse(std::format_parse_context& ctx) {
+        return ctx.begin();
+        }
+
+        auto format(const dpp::snowflake& snowflake, std::format_context& ctx) const {
+        return std::format_to(ctx.out(), "{}", snowflake.str());
+        }
+};
+
+#endif // __cpp_lib_format
+#endif // __cplusplus >= 202002L
