@@ -2246,20 +2246,25 @@
 [[nodiscard]] async<confirmation_callback_t> co_thread_get(snowflake thread_id);
 
 /**
- * @brief Edit current (bot) user
+ * @brief Edit current (bot) user.
  *
- * Modifies the current member in a guild. Returns the updated guild_member object on success.
- * Fires a `Guild Member Update` Gateway event.
+ * Modify the requester's user account settings. Returns a dpp::user object on success.
+ * Fires a User Update Gateway event.
+ *
+ * @note There appears to be no limit to the image size, however, if your image cannot be processed/uploaded in time, you will receive a malformed http request.
+ *
  * @see dpp::cluster::current_user_edit
  * @see https://discord.com/developers/docs/resources/user#modify-current-user
  * @param nickname Nickname to set
- * @param image_blob Avatar data to upload (NOTE: Very heavily rate limited!)
- * @param type Type of image for avatar. It can be one of `i_gif`, `i_jpg` or `i_png`.
+ * @param avatar_blob Avatar data to upload
+ * @param avatar_type Type of image for avatar. It can be one of `i_gif`, `i_jpg` or `i_png`.
+ * @param banner_blob Banner data to upload
+ * @param banner_type Type of image for Banner. It can be one of `i_gif`, `i_jpg` or `i_png`.
  * @return user returned object on completion
  	 * @throw dpp::length_exception Image data is larger than the maximum size of 256 kilobytes
  * \memberof dpp::cluster
  */
-[[nodiscard]] async<confirmation_callback_t> co_current_user_edit(const std::string &nickname, const std::string& image_blob = "", const image_type type = i_png);
+[[nodiscard]] async<confirmation_callback_t> co_current_user_edit(const std::string &nickname, const std::string& avatar_blob = "", const image_type avatar_type = i_png, const std::string& banner_blob = "", const image_type banner_type = i_png);
 
 /**
  * @brief Get current (bot) application

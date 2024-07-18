@@ -155,7 +155,7 @@ DPP_TEST(ERRORS, "Human readable error translation", tf_offline);
 DPP_TEST(INVALIDUTF8, "Invalid UTF-8 handling", tf_online);
 
 DPP_TEST(GUILD_EDIT, "cluster::guild_edit", tf_online);
-DPP_TEST(GUILD_BAN_CREATE, "cluster::guild_ban_add ban three deleted discord accounts", tf_online);
+DPP_TEST(GUILD_BAN_CREATE, "cluster::guild_ban_add ban three well-known discord accounts", tf_online);
 DPP_TEST(GUILD_BAN_GET, "cluster::guild_get_ban getting one of the banned accounts", tf_online);
 DPP_TEST(GUILD_BANS_GET, "cluster::guild_get_bans get bans using the after-parameter", tf_online);
 DPP_TEST(GUILD_BAN_DELETE, "cluster::guild_ban_delete unban the banned discord accounts", tf_online);
@@ -256,6 +256,7 @@ DPP_TEST(THREAD_MESSAGE_REACT_ADD_EVENT, "cluster::on_reaction_add in thread", t
 DPP_TEST(THREAD_MESSAGE_REACT_REMOVE_EVENT, "cluster::on_reaction_remove in thread", tf_online | tf_extended);
 
 DPP_TEST(CORO_JOB_OFFLINE, "coro: offline job", tf_offline | tf_coro);
+DPP_TEST(CORO_AWAITABLE_OFFLINE, "coro: offline promise & awaitable", tf_offline | tf_coro);
 DPP_TEST(CORO_COROUTINE_OFFLINE, "coro: offline coroutine", tf_offline | tf_coro);
 DPP_TEST(CORO_TASK_OFFLINE, "coro: offline task", tf_offline | tf_coro);
 DPP_TEST(CORO_ASYNC_OFFLINE, "coro: offline async", tf_offline | tf_coro);

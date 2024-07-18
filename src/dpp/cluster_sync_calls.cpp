@@ -745,8 +745,8 @@ thread cluster::thread_get_sync(snowflake thread_id) {
 	return dpp::sync<thread>(this, static_cast<void (cluster::*)(snowflake, command_completion_event_t)>(&cluster::thread_get), thread_id);
 }
 
-user cluster::current_user_edit_sync(const std::string &nickname, const std::string& image_blob, const image_type type) {
-	return dpp::sync<user>(this, static_cast<void (cluster::*)(const std::string &, const std::string&, const image_type, command_completion_event_t)>(&cluster::current_user_edit), nickname, image_blob, type);
+user cluster::current_user_edit_sync(const std::string &nickname, const std::string& avatar_blob, const image_type avatar_type, const std::string& banner_blob, const image_type banner_type) {
+	return dpp::sync<user>(this, static_cast<void (cluster::*)(const std::string &, const std::string&, const image_type, const std::string&, const image_type, command_completion_event_t)>(&cluster::current_user_edit), nickname, avatar_blob, avatar_type, banner_blob, banner_type);
 }
 
 application cluster::current_application_get_sync() {

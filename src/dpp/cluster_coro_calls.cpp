@@ -747,8 +747,8 @@ async<confirmation_callback_t> cluster::co_thread_get(snowflake thread_id) {
 	return async{ this, static_cast<void (cluster::*)(snowflake, command_completion_event_t)>(&cluster::thread_get), thread_id };
 }
 
-async<confirmation_callback_t> cluster::co_current_user_edit(const std::string &nickname, const std::string& image_blob, const image_type type) {
-	return async{ this, static_cast<void (cluster::*)(const std::string &, const std::string&, const image_type, command_completion_event_t)>(&cluster::current_user_edit), nickname, image_blob, type };
+async<confirmation_callback_t> cluster::co_current_user_edit(const std::string &nickname, const std::string& avatar_blob, const image_type avatar_type, const std::string& banner_blob, const image_type banner_type) {
+	return async{ this, static_cast<void (cluster::*)(const std::string &, const std::string&, const image_type, const std::string&, const image_type, command_completion_event_t)>(&cluster::current_user_edit), nickname, avatar_blob, avatar_type, banner_blob, banner_type };
 }
 
 async<confirmation_callback_t> cluster::co_current_application_get() {
