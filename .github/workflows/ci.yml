@@ -118,7 +118,8 @@ jobs:
       fail-fast: false # Don't fail everything if one fails. We want to test each OS/Compiler individually
       matrix:
         cfg:
-          - { arch: 'x64', concurrency: 3, os: macos-latest, cpp-version: clang++-15, cmake-flags: ''}
+          - { arch: 'x64', concurrency: 3, os: macos-latest, cpp-version: clang++-15, cmake-flags: '', xcode-version: '15.3' }
+          - { arch: 'x64', concurrency: 3, os: macos-latest, cpp-version: clang++-14, cmake-flags: '', xcode-version: '14.3.1' }
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@17d0e2bd7d51742c71671bd19fa12bdc9d40a3d6 # v2.8.1
@@ -131,7 +132,7 @@ jobs:
       - name: Update Xcode
         uses: maxim-lobanov/setup-xcode@v60606e260d2fc5762a71e64e74b2174e8ea3c8bd # v1.6.0
         with:
-          xcode-version: '15.3'
+          xcode-version: ${{ matrix.cfg.xcode-version }}
 
       - name: Install homebrew packages
         run: brew install cmake make libsodium opus openssl pkg-config
