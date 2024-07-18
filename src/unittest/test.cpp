@@ -382,15 +382,24 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
         { // test snowflake: std::format support
 
                 #if __cplusplus >= 202002L
-                #if defined(__cpp_lib_format) || __has_include(<format>) //fix for https://github.com/llvm/llvm-project/issues/77773
-                        start_test(SNOWFLAKE_STD_FORMAT);
+
+                //fix for https://github.com/llvm/llvm-project/issues/77773 and
+                // apple support on clang 14 https://developer.apple.com/xcode/cpp/
+                #if defined(__cpp_lib_format) || \
+                                (__has_include(<format>)&& (!defined(__clang__) || \
+                                (defined(__clang__) && ((__clang_major__ >= 15 && defined(__APPLE__)) || __clang_major__ >=14))))
                         set_test(SNOWFLAKE_STD_FORMAT,
                             std::format("{}",dpp::snowflake{}) == "0" &&
                             std::format("{}",dpp::snowflake{12345}) == "12345" &&
                             std::format("{} hello {}", dpp::snowflake{12345}, dpp::snowflake{54321}) == "12345 hello 54321"
                         );
 
+                #else
+                        set_status(SNOWFLAKE_STD_FORMAT,ts_skipped);
                 #endif // __cpp_lib_format
+
+                #else
+                        set_status(SNOWFLAKE_STD_FORMAT,ts_skipped);
                 #endif // __cplusplus >= 202002L
         };
 
