@@ -22,6 +22,7 @@
 #pragma once
 #include <dpp/export.h>
 #include <stddef.h>
+#include <cstdint>
 
 namespace dpp {
 
