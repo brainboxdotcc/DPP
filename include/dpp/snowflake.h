@@ -296,11 +296,13 @@ struct std::hash<dpp::snowflake>
 template <>
 struct std::formatter<dpp::snowflake>
 {
-        constexpr auto parse(std::format_parse_context& ctx) {
+        template<class TP>
+        constexpr TP::iterator parse(TP& ctx) {
         return ctx.begin();
         }
 
-        auto format(const dpp::snowflake& snowflake, std::format_context& ctx) const {
+        template<class TF>
+        TF::iterator format(const dpp::snowflake& snowflake, TF& ctx) const {
         return std::format_to(ctx.out(), "{}", snowflake.str());
         }
 };
