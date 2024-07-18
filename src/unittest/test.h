@@ -265,7 +265,6 @@ DPP_TEST(CORO_MUMBO_JUMBO, "coro: online mumbo jumbo in event handler", tf_onlin
 
 DPP_TEST(SNOWLAKE_STD_FORMAT, "snowlfake: std::format support", tf_offline);
 
-
 void coro_offline_tests();
 void coro_online_tests(dpp::cluster *bot);
 
