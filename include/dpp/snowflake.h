@@ -287,7 +287,7 @@ struct std::hash<dpp::snowflake>
 // apple support on clang 14 https://developer.apple.com/xcode/cpp/
 #if (!defined(__clang__) || \
         (defined(__clang__) && ((__clang_major__ >= 15 && defined(__APPLE__)) || (__clang_major__ >= 14 && !defined(__APPLE__))))) && (defined(__cpp_lib_format) || \
-        (__has_include(<format>))
+        (__has_include(<format>)))
 #include <format>
 
 /*

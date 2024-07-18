@@ -387,7 +387,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
                 // apple support on clang 14 https://developer.apple.com/xcode/cpp/
                 #if (!defined(__clang__) || \
                         (defined(__clang__) && ((__clang_major__ >= 15 && defined(__APPLE__)) || (__clang_major__ >= 14 && !defined(__APPLE__))))) && (defined(__cpp_lib_format) || \
-                        (__has_include(<format>))
+                        (__has_include(<format>)))
                         set_test(SNOWFLAKE_STD_FORMAT,
                             std::format("{}",dpp::snowflake{}) == "0" &&
                             std::format("{}",dpp::snowflake{12345}) == "12345" &&
