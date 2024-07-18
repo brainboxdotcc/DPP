@@ -70,7 +70,7 @@ jobs:
 
       - name: Setup mold
         if: ${{ matrix.cfg.mold == 'yes' }}
-        uses: rui314/setup-mold@2e332a0b602c2fc65d2d3995941b1b29a5f554a0
+        uses: rui314/setup-mold@2e332a0b602c2fc65d2d3995941b1b29a5f554a0 # v1
 
       - name: Generate CMake
         run: cmake -B build -DDPP_NO_VCPKG=ON -DAVX_TYPE=AVX0 -DCMAKE_BUILD_TYPE=Release ${{matrix.cfg.cmake-flags}}
@@ -118,7 +118,7 @@ jobs:
       fail-fast: false # Don't fail everything if one fails. We want to test each OS/Compiler individually
       matrix:
         cfg:
-          - { arch: 'x64', concurrency: 3, os: macos-latest, cpp-version: clang++-14, cmake-flags: ''}
+          - { arch: 'x64', concurrency: 3, os: macos-latest, cpp-version: clang++-15, cmake-flags: ''}
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@17d0e2bd7d51742c71671bd19fa12bdc9d40a3d6 # v2.8.1
@@ -127,6 +127,11 @@ jobs:
 
       - name: Checkout D++
         uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
+
+      - name: Update Xcode
+        uses: maxim-lobanov/setup-xcode@v60606e260d2fc5762a71e64e74b2174e8ea3c8bd # v1.6.0
+        with:
+          xcode-version: '15.3'
 
       - name: Install homebrew packages
         run: brew install cmake make libsodium opus openssl pkg-config
