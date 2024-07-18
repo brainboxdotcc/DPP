@@ -285,13 +285,12 @@ struct std::hash<dpp::snowflake>
 #if __cplusplus >= 202002L
 //fix for https://github.com/llvm/llvm-project/issues/77773 and
 // apple support on clang 14 https://developer.apple.com/xcode/cpp/
-#if (!defined(__clang__) || \
-        (defined(__clang__) && ((__clang_major__ >= 15 && defined(__APPLE__)) || (__clang_major__ >= 14 && !defined(__APPLE__))))) && (defined(__cpp_lib_format) || \
-        (__has_include(<format>)))
+#if (defined(__cpp_lib_format) || \
+        (defined(__clang__) && __clang_major__ >= 14 && !defined(__APPLE__) && __has_include(<format>)))
 #include <format>
 
 /*
- * @brief implementation of formater for dpp::snowlfake for std::format support
+ * @brief implementation of formater for dpp::snowflake for std::format support
  * https://en.cppreference.com/w/cpp/utility/format/formatter
  */
 template <>

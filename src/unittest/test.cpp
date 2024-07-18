@@ -385,9 +385,9 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 
                 //fix for https://github.com/llvm/llvm-project/issues/77773 and
                 // apple support on clang 14 https://developer.apple.com/xcode/cpp/
-                #if (!defined(__clang__) || \
-                        (defined(__clang__) && ((__clang_major__ >= 15 && defined(__APPLE__)) || (__clang_major__ >= 14 && !defined(__APPLE__))))) && (defined(__cpp_lib_format) || \
-                        (__has_include(<format>)))
+                #if (defined(__cpp_lib_format) || \
+                        (defined(__clang__) && __clang_major__ >= 14 && !defined(__APPLE__) && __has_include(<format>)))
+
                         set_test(SNOWFLAKE_STD_FORMAT,
                             std::format("{}",dpp::snowflake{}) == "0" &&
                             std::format("{}",dpp::snowflake{12345}) == "12345" &&
@@ -800,7 +800,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 				 m5.get_url() == "" &&
 				 m6.get_url() == "" &&
 				 m7.get_url() == "" &&
-				 m8.get_url() == "" 
+				 m8.get_url() == ""
 		);
 	}
 
@@ -910,31 +910,31 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 
 		set_test(UTILITY_USER_URL, false);
 		auto user_url = dpp::utility::user_url(123);
-		set_test(UTILITY_USER_URL, 
-				 user_url == dpp::utility::url_host + "/users/123" && 
+		set_test(UTILITY_USER_URL,
+				 user_url == dpp::utility::url_host + "/users/123" &&
 				 dpp::utility::user_url(0) == ""
 		);
 
 		set_test(UTILITY_MESSAGE_URL, false);
 		auto message_url = dpp::utility::message_url(1,2,3);
 		set_test(UTILITY_MESSAGE_URL,
-				 message_url == dpp::utility::url_host+ "/channels/1/2/3" && 
+				 message_url == dpp::utility::url_host+ "/channels/1/2/3" &&
 				 dpp::utility::message_url(0,2,3) == "" &&
-				 dpp::utility::message_url(1,0,3) == "" && 
+				 dpp::utility::message_url(1,0,3) == "" &&
 				 dpp::utility::message_url(1,2,0) == "" &&
 				 dpp::utility::message_url(0,0,3) == "" &&
 				 dpp::utility::message_url(0,2,0) == "" &&
 				 dpp::utility::message_url(1,0,0) == "" &&
-				 dpp::utility::message_url(0,0,0) == "" 
+				 dpp::utility::message_url(0,0,0) == ""
 		);
 
 		set_test(UTILITY_CHANNEL_URL, false);
 		auto channel_url = dpp::utility::channel_url(1,2);
-		set_test(UTILITY_CHANNEL_URL, 
+		set_test(UTILITY_CHANNEL_URL,
 				 channel_url == dpp::utility::url_host+ "/channels/1/2" &&
 				 dpp::utility::channel_url(0,2) == "" &&
 				 dpp::utility::channel_url(1,0) == "" &&
-				 dpp::utility::channel_url(0,0) == "" 
+				 dpp::utility::channel_url(0,0) == ""
 		);
 
 		set_test(UTILITY_THREAD_URL, false);
@@ -943,7 +943,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 				 thread_url == dpp::utility::url_host+ "/channels/1/2" &&
 				 dpp::utility::thread_url(0,2) == "" &&
 				 dpp::utility::thread_url(1,0) == "" &&
-				 dpp::utility::thread_url(0,0) == "" 
+				 dpp::utility::thread_url(0,0) == ""
 		);
 	}
 
@@ -1672,7 +1672,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 									set_test(TIMESTAMP, false);
 								}
 							} else {
-								set_test(MESSAGESGET, false);	
+								set_test(MESSAGESGET, false);
 							}
 						}  else {
 							set_test(MESSAGESGET, false);
