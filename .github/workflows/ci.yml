@@ -134,6 +134,9 @@ jobs:
         with:
           xcode-version: ${{ matrix.cfg.xcode-version }}
 
+      - name: Clang Defines
+        run: clang++ -dM -E -x c /dev/null | grep __clang_m
+
       - name: Install homebrew packages
         run: brew install cmake make libsodium opus openssl pkg-config
 
