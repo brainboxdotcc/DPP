@@ -24,7 +24,7 @@ option(RUN_LDCONFIG "Run ldconfig after installation" ON)
 option(DPP_INSTALL "Generate the install target" ON)
 option(DPP_BUILD_TEST "Build the test program" ON)
 option(DPP_NO_VCPKG "No VCPKG" OFF)
-option(DPP_CORO "Experimental support for C++20 coroutines" OFF)
+option(DPP_CORO "Experimental support for C++20 coroutines" ON)
 option(DPP_USE_EXTERNAL_JSON "Use an external installation of nlohmann::json" OFF)
 option(DPP_USE_PCH "Use precompiled headers to speed up compilation" OFF)
 option(AVX_TYPE "Force AVX type for speeding up audio mixing" OFF)
@@ -115,3 +115,43 @@ else()
 	# that made no sense, it seems they may have changed their parsing rules somehow.
 	message("-- Using bundled nlohmann::json")
 endif()
+
+if ("cxx_std_20" IN_LIST CMAKE_CXX_COMPILE_FEATURES)
+	include(CheckCXXSourceCompiles)
+	unset(HAS_FORMAT CACHE)
+	set(temp_flags "${CMAKE_REQUIRED_FLAGS}")
+	set(CMAKE_REQUIRED_FLAGS "-std=c++20")
+	check_cxx_source_compiles(
+		"
+		#include <format>
+		#include <string>
+
+		struct MyType {
+		int value;
+		std::string str() const { return std::to_string(value); }
+		};
+
+		template <>
+		struct std::formatter<MyType> : std::formatter<std::string> {
+		auto format(const MyType& item, std::format_context& ctx) const -> decltype(ctx.out()) {
+		  return std::format_to(ctx.out(), \"{}\", item.str());
+		}
+		};
+
+		int main() {
+		MyType my{42};
+		auto s = std::format(\"{}\", my);
+		return 0;
+		}
+		"
+		HAS_FORMAT
+
+	)
+	set(CMAKE_REQUIRED_FLAGS ${temp_flags})
+	if(HAS_FORMAT)
+		message("-- INFO: Found std::format support")
+		target_compile_definitions(dpp PUBLIC DPP_HAS_FORMAT)
+	else ()
+		message("-- INFO: std::format support not found")
+	endif()
+endif ()
