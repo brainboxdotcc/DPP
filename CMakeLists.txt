@@ -116,7 +116,7 @@ else()
 	message("-- Using bundled nlohmann::json")
 endif()
 
-if ("cxx_std_20" IN_LIST CMAKE_CXX_COMPILE_FEATURES)
+if (CMAKE_CXX_STANDARD GREATER_EQUAL 20)
 	include(CheckCXXSourceCompiles)
 	unset(HAS_FORMAT CACHE)
 	set(temp_flags "${CMAKE_REQUIRED_FLAGS}")
