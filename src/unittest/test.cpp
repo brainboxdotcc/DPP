@@ -386,7 +386,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
                 //fix for https://github.com/llvm/llvm-project/issues/77773 and
                 // apple support on clang 14 https://developer.apple.com/xcode/cpp/
                 #if (defined(__cpp_lib_format) || \
-                        (defined(__clang__) && __clang_major__ >= 14 && !defined(__APPLE__) && __has_include(<format>)))
+                        (defined(__clang__) && __clang_major__ >= 14 && !defined(__APPLE__) && __has_include(<format>))) || ( defined(__GNUC__) &&  __GNUC__ >= 13)
 
                         set_test(SNOWFLAKE_STD_FORMAT,
                             std::format("{}",dpp::snowflake{}) == "0" &&

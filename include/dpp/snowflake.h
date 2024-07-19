@@ -286,7 +286,8 @@ struct std::hash<dpp::snowflake>
 //fix for https://github.com/llvm/llvm-project/issues/77773 and
 // apple support on clang 14 https://developer.apple.com/xcode/cpp/
 #if (defined(__cpp_lib_format) || \
-        (defined(__clang__) && __clang_major__ >= 14 && !defined(__APPLE__) && __has_include(<format>)))
+        (defined(__clang__) && __clang_major__ >= 14 && !defined(__APPLE__) && __has_include(<format>))) || ( defined(__GNUC__) &&  __GNUC__ >= 13)
+
 #include <format>
 
 /*
@@ -297,13 +298,13 @@ template <>
 struct std::formatter<dpp::snowflake>
 {
         template<class TP>
-        constexpr TP::iterator parse(TP& ctx) {
-        return ctx.begin();
+        constexpr typename TP::iterator parse(TP& ctx) {
+                return ctx.begin();
         }
 
         template<class TF>
-        TF::iterator format(const dpp::snowflake& snowflake, TF& ctx) const {
-        return std::format_to(ctx.out(), "{}", snowflake.str());
+        typename TF::iterator format(const dpp::snowflake& snowflake, TF& ctx) const {
+                return std::format_to(ctx.out(), "{}", snowflake.str());
         }
 };
 
