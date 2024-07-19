@@ -30,7 +30,6 @@
 #include <format>
 #endif
 
-
 /**
  * @brief The main namespace for D++ functions. classes and types
  */
