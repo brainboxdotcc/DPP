@@ -117,7 +117,7 @@ else()
 endif()
 
 
-if(CMAKE_CXX_STANDARD EQUAL 20 OR DPP_CORO)
+if(CMAKE_CXX_STANDARD GREATER_EQUAL 20 OR DPP_CORO)
 	include(CheckCXXSourceCompiles)
 	unset(HAS_FORMAT CACHE)
 	set(temp_flags "${CMAKE_REQUIRED_FLAGS}")
