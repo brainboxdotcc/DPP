@@ -116,7 +116,6 @@ else()
 	message("-- Using bundled nlohmann::json")
 endif()
 
-
 if(CMAKE_CXX_STANDARD GREATER_EQUAL 20 OR DPP_CORO)
 	include(CheckCXXSourceCompiles)
 	unset(HAS_FORMAT CACHE)
