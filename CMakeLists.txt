@@ -120,7 +120,11 @@ if ("cxx_std_20" IN_LIST CMAKE_CXX_COMPILE_FEATURES)
 	include(CheckCXXSourceCompiles)
 	unset(HAS_FORMAT CACHE)
 	set(temp_flags "${CMAKE_REQUIRED_FLAGS}")
-	set(CMAKE_REQUIRED_FLAGS "-std=c++20")
+	if (WIN32)
+		set(CMAKE_REQUIRED_FLAGS "/std:c++20")
+	else ()
+		set(CMAKE_REQUIRED_FLAGS "-std=c++20")
+	endif ()
 	check_cxx_source_compiles(
 		"
 		#include <format>
