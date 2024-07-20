@@ -406,6 +406,7 @@ static const std::map<std::string, dpp::events::event*> event_map = {
 	{ "GUILD_SOUNDBOARD_SOUND_CREATE", nullptr },
 	{ "GUILD_SOUNDBOARD_SOUND_DELETE", nullptr },
 	{ "GUILD_SOUNDBOARD_SOUNDS_UPDATE", nullptr },
+	{ "GUILD_SOUNDBOARD_SOUND_UPDATE", nullptr },
 	{ "VOICE_CHANNEL_STATUS_UPDATE", nullptr },
 	{ "GUILD_SCHEDULED_EVENT_CREATE", make_static_event<dpp::events::guild_scheduled_event_create>() },
 	{ "GUILD_SCHEDULED_EVENT_UPDATE", make_static_event<dpp::events::guild_scheduled_event_update>() },
