@@ -23,6 +23,7 @@
 #include <dpp/export.h>
 #include <dpp/json_fwd.h>
 #include <dpp/exception.h>
+#include <dpp/autoconfig.h>
 #include <cstdint>
 #include <type_traits>
 

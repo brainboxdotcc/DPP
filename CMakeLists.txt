@@ -154,8 +154,14 @@ if(CMAKE_CXX_STANDARD GREATER_EQUAL 20 OR DPP_CORO)
 	set(CMAKE_REQUIRED_FLAGS ${temp_flags})
 	if(HAS_FORMAT)
 		message("-- INFO: Found std::format support")
-		target_compile_definitions(dpp PUBLIC DPP_HAS_FORMAT)
+		set(DPP_HAS_FORMAT 1)
 	else ()
 		message("-- INFO: std::format support not found")
 	endif()
 endif ()
+
+configure_file(
+		${CMAKE_CURRENT_SOURCE_DIR}/include/dpp/autoconfig.h.in
+		${CMAKE_CURRENT_SOURCE_DIR}/include/dpp/autoconfig.h
+		@ONLY
+)
