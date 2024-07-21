@@ -2753,7 +2753,7 @@ public:
 	 * @see https://discord.com/developers/docs/resources/emoji#modify-application-emoji
 	 * @param newemoji The emoji to edit
 	 * @param callback Function to call when the API call completes.
-	 * On success the callback will contain a dpp::emoji_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 * On success the callback will contain a dpp::emoji object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void application_emoji_edit(const class emoji& newemoji, command_completion_event_t callback = utility::log_error());
 
