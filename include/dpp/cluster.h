@@ -2719,6 +2719,55 @@ public:
 	void guild_emoji_delete(snowflake guild_id, snowflake emoji_id, command_completion_event_t callback = utility::log_error());
 
 	/**
+	 * @brief List all Application Emojis
+	 *
+	 * @see https://discord.com/developers/docs/resources/emoji#list-application-emojis
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::emoji_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void application_emojis_get(command_completion_event_t callback = utility::log_error());
+
+	/**
+	 * @brief Get an Application Emoji
+	 *
+	 * @see https://discord.com/developers/docs/resources/emoji#get-application-emoji
+	 * @param emoji_id The ID of the Emoji to get.
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::emoji object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void application_emoji_get(snowflake emoji_id, command_completion_event_t callback = utility::log_error());
+
+	/**
+	 * @brief Create an Application Emoji
+	 *
+	 * @see https://discord.com/developers/docs/resources/emoji#create-application-emoji
+	 * @param newemoji The emoji to create
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::emoji object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void application_emoji_create(const class emoji& newemoji, command_completion_event_t callback = utility::log_error());
+
+	/**
+	 * @brief Edit an Application Emoji
+	 *
+	 * @see https://discord.com/developers/docs/resources/emoji#modify-application-emoji
+	 * @param newemoji The emoji to edit
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::emoji_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void application_emoji_edit(const class emoji& newemoji, command_completion_event_t callback = utility::log_error());
+
+	/**
+	 * @brief Delete an Application Emoji
+	 *
+	 * @see https://discord.com/developers/docs/resources/emoji#delete-application-emoji
+	 * @param emoji_id The emoji's ID to delete.
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void application_emoji_delete(snowflake emoji_id, command_completion_event_t callback = utility::log_error());
+
+	/**
 	 * @brief Get prune counts
 	 * 
 	 * Returns a prune object indicating the number of members that would be removed in a prune operation. Requires the `KICK_MEMBERS`
