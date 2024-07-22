@@ -203,6 +203,11 @@ public:
 	std::condition_variable terminating;
 
 	/**
+	 * @brief The time (in seconds) that a request is allowed to take.
+	 */
+	uint16_t request_timeout = 10;
+
+	/**
 	 * @brief Constructor for creating a cluster. All but the token are optional.
 	 * @param token The bot token to use for all HTTP commands and websocket connections
 	 * @param intents A bitmask of dpd::intents values for all shards on this cluster. This is required to be sent for all bots with over 100 servers.
@@ -419,6 +424,15 @@ public:
 	 * @return shard_list& Reference to map of shards for this cluster
 	 */
 	const shard_list& get_shards();
+
+	/**
+	 * @brief Sets the request timeout.
+	 *
+	 * @param timeout The length of time (in seconds) that requests are allowed to take. Default: 20.
+	 *
+	 * @return cluster& Reference to self for chaining.
+	 */
+	cluster& set_request_timeout(uint16_t timeout);
 
 	/* Functions for attaching to event handlers */
 

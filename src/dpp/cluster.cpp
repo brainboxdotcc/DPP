@@ -456,4 +456,9 @@ const shard_list& cluster::get_shards() {
 	return shards;
 }
 
+cluster& cluster::set_request_timeout(uint16_t timeout) {
+	request_timeout = timeout;
+	return *this;
+}
+
 };
