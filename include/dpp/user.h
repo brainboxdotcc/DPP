@@ -28,6 +28,8 @@
 
 namespace dpp {
 
+constexpr uint32_t MAX_AVATAR_SIZE = 10240 * 1000; // 10240KB.
+
 /**
  * @brief Various bitmask flags used to represent information about a dpp::user
  */
