@@ -205,7 +205,7 @@ public:
 	/**
 	 * @brief The time (in seconds) that a request is allowed to take.
 	 */
-	uint16_t request_timeout = 10;
+	uint16_t request_timeout = 20;
 
 	/**
 	 * @brief Constructor for creating a cluster. All but the token are optional.
