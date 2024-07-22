@@ -22,6 +22,6 @@
 
 #pragma once
 
-#if __cplusplus >= 202002L
+#if __cplusplus >= 202002L // c++20 or higher
 #cmakedefine DPP_HAS_FORMAT
 #endif
