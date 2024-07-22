@@ -261,6 +261,26 @@ emoji_map cluster::guild_emojis_get_sync(snowflake guild_id) {
 	return dpp::sync<emoji_map>(this, static_cast<void (cluster::*)(snowflake, command_completion_event_t)>(&cluster::guild_emojis_get), guild_id);
 }
 
+emoji_map cluster::application_emojis_get_sync() {
+	return dpp::sync<emoji_map>(this, static_cast<void (cluster::*)(command_completion_event_t)>(&cluster::application_emojis_get));
+}
+
+emoji cluster::application_emoji_get_sync(snowflake emoji_id) {
+	return dpp::sync<emoji>(this, static_cast<void (cluster::*)(snowflake, command_completion_event_t)>(&cluster::application_emoji_get), emoji_id);
+}
+
+emoji cluster::application_emoji_create_sync(const class emoji& newemoji) {
+	return dpp::sync<emoji>(this, static_cast<void (cluster::*)(const class emoji&, command_completion_event_t)>(&cluster::application_emoji_create), newemoji);
+}
+
+emoji cluster::application_emoji_edit_sync(const class emoji& newemoji) {
+	return dpp::sync<emoji>(this, static_cast<void (cluster::*)(const class emoji&, command_completion_event_t)>(&cluster::application_emoji_edit), newemoji);
+}
+
+confirmation cluster::application_emoji_delete_sync(snowflake emoji_id) {
+	return dpp::sync<confirmation>(this, static_cast<void (cluster::*)(snowflake, command_completion_event_t)>(&cluster::application_emoji_delete), emoji_id);
+}
+
 entitlement_map cluster::entitlements_get_sync(snowflake user_id, const std::vector<snowflake>& sku_ids, snowflake before_id, snowflake after_id, uint8_t limit, snowflake guild_id, bool exclude_ended) {
 	return dpp::sync<entitlement_map>(this, static_cast<void (cluster::*)(snowflake, const std::vector<snowflake>&, snowflake, snowflake, uint8_t, snowflake, bool, command_completion_event_t)>(&cluster::entitlements_get), user_id, sku_ids, before_id, after_id, limit, guild_id, exclude_ended);
 }

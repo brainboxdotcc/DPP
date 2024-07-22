@@ -709,6 +709,60 @@
 [[nodiscard]] async<confirmation_callback_t> co_guild_emojis_get(snowflake guild_id);
 
 /**
+ * @brief List all Application Emojis
+ *
+ * @see dpp::cluster::application_emojis_get
+ * @see https://discord.com/developers/docs/resources/emoji#list-application-emojis
+ * @return emoji_map returned object on completion
+ * \memberof dpp::cluster
+ */
+[[nodiscard]] async<confirmation_callback_t> co_application_emojis_get();
+
+/**
+ * @brief Get an Application Emoji
+ *
+ * @see dpp::cluster::application_emoji_get
+ * @see https://discord.com/developers/docs/resources/emoji#get-application-emoji
+ * @param emoji_id The ID of the Emoji to get.
+ * @return emoji returned object on completion
+ * \memberof dpp::cluster
+ */
+[[nodiscard]] async<confirmation_callback_t> co_application_emoji_get(snowflake emoji_id);
+
+/**
+ * @brief Create an Application Emoji
+ *
+ * @see dpp::cluster::application_emoji_create
+ * @see https://discord.com/developers/docs/resources/emoji#create-application-emoji
+ * @param newemoji The emoji to create
+ * @return emoji returned object on completion
+ * \memberof dpp::cluster
+ */
+[[nodiscard]] async<confirmation_callback_t> co_application_emoji_create(const class emoji& newemoji);
+
+/**
+ * @brief Edit an Application Emoji
+ *
+ * @see dpp::cluster::application_emoji_edit
+ * @see https://discord.com/developers/docs/resources/emoji#modify-application-emoji
+ * @param newemoji The emoji to edit
+ * @return emoji returned object on completion
+ * \memberof dpp::cluster
+ */
+[[nodiscard]] async<confirmation_callback_t> co_application_emoji_edit(const class emoji& newemoji);
+
+/**
+ * @brief Delete an Application Emoji
+ *
+ * @see dpp::cluster::application_emoji_delete
+ * @see https://discord.com/developers/docs/resources/emoji#delete-application-emoji
+ * @param emoji_id The emoji's ID to delete.
+ * @return confirmation returned object on completion
+ * \memberof dpp::cluster
+ */
+[[nodiscard]] async<confirmation_callback_t> co_application_emoji_delete(snowflake emoji_id);
+
+/**
  * @brief Returns all entitlements for a given app, active and expired.
  *
  * @see dpp::cluster::entitlements_get
