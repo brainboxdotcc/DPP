@@ -21,5 +21,7 @@
  ************************************************************************************/
 
 #pragma once
-#cmakedefine DPP_HAS_FORMAT
 
+#if __cplusplus >= 202002L
+#cmakedefine DPP_HAS_FORMAT
+#endif
