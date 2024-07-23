@@ -127,50 +127,57 @@ void websocket_client::write(const std::string &data)
 
 bool websocket_client::handle_buffer(std::string &buffer)
 {
-	switch (state) {
-		case HTTP_HEADERS:
-			if (buffer.find("\r\n\r\n") != std::string::npos) {
-				/* Got all headers, proceed to new state */
+	if (state == HTTP_HEADERS) {
+		/* We can expect Discord to end all packets with this.
+		 * If they don't, something is wrong and we should abort.
+		 */
+		if (buffer.find("\r\n\r\n") == std::string::npos) {
+			return false;
+		}
 
-				/* Get headers string */
-				std::string headers = buffer.substr(0, buffer.find("\r\n\r\n"));
+		/* Got all headers, proceed to new state */
 
-				/* Modify buffer, remove headers section */
-				buffer.erase(0, buffer.find("\r\n\r\n") + 4);
+		/* Get headers string */
+		std::string headers = buffer.substr(0, buffer.find("\r\n\r\n"));
 
-				/* Process headers into map */
-				std::vector<std::string> h = utility::tokenize(headers);
-				if (h.size()) {
-					std::string status_line = h[0];
-					h.erase(h.begin());
-					/* HTTP/1.1 101 Switching Protocols */
-					std::vector<std::string> status = utility::tokenize(status_line, " ");
-					if (status.size() >= 3 && status[1] == "101") {
-						for(auto &hd : h) {
-							std::string::size_type sep = hd.find(": ");
-							if (sep != std::string::npos) {
-								std::string key = hd.substr(0, sep);
-								std::string value = hd.substr(sep + 2, hd.length());
-								http_headers[key] = value;
-							}
-						}
-		
-						state = CONNECTED;
-					} else if (status.size() < 3) {
-						log(ll_warning, "Malformed HTTP response on websocket");
-						return false;
-					} else if (status[1] != "200" && status[1] != "204") {
-						log(ll_warning, "Received unhandled code: " + status[1]);
-						return false;
-					}
+		/* Modify buffer, remove headers section */
+		buffer.erase(0, buffer.find("\r\n\r\n") + 4);
+
+		/* Process headers into map */
+		std::vector<std::string> h = utility::tokenize(headers);
+
+		/* No headers? Something aint right. */
+		if (h.empty()) {
+			return false;
+		}
+
+		std::string status_line = h[0];
+		h.erase(h.begin());
+		std::vector<std::string> status = utility::tokenize(status_line, " ");
+		/* HTTP/1.1 101 Switching Protocols */
+		if (status.size() >= 3 && status[1] == "101") {
+			for(auto &hd : h) {
+				std::string::size_type sep = hd.find(": ");
+				if (sep != std::string::npos) {
+					std::string key = hd.substr(0, sep);
+					std::string value = hd.substr(sep + 2, hd.length());
+					http_headers[key] = value;
 				}
 			}
-		break;
-		case CONNECTED:
-			/* Process packets until we can't */
-			while (this->parseheader(buffer));
-		break;
+
+			state = CONNECTED;
+		} else if (status.size() < 3) {
+			log(ll_warning, "Malformed HTTP response on websocket");
+			return false;
+		} else if (status[1] != "200" && status[1] != "204") {
+			log(ll_warning, "Received unhandled code: " + status[1]);
+			return false;
+		}
+	} else if (state == CONNECTED) {
+		/* Process packets until we can't */
+		while (this->parseheader(buffer));
 	}
+
 	return true;
 }
 
@@ -184,88 +191,89 @@ bool websocket_client::parseheader(std::string &data)
 	if (data.size() < 4) {
 		/* Not enough data to form a frame yet */
 		return false;
-	} else {
-		unsigned char opcode = data[0];
-		switch (opcode & ~WS_FINBIT) {
-			case OP_CONTINUATION:
-			case OP_TEXT:
-			case OP_BINARY:
-			case OP_PING:
-			case OP_PONG: {
-				unsigned char len1 = data[1];
-				unsigned int payloadstartoffset = 2;
+	}
 
-				if (len1 & WS_MASKBIT) {
-					len1 &= ~WS_MASKBIT;
-					payloadstartoffset += 2;
-					/* We don't handle masked data, because discord doesn't send it */
-					return true;
-				}
+	unsigned char opcode = data[0];
+	switch (opcode & ~WS_FINBIT) {
+		case OP_CONTINUATION:
+		case OP_TEXT:
+		case OP_BINARY:
+		case OP_PING:
+		case OP_PONG: {
+			unsigned char len1 = data[1];
+			unsigned int payloadstartoffset = 2;
 
-				/* 6 bit ("small") length frame */
-				uint64_t len = len1;
+			if (len1 & WS_MASKBIT) {
+				len1 &= ~WS_MASKBIT;
+				payloadstartoffset += 2;
+				/* We don't handle masked data, because discord doesn't send it */
+				return true;
+			}
 
-				if (len1 == WS_PAYLOAD_LENGTH_MAGIC_LARGE) {
-					/* 24 bit ("large") length frame */
-					if (data.length() < 8) {
-						/* We don't have a complete header yet */
-						return false;
-					}
+			/* 6 bit ("small") length frame */
+			uint64_t len = len1;
 
-					unsigned char len2 = (unsigned char)data[2];
-					unsigned char len3 = (unsigned char)data[3];
-					len = (len2 << 8) | len3;
-
-					payloadstartoffset += 2;
-				} else if (len1 == WS_PAYLOAD_LENGTH_MAGIC_HUGE) {
-					/* 64 bit ("huge") length frame */
-					if (data.length() < 10) {
-						/* We don't have a complete header yet */
-						return false;
-					}
-					len = 0;
-					for (int v = 2, shift = 56; v < 10; ++v, shift -= 8) {
-						unsigned char l = (unsigned char)data[v];
-						len |= (uint64_t)(l & 0xff) << shift;
-					}
-					payloadstartoffset += 8;
-				}
-
-				if (data.length() < payloadstartoffset + len) {
-					/* We don't have a complete frame yet */
+			if (len1 == WS_PAYLOAD_LENGTH_MAGIC_LARGE) {
+				/* 24 bit ("large") length frame */
+				if (data.length() < 8) {
+					/* We don't have a complete header yet */
 					return false;
 				}
 
-				if ((opcode & ~WS_FINBIT) == OP_PING || (opcode & ~WS_FINBIT) == OP_PONG) {
-					handle_ping_pong((opcode & ~WS_FINBIT) == OP_PING, data.substr(payloadstartoffset, len));
-				} else {
-					/* Pass this frame to the deriving class */
-					this->handle_frame(data.substr(payloadstartoffset, len));
+				unsigned char len2 = (unsigned char)data[2];
+				unsigned char len3 = (unsigned char)data[3];
+				len = (len2 << 8) | len3;
+
+				payloadstartoffset += 2;
+			} else if (len1 == WS_PAYLOAD_LENGTH_MAGIC_HUGE) {
+				/* 64 bit ("huge") length frame */
+				if (data.length() < 10) {
+					/* We don't have a complete header yet */
+					return false;
 				}
-
-				/* Remove this frame from the input buffer */
-				data.erase(data.begin(), data.begin() + payloadstartoffset + len);
-
-				return true;
+				len = 0;
+				for (int v = 2, shift = 56; v < 10; ++v, shift -= 8) {
+					unsigned char l = (unsigned char)data[v];
+					len |= (uint64_t)(l & 0xff) << shift;
+				}
+				payloadstartoffset += 8;
 			}
-			break;
 
-			case OP_CLOSE: {
-				uint16_t error = data[2] & 0xff;
-			       	error <<= 8;
-				error |= (data[3] & 0xff);
-				this->error(error);
+			if (data.length() < payloadstartoffset + len) {
+				/* We don't have a complete frame yet */
 				return false;
 			}
-			break;
 
-			default: {
-				this->error(0);
-				return false;
+			if ((opcode & ~WS_FINBIT) == OP_PING) {
+				handle_ping(data.substr(payloadstartoffset, len));
+			} else if ((opcode & ~WS_FINBIT) != OP_PONG) {
+				/* Pass this frame to the deriving class */
+				this->handle_frame(data.substr(payloadstartoffset, len));
 			}
-			break;
+
+			/* Remove this frame from the input buffer */
+			data.erase(data.begin(), data.begin() + payloadstartoffset + len);
+
+			return true;
 		}
+		break;
+
+		case OP_CLOSE: {
+			uint16_t error = data[2] & 0xff;
+			error <<= 8;
+			error |= (data[3] & 0xff);
+			this->error(error);
+			return false;
+		}
+		break;
+
+		default: {
+			this->error(0);
+			return false;
+		}
+		break;
 	}
+
 	return false;
 }
 
@@ -282,16 +290,14 @@ void websocket_client::one_second_timer()
 	}
 }
 
-void websocket_client::handle_ping_pong(bool ping, const std::string &payload)
+void websocket_client::handle_ping(const std::string &payload)
 {
-	if (ping) {
-		/* For receiving pings we echo back their payload with the type OP_PONG */
-		unsigned char out[MAXHEADERSIZE];
-		size_t s = this->fill_header(out, payload.length(), OP_PONG);
-		std::string header((const char*)out, s);
-		ssl_client::write(header);
-		ssl_client::write(payload);
-	}
+	/* For receiving pings we echo back their payload with the type OP_PONG */
+	unsigned char out[MAXHEADERSIZE];
+	size_t s = this->fill_header(out, payload.length(), OP_PONG);
+	std::string header((const char*)out, s);
+	ssl_client::write(header);
+	ssl_client::write(payload);
 }
 
 void websocket_client::send_close_packet()

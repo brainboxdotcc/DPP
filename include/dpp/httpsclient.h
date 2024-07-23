@@ -32,7 +32,7 @@
 
 namespace dpp {
 
-static inline const std::string http_version = "DiscordBot (https://github.com/brainboxdotcc/DPP, "
+static inline constexpr std::string http_version = "DiscordBot (https://github.com/brainboxdotcc/DPP, "
                                                 + to_hex(DPP_VERSION_MAJOR, false) + "."
                                                 + to_hex(DPP_VERSION_MINOR, false) + "."
                                                 + to_hex(DPP_VERSION_PATCH, false) + ")";

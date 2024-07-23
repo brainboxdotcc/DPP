@@ -151,11 +151,10 @@ class DPP_EXPORT websocket_client : public ssl_client {
 	size_t fill_header(unsigned char* outbuf, size_t sendlength, ws_opcode opcode);
 
 	/**
-	 * @brief Handle ping and pong requests.
-	 * @param ping True if this is a ping, false if it is a pong 
-	 * @param payload The ping payload, to be returned as-is for a ping
+	 * @brief Handle ping requests.
+	 * @param payload The ping payload, to be returned as-is for a pong
 	 */
-	void handle_ping_pong(bool ping, const std::string &payload);
+	void handle_ping(const std::string &payload);
 
 protected:
 

@@ -73,7 +73,7 @@
 #include <dpp/dns.h>
 
 /* Maximum allowed time in milliseconds for socket read/write timeouts and connect() */
-#define SOCKET_OP_TIMEOUT 5000
+constexpr uint16_t SOCKET_OP_TIMEOUT{5000};
 
 namespace dpp {
 
@@ -123,10 +123,10 @@ thread_local std::unordered_map<std::string, keepalive_cache_t> keepalives;
  * SSL_read in non-blocking mode will only read 16k at a time. There's no point in a bigger buffer as
  * it'd go unused.
  */
-#define DPP_BUFSIZE 16 * 1024
+constexpr uint32_t DPP_BUFSIZE{16 * 1024};
 
 /* Represents a failed socket system call, e.g. connect() failure */
-const int ERROR_STATUS = -1;
+constexpr int ERROR_STATUS{-1};
 
 bool close_socket(dpp::socket sfd)
 {
@@ -197,25 +197,26 @@ int connect_with_timeout(dpp::socket sockfd, const struct sockaddr *addr, sockle
 #endif
 	if (rc == -1 && err != EWOULDBLOCK && err != EINPROGRESS) {
 		throw connection_exception(err_connect_failure, strerror(errno));
-	} else {
-		/* Set a deadline timestamp 'timeout' ms from now */
-		double deadline = utility::time_f() + (timeout_ms / 1000.0);
-		do {
-			rc = -1;
-			if (utility::time_f() >= deadline) {
-				throw connection_exception(err_connection_timed_out, "Connection timed out");
-			}
-			pollfd pfd = {};
-			pfd.fd = sockfd;
-			pfd.events = POLLOUT;
-			int r = ::poll(&pfd, 1, 10);
-			if (r > 0 && pfd.revents & POLLOUT) {
-				rc = 0;
-			} else if (r != 0 || pfd.revents & POLLERR) {
-				throw connection_exception(err_connection_timed_out, strerror(errno));
-			}
-		} while (rc == -1);
 	}
+
+	/* Set a deadline timestamp 'timeout' ms from now */
+	double deadline = utility::time_f() + (timeout_ms / 1000.0);
+
+	do {
+		if (utility::time_f() >= deadline) {
+			throw connection_exception(err_connection_timed_out, "Connection timed out");
+		}
+		pollfd pfd = {};
+		pfd.fd = sockfd;
+		pfd.events = POLLOUT;
+		const int r = ::poll(&pfd, 1, 10);
+		if (r > 0 && pfd.revents & POLLOUT) {
+			rc = 0;
+		} else if (r != 0 || pfd.revents & POLLERR) {
+			throw connection_exception(err_connection_timed_out, strerror(errno));
+		}
+	} while (rc == -1);
+
 	if (!set_nonblocking(sockfd, false)) {
 		throw connection_exception(err_nonblocking_failure, "Can't switch socket to blocking mode!");
 	}
@@ -502,16 +503,17 @@ void ssl_client::read_loop()
 					read_blocked_on_write = false;
 					read_blocked = false;
 					r = (int) ::recv(sfd, server_to_client_buffer, DPP_BUFSIZE, 0);
+
 					if (r <= 0) {
 						/* error or EOF */
 						return;
-					} else {
-						buffer.append(server_to_client_buffer, r);
-						if (!this->handle_buffer(buffer)) {
-							return;
-						}
-						bytes_in += r;
 					}
+
+					buffer.append(server_to_client_buffer, r);
+					if (!this->handle_buffer(buffer)) {
+						return;
+					}
+					bytes_in += r;
 				} else {
 					do {
 						read_blocked_on_write = false;
