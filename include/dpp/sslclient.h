@@ -239,7 +239,7 @@ public:
 
 	/**
 	 * @brief Write to the output buffer.
-	 * @param data Data to be written to the buffer
+	 * @param data Data to be written to the buffer.
 	 * @note The data may not be written immediately and may be written at a later time to the socket.
 	 */
 	virtual void write(const std::string_view data);
