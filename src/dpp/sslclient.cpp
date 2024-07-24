@@ -176,8 +176,8 @@ bool set_nonblocking(dpp::socket sockfd, bool non_blocking)
  */
 int connect_with_timeout(dpp::socket sockfd, const struct sockaddr *addr, socklen_t addrlen, unsigned int timeout_ms) {
 #ifdef __APPLE__
-		/* Unreliable on OSX right now */
-		return (::connect(sockfd, addr, addrlen));
+	/* Unreliable on OSX right now */
+	return (::connect(sockfd, addr, addrlen));
 #else
 	if (!set_nonblocking(sockfd, true)) {
 		throw dpp::connection_exception(err_nonblocking_failure, "Can't switch socket to non-blocking mode!");
@@ -227,7 +227,7 @@ int connect_with_timeout(dpp::socket sockfd, const struct sockaddr *addr, sockle
 #ifndef _WIN32
 void set_signal_handler(int signal)
 {
-	struct sigaction sa;
+	struct sigaction sa{};
 	sigaction(signal, nullptr, &sa);
 	if (sa.sa_flags == 0 && sa.sa_handler == nullptr) {
 		sa = {};
@@ -389,16 +389,17 @@ void ssl_client::write(const std::string_view data)
 	 */
 	if (nonblocking) {
 		obuffer += data;
+		return;
+	}
+
+	const int data_length = static_cast<int>(data.length());
+	if (plaintext) {
+		if (sfd == INVALID_SOCKET || ::send(sfd, data.data(), data_length, 0) != data_length) {
+			throw dpp::connection_exception(err_write, "write() failed");
+		}
 	} else {
-		const int data_length = (int)data.length();
-		if (plaintext) {
-			if (sfd == INVALID_SOCKET || ::send(sfd, data.data(), data_length, 0) != data_length) {
-				throw dpp::connection_exception(err_write, "write() failed");
-			}
-		} else {
-			if (SSL_write(ssl->ssl, data.data(), data_length) != data_length) {
-				throw dpp::connection_exception(err_ssl_write, "SSL_write() failed");
-			}
+		if (SSL_write(ssl->ssl, data.data(), data_length) != data_length) {
+			throw dpp::connection_exception(err_ssl_write, "SSL_write() failed");
 		}
 	}
 }
@@ -579,14 +580,14 @@ void ssl_client::read_loop()
 					if (r < 0) {
 						/* Write error */
 						return;
-					} else {
-						client_to_server_length -= r;
-						client_to_server_offset += r;
-						bytes_out += r;
 					}
+
+					client_to_server_length -= r;
+					client_to_server_offset += r;
+					bytes_out += r;
 				} else {
 					r = SSL_write(ssl->ssl, client_to_server_buffer + client_to_server_offset, (int)client_to_server_length);
-					
+
 					switch(SSL_get_error(ssl->ssl,r)) {
 						/* We wrote something */
 						case SSL_ERROR_NONE:

@@ -23,8 +23,6 @@
 #include <dpp/export.h>
 #include <string>
 #include <map>
-#include <vector>
-#include <variant>
 #include <dpp/sslclient.h>
 
 namespace dpp {
@@ -167,7 +165,7 @@ protected:
 	 * @brief Get websocket state
 	 * @return websocket state
 	 */
-	ws_state get_state() const;
+	[[nodiscard]] ws_state get_state() const;
 
 public:
 
