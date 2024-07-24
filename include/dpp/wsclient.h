@@ -23,8 +23,6 @@
 #include <dpp/export.h>
 #include <string>
 #include <map>
-#include <vector>
-#include <variant>
 #include <dpp/sslclient.h>
 
 namespace dpp {
@@ -37,7 +35,7 @@ enum websocket_protocol_t : uint8_t {
 	 * @brief JSON data, text, UTF-8 character set
 	 */
 	ws_json = 0,
-	
+
 	/**
 	 * @brief Erlang Term Format (ETF) binary protocol
 	 */
@@ -68,32 +66,32 @@ enum ws_opcode : uint8_t {
 	/**
 	 * @brief Continuation.
 	 */
-        OP_CONTINUATION = 0x00,
+	OP_CONTINUATION = 0x00,
 
 	/**
 	 * @brief Text frame.
 	 */
-        OP_TEXT = 0x01,
+	OP_TEXT = 0x01,
 
 	/**
 	 * @brief Binary frame.
 	 */
-        OP_BINARY = 0x02,
+	OP_BINARY = 0x02,
 
 	/**
 	 * @brief Close notification with close code.
 	 */
-        OP_CLOSE = 0x08,
+	OP_CLOSE = 0x08,
 
 	/**
 	 * @brief Low level ping.
 	 */
-        OP_PING = 0x09,
+	OP_PING = 0x09,
 
 	/**
 	 * @brief Low level pong.
 	 */
-        OP_PONG = 0x0a
+	OP_PONG = 0x0a
 };
 
 /**
@@ -130,7 +128,7 @@ class DPP_EXPORT websocket_client : public ssl_client {
 	 * @param buffer The buffer to operate on. Will modify the string removing completed items from the head of the queue
 	 * @return true if a complete header has been received
 	 */
-	bool parseheader(std::string &buffer);
+	bool parseheader(std::string& buffer);
 
 	/**
 	 * @brief Unpack a frame and pass completed frames up the stack.
@@ -139,7 +137,7 @@ class DPP_EXPORT websocket_client : public ssl_client {
 	 * @param first True if is the first element (reserved for future use)
 	 * @return true if a complete frame has been received
 	 */
-	bool unpack(std::string &buffer, uint32_t offset, bool first = true);
+	bool unpack(std::string& buffer, uint32_t offset, bool first = true);
 
 	/**
 	 * @brief Fill a header for outbound messages
@@ -151,11 +149,10 @@ class DPP_EXPORT websocket_client : public ssl_client {
 	size_t fill_header(unsigned char* outbuf, size_t sendlength, ws_opcode opcode);
 
 	/**
-	 * @brief Handle ping and pong requests.
-	 * @param ping True if this is a ping, false if it is a pong 
-	 * @param payload The ping payload, to be returned as-is for a ping
+	 * @brief Handle ping requests.
+	 * @param payload The ping payload, to be returned as-is for a pong
 	 */
-	void handle_ping_pong(bool ping, const std::string &payload);
+	void handle_ping(const std::string& payload);
 
 protected:
 
@@ -168,7 +165,7 @@ protected:
 	 * @brief Get websocket state
 	 * @return websocket state
 	 */
-	ws_state get_state();
+	[[nodiscard]] ws_state get_state() const;
 
 public:
 
@@ -181,41 +178,41 @@ public:
 	 * @note Voice websockets only support OP_TEXT, and other websockets must be
 	 * OP_BINARY if you are going to send ETF.
 	 */
-        websocket_client(const std::string &hostname, const std::string &port = "443", const std::string &urlpath = "", ws_opcode opcode = OP_BINARY);
+	websocket_client(const std::string& hostname, const std::string& port = "443", const std::string& urlpath = "", ws_opcode opcode = OP_BINARY);
 
 	/**
 	 * @brief Destroy the websocket client object
 	 */
-        virtual ~websocket_client() = default;
+	virtual ~websocket_client() = default;
 
 	/**
 	 * @brief Write to websocket. Encapsulates data in frames if the status is CONNECTED.
 	 * @param data The data to send.
 	 */
-        virtual void write(const std::string &data);
+	virtual void write(const std::string_view data);
 
 	/**
 	 * @brief Processes incoming frames from the SSL socket input buffer.
 	 * @param buffer The buffer contents. Can modify this value removing the head elements when processed.
 	 */
-        virtual bool handle_buffer(std::string &buffer);
+	virtual bool handle_buffer(std::string& buffer);
 
 	/**
 	 * @brief Close websocket
 	 */
-        virtual void close();
+	virtual void close();
 
 	/**
 	 * @brief Receives raw frame content only without headers
-	 * 
+	 *
 	 * @param buffer The buffer contents
 	 * @return True if the frame was successfully handled. False if no valid frame is in the buffer.
 	 */
-	virtual bool handle_frame(const std::string &buffer);
+	virtual bool handle_frame(const std::string& buffer);
 
 	/**
 	 * @brief Called upon error frame.
-	 * 
+	 *
 	 * @param errorcode The error code from the websocket server
 	 */
 	virtual void error(uint32_t errorcode);
