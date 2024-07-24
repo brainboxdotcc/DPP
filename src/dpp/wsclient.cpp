@@ -37,7 +37,7 @@ constexpr size_t WS_MAX_PAYLOAD_LENGTH_SMALL = 125;
 constexpr size_t WS_MAX_PAYLOAD_LENGTH_LARGE = 65535;
 constexpr size_t MAXHEADERSIZE = sizeof(uint64_t) + 2;
 
-websocket_client::websocket_client(const std::string &hostname, const std::string &port, const std::string &urlpath, ws_opcode opcode)
+websocket_client::websocket_client(const std::string& hostname, const std::string& port, const std::string& urlpath, ws_opcode opcode)
 	: ssl_client(hostname, port),
 	state(HTTP_HEADERS),
 	path(urlpath),
@@ -73,7 +73,7 @@ void websocket_client::connect()
 	);
 }
 
-bool websocket_client::handle_frame(const std::string &buffer)
+bool websocket_client::handle_frame(const std::string& buffer)
 {
 	/* This is a stub for classes that derive the websocket client */
 	return true;
@@ -111,7 +111,7 @@ size_t websocket_client::fill_header(unsigned char* outbuf, size_t sendlength, w
 }
 
 
-void websocket_client::write(const std::string &data)
+void websocket_client::write(const std::string_view data)
 {
 	if (state == HTTP_HEADERS) {
 		/* Simple write */
@@ -125,7 +125,7 @@ void websocket_client::write(const std::string &data)
 	}
 }
 
-bool websocket_client::handle_buffer(std::string &buffer)
+bool websocket_client::handle_buffer(std::string& buffer)
 {
 	if (state == HTTP_HEADERS) {
 		/* We can expect Discord to end all packets with this.
@@ -174,19 +174,19 @@ bool websocket_client::handle_buffer(std::string &buffer)
 			return false;
 		}
 	} else if (state == CONNECTED) {
-		/* Process packets until we can't */
-		while (this->parseheader(buffer));
+		/* Process packets until we can't (buffer will erase data until parseheader returns false) */
+		while (this->parseheader(buffer)){}
 	}
 
 	return true;
 }
 
-ws_state websocket_client::get_state()
+ws_state websocket_client::get_state() const
 {
 	return this->state;
 }
 
-bool websocket_client::parseheader(std::string &data)
+bool websocket_client::parseheader(std::string& data)
 {
 	if (data.size() < 4) {
 		/* Not enough data to form a frame yet */
@@ -244,9 +244,10 @@ bool websocket_client::parseheader(std::string &data)
 				return false;
 			}
 
+			/* If we received a ping, we need to handle it. */
 			if ((opcode & ~WS_FINBIT) == OP_PING) {
 				handle_ping(data.substr(payloadstartoffset, len));
-			} else if ((opcode & ~WS_FINBIT) != OP_PONG) {
+			} else if ((opcode & ~WS_FINBIT) != OP_PONG) { /* Otherwise, handle everything else apart from a PONG. */
 				/* Pass this frame to the deriving class */
 				this->handle_frame(data.substr(payloadstartoffset, len));
 			}
