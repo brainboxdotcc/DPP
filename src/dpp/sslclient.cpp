@@ -123,7 +123,7 @@ thread_local std::unordered_map<std::string, keepalive_cache_t> keepalives;
  * SSL_read in non-blocking mode will only read 16k at a time. There's no point in a bigger buffer as
  * it'd go unused.
  */
-constexpr uint32_t DPP_BUFSIZE{16 * 1024};
+constexpr uint16_t DPP_BUFSIZE{16 * 1024};
 
 /* Represents a failed socket system call, e.g. connect() failure */
 constexpr int ERROR_STATUS{-1};
