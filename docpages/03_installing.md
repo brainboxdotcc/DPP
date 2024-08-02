@@ -7,6 +7,7 @@ There are many ways to install D++, either from a package manager, or from sourc
 * \subpage install-vcpkg
 * \subpage install-arch-aur
 * \subpage install-void-xbps
+* \subpage install-gentoo-portage
 * \subpage install-windows-vs-zip
 * \subpage install-xmake
 * \subpage install-brew
