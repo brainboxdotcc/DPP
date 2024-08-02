@@ -1,5 +1,4 @@
 #include <dpp/dpp.h>
-#include <fmt/format.h>
 #include <iomanip>
 #include <sstream>
 
