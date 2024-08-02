@@ -263,6 +263,26 @@ async<confirmation_callback_t> cluster::co_guild_emojis_get(snowflake guild_id) 
 	return async{ this, static_cast<void (cluster::*)(snowflake, command_completion_event_t)>(&cluster::guild_emojis_get), guild_id };
 }
 
+async<confirmation_callback_t> cluster::co_application_emojis_get() {
+	return async{ this, static_cast<void (cluster::*)(command_completion_event_t)>(&cluster::application_emojis_get) };
+}
+
+async<confirmation_callback_t> cluster::co_application_emoji_get(snowflake emoji_id) {
+	return async{ this, static_cast<void (cluster::*)(snowflake, command_completion_event_t)>(&cluster::application_emoji_get), emoji_id };
+}
+
+async<confirmation_callback_t> cluster::co_application_emoji_create(const class emoji& newemoji) {
+	return async{ this, static_cast<void (cluster::*)(const class emoji&, command_completion_event_t)>(&cluster::application_emoji_create), newemoji };
+}
+
+async<confirmation_callback_t> cluster::co_application_emoji_edit(const class emoji& newemoji) {
+	return async{ this, static_cast<void (cluster::*)(const class emoji&, command_completion_event_t)>(&cluster::application_emoji_edit), newemoji };
+}
+
+async<confirmation_callback_t> cluster::co_application_emoji_delete(snowflake emoji_id) {
+	return async{ this, static_cast<void (cluster::*)(snowflake, command_completion_event_t)>(&cluster::application_emoji_delete), emoji_id };
+}
+
 async<confirmation_callback_t> cluster::co_entitlements_get(snowflake user_id, const std::vector<snowflake>& sku_ids, snowflake before_id, snowflake after_id, uint8_t limit, snowflake guild_id, bool exclude_ended) {
 	return async{ this, static_cast<void (cluster::*)(snowflake, const std::vector<snowflake>&, snowflake, snowflake, uint8_t, snowflake, bool, command_completion_event_t)>(&cluster::entitlements_get), user_id, sku_ids, before_id, after_id, limit, guild_id, exclude_ended };
 }

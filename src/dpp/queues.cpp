@@ -176,7 +176,7 @@ http_request_completion_t http_request::run(cluster* owner) {
 	}
 	http_connect_info hci = https_client::get_host_info(_host);
 	try {
-		https_client cli(hci.hostname, hci.port, _url, request_verb[method], multipart.body, headers, !hci.is_ssl, request_timeout, protocol);
+		https_client cli(hci.hostname, hci.port, _url, request_verb[method], multipart.body, headers, !hci.is_ssl, owner->request_timeout, protocol);
 		rv.latency = dpp::utility::time_f() - start;
 		if (cli.timed_out) {
 			rv.error = h_connection;			

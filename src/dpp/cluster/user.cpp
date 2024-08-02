@@ -38,10 +38,19 @@ void cluster::current_user_edit(const std::string &nickname, const std::string& 
 	};
 
 	if (!avatar_blob.empty()) {
+		if(avatar_blob.size() > MAX_AVATAR_SIZE) { // Avatar limit is 10240 kb.
+			throw dpp::length_exception(err_icon_size, "Avatar file exceeds discord limit of 10240 kilobytes");
+		}
 		j["avatar"] = "data:" + mimetypes.find(avatar_type)->second + ";base64," + base64_encode((unsigned char const*)avatar_blob.data(), static_cast<unsigned int>(avatar_blob.length()));
 	}
 
 	if (!banner_blob.empty()) {
+		/* There doesn't seem to be a banner limit (probably due to the limit of 640x280)
+		 * however, this is here as a precautionary.
+		 */
+		if(banner_blob.size() > MAX_AVATAR_SIZE) {
+			throw dpp::length_exception(err_icon_size, "Banner file exceeds discord limit of 10240 kilobytes");
+		}
 		j["banner"] = "data:" + mimetypes.find(banner_type)->second + ";base64," + base64_encode((unsigned char const*)banner_blob.data(), static_cast<unsigned int>(banner_blob.length()));
 	}
 
