@@ -616,7 +616,7 @@ public:
 	 * @copydoc basic_promise<T>::set_value(T&&)
 	 */
 	template <bool Notify = true, typename U = T>
-	void set_value(U&& v) requires (std::convertible_to<const U&, T>) {
+	void set_value(U&& v) requires (std::convertible_to<U&&, T>) {
 		shared_state->template set_value<Notify>(std::move(v));
 	}
 
