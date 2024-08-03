@@ -534,19 +534,7 @@ public:
 	}
 
 	/**
-	 * @brief Construct the result by copy, and resume any awaiter.
-	 *
-	 * @tparam Notify Whether to resume any awaiter or not.
-	 * @throws dpp::logic_exception if the promise is not empty.
-	 */
-	template <bool Notify = true, typename U = T>
-	requires (std::convertible_to<const U&, T>)
-	void set_value(const U& v) {
-		emplace_value<Notify>(v);
-	}
-
-	/**
-	 * @brief Construct the result by move, and resume any awaiter.
+	 * @brief Construct the result by forwarding reference, and resume any awaiter.
 	 *
 	 * @tparam Notify Whether to resume any awaiter or not.
 	 * @throws dpp::logic_exception if the promise is not empty.
@@ -554,11 +542,11 @@ public:
 	template <bool Notify = true, typename U = T>
 	requires (std::convertible_to<U&&, T>)
 	void set_value(U&& v) {
-		emplace_value<Notify>(std::move(v));
+		emplace_value<Notify>(std::forward<U>(v));
 	}
 
 	/**
-	 * @brief Construct the result by move, and resume any awaiter.
+	 * @brief Construct a void result, and resume any awaiter.
 	 *
 	 * @tparam Notify Whether to resume any awaiter or not.
 	 * @throws dpp::logic_exception if the promise is not empty.
@@ -605,19 +593,11 @@ public:
 	}
 
 	/**
-	 * @copydoc basic_promise<T>::set_value(const T&)
-	 */
-	template <bool Notify = true, typename U = T>
-	void set_value(const U& v) requires (std::convertible_to<const U&, T>) {
-		shared_state->template set_value<Notify>(v);
-	}
-
-	/**
-	 * @copydoc basic_promise<T>::set_value(T&&)
+	 * @copydoc basic_promise<T>::set_value(U&&)
 	 */
 	template <bool Notify = true, typename U = T>
 	void set_value(U&& v) requires (std::convertible_to<U&&, T>) {
-		shared_state->template set_value<Notify>(std::move(v));
+		shared_state->template set_value<Notify>(std::forward<U>(v));
 	}
 
 	/**
