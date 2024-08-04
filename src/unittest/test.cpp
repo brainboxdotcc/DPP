@@ -381,7 +381,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 
         { // test snowflake: std::format support
 
-                #ifdef DPP_HAS_FORMAT
+                #ifdef DPP_FORMATTERS
                         set_test(SNOWFLAKE_STD_FORMAT,
                             std::format("{}",dpp::snowflake{}) == "0" &&
                             std::format("{}",dpp::snowflake{12345}) == "12345" &&
@@ -389,7 +389,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
                         );
                 #else
                         set_status(SNOWFLAKE_STD_FORMAT,ts_skipped);
-                #endif // DPP_HAS_FORMAT
+                #endif // DPP_FORMATTERS
         };
 
 	{ // test dpp::json_interface

@@ -23,11 +23,10 @@
 #include <dpp/export.h>
 #include <dpp/json_fwd.h>
 #include <dpp/exception.h>
-#include <dpp/autoconfig.h>
 #include <cstdint>
 #include <type_traits>
 
-#ifdef DPP_HAS_FORMAT
+#ifdef DPP_FORMATTERS
 #include <format>
 #endif
 
@@ -287,7 +286,7 @@ struct std::hash<dpp::snowflake>
 	}
 };
 
-#ifdef DPP_HAS_FORMAT
+#ifdef DPP_FORMATTERS
 /*
  * @brief implementation of formater for dpp::snowflake for std::format support
  * https://en.cppreference.com/w/cpp/utility/format/formatter
@@ -305,4 +304,4 @@ struct std::formatter<dpp::snowflake>
                 return std::format_to(ctx.out(), "{}", snowflake.str());
         }
 };
-#endif //DPP_HAS_FORMAT
+#endif //DPP_FORMATTERS

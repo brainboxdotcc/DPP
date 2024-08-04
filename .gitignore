@@ -12,7 +12,6 @@ buildtools/composer.phar
 src/build
 cmake-build-debug
 docpages/example_code/build
-*autoconfig.h
 
 # tests
 test
