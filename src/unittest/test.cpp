@@ -379,6 +379,19 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		set_test(SNOWFLAKE, success);
 	}
 
+        { // test snowflake: std::format support
+
+                #ifdef DPP_FORMATTERS
+                        set_test(SNOWFLAKE_STD_FORMAT,
+                            std::format("{}",dpp::snowflake{}) == "0" &&
+                            std::format("{}",dpp::snowflake{12345}) == "12345" &&
+                            std::format("{} hello {}", dpp::snowflake{12345}, dpp::snowflake{54321}) == "12345 hello 54321"
+                        );
+                #else
+                        set_status(SNOWFLAKE_STD_FORMAT,ts_skipped);
+                #endif // DPP_FORMATTERS
+        };
+
 	{ // test dpp::json_interface
 		start_test(JSON_INTERFACE);
 		struct fillable : dpp::json_interface<fillable> {
@@ -776,7 +789,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 				 m5.get_url() == "" &&
 				 m6.get_url() == "" &&
 				 m7.get_url() == "" &&
-				 m8.get_url() == "" 
+				 m8.get_url() == ""
 		);
 	}
 
@@ -886,31 +899,31 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 
 		set_test(UTILITY_USER_URL, false);
 		auto user_url = dpp::utility::user_url(123);
-		set_test(UTILITY_USER_URL, 
-				 user_url == dpp::utility::url_host + "/users/123" && 
+		set_test(UTILITY_USER_URL,
+				 user_url == dpp::utility::url_host + "/users/123" &&
 				 dpp::utility::user_url(0) == ""
 		);
 
 		set_test(UTILITY_MESSAGE_URL, false);
 		auto message_url = dpp::utility::message_url(1,2,3);
 		set_test(UTILITY_MESSAGE_URL,
-				 message_url == dpp::utility::url_host+ "/channels/1/2/3" && 
+				 message_url == dpp::utility::url_host+ "/channels/1/2/3" &&
 				 dpp::utility::message_url(0,2,3) == "" &&
-				 dpp::utility::message_url(1,0,3) == "" && 
+				 dpp::utility::message_url(1,0,3) == "" &&
 				 dpp::utility::message_url(1,2,0) == "" &&
 				 dpp::utility::message_url(0,0,3) == "" &&
 				 dpp::utility::message_url(0,2,0) == "" &&
 				 dpp::utility::message_url(1,0,0) == "" &&
-				 dpp::utility::message_url(0,0,0) == "" 
+				 dpp::utility::message_url(0,0,0) == ""
 		);
 
 		set_test(UTILITY_CHANNEL_URL, false);
 		auto channel_url = dpp::utility::channel_url(1,2);
-		set_test(UTILITY_CHANNEL_URL, 
+		set_test(UTILITY_CHANNEL_URL,
 				 channel_url == dpp::utility::url_host+ "/channels/1/2" &&
 				 dpp::utility::channel_url(0,2) == "" &&
 				 dpp::utility::channel_url(1,0) == "" &&
-				 dpp::utility::channel_url(0,0) == "" 
+				 dpp::utility::channel_url(0,0) == ""
 		);
 
 		set_test(UTILITY_THREAD_URL, false);
@@ -919,7 +932,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 				 thread_url == dpp::utility::url_host+ "/channels/1/2" &&
 				 dpp::utility::thread_url(0,2) == "" &&
 				 dpp::utility::thread_url(1,0) == "" &&
-				 dpp::utility::thread_url(0,0) == "" 
+				 dpp::utility::thread_url(0,0) == ""
 		);
 	}
 
@@ -1648,7 +1661,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 									set_test(TIMESTAMP, false);
 								}
 							} else {
-								set_test(MESSAGESGET, false);	
+								set_test(MESSAGESGET, false);
 							}
 						}  else {
 							set_test(MESSAGESGET, false);
