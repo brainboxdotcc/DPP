@@ -421,20 +421,65 @@ void commandhandler::reply(const dpp::message &m, command_source source, command
 	}
 }
 
-void commandhandler::thinking(command_source source, command_completion_event_t callback)
+void commandhandler::thinking(command_source source, bool ephemeral, command_completion_event_t callback)
 {
 	dpp::message msg(this->owner);
 	msg.content = "*";
 	msg.guild_id = source.guild_id;
 	msg.channel_id = source.channel_id;
+	if (ephemeral) {
+		msg.set_flags(dpp::m_ephemeral);
+	}
 	if (!source.command_token.empty() && source.command_id) {
 		owner->interaction_response_create(source.command_id, source.command_token, dpp::interaction_response(ir_deferred_channel_message_with_source, msg), callback);
 	}
 }
 
-void commandhandler::thonk(command_source source, command_completion_event_t callback)
+void commandhandler::thonk(command_source source, bool ephemeral, command_completion_event_t callback)
 {
-	thinking(source, callback);
+	thinking(source, ephemeral, callback);
+}
+
+void commandhandler::edit_response(const message &m, command_source source, command_completion_event_t callback) {
+	owner->interaction_response_edit(source.command_token, m, std::move(callback));
+}
+
+void commandhandler::edit_response(const std::string &mt, command_source source, command_completion_event_t callback) {
+	this->edit_response(dpp::message(source.channel_id, mt, mt_application_command), source, std::move(callback));
+}
+
+void commandhandler::get_original_response(command_source source, command_completion_event_t callback) {
+	owner->post_rest(API_PATH "/webhooks", owner->me.id.str(), source.command_token + "/messages/@original", m_get, "", [creator = owner, cb = std::move(callback)](json& j, const http_request_completion_t& http) {
+		if (cb) {
+			cb(confirmation_callback_t(creator, message().fill_from_json(&j), http));
+		}
+	});
+}
+
+void commandhandler::edit_original_response(const message &m, command_source source, command_completion_event_t callback) {
+	std::vector<std::string> file_names{};
+	std::vector<std::string> file_contents{};
+	std::vector<std::string> file_mimetypes{};
+
+	for(message_file_data data : m.file_data) {
+		file_names.push_back(data.name);
+		file_contents.push_back(data.content);
+		file_mimetypes.push_back(data.mimetype);
+	}
+
+	owner->post_rest_multipart(API_PATH "/webhooks", owner->me.id.str(), source.command_token + "/messages/@original", m_patch, m.build_json(), [creator = owner, cb = std::move(callback)](json& j, const http_request_completion_t& http) {
+		if (cb) {
+			cb(confirmation_callback_t(creator, message().fill_from_json(&j), http));
+		}
+	}, m.file_data);
+}
+
+void commandhandler::delete_original_response(command_source source, command_completion_event_t callback) {
+	owner->post_rest(API_PATH "/webhooks", owner->me.id.str(), source.command_token + "/messages/@original", m_delete, "", [creator = owner, cb = std::move(callback)](const json &, const http_request_completion_t& http) {
+		if (cb) {
+			cb(confirmation_callback_t(creator, confirmation(), http));
+		}
+	});
 }
 
 } // namespace dpp
