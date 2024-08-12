@@ -1454,7 +1454,7 @@ public:
 	 * D++ defaults this to false. Cannot be set to true in a guild
 	 * command, only a global command.
 	 */
-	bool dm_permission;
+	[[deprecated("Use contexts instead.")]] bool dm_permission;
 
 	/**
 	 * @brief Indicates whether the command is [age-restricted](https://discord.com/developers/docs/interactions/application-commands#agerestricted-commands).

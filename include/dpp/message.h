@@ -2165,7 +2165,7 @@ public:
 	/**
 	 * @brief Reference to an interaction
 	 */
-	struct message_interaction_struct{
+	[[deprecated("Use interaction_metadata instead.")]] struct message_interaction_struct{
 		/**
 		 * @brief ID of the interaction.
 		 */
