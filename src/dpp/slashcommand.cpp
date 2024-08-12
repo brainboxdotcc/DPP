@@ -24,7 +24,8 @@
 #include <dpp/json.h>
 #include <dpp/stringops.h>
 #include <dpp/cache.h>
-#include <iostream>
+#include <algorithm>
+#include <iterator>
 
 namespace dpp {
 
@@ -74,6 +75,9 @@ slashcommand& slashcommand::fill_from_json_impl(nlohmann::json* j) {
 
 	type = (slashcommand_contextmenu_type)int8_not_null(j, "type");
 	set_object_array_not_null<command_option>(j, "options", options); // command_option fills recursive
+	if (auto it = j->find("contexts"); it != j->end()) {
+		it->get_to(this->contexts);
+	}
 	return *this;
 }
 
@@ -252,6 +256,11 @@ void to_json(json& j, const slashcommand& p) {
 		}
 	}
 
+	// TODO: Maybe a std::optional is better to differentiate
+	if (p.contexts.size()) {
+		j["contexts"] = p.contexts;
+	}
+
 	// DEPRECATED
 	// j["default_permission"] = p.default_permission;
 	j["application_id"] = std::to_string(p.application_id);
@@ -291,6 +300,11 @@ slashcommand& slashcommand::set_description(const std::string &d) {
 
 slashcommand& slashcommand::set_application_id(snowflake i) {
 	application_id = i;
+	return *this;
+}
+
+slashcommand& slashcommand::set_interaction_contexts(std::vector<interaction_context_type> contexts) {
+	this->contexts = std::move(contexts);
 	return *this;
 }
 
@@ -726,6 +740,10 @@ void from_json(const nlohmann::json& j, interaction& i) {
 			j.at("data").get_to(ai);
 			i.data = ai;
 		}
+	}
+
+	if (auto it = j.find("context"); it != j.end()) {
+		i.context = static_cast<interaction_context_type>(*it);
 	}
 
 	if(j.contains("entitlements")) {

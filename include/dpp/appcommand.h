@@ -773,6 +773,26 @@ enum interaction_type {
 	it_modal_submit = 5,
 };
 
+/*
+* @brief Context type where the interaction can be used or triggered from, e.g. guild, user etc
+*/
+enum interaction_context_type {
+	/**
+	 * @brief Interaction can be used within servers
+	 */
+	itc_guild = 0,
+
+	/**
+	 * @brief Interaction can be used within DMs with the app's bot user
+	 */
+	itc_bot_dm = 1,
+
+	/**
+	 * @brief Interaction can be used within Group DMs and DMs other than the app's bot user
+	 */
+	itc_private_channel = 2,
+};
+
 /**
  * @brief Right-click context menu types
  */
@@ -952,6 +972,10 @@ protected:
 	virtual json to_json_impl(bool with_id = false) const;
 
 public:
+	/**
+	 * @brief Context where the interaction was triggered from
+	 */
+	std::optional<interaction_context_type> context;
 	/**
 	 * @brief ID of the application this interaction is for.
 	 */
@@ -1421,6 +1445,11 @@ public:
 	permission default_member_permissions;
 
 	/**
+	 * @brief Interaction context(s) where the command can be used, only for globally-scoped commands. By default, all interaction context types included for new commands.
+	 */
+	std::vector<interaction_context_type> contexts;
+
+	/**
 	 * @brief True if this command should be allowed in a DM
 	 * D++ defaults this to false. Cannot be set to true in a guild
 	 * command, only a global command.
@@ -1542,6 +1571,14 @@ public:
 	 * @return slashcommand& reference to self for chaining of calls
 	 */
 	slashcommand& set_application_id(snowflake i);
+
+	/**
+	 * @brief Set the interaction contexts for the command
+	 *
+	 * @param contexts the contexts to set
+	 * @return slashcommand& reference to self for chaining of calls
+	 */
+	slashcommand& set_interaction_contexts(std::vector<interaction_context_type> contexts);
 
 	/**
 	 * @brief Adds a permission to the command
