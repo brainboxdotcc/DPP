@@ -19,6 +19,7 @@
  *
  ************************************************************************************/
 #pragma once
+#include <dpp/integration.h>
 #include <dpp/export.h>
 #include <dpp/snowflake.h>
 #include <dpp/managed.h>
@@ -975,7 +976,13 @@ public:
 	/**
 	 * @brief Context where the interaction was triggered from
 	 */
+	std::map<application_integration_types, snowflake> authorizing_integration_owners;
+
+	/**
+	 * @brief Context where the interaction was triggered from
+	 */
 	std::optional<interaction_context_type> context;
+
 	/**
 	 * @brief ID of the application this interaction is for.
 	 */

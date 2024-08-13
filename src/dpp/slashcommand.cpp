@@ -755,6 +755,10 @@ void from_json(const nlohmann::json& j, interaction& i) {
 		i.context = static_cast<interaction_context_type>(*it);
 	}
 
+	if (auto it = j.find("authorizing_integration_owners"); it != j.end()) {
+		it->get_to(i.authorizing_integration_owners);
+	}
+
 	if(j.contains("entitlements")) {
 		for (auto& entitle : j["entitlements"]) {
 			i.entitlements.emplace_back(entitlement().fill_from_json(const_cast<json*>(&entitle)));
