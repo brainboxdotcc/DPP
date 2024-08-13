@@ -1445,6 +1445,11 @@ public:
 	permission default_member_permissions;
 
 	/**
+	 * @brief Installation contexts where the command is available, only for globally-scoped commands. Defaults to your app's configured contexts
+	 */
+	std::vector<application_integration_types> integration_types;
+
+	/**
 	 * @brief Interaction context(s) where the command can be used, only for globally-scoped commands. By default, all interaction context types included for new commands.
 	 */
 	std::vector<interaction_context_type> contexts;

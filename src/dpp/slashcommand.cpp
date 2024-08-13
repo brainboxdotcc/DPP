@@ -75,6 +75,11 @@ slashcommand& slashcommand::fill_from_json_impl(nlohmann::json* j) {
 
 	type = (slashcommand_contextmenu_type)int8_not_null(j, "type");
 	set_object_array_not_null<command_option>(j, "options", options); // command_option fills recursive
+	
+	if (auto it = j->find("integration_types"); it != j->end()) {
+		it->get_to(this->integration_types);
+	}
+
 	if (auto it = j->find("contexts"); it != j->end()) {
 		it->get_to(this->contexts);
 	}
@@ -254,6 +259,10 @@ void to_json(json& j, const slashcommand& p) {
 			json jperm = perm;
 			j["permissions"].push_back(jperm);
 		}
+	}
+
+	if (p.integration_types.size()) {
+		j["integration_types"] = p.integration_types;
 	}
 
 	// TODO: Maybe a std::optional is better to differentiate
