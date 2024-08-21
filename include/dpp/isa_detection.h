@@ -20,7 +20,9 @@
  ************************************************************************************/
 #pragma once
 
-#if AVX_TYPE == 512
+#if AVX_TYPE == 1024
+	#include "isa/neon.h"
+#elif AVX_TYPE == 512
 	#include "isa/avx512.h"
 #elif AVX_TYPE == 2
 	#include "isa/avx2.h"
