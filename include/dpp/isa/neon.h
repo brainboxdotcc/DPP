@@ -52,7 +52,9 @@ namespace dpp {
 		inline void collect_single_register(int32_t* data_in, int16_t* data_out, float current_gain, float increment) {
 			neon_float gathered_values = gather_values(data_in);
 			neon_float gain_vector = vdupq_n_f32(current_gain);
-			neon_float increment_vector = vmulq_f32(vdupq_n_f32(increment), vsetq_f32(0.0f, 1.0f, 2.0f, 3.0f));
+			static constexpr float data[4] = { 0.0f, 1.0f, 2.0f, 3.0f };
+			neon_float floats = vld1q_f32(data);
+			neon_float increment_vector = vmulq_f32(vdupq_n_f32(increment), floats));
 			neon_float current_samples_new = vmulq_f32(gathered_values, vaddq_f32(gain_vector, increment_vector));
 
 			// Clamping the values between int16_t min and max
