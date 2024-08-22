@@ -1,4 +1,4 @@
-arminclude(CheckCXXSourceRuns)
+include(CheckCXXSourceRuns)
 
 function(check_instruction_set INSTRUCTION_SET_NAME INSTRUCTION_SET_FLAG INSTRUCTION_SET_INTRINSIC)
 
