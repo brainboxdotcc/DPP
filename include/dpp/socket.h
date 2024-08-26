@@ -1,18 +1,16 @@
 #pragma once
 
-#ifndef _WIN32
-#ifndef SOCKET
-#define SOCKET int
-#endif
-#endif
-
 namespace dpp
 {
 	/**
 	 * @brief Represents a socket file descriptor.
 	 * This is used to ensure parity between windows and unix-like systems.
 	 */
-	typedef SOCKET socket;
+#ifndef _WIN32
+	using socket = int;
+#else
+	using socket = SOCKET;
+#endif
 } // namespace dpp
 
 #ifndef SOCKET_ERROR

@@ -46,7 +46,6 @@
 	#else
 		/* Including the library */
 		#ifdef _WIN32
-			#include <dpp/win32_safe_warnings.h>
 			#define DPP_EXPORT __declspec(dllimport)
 		#else
 			#define DPP_EXPORT
@@ -116,11 +115,7 @@ extern bool DPP_EXPORT validate_configuration();
 
 }
 
-#ifndef _WIN32
-	#ifndef SOCKET
-		#define SOCKET int
-	#endif
-#else
+#ifdef _WIN32
 	#ifndef NOMINMAX
 		#define NOMINMAX
 	#endif
