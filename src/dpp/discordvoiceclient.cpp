@@ -650,7 +650,7 @@ bool discord_voice_client::handle_frame(const std::string &data)
 								{ "data", {
 										{ "address", external_ip },
 										{ "port", bound_port },
-										{ "mode", "xsalsa20_poly1305" }
+										{ "mode", "aead_xchacha20_poly1305_rtpsize" }
 									}
 								}
 							}
@@ -764,6 +764,8 @@ void discord_voice_client::read_ready()
 		const ptrdiff_t offset_to_data = header_size + sizeof(uint32_t) * csrc_count;
 		uint8_t* encrypted_data = buffer + offset_to_data;
 		const size_t encrypted_data_len = packet_size - offset_to_data;
+
+		if(crypto_aead_xchacha20poly1305_ietf_decrypt() != 0)
 
 		if (crypto_secretbox_open_easy(encrypted_data, encrypted_data,
 		                               encrypted_data_len, nonce, secret_key)) {
@@ -1278,17 +1280,18 @@ discord_voice_client& discord_voice_client::send_audio_opus(uint8_t* opus_packet
 	memcpy(encodedAudioData.data(), opus_packet, length);
 
 	++sequence;
-	const int nonceSize = 24;
 	rtp_header header(sequence, timestamp, (uint32_t)ssrc);
-
-	int8_t nonce[nonceSize];
-	std::memcpy(nonce, &header, sizeof(header));
-	std::memset(nonce + sizeof(header), 0, sizeof(nonce) - sizeof(header));
 
 	std::vector<uint8_t> audioDataPacket(sizeof(header) + encodedAudioLength + crypto_secretbox_MACBYTES);
 	std::memcpy(audioDataPacket.data(), &header, sizeof(header));
 
-	crypto_secretbox_easy(audioDataPacket.data() + sizeof(header), encodedAudioData.data(), encodedAudioLength, (const unsigned char*)nonce, secret_key);
+	unsigned char nonce[crypto_aead_xchacha20poly1305_ietf_NPUBBYTES];
+	randombytes_buf(nonce, sizeof nonce);
+
+	unsigned long long clen_p;
+	crypto_aead_xchacha20poly1305_ietf_encrypt(audioDataPacket.data() + sizeof(header), &clen_p, encodedAudioData.data(), encodedAudioLength, NULL, NULL, NULL, (const unsigned char*)nonce, secret_key);
+
+	//crypto_secretbox_easy(audioDataPacket.data() + sizeof(header), encodedAudioData.data(), encodedAudioLength, (const unsigned char*)nonce, secret_key);
 
 	this->send((const char*)audioDataPacket.data(), audioDataPacket.size(), duration);
 	timestamp += frameSize;
