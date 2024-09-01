@@ -76,7 +76,7 @@ jobs:
 
       - name: Setup mold
         if: ${{ matrix.cfg.mold == 'yes' }}
-        uses: rui314/setup-mold@2e332a0b602c2fc65d2d3995941b1b29a5f554a0 # v1
+        uses: rui314/setup-mold@0bf4f07ef9048ec62a45f9dbf2f098afa49695f0 # v1
 
       - name: Generate CMake
         run: cmake -B build -DDPP_NO_VCPKG=ON -DAVX_TYPE=AVX0 -DCMAKE_BUILD_TYPE=Release ${{matrix.cfg.cmake-flags}}
