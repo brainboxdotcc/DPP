@@ -1,5 +1,7 @@
 \page coro-simple-commands Making simple commands
 
+\include{doc} coro_warn.dox
+
 ### Several steps in one
 
 \note The next example assumes you are already familiar with how to use \ref firstbot "slash commands", \ref slashcommands "parameters", and \ref discord-application-command-file-upload "sending files through a command".
