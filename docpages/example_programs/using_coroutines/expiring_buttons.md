@@ -1,5 +1,7 @@
 \page expiring-buttons Making expiring buttons with when_any
 
+\include{doc} coro_warn.dox
+
 In the last example we've explored how to \ref awaiting-events "await events" using coroutines, we ran into the problem of the coroutine waiting forever if the button was never clicked. Wouldn't it be nice if we could add an "or" to our algorithm, for example wait for the button to be clicked *or* for a timer to expire? I'm glad you asked! D++ offers \ref dpp::when_any "when_any" which allows exactly that. It is a templated class that can take any number of awaitable objects and can be `co_await`-ed itself, will resume when the __first__ awaitable completes and return a \ref dpp::when_any::result "result" object that allows to retrieve which awaitable completed as well as its result, in a similar way as std::variant.
 
 \include{cpp} coro_expiring_buttons.cpp
