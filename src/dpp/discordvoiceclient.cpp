@@ -1325,7 +1325,7 @@ discord_voice_client& discord_voice_client::send_audio_opus(uint8_t* opus_packet
 			reinterpret_cast<const unsigned char *>(&header),
 			sizeof(header),
 			nullptr,
-			(const unsigned char*)encrypt_nonce,
+			static_cast<const unsigned char*>(encrypt_nonce),
 			secret_key);
 
 	/* Append the 4 byte nonce to the resulting payload */
