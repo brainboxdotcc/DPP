@@ -20,6 +20,7 @@
  *
  ************************************************************************************/
 
+#include <cstdint>
 #include <dpp/export.h>
 #ifdef _WIN32
 	#include <WinSock2.h>
@@ -316,6 +317,7 @@ discord_voice_client::discord_voice_client(dpp::cluster* _cluster, snowflake _ch
 	secret_key(nullptr),
 	sequence(0),
 	timestamp(0),
+	packet_nonce(1),
 	last_timestamp(std::chrono::high_resolution_clock::now()),
 	sending(false),
 	tracks(0),
@@ -593,6 +595,9 @@ bool discord_voice_client::handle_frame(const std::string &data)
 					rdy.voice_channel_id = this->channel_id;
 					creator->on_voice_ready.call(rdy);
 				}
+
+				/* Reset packet_nonce */
+				packet_nonce = 1;
 			}
 			break;
 			/* Voice ready */
@@ -754,30 +759,30 @@ void discord_voice_client::read_ready()
 		std::memcpy(&vp.timestamp, &buffer[4], sizeof(rtp_timestamp_t));
 		vp.timestamp = ntohl(vp.timestamp);
 
-		/* Nonce is the RTP Header with zero padding */
-		uint8_t nonce[24] = { 0 };
-		std::memcpy(nonce, buffer, header_size);
+		// nonce is 4 byte at the end of payload now
+		// change accordingly
+		// /* Nonce is the RTP Header with zero padding */
+		// uint8_t nonce[24] = { 0 };
+		// std::memcpy(nonce, buffer, header_size);
 
-		/* Get the number of CSRC in header */
-		const size_t csrc_count = buffer[0] & 0b0000'1111;
-		/* Skip to the encrypted voice data */
-		const ptrdiff_t offset_to_data = header_size + sizeof(uint32_t) * csrc_count;
-		uint8_t* ciphertext = buffer + offset_to_data;
-		const size_t ciphertext_len = packet_size - offset_to_data;
+		// /* Get the number of CSRC in header */
+		// const size_t csrc_count = buffer[0] & 0b0000'1111;
+		// /* Skip to the encrypted voice data */
+		// const ptrdiff_t offset_to_data = header_size + sizeof(uint32_t) * csrc_count;
+		// uint8_t* ciphertext = buffer + offset_to_data;
+		// const size_t ciphertext_len = packet_size - offset_to_data;
 
-		std::vector<uint8_t> decrypted;
-		decrypted.reserve(ciphertext_len);
 		unsigned long long decrypted_len = 0;
 
-		if (crypto_aead_chacha20poly1305_ietf_decrypt(decrypted.data(), &decrypted_len,
-								NULL,
-								ciphertext, ciphertext_len,
-								NULL,
-								NULL,
-								nonce, secret_key) != 0) {
-				/* Invalid Discord RTP payload. */
-				return;
-		}
+		// if (crypto_aead_xchacha20poly1305_ietf_decrypt(buffer, &decrypted_len,
+		// 						NULL,
+		// 						ciphertext, ciphertext_len,
+		// 						NULL,
+		// 						NULL,
+		// 						nonce, secret_key) != 0) {
+		// 		/* Invalid Discord RTP payload. */
+		// 		return;
+		// }
 
 		// if(crypto_aead_xchacha20poly1305_ietf_decrypt() != 0)
 
@@ -807,7 +812,7 @@ void discord_voice_client::read_ready()
 		 * We're left with the decrypted, opus-encoded data.
 		 * Park the payload and decode on the voice courier thread.
 		 */
-		vp.vr->audio_data.assign(decrypted.begin(), decrypted.end());
+		vp.vr->audio_data.assign(buffer, buffer + decrypted_len);
 
 		{
 			std::lock_guard lk(voice_courier_shared_state.mtx);
@@ -1296,19 +1301,67 @@ discord_voice_client& discord_voice_client::send_audio_opus(uint8_t* opus_packet
 	++sequence;
 	rtp_header header(sequence, timestamp, (uint32_t)ssrc);
 
-	std::vector<uint8_t> audioDataPacket(sizeof(header) + encodedAudioLength + crypto_secretbox_MACBYTES);
+	/* Unencrypted header + encrypted opus packet + encrypted header as additional data + unencrypted 32 bit nonce */
+	size_t packet_siz = (sizeof(header) * 2) + (encodedAudioLength + crypto_aead_xchacha20poly1305_IETF_ABYTES) + sizeof(packet_nonce);
+	std::vector<uint8_t> audioDataPacket(packet_siz);
 	std::memcpy(audioDataPacket.data(), &header, sizeof(header));
 
-	unsigned char nonce[crypto_aead_xchacha20poly1305_ietf_NPUBBYTES];
-	randombytes_buf(nonce, sizeof nonce);
+	/* Convert to big-endian */
+	uint32_t noncel = htonl(packet_nonce);
+
+	/* 4 byte encrypt nonce padded with 20 byte NULL */
+	unsigned char encrypt_nonce[crypto_aead_xchacha20poly1305_ietf_NPUBBYTES] = { NULL };
+	memcpy(encrypt_nonce, &packet_nonce, sizeof(packet_nonce));
 
 	unsigned long long clen_p;
-	crypto_aead_xchacha20poly1305_ietf_encrypt(audioDataPacket.data() + sizeof(header), &clen_p, encodedAudioData.data(), encodedAudioLength, NULL, NULL, NULL, (const unsigned char*)nonce, secret_key);
+	crypto_aead_xchacha20poly1305_ietf_encrypt(audioDataPacket.data() + sizeof(header), &clen_p, encodedAudioData.data(), encodedAudioLength, (const unsigned char *)&header, sizeof(header), NULL, (const unsigned char*)encrypt_nonce, secret_key);
+
+	std::cout << "data[\n";
+
+	/*::write(STDIN_FILENO, audioDataPacket.data(), audioDataPacket.size());*/
+
+	std::cout << "\n]\n";
+	std::cout << "size("<< audioDataPacket.size() << ")\n";
+	std::cout << "clen_p("<< clen_p << ")\n";
+
+	// uint8_t buffer[65535] = {NULL};
+	// unsigned long long decrypted_len = 0;
+	// if (crypto_aead_xchacha20poly1305_ietf_decrypt(buffer, &decrypted_len,
+	// 						NULL,
+	// 						audioDataPacket.data() + sizeof(header), audioDataPacket.size() - sizeof(header),
+	// 						NULL,
+	// 						NULL,
+	// 						(const unsigned char*)encrypt_nonce, secret_key) != 0) {
+	// 		std::cout << "VERIFICATION FAILED\n";
+	// }
+	// else {
+	// 		auto pb = [](unsigned char *bin, size_t siz){
+	// 				for (size_t i = 0; i < siz; i++) {
+	// 						printf("%d ", bin[i]);
+	// 				}
+	// 		};
+
+	// 		std::cout << "buffer[\n";
+	// 		pb(encodedAudioData.data(), encodedAudioLength);
+	// 		std::cout<<"\n]\n";
+	// 		std::cout << "buffer_len("<< encodedAudioLength <<")\n";
+
+	// 		std::cout << "decrypted_buffer[\n";
+	// 		pb(buffer, decrypted_len);
+	// 		std::cout		<<"\n]\n";
+	// 		std::cout << "decrypted_len("<< decrypted_len <<")\n";
+	// }
 
 	//crypto_secretbox_easy(audioDataPacket.data() + sizeof(header), encodedAudioData.data(), encodedAudioLength, (const unsigned char*)nonce, secret_key);
 
+	/* Append the 4 byte nonce to the whole payload */
+	std::memcpy(audioDataPacket.data() + audioDataPacket.size() - sizeof(noncel), &noncel, sizeof(noncel));
+
 	this->send((const char*)audioDataPacket.data(), audioDataPacket.size(), duration);
 	timestamp += frameSize;
+
+	/* Increment for next packet */
+	packet_nonce++;
 
 	speak();
 #else
