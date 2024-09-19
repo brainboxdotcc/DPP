@@ -756,44 +756,58 @@ void discord_voice_client::read_ready()
 
 		/* Nonce is the RTP Header with zero padding */
 		uint8_t nonce[24] = { 0 };
-		std::memcpy(nonce, &buffer[0], header_size);
+		std::memcpy(nonce, buffer, header_size);
 
 		/* Get the number of CSRC in header */
 		const size_t csrc_count = buffer[0] & 0b0000'1111;
 		/* Skip to the encrypted voice data */
 		const ptrdiff_t offset_to_data = header_size + sizeof(uint32_t) * csrc_count;
-		uint8_t* encrypted_data = buffer + offset_to_data;
-		const size_t encrypted_data_len = packet_size - offset_to_data;
+		uint8_t* ciphertext = buffer + offset_to_data;
+		const size_t ciphertext_len = packet_size - offset_to_data;
 
-		if(crypto_aead_xchacha20poly1305_ietf_decrypt() != 0)
+		std::vector<uint8_t> decrypted;
+		decrypted.reserve(ciphertext_len);
+		unsigned long long decrypted_len = 0;
 
-		if (crypto_secretbox_open_easy(encrypted_data, encrypted_data,
-		                               encrypted_data_len, nonce, secret_key)) {
-			/* Invalid Discord RTP payload. */
-			return;
+		if (crypto_aead_chacha20poly1305_ietf_decrypt(decrypted.data(), &decrypted_len,
+								NULL,
+								ciphertext, ciphertext_len,
+								NULL,
+								NULL,
+								nonce, secret_key) != 0) {
+				/* Invalid Discord RTP payload. */
+				return;
 		}
 
-                const uint8_t* decrypted_data = encrypted_data;
-                size_t decrypted_data_len = encrypted_data_len - crypto_box_MACBYTES;
-		if ([[maybe_unused]] const bool uses_extension = (buffer[0] >> 4) & 0b0001) {
-			/* Skip the RTP Extensions */
-			size_t ext_len = 0;
-			{
-				uint16_t ext_len_in_words;
-				memcpy(&ext_len_in_words, &decrypted_data[2], sizeof(uint16_t));
-				ext_len_in_words = ntohs(ext_len_in_words);
-				ext_len = sizeof(uint32_t) * ext_len_in_words;
-			}
-			constexpr size_t ext_header_len = sizeof(uint16_t) * 2;
-                        decrypted_data += ext_header_len + ext_len;
-                        decrypted_data_len -= ext_header_len + ext_len;
-		}
+		// if(crypto_aead_xchacha20poly1305_ietf_decrypt() != 0)
+
+		// 		if (crypto_secretbox_open_easy(encrypted_data, encrypted_data,
+		// 								encrypted_data_len, nonce, secret_key)) {
+		// 				/* Invalid Discord RTP payload. */
+		// 				return;
+		// 		}
+
+		// const uint8_t* decrypted_data = encrypted_data;
+		// size_t decrypted_data_len = encrypted_data_len - crypto_box_MACBYTES;
+		// if ([[maybe_unused]] const bool uses_extension = (buffer[0] >> 4) & 0b0001) {
+		// 		/* Skip the RTP Extensions */
+		// 		size_t ext_len = 0;
+		// 		{
+		// 				uint16_t ext_len_in_words;
+		// 				memcpy(&ext_len_in_words, &decrypted_data[2], sizeof(uint16_t));
+		// 				ext_len_in_words = ntohs(ext_len_in_words);
+		// 				ext_len = sizeof(uint32_t) * ext_len_in_words;
+		// 		}
+		// 		constexpr size_t ext_header_len = sizeof(uint16_t) * 2;
+		// 		decrypted_data += ext_header_len + ext_len;
+		// 		decrypted_data_len -= ext_header_len + ext_len;
+		// }
 
 		/*
 		 * We're left with the decrypted, opus-encoded data.
 		 * Park the payload and decode on the voice courier thread.
 		 */
-		vp.vr->audio_data.assign(decrypted_data, decrypted_data + decrypted_data_len);
+		vp.vr->audio_data.assign(decrypted.begin(), decrypted.end());
 
 		{
 			std::lock_guard lk(voice_courier_shared_state.mtx);
