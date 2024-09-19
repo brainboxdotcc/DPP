@@ -1301,63 +1301,37 @@ discord_voice_client& discord_voice_client::send_audio_opus(uint8_t* opus_packet
 	++sequence;
 	rtp_header header(sequence, timestamp, (uint32_t)ssrc);
 
-	/* Unencrypted header + encrypted opus packet + encrypted header as additional data + unencrypted 32 bit nonce */
-	size_t packet_siz = (sizeof(header) * 2) + (encodedAudioLength + crypto_aead_xchacha20poly1305_IETF_ABYTES) + sizeof(packet_nonce);
+	/* Expected payload size is unencrypted header + encrypted opus packet + unencrypted 32 bit nonce */
+	size_t packet_siz = sizeof(header) + (encodedAudioLength + crypto_aead_xchacha20poly1305_IETF_ABYTES) + sizeof(packet_nonce);
+
 	std::vector<uint8_t> audioDataPacket(packet_siz);
+
+	/* Set RTP header */
 	std::memcpy(audioDataPacket.data(), &header, sizeof(header));
 
-	/* Convert to big-endian */
+	/* Convert nonce to big-endian */
 	uint32_t noncel = htonl(packet_nonce);
 
-	/* 4 byte encrypt nonce padded with 20 byte NULL */
-	unsigned char encrypt_nonce[crypto_aead_xchacha20poly1305_ietf_NPUBBYTES] = { NULL };
-	memcpy(encrypt_nonce, &packet_nonce, sizeof(packet_nonce));
+	/* 24 byte is needed for encrypting, discord just want 4 byte so just fill up the rest with null */
+	unsigned char encrypt_nonce[crypto_aead_xchacha20poly1305_ietf_NPUBBYTES] = { '\0' };
+	memcpy(encrypt_nonce, &noncel, sizeof(noncel));
 
-	unsigned long long clen_p;
-	crypto_aead_xchacha20poly1305_ietf_encrypt(audioDataPacket.data() + sizeof(header), &clen_p, encodedAudioData.data(), encodedAudioLength, (const unsigned char *)&header, sizeof(header), NULL, (const unsigned char*)encrypt_nonce, secret_key);
+	/* Execute */
+	crypto_aead_xchacha20poly1305_ietf_encrypt(
+			audioDataPacket.data() + sizeof(header),
+			nullptr,
+			encodedAudioData.data(),
+			encodedAudioLength,
+			reinterpret_cast<const unsigned char *>(&header),
+			sizeof(header),
+			nullptr,
+			(const unsigned char*)encrypt_nonce,
+			secret_key);
 
-	std::cout << "data[\n";
-
-	/*::write(STDIN_FILENO, audioDataPacket.data(), audioDataPacket.size());*/
-
-	std::cout << "\n]\n";
-	std::cout << "size("<< audioDataPacket.size() << ")\n";
-	std::cout << "clen_p("<< clen_p << ")\n";
-
-	// uint8_t buffer[65535] = {NULL};
-	// unsigned long long decrypted_len = 0;
-	// if (crypto_aead_xchacha20poly1305_ietf_decrypt(buffer, &decrypted_len,
-	// 						NULL,
-	// 						audioDataPacket.data() + sizeof(header), audioDataPacket.size() - sizeof(header),
-	// 						NULL,
-	// 						NULL,
-	// 						(const unsigned char*)encrypt_nonce, secret_key) != 0) {
-	// 		std::cout << "VERIFICATION FAILED\n";
-	// }
-	// else {
-	// 		auto pb = [](unsigned char *bin, size_t siz){
-	// 				for (size_t i = 0; i < siz; i++) {
-	// 						printf("%d ", bin[i]);
-	// 				}
-	// 		};
-
-	// 		std::cout << "buffer[\n";
-	// 		pb(encodedAudioData.data(), encodedAudioLength);
-	// 		std::cout<<"\n]\n";
-	// 		std::cout << "buffer_len("<< encodedAudioLength <<")\n";
-
-	// 		std::cout << "decrypted_buffer[\n";
-	// 		pb(buffer, decrypted_len);
-	// 		std::cout		<<"\n]\n";
-	// 		std::cout << "decrypted_len("<< decrypted_len <<")\n";
-	// }
-
-	//crypto_secretbox_easy(audioDataPacket.data() + sizeof(header), encodedAudioData.data(), encodedAudioLength, (const unsigned char*)nonce, secret_key);
-
-	/* Append the 4 byte nonce to the whole payload */
+	/* Append the 4 byte nonce to the resulting payload */
 	std::memcpy(audioDataPacket.data() + audioDataPacket.size() - sizeof(noncel), &noncel, sizeof(noncel));
 
-	this->send((const char*)audioDataPacket.data(), audioDataPacket.size(), duration);
+	this->send(reinterpret_cast<const char*>(audioDataPacket.data()), audioDataPacket.size(), duration);
 	timestamp += frameSize;
 
 	/* Increment for next packet */
