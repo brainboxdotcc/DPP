@@ -124,7 +124,7 @@ jobs:
       fail-fast: false # Don't fail everything if one fails. We want to test each OS/Compiler individually
       matrix:
         cfg:
-          - { arch: 'arm64', concurrency: 3, os: macos-latest, cpp-version: clang++-16, cmake-flags: '', xcode-version: '16.0-beta' }
+          - { arch: 'arm64', concurrency: 3, os: macos-latest, cpp-version: clang++-16, cmake-flags: '', xcode-version: '16.0.0' }
           - { arch: 'arm64', concurrency: 3, os: macos-latest, cpp-version: clang++-15, cmake-flags: '', xcode-version: '15.3' }
           - { arch: 'arm64', concurrency: 3, os: macos-latest, cpp-version: clang++-14, cmake-flags: '', xcode-version: '14.3.1' }
     steps:
