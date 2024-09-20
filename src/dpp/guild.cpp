@@ -217,7 +217,7 @@ void from_json(const nlohmann::json& j, guild_member& gm) {
 std::string guild_member::get_avatar_url(uint16_t size, const image_type format, bool prefer_animated) const {
 	if (this->guild_id && this->user_id && !this->avatar.to_string().empty()) {
 		return utility::cdn_endpoint_url_hash({ i_jpg, i_png, i_webp, i_gif },
-			"guilds/" + std::to_string(this->guild_id) + "/" + std::to_string(this->user_id), this->avatar.to_string(),
+			"guilds/" + std::to_string(this->guild_id) + "/users/" + std::to_string(this->user_id) + "/avatars", this->avatar.to_string(),
 			format, size, prefer_animated, has_animated_guild_avatar());
 	} else {
 		return std::string();

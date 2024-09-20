@@ -3,8 +3,13 @@ include(CheckCXXSourceRuns)
 function(check_instruction_set INSTRUCTION_SET_NAME INSTRUCTION_SET_FLAG INSTRUCTION_SET_INTRINSIC)
 
     set(INSTRUCTION_SET_CODE "
+     #if defined(__arm__) || defined(__aarch64__)
+        #include <arm_neon.h>
+     #else
         #include <immintrin.h>
         #include <stdint.h>
+     #endif
+
         int main()
         {
             ${INSTRUCTION_SET_INTRINSIC};
@@ -27,12 +32,14 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
         "AVX1?/arch:AVX?__m128i value{}#auto result = _mm_extract_epi32(value, 0)"
         "AVX2?/arch:AVX2?__m256i value{}#auto result = _mm256_add_epi32(__m256i{}, __m256i{})"
         "AVX512?/arch:AVX512?int32_t result[16]#const _mm512i& value{}#_mm512_store_si512(result, value)"
+        "AVX1024??uint8x16_t mask{ 0x0F, 0x0F, 0x0F, 0x0F, 0x0F, 0x0F, 0x0F, 0x0F, 0x0F, 0x0F, 0x0F, 0x0F, 0x0F, 0x0F, 0x0F, 0x0F }#vandq_u8(mask, mask)"
     )
 else()
     set(INSTRUCTION_SETS
         "AVX1?-mavx?__m128i value{}#auto result = _mm_extract_epi32(value, 0)"
         "AVX2?-mavx2?__m256i value{}#auto result = _mm256_add_epi32(__m256i{}, __m256i{})"
         "AVX512?-mavx512f?int32_t result[16]#const _mm512i& value{}#_mm512_store_si512(result, value)"
+        "AVX1024??uint8x16_t mask{ 0x0F, 0x0F, 0x0F, 0x0F, 0x0F, 0x0F, 0x0F, 0x0F, 0x0F, 0x0F, 0x0F, 0x0F, 0x0F, 0x0F, 0x0F, 0x0F }#vandq_u8(mask, mask)"
 )
 endif()
 
@@ -43,7 +50,7 @@ set(AVX_TYPE "AVX0" PARENT_SCOPE)
 set(AVX_FLAGS "" PARENT_SCOPE)
 
 # This is only supported on x86/x64, it is completely skipped and forced to T_fallback anywhere else
-if ((${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86_64") OR (${CMAKE_SYSTEM_PROCESSOR} MATCHES "i386") OR (${CMAKE_SYSTEM_PROCESSOR} MATCHES "AMD64"))
+if ((${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86_64") OR (${CMAKE_SYSTEM_PROCESSOR} MATCHES "i386") OR (${CMAKE_SYSTEM_PROCESSOR} MATCHES "AMD64") OR (${CMAKE_HOST_SYSTEM_PROCESSOR} MATCHES "arm64") OR (${CMAKE_HOST_SYSTEM_PROCESSOR} MATCHES "armv7l"))
 
 	foreach(INSTRUCTION_SET IN LISTS INSTRUCTION_SETS)
 		string(REPLACE "?" ";" CURRENT_LIST "${INSTRUCTION_SET}")

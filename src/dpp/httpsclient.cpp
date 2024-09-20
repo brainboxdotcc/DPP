@@ -284,7 +284,7 @@ bool https_client::handle_buffer(std::string &buffer)
 			case HTTPS_CONTENT:
 				body += buffer;
 				buffer.clear();
-				if (body.length() >= content_length) {
+				if (content_length == ULLONG_MAX || body.length() >= content_length) {
 					state = HTTPS_DONE;
 					this->close();
 					return false;
