@@ -1275,13 +1275,13 @@ discord_voice_client& discord_voice_client::send_audio_raw(uint16_t* audio_data,
 		return send_audio_raw((uint16_t*)packet.data(), packet.size());
 	}
 
-	opus_int32 encodedAudioMaxLength = (opus_int32)length;
-	std::vector<uint8_t> encodedAudioData(encodedAudioMaxLength);
-	size_t encodedAudioLength = encodedAudioMaxLength;
+	opus_int32 encoded_audio_max_length = (opus_int32)length;
+	std::vector<uint8_t> encoded_audio(encoded_audio_max_length);
+	size_t encoded_audio_length = encoded_audio_max_length;
 
-	encodedAudioLength = this->encode((uint8_t*)audio_data, length, encodedAudioData.data(), encodedAudioLength);
+	encoded_audio_length = this->encode((uint8_t*)audio_data, length, encoded_audio.data(), encoded_audio_length);
 
-	send_audio_opus(encodedAudioData.data(), encodedAudioLength);
+	send_audio_opus(encoded_audio.data(), encoded_audio_length);
 #else
 	throw dpp::voice_exception(err_no_voice_support, "Voice support not enabled in this build of D++");
 #endif
@@ -1301,25 +1301,25 @@ discord_voice_client& discord_voice_client::send_audio_opus(uint8_t* opus_packet
 
 discord_voice_client& discord_voice_client::send_audio_opus(uint8_t* opus_packet, const size_t length, uint64_t duration) {
 #if HAVE_VOICE
-	int frameSize = (int)(48 * duration * (timescale / 1000000));
-	opus_int32 encodedAudioMaxLength = (opus_int32)length;
-	std::vector<uint8_t> encodedAudioData(encodedAudioMaxLength);
-	size_t encodedAudioLength = encodedAudioMaxLength;
+	int frame_size = (int)(48 * duration * (timescale / 1000000));
+	opus_int32 encoded_audio_max_length = (opus_int32)length;
+	std::vector<uint8_t> encoded_audio(encoded_audio_max_length);
+	size_t encoded_audio_length = encoded_audio_max_length;
 
-	encodedAudioLength = length;
-	encodedAudioData.reserve(length);
-	memcpy(encodedAudioData.data(), opus_packet, length);
+	encoded_audio_length = length;
+	encoded_audio.reserve(length);
+	memcpy(encoded_audio.data(), opus_packet, length);
 
 	++sequence;
 	rtp_header header(sequence, timestamp, (uint32_t)ssrc);
 
 	/* Expected payload size is unencrypted header + encrypted opus packet + unencrypted 32 bit nonce */
-	size_t packet_siz = sizeof(header) + (encodedAudioLength + crypto_aead_xchacha20poly1305_IETF_ABYTES) + sizeof(packet_nonce);
+	size_t packet_siz = sizeof(header) + (encoded_audio_length + crypto_aead_xchacha20poly1305_IETF_ABYTES) + sizeof(packet_nonce);
 
-	std::vector<uint8_t> audioDataPacket(packet_siz);
+	std::vector<uint8_t> payload(packet_siz);
 
 	/* Set RTP header */
-	std::memcpy(audioDataPacket.data(), &header, sizeof(header));
+	std::memcpy(payload.data(), &header, sizeof(header));
 
 	/* Convert nonce to big-endian */
 	uint32_t noncel = htonl(packet_nonce);
@@ -1330,10 +1330,10 @@ discord_voice_client& discord_voice_client::send_audio_opus(uint8_t* opus_packet
 
 	/* Execute */
 	crypto_aead_xchacha20poly1305_ietf_encrypt(
-			audioDataPacket.data() + sizeof(header),
+			payload.data() + sizeof(header),
 			nullptr,
-			encodedAudioData.data(),
-			encodedAudioLength,
+			encoded_audio.data(),
+			encoded_audio_length,
 			/* The RTP Header as Additional Data */
 			reinterpret_cast<const unsigned char *>(&header),
 			sizeof(header),
@@ -1342,10 +1342,10 @@ discord_voice_client& discord_voice_client::send_audio_opus(uint8_t* opus_packet
 			secret_key);
 
 	/* Append the 4 byte nonce to the resulting payload */
-	std::memcpy(audioDataPacket.data() + audioDataPacket.size() - sizeof(noncel), &noncel, sizeof(noncel));
+	std::memcpy(payload.data() + payload.size() - sizeof(noncel), &noncel, sizeof(noncel));
 
-	this->send(reinterpret_cast<const char*>(audioDataPacket.data()), audioDataPacket.size(), duration);
-	timestamp += frameSize;
+	this->send(reinterpret_cast<const char*>(payload.data()), payload.size(), duration);
+	timestamp += frame_size;
 
 	/* Increment for next packet */
 	packet_nonce++;
