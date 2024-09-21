@@ -710,28 +710,11 @@ void discord_voice_client::send(const char* packet, size_t len, uint64_t duratio
 	outbuf.emplace_back(frame);
 }
 
-// static FILE *f = NULL;
-// 
-// void init() {
-// 	static bool i = false;
-// 	if (i) return;
-// 	i = true;
-// 
-// 	f = fopen("report.bin", "wb");
-// }
-
 void discord_voice_client::read_ready()
 {
 #ifdef HAVE_VOICE
 	uint8_t buffer[65535];
 	int packet_size = this->udp_recv((char*)buffer, sizeof(buffer));
-
-	std::cout << "RECEIVED SIZE("<<packet_size<<")\n";
-	// init();
-	// fwrite("\n;",1,2,f);
-	// fwrite(secret_key,1,32,f);
-	// fwrite(";\n",1,2,f);
-	// fwrite(buffer, 1, packet_size, f);
 
 	bool receive_handler_is_empty = creator->on_voice_receive.empty() && creator->on_voice_receive_combined.empty();
 	if (packet_size <= 0 || receive_handler_is_empty) {
@@ -820,7 +803,6 @@ void discord_voice_client::read_ready()
 		total_header_len,
 		nonce, secret_key) != 0) {
 		/* Invalid Discord RTP payload. */
-		std::cout << "INVALID PACKET\n";
 		return;
 	}
 
@@ -830,9 +812,6 @@ void discord_voice_client::read_ready()
 		opus_packet += ext_len;
 		opus_packet_len -= ext_len;
 	}
-
-	// const uint8_t* decrypted_data = buffer;
-	// size_t decrypted_data_len = encrypted_data_len - crypto_box_MACBYTES;
 
 	/*
 	 * We're left with the decrypted, opus-encoded data.
