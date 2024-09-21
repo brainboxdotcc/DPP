@@ -31,10 +31,10 @@ jobs:
     permissions:
       contents: write
     concurrency:
-      group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.cfg.arch }}-(${{ matrix.cfg.cpp-version }})
+      group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.cfg.arch }}-(${{ matrix.cfg.cpp }}-${{ matrix.cfg.version }})
       cancel-in-progress: true
-    name: Linux ${{matrix.cfg.arch}} (${{matrix.cfg.cpp-version}})
-    runs-on: ${{matrix.cfg.os}}
+    name: Linux ${{ matrix.cfg.arch }} (${{ matrix.cfg.cpp }}-${{ matrix.cfg.version }}${{ matrix.cfg.name-extra }})
+    runs-on: ${{ matrix.cfg.os }}
     strategy:
       fail-fast: false # Don't fail everything if one fails. We want to test each OS/Compiler individually
       matrix:
@@ -42,26 +42,27 @@ jobs:
         # arm7hf is a self-hosted docker-based runner at Brainbox.cc. Raspberry Pi 4, 8gb 4-core with NEON
         cfg:
           # clang++
-          - { arch: 'amd64', concurrency: 4, os: ubuntu-20.04, package: clang-10, cpp-version: clang++-10, cmake-flags: '', cpack: 'no', ctest: 'no', mold: 'yes' }
-          - { arch: 'amd64', concurrency: 4, os: ubuntu-22.04, package: clang-11, cpp-version: clang++-11, cmake-flags: '', cpack: 'no', ctest: 'no', mold: 'yes' }
-          - { arch: 'amd64', concurrency: 4, os: ubuntu-22.04, package: clang-12, cpp-version: clang++-12, cmake-flags: '', cpack: 'no', ctest: 'no', mold: 'yes' }
-          - { arch: 'amd64', concurrency: 4, os: ubuntu-22.04, package: clang-13, cpp-version: clang++-13, cmake-flags: '', cpack: 'no', ctest: 'no', mold: 'yes' }
-          - { arch: 'amd64', concurrency: 4, os: ubuntu-22.04, package: clang-14, cpp-version: clang++-14, cmake-flags: '-DDPP_CORO=ON', cpack: 'no', ctest: 'no', mold: 'yes' }
-          - { arch: 'amd64', concurrency: 4, os: ubuntu-22.04, package: clang-15, cpp-version: clang++-15, cmake-flags: '-DDPP_CORO=ON', cpack: 'no', ctest: 'no', mold: 'yes' }
-          - { arch: 'amd64', concurrency: 4, os: ubuntu-24.04, package: clang-16, cpp-version: clang++-16, cmake-flags: '-DDPP_CORO=ON', cpack: 'no', ctest: 'no', mold: 'yes' }
-          - { arch: 'amd64', concurrency: 4, os: ubuntu-24.04, package: clang-17, cpp-version: clang++-17, cmake-flags: '-DDPP_CORO=ON', cpack: 'no', ctest: 'no', mold: 'yes' }
-          - { arch: 'amd64', concurrency: 4, os: ubuntu-24.04, package: clang-18, cpp-version: clang++-18, cmake-flags: '-DDPP_CORO=ON', cpack: 'no', ctest: 'no', mold: 'yes' }
+          - { arch: 'amd64', concurrency: 4, os: ubuntu-20.04, package: clang-10, cpp: clang++, version: 10, cmake-flags: '', cpack: 'no', ctest: 'no', mold: 'yes' }
+          - { arch: 'amd64', concurrency: 4, os: ubuntu-22.04, package: clang-11, cpp: clang++, version: 11, cmake-flags: '', cpack: 'no', ctest: 'no', mold: 'yes' }
+          - { arch: 'amd64', concurrency: 4, os: ubuntu-22.04, package: clang-12, cpp: clang++, version: 12, cmake-flags: '', cpack: 'no', ctest: 'no', mold: 'yes' }
+          - { arch: 'amd64', concurrency: 4, os: ubuntu-22.04, package: clang-13, cpp: clang++, version: 13, cmake-flags: '', cpack: 'no', ctest: 'no', mold: 'yes' }
+          - { arch: 'amd64', concurrency: 4, os: ubuntu-22.04, package: clang-14, cpp: clang++, version: 14, cmake-flags: '-DDPP_CORO=ON', cpack: 'no', ctest: 'no', mold: 'yes' }
+          - { arch: 'amd64', concurrency: 4, os: ubuntu-22.04, package: clang-15, cpp: clang++, version: 15, cmake-flags: '-DDPP_CORO=ON', cpack: 'no', ctest: 'no', mold: 'yes' }
+          - { arch: 'amd64', concurrency: 4, os: ubuntu-24.04, package: clang-16, cpp: clang++, version: 16, cmake-flags: '-DDPP_CORO=ON', cpack: 'no', ctest: 'no', mold: 'yes' }
+          - { arch: 'amd64', concurrency: 4, os: ubuntu-24.04, package: clang-17, cpp: clang++, version: 17, cmake-flags: '-DDPP_CORO=ON', cpack: 'no', ctest: 'no', mold: 'yes' }
+          - { arch: 'amd64', concurrency: 4, os: ubuntu-24.04, package: clang-18, cpp: clang++, version: 18, cmake-flags: '-DDPP_CORO=ON', cpack: 'no', ctest: 'no', mold: 'yes' }
+          - { arch: 'amd64', concurrency: 4, os: ubuntu-24.04, package: '',       cpp: clang++, version: 19, cmake-flags: '-DDPP_CORO=ON -DCMAKE_CXX_FLAGS="-stdlib=libc++" -DCMAKE_EXE_LINKER_FLAGS="-stdlib=libc++"', cpack: 'no', ctest: 'no', mold: 'yes', llvm-install: '19.1.0', name-extra: " libc++" }
           # g++
-          - { arch: 'amd64', concurrency: 4, os: ubuntu-24.04, package: g++-13, cpp-version: g++-13, cmake-flags: '-DDPP_CORO=ON', cpack: 'no', ctest: 'no', mold: 'yes' }
-          - { arch: 'amd64', concurrency: 4, os: ubuntu-24.04, package: g++-14, cpp-version: g++-14, cmake-flags: '-DDPP_CORO=ON', cpack: 'no', ctest: 'no', mold: 'yes' }
-          - { arch: 'amd64', concurrency: 4, os: ubuntu-22.04, package: g++-12, cpp-version: g++-12, cmake-flags: '-DDPP_CORO=ON', cpack: 'no', ctest: 'no', mold: 'yes' }
-          - { arch: 'amd64', concurrency: 4, os: ubuntu-22.04, package: g++-11, cpp-version: g++-11, cmake-flags: '-DDPP_CORO=ON', cpack: 'no', ctest: 'no', mold: 'yes' }
-          - { arch: 'amd64', concurrency: 4, os: ubuntu-22.04, package: g++-10, cpp-version: g++-10, cmake-flags: '', cpack: 'yes', ctest: 'no', mold: 'yes' }
-          - { arch: 'amd64', concurrency: 4, os: ubuntu-20.04, package: g++-9, cpp-version: g++-9, cmake-flags: '', cpack: 'no', ctest: 'no', mold: 'yes' }
-          - { arch: 'amd64', concurrency: 4, os: ubuntu-20.04, package: g++-8, cpp-version: g++-8, cmake-flags: '', cpack: 'no', ctest: 'yes', mold: 'yes' }
+          - { arch: 'amd64', concurrency: 4, os: ubuntu-24.04, package: g++-13, cpp: g++, version: 13, cmake-flags: '-DDPP_CORO=ON', cpack: 'no', ctest: 'no', mold: 'yes' }
+          - { arch: 'amd64', concurrency: 4, os: ubuntu-24.04, package: g++-14, cpp: g++, version: 14, cmake-flags: '-DDPP_CORO=ON', cpack: 'no', ctest: 'no', mold: 'yes' }
+          - { arch: 'amd64', concurrency: 4, os: ubuntu-22.04, package: g++-12, cpp: g++, version: 12, cmake-flags: '-DDPP_CORO=ON', cpack: 'no', ctest: 'no', mold: 'yes' }
+          - { arch: 'amd64', concurrency: 4, os: ubuntu-22.04, package: g++-11, cpp: g++, version: 11, cmake-flags: '-DDPP_CORO=ON', cpack: 'no', ctest: 'no', mold: 'yes' }
+          - { arch: 'amd64', concurrency: 4, os: ubuntu-22.04, package: g++-10, cpp: g++, version: 10, cmake-flags: '', cpack: 'yes', ctest: 'no', mold: 'yes' }
+          - { arch: 'amd64', concurrency: 4, os: ubuntu-20.04, package: g++-9, cpp: g++, version: 9, cmake-flags: '', cpack: 'no', ctest: 'no', mold: 'yes' }
+          - { arch: 'amd64', concurrency: 4, os: ubuntu-20.04, package: g++-8, cpp: g++, version: 8, cmake-flags: '', cpack: 'no', ctest: 'yes', mold: 'yes' }
           # Self hosted
-          - { arch: 'arm7hf', concurrency: 4, os: [self-hosted, linux, ARM], package: g++-12, cpp-version: g++-12, cmake-flags: '', cpack: 'yes', ctest: 'no', mold: 'no' }
-          - { arch: 'arm64', concurrency: 4, os: [self-hosted, linux, ARM64], package: g++-12, cpp-version: g++-12, cmake-flags: '', cpack: 'yes', ctest: 'no', mold: 'yes' }
+          - { arch: 'arm7hf', concurrency: 4, os: [self-hosted, linux, ARM], package: g++-12, cpp: g++, version: 12, cmake-flags: '', cpack: 'yes', ctest: 'no', mold: 'no' }
+          - { arch: 'arm64', concurrency: 4, os: [self-hosted, linux, ARM64], package: g++-12, cpp: g++, version: 12, cmake-flags: '', cpack: 'yes', ctest: 'no', mold: 'yes' }
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@17d0e2bd7d51742c71671bd19fa12bdc9d40a3d6 # v2.8.1
@@ -71,17 +72,24 @@ jobs:
       - name: Checkout D++
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
 
-      - name: Install apt packages
-        run: sudo sed -i 's/azure\.//' /etc/apt/sources.list && sudo apt update && sudo apt-get install -y ${{ matrix.cfg.package }} pkg-config libsodium-dev libopus-dev zlib1g-dev rpm
-
       - name: Setup mold
         if: ${{ matrix.cfg.mold == 'yes' }}
         uses: rui314/setup-mold@0bf4f07ef9048ec62a45f9dbf2f098afa49695f0 # v1
 
+      - name: Install LLVM
+        if: ${{ matrix.cfg.llvm-install != '' }}
+        run: |
+          wget https://apt.llvm.org/llvm.sh
+          chmod +x llvm.sh
+          sudo ./llvm.sh ${{ matrix.cfg.version }} all
+
+      - name: Install apt packages
+        run: sudo sed -i 's/azure\.//' /etc/apt/sources.list && sudo apt update && sudo apt-get install -y ${{ matrix.cfg.package }} pkg-config libsodium-dev libopus-dev zlib1g-dev rpm
+
       - name: Generate CMake
         run: cmake -B build -DDPP_NO_VCPKG=ON -DAVX_TYPE=AVX0 -DCMAKE_BUILD_TYPE=Release ${{matrix.cfg.cmake-flags}}
         env:
-          CXX: ${{matrix.cfg.cpp-version}}
+          CXX: ${{ matrix.cfg.cpp }}-${{ matrix.cfg.version }}
 
       - name: Build Project
         run: cd build && make -j${{ matrix.cfg.concurrency }}
@@ -118,15 +126,15 @@ jobs:
   macos:
     permissions:
       contents: write
-    name: macOS ${{matrix.cfg.arch}} (${{matrix.cfg.cpp-version}})
-    runs-on: ${{matrix.cfg.os}}
+    name: macOS ${{ matrix.cfg.arch }} (${{ matrix.cfg.cpp }}-${{ matrix.cfg.version }})
+    runs-on: ${{ matrix.cfg.os }}
     strategy:
       fail-fast: false # Don't fail everything if one fails. We want to test each OS/Compiler individually
       matrix:
         cfg:
-          - { arch: 'arm64', concurrency: 3, os: macos-latest, cpp-version: clang++-16, cmake-flags: '', xcode-version: '16.0-beta' }
-          - { arch: 'arm64', concurrency: 3, os: macos-latest, cpp-version: clang++-15, cmake-flags: '', xcode-version: '15.3' }
-          - { arch: 'arm64', concurrency: 3, os: macos-latest, cpp-version: clang++-14, cmake-flags: '', xcode-version: '14.3.1' }
+          - { arch: 'arm64', concurrency: 3, os: macos-latest, cpp: clang++, version: 16, cmake-flags: '', xcode-version: '16.0.0' }
+          - { arch: 'arm64', concurrency: 3, os: macos-latest, cpp: clang++, version: 15, cmake-flags: '', xcode-version: '15.3' }
+          - { arch: 'arm64', concurrency: 3, os: macos-latest, cpp: clang++, version: 14, cmake-flags: '', xcode-version: '14.3.1' }
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@17d0e2bd7d51742c71671bd19fa12bdc9d40a3d6 # v2.8.1
