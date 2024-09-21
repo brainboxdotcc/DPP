@@ -780,7 +780,10 @@ void discord_voice_client::read_ready()
 
 	size_t ext_len = 0;
 	if ([[maybe_unused]] const bool uses_extension = (buffer[0] >> 4) & 0b0001) {
-		/* Get the RTP Extensions size */
+		/**
+		 * Get the RTP Extensions size, we only get the size here because
+		 * the extension itself is encrypted along with the opus packet
+		 */
 		{
 			uint16_t ext_len_in_words;
 			memcpy(&ext_len_in_words, &ciphertext[2], sizeof(uint16_t));
@@ -797,9 +800,14 @@ void discord_voice_client::read_ready()
 	unsigned long long opus_packet_len  = 0;
 	if (crypto_aead_xchacha20poly1305_ietf_decrypt(
 		decrypted, &opus_packet_len,
-		NULL,
+		nullptr,
 		ciphertext, ciphertext_len,
 		buffer,
+		/**
+		 * Additional Data:
+		 * The whole header (including csrc list) +
+		 * 4 byte extension header (magic 0xBEDE + 16-bit denoting extension length)
+		 */
 		total_header_len,
 		nonce, secret_key) != 0) {
 		/* Invalid Discord RTP payload. */
@@ -808,7 +816,7 @@ void discord_voice_client::read_ready()
 
 	uint8_t *opus_packet = decrypted;
 	if (ext_len > 0) {
-		/* Skip RTP Header Extension */
+		/* Skip previously encrypted RTP Header Extension */
 		opus_packet += ext_len;
 		opus_packet_len -= ext_len;
 	}
@@ -1326,6 +1334,7 @@ discord_voice_client& discord_voice_client::send_audio_opus(uint8_t* opus_packet
 			nullptr,
 			encodedAudioData.data(),
 			encodedAudioLength,
+			/* The RTP Header as Additional Data */
 			reinterpret_cast<const unsigned char *>(&header),
 			sizeof(header),
 			nullptr,
