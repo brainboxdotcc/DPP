@@ -51,7 +51,7 @@ jobs:
           - { arch: 'amd64', concurrency: 4, os: ubuntu-24.04, package: clang-16, cpp: clang++, version: 16, cmake-flags: '-DDPP_CORO=ON', cpack: 'no', ctest: 'no', mold: 'yes' }
           - { arch: 'amd64', concurrency: 4, os: ubuntu-24.04, package: clang-17, cpp: clang++, version: 17, cmake-flags: '-DDPP_CORO=ON', cpack: 'no', ctest: 'no', mold: 'yes' }
           - { arch: 'amd64', concurrency: 4, os: ubuntu-24.04, package: clang-18, cpp: clang++, version: 18, cmake-flags: '-DDPP_CORO=ON', cpack: 'no', ctest: 'no', mold: 'yes' }
-          - { arch: 'amd64', concurrency: 4, os: ubuntu-24.04, package: '',       cpp: clang++, version: 19, cmake-flags: '-DDPP_CORO=ON -DCMAKE_CXX_FLAGS="-stdlib=libc++" -DCMAKE_EXE_LINKER_FLAGS="-stdlib=libc++"', cpack: 'no', ctest: 'no', mold: 'yes', llvm-install: '19.1.0', name-extra: " libc++" }
+          - { arch: 'amd64', concurrency: 4, os: ubuntu-24.04, package: 'clang-19 libc++-19-dev libc++abi-19-dev', cpp: clang++, version: 19, cmake-flags: '-DDPP_CORO=ON -DCMAKE_CXX_FLAGS="-stdlib=libc++" -DCMAKE_EXE_LINKER_FLAGS="-stdlib=libc++"', cpack: 'no', ctest: 'no', mold: 'yes', name-extra: " libc++", llvm-apt: 'yes' }
           # g++
           - { arch: 'amd64', concurrency: 4, os: ubuntu-24.04, package: g++-13, cpp: g++, version: 13, cmake-flags: '-DDPP_CORO=ON', cpack: 'no', ctest: 'no', mold: 'yes' }
           - { arch: 'amd64', concurrency: 4, os: ubuntu-24.04, package: g++-14, cpp: g++, version: 14, cmake-flags: '-DDPP_CORO=ON', cpack: 'no', ctest: 'no', mold: 'yes' }
@@ -76,12 +76,12 @@ jobs:
         if: ${{ matrix.cfg.mold == 'yes' }}
         uses: rui314/setup-mold@0bf4f07ef9048ec62a45f9dbf2f098afa49695f0 # v1
 
-      - name: Install LLVM
-        if: ${{ matrix.cfg.llvm-install != '' }}
+      - name: Add LLVM apt repository
+        if: ${{ matrix.cfg.llvm-apt }}
         run: |
-          wget https://apt.llvm.org/llvm.sh
-          chmod +x llvm.sh
-          sudo ./llvm.sh ${{ matrix.cfg.version }} all
+          osname=`cat /etc/os-release | grep -e "^VERSION_CODENAME" | cut -d= -f2`
+          wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+          sudo apt-add-repository -y "deb http://apt.llvm.org/$osname/ llvm-toolchain-$osname-${{ matrix.cfg.version }} main"
 
       - name: Install apt packages
         run: sudo sed -i 's/azure\.//' /etc/apt/sources.list && sudo apt update && sudo apt-get install -y ${{ matrix.cfg.package }} pkg-config libsodium-dev libopus-dev zlib1g-dev rpm
