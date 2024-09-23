@@ -677,11 +677,12 @@ message::message(class cluster* o) : message() {
 	owner = o;
 }
 
-message& message::set_reference(snowflake _message_id, snowflake _guild_id, snowflake _channel_id, bool fail_if_not_exists) {
+message& message::set_reference(snowflake _message_id, snowflake _guild_id, snowflake _channel_id, bool fail_if_not_exists, message_ref_type type) {
 	message_reference.channel_id = _channel_id;
 	message_reference.guild_id = _guild_id;
 	message_reference.message_id = _message_id;
 	message_reference.fail_if_not_exists = fail_if_not_exists;
+	message_reference.type = type;
 	return *this;
 }
 
@@ -1119,6 +1120,7 @@ json message::to_json(bool with_id, bool is_interaction_response) const {
 	/* Populate message reference */
 	if (message_reference.channel_id || message_reference.guild_id || message_reference.message_id) {
 		j["message_reference"] = json::object();
+		j["message_reference"]["type"] = static_cast<uint32_t>(message_reference.type);
 		if (message_reference.channel_id) {
 			j["message_reference"]["channel_id"] = std::to_string(message_reference.channel_id);
 		}
@@ -1408,10 +1410,17 @@ message& message::fill_from_json(json* d, cache_policy_t cp) {
 	}
 	if (d->find("message_reference") != d->end()) {
 		json& mr = (*d)["message_reference"];
+		message_reference.type = static_cast<message_ref_type>(int8_not_null(&mr, "type"));
 		message_reference.channel_id = snowflake_not_null(&mr, "channel_id");
 		message_reference.guild_id = snowflake_not_null(&mr, "guild_id");
 		message_reference.message_id = snowflake_not_null(&mr, "message_id");
 		message_reference.fail_if_not_exists = bool_not_null(&mr, "fail_if_not_exists");
+
+		if (message_reference.type == mrt_forward) {
+			for (auto& e : (*d)["message_snapshots"]) {
+				message_snapshots.messages.emplace_back(message().fill_from_json(&(e["message"]), cp));
+			}
+		}
 	}
 	if (auto it = d->find("poll"); it != d->end()) {
 		from_json(*it, attached_poll.emplace());
