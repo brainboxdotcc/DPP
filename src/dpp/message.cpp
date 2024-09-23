@@ -1120,6 +1120,7 @@ json message::to_json(bool with_id, bool is_interaction_response) const {
 	/* Populate message reference */
 	if (message_reference.channel_id || message_reference.guild_id || message_reference.message_id) {
 		j["message_reference"] = json::object();
+		j["message_reference"]["type"] = static_cast<uint32_t>(message_reference.type);
 		if (message_reference.channel_id) {
 			j["message_reference"]["channel_id"] = std::to_string(message_reference.channel_id);
 		}
@@ -1409,7 +1410,7 @@ message& message::fill_from_json(json* d, cache_policy_t cp) {
 	}
 	if (d->find("message_reference") != d->end()) {
 		json& mr = (*d)["message_reference"];
-		message_reference.type = (message_ref_type)int8_not_null(&mr, "type");
+		message_reference.type = static_cast<message_ref_type>(int8_not_null(&mr, "type"));
 		message_reference.channel_id = snowflake_not_null(&mr, "channel_id");
 		message_reference.guild_id = snowflake_not_null(&mr, "guild_id");
 		message_reference.message_id = snowflake_not_null(&mr, "message_id");
