@@ -1417,7 +1417,7 @@ message& message::fill_from_json(json* d, cache_policy_t cp) {
 
 		if (message_reference.type == mrt_forward) {
 			for (auto& e : (*d)["message_snapshots"]) {
-				message_snapshots.messages.emplace_back(message().fill_from_json(e["message"], cp));
+				message_snapshots.messages.emplace_back(message().fill_from_json(&(e["message"]), cp));
 			}
 		}
 	}
