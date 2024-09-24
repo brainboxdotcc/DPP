@@ -20,20 +20,14 @@
  *
  ************************************************************************************/
 
-#include <cstdint>
-#include <dpp/export.h>
 #ifdef _WIN32
 	#include <WinSock2.h>
 	#include <WS2tcpip.h>
 	#include <io.h>
 #else
-	#include <unistd.h>
 	#include <arpa/inet.h>
 	#include <netinet/in.h>
-	#include <resolv.h>
-	#include <netdb.h>
 	#include <sys/socket.h>
-	#include <netinet/tcp.h>
 #endif
 #include <string_view>
 #include <iostream>
@@ -43,8 +37,6 @@
 #include <dpp/exception.h>
 #include <dpp/isa_detection.h>
 #include <dpp/discordvoiceclient.h>
-#include <dpp/cache.h>
-#include <dpp/cluster.h>
 #include <dpp/json.h>
 
 #ifdef HAVE_VOICE
