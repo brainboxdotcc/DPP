@@ -303,7 +303,7 @@ void discord_voice_client::voice_courier_loop(discord_voice_client& client, cour
 }
 
 discord_voice_client::discord_voice_client(dpp::cluster* _cluster, snowflake _channel_id, snowflake _server_id, const std::string &_token, const std::string &_session_id, const std::string &_host)
-	   : websocket_client(_host.substr(0, _host.find(":")), _host.substr(_host.find(":") + 1, _host.length()), "/?v=4", OP_TEXT),
+	   : websocket_client(_host.substr(0, _host.find(":")), _host.substr(_host.find(":") + 1, _host.length()), "/?v=8", OP_TEXT),
 	runner(nullptr),
 	connect_time(0),
 	mixer(std::make_unique<audio_mixer>()),
