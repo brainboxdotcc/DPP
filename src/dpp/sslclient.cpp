@@ -73,7 +73,7 @@
 #include <dpp/dns.h>
 
 /* Maximum allowed time in milliseconds for socket read/write timeouts and connect() */
-#define SOCKET_OP_TIMEOUT 5000
+constexpr uint16_t SOCKET_OP_TIMEOUT{5000};
 
 namespace dpp {
 
@@ -123,10 +123,10 @@ thread_local std::unordered_map<std::string, keepalive_cache_t> keepalives;
  * SSL_read in non-blocking mode will only read 16k at a time. There's no point in a bigger buffer as
  * it'd go unused.
  */
-#define DPP_BUFSIZE 16 * 1024
+constexpr uint16_t DPP_BUFSIZE{16 * 1024};
 
 /* Represents a failed socket system call, e.g. connect() failure */
-const int ERROR_STATUS = -1;
+constexpr int ERROR_STATUS{-1};
 
 bool close_socket(dpp::socket sfd)
 {
@@ -176,8 +176,8 @@ bool set_nonblocking(dpp::socket sockfd, bool non_blocking)
  */
 int connect_with_timeout(dpp::socket sockfd, const struct sockaddr *addr, socklen_t addrlen, unsigned int timeout_ms) {
 #ifdef __APPLE__
-		/* Unreliable on OSX right now */
-		return (::connect(sockfd, addr, addrlen));
+	/* Unreliable on OSX right now */
+	return (::connect(sockfd, addr, addrlen));
 #else
 	if (!set_nonblocking(sockfd, true)) {
 		throw dpp::connection_exception(err_nonblocking_failure, "Can't switch socket to non-blocking mode!");
@@ -197,31 +197,44 @@ int connect_with_timeout(dpp::socket sockfd, const struct sockaddr *addr, sockle
 #endif
 	if (rc == -1 && err != EWOULDBLOCK && err != EINPROGRESS) {
 		throw connection_exception(err_connect_failure, strerror(errno));
-	} else {
-		/* Set a deadline timestamp 'timeout' ms from now */
-		double deadline = utility::time_f() + (timeout_ms / 1000.0);
-		do {
-			rc = -1;
-			if (utility::time_f() >= deadline) {
-				throw connection_exception(err_connection_timed_out, "Connection timed out");
-			}
-			pollfd pfd = {};
-			pfd.fd = sockfd;
-			pfd.events = POLLOUT;
-			int r = poll(&pfd, 1, 10);
-			if (r > 0 && pfd.revents & POLLOUT) {
-				rc = 0;
-			} else if (r != 0 || pfd.revents & POLLERR) {
-				throw connection_exception(err_connection_timed_out, strerror(errno));
-			}
-		} while (rc == -1);
 	}
+
+	/* Set a deadline timestamp 'timeout' ms from now */
+	double deadline = utility::time_f() + (timeout_ms / 1000.0);
+
+	do {
+		if (utility::time_f() >= deadline) {
+			throw connection_exception(err_connection_timed_out, "Connection timed out");
+		}
+		pollfd pfd = {};
+		pfd.fd = sockfd;
+		pfd.events = POLLOUT;
+		const int r = ::poll(&pfd, 1, 10);
+		if (r > 0 && pfd.revents & POLLOUT) {
+			rc = 0;
+		} else if (r != 0 || pfd.revents & POLLERR) {
+			throw connection_exception(err_connection_timed_out, strerror(errno));
+		}
+	} while (rc == -1);
+
 	if (!set_nonblocking(sockfd, false)) {
 		throw connection_exception(err_nonblocking_failure, "Can't switch socket to blocking mode!");
 	}
 	return rc;
 #endif
 }
+
+#ifndef _WIN32
+void set_signal_handler(int signal)
+{
+	struct sigaction sa{};
+	sigaction(signal, nullptr, &sa);
+	if (sa.sa_flags == 0 && sa.sa_handler == nullptr) {
+		sa = {};
+		sigaction(signal, &sa, nullptr);
+	}
+}
+#endif
 
 ssl_client::ssl_client(const std::string &_hostname, const std::string &_port, bool plaintext_downgrade, bool reuse) :
 	nonblocking(false),
@@ -237,11 +250,11 @@ ssl_client::ssl_client(const std::string &_hostname, const std::string &_port, b
 	keepalive(reuse)
 {
 #ifndef WIN32
-	signal(SIGALRM, SIG_IGN);
+	set_signal_handler(SIGALRM);
+	set_signal_handler(SIGXFSZ);
+	set_signal_handler(SIGCHLD);
 	signal(SIGHUP, SIG_IGN);
 	signal(SIGPIPE, SIG_IGN);
-	signal(SIGCHLD, SIG_IGN);
-	signal(SIGXFSZ, SIG_IGN);
 #else
 	// Set up winsock.
 	WSADATA wsadata;
@@ -257,7 +270,7 @@ ssl_client::ssl_client(const std::string &_hostname, const std::string &_port, b
 			pollfd pfd = {};
 			pfd.fd = iter->second.sfd;
 			pfd.events = POLLOUT;
-			int r = poll(&pfd, 1, 1);
+			int r = ::poll(&pfd, 1, 1);
 			if (time(nullptr) > (iter->second.created + 60) || r < 0 || pfd.revents & POLLERR) {
 				make_new = true;
 				/* This connection is dead, free its resources and make a new one */
@@ -366,7 +379,7 @@ void ssl_client::connect()
 	}
 }
 
-void ssl_client::write(const std::string &data)
+void ssl_client::write(const std::string_view data)
 {
 	/* If we are in nonblocking mode, append to the buffer,
 	 * otherwise just use SSL_write directly. The only time we
@@ -376,16 +389,17 @@ void ssl_client::write(const std::string &data)
 	 */
 	if (nonblocking) {
 		obuffer += data;
+		return;
+	}
+
+	const int data_length = static_cast<int>(data.length());
+	if (plaintext) {
+		if (sfd == INVALID_SOCKET || ::send(sfd, data.data(), data_length, 0) != data_length) {
+			throw dpp::connection_exception(err_write, "write() failed");
+		}
 	} else {
-		const int data_length = (int)data.length();
-		if (plaintext) {
-			if (sfd == INVALID_SOCKET || ::send(sfd, data.data(), data_length, 0) != data_length) {
-				throw dpp::connection_exception(err_write, "write() failed");
-			}
-		} else {
-			if (SSL_write(ssl->ssl, data.data(), data_length) != data_length) {
-				throw dpp::connection_exception(err_ssl_write, "SSL_write() failed");
-			}
+		if (SSL_write(ssl->ssl, data.data(), data_length) != data_length) {
+			throw dpp::connection_exception(err_ssl_write, "SSL_write() failed");
 		}
 	}
 }
@@ -468,7 +482,7 @@ void ssl_client::read_loop()
 			const int64_t now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 			int poll_time = 1000 - (now % 1000);
 			poll_time = poll_time > 400 ? 1000 : poll_time + poll_time / 3 + 1;
-			r = poll(pfd, sockets, now / 1000 == (int64_t)last_tick ? poll_time : 0);
+			r = ::poll(pfd, sockets, now / 1000 == (int64_t)last_tick ? poll_time : 0);
 
 			if (r == 0) {
 				continue;
@@ -490,16 +504,17 @@ void ssl_client::read_loop()
 					read_blocked_on_write = false;
 					read_blocked = false;
 					r = (int) ::recv(sfd, server_to_client_buffer, DPP_BUFSIZE, 0);
+
 					if (r <= 0) {
 						/* error or EOF */
 						return;
-					} else {
-						buffer.append(server_to_client_buffer, r);
-						if (!this->handle_buffer(buffer)) {
-							return;
-						}
-						bytes_in += r;
 					}
+
+					buffer.append(server_to_client_buffer, r);
+					if (!this->handle_buffer(buffer)) {
+						return;
+					}
+					bytes_in += r;
 				} else {
 					do {
 						read_blocked_on_write = false;
@@ -565,14 +580,14 @@ void ssl_client::read_loop()
 					if (r < 0) {
 						/* Write error */
 						return;
-					} else {
-						client_to_server_length -= r;
-						client_to_server_offset += r;
-						bytes_out += r;
 					}
+
+					client_to_server_length -= r;
+					client_to_server_offset += r;
+					bytes_out += r;
 				} else {
 					r = SSL_write(ssl->ssl, client_to_server_buffer + client_to_server_offset, (int)client_to_server_length);
-					
+
 					switch(SSL_get_error(ssl->ssl,r)) {
 						/* We wrote something */
 						case SSL_ERROR_NONE:

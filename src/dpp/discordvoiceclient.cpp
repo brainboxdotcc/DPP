@@ -20,6 +20,7 @@
  *
  ************************************************************************************/
 
+#include <cstdint>
 #include <dpp/export.h>
 #ifdef _WIN32
 	#include <WinSock2.h>
@@ -259,11 +260,11 @@ void discord_voice_client::voice_courier_loop(discord_voice_client& client, cour
 					}
 				} else {
 					voice_receive_t& vr = *d.parked_payloads.top().vr;
-					if (vr.audio_data.length() > 0x7FFFFFFF) {
+					if (vr.audio_data.size() > 0x7FFFFFFF) {
 						throw dpp::length_exception(err_massive_audio, "audio_data > 2GB! This should never happen!");
 					}
 					if (samples = opus_decode(d.decoder.get(), vr.audio_data.data(),
-						static_cast<opus_int32>(vr.audio_data.length() & 0x7FFFFFFF), pcm, 5760, 0);
+						static_cast<opus_int32>(vr.audio_data.size() & 0x7FFFFFFF), pcm, 5760, 0);
 					    samples >= 0) {
 						vr.reassign(&client, d.user_id, reinterpret_cast<uint8_t*>(pcm),
 							samples * opus_channel_count * sizeof(opus_int16));
@@ -316,6 +317,7 @@ discord_voice_client::discord_voice_client(dpp::cluster* _cluster, snowflake _ch
 	secret_key(nullptr),
 	sequence(0),
 	timestamp(0),
+	packet_nonce(1),
 	last_timestamp(std::chrono::high_resolution_clock::now()),
 	sending(false),
 	tracks(0),
@@ -550,7 +552,7 @@ bool discord_voice_client::handle_frame(const std::string &data)
 							}
 						}
 					};
-					this->write(obj.dump());
+					this->write(obj.dump(-1, ' ', false, json::error_handler_t::replace));
 				} else {
 					log(dpp::ll_debug, "Connecting new voice session...");
 						json obj = {
@@ -565,7 +567,7 @@ bool discord_voice_client::handle_frame(const std::string &data)
 							}
 						}
 					};
-					this->write(obj.dump());
+					this->write(obj.dump(-1, ' ', false, json::error_handler_t::replace));
 				}
 				this->connect_time = time(nullptr);
 			}
@@ -593,6 +595,9 @@ bool discord_voice_client::handle_frame(const std::string &data)
 					rdy.voice_channel_id = this->channel_id;
 					creator->on_voice_ready.call(rdy);
 				}
+
+				/* Reset packet_nonce */
+				packet_nonce = 1;
 			}
 			break;
 			/* Voice ready */
@@ -650,12 +655,12 @@ bool discord_voice_client::handle_frame(const std::string &data)
 								{ "data", {
 										{ "address", external_ip },
 										{ "port", bound_port },
-										{ "mode", "xsalsa20_poly1305" }
+										{ "mode", "aead_xchacha20_poly1305_rtpsize" }
 									}
 								}
 							}
 						}
-					}).dump());
+					}).dump(-1, ' ', false, json::error_handler_t::replace));
 				}
 			}
 			break;
@@ -692,6 +697,8 @@ dpp::utility::uptime discord_voice_client::get_remaining() {
 discord_voice_client& discord_voice_client::stop_audio() {
 	std::lock_guard<std::mutex> lock(this->stream_mutex);
 	outbuf.clear();
+	track_meta.clear();
+	tracks = 0;
 	return *this;
 }
 
@@ -707,130 +714,159 @@ void discord_voice_client::read_ready()
 {
 #ifdef HAVE_VOICE
 	uint8_t buffer[65535];
-	int r = this->udp_recv((char*)buffer, sizeof(buffer));
+	int packet_size = this->udp_recv((char*)buffer, sizeof(buffer));
 
-	if (r > 0 && (!creator->on_voice_receive.empty() || !creator->on_voice_receive_combined.empty())) {
-		const std::basic_string_view<uint8_t> packet{buffer, static_cast<size_t>(r)};
-		constexpr size_t header_size = 12;
-		if (static_cast<size_t>(r) < header_size) {
-			/* Invalid RTP payload */
-			return;
-		}
+	bool receive_handler_is_empty = creator->on_voice_receive.empty() && creator->on_voice_receive_combined.empty();
+	if (packet_size <= 0 || receive_handler_is_empty) {
+		/* Nothing to do */
+		return;
+	}
 
-		/* It's a "silence packet" - throw it away. */
-		if (packet.size() < 44) {
-			return;
-		}
+	constexpr size_t header_size = 12;
+	if (static_cast<size_t>(packet_size) < header_size) {
+		/* Invalid RTP payload */
+		return;
+	}
 
-		if (uint8_t payload_type = packet[1] & 0b0111'1111;
-		    72 <= payload_type && payload_type <= 76) {
-			/*
-			 * This is an RTCP payload. Discord is known to send
-			 * RTCP Receiver Reports.
-			 *
-			 * See https://datatracker.ietf.org/doc/html/rfc3551#section-6
-			 */
-			return;
-		}
+	/* It's a "silence packet" - throw it away. */
+	if (packet_size < 44) {
+		return;
+	}
 
-		voice_payload vp{0, // seq, populate later
-		                 0, // timestamp, populate later
-		                 std::make_unique<voice_receive_t>(nullptr, std::string((char*)buffer, r))};
-
-		vp.vr->voice_client = this;
-
-		{	/* Get the User ID of the speaker */
-			uint32_t speaker_ssrc;
-			std::memcpy(&speaker_ssrc, &packet[8], sizeof(uint32_t));
-			speaker_ssrc = ntohl(speaker_ssrc);
-			vp.vr->user_id = ssrc_map[speaker_ssrc];
-		}
-
-		/* Get the sequence number of the voice UDP packet */
-		std::memcpy(&vp.seq, &packet[2], sizeof(rtp_seq_t));
-		vp.seq = ntohs(vp.seq);
-		/* Get the timestamp of the voice UDP packet */
-		std::memcpy(&vp.timestamp, &packet[4], sizeof(rtp_timestamp_t));
-		vp.timestamp = ntohl(vp.timestamp);
-
-		/* Nonce is the RTP Header with zero padding */
-		uint8_t nonce[24] = { 0 };
-		std::memcpy(nonce, &packet[0], header_size);
-
-		/* Get the number of CSRC in header */
-		const size_t csrc_count = packet[0] & 0b0000'1111;
-		/* Skip to the encrypted voice data */
-		const ptrdiff_t offset_to_data = header_size + sizeof(uint32_t) * csrc_count;
-		uint8_t* encrypted_data = buffer + offset_to_data;
-		const size_t encrypted_data_len = r - offset_to_data;
-
-		if (crypto_secretbox_open_easy(encrypted_data, encrypted_data,
-		                               encrypted_data_len, nonce, secret_key)) {
-			/* Invalid Discord RTP payload. */
-			return;
-		}
-
-		std::basic_string_view<uint8_t> decrypted_data{encrypted_data, encrypted_data_len - crypto_box_MACBYTES};
-		if (const bool uses_extension [[maybe_unused]] = (packet[0] >> 4) & 0b0001) {
-			/* Skip the RTP Extensions */
-			size_t ext_len = 0;
-			{
-				uint16_t ext_len_in_words;
-				memcpy(&ext_len_in_words, &decrypted_data[2], sizeof(uint16_t));
-				ext_len_in_words = ntohs(ext_len_in_words);
-				ext_len = sizeof(uint32_t) * ext_len_in_words;
-			}
-			constexpr size_t ext_header_len = sizeof(uint16_t) * 2;
-			decrypted_data = decrypted_data.substr(ext_header_len + ext_len);
-		}
-
+	if (uint8_t payload_type = buffer[1] & 0b0111'1111;
+		72 <= payload_type && payload_type <= 76) {
 		/*
-		 * We're left with the decrypted, opus-encoded data.
-		 * Park the payload and decode on the voice courier thread.
+		 * This is an RTCP payload. Discord is known to send
+		 * RTCP Receiver Reports.
+		 *
+		 * See https://datatracker.ietf.org/doc/html/rfc3551#section-6
 		 */
-		vp.vr->audio_data.assign(decrypted_data);
+		return;
+	}
 
+	voice_payload vp{0, // seq, populate later
+		0, // timestamp, populate later
+		std::make_unique<voice_receive_t>(nullptr, std::string((char*)buffer, packet_size))};
+
+	vp.vr->voice_client = this;
+
+	uint32_t speaker_ssrc;
+	{	/* Get the User ID of the speaker */
+		std::memcpy(&speaker_ssrc, &buffer[8], sizeof(uint32_t));
+		speaker_ssrc = ntohl(speaker_ssrc);
+		vp.vr->user_id = ssrc_map[speaker_ssrc];
+	}
+
+	/* Get the sequence number of the voice UDP packet */
+	std::memcpy(&vp.seq, &buffer[2], sizeof(rtp_seq_t));
+	vp.seq = ntohs(vp.seq);
+	/* Get the timestamp of the voice UDP packet */
+	std::memcpy(&vp.timestamp, &buffer[4], sizeof(rtp_timestamp_t));
+	vp.timestamp = ntohl(vp.timestamp);
+
+	constexpr size_t nonce_size = sizeof(uint32_t);
+	/* Nonce is 4 byte at the end of payload with zero padding */
+	uint8_t nonce[24] = { 0 };
+	std::memcpy(nonce, buffer + packet_size - nonce_size, nonce_size);
+
+	/* Get the number of CSRC in header */
+	const size_t csrc_count = buffer[0] & 0b0000'1111;
+	/* Skip to the encrypted voice data */
+	const ptrdiff_t offset_to_data = header_size + sizeof(uint32_t) * csrc_count;
+	size_t total_header_len = offset_to_data;
+
+	uint8_t* ciphertext = buffer + offset_to_data;
+	size_t ciphertext_len = packet_size - offset_to_data - nonce_size;
+
+	size_t ext_len = 0;
+	if ([[maybe_unused]] const bool uses_extension = (buffer[0] >> 4) & 0b0001) {
+		/**
+		 * Get the RTP Extensions size, we only get the size here because
+		 * the extension itself is encrypted along with the opus packet
+		 */
 		{
-			std::lock_guard lk(voice_courier_shared_state.mtx);
-			auto& [range, payload_queue, pending_decoder_ctls, decoder] = voice_courier_shared_state.parked_voice_payloads[vp.vr->user_id];
+			uint16_t ext_len_in_words;
+			memcpy(&ext_len_in_words, &ciphertext[2], sizeof(uint16_t));
+			ext_len_in_words = ntohs(ext_len_in_words);
+			ext_len = sizeof(uint32_t) * ext_len_in_words;
+		}
+		constexpr size_t ext_header_len = sizeof(uint16_t) * 2;
+		ciphertext += ext_header_len;
+		ciphertext_len -= ext_header_len;
+		total_header_len += ext_header_len;
+	}
 
-			if (!decoder) {
-				/*
-				 * Most likely this is the first time we encounter this speaker.
-				 * Do some initialization for not only the decoder but also the range.
+	uint8_t decrypted[65535] = { 0 };
+	unsigned long long opus_packet_len  = 0;
+	if (crypto_aead_xchacha20poly1305_ietf_decrypt(
+		decrypted, &opus_packet_len,
+		nullptr,
+		ciphertext, ciphertext_len,
+		buffer,
+		/**
+		 * Additional Data:
+		 * The whole header (including csrc list) +
+		 * 4 byte extension header (magic 0xBEDE + 16-bit denoting extension length)
+		 */
+		total_header_len,
+		nonce, secret_key) != 0) {
+		/* Invalid Discord RTP payload. */
+		return;
+	}
+
+	uint8_t *opus_packet = decrypted;
+	if (ext_len > 0) {
+		/* Skip previously encrypted RTP Header Extension */
+		opus_packet += ext_len;
+		opus_packet_len -= ext_len;
+	}
+
+	/*
+	 * We're left with the decrypted, opus-encoded data.
+	 * Park the payload and decode on the voice courier thread.
+	 */
+	vp.vr->audio_data.assign(opus_packet, opus_packet + opus_packet_len);
+
+	{
+		std::lock_guard lk(voice_courier_shared_state.mtx);
+		auto& [range, payload_queue, pending_decoder_ctls, decoder] = voice_courier_shared_state.parked_voice_payloads[vp.vr->user_id];
+
+		if (!decoder) {
+			/*
+			 * Most likely this is the first time we encounter this speaker.
+			 * Do some initialization for not only the decoder but also the range.
+			 */
+			range.min_seq = vp.seq;
+			range.min_timestamp = vp.timestamp;
+
+			int opus_error = 0;
+			decoder.reset(opus_decoder_create(opus_sample_rate_hz, opus_channel_count, &opus_error),
+				 &opus_decoder_destroy);
+			if (opus_error) {
+				/**
+				 * NOTE: The -10 here makes the opus_error match up with values of exception_error_code,
+				 * which would otherwise conflict as every C library loves to use values from -1 downwards.
 				 */
-				range.min_seq = vp.seq;
-				range.min_timestamp = vp.timestamp;
-
-				int opus_error = 0;
-				decoder.reset(opus_decoder_create(opus_sample_rate_hz, opus_channel_count, &opus_error),
-				              &opus_decoder_destroy);
-				if (opus_error) {
-					/**
-					 * NOTE: The -10 here makes the opus_error match up with values of exception_error_code,
-					 * which would otherwise conflict as every C library loves to use values from -1 downwards.
-					 */
-					throw dpp::voice_exception((exception_error_code)(opus_error - 10), "discord_voice_client::discord_voice_client; opus_decoder_create() failed");
-				}
+				throw dpp::voice_exception((exception_error_code)(opus_error - 10), "discord_voice_client::discord_voice_client; opus_decoder_create() failed");
 			}
-
-			if (vp.seq < range.min_seq && vp.timestamp < range.min_timestamp) {
-				/* This packet arrived too late. We can only discard it. */
-				return;
-			}
-			range.max_seq = vp.seq;
-			range.max_timestamp = vp.timestamp;
-			payload_queue.push(std::move(vp));
 		}
 
-		voice_courier_shared_state.signal_iteration.notify_one();
-
-		if (!voice_courier.joinable()) {
-			/* Courier thread is not running, start it */
-			voice_courier = std::thread(&voice_courier_loop,
-			                            std::ref(*this),
-			                            std::ref(voice_courier_shared_state));
+		if (vp.seq < range.min_seq && vp.timestamp < range.min_timestamp) {
+			/* This packet arrived too late. We can only discard it. */
+			return;
 		}
+		range.max_seq = vp.seq;
+		range.max_timestamp = vp.timestamp;
+		payload_queue.push(std::move(vp));
+	}
+
+	voice_courier_shared_state.signal_iteration.notify_one();
+
+	if (!voice_courier.joinable()) {
+		/* Courier thread is not running, start it */
+		voice_courier = std::thread(&voice_courier_loop,
+							  std::ref(*this),
+							  std::ref(voice_courier_shared_state));
 	}
 #else
 	throw dpp::voice_exception(err_no_voice_support, "Voice support not enabled in this build of D++");
@@ -847,7 +883,7 @@ void discord_voice_client::write_ready()
 		std::lock_guard<std::mutex> lock(this->stream_mutex);
 		if (!this->paused && outbuf.size()) {
 			type = send_audio_type;
-			if (outbuf[0].packet.size() == 2 && (*((uint16_t*)(outbuf[0].packet.data()))) == AUDIO_TRACK_MARKER) {
+			if (outbuf[0].packet.size() == sizeof(uint16_t) && (*((uint16_t*)(outbuf[0].packet.data()))) == AUDIO_TRACK_MARKER) {
 				outbuf.erase(outbuf.begin());
 				track_marker_found = true;
 				if (tracks > 0) {
@@ -897,7 +933,8 @@ void discord_voice_client::write_ready()
 		last_timestamp = std::chrono::high_resolution_clock::now();
 		if (!creator->on_voice_buffer_send.empty()) {
 			voice_buffer_send_t snd(nullptr, "");
-			snd.buffer_size = (int)bufsize;
+			snd.buffer_size = bufsize;
+			snd.packets_left = outbuf.size();
 			snd.voice_client = this;
 			creator->on_voice_buffer_send.call(snd);
 		}
@@ -1082,7 +1119,7 @@ void discord_voice_client::one_second_timer()
 		if (this->heartbeat_interval) {
 			/* Check if we're due to emit a heartbeat */
 			if (time(nullptr) > last_heartbeat + ((heartbeat_interval / 1000.0) * 0.75)) {
-				queue_message(json({{"op", 3}, {"d", rand()}}).dump(), true);
+				queue_message(json({{"op", 3}, {"d", rand()}}).dump(-1, ' ', false, json::error_handler_t::replace), true);
 				last_heartbeat = time(nullptr);
 			}
 		}
@@ -1165,20 +1202,29 @@ uint32_t discord_voice_client::get_tracks_remaining() {
 
 discord_voice_client& discord_voice_client::skip_to_next_marker() {
 	std::lock_guard<std::mutex> lock(this->stream_mutex);
-	/* Keep popping the first entry off the outbuf until the first entry is a track marker */
-	while (!outbuf.empty() && outbuf[0].packet.size() != sizeof(uint16_t) && (*((uint16_t*)(outbuf[0].packet.data()))) != AUDIO_TRACK_MARKER) {
-		outbuf.erase(outbuf.begin());
+	if (!outbuf.empty()) {
+		/* Find the first marker to skip to */
+		auto i = std::find_if(outbuf.begin(), outbuf.end(), [](const voice_out_packet &v){
+			return v.packet.size() == sizeof(uint16_t) && (*((uint16_t*)(v.packet.data()))) == AUDIO_TRACK_MARKER;
+		});
+
+		if (i != outbuf.end()) {
+			/* Skip queued packets until including found marker */
+			outbuf.erase(outbuf.begin(), i+1);
+		} else {
+			/* No market found, skip the whole queue */
+			outbuf.clear();
+		}
 	}
-	if (outbuf.size()) {
-		/* Remove the actual track marker out of the buffer */
-		outbuf.erase(outbuf.begin());
-	}
+
 	if (tracks > 0) {
 		tracks--;
 	}
+
 	if (!track_meta.empty()) {
 		track_meta.erase(track_meta.begin());
 	}
+
 	return *this;
 }
 
@@ -1229,13 +1275,13 @@ discord_voice_client& discord_voice_client::send_audio_raw(uint16_t* audio_data,
 		return send_audio_raw((uint16_t*)packet.data(), packet.size());
 	}
 
-	opus_int32 encodedAudioMaxLength = (opus_int32)length;
-	std::vector<uint8_t> encodedAudioData(encodedAudioMaxLength);
-	size_t encodedAudioLength = encodedAudioMaxLength;
+	opus_int32 encoded_audio_max_length = (opus_int32)length;
+	std::vector<uint8_t> encoded_audio(encoded_audio_max_length);
+	size_t encoded_audio_length = encoded_audio_max_length;
 
-	encodedAudioLength = this->encode((uint8_t*)audio_data, length, encodedAudioData.data(), encodedAudioLength);
+	encoded_audio_length = this->encode((uint8_t*)audio_data, length, encoded_audio.data(), encoded_audio_length);
 
-	send_audio_opus(encodedAudioData.data(), encodedAudioLength);
+	send_audio_opus(encoded_audio.data(), encoded_audio_length);
 #else
 	throw dpp::voice_exception(err_no_voice_support, "Voice support not enabled in this build of D++");
 #endif
@@ -1255,30 +1301,54 @@ discord_voice_client& discord_voice_client::send_audio_opus(uint8_t* opus_packet
 
 discord_voice_client& discord_voice_client::send_audio_opus(uint8_t* opus_packet, const size_t length, uint64_t duration) {
 #if HAVE_VOICE
-	int frameSize = (int)(48 * duration * (timescale / 1000000));
-	opus_int32 encodedAudioMaxLength = (opus_int32)length;
-	std::vector<uint8_t> encodedAudioData(encodedAudioMaxLength);
-	size_t encodedAudioLength = encodedAudioMaxLength;
+	int frame_size = (int)(48 * duration * (timescale / 1000000));
+	opus_int32 encoded_audio_max_length = (opus_int32)length;
+	std::vector<uint8_t> encoded_audio(encoded_audio_max_length);
+	size_t encoded_audio_length = encoded_audio_max_length;
 
-	encodedAudioLength = length;
-	encodedAudioData.reserve(length);
-	memcpy(encodedAudioData.data(), opus_packet, length);
+	encoded_audio_length = length;
+	encoded_audio.reserve(length);
+	memcpy(encoded_audio.data(), opus_packet, length);
 
 	++sequence;
-	const int nonceSize = 24;
 	rtp_header header(sequence, timestamp, (uint32_t)ssrc);
 
-	int8_t nonce[nonceSize];
-	std::memcpy(nonce, &header, sizeof(header));
-	std::memset(nonce + sizeof(header), 0, sizeof(nonce) - sizeof(header));
+	/* Expected payload size is unencrypted header + encrypted opus packet + unencrypted 32 bit nonce */
+	size_t packet_siz = sizeof(header) + (encoded_audio_length + crypto_aead_xchacha20poly1305_IETF_ABYTES) + sizeof(packet_nonce);
 
-	std::vector<uint8_t> audioDataPacket(sizeof(header) + encodedAudioLength + crypto_secretbox_MACBYTES);
-	std::memcpy(audioDataPacket.data(), &header, sizeof(header));
+	std::vector<uint8_t> payload(packet_siz);
 
-	crypto_secretbox_easy(audioDataPacket.data() + sizeof(header), encodedAudioData.data(), encodedAudioLength, (const unsigned char*)nonce, secret_key);
+	/* Set RTP header */
+	std::memcpy(payload.data(), &header, sizeof(header));
 
-	this->send((const char*)audioDataPacket.data(), audioDataPacket.size(), duration);
-	timestamp += frameSize;
+	/* Convert nonce to big-endian */
+	uint32_t noncel = htonl(packet_nonce);
+
+	/* 24 byte is needed for encrypting, discord just want 4 byte so just fill up the rest with null */
+	unsigned char encrypt_nonce[crypto_aead_xchacha20poly1305_ietf_NPUBBYTES] = { '\0' };
+	memcpy(encrypt_nonce, &noncel, sizeof(noncel));
+
+	/* Execute */
+	crypto_aead_xchacha20poly1305_ietf_encrypt(
+			payload.data() + sizeof(header),
+			nullptr,
+			encoded_audio.data(),
+			encoded_audio_length,
+			/* The RTP Header as Additional Data */
+			reinterpret_cast<const unsigned char *>(&header),
+			sizeof(header),
+			nullptr,
+			static_cast<const unsigned char*>(encrypt_nonce),
+			secret_key);
+
+	/* Append the 4 byte nonce to the resulting payload */
+	std::memcpy(payload.data() + payload.size() - sizeof(noncel), &noncel, sizeof(noncel));
+
+	this->send(reinterpret_cast<const char*>(payload.data()), payload.size(), duration);
+	timestamp += frame_size;
+
+	/* Increment for next packet */
+	packet_nonce++;
 
 	speak();
 #else
@@ -1296,7 +1366,7 @@ discord_voice_client& discord_voice_client::speak() {
 			{"delay", 0},
 			{"ssrc", ssrc}
 		}}
-		}).dump(), true);
+		}).dump(-1, ' ', false, json::error_handler_t::replace), true);
 		sending = true;
 	}
 	return *this;

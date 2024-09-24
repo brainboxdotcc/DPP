@@ -21,8 +21,6 @@
 #include <dpp/channel.h>
 #include <dpp/restrequest.h>
 
-#include <utility>
-
 namespace dpp {
 
 void cluster::channel_create(const class channel &c, command_completion_event_t callback) {
@@ -43,7 +41,7 @@ void cluster::channel_edit_permissions(const class channel &c, const snowflake o
 
 void cluster::channel_edit_permissions(const snowflake channel_id, const snowflake overwrite_id, const uint64_t allow, const uint64_t deny, const bool member, command_completion_event_t callback) {
 	json j({ {"allow", std::to_string(allow)}, {"deny", std::to_string(deny)}, {"type", member ? 1 : 0}  });
-	rest_request<confirmation>(this, API_PATH "/channels", std::to_string(channel_id), "permissions/" + std::to_string(overwrite_id), m_put, j.dump(), callback);
+	rest_request<confirmation>(this, API_PATH "/channels", std::to_string(channel_id), "permissions/" + std::to_string(overwrite_id), m_put, j.dump(-1, ' ', false, json::error_handler_t::replace), callback);
 }
 
 void cluster::channel_edit_positions(const std::vector<channel> &c, command_completion_event_t callback) {
@@ -61,7 +59,7 @@ void cluster::channel_edit_positions(const std::vector<channel> &c, command_comp
 		}
 		j.push_back(cj);
 	}
-	rest_request<confirmation>(this, API_PATH "/guilds", std::to_string(c[0].guild_id), "channels/" + std::to_string(c[0].id), m_patch, j.dump(), callback);
+	rest_request<confirmation>(this, API_PATH "/guilds", std::to_string(c[0].guild_id), "channels/" + std::to_string(c[0].id), m_patch, j.dump(-1, ' ', false, json::error_handler_t::replace), callback);
 }
 
 void cluster::channel_edit(const class channel &c, command_completion_event_t callback) {
@@ -70,7 +68,7 @@ void cluster::channel_edit(const class channel &c, command_completion_event_t ca
 
 void cluster::channel_follow_news(const class channel &c, snowflake target_channel_id, command_completion_event_t callback) {
 	json j({ {"webhook_channel_id", target_channel_id} });
-	rest_request<confirmation>(this, API_PATH "/channels", std::to_string(c.id), "followers", m_post, j.dump(), callback);
+	rest_request<confirmation>(this, API_PATH "/channels", std::to_string(c.id), "followers", m_post, j.dump(-1, ' ', false, json::error_handler_t::replace), callback);
 }
 
 void cluster::channel_get(snowflake c, command_completion_event_t callback) {
@@ -100,7 +98,7 @@ void cluster::channels_get(snowflake guild_id, command_completion_event_t callba
 
 void cluster::channel_set_voice_status(snowflake channel_id, const std::string& status, command_completion_event_t callback) {
 	json j({ {"status", status} });
-	rest_request<confirmation>(this, API_PATH "/channels", std::to_string(channel_id), "voice-status", m_put, j.dump(), callback);
+	rest_request<confirmation>(this, API_PATH "/channels", std::to_string(channel_id), "voice-status", m_put, j.dump(-1, ' ', false, json::error_handler_t::replace), callback);
 }
 
 } // namespace dpp

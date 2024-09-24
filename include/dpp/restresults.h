@@ -220,7 +220,7 @@ struct DPP_EXPORT error_detail {
 	/**
 	 * @brief Object field index
 	 */
-	int index = 0;
+	DPP_DEPRECATED("index is unused and will be removed in a future version") int index = 0;
 };
 
 /**

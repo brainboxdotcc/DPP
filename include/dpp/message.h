@@ -79,14 +79,14 @@ enum component_type : uint8_t {
 };
 
 /**
- * @brief An emoji for a component (select menus included).
+ * @brief An emoji reference for a component (select menus included) or a poll.
  *
- * To set an emoji on your button, you must set one of either the name or id fields.
- * The easiest way is to use the dpp::component::set_emoji method.
+ * To set an emoji on your button or poll answer, you must set one of either the name or id fields.
+ * The easiest way for buttons is to use the dpp::component::set_emoji method.
  *
  * @note This is a **very** scaled down version of dpp::emoji, we advise that you refrain from using this.
  */
-struct component_emoji {
+struct partial_emoji {
 	/**
 	 * @brief The name of the emoji.
 	 *
@@ -94,7 +94,7 @@ struct component_emoji {
 	 * actual unicode value of the emoji e.g. "😄"
 	 * and not for example ":smile:"
 	 */
-	std::string name{""};
+	std::string name{};
 
 	/**
 	 * @brief The emoji ID value for emojis that are custom
@@ -114,6 +114,13 @@ struct component_emoji {
 	 */
 	bool animated{false};
 };
+
+/**
+ * @brief An emoji for a component. Alias to partial_emoji, for backwards compatibility.
+ *
+ * @see partial_emoji
+ */
+using component_emoji = partial_emoji;
 
 /**
  * @brief The data for a file attached to a message.
@@ -159,29 +166,36 @@ enum text_style_type : uint8_t {
  */
 enum component_style : uint8_t {
 	/**
-	 * @brief Blurple
+	 * @brief Blurple; Primary
 	 */
 	cos_primary = 1,
 
 	/**
-	 * @brief Grey
+	 * @brief Grey; Secondary
 	 */
 	cos_secondary,
 
 	/**
-	 * @brief Green
+	 * @brief Green; Success
 	 */
 	cos_success,
 
 	/**
-	 * @brief Red
+	 * @brief Red; danger
 	 */
 	cos_danger,
 
 	/**
-	 * @brief An external hyperlink to a website
+	 * @brief An external hyperlink to a website, requires url to be set
+	 * @note Will not work unless url is set
 	 */
-	cos_link
+	cos_link,
+
+	/**
+	 * @brief Premium upsell button, requires sku_id to be set
+	 * @note Will not work unless sku is set
+	 */
+	cos_premium,
 };
 
 /**
@@ -247,7 +261,7 @@ public:
 	/**
 	 * @brief The emoji for the select option.
 	 */
-	component_emoji emoji;
+	partial_emoji emoji;
 
 	/**
 	 * @brief Construct a new select option object
@@ -266,7 +280,7 @@ public:
 	 * @param value Value of option
 	 * @param description Description of option
 	 */
-	select_option(const std::string &label, const std::string &value, const std::string &description = "");
+	select_option(std::string_view label, std::string_view value, std::string_view description = "");
 
 	/**
 	 * @brief Set the label
@@ -274,7 +288,7 @@ public:
 	 * @param l the user-facing name of the option. It will be truncated to the maximum length of 100 UTF-8 characters.
 	 * @return select_option& reference to self for chaining
 	 */
-	select_option& set_label(const std::string &l);
+	select_option& set_label(std::string_view l);
 
 	/**
 	 * @brief Set the value
@@ -282,7 +296,7 @@ public:
 	 * @param v value to set. It will be truncated to the maximum length of 100 UTF-8 characters.
 	 * @return select_option& reference to self for chaining
 	 */
-	select_option& set_value(const std::string &v);
+	select_option& set_value(std::string_view v);
 
 	/**
 	 * @brief Set the description
@@ -290,7 +304,7 @@ public:
 	 * @param d description to set. It will be truncated to the maximum length of 100 UTF-8 characters.
 	 * @return select_option& reference to self for chaining
 	 */
-	select_option& set_description(const std::string &d);
+	select_option& set_description(std::string_view d);
 
 	/**
 	 * @brief Set the emoji
@@ -300,7 +314,7 @@ public:
 	 * @param animated true if animated emoji
 	 * @return select_option& reference to self for chaining
 	 */
-	select_option& set_emoji(const std::string &n, dpp::snowflake id = 0, bool animated = false);
+	select_option& set_emoji(std::string_view n, dpp::snowflake id = 0, bool animated = false);
 
 	/**
 	 * @brief Set the option as default
@@ -381,6 +395,11 @@ public:
 	std::string url;
 
 	/**
+	 * @brief The SKU ID for premium upsell buttons
+	 */
+	dpp::snowflake sku_id;
+
+	/**
 	 * @brief Placeholder text for select menus and text inputs (max 150 characters)
 	 */
 	std::string placeholder;
@@ -449,7 +468,7 @@ public:
 	/**
 	 * @brief The emoji for this component.
 	 */
-	component_emoji emoji;
+	partial_emoji emoji;
 
 	/**
 	 * @brief Constructor
@@ -483,6 +502,17 @@ public:
 	component& set_type(component_type ct);
 
 	/**
+	 * @brief Set the SKU ID for a premium upsell button
+	 * This is only valid for premium upsell buttons of type
+	 * cos_premium. It indicates which premium package to
+	 * link to when the button is clicked.
+	 *
+	 * @param sku The SKU ID
+	 * @return component& reference to self
+	 */
+	component& set_sku_id(dpp::snowflake sku);
+
+	/**
 	 * @brief Set the text style of a text component
 	 * @note Sets type to `cot_text`
 	 * 
@@ -499,7 +529,7 @@ public:
 	 * @param label Label text to set. It will be truncated to the maximum length of 80 UTF-8 characters.
 	 * @return component& Reference to self
 	 */
-	component& set_label(const std::string &label);
+	component& set_label(std::string_view label);
 
 	/**
 	 * @brief Set the default value of the text input component.
@@ -509,7 +539,7 @@ public:
 	 * @param val Value text to set. It will be truncated to the maximum length of 4000 UTF-8 characters.
 	 * @return component& Reference to self
 	 */
-	component& set_default_value(const std::string &val);
+	component& set_default_value(std::string_view val);
 
 	/**
 	 * @brief Set the url for dpp::cos_link types.
@@ -519,7 +549,7 @@ public:
 	 * @param url URL to set. It will be truncated to the maximum length of 512 UTF-8 characters.
 	 * @return component& reference to self.
 	 */
-	component& set_url(const std::string &url);
+	component& set_url(std::string_view url);
 
 	/**
 	 * @brief Set the style of the component, e.g. button colour.
@@ -542,13 +572,13 @@ public:
 	 * If your Custom ID is longer than this, it will be truncated.
 	 * @return component& Reference to self
 	 */
-	component& set_id(const std::string &id);
+	component& set_id(std::string_view id);
 
 	/**
 	 * @brief Set the component to disabled.
 	 * Defaults to false on all created components.
 	 *
-	 * @param disable True to disable, false to disable.
+	 * @param disable True to disable the component, False to enable the component.
 	 * @return component& Reference to self
 	 */
 	component& set_disabled(bool disable);
@@ -570,7 +600,7 @@ public:
 	 * characters for modals.
 	 * @return component& Reference to self
 	 */
-	component& set_placeholder(const std::string &placeholder);
+	component& set_placeholder(std::string_view placeholder);
 
 	/**
 	 * @brief Set the minimum number of items that must be chosen for a select menu
@@ -632,9 +662,12 @@ public:
 
 	/**
 	 * @brief Set the emoji of the current sub-component.
-	 * Only valid for buttons. Adding an emoji to a component
-	 * will automatically set this components type to
-	 * dpp::cot_button. One or both of name and id must be set.
+	 * 
+	 * @warning Only valid for buttons.
+	 * 
+	 * @note Adding an emoji to a component will 
+	 * automatically set this components type to
+	 * dpp::cot_button. **One or both of name and id must be set**.
 	 * For a built in unicode emoji, you only need set name,
 	 * and should set it to a unicode character e.g. "😄".
 	 * For custom emojis, set the name to the name of the emoji
@@ -647,7 +680,7 @@ public:
 	 * @param animated True if the custom emoji is animated.
 	 * @return component& Reference to self
 	 */
-	component& set_emoji(const std::string& name, dpp::snowflake id = 0, bool animated = false);
+	component& set_emoji(std::string_view name, dpp::snowflake id = 0, bool animated = false);
 };
 
 /**
@@ -676,21 +709,21 @@ struct DPP_EXPORT embed_footer {
 	 * @param t string to set as footer text. It will be truncated to the maximum length of 2048 UTF-8 characters.
 	 * @return A reference to self so this method may be "chained".
 	 */
-	embed_footer& set_text(const std::string& t);
+	embed_footer& set_text(std::string_view t);
 
 	/**
 	 * @brief Set footer's icon url.
 	 * @param i url to set as footer icon url
 	 * @return A reference to self so this method may be "chained".
 	 */
-	embed_footer& set_icon(const std::string& i);
+	embed_footer& set_icon(std::string_view i);
 
 	/**
 	 * @brief Set footer's proxied icon url.
 	 * @param p url to set as footer proxied icon url
 	 * @return A reference to self so this method may be "chained".
 	 */
-	embed_footer& set_proxy(const std::string& p);
+	embed_footer& set_proxy(std::string_view p);
 };
 
 /**
@@ -878,14 +911,14 @@ struct DPP_EXPORT embed {
 	 * @param text The text of the title. It will be truncated to the maximum length of 256 UTF-8 characters.
 	 * @return A reference to self so this method may be "chained".
 	 */
-	embed& set_title(const std::string &text);
+	embed& set_title(std::string_view text);
 
 	/**
 	 * @brief Set embed description.
 	 * @param text The text of the title. It will be truncated to the maximum length of 4096 UTF-8 characters.
 	 * @return A reference to self so this method may be "chained".
 	 */
-	embed& set_description(const std::string &text);
+	embed& set_description(std::string_view text);
 
 	/**
 	 * @brief Set the footer of the embed.
@@ -900,7 +933,7 @@ struct DPP_EXPORT embed {
 	 * @param icon_url an url to set as footer icon url (only supports http(s) and attachments)
 	 * @return A reference to self so this method may be "chained".
 	 */
-	embed& set_footer(const std::string& text, const std::string& icon_url);
+	embed& set_footer(std::string_view text, std::string_view icon_url);
 
 	/**
 	 * @brief Set embed colour.
@@ -928,7 +961,7 @@ struct DPP_EXPORT embed {
 	 * @param url the url of the embed
 	 * @return A reference to self so this method may be "chained".
 	 */
-	embed& set_url(const std::string &url);
+	embed& set_url(std::string_view url);
 
 	/**
 	 * @brief Add an embed field.
@@ -937,7 +970,7 @@ struct DPP_EXPORT embed {
 	 * @param is_inline Whether or not to display the field 'inline' or on its own line
 	 * @return A reference to self so this method may be "chained".
 	 */
-	embed& add_field(const std::string& name, const std::string &value, bool is_inline = false);
+	embed& add_field(std::string_view name, std::string_view value, bool is_inline = false);
 
 	/**
 	 * @brief Set embed author.
@@ -953,7 +986,7 @@ struct DPP_EXPORT embed {
 	 * @param icon_url The icon URL of the author (only supports http(s) and attachments)
 	 * @return A reference to self so this method may be "chained".
 	 */
-	embed& set_author(const std::string& name, const std::string& url, const std::string& icon_url);
+	embed& set_author(std::string_view name, std::string_view url, std::string_view icon_url);
 
 	/**
 	 * @brief Set embed provider.
@@ -961,28 +994,28 @@ struct DPP_EXPORT embed {
 	 * @param url The provider url
 	 * @return A reference to self so this method may be "chained".
 	 */
-	embed& set_provider(const std::string& name, const std::string& url);
+	embed& set_provider(std::string_view name, std::string_view url);
 
 	/**
 	 * @brief Set embed image.
 	 * @param url The embed image URL (only supports http(s) and attachments)
 	 * @return A reference to self so this method may be "chained".
 	 */
-	embed& set_image(const std::string& url);
+	embed& set_image(std::string_view url);
 
 	/**
 	 * @brief Set embed video.
 	 * @param url The embed video url
 	 * @return A reference to self so this method may be "chained".
 	 */
-	embed& set_video(const std::string& url);
+	embed& set_video(std::string_view url);
 
 	/**
 	 * @brief Set embed thumbnail.
 	 * @param url The embed thumbnail url (only supports http(s) and attachments)
 	 * @return A reference to self so this method may be "chained".
 	 */
-	embed& set_thumbnail(const std::string& url);
+	embed& set_thumbnail(std::string_view url);
 };
 
 /**
@@ -1330,15 +1363,15 @@ public:
 	 * @param fn filename
 	 * @return message& reference to self
 	 */
-	sticker& set_filename(const std::string &fn);
+	sticker& set_filename(std::string_view fn);
 
 	/**
 	 * @brief Set the file content
-	 * 
-	 * @param fc raw file content contained in std::string
+	 *
+	 * @param fc raw file content
 	 * @return message& reference to self
 	 */
-	sticker& set_file_content(const std::string &fc);
+	sticker& set_file_content(std::string_view fc);
 
 };
 
@@ -1365,39 +1398,267 @@ public:
 	/**
 	 * @brief The stickers in the pack.
 	 */
-	std::map<snowflake, sticker> stickers;
+	std::map<snowflake, sticker> stickers{};
 
 	/**
 	 * @brief Name of the sticker pack.
 	 */
-	std::string name;
+	std::string name{};
 
 	/**
 	 * @brief ID of the pack's SKU.
 	 */
-	snowflake sku_id;
+	snowflake sku_id{0};
 
 	/**
 	 * @brief Optional: ID of a sticker in the pack which is shown as the pack's icon.
 	 */
-	snowflake cover_sticker_id;
+	snowflake cover_sticker_id{0};
 
 	/**
 	 * @brief Description of the sticker pack.
 	 */
-	std::string description;
+	std::string description{};
 
 	/**
 	 * @brief ID of the sticker pack's banner image.
 	 */
-	snowflake banner_asset_id;
+	snowflake banner_asset_id{};
+};
+
+/**
+ * @brief Poll layout types
+ *
+ * @note At the time of writing Discord only has 1, "The, uhm, default layout type."
+ * @see https://discord.com/developers/docs/resources/poll#layout-type
+ */
+enum poll_layout_type {
+	/**
+	 * @brief According to Discord, quote, "The, uhm, default layout type."
+	 */
+	pl_default = 1
+};
+
+/**
+ * @brief Structure representing a poll media, for example the poll question or a possible poll answer.
+ *
+ * @see https://discord.com/developers/docs/resources/poll#poll-media-object-poll-media-object-structure
+ */
+struct poll_media {
+	/**
+	 * @brief Text of the media
+	 */
+	std::string text{};
 
 	/**
-	 * @brief Construct a new sticker pack object
+	 * @brief Emoji of the media.
 	 */
-	sticker_pack();
+	partial_emoji emoji{};
+};
 
-	virtual ~sticker_pack() = default;
+/**
+ * @brief Represents an answer in a poll.
+ *
+ * @see https://discord.com/developers/docs/resources/poll#poll-answer-object-poll-answer-object-structure
+ */
+struct poll_answer {
+	/**
+	 * @brief ID of the answer. Only sent by the Discord API, this is a dead field when creating a poll.
+	 *
+	 * @warn At the time of writing the Discord API warns users not to rely on anything regarding sequence or "first value" of this field.
+	 */
+	uint32_t id{0};
+
+	/**
+	 * @brief Data of the answer.
+	 *
+	 * @see poll_media
+	 */
+	poll_media media{};
+};
+
+/**
+ * @brief Represents the results of a poll
+ *
+ * @see https://discord.com/developers/docs/resources/poll#poll-results-object-poll-results-object-structure
+ */
+struct poll_results {
+	/**
+	 * @brief Represents a reference to an answer and its count of votes
+	 *
+	 * @see https://discord.com/developers/docs/resources/poll#poll-results-object-poll-answer-count-object-structure
+	 */
+	struct answer_count {
+		/**
+		 * @brief ID of the answer. Relates to an answer in the answers field
+		 *
+		 * @see poll_answer::answer_id
+		 */
+		uint32_t answer_id{0};
+
+		/**
+		 * @brief Number of votes for this answer
+		 */
+		uint32_t count{0};
+
+		/**
+		 * @brief Whether the current user voted
+		 */
+		bool me_voted{false};
+	};
+
+	/**
+	 * @brief Whether the poll has finalized, and the answers are precisely counted
+	 *
+	 * @note Discord states that due to the way they count and cache answers,
+	 * while a poll is running the count of answers might not be accurate.
+	 */
+	bool is_finalized{false};
+
+	/**
+	 * @brief Count of votes for each answer. If an answer is not present in this list,
+	 * then its vote count is 0
+	 */
+	std::map<uint32_t, answer_count> answer_counts;
+};
+
+/**
+ * @brief Represents a poll.
+ *
+ * @see https://discord.com/developers/docs/resources/poll
+ */
+struct DPP_EXPORT poll {
+	/**
+	 * @brief Poll question. At the time of writing only the text field is supported by Discord
+	 *
+	 * @see media
+	 */
+	poll_media question{};
+
+	/**
+	 * @brief List of answers of the poll.
+	 *
+	 * @note At the time of writing this can contain up to 10 answers
+	 * @see answer
+	 */
+	std::map<uint32_t, poll_answer> answers{};
+
+	/**
+	 * @brief When retriving a poll from the API, this is the timestamp at which the poll will expire.
+	 * When creating a poll, this is the number of hours the poll should be up for, up to 7 days (168 hours), and this field will be rounded.
+	 */
+	double expiry{24.0};
+
+	/**
+	 * @brief Whether a user can select multiple answers
+	 */
+	bool allow_multiselect{false};
+
+	/**
+	 * @brief Layout type of the poll. Defaults to, well, pl_default
+	 *
+	 * @see poll_layout_type
+	 */
+	poll_layout_type layout_type{pl_default};
+
+	/**
+	 * @brief The (optional) results of the poll. This field may or may not be present, and its absence means "unknown results", not "no results".
+	 *
+	 * @note Quote from Discord: "The results field may be not present in certain responses where, as an implementation detail,
+	 * we do not fetch the poll results in our backend. This should be treated as "unknown results",
+	 * as opposed to "no results". You can keep using the results if you have previously received them through other means."
+	 *
+	 * @see https://discord.com/developers/docs/resources/poll#poll-results-object
+	 */
+	std::optional<poll_results> results{std::nullopt};
+
+	/**
+	 * @brief Set the question for this poll
+	 *
+	 * @param text Text for the question
+	 * @return self for method chaining
+	 */
+	poll& set_question(std::string_view text);
+
+	/**
+	 * @brief Set the duration of the poll in hours
+	 *
+	 * @param hours Duration of the poll in hours, max 7 days (168 hours) at the time of writing
+	 * @return self for method chaining
+	 */
+	poll& set_duration(uint32_t hours) noexcept;
+
+	/**
+	 * @brief Set if the poll should allow multi-selecting
+	 *
+	 * @param allow Should allow multi-select?
+	 * @return self for method chaining
+	 */
+	poll& set_allow_multiselect(bool allow) noexcept;
+
+	/**
+	 * @brief Add an answer to this poll
+	 *
+	 * @note At the time of writing this, a poll can have up to 10 answers
+	 * @param media Data of the answer
+	 * @return self for method chaining
+	 */
+	poll& add_answer(const poll_media& media);
+
+	/**
+	 * @brief Add an answer to this poll
+	 *
+	 * @note At the time of writing this, a poll can have up to 10 answers
+	 * @param text Text for the answer
+	 * @param emoji_id Optional emoji
+	 * @param is_animated Whether the emoji is animated
+	 * @return self for method chaining
+	 */
+	poll& add_answer(std::string_view text, snowflake emoji_id = 0, bool is_animated = false);
+
+	/**
+	 * @brief Add an answer to this poll
+	 *
+	 * @note At the time of writing this, a poll can have up to 10 answers
+	 * @param text Text for the answer
+	 * @param emoji Optional emoji
+	 * @return self for method chaining
+	 */
+	poll& add_answer(std::string_view text, std::string_view emoji);
+
+	/**
+	 * @brief Add an answer to this poll
+	 *
+	 * @note At the time of writing this, a poll can have up to 10 answers
+	 * @param text Text for the answer
+	 * @param e Optional emoji
+	 * @return self for method chaining
+	 */
+	poll& add_answer(std::string_view text, const emoji& e);
+
+	/**
+	 * @brief Helper to get the question text
+	 *
+	 * @return question.text
+	 */
+	[[nodiscard]] const std::string& get_question_text() const noexcept;
+
+	/**
+	 * @brief Helper to find an answer by ID
+	 *
+	 * @param id ID to find
+	 * @return Pointer to the answer with the matching ID, or nullptr if not found
+	 */
+	[[nodiscard]] const poll_media* find_answer(uint32_t id) const noexcept;
+
+	/**
+	 * @brief Helper to find the vote count in the results
+	 *
+	 * @param answer_id ID of the answer to find
+	 * @return std::optional<uint32_t> Optional count of votes. An empty optional means Discord did not send the results, it does not mean 0. It can also mean the poll does not have an answer with this ID
+	 * @see https://discord.com/developers/docs/resources/poll#poll-results-object
+	 */
+	[[nodiscard]] std::optional<uint32_t> get_vote_count(uint32_t answer_id) const noexcept;
 };
 
 /**
@@ -1634,6 +1895,8 @@ enum message_type {
 
 	/**
 	 * @brief Interaction premium upsell
+	 * @depreciated Replaced with buttons with a style of cos_premium
+	 * This message type may stop working at any point
 	 */
 	mt_interaction_premium_upsell = 26,
 
@@ -1748,6 +2011,24 @@ namespace cache_policy {
 };
 
 /**
+ * @brief Message Reference type
+ */
+enum DPP_EXPORT message_ref_type : uint8_t {
+	/**
+	 * A reply or crosspost
+	 */
+	mrt_default = 0,
+	/**
+	 * A forwarded message
+	 */
+	mrt_forward = 1,
+};
+
+template <typename T> struct message_snapshot {
+	std::vector<T> messages;
+};
+
+	/**
  * @brief Represents messages sent and received on Discord
  */
 struct DPP_EXPORT message : public managed, json_interface<message> {
@@ -1878,6 +2159,10 @@ public:
 	 */
 	struct message_ref {
 		/**
+		 * @brief Message reference type, set to 1 to forward a message
+		 */
+		message_ref_type type{mrt_default};
+		/**
 		 * @brief ID of the originating message.
 		 */
 		snowflake message_id;
@@ -1900,9 +2185,14 @@ public:
 	} message_reference;
 
 	/**
+	 * @brief Message snapshots for a forwarded message
+	 */
+	message_snapshot<message> message_snapshots;
+
+	/**
 	 * @brief Reference to an interaction
 	 */
-	struct message_interaction_struct{
+	struct message_interaction_struct {
 		/**
 		 * @brief ID of the interaction.
 		 */
@@ -1990,6 +2280,11 @@ public:
 	bool mention_everyone;
 
 	/**
+	 * @brief Optional poll attached to this message
+	 */
+	std::optional<poll> attached_poll;
+
+	/**
 	 * @brief Construct a new message object
 	 */
 	message();
@@ -2021,7 +2316,7 @@ public:
 	 * @param content The content of the message. It will be truncated to the maximum length of 4000 UTF-8 characters.
 	 * @param type The message type to create
 	 */
-	message(snowflake channel_id, const std::string &content, message_type type = mt_default);
+	message(snowflake channel_id, std::string_view content, message_type type = mt_default);
 
 	/**
 	 * @brief Construct a new message object with content
@@ -2044,7 +2339,7 @@ public:
 	 * @param content The content of the message. It will be truncated to the maximum length of 4000 UTF-8 characters.
 	 * @param type The message type to create
 	 */
-	message(const std::string &content, message_type type = mt_default);
+	message(std::string_view content, message_type type = mt_default);
 
 	/**
 	 * @brief Destroy the message object
@@ -2074,9 +2369,10 @@ public:
 	 * @param _guild_id guild id to reply to (optional)
 	 * @param _channel_id channel id to reply to (optional)
 	 * @param fail_if_not_exists true if the message send should fail if these values are invalid (optional)
+	 * @param type Type of reference
 	 * @return message& reference to self
 	 */
-	message& set_reference(snowflake _message_id, snowflake _guild_id = 0, snowflake _channel_id = 0, bool fail_if_not_exists = false);
+	message& set_reference(snowflake _message_id, snowflake _guild_id = 0, snowflake _channel_id = 0, bool fail_if_not_exists = false, message_ref_type type = mrt_default);
 
 	/**
 	 * @brief Set the allowed mentions object for pings on the message
@@ -2251,26 +2547,26 @@ public:
 	 * @return message& reference to self
 	 * @deprecated Use message::add_file instead
 	 */
-	message& set_filename(const std::string &fn);
+	message& set_filename(std::string_view fn);
 
 	/**
 	 * @brief Set the file content of the last file in list
 	 * 
-	 * @param fc raw file content contained in std::string
+	 * @param fc raw file content
 	 * @return message& reference to self
 	 * @deprecated Use message::add_file instead
 	 */
-	message& set_file_content(const std::string &fc);
+	message& set_file_content(std::string_view fc);
 
 	/**
 	 * @brief Add a file to the message
 	 *
 	 * @param filename filename
-	 * @param filecontent raw file content contained in std::string
+	 * @param filecontent raw file content
 	 * @param filemimetype optional mime type of the file
 	 * @return message& reference to self
 	 */
-	message& add_file(const std::string &filename, const std::string &filecontent, const std::string &filemimetype = "");
+	message& add_file(std::string_view filename, std::string_view filecontent, std::string_view filemimetype = "");
 
 	/**
 	 * @brief Set the message content
@@ -2278,7 +2574,7 @@ public:
 	 * @param c message content. It will be truncated to the maximum length of 4000 UTF-8 characters.
 	 * @return message& reference to self
 	 */
-	message& set_content(const std::string &c);
+	message& set_content(std::string_view c);
 	
 	/**
 	 * @brief Set the channel id
@@ -2316,6 +2612,28 @@ public:
 	 * @return string of URL to message
 	 */
 	std::string get_url() const;
+
+	/**
+	 * @brief Convenience method to set the poll
+	 *
+	 * @return message& Self reference for method chaining
+	 */
+	message& set_poll(const poll& p);
+
+	/**
+	 * @brief Convenience method to get the poll attached to this message
+	 *
+	 * @throw std::bad_optional_access if has_poll() == false
+	 * @return const poll& Poll attached to this object
+	 */
+	[[nodiscard]] const poll& get_poll() const;
+
+	/**
+	 * @brief Method to check if the message has a poll
+	 *
+	 * @return bool Whether the message has a poll
+	 */
+	[[nodiscard]] bool has_poll() const noexcept;
 };
 
 /**

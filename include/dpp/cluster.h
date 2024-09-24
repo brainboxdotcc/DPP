@@ -203,6 +203,11 @@ public:
 	std::condition_variable terminating;
 
 	/**
+	 * @brief The time (in seconds) that a request is allowed to take.
+	 */
+	uint16_t request_timeout = 20;
+
+	/**
 	 * @brief Constructor for creating a cluster. All but the token are optional.
 	 * @param token The bot token to use for all HTTP commands and websocket connections
 	 * @param intents A bitmask of dpd::intents values for all shards on this cluster. This is required to be sent for all bots with over 100 servers.
@@ -325,7 +330,7 @@ public:
 	 *
 	 * @return cluster& Reference to self for chaining.
 	 */
-	cluster& set_default_gateway(std::string& default_gateway);
+	cluster& set_default_gateway(const std::string& default_gateway);
 
 	/**
 	 * @brief Log a message to whatever log the user is using.
@@ -419,6 +424,15 @@ public:
 	 * @return shard_list& Reference to map of shards for this cluster
 	 */
 	const shard_list& get_shards();
+
+	/**
+	 * @brief Sets the request timeout.
+	 *
+	 * @param timeout The length of time (in seconds) that requests are allowed to take. Default: 20.
+	 *
+	 * @return cluster& Reference to self for chaining.
+	 */
+	cluster& set_request_timeout(uint16_t timeout);
 
 	/* Functions for attaching to event handlers */
 
@@ -993,6 +1007,24 @@ public:
 	event_router_t<message_create_t> on_message_create;
 
 	/**
+	 * @brief Called when a vote is added to a message poll.
+	 *
+	 * @see https://discord.com/developers/docs/topics/gateway-events#message-poll-vote-add
+	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
+	 * The function signature for this event takes a single `const` reference of type message_poll_vote_add_t&, and returns void.
+	 */
+	event_router_t<message_poll_vote_add_t> on_message_poll_vote_add;
+
+	/**
+	 * @brief Called when a vote is removed from a message poll.
+	 *
+	 * @see https://discord.com/developers/docs/topics/gateway-events#message-poll-vote-remove
+	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
+	 * The function signature for this event takes a single `const` reference of type message_poll_vote_remove_t&, and returns void.
+	 */
+	event_router_t<message_poll_vote_remove_t> on_message_poll_vote_remove;
+
+	/**
 	 * @brief Called when a guild audit log entry is created.
 	 *
 	 * @see https://discord.com/developers/docs/topics/gateway-events#guild-audit-log-entry-create
@@ -1382,8 +1414,9 @@ public:
 	 * @param mimetype MIME type of POST data
 	 * @param headers Headers to send with the request
 	 * @param protocol HTTP protocol to use (1.1 and 1.0 are supported)
+	 * @param request_timeout How many seconds before the connection is considered failed if not finished
 	 */
-	void request(const std::string &url, http_method method, http_completion_event callback, const std::string &postdata = "", const std::string &mimetype = "text/plain", const std::multimap<std::string, std::string> &headers = {}, const std::string &protocol = "1.1");
+	void request(const std::string &url, http_method method, http_completion_event callback, const std::string &postdata = "", const std::string &mimetype = "text/plain", const std::multimap<std::string, std::string> &headers = {}, const std::string &protocol = "1.1", time_t request_timeout = 5);
 
 	/**
 	 * @brief Respond to a slash command
@@ -1947,6 +1980,54 @@ public:
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void message_delete_bulk(const std::vector<snowflake> &message_ids, snowflake channel_id, command_completion_event_t callback = utility::log_error());
+
+	/**
+	 * @brief Get a list of users that voted for this specific answer.
+	 *
+	 * @param m Message that contains the poll to retrieve the answers from
+	 * @param answer_id ID of the answer to retrieve votes from (see poll_answer::answer_id)
+	 * @param after Users after this ID should be retrieved if this is set to non-zero
+	 * @param limit This number of users maximum should be returned, up to 100
+	 * @param callback Function to call when the API call completes.
+	 * @see https://discord.com/developers/docs/resources/poll#get-answer-voters
+	 * On success the callback will contain a dpp::user_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void poll_get_answer_voters(const message& m, uint32_t answer_id, snowflake after, uint64_t limit, command_completion_event_t callback = utility::log_error());
+
+	/**
+	 * @brief Get a list of users that voted for this specific answer.
+	 *
+	 * @param message_id ID of the message with the poll to retrieve the answers from
+	 * @param channel_id ID of the channel with the poll to retrieve the answers from
+	 * @param answer_id ID of the answer to retrieve votes from (see poll_answer::answer_id)
+	 * @param after Users after this ID should be retrieved if this is set to non-zero
+	 * @param limit This number of users maximum should be returned, up to 100
+	 * @param callback Function to call when the API call completes.
+	 * @see https://discord.com/developers/docs/resources/poll#get-answer-voters
+	 * On success the callback will contain a dpp::user_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void poll_get_answer_voters(snowflake message_id, snowflake channel_id, uint32_t answer_id, snowflake after, uint64_t limit, command_completion_event_t callback = utility::log_error());
+
+	/**
+	 * @brief Immediately end a poll.
+	 *
+	 * @param m Message that contains the poll
+	 * @param callback Function to call when the API call completes.
+	 * @see https://discord.com/developers/docs/resources/poll#end-poll
+	 * On success the callback will contain a dpp::message object representing the message containing the poll in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void poll_end(const message &m, command_completion_event_t callback = utility::log_error());
+
+	/**
+	 * @brief Immediately end a poll.
+	 *
+	 * @param message_id ID of the message with the poll to end
+	 * @param channel_id ID of the channel with the poll to end
+	 * @param callback Function to call when the API call completes.
+	 * @see https://discord.com/developers/docs/resources/poll#end-poll
+	 * On success the callback will contain a dpp::message object representing the message containing the poll in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void poll_end(snowflake message_id, snowflake channel_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get a channel
@@ -2652,6 +2733,55 @@ public:
 	void guild_emoji_delete(snowflake guild_id, snowflake emoji_id, command_completion_event_t callback = utility::log_error());
 
 	/**
+	 * @brief List all Application Emojis
+	 *
+	 * @see https://discord.com/developers/docs/resources/emoji#list-application-emojis
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::emoji_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void application_emojis_get(command_completion_event_t callback = utility::log_error());
+
+	/**
+	 * @brief Get an Application Emoji
+	 *
+	 * @see https://discord.com/developers/docs/resources/emoji#get-application-emoji
+	 * @param emoji_id The ID of the Emoji to get.
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::emoji object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void application_emoji_get(snowflake emoji_id, command_completion_event_t callback = utility::log_error());
+
+	/**
+	 * @brief Create an Application Emoji
+	 *
+	 * @see https://discord.com/developers/docs/resources/emoji#create-application-emoji
+	 * @param newemoji The emoji to create
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::emoji object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void application_emoji_create(const class emoji& newemoji, command_completion_event_t callback = utility::log_error());
+
+	/**
+	 * @brief Edit an Application Emoji
+	 *
+	 * @see https://discord.com/developers/docs/resources/emoji#modify-application-emoji
+	 * @param newemoji The emoji to edit
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::emoji object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void application_emoji_edit(const class emoji& newemoji, command_completion_event_t callback = utility::log_error());
+
+	/**
+	 * @brief Delete an Application Emoji
+	 *
+	 * @see https://discord.com/developers/docs/resources/emoji#delete-application-emoji
+	 * @param emoji_id The emoji's ID to delete.
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void application_emoji_delete(snowflake emoji_id, command_completion_event_t callback = utility::log_error());
+
+	/**
 	 * @brief Get prune counts
 	 * 
 	 * Returns a prune object indicating the number of members that would be removed in a prune operation. Requires the `KICK_MEMBERS`
@@ -3186,19 +3316,24 @@ public:
 	void current_user_get_guilds(command_completion_event_t callback);
 
 	/**
-	 * @brief Edit current (bot) user
+	 * @brief Edit current (bot) user.
 	 *
-	 * Modifies the current member in a guild. Returns the updated guild_member object on success.
-	 * Fires a `Guild Member Update` Gateway event.
+	 * Modify the requester's user account settings. Returns a dpp::user object on success.
+	 * Fires a User Update Gateway event.
+	 *
+	 * @note There appears to be no limit to the image size, however, if your image cannot be processed/uploaded in time, you will receive a malformed http request.
+	 *
 	 * @see https://discord.com/developers/docs/resources/user#modify-current-user
 	 * @param nickname Nickname to set
-	 * @param image_blob Avatar data to upload (NOTE: Very heavily rate limited!)
-	 * @param type Type of image for avatar. It can be one of `i_gif`, `i_jpg` or `i_png`.
+	 * @param avatar_blob Avatar data to upload
+	 * @param avatar_type Type of image for avatar. It can be one of `i_gif`, `i_jpg` or `i_png`.
+	 * @param banner_blob Banner data to upload
+	 * @param banner_type Type of image for Banner. It can be one of `i_gif`, `i_jpg` or `i_png`.
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::user object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
  	 * @throw dpp::length_exception Image data is larger than the maximum size of 256 kilobytes
 	 */
-	void current_user_edit(const std::string &nickname, const std::string& image_blob = "", const image_type type = i_png, command_completion_event_t callback = utility::log_error());
+	void current_user_edit(const std::string &nickname, const std::string& avatar_blob = "", const image_type avatar_type = i_png, const std::string& banner_blob = "", const image_type banner_type = i_png, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get current user DM channels
@@ -3713,6 +3848,16 @@ public:
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void entitlement_test_delete(snowflake entitlement_id, command_completion_event_t callback = utility::log_error());
+
+	/**
+	 * @brief For One-Time Purchase consumable SKUs, marks a given entitlement for the user as consumed.
+	 *
+	 * @see https://discord.com/developers/docs/monetization/entitlements#consume-an-entitlement
+	 * @param entitlement_id The entitlement to mark as consumed.
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void entitlement_consume(snowflake entitlement_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Returns all SKUs for a given application.

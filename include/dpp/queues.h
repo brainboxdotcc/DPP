@@ -30,6 +30,7 @@
 #include <vector>
 #include <functional>
 #include <condition_variable>
+#include <atomic>
 
 namespace dpp {
 
@@ -294,6 +295,13 @@ public:
 	std::string protocol;
 
 	/**
+	 * @brief How many seconds before the connection is considered failed if not finished
+	 *
+	 * @deprecated Please now use dpp::cluster::request_timeout
+	 */
+	DPP_DEPRECATED("Please now use dpp::cluster::request_timeout") time_t request_timeout;
+
+	/**
 	 * @brief Constructor. When constructing one of these objects it should be passed to request_queue::post_request().
 	 * @param _endpoint The API endpoint, e.g. /api/guilds
 	 * @param _parameters Major and minor parameters for the endpoint e.g. a user id or guild id
@@ -332,8 +340,9 @@ public:
 	 * @param _mimetype POST data mime type
 	 * @param _headers HTTP headers to send
 	 * @param http_protocol HTTP protocol
+	 * @param _request_timeout How many seconds before the connection is considered failed if not finished
 	 */
-	http_request(const std::string &_url, http_completion_event completion, http_method method = m_get, const std::string &_postdata = "", const std::string &_mimetype = "text/plain", const std::multimap<std::string, std::string> &_headers = {}, const std::string &http_protocol = "1.1");
+	http_request(const std::string &_url, http_completion_event completion, http_method method = m_get, const std::string &_postdata = "", const std::string &_mimetype = "text/plain", const std::multimap<std::string, std::string> &_headers = {}, const std::string &http_protocol = "1.1", time_t _request_timeout = 5);
 
 	/**
 	 * @brief Destroy the http request object
@@ -401,7 +410,7 @@ private:
 	/**
 	 * @brief True if ending.
 	 */
-	bool terminating;
+	std::atomic<bool> terminating;
 
 	/**
 	 * @brief Request queue that owns this in_thread.
@@ -458,6 +467,12 @@ public:
 	 * This will end the thread that is owned by this object by joining it.
 	 */
 	~in_thread();
+
+	/**
+	 * @brief Terminates the thread
+	 * This will end the thread that is owned by this object, but will not join it.
+	 */
+	void terminate();
 
 	/**
 	 * @brief Post a http_request to this thread.
@@ -545,7 +560,7 @@ protected:
 	 * 2) Requests for different endpoints go into different buckets, so that they may be requested in parallel
 	 * A global ratelimit event pauses all threads in the pool. These are few and far between.
 	 */
-	std::vector<in_thread*> requests_in;
+	std::vector<std::unique_ptr<in_thread>> requests_in;
 
 	/**
 	 * @brief A request queued for deletion in the queue.
@@ -584,7 +599,7 @@ protected:
 	/**
 	 * @brief Set to true if the threads should terminate
 	 */
-	bool terminating;
+	std::atomic<bool> terminating;
 
 	/**
 	 * @brief True if globally rate limited - makes the entire request thread wait

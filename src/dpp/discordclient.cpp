@@ -638,7 +638,7 @@ discord_client& discord_client::connect_voice(snowflake guild_id, snowflake chan
 
 std::string discord_client::jsonobj_to_string(const nlohmann::json& json) {
 	if (protocol == ws_json) {
-		return json.dump();
+		return json.dump(-1, ' ', false, json::error_handler_t::replace);
 	} else {
 		return etf->build(json);
 	}

@@ -75,3 +75,4 @@
 #include <dpp/discordevents.h>
 #include <dpp/timed_listener.h>
 #include <dpp/collector.h>
+#include <dpp/bignum.h>

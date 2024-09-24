@@ -21,7 +21,7 @@
 
 #pragma once
 #include <dpp/export.h>
-#include <dpp/json_fwd.h>
+#include <dpp/json.h>
 
 namespace dpp {
 
@@ -66,7 +66,7 @@ struct json_interface {
 	 */
 	template <typename U = T, typename = decltype(std::declval<U&>().to_json_impl(bool{}))>
 	std::string build_json(bool with_id = false) const {
-		return to_json(with_id).dump();
+		return to_json(with_id).dump(-1, ' ', false, nlohmann::detail::error_handler_t::replace);
 	}
 };
 

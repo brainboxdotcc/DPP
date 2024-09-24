@@ -347,6 +347,17 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	uint32_t timestamp;
 
 	/**
+	 * @brief Each packet should have a nonce, a 32-bit incremental
+	 * integer value appended to payload.
+	 *
+	 * We should keep track of this value and increment it for each
+	 * packet sent.
+	 *
+	 * Current initial value is hardcoded to 1.
+	 */
+	uint32_t packet_nonce;
+
+	/**
 	 * @brief Last sent packet high-resolution timestamp
 	 */
 	std::chrono::high_resolution_clock::time_point last_timestamp;

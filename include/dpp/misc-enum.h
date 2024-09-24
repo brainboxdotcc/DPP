@@ -21,14 +21,15 @@
  ************************************************************************************/
 #pragma once
 #include <dpp/export.h>
-#include <stddef.h>
+#include <cstddef>
+#include <cstdint>
 
 namespace dpp {
 
 /**
  * @brief Supported image types for profile pictures and CDN endpoints
  */
-enum image_type {
+enum image_type : uint8_t {
 	/**
 	 * @brief image/png
 	 */

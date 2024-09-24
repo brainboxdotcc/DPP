@@ -96,6 +96,21 @@ Markdown lol ||spoiler|| ~~strikethrough~~ `small *code* block`\n";
 	u3.id = 777;
 	set_test(COMPARISON, u1 == u2 && u1 != u3);
 
+	set_test(BIGNUM, false);
+	std::string big_in{"1234567890123456789012345678901234567890"};
+	dpp::bignumber big(big_in);
+	std::string returned = big.get_number();
+	set_test(BIGNUM, big_in == returned);
+
+	set_test(BIGNUM2, false);
+	std::vector<uint64_t> vec{0xff00ff00ff00ff00, 0x1122334455667788};
+	dpp::bignumber big2(vec);
+	returned = big2.get_number(true);
+	set_test(BIGNUM2, dpp::lowercase(returned) == "1122334455667788ff00ff00ff00ff00");
+
+	set_test(BIGNUM3, false);
+	std::vector<uint64_t> ret_bin = big2.get_binary();
+	set_test(BIGNUM3, ret_bin.size() == 2 && ret_bin[0] == 0xff00ff00ff00ff00 && ret_bin[1] == 0x1122334455667788);
 
 	set_test(ERRORS, false);
 
@@ -187,6 +202,23 @@ Markdown lol ||spoiler|| ~~strikethrough~~ `small *code* block`\n";
 		}\
 	}";
 	error_message_success = (error_message_success && error_test.get_error().human_readable == "50035: Invalid Form Body - <array>[1].options[1].description: Must be between 1 and 100 in length. (BASE_TYPE_BAD_LENGTH)");
+
+	error_test.http_info.body = "{\
+  	\"message\": \"Invalid Form Body\",\
+  	\"code\": 50035,\
+  	\"errors\": {\
+  	  \"data\": {\
+  	    \"poll\": {\
+  	      \"_errors\": [\
+  	        {\
+							\"code\": \"POLL_TYPE_QUESTION_ALLOWS_TEXT_ONLY\",\
+ 							\"message\": \"This poll type cannot include attachments, emoji or stickers with the question\"}\
+  	      ]\
+  	    }\
+  	  }\
+  	}\
+	}";
+	error_message_success = (error_message_success && error_test.get_error().human_readable == "50035: Invalid Form Body - data.poll: This poll type cannot include attachments, emoji or stickers with the question (POLL_TYPE_QUESTION_ALLOWS_TEXT_ONLY)");
 
 	set_test(ERRORS, error_message_success);
 
@@ -346,6 +378,19 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		success = success && dpp::snowflake{0} == 0;
 		set_test(SNOWFLAKE, success);
 	}
+
+        { // test snowflake: std::format support
+
+                #ifdef DPP_FORMATTERS
+                        set_test(SNOWFLAKE_STD_FORMAT,
+                            std::format("{}",dpp::snowflake{}) == "0" &&
+                            std::format("{}",dpp::snowflake{12345}) == "12345" &&
+                            std::format("{} hello {}", dpp::snowflake{12345}, dpp::snowflake{54321}) == "12345 hello 54321"
+                        );
+                #else
+                        set_status(SNOWFLAKE_STD_FORMAT,ts_skipped);
+                #endif // DPP_FORMATTERS
+        };
 
 	{ // test dpp::json_interface
 		start_test(JSON_INTERFACE);
@@ -744,7 +789,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 				 m5.get_url() == "" &&
 				 m6.get_url() == "" &&
 				 m7.get_url() == "" &&
-				 m8.get_url() == "" 
+				 m8.get_url() == ""
 		);
 	}
 
@@ -854,31 +899,31 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 
 		set_test(UTILITY_USER_URL, false);
 		auto user_url = dpp::utility::user_url(123);
-		set_test(UTILITY_USER_URL, 
-				 user_url == dpp::utility::url_host + "/users/123" && 
+		set_test(UTILITY_USER_URL,
+				 user_url == dpp::utility::url_host + "/users/123" &&
 				 dpp::utility::user_url(0) == ""
 		);
 
 		set_test(UTILITY_MESSAGE_URL, false);
 		auto message_url = dpp::utility::message_url(1,2,3);
 		set_test(UTILITY_MESSAGE_URL,
-				 message_url == dpp::utility::url_host+ "/channels/1/2/3" && 
+				 message_url == dpp::utility::url_host+ "/channels/1/2/3" &&
 				 dpp::utility::message_url(0,2,3) == "" &&
-				 dpp::utility::message_url(1,0,3) == "" && 
+				 dpp::utility::message_url(1,0,3) == "" &&
 				 dpp::utility::message_url(1,2,0) == "" &&
 				 dpp::utility::message_url(0,0,3) == "" &&
 				 dpp::utility::message_url(0,2,0) == "" &&
 				 dpp::utility::message_url(1,0,0) == "" &&
-				 dpp::utility::message_url(0,0,0) == "" 
+				 dpp::utility::message_url(0,0,0) == ""
 		);
 
 		set_test(UTILITY_CHANNEL_URL, false);
 		auto channel_url = dpp::utility::channel_url(1,2);
-		set_test(UTILITY_CHANNEL_URL, 
+		set_test(UTILITY_CHANNEL_URL,
 				 channel_url == dpp::utility::url_host+ "/channels/1/2" &&
 				 dpp::utility::channel_url(0,2) == "" &&
 				 dpp::utility::channel_url(1,0) == "" &&
-				 dpp::utility::channel_url(0,0) == "" 
+				 dpp::utility::channel_url(0,0) == ""
 		);
 
 		set_test(UTILITY_THREAD_URL, false);
@@ -887,7 +932,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 				 thread_url == dpp::utility::url_host+ "/channels/1/2" &&
 				 dpp::utility::thread_url(0,2) == "" &&
 				 dpp::utility::thread_url(1,0) == "" &&
-				 dpp::utility::thread_url(0,0) == "" 
+				 dpp::utility::thread_url(0,0) == ""
 		);
 	}
 
@@ -940,6 +985,15 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 			}
 		});
 
+		if (!offline) {
+			start_test(INVALIDUTF8);
+			bot.message_create(dpp::message(TEST_TEXT_CHANNEL_ID, "ä\xA9ü"), [](const auto &cc) {
+				set_status(INVALIDUTF8, ts_success);
+			});
+		} else {
+			set_status(INVALIDUTF8, ts_skipped);
+		}
+
 		dpp::utility::iconhash i;
 		std::string dummyval("fcffffffffffff55acaaaaaaaaaaaa66");
 		i = dummyval;
@@ -977,7 +1031,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 						return;
 					}
 					g.remove_icon();
-					bot.guild_edit(g, [&bot](const dpp::confirmation_callback_t &result) {
+					bot.guild_edit(g, [](const dpp::confirmation_callback_t &result) {
 						if (result.is_error()) {
 							set_status(GUILD_EDIT, ts_failed, "guild_edit 2 errored:\n" + result.get_error().human_readable);
 							return;
@@ -1099,7 +1153,13 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		});
 
 		bot.on_voice_buffer_send([&](const dpp::voice_buffer_send_t & event) {
-			if (event.buffer_size == 0) {
+			static bool sent_some_data = false;
+
+			if (event.buffer_size > 0) {
+			   sent_some_data = true;
+			}
+
+			if (sent_some_data && event.packets_left == 0) {
 				set_test(VOICESEND, true);
 			}
 		});
@@ -1601,7 +1661,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 									set_test(TIMESTAMP, false);
 								}
 							} else {
-								set_test(MESSAGESGET, false);	
+								set_test(MESSAGESGET, false);
 							}
 						}  else {
 							set_test(MESSAGESGET, false);
@@ -1704,10 +1764,10 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 			set_test(GUILD_BANS_GET, false);
 			set_test(GUILD_BAN_DELETE, false);
 			if (!offline) {
-				// some deleted discord accounts to test the ban stuff with...
-				dpp::snowflake deadUser1(802670069523415057);
-				dpp::snowflake deadUser2(875302419335094292);
-				dpp::snowflake deadUser3(1048247361903792198);
+				// some discord accounts to test the ban stuff with...
+				dpp::snowflake deadUser1(155149108183695360); // Dyno
+				dpp::snowflake deadUser2(159985870458322944); // MEE6
+				dpp::snowflake deadUser3(936929561302675456); // MidJourney Bot
 
 				bot.set_audit_reason("ban reason one").guild_ban_add(TEST_GUILD_ID, deadUser1, 0, [deadUser1, deadUser2, deadUser3, &bot](const dpp::confirmation_callback_t &event) {
 					if (!event.is_error()) bot.guild_ban_add(TEST_GUILD_ID, deadUser2, 0, [deadUser1, deadUser2, deadUser3, &bot](const dpp::confirmation_callback_t &event) {
@@ -1716,50 +1776,61 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 								return;
 							}
 							set_test(GUILD_BAN_CREATE, true);
-							// when created, continue with getting and deleting
 
 							// get ban
-							bot.guild_get_ban(TEST_GUILD_ID, deadUser1, [deadUser1](const dpp::confirmation_callback_t &event) {
+							bot.guild_get_ban(TEST_GUILD_ID, deadUser1, [&bot, deadUser1, deadUser2, deadUser3](const dpp::confirmation_callback_t &event) {
 								if (!event.is_error()) {
 									dpp::ban ban = event.get<dpp::ban>();
+									// Check the audit reason was set correctly
 									if (ban.user_id == deadUser1 && ban.reason == "ban reason one") {
 										set_test(GUILD_BAN_GET, true);
+									} else {
+										set_test(GUILD_BAN_GET, false);
 									}
-								}
-							});
-
-							// get multiple bans
-							bot.guild_get_bans(TEST_GUILD_ID, 0, deadUser1, 3, [deadUser2, deadUser3](const dpp::confirmation_callback_t &event) {
-								if (!event.is_error()) {
-									dpp::ban_map bans = event.get<dpp::ban_map>();
-									int successCount = 0;
-									for (auto &ban: bans) {
-										if (ban.first == ban.second.user_id) { // the key should match the ban's user_id
-											if (ban.first == deadUser2 && ban.second.reason.empty()) {
-												successCount++;
-											} else if (ban.first == deadUser3 && ban.second.reason == "ban reason three") {
-												successCount++;
-											}
-										}
-									}
-									if (successCount == 2) {
-										set_test(GUILD_BANS_GET, true);
-									}
-								}
-							});
-
-							// unban them
-							bot.guild_ban_delete(TEST_GUILD_ID, deadUser1, [&bot, deadUser2, deadUser3](const dpp::confirmation_callback_t &event) {
-								if (!event.is_error()) {
-									bot.guild_ban_delete(TEST_GUILD_ID, deadUser2, [&bot, deadUser3](const dpp::confirmation_callback_t &event) {
+									// get all bans after deadUser1
+									bot.guild_get_bans(TEST_GUILD_ID, 0, deadUser1, 50, [&bot, deadUser1, deadUser2, deadUser3](const dpp::confirmation_callback_t &event) {
 										if (!event.is_error()) {
-											bot.guild_ban_delete(TEST_GUILD_ID, deadUser3, [](const dpp::confirmation_callback_t &event) {
+											auto bans = event.get<dpp::ban_map>();
+											// The ban set should contain at least two bans, two of which should be deadUser2 and deadUser3,
+											// but never deadUser1. Take into account that *other bans* might exist in the list so we can't
+											// just assume there are three or set a limit of 3 above.
+											set_test(
+												GUILD_BANS_GET,
+												bans.find(deadUser1) == bans.end()
+												&& bans.find(deadUser2) != bans.end()
+												&& bans.find(deadUser3) != bans.end()
+											);
+											// unban all three
+											bot.guild_ban_delete(TEST_GUILD_ID, deadUser1, [&bot, deadUser1, deadUser2, deadUser3](const dpp::confirmation_callback_t &event) {
 												if (!event.is_error()) {
-													set_test(GUILD_BAN_DELETE, true);
+													bot.guild_ban_delete(TEST_GUILD_ID, deadUser2, [&bot, deadUser3](const dpp::confirmation_callback_t &event) {
+														if (!event.is_error()) {
+															bot.guild_ban_delete(TEST_GUILD_ID, deadUser3, [](const dpp::confirmation_callback_t &event) {
+																if (!event.is_error()) {
+																	set_test(GUILD_BAN_DELETE, true);
+																} else {
+																	set_test(GUILD_BAN_DELETE, false);
+																}
+															});
+														} else {
+															set_test(GUILD_BAN_DELETE, false);
+														}
+													});
+												} else {
+													set_test(GUILD_BAN_DELETE, false);
 												}
 											});
+										} else {
+											/* An error in this test cascades to others failing immediately */
+											set_test(GUILD_BANS_GET, false);
+											set_test(GUILD_BAN_DELETE, false);
 										}
 									});
+								} else {
+									/* An error in the parent test cascades to the others failing immediately */
+									set_test(GUILD_BAN_GET, false);
+									set_test(GUILD_BANS_GET, false);
+									set_test(GUILD_BAN_DELETE, false);
 								}
 							});
 						});
@@ -2076,7 +2147,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 					}
 				});
 			}
-			
+
 			set_test(THREAD_CREATE, false);
 			if (!offline) {
 				bot.thread_create("thread test", TEST_TEXT_CHANNEL_ID, 60, dpp::channel_type::CHANNEL_PUBLIC_THREAD, true, 60, [&](const dpp::confirmation_callback_t &event) {
@@ -2085,6 +2156,99 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 						set_test(THREAD_CREATE, true);
 					}
 					// the thread tests are in the on_thread_create event handler
+				});
+			}
+
+			start_test(POLL_CREATE);
+			if (!offline) {
+				dpp::message poll_msg{};
+
+				poll_msg.set_poll(dpp::poll{}
+					.set_question("hello!")
+					.add_answer("one", dpp::unicode_emoji::one)
+					.add_answer("two", dpp::unicode_emoji::two)
+					.add_answer("three", dpp::unicode_emoji::three)
+					.add_answer("four")
+					.set_duration(48)
+					.set_allow_multiselect(true)
+				).set_channel_id(TEST_TEXT_CHANNEL_ID);
+
+				bot.message_create(poll_msg, [&bot, poll_msg](const dpp::confirmation_callback_t& result) {
+					if (result.is_error()) {
+						set_status(POLL_CREATE, ts_failed, result.get_error().human_readable);
+						return;
+					}
+
+					const dpp::message& m = std::get<dpp::message>(result.value);
+
+					if (!m.attached_poll.has_value()) {
+						set_status(POLL_CREATE, ts_failed, "poll missing in received message");
+						return;
+					}
+
+					if (m.attached_poll->find_answer(std::numeric_limits<uint32_t>::max()) != nullptr) {
+						set_status(POLL_CREATE, ts_failed, "poll::find_answer failed to return nullptr");
+						return;
+					}
+
+					std::array<bool, 4> correct = {false, false, false, false};
+					int i = 0;
+					for (const auto& [_, answer] : m.attached_poll->answers) {
+						if (m.attached_poll->find_answer(answer.id) != &answer.media) {
+							set_status(POLL_CREATE, ts_failed, "poll::find_answer failed to return valid answer");
+							return;
+						}
+						if (answer.media.text == "one" && answer.media.emoji.name == dpp::unicode_emoji::one) {
+							if (correct[i]) {
+								set_status(POLL_CREATE, ts_failed, "poll answer found twice");
+								return;
+							}
+							correct[i] = true;
+						}
+						if (answer.media.text == "two" && answer.media.emoji.name == dpp::unicode_emoji::two) {
+							if (correct[i]) {
+								set_status(POLL_CREATE, ts_failed, "poll answer found twice");
+								return;
+							}
+							correct[i] = true;
+						}
+						if (answer.media.text == "three" && answer.media.emoji.name == dpp::unicode_emoji::three) {
+							if (correct[i]) {
+								set_status(POLL_CREATE, ts_failed, "poll answer found twice");
+								return;
+							}
+							correct[i] = true;
+						}
+						if (answer.media.text == "four" && answer.media.emoji.name.empty()) {
+							if (correct[i]) {
+								set_status(POLL_CREATE, ts_failed, "poll answer found twice");
+								return;
+							}
+							correct[i] = true;
+							bot.poll_get_answer_voters(m, answer.id, 0, 100, [m, &bot](const dpp::confirmation_callback_t& result) {
+								if (result.is_error()) {
+									set_status(POLL_CREATE, ts_failed, "poll_get_answer_voters: " + result.get_error().human_readable);
+									return;
+								}
+
+								start_test(POLL_END);
+								bot.poll_end(m, [message_id = m.id, channel_id = m.channel_id, &bot](const dpp::confirmation_callback_t& result) {
+									if (result.is_error()) {
+										set_status(POLL_END, ts_failed, result.get_error().human_readable);
+										return;
+									}
+									set_status(POLL_END, ts_success);
+									bot.message_delete(message_id, channel_id);
+								});
+							});
+						}
+						++i;
+					}
+					if (correct == std::array<bool, 4>{true, true, true, true}) {
+						set_status(POLL_CREATE, ts_success);
+					} else {
+						set_status(POLL_CREATE, ts_failed, "failed to find the submitted answers");
+					}
 				});
 			}
 

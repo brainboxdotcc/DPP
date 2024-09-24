@@ -83,6 +83,9 @@ struct test_t {
 
 /* Current list of unit tests */
 DPP_TEST(SNOWFLAKE, "dpp::snowflake class", tf_offline);
+DPP_TEST(BIGNUM, "dpp::bignumber decimal to raw buffer", tf_offline);
+DPP_TEST(BIGNUM2, "dpp::bignumber raw buffer to hex", tf_offline);
+DPP_TEST(BIGNUM3, "dpp::bignumber to_binary()", tf_offline);
 DPP_TEST(JSON_INTERFACE, "dpp::json_interface class", tf_offline);
 DPP_TEST(CLUSTER, "Instantiate DPP cluster", tf_offline);
 DPP_TEST(BOTSTART, "cluster::start method", tf_online);
@@ -149,9 +152,10 @@ DPP_TEST(FORUM_CREATION, "create a forum channel", tf_online);
 DPP_TEST(FORUM_CHANNEL_GET, "retrieve the created forum channel", tf_online);
 DPP_TEST(FORUM_CHANNEL_DELETE, "delete the created forum channel", tf_online);
 DPP_TEST(ERRORS, "Human readable error translation", tf_offline);
+DPP_TEST(INVALIDUTF8, "Invalid UTF-8 handling", tf_online);
 
 DPP_TEST(GUILD_EDIT, "cluster::guild_edit", tf_online);
-DPP_TEST(GUILD_BAN_CREATE, "cluster::guild_ban_add ban three deleted discord accounts", tf_online);
+DPP_TEST(GUILD_BAN_CREATE, "cluster::guild_ban_add ban three well-known discord accounts", tf_online);
 DPP_TEST(GUILD_BAN_GET, "cluster::guild_get_ban getting one of the banned accounts", tf_online);
 DPP_TEST(GUILD_BANS_GET, "cluster::guild_get_bans get bans using the after-parameter", tf_online);
 DPP_TEST(GUILD_BAN_DELETE, "cluster::guild_ban_delete unban the banned discord accounts", tf_online);
@@ -233,6 +237,9 @@ DPP_TEST(VOICESEND, "Send audio to voice channel", tf_online | tf_extended); // 
 DPP_TEST(MESSAGEPIN, "Pinning a channel message", tf_online | tf_extended);
 DPP_TEST(MESSAGEUNPIN, "Unpinning a channel message", tf_online | tf_extended);
 
+DPP_TEST(POLL_CREATE, "Creating a poll", tf_online);
+DPP_TEST(POLL_END, "Ending a poll", tf_online);
+
 DPP_TEST(THREAD_MEMBER_ADD, "cluster::thread_member_add", tf_online | tf_extended);
 DPP_TEST(THREAD_MEMBER_GET, "cluster::thread_member_get", tf_online | tf_extended);
 DPP_TEST(THREAD_MEMBERS_GET, "cluster::thread_members_get", tf_online | tf_extended);
@@ -249,12 +256,15 @@ DPP_TEST(THREAD_MESSAGE_REACT_ADD_EVENT, "cluster::on_reaction_add in thread", t
 DPP_TEST(THREAD_MESSAGE_REACT_REMOVE_EVENT, "cluster::on_reaction_remove in thread", tf_online | tf_extended);
 
 DPP_TEST(CORO_JOB_OFFLINE, "coro: offline job", tf_offline | tf_coro);
+DPP_TEST(CORO_AWAITABLE_OFFLINE, "coro: offline promise & awaitable", tf_offline | tf_coro);
 DPP_TEST(CORO_COROUTINE_OFFLINE, "coro: offline coroutine", tf_offline | tf_coro);
 DPP_TEST(CORO_TASK_OFFLINE, "coro: offline task", tf_offline | tf_coro);
 DPP_TEST(CORO_ASYNC_OFFLINE, "coro: offline async", tf_offline | tf_coro);
 DPP_TEST(CORO_EVENT_HANDLER, "coro: online event handler", tf_online | tf_coro);
 DPP_TEST(CORO_API_CALLS, "coro: online api calls", tf_online | tf_coro);
 DPP_TEST(CORO_MUMBO_JUMBO, "coro: online mumbo jumbo in event handler", tf_online | tf_coro | tf_extended);
+
+DPP_TEST(SNOWFLAKE_STD_FORMAT, "snowflake: std::format support", tf_offline);
 
 void coro_offline_tests();
 void coro_online_tests(dpp::cluster *bot);

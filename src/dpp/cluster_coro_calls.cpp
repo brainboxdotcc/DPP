@@ -263,6 +263,26 @@ async<confirmation_callback_t> cluster::co_guild_emojis_get(snowflake guild_id) 
 	return async{ this, static_cast<void (cluster::*)(snowflake, command_completion_event_t)>(&cluster::guild_emojis_get), guild_id };
 }
 
+async<confirmation_callback_t> cluster::co_application_emojis_get() {
+	return async{ this, static_cast<void (cluster::*)(command_completion_event_t)>(&cluster::application_emojis_get) };
+}
+
+async<confirmation_callback_t> cluster::co_application_emoji_get(snowflake emoji_id) {
+	return async{ this, static_cast<void (cluster::*)(snowflake, command_completion_event_t)>(&cluster::application_emoji_get), emoji_id };
+}
+
+async<confirmation_callback_t> cluster::co_application_emoji_create(const class emoji& newemoji) {
+	return async{ this, static_cast<void (cluster::*)(const class emoji&, command_completion_event_t)>(&cluster::application_emoji_create), newemoji };
+}
+
+async<confirmation_callback_t> cluster::co_application_emoji_edit(const class emoji& newemoji) {
+	return async{ this, static_cast<void (cluster::*)(const class emoji&, command_completion_event_t)>(&cluster::application_emoji_edit), newemoji };
+}
+
+async<confirmation_callback_t> cluster::co_application_emoji_delete(snowflake emoji_id) {
+	return async{ this, static_cast<void (cluster::*)(snowflake, command_completion_event_t)>(&cluster::application_emoji_delete), emoji_id };
+}
+
 async<confirmation_callback_t> cluster::co_entitlements_get(snowflake user_id, const std::vector<snowflake>& sku_ids, snowflake before_id, snowflake after_id, uint8_t limit, snowflake guild_id, bool exclude_ended) {
 	return async{ this, static_cast<void (cluster::*)(snowflake, const std::vector<snowflake>&, snowflake, snowflake, uint8_t, snowflake, bool, command_completion_event_t)>(&cluster::entitlements_get), user_id, sku_ids, before_id, after_id, limit, guild_id, exclude_ended };
 }
@@ -273,6 +293,10 @@ async<confirmation_callback_t> cluster::co_entitlement_test_create(const class e
 
 async<confirmation_callback_t> cluster::co_entitlement_test_delete(const class snowflake entitlement_id) {
 	return async{ this, static_cast<void (cluster::*)(const class snowflake, command_completion_event_t)>(&cluster::entitlement_test_delete), entitlement_id };
+}
+
+async<confirmation_callback_t> cluster::co_entitlement_consume(const class snowflake entitlement_id) {
+	return async{ this, static_cast<void (cluster::*)(const class snowflake, command_completion_event_t)>(&cluster::entitlement_consume), entitlement_id };
 }
 
 async<confirmation_callback_t> cluster::co_get_gateway_bot() {
@@ -531,6 +555,22 @@ async<confirmation_callback_t> cluster::co_message_unpin(snowflake channel_id, s
 	return async{ this, static_cast<void (cluster::*)(snowflake, snowflake, command_completion_event_t)>(&cluster::message_unpin), channel_id, message_id };
 }
 
+async<confirmation_callback_t> cluster::co_poll_get_answer_voters(const message& m, uint32_t answer_id, snowflake after, uint64_t limit) {
+	return async{ this, static_cast<void (cluster::*)(const message&, uint32_t, snowflake, uint64_t, command_completion_event_t)>(&cluster::poll_get_answer_voters), m, answer_id, after, limit };
+}
+
+async<confirmation_callback_t> cluster::co_poll_get_answer_voters(snowflake message_id, snowflake channel_id, uint32_t answer_id, snowflake after, uint64_t limit) {
+	return async{ this, static_cast<void (cluster::*)(snowflake, snowflake, uint32_t, snowflake, uint64_t, command_completion_event_t)>(&cluster::poll_get_answer_voters), message_id, channel_id, answer_id, after, limit };
+}
+
+async<confirmation_callback_t> cluster::co_poll_end(const message &m) {
+	return async{ this, static_cast<void (cluster::*)(const message &, command_completion_event_t)>(&cluster::poll_end), m };
+}
+
+async<confirmation_callback_t> cluster::co_poll_end(snowflake message_id, snowflake channel_id) {
+	return async{ this, static_cast<void (cluster::*)(snowflake, snowflake, command_completion_event_t)>(&cluster::poll_end), message_id, channel_id };
+}
+
 async<confirmation_callback_t> cluster::co_channel_pins_get(snowflake channel_id) {
 	return async{ this, static_cast<void (cluster::*)(snowflake, command_completion_event_t)>(&cluster::channel_pins_get), channel_id };
 }
@@ -727,8 +767,8 @@ async<confirmation_callback_t> cluster::co_thread_get(snowflake thread_id) {
 	return async{ this, static_cast<void (cluster::*)(snowflake, command_completion_event_t)>(&cluster::thread_get), thread_id };
 }
 
-async<confirmation_callback_t> cluster::co_current_user_edit(const std::string &nickname, const std::string& image_blob, const image_type type) {
-	return async{ this, static_cast<void (cluster::*)(const std::string &, const std::string&, const image_type, command_completion_event_t)>(&cluster::current_user_edit), nickname, image_blob, type };
+async<confirmation_callback_t> cluster::co_current_user_edit(const std::string &nickname, const std::string& avatar_blob, const image_type avatar_type, const std::string& banner_blob, const image_type banner_type) {
+	return async{ this, static_cast<void (cluster::*)(const std::string &, const std::string&, const image_type, const std::string&, const image_type, command_completion_event_t)>(&cluster::current_user_edit), nickname, avatar_blob, avatar_type, banner_blob, banner_type };
 }
 
 async<confirmation_callback_t> cluster::co_current_application_get() {
@@ -831,8 +871,8 @@ async<confirmation_callback_t> cluster::co_get_webhook_with_token(snowflake webh
 };
 
 /* End of auto-generated definitions */
-dpp::async<dpp::http_request_completion_t> dpp::cluster::co_request(const std::string &url, http_method method, const std::string &postdata, const std::string &mimetype, const std::multimap<std::string, std::string> &headers, const std::string &protocol) {
-	return async<http_request_completion_t>{ [&, this] <typename C> (C &&cc) { return this->request(url, method, std::forward<C>(cc), postdata, mimetype, headers, protocol); }};
+dpp::async<dpp::http_request_completion_t> dpp::cluster::co_request(const std::string &url, http_method method, const std::string &postdata, const std::string &mimetype, const std::multimap<std::string, std::string> &headers, const std::string &protocol, time_t request_timeout) {
+	return async<http_request_completion_t>{ [&, this] <typename C> (C &&cc) { return this->request(url, method, std::forward<C>(cc), postdata, mimetype, headers, protocol, request_timeout); }};
 }
 
 #endif

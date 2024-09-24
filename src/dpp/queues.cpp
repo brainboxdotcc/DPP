@@ -33,7 +33,7 @@
 namespace dpp {
 
 http_request::http_request(const std::string &_endpoint, const std::string &_parameters, http_completion_event completion, const std::string &_postdata, http_method _method, const std::string &audit_reason, const std::string &filename, const std::string &filecontent, const std::string &filemimetype, const std::string &http_protocol)
- : complete_handler(completion), completed(false), non_discord(false), endpoint(_endpoint), parameters(_parameters), postdata(_postdata),  method(_method), reason(audit_reason), mimetype("application/json"), waiting(false), protocol(http_protocol)
+ : complete_handler(completion), completed(false), non_discord(false), endpoint(_endpoint), parameters(_parameters), postdata(_postdata),  method(_method), reason(audit_reason), mimetype("application/json"), waiting(false), protocol(http_protocol), request_timeout(5)
 {
 	if (!filename.empty()) {
 		file_name.push_back(filename);
@@ -47,13 +47,13 @@ http_request::http_request(const std::string &_endpoint, const std::string &_par
 }
 
 http_request::http_request(const std::string &_endpoint, const std::string &_parameters, http_completion_event completion, const std::string &_postdata, http_method method, const std::string &audit_reason, const std::vector<std::string> &filename, const std::vector<std::string> &filecontent, const std::vector<std::string> &filemimetypes, const std::string &http_protocol)
- : complete_handler(completion), completed(false), non_discord(false), endpoint(_endpoint), parameters(_parameters), postdata(_postdata),  method(method), reason(audit_reason), file_name(filename), file_content(filecontent), file_mimetypes(filemimetypes), mimetype("application/json"), waiting(false), protocol(http_protocol)
+ : complete_handler(completion), completed(false), non_discord(false), endpoint(_endpoint), parameters(_parameters), postdata(_postdata),  method(method), reason(audit_reason), file_name(filename), file_content(filecontent), file_mimetypes(filemimetypes), mimetype("application/json"), waiting(false), protocol(http_protocol), request_timeout(5)
 {
 }
 
 
-http_request::http_request(const std::string &_url, http_completion_event completion, http_method _method, const std::string &_postdata, const std::string &_mimetype, const std::multimap<std::string, std::string> &_headers, const std::string &http_protocol)
- : complete_handler(completion), completed(false), non_discord(true), endpoint(_url), postdata(_postdata), method(_method), mimetype(_mimetype), req_headers(_headers), waiting(false), protocol(http_protocol)
+http_request::http_request(const std::string &_url, http_completion_event completion, http_method _method, const std::string &_postdata, const std::string &_mimetype, const std::multimap<std::string, std::string> &_headers, const std::string &http_protocol, time_t _request_timeout)
+ : complete_handler(completion), completed(false), non_discord(true), endpoint(_url), postdata(_postdata), method(_method), mimetype(_mimetype), req_headers(_headers), waiting(false), protocol(http_protocol), request_timeout(_request_timeout)
 {
 }
 
@@ -176,9 +176,12 @@ http_request_completion_t http_request::run(cluster* owner) {
 	}
 	http_connect_info hci = https_client::get_host_info(_host);
 	try {
-		https_client cli(hci.hostname, hci.port, _url, request_verb[method], multipart.body, headers, !hci.is_ssl, 5, protocol);
+		https_client cli(hci.hostname, hci.port, _url, request_verb[method], multipart.body, headers, !hci.is_ssl, owner->request_timeout, protocol);
 		rv.latency = dpp::utility::time_f() - start;
-		if (cli.get_status() < 100) {
+		if (cli.timed_out) {
+			rv.error = h_connection;			
+			owner->log(ll_error, "HTTP(S) error on " + hci.scheme + " connection to " + hci.hostname + ":" + std::to_string(hci.port) + ": Timed out while waiting for the response");
+		} else if (cli.get_status() < 100) {
 			rv.error = h_connection;
 			owner->log(ll_error, "HTTP(S) error on " + hci.scheme + " connection to " + hci.hostname + ":" + std::to_string(hci.port) + ": Malformed HTTP response");
 		} else {
@@ -198,7 +201,7 @@ http_request_completion_t http_request::run(cluster* owner) {
 request_queue::request_queue(class cluster* owner, uint32_t request_threads) : creator(owner), terminating(false), globally_ratelimited(false), globally_limited_for(0), in_thread_pool_size(request_threads)
 {
 	for (uint32_t in_alloc = 0; in_alloc < in_thread_pool_size; ++in_alloc) {
-		requests_in.push_back(new in_thread(owner, this, in_alloc));
+		requests_in.push_back(std::make_unique<in_thread>(owner, this, in_alloc));
 	}
 	out_thread = new std::thread(&request_queue::out_loop, this);
 }
@@ -206,7 +209,7 @@ request_queue::request_queue(class cluster* owner, uint32_t request_threads) : c
 request_queue& request_queue::add_request_threads(uint32_t request_threads)
 {
 	for (uint32_t in_alloc_ex = 0; in_alloc_ex < request_threads; ++in_alloc_ex) {
-		requests_in.push_back(new in_thread(creator, this, in_alloc_ex + in_thread_pool_size));
+		requests_in.push_back(std::make_unique<in_thread>(creator, this, in_alloc_ex + in_thread_pool_size));
 	}
 	in_thread_pool_size += request_threads;
 	return *this;
@@ -224,16 +227,24 @@ in_thread::in_thread(class cluster* owner, class request_queue* req_q, uint32_t 
 
 in_thread::~in_thread()
 {
-	terminating = true;
-	in_ready.notify_one();
+	terminate();
 	in_thr->join();
 	delete in_thr;
 }
 
+void in_thread::terminate()
+{
+	terminating.store(true, std::memory_order_relaxed);
+	in_ready.notify_one();
+}
+
 request_queue::~request_queue()
 {
-	terminating = true;
+	terminating.store(true, std::memory_order_relaxed);
 	out_ready.notify_one();
+	for (auto& in_thr : requests_in) {
+		in_thr->terminate(); // signal all of them here, otherwise they will all join 1 by 1 and it will take forever
+	}
 	out_thread->join();
 	delete out_thread;
 }
@@ -281,7 +292,7 @@ struct compare_request {
 void in_thread::in_loop(uint32_t index)
 {
 	utility::set_thread_name(std::string("http_req/") + std::to_string(index));
-	while (!terminating) {
+	while (!terminating.load(std::memory_order_relaxed)) {
 		std::mutex mtx;
 		std::unique_lock<std::mutex> lock{ mtx };
 		in_ready.wait_for(lock, std::chrono::seconds(1));
@@ -394,7 +405,7 @@ bool request_queue::queued_deleting_request::operator<(time_t time) const noexce
 void request_queue::out_loop()
 {
 	utility::set_thread_name("req_callback");
-	while (!terminating) {
+	while (!terminating.load(std::memory_order_relaxed)) {
 
 		std::mutex mtx;
 		std::unique_lock lock{ mtx };

@@ -1688,6 +1688,72 @@ struct DPP_EXPORT message_create_t : public event_dispatch_t {
 };
 
 /**
+ * @brief Message poll vote add
+ */
+struct DPP_EXPORT message_poll_vote_add_t : public event_dispatch_t {
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
+	/**
+	 * @brief ID of the user who added the vote
+	 */
+	snowflake user_id;
+
+	/**
+	 * @brief ID of the channel containing the vote
+	 */
+	snowflake channel_id;
+
+	/**
+	 * @brief ID of the message containing the vote
+	 */
+	snowflake message_id;
+
+	/**
+	 * @brief ID of the guild containing the vote or 0 for DMs
+	 */
+	snowflake guild_id;
+
+	/**
+	 * @brief ID of the answer in the message poll object
+	 */
+	uint32_t answer_id;
+};
+
+/**
+ * @brief Message poll vote remove
+ */
+struct DPP_EXPORT message_poll_vote_remove_t : public event_dispatch_t {
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
+	/**
+	 * @brief ID of the user who added the vote
+	 */
+	snowflake user_id;
+
+	/**
+	 * @brief ID of the channel containing the vote
+	 */
+	snowflake channel_id;
+
+	/**
+	 * @brief ID of the message containing the vote
+	 */
+	snowflake message_id;
+
+	/**
+	 * @brief ID of the guild containing the vote or 0 for DMs
+	 */
+	snowflake guild_id;
+
+	/**
+	 * @brief ID of the answer in the message poll object
+	 */
+	uint32_t answer_id;
+};
+
+/**
  * @brief Guild audit log entry create
  */
 struct DPP_EXPORT guild_audit_log_entry_create_t : public event_dispatch_t {
@@ -1914,7 +1980,12 @@ struct DPP_EXPORT voice_buffer_send_t : public event_dispatch_t {
 	/**
 	 * @brief encoded size of sent buffer
 	 */
-	int buffer_size = 0;
+	uint64_t buffer_size = 0;
+
+	/**
+	 * @brief number of packet waiting to be sent in the queue
+	 */
+	size_t packets_left = 0;
 };
 
 /**
@@ -2013,7 +2084,7 @@ struct DPP_EXPORT voice_receive_t : public event_dispatch_t {
 	/**
 	 * @brief Audio data, encoded as 48kHz stereo PCM or Opus,
 	 */
-	std::basic_string<uint8_t> audio_data = {};
+	std::vector<uint8_t> audio_data = {};
 
 	/**
 	 * @brief User ID of speaker (zero if unknown)

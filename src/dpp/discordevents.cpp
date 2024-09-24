@@ -363,6 +363,8 @@ static const std::map<std::string, dpp::events::event*> event_map = {
 	{ "MESSAGE_REACTION_REMOVE", make_static_event<dpp::events::message_reaction_remove>() },
 	{ "MESSAGE_REACTION_REMOVE_ALL", make_static_event<dpp::events::message_reaction_remove_all>() },
 	{ "MESSAGE_REACTION_REMOVE_EMOJI", make_static_event<dpp::events::message_reaction_remove_emoji>() },
+	{ "MESSAGE_POLL_VOTE_ADD", make_static_event<dpp::events::message_poll_vote_add>() },
+	{ "MESSAGE_POLL_VOTE_REMOVE", make_static_event<dpp::events::message_poll_vote_remove>() },
 	{ "CHANNEL_PINS_UPDATE", make_static_event<dpp::events::channel_pins_update>() },
 	{ "GUILD_BAN_ADD", make_static_event<dpp::events::guild_ban_add>() },
 	{ "GUILD_BAN_REMOVE", make_static_event<dpp::events::guild_ban_remove>() },
@@ -401,6 +403,10 @@ static const std::map<std::string, dpp::events::event*> event_map = {
 	{ "EMBEDDED_ACTIVITY_UPDATE", nullptr },
 	{ "GUILD_APPLICATION_COMMAND_INDEX_UPDATE", nullptr },
 	{ "CHANNEL_TOPIC_UPDATE", nullptr },
+	{ "GUILD_SOUNDBOARD_SOUND_CREATE", nullptr },
+	{ "GUILD_SOUNDBOARD_SOUND_DELETE", nullptr },
+	{ "GUILD_SOUNDBOARD_SOUNDS_UPDATE", nullptr },
+	{ "GUILD_SOUNDBOARD_SOUND_UPDATE", nullptr },
 	{ "VOICE_CHANNEL_STATUS_UPDATE", nullptr },
 	{ "GUILD_SCHEDULED_EVENT_CREATE", make_static_event<dpp::events::guild_scheduled_event_create>() },
 	{ "GUILD_SCHEDULED_EVENT_UPDATE", make_static_event<dpp::events::guild_scheduled_event_update>() },
@@ -429,7 +435,7 @@ void discord_client::handle_event(const std::string &event, json &j, const std::
 			ev_iter->second->handle(this, j, raw);
 		}
 	} else {
-		log(dpp::ll_debug, "Unhandled event: " + event + ", " + j.dump());
+		log(dpp::ll_debug, "Unhandled event: " + event + ", " + j.dump(-1, ' ', false, json::error_handler_t::replace));
 	}
 }
 

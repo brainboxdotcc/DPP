@@ -880,6 +880,75 @@ emoji guild_emoji_get_sync(snowflake guild_id, snowflake emoji_id);
 emoji_map guild_emojis_get_sync(snowflake guild_id);
 
 /**
+ * @brief List all Application Emojis
+ *
+ * @see dpp::cluster::application_emojis_get
+ * @see https://discord.com/developers/docs/resources/emoji#list-application-emojis
+ * @return emoji_map returned object on completion
+ * \memberof dpp::cluster
+ * @throw dpp::rest_exception upon failure to execute REST function
+ * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
+ * Avoid direct use of this function inside an event handler.
+ */
+emoji_map application_emojis_get_sync();
+
+/**
+ * @brief Get an Application Emoji
+ *
+ * @see dpp::cluster::application_emoji_get
+ * @see https://discord.com/developers/docs/resources/emoji#get-application-emoji
+ * @param emoji_id The ID of the Emoji to get.
+ * @return emoji returned object on completion
+ * \memberof dpp::cluster
+ * @throw dpp::rest_exception upon failure to execute REST function
+ * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
+ * Avoid direct use of this function inside an event handler.
+ */
+emoji application_emoji_get_sync(snowflake emoji_id);
+
+/**
+ * @brief Create an Application Emoji
+ *
+ * @see dpp::cluster::application_emoji_create
+ * @see https://discord.com/developers/docs/resources/emoji#create-application-emoji
+ * @param newemoji The emoji to create
+ * @return emoji returned object on completion
+ * \memberof dpp::cluster
+ * @throw dpp::rest_exception upon failure to execute REST function
+ * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
+ * Avoid direct use of this function inside an event handler.
+ */
+emoji application_emoji_create_sync(const class emoji& newemoji);
+
+/**
+ * @brief Edit an Application Emoji
+ *
+ * @see dpp::cluster::application_emoji_edit
+ * @see https://discord.com/developers/docs/resources/emoji#modify-application-emoji
+ * @param newemoji The emoji to edit
+ * @return emoji returned object on completion
+ * \memberof dpp::cluster
+ * @throw dpp::rest_exception upon failure to execute REST function
+ * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
+ * Avoid direct use of this function inside an event handler.
+ */
+emoji application_emoji_edit_sync(const class emoji& newemoji);
+
+/**
+ * @brief Delete an Application Emoji
+ *
+ * @see dpp::cluster::application_emoji_delete
+ * @see https://discord.com/developers/docs/resources/emoji#delete-application-emoji
+ * @param emoji_id The emoji's ID to delete.
+ * @return confirmation returned object on completion
+ * \memberof dpp::cluster
+ * @throw dpp::rest_exception upon failure to execute REST function
+ * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
+ * Avoid direct use of this function inside an event handler.
+ */
+confirmation application_emoji_delete_sync(snowflake emoji_id);
+
+/**
  * @brief Returns all entitlements for a given app, active and expired.
  *
  * @see dpp::cluster::entitlements_get
@@ -930,6 +999,20 @@ entitlement entitlement_test_create_sync(const class entitlement& new_entitlemen
  * Avoid direct use of this function inside an event handler.
  */
 confirmation entitlement_test_delete_sync(snowflake entitlement_id);
+
+/**
+ * @brief For One-Time Purchase consumable SKUs, marks a given entitlement for the user as consumed.
+ *
+ * @see dpp::cluster::entitlement_consume
+ * @see https://discord.com/developers/docs/monetization/entitlements#consume-an-entitlement
+ * @param entitlement_id The entitlement to mark as consumed.
+ * @return confirmation returned object on completion
+ * \memberof dpp::cluster
+ * @throw dpp::rest_exception upon failure to execute REST function
+ * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
+ * Avoid direct use of this function inside an event handler.
+ */
+confirmation entitlement_consume_sync(snowflake entitlement_id);
 
 /**
  * @brief Get the gateway information for the bot using the token
@@ -1985,6 +2068,70 @@ message_map messages_get_sync(snowflake channel_id, snowflake around, snowflake 
 confirmation message_unpin_sync(snowflake channel_id, snowflake message_id);
 
 /**
+ * @brief Get a list of users that voted for this specific answer.
+ *
+ * @param m Message that contains the poll to retrieve the answers from
+ * @param answer_id ID of the answer to retrieve votes from (see poll_answer::answer_id)
+ * @param after Users after this ID should be retrieved if this is set to non-zero
+ * @param limit This number of users maximum should be returned, up to 100
+ * @return user_map returned object on completion
+ * @see dpp::cluster::poll_get_answer_voters
+ * @see https://discord.com/developers/docs/resources/poll#get-answer-voters
+ * \memberof dpp::cluster
+ * @throw dpp::rest_exception upon failure to execute REST function
+ * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
+ * Avoid direct use of this function inside an event handler.
+ */
+user_map poll_get_answer_voters_sync(const message& m, uint32_t answer_id, snowflake after, uint64_t limit);
+
+/**
+ * @brief Get a list of users that voted for this specific answer.
+ *
+ * @param message_id ID of the message with the poll to retrieve the answers from
+ * @param channel_id ID of the channel with the poll to retrieve the answers from
+ * @param answer_id ID of the answer to retrieve votes from (see poll_answer::answer_id)
+ * @param after Users after this ID should be retrieved if this is set to non-zero
+ * @param limit This number of users maximum should be returned, up to 100
+ * @return user_map returned object on completion
+ * @see dpp::cluster::poll_get_answer_voters
+ * @see https://discord.com/developers/docs/resources/poll#get-answer-voters
+ * \memberof dpp::cluster
+ * @throw dpp::rest_exception upon failure to execute REST function
+ * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
+ * Avoid direct use of this function inside an event handler.
+ */
+user_map poll_get_answer_voters_sync(snowflake message_id, snowflake channel_id, uint32_t answer_id, snowflake after, uint64_t limit);
+
+/**
+ * @brief Immediately end a poll.
+ *
+ * @param m Message that contains the poll
+ * @return message returned object on completion
+ * @see dpp::cluster::poll_end
+ * @see https://discord.com/developers/docs/resources/poll#end-poll
+ * \memberof dpp::cluster
+ * @throw dpp::rest_exception upon failure to execute REST function
+ * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
+ * Avoid direct use of this function inside an event handler.
+ */
+message poll_end_sync(const message &m);
+
+/**
+ * @brief Immediately end a poll.
+ *
+ * @param message_id ID of the message with the poll to end
+ * @param channel_id ID of the channel with the poll to end
+ * @return message returned object on completion
+ * @see dpp::cluster::poll_end
+ * @see https://discord.com/developers/docs/resources/poll#end-poll
+ * \memberof dpp::cluster
+ * @throw dpp::rest_exception upon failure to execute REST function
+ * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
+ * Avoid direct use of this function inside an event handler.
+ */
+message poll_end_sync(snowflake message_id, snowflake channel_id);
+
+/**
  * @brief Get a channel's pins
  * @see dpp::cluster::channel_pins_get
  * @see https://discord.com/developers/docs/resources/channel#get-pinned-messages
@@ -2687,15 +2834,20 @@ confirmation thread_member_remove_sync(snowflake thread_id, snowflake user_id);
 thread thread_get_sync(snowflake thread_id);
 
 /**
- * @brief Edit current (bot) user
+ * @brief Edit current (bot) user.
  *
- * Modifies the current member in a guild. Returns the updated guild_member object on success.
- * Fires a `Guild Member Update` Gateway event.
+ * Modify the requester's user account settings. Returns a dpp::user object on success.
+ * Fires a User Update Gateway event.
+ *
+ * @note There appears to be no limit to the image size, however, if your image cannot be processed/uploaded in time, you will receive a malformed http request.
+ *
  * @see dpp::cluster::current_user_edit
  * @see https://discord.com/developers/docs/resources/user#modify-current-user
  * @param nickname Nickname to set
- * @param image_blob Avatar data to upload (NOTE: Very heavily rate limited!)
- * @param type Type of image for avatar. It can be one of `i_gif`, `i_jpg` or `i_png`.
+ * @param avatar_blob Avatar data to upload
+ * @param avatar_type Type of image for avatar. It can be one of `i_gif`, `i_jpg` or `i_png`.
+ * @param banner_blob Banner data to upload
+ * @param banner_type Type of image for Banner. It can be one of `i_gif`, `i_jpg` or `i_png`.
  * @return user returned object on completion
  	 * @throw dpp::length_exception Image data is larger than the maximum size of 256 kilobytes
  * \memberof dpp::cluster
@@ -2703,7 +2855,7 @@ thread thread_get_sync(snowflake thread_id);
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-user current_user_edit_sync(const std::string &nickname, const std::string& image_blob = "", const image_type type = i_png);
+user current_user_edit_sync(const std::string &nickname, const std::string& avatar_blob = "", const image_type avatar_type = i_png, const std::string& banner_blob = "", const image_type banner_type = i_png);
 
 /**
  * @brief Get current (bot) application

@@ -74,22 +74,39 @@ bool confirmation_callback_t::is_error() const {
 
 namespace {
 
-std::vector<error_detail> find_errors_in_array(const std::string& obj, size_t index, const std::string& current_field, json::iterator begin, json::iterator end) {
+std::vector<error_detail> find_errors_in_object(const std::string& obj, const std::string& current_field, const json &j) {
 	std::vector<error_detail> ret;
 
-	for (auto it = begin; it != end; ++it) {
-		if (auto errors = it->find("_errors"); errors != it->end()) {
-			for (auto errordetails = errors->begin(); errordetails != errors->end(); ++errordetails) {
-				error_detail detail;
-				detail.code = (*errordetails)["code"].get<std::string>();
-				detail.reason = (*errordetails)["message"].get<std::string>();
-				detail.field = current_field + it.key();
-				detail.object = obj;
-				detail.index = index;
-				ret.emplace_back(detail);
+	if (auto errors = j.find("_errors"); errors != j.end()) {
+		for (const json& errordetails : *errors) {
+			error_detail detail;
+			detail.code = errordetails["code"].get<std::string>();
+			detail.reason = errordetails["message"].get<std::string>();
+			detail.field = current_field;
+			detail.object = obj;
+			ret.emplace_back(detail);
+		}
+	} else {
+		for (auto it = j.begin(); it != j.end(); ++it) {
+			std::vector<error_detail> sub_errors;
+			std::string               field;
+
+			if (obj.empty()) {
+				field = current_field;
+			} else if (isdigit(*current_field.c_str())) {
+				/* An element of an array, e.g. an element of a slash command vector for global_bulk_slash_command_create */
+				field = obj;
+				field += '[';
+				field += current_field;
+				field += ']';
+			} else {
+				/* A field of an object, e.g. message.content too long */
+				field = obj;
+				field += '.';
+				field += current_field;
 			}
-		} else { // subobject has errors
-			auto sub_errors = find_errors_in_array(obj, index, current_field + it.key() + ".", it->begin(), it->end());
+
+			sub_errors = find_errors_in_object(field, it.key(), *it);
 
 			if (!sub_errors.empty()) {
 				ret.reserve(ret.capacity() + sub_errors.size());
@@ -104,105 +121,44 @@ std::vector<error_detail> find_errors_in_array(const std::string& obj, size_t in
 
 error_info confirmation_callback_t::get_error() const {
 	if (is_error()) {
-		json j = json::parse(this->http_info.body);
-		error_info e;
+		try {
+			json j = json::parse(this->http_info.body);
+			error_info e;
 
-		set_int32_not_null(&j, "code", e.code);
-		set_string_not_null(&j, "message", e.message);
-		json& errors = j["errors"];
-		for (auto obj = errors.begin(); obj != errors.end(); ++obj) {
+			set_int32_not_null(&j, "code", e.code);
+			set_string_not_null(&j, "message", e.message);
+			json &errors = j["errors"];
+			for (auto obj = errors.begin(); obj != errors.end(); ++obj) {
+				std::vector<error_detail> sub_errors;
+				std::string field = isdigit(*obj.key().c_str()) ? "<array>[" + obj.key() + "]" : obj.key();
 
-			/* Arrays in the error report are numerically indexed with a number in a string. Ugh. */
-			if (isdigit(*(obj.key().c_str()))) {
-				/* An array of error messages */
-				int array_index = std::atoll(obj.key().c_str());
-				for (auto index = obj->begin(); index != obj->end(); ++index) {
-					if (index->find("_errors") != index->end()) {
-						/* A single object where one or more fields generated an error */
-						for (auto errordetails = (*index)["_errors"].begin(); errordetails != (*index)["_errors"].end(); ++errordetails) {
-							error_detail detail;
-							detail.code = (*errordetails)["code"].get<std::string>();
-							detail.reason = (*errordetails)["message"].get<std::string>();
-							detail.object.clear();
-							detail.field = obj.key();
-							detail.index = array_index;
-							e.errors.emplace_back(detail);
-						}
-					} else {
-						/* An object where one or more fields within it generated an error, e.g. slash command */
-						for (auto fields = index->begin(); fields != index->end(); ++fields) {
-							if (fields->find("_errors") != fields->end()) {
-								for (auto errordetails = (*fields)["_errors"].begin(); errordetails != (*fields)["_errors"].end(); ++errordetails) {
-									error_detail detail;
-									detail.code = (*errordetails)["code"].get<std::string>();
-									detail.reason = (*errordetails)["message"].get<std::string>();
-									detail.field = fields.key();
-									detail.object = obj.key();
-									detail.index = array_index;
-									e.errors.emplace_back(detail);
-								}
-							} else {
-								/* An array of objects where one or more generated an error, e.g. slash command bulk registration */
-								for (auto fields2 = fields->begin(); fields2 != fields->end(); ++fields2) {
-									for (auto errordetails = (*fields2)["_errors"].begin(); errordetails != (*fields2)["_errors"].end(); ++errordetails) {
-										error_detail detail;
-										detail.code = (*errordetails)["code"].get<std::string>();
-										detail.reason = (*errordetails)["message"].get<std::string>();
-										detail.field = index.key() + "[" + fields.key() +  "]." + fields2.key();
-										detail.object = obj.key();
-										detail.index = array_index;
-										e.errors.emplace_back(detail);
-									}
-								}
-							}
-						}
-					}
-				}
+				sub_errors = find_errors_in_object({}, field, *obj);
 
-			} else if (obj->find("_errors") != obj->end()) {
-				/* An object of error messages (rare) */
-				e.errors.reserve((*obj)["_errors"].size());
-				for (auto errordetails = (*obj)["_errors"].begin(); errordetails != (*obj)["_errors"].end(); ++errordetails) {
-					error_detail detail;
-					detail.code = (*errordetails)["code"].get<std::string>();
-					detail.reason = (*errordetails)["message"].get<std::string>();
-					detail.object.clear();
-					detail.field = obj.key();
-					detail.index = 0;
-					e.errors.emplace_back(detail);
-				}
-			} else {
-				/* An object that has a subobject with errors */
-				for (auto index = obj->begin(); index != obj->end(); ++index) {
-					int array_index = std::atoll(index.key().c_str());
-					auto sub_errors = find_errors_in_array(obj.key(), array_index, {}, index->begin(), index->end());
-
-					if (!sub_errors.empty()) {
-						e.errors.reserve(e.errors.capacity() + sub_errors.size());
-						std::move(sub_errors.begin(), sub_errors.end(), std::back_inserter(e.errors));
-					}
+				if (!sub_errors.empty()) {
+					e.errors.reserve(e.errors.capacity() + sub_errors.size());
+					std::move(sub_errors.begin(), sub_errors.end(), std::back_inserter(e.errors));
 				}
 			}
-		}
 
-		e.human_readable = std::to_string(e.code) + ": " + e.message;
-		std::string prefix = e.errors.size() == 1 ? " " : "\n\t";
-		for (const auto& error : e.errors) {
-			if (error.object.empty()) {
-				/* A singular field with an error in an unnamed object */
-				e.human_readable += prefix + "- " + error.field + ": " + error.reason + " (" + error.code + ")";
-			} else if (isdigit(*(error.object.c_str()))) {
-				/* An unnamed array of objects where one or more generated an error, e.g. slash command bulk registration */
-				e.human_readable += prefix + "- <array>[" + error.object + "]." + error.field + ": " + error.reason + " (" + error.code + ")";
-			} else {
-				/* A named array of objects whre a field in the object has an error */
-				e.human_readable += prefix + "- " + error.object + "[" + std::to_string(error.index) + "]." + error.field + ": " + error.reason + " (" + error.code + ")";
+			e.human_readable = std::to_string(e.code) + ": " + e.message;
+			std::string prefix = e.errors.size() == 1 ? " " : "\n\t";
+			for (const auto &error: e.errors) {
+				if (error.object.empty()) {
+					/* A singular field with an error in an unnamed object */
+					e.human_readable += prefix + "- " + error.field + ": " + error.reason + " (" + error.code + ")";
+				} else {
+					/* An object field that caused an error */
+					e.human_readable += prefix + "- " + error.object + '.' + error.field + ": " + error.reason + " (" + error.code + ")";
+				}
 			}
-		}
 
-		return e;
+			return e;
+		}
+		catch (const std::exception &e) {
+			return {};
+		}
 	}
-	return error_info();
+	return {};
 }
 
 } // namespace dpp

@@ -171,10 +171,31 @@ void cluster::start(bool return_after) {
 		this->terminating.wait(thread_lock);
 	};
 
+	if (on_guild_member_add && !(intents & dpp::i_guild_members)) {
+		log(ll_warning, "You have attached an event to cluster::on_guild_member_add() but have not specified the privileged intent dpp::i_guild_members. This event will not fire.");
+	}
+
+	if (on_guild_member_remove && !(intents & dpp::i_guild_members)) {
+		log(ll_warning, "You have attached an event to cluster::on_guild_member_remove() but have not specified the privileged intent dpp::i_guild_members. This event will not fire.");
+	}
+
+	if (on_guild_member_update && !(intents & dpp::i_guild_members)) {
+		log(ll_warning, "You have attached an event to cluster::on_guild_member_update() but have not specified the privileged intent dpp::i_guild_members. This event will not fire.");
+	}
+
+	if (on_presence_update && !(intents & dpp::i_guild_presences)) {
+		log(ll_warning, "You have attached an event to cluster::on_presence_update() but have not specified the privileged intent dpp::i_guild_presences. This event will not fire.");
+	}
+
 	/* Start up all shards */
 	gateway g;
 	try {
+#ifdef DPP_CORO
+		confirmation_callback_t cc = co_get_gateway_bot().sync_wait();
+		g = std::get<gateway>(cc.value);
+#else
 		g = dpp::sync<gateway>(this, &cluster::get_gateway_bot);
+#endif
 		log(ll_debug, "Cluster: " + std::to_string(g.session_start_remaining) + " of " + std::to_string(g.session_start_total) + " session starts remaining");
 		if (g.session_start_remaining < g.shards) {
 			throw dpp::connection_exception(err_no_sessions_left, "Discord indicates you cannot start enough sessions to boot this cluster! Cluster startup aborted. Try again later.");
@@ -317,7 +338,7 @@ json error_response(const std::string& message, http_request_completion_t& rv)
 		}},
 		{"message", message}
 	});
-	rv.body = j.dump();
+	rv.body = j.dump(-1, ' ', false, json::error_handler_t::replace);
 	return j;
 }
 
@@ -366,8 +387,8 @@ void cluster::post_rest_multipart(const std::string &endpoint, const std::string
 }
 
 
-void cluster::request(const std::string &url, http_method method, http_completion_event callback, const std::string &postdata, const std::string &mimetype, const std::multimap<std::string, std::string> &headers, const std::string &protocol) {
-	raw_rest->post_request(std::make_unique<http_request>(url, callback, method, postdata, mimetype, headers, protocol));
+void cluster::request(const std::string &url, http_method method, http_completion_event callback, const std::string &postdata, const std::string &mimetype, const std::multimap<std::string, std::string> &headers, const std::string &protocol, time_t request_timeout) {
+	raw_rest->post_request(std::make_unique<http_request>(url, callback, method, postdata, mimetype, headers, protocol, request_timeout));
 }
 
 gateway::gateway() : shards(0), session_start_total(0), session_start_remaining(0), session_start_reset_after(0), session_start_max_concurrency(0) {
@@ -388,6 +409,11 @@ gateway::gateway(nlohmann::json* j) {
 }
 
 void cluster::set_presence(const dpp::presence &p) {
+	if(p.activities.empty()) {
+		log(ll_warning, "An empty presence was passed to set_presence.");
+		return;
+	}
+
 	json pres = p.to_json();
 	for (auto& s : shards) {
 		if (s.second->is_connected()) {
@@ -406,7 +432,7 @@ cluster& cluster::clear_audit_reason() {
 	return *this;
 }
 
-cluster& cluster::set_default_gateway(std::string &default_gateway_new) {
+cluster& cluster::set_default_gateway(const std::string &default_gateway_new) {
 	default_gateway = default_gateway_new;
 	return *this;
 }
@@ -428,6 +454,11 @@ discord_client* cluster::get_shard(uint32_t id) {
 
 const shard_list& cluster::get_shards() {
 	return shards;
+}
+
+cluster& cluster::set_request_timeout(uint16_t timeout) {
+	request_timeout = timeout;
+	return *this;
 }
 
 };

@@ -478,7 +478,7 @@ public:
 	 * saving it in a variable is recommended to avoid variable lifetime issues.
 	 *
 	 * @details Example: @code{cpp}
-	 * dpp::job my_handler(dpp::slashcommand_t event) {
+	 * dpp::task<> my_handler(const dpp::slashcommand_t& event) {
 	 *	co_await event.co_reply(dpp::message().add_component(dpp::component().add_component().set_label("click me!").set_id("test")));
 	 *
 	 *	dpp::button_click_t b = co_await c->on_button_click.with([](const dpp::button_click_t &event){ return event.custom_id == "test"; });
@@ -514,7 +514,7 @@ public:
 	 *
 	 * Example:
 	 * @details Example: @code{cpp}
-	 * dpp::job my_handler(dpp::slashcommand_t event) {
+	 * dpp::task<> my_handler(const dpp::slashcommand_t& event) {
 	 *	co_await event.co_reply(dpp::message().add_component(dpp::component().add_component().set_label("click me!").set_id("test")));
 	 *
 	 *	dpp::button_click_t b = co_await c->on_message_create;
@@ -607,7 +607,7 @@ public:
 	 * detach the listener from the event later if necessary.
 	 */
 	template <typename F>
-	requires (utility::callable_returns<F, dpp::job, const T&> || utility::callable_returns<F, dpp::task<void>, const T&> || utility::callable_returns<F, void, const T&>)
+	requires (utility::callable_returns<F, dpp::task<void>, const T&> || utility::callable_returns<F, void, const T&>)
 	[[maybe_unused]] event_handle operator()(F&& fun) {
 		return this->attach(std::forward<F>(fun));
 	}
@@ -647,28 +647,6 @@ public:
 		std::unique_lock l(mutex);
 		event_handle h = next_handle++;
 		dispatch_container.emplace(std::piecewise_construct, std::forward_as_tuple(h), std::forward_as_tuple(std::in_place_type_t<task_handler_t>{}, std::forward<F>(fun)));
-		return h;
-	}
-
-	/**
-	 * @brief Attach a callable to the event, adding a listener.
-	 * The callable should either be of the form `void(const T&)` or
-	 * `dpp::task<void>(const T&)`, where T is the event type for this event router.
-	 *
-	 * @deprecated dpp::job event handlers are deprecated and will be removed in a future version, use dpp::task<void> instead.
-	 * @param fun Callable to attach to event
-	 * @return event_handle An event handle unique to this event, used to
-	 * detach the listener from the event later if necessary.
-	 */
-	template <typename F>
-	requires (utility::callable_returns<F, dpp::job, const T&>)
-	DPP_DEPRECATED("dpp::job event handlers are deprecated and will be removed in a future version, use dpp::task<void> instead")
-	[[maybe_unused]] event_handle attach(F&& fun) {
-		assert(dpp::utility::is_coro_enabled());
-
-		std::unique_lock l(mutex);
-		event_handle h = next_handle++;
-		dispatch_container.emplace(std::piecewise_construct, std::forward_as_tuple(h), std::forward_as_tuple(std::in_place_type_t<regular_handler_t>{}, std::forward<F>(fun)));
 		return h;
 	}
 #  else

@@ -261,6 +261,26 @@ emoji_map cluster::guild_emojis_get_sync(snowflake guild_id) {
 	return dpp::sync<emoji_map>(this, static_cast<void (cluster::*)(snowflake, command_completion_event_t)>(&cluster::guild_emojis_get), guild_id);
 }
 
+emoji_map cluster::application_emojis_get_sync() {
+	return dpp::sync<emoji_map>(this, static_cast<void (cluster::*)(command_completion_event_t)>(&cluster::application_emojis_get));
+}
+
+emoji cluster::application_emoji_get_sync(snowflake emoji_id) {
+	return dpp::sync<emoji>(this, static_cast<void (cluster::*)(snowflake, command_completion_event_t)>(&cluster::application_emoji_get), emoji_id);
+}
+
+emoji cluster::application_emoji_create_sync(const class emoji& newemoji) {
+	return dpp::sync<emoji>(this, static_cast<void (cluster::*)(const class emoji&, command_completion_event_t)>(&cluster::application_emoji_create), newemoji);
+}
+
+emoji cluster::application_emoji_edit_sync(const class emoji& newemoji) {
+	return dpp::sync<emoji>(this, static_cast<void (cluster::*)(const class emoji&, command_completion_event_t)>(&cluster::application_emoji_edit), newemoji);
+}
+
+confirmation cluster::application_emoji_delete_sync(snowflake emoji_id) {
+	return dpp::sync<confirmation>(this, static_cast<void (cluster::*)(snowflake, command_completion_event_t)>(&cluster::application_emoji_delete), emoji_id);
+}
+
 entitlement_map cluster::entitlements_get_sync(snowflake user_id, const std::vector<snowflake>& sku_ids, snowflake before_id, snowflake after_id, uint8_t limit, snowflake guild_id, bool exclude_ended) {
 	return dpp::sync<entitlement_map>(this, static_cast<void (cluster::*)(snowflake, const std::vector<snowflake>&, snowflake, snowflake, uint8_t, snowflake, bool, command_completion_event_t)>(&cluster::entitlements_get), user_id, sku_ids, before_id, after_id, limit, guild_id, exclude_ended);
 }
@@ -271,6 +291,10 @@ entitlement cluster::entitlement_test_create_sync(const class entitlement& new_e
 
 confirmation cluster::entitlement_test_delete_sync(const class snowflake entitlement_id) {
 	return dpp::sync<confirmation>(this, static_cast<void (cluster::*)(const class snowflake, command_completion_event_t)>(&cluster::entitlement_test_delete), entitlement_id);
+}
+
+confirmation cluster::entitlement_consume_sync(const class snowflake entitlement_id) {
+	return dpp::sync<confirmation>(this, static_cast<void (cluster::*)(const class snowflake, command_completion_event_t)>(&cluster::entitlement_consume), entitlement_id);
 }
 
 gateway cluster::get_gateway_bot_sync() {
@@ -529,6 +553,22 @@ confirmation cluster::message_unpin_sync(snowflake channel_id, snowflake message
 	return dpp::sync<confirmation>(this, static_cast<void (cluster::*)(snowflake, snowflake, command_completion_event_t)>(&cluster::message_unpin), channel_id, message_id);
 }
 
+user_map cluster::poll_get_answer_voters_sync(const message& m, uint32_t answer_id, snowflake after, uint64_t limit) {
+	return dpp::sync<user_map>(this, static_cast<void (cluster::*)(const message&, uint32_t, snowflake, uint64_t, command_completion_event_t)>(&cluster::poll_get_answer_voters), m, answer_id, after, limit);
+}
+
+user_map cluster::poll_get_answer_voters_sync(snowflake message_id, snowflake channel_id, uint32_t answer_id, snowflake after, uint64_t limit) {
+	return dpp::sync<user_map>(this, static_cast<void (cluster::*)(snowflake, snowflake, uint32_t, snowflake, uint64_t, command_completion_event_t)>(&cluster::poll_get_answer_voters), message_id, channel_id, answer_id, after, limit);
+}
+
+message cluster::poll_end_sync(const message &m) {
+	return dpp::sync<message>(this, static_cast<void (cluster::*)(const message &, command_completion_event_t)>(&cluster::poll_end), m);
+}
+
+message cluster::poll_end_sync(snowflake message_id, snowflake channel_id) {
+	return dpp::sync<message>(this, static_cast<void (cluster::*)(snowflake, snowflake, command_completion_event_t)>(&cluster::poll_end), message_id, channel_id);
+}
+
 message_map cluster::channel_pins_get_sync(snowflake channel_id) {
 	return dpp::sync<message_map>(this, static_cast<void (cluster::*)(snowflake, command_completion_event_t)>(&cluster::channel_pins_get), channel_id);
 }
@@ -725,8 +765,8 @@ thread cluster::thread_get_sync(snowflake thread_id) {
 	return dpp::sync<thread>(this, static_cast<void (cluster::*)(snowflake, command_completion_event_t)>(&cluster::thread_get), thread_id);
 }
 
-user cluster::current_user_edit_sync(const std::string &nickname, const std::string& image_blob, const image_type type) {
-	return dpp::sync<user>(this, static_cast<void (cluster::*)(const std::string &, const std::string&, const image_type, command_completion_event_t)>(&cluster::current_user_edit), nickname, image_blob, type);
+user cluster::current_user_edit_sync(const std::string &nickname, const std::string& avatar_blob, const image_type avatar_type, const std::string& banner_blob, const image_type banner_type) {
+	return dpp::sync<user>(this, static_cast<void (cluster::*)(const std::string &, const std::string&, const image_type, const std::string&, const image_type, command_completion_event_t)>(&cluster::current_user_edit), nickname, avatar_blob, avatar_type, banner_blob, banner_type);
 }
 
 application cluster::current_application_get_sync() {

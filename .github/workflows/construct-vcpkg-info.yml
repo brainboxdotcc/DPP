@@ -15,17 +15,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
          - name: Harden Runner
-           uses: step-security/harden-runner@63c24ba6bd7ba022e95695ff85de572c04a18142 # v2.7.0
+           uses: step-security/harden-runner@17d0e2bd7d51742c71671bd19fa12bdc9d40a3d6 # v2.8.1
            with:
              egress-policy: audit
 
          - name: Setup PHP
-           uses: shivammathur/setup-php@6d7209f44a25a59e904b1ee9f3b0c33ab2cd888d # v2
+           uses: shivammathur/setup-php@c541c155eee45413f5b09a52248675b1a2575231 # v2
            with:
              php-version: '8.1'
 
          - name: Checkout D++
-           uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.1.2
+           uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
            with:
              submodules: recursive
 
