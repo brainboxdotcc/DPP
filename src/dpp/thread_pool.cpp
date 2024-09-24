@@ -21,7 +21,7 @@
  ************************************************************************************/
 
 #include <dpp/utility.h>
-#include <ssod/thread_pool.h>
+#include <dpp/thread_pool.h>
 #include <shared_mutex>
 
 thread_pool::thread_pool(size_t num_threads) {
