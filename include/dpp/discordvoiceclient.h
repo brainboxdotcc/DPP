@@ -100,6 +100,52 @@ struct DPP_EXPORT voice_out_packet {
 	uint64_t duration;
 };
 
+/**
+ * @brief Supported DAVE (Discord Audio Visual Encryption) protocol versions
+ */
+enum dave_version_t : uint8_t {
+	/**
+	 * @brief DAVE disabled (default for now)
+	 */
+	dave_version_none = 0,
+	/**
+	 * @brief DAVE enabled, version 1 (E2EE encryption on top of sodium)
+	 */
+	dave_version_1 = 1,
+};
+
+/**
+ * @brief Discord voice websocket opcode types
+ */
+enum voice_websocket_opcode_t : uint8_t {
+	voice_opcode_connection_identify = 0,
+	voice_opcode_connection_select_protocol = 1,
+	voice_opcode_connection_ready = 2,
+	voice_opcode_connection_heartbeat = 3,
+	voice_opcode_connection_description = 4,
+	voice_opcode_client_speaking = 5,
+	voice_opcode_connection_heartbeat_ack = 6,
+	voice_opcode_connection_resume = 7,
+	voice_opcode_connection_hello = 8,
+	voice_opcode_connection_resumed = 9,
+	voice_opcode_multiple_clients_connect = 11,
+	voice_opcode_client_connect = 12,
+	voice_opcode_client_disconnect = 13,
+	voice_client_flags = 18,
+	voice_client_platform = 20,
+	voice_client_dave_prepare_transition = 21,
+	voice_client_dave_execute_transition = 22,
+	voice_client_dave_transition_ready = 23,
+	voice_client_dave_prepare_epoch = 24,
+	voice_client_dave_mls_external_sender = 25,
+	voice_client_dave_mls_key_package = 26,
+	voice_client_dave_mls_proposals = 27,
+	voice_client_dave_mls_commit_message = 28,
+	voice_client_dave_announce_commit_transaction = 29,
+	voice_client_dave_mls_welcome = 30,
+	voice_client_dave_mls_invalid_commit_welcome = 31,
+};
+
 /** @brief Implements a discord voice connection.
  * Each discord_voice_client connects to one voice channel and derives from a websocket client.
  */
@@ -340,6 +386,11 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	uint16_t sequence;
 
 	/**
+	 * @brief Last received sequence from gateway
+	 */
+	uint16_t receive_sequence;
+
+	/**
 	 * @brief Timestamp value used in outbound audio. Each packet
 	 * has the timestamp value which is incremented to match
 	 * how many frames are sent.
@@ -401,6 +452,13 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	 * @brief Encoding buffer for opus repacketizer and encode
 	 */
 	uint8_t encode_buffer[65536];
+
+	/**
+	 * @brief DAVE - Discord Audio Visual Encryption
+	 * Used for E2EE encryption. dave_protocol_none is
+	 * the default before negotiation.
+	 */
+	dave_version_t dave_version{dave_version_none};
 
 	/**
 	 * @brief Send data to UDP socket immediately.
@@ -687,9 +745,11 @@ public:
 	 * @param _token The voice session token to use for identifying to the websocket
 	 * @param _session_id The voice session id to identify with
 	 * @param _host The voice server hostname to connect to (hostname:port format)
+	 * @param enable_dave Enable DAVE E2EE
 	 * @throw dpp::voice_exception Sodium or Opus failed to initialise, or D++ is not compiled with voice support
+	 * @warning DAVE E2EE is an EXPERIMENTAL feature!
 	 */
-	discord_voice_client(dpp::cluster* _cluster, snowflake _channel_id, snowflake _server_id, const std::string &_token, const std::string &_session_id, const std::string &_host);
+	discord_voice_client(dpp::cluster* _cluster, snowflake _channel_id, snowflake _server_id, const std::string &_token, const std::string &_session_id, const std::string &_host, bool enable_dave = false);
 
 	/**
 	 * @brief Destroy the discord voice client object

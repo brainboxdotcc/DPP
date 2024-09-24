@@ -86,7 +86,8 @@ moving_averager::operator float() {
 constexpr int32_t opus_sample_rate_hz = 48000;
 [[maybe_unused]]
 constexpr int32_t opus_channel_count = 2;
-std::string external_ip;
+static std::string external_ip;
+constexpr std::string_view transport_encryption_protocol = "aead_xchacha20_poly1305_rtpsize";
 
 /**
  * @brief Represents an RTP packet. Size should always be exactly 12.
@@ -302,7 +303,7 @@ void discord_voice_client::voice_courier_loop(discord_voice_client& client, cour
 #endif
 }
 
-discord_voice_client::discord_voice_client(dpp::cluster* _cluster, snowflake _channel_id, snowflake _server_id, const std::string &_token, const std::string &_session_id, const std::string &_host)
+discord_voice_client::discord_voice_client(dpp::cluster* _cluster, snowflake _channel_id, snowflake _server_id, const std::string &_token, const std::string &_session_id, const std::string &_host, bool enable_dave)
 	   : websocket_client(_host.substr(0, _host.find(":")), _host.substr(_host.find(":") + 1, _host.length()), "/?v=4", OP_TEXT),
 	runner(nullptr),
 	connect_time(0),
@@ -316,11 +317,13 @@ discord_voice_client::discord_voice_client(dpp::cluster* _cluster, snowflake _ch
 	fd(INVALID_SOCKET),
 	secret_key(nullptr),
 	sequence(0),
+	receive_sequence(0),
 	timestamp(0),
 	packet_nonce(1),
 	last_timestamp(std::chrono::high_resolution_clock::now()),
 	sending(false),
 	tracks(0),
+	dave_version(enable_dave ? dave_version_1 : dave_version_none),
 	creator(_cluster),
 	terminating(false),
 	heartbeat_interval(0),
@@ -488,8 +491,30 @@ bool discord_voice_client::handle_frame(const std::string &data)
 		uint32_t op = j["op"];
 
 		switch (op) {
+			/* Ping acknowledgement */
+			case voice_opcode_connection_heartbeat_ack:
+				/* These opcodes do not require a response or further action */
+			break;
+			case voice_client_flags: {
+			}
+			break;
+			case voice_client_platform: {
+				snowflake u_id = snowflake_not_null(&j["d"], "user_id");
+				voice_client_platform_t vcp(nullptr, data);
+				vcp.voice_client = this;
+				vcp.user_id = snowflake_not_null(&j["d"], "user_id");
+				vcp.platform = static_cast<client_platform_t>(int8_not_null(&j["d"], "platform"));
+				creator->on_voice_client_platform.call(vcp);
+
+			}
+			break;
+			case voice_opcode_multiple_clients_connect: {
+				auto client_list = op["d"]["user_ids"];
+				log(ll_debug, "Number of new clients in voice channel: " + std::to_string(client_list.length()));
+			}
+			break;
 			/* Client Disconnect */
-			case 13: {
+			case voice_opcode_client_disconnect: {
 				if (j.find("d") != j.end() && j["d"].find("user_id") != j["d"].end() && !j["d"]["user_id"].is_null()) {
 					snowflake u_id = snowflake_not_null(&j["d"], "user_id");
 					auto it = std::find_if(ssrc_map.begin(), ssrc_map.end(),
@@ -509,9 +534,9 @@ bool discord_voice_client::handle_frame(const std::string &data)
 			}
 			break;
 			/* Speaking */ 
-			case 5:
+			case voice_opcode_client_speaking:
 			/* Client Connect (doesn't seem to work) */
-			case 12: {
+			case voice_opcode_client_connect: {
 				if (j.find("d") != j.end() 
 					&& j["d"].find("user_id") != j["d"].end() && !j["d"]["user_id"].is_null()
 					&& j["d"].find("ssrc") != j["d"].end() && !j["d"]["ssrc"].is_null() && j["d"]["ssrc"].is_number_integer()) {
@@ -530,11 +555,11 @@ bool discord_voice_client::handle_frame(const std::string &data)
 			}
 			break;
 			/* Voice resume */
-			case 9:
+			case voice_opcode_connection_resumed:
 				log(ll_debug, "Voice connection resumed");
 			break;
 			/* Voice HELLO */
-			case 8: {
+			case voice_opcode_connection_hello: {
 				if (j.find("d") != j.end() && j["d"].find("heartbeat_interval") != j["d"].end() && !j["d"]["heartbeat_interval"].is_null()) {
 					this->heartbeat_interval = j["d"]["heartbeat_interval"].get<uint32_t>();
 				}
@@ -542,7 +567,7 @@ bool discord_voice_client::handle_frame(const std::string &data)
 				if (!modes.empty()) {
 					log(dpp::ll_debug, "Resuming voice session...");
 						json obj = {
-						{ "op", 7 },
+						{ "op", voice_opcode_connection_resume },
 						{
 							"d",
 							{
@@ -554,9 +579,9 @@ bool discord_voice_client::handle_frame(const std::string &data)
 					};
 					this->write(obj.dump(-1, ' ', false, json::error_handler_t::replace));
 				} else {
-					log(dpp::ll_debug, "Connecting new voice session...");
+					log(dpp::ll_debug, "Connecting new voice session (DAVE: " + std::string(dave_version == dave_version_1 ? "Enabled" : "Disabled") + ")...");
 						json obj = {
-						{ "op", 0 },
+						{ "op", voice_opcode_connection_identify },
 						{
 							"d",
 							{
@@ -564,6 +589,7 @@ bool discord_voice_client::handle_frame(const std::string &data)
 								{ "server_id", std::to_string(this->server_id) },
 								{ "session_id", this->sessionid },
 								{ "token", this->token },
+								{ "max_dave_protocol_version", dave_version },
 							}
 						}
 					};
@@ -573,7 +599,7 @@ bool discord_voice_client::handle_frame(const std::string &data)
 			}
 			break;
 			/* Session description */
-			case 4: {
+			case voice_opcode_connection_description: {
 				json &d = j["d"];
 				secret_key = new uint8_t[32];
 				size_t ofs = 0;
@@ -601,7 +627,7 @@ bool discord_voice_client::handle_frame(const std::string &data)
 			}
 			break;
 			/* Voice ready */
-			case 2: {
+			case voice_opcode_connection_ready: {
 				/* Video stream stuff comes in this frame too, but we can't use it (YET!) */
 				json &d = j["d"];
 				this->ip = d["ip"].get<std::string>();
@@ -649,19 +675,23 @@ bool discord_voice_client::handle_frame(const std::string &data)
 					log(ll_debug, "External IP address: " + external_ip);
 
 					this->write(json({
-						{ "op", 1 },
+						{ "op", voice_opcode_connection_select_protocol },
 							{ "d", {
 								{ "protocol", "udp" },
 								{ "data", {
 										{ "address", external_ip },
 										{ "port", bound_port },
-										{ "mode", "aead_xchacha20_poly1305_rtpsize" }
+										{ "mode", transport_encryption_protocol }
 									}
 								}
 							}
 						}
 					}).dump(-1, ' ', false, json::error_handler_t::replace));
 				}
+			}
+			break;
+			default: {
+				log(ll_debug, "Unknown voice opcode " + std::to_string(op) + ": " + data);
 			}
 			break;
 		}
@@ -760,6 +790,10 @@ void discord_voice_client::read_ready()
 	/* Get the sequence number of the voice UDP packet */
 	std::memcpy(&vp.seq, &buffer[2], sizeof(rtp_seq_t));
 	vp.seq = ntohs(vp.seq);
+
+	/* Used for buffered resume of receive */
+	receive_sequence = vp.seq;
+
 	/* Get the timestamp of the voice UDP packet */
 	std::memcpy(&vp.timestamp, &buffer[4], sizeof(rtp_timestamp_t));
 	vp.timestamp = ntohl(vp.timestamp);
@@ -1119,7 +1153,11 @@ void discord_voice_client::one_second_timer()
 		if (this->heartbeat_interval) {
 			/* Check if we're due to emit a heartbeat */
 			if (time(nullptr) > last_heartbeat + ((heartbeat_interval / 1000.0) * 0.75)) {
-				queue_message(json({{"op", 3}, {"d", rand()}}).dump(-1, ' ', false, json::error_handler_t::replace), true);
+				queue_message(json({
+					{"op", voice_opcode_connection_heartbeat},
+					{"d", rand()},
+					{"seq_ack", sequence}
+				}).dump(-1, ' ', false, json::error_handler_t::replace), true);
 				last_heartbeat = time(nullptr);
 			}
 		}
@@ -1360,7 +1398,7 @@ discord_voice_client& discord_voice_client::send_audio_opus(uint8_t* opus_packet
 discord_voice_client& discord_voice_client::speak() {
 	if (!this->sending) {
 		this->queue_message(json({
-		{"op", 5},
+		{"op", voice_opcode_client_speaking},
 		{"d", {
 			{"speaking", 1},
 			{"delay", 0},

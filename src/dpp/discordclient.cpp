@@ -608,7 +608,7 @@ uint64_t discord_client::get_channel_count() {
 	return total;
 }
 
-discord_client& discord_client::connect_voice(snowflake guild_id, snowflake channel_id, bool self_mute, bool self_deaf) {
+discord_client& discord_client::connect_voice(snowflake guild_id, snowflake channel_id, bool self_mute, bool self_deaf, bool enable_dave) {
 #ifdef HAVE_VOICE
 	std::unique_lock lock(voice_mutex);
 	if (connecting_voice_channels.find(guild_id) != connecting_voice_channels.end()) {
@@ -617,11 +617,11 @@ discord_client& discord_client::connect_voice(snowflake guild_id, snowflake chan
 			return *this;
 		}
 	}
-	connecting_voice_channels[guild_id] = std::make_unique<voiceconn>(this, channel_id);
+	connecting_voice_channels[guild_id] = std::make_unique<voiceconn>(this, channel_id, enable_dave);
 	/* Once sent, this expects two events (in any order) on the websocket:
 	* VOICE_SERVER_UPDATE and VOICE_STATUS_UPDATE
 	*/
-	log(ll_debug, "Sending op 4 to join VC, guild " + std::to_string(guild_id) + " channel " + std::to_string(channel_id));
+	log(ll_debug, "Sending op 4 to join VC, guild " + std::to_string(guild_id) + " channel " + std::to_string(channel_id) + (enable_dave ? " WITH DAVE" : ""));
 	queue_message(jsonobj_to_string(json({
 		{ "op", 4 },
 		{ "d", {
@@ -684,7 +684,7 @@ voiceconn* discord_client::get_voice(snowflake guild_id) {
 }
 
 
-voiceconn::voiceconn(discord_client* o, snowflake _channel_id) : creator(o), channel_id(_channel_id), voiceclient(nullptr) {
+voiceconn::voiceconn(discord_client* o, snowflake _channel_id, bool enable_dave) : creator(o), channel_id(_channel_id), voiceclient(nullptr), dave(enable_dave) {
 }
 
 bool voiceconn::is_ready() {
