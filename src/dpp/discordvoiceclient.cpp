@@ -57,6 +57,33 @@
 #endif
 
 namespace dpp {
+
+/**
+ * @brief Sample rate for OPUS (48khz)
+ */
+[[maybe_unused]] constexpr int32_t opus_sample_rate_hz = 48000;
+
+/**
+ * @brief Channel count for OPUS (stereo)
+ */
+[[maybe_unused]] constexpr int32_t opus_channel_count = 2;
+
+/**
+ * @brief Discord voice protocol version
+ */
+constexpr uint8_t voice_protocol_version = 8;
+
+/**
+ * @brief Our public IP address
+ */
+static std::string external_ip;
+
+/**
+ * @brief Transport encryption type (libsodium)
+ */
+constexpr std::string_view transport_encryption_protocol = "aead_xchacha20_poly1305_rtpsize";
+
+
 moving_averager::moving_averager(uint64_t collection_count_new) {
 	collectionCount = collection_count_new;
 }
@@ -81,13 +108,6 @@ moving_averager::operator float() {
 		return 0.0f;
 	}
 }
-
-[[maybe_unused]]
-constexpr int32_t opus_sample_rate_hz = 48000;
-[[maybe_unused]]
-constexpr int32_t opus_channel_count = 2;
-static std::string external_ip;
-constexpr std::string_view transport_encryption_protocol = "aead_xchacha20_poly1305_rtpsize";
 
 /**
  * @brief Represents an RTP packet. Size should always be exactly 12.
@@ -304,7 +324,7 @@ void discord_voice_client::voice_courier_loop(discord_voice_client& client, cour
 }
 
 discord_voice_client::discord_voice_client(dpp::cluster* _cluster, snowflake _channel_id, snowflake _server_id, const std::string &_token, const std::string &_session_id, const std::string &_host, bool enable_dave)
-	   : websocket_client(_host.substr(0, _host.find(":")), _host.substr(_host.find(":") + 1, _host.length()), "/?v=4", OP_TEXT),
+	: websocket_client(_host.substr(0, _host.find(":")), _host.substr(_host.find(":") + 1, _host.length()), "/?v=" + std::to_string(voice_protocol_version), OP_TEXT),
 	runner(nullptr),
 	connect_time(0),
 	mixer(std::make_unique<audio_mixer>()),
@@ -499,7 +519,6 @@ bool discord_voice_client::handle_frame(const std::string &data)
 			}
 			break;
 			case voice_client_platform: {
-				snowflake u_id = snowflake_not_null(&j["d"], "user_id");
 				voice_client_platform_t vcp(nullptr, data);
 				vcp.voice_client = this;
 				vcp.user_id = snowflake_not_null(&j["d"], "user_id");
@@ -509,8 +528,8 @@ bool discord_voice_client::handle_frame(const std::string &data)
 			}
 			break;
 			case voice_opcode_multiple_clients_connect: {
-				auto client_list = op["d"]["user_ids"];
-				log(ll_debug, "Number of new clients in voice channel: " + std::to_string(client_list.length()));
+				auto client_list = j["d"]["user_ids"];
+				log(ll_debug, "Number of new clients in voice channel: " + std::to_string(client_list.size()));
 			}
 			break;
 			/* Client Disconnect */

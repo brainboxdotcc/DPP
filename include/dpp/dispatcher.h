@@ -2159,7 +2159,7 @@ enum client_platform_t : uint8_t {
 };
 
 /**
- * @brief voice client disconnect event
+ * @brief voice client platform type notification event
  */
 struct DPP_EXPORT voice_client_platform_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
@@ -2175,7 +2175,11 @@ struct DPP_EXPORT voice_client_platform_t : public event_dispatch_t {
 	 */
 	snowflake user_id = {};
 
-	voice_client_platform_t platform = client_platform_desktop;
+	/**
+	 * @brief Client platform for the voice user
+	 * Either desktop, or mobile
+	 */
+	client_platform_t platform = client_platform_desktop;
 };
 
 /**
