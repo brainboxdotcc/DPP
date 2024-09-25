@@ -59,4 +59,5 @@ include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../../lib/bytes/include")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../../lib/hpke/include")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../../lib/mls_vectors/include")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../../lib/tls_syntax/include")
-
+# For nlohmann/json.hpp
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../../../include")
