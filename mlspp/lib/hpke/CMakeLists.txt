@@ -18,8 +18,6 @@ target_include_directories(${CURRENT_LIB_NAME}
 target_link_libraries(${CURRENT_LIB_NAME} 
   PUBLIC
     bytes tls_syntax
-  PRIVATE
-    OpenSSL::Crypto
 )
 
 target_include_directories(${CURRENT_LIB_NAME}
