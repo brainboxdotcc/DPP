@@ -612,7 +612,7 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 				}
 
 				if (!modes.empty()) {
-					log(dpp::ll_debug, "Resuming voice session...");
+					log(dpp::ll_debug, "Resuming voice session " + this->sessionid + "...");
 						json obj = {
 						{ "op", voice_opcode_connection_resume },
 						{
@@ -621,6 +621,7 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 								{ "server_id", std::to_string(this->server_id) },
 								{ "session_id", this->sessionid },
 								{ "token", this->token },
+								{ "seq_ack", this->sequence },
 							}
 						}
 					};
