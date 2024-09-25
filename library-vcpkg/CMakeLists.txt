@@ -31,6 +31,8 @@ if(WIN32)
 	add_compile_definitions(WIN32_LEAN_AND_MEAN)
 	add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
 	add_compile_definitions(_CRT_NONSTDC_NO_DEPRECATE)
+	# For MLSPP
+	set(OPENSSL_VERSION "1.1.1f")
 endif()
 
 target_compile_options(

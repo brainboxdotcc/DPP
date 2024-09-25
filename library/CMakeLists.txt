@@ -47,6 +47,9 @@ if(WIN32 AND NOT MINGW)
 		link_libraries("${CMAKE_CURRENT_SOURCE_DIR}/../win32/lib/libsodium.lib")
 		link_libraries("${CMAKE_CURRENT_SOURCE_DIR}/../win32/lib/opus.lib")
 
+		# For MLSPP
+		set(OPENSSL_VERSION "1.1.1f")
+
 		set(OPUS_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/../win32/include")
 		set(OPUS_LIBRARIES "${CMAKE_CURRENT_SOURCE_DIR}/../win32/lib/opus.lib")
 		set(sodium_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../win32/include")
