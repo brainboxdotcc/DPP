@@ -393,8 +393,8 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 
 	/**
 	 * @brief Secret key for encrypting voice.
-	 * If it has been sent, this is non-null and points to a 
-	 * sequence of exactly 32 bytes.
+	 * If it has been sent, this contains a sequence of exactly 32 bytes
+	 * (secret_key_size) and has_secret_key is set to true.
 	 */
 	std::array<uint8_t, secret_key_size> secret_key;
 
