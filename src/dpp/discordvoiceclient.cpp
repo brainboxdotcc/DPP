@@ -327,7 +327,6 @@ discord_voice_client::discord_voice_client(dpp::cluster* _cluster, snowflake _ch
 	encoder(nullptr),
 	repacketizer(nullptr),
 	fd(INVALID_SOCKET),
-	secret_key(nullptr),
 	sequence(0),
 	receive_sequence(0),
 	timestamp(0),
@@ -404,12 +403,10 @@ void discord_voice_client::cleanup()
 		voice_courier.join();
 	}
 #endif
-	delete[] secret_key;
-	secret_key = nullptr;
 }
 
 bool discord_voice_client::is_ready() {
-	return secret_key != nullptr;
+	return has_secret_key;
 }
 
 bool discord_voice_client::is_playing() {
@@ -649,15 +646,14 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 			/* Session description */
 			case voice_opcode_connection_description: {
 				json &d = j["d"];
-				secret_key = new uint8_t[32];
 				size_t ofs = 0;
 				for (auto & c : d["secret_key"]) {
-					*(secret_key + ofs) = (uint8_t)c;
-					ofs++;
-					if (ofs > 31) {
+					secret_key[ofs++] = (uint8_t)c;
+					if (ofs > secret_key.size() - 1) {
 						break;
 					}
 				}
+				has_secret_key = true;
 
 				if (dave_version != dave_version_none) {
 					if (j["d"]["dave_protocol_version"] != static_cast<uint32_t>(dave_version)) {
@@ -902,7 +898,7 @@ void discord_voice_client::read_ready()
 		 * 4 byte extension header (magic 0xBEDE + 16-bit denoting extension length)
 		 */
 		total_header_len,
-		nonce, secret_key) != 0) {
+		nonce, secret_key.data()) != 0) {
 		/* Invalid Discord RTP payload. */
 		return;
 	}
@@ -1430,7 +1426,7 @@ discord_voice_client& discord_voice_client::send_audio_opus(uint8_t* opus_packet
 	memcpy(encrypt_nonce, &noncel, sizeof(noncel));
 
 	/* Execute */
-	crypto_aead_xchacha20poly1305_ietf_encrypt(
+	int r = crypto_aead_xchacha20poly1305_ietf_encrypt(
 			payload.data() + sizeof(header),
 			nullptr,
 			encoded_audio.data(),
@@ -1440,7 +1436,7 @@ discord_voice_client& discord_voice_client::send_audio_opus(uint8_t* opus_packet
 			sizeof(header),
 			nullptr,
 			static_cast<const unsigned char*>(encrypt_nonce),
-			secret_key);
+			secret_key.data());
 
 	/* Append the 4 byte nonce to the resulting payload */
 	std::memcpy(payload.data() + payload.size() - sizeof(noncel), &noncel, sizeof(noncel));

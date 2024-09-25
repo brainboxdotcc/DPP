@@ -64,6 +64,8 @@ class audio_mixer;
 
 inline constexpr size_t send_audio_raw_max_length = 11520;
 
+inline constexpr size_t secret_key_size = 32;
+
 /*
 * @brief For holding a moving average of the number of current voice users, for applying a smooth gain ramp.
 */
@@ -394,7 +396,12 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	 * If it has been sent, this is non-null and points to a 
 	 * sequence of exactly 32 bytes.
 	 */
-	uint8_t* secret_key;
+	std::array<uint8_t, secret_key_size> secret_key;
+
+	/**
+	 * @brief True if the voice client has a secret key
+	 */
+	bool has_secret_key{false};
 
 	/**
 	 * @brief Sequence number of outbound audio. This is incremented

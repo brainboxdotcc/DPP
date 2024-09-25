@@ -24,6 +24,29 @@
 #include <iostream>
 #include <string>
 
+std::string get_testdata_dir() {
+	char *env_var = getenv("TEST_DATA_DIR");
+	return (env_var ? env_var : "../../testdata/");
+}
+
+std::vector<uint8_t> load_test_audio() {
+	std::vector<uint8_t> testaudio;
+	std::string dir = get_testdata_dir();
+	std::ifstream input (dir + "Robot.pcm", std::ios::in|std::ios::binary|std::ios::ate);
+	if (input.is_open()) {
+		size_t testaudio_size = input.tellg();
+		testaudio.resize(testaudio_size);
+		input.seekg(0, std::ios::beg);
+		input.read((char*)testaudio.data(), testaudio_size);
+		input.close();
+	}
+	else {
+		std::cout << "ERROR: Can't load " + dir + "Robot.pcm\n";
+		exit(1);
+	}
+	return testaudio;
+}
+
 int main() {
 	using namespace std::chrono_literals;
 	char* t = getenv("DPP_UNIT_TEST_TOKEN");
@@ -40,10 +63,20 @@ int main() {
 		std::cout << "[" << dpp::utility::current_date_time() << "] " << dpp::utility::loglevel(log.severity) << ": " << log.message << std::endl;
 	});
 
+	std::vector<uint8_t> testaudio = load_test_audio();
+
+	dave_test.on_voice_ready([&](const dpp::voice_ready_t & event) {
+		dpp::discord_voice_client* v = event.voice_client;
+		if (v && v->is_ready()) {
+			v->send_audio_raw((uint16_t*)testaudio.data(), testaudio.size());
+		}
+	});
+
+
 	dave_test.on_guild_create([&](const dpp::guild_create_t & event) {
 		if (event.created->id == TEST_GUILD_ID) {
 			dpp::discord_client* s = dave_test.get_shard(0);
-			s->connect_voice(TEST_GUILD_ID, TEST_VC_ID, false, false, true);
+			s->connect_voice(TEST_GUILD_ID, TEST_VC_ID, false, false, false);
 		}
 	});
 	dave_test.start(false);
