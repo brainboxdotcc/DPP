@@ -486,17 +486,15 @@ int discord_voice_client::udp_recv(char* data, size_t max_length)
 	return (int) recv(this->fd, data, (int)max_length, 0);
 }
 
-bool discord_voice_client::handle_frame(const std::string &data)
+bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcode)
 {
 	log(dpp::ll_trace, std::string("R: ") + data);
 	json j;
 
 	/**
-	 * Because all discord JSON must be valid UTF-8, if we see a packet with the 2nd character
-	 * being less than 32 (' '), then we know it is a binary MLS frame, as all the binary frame
-	 * opcodes are purposefully less than 32. We then try and parse it as MLS binary.
+	 * MLS frames come in as type OP_BINARY, we can also reply to them as type OP_BINARY.
 	 */
-	if (data.size() >= sizeof(dave_binary_header_t) && data[2] <= voice_client_dave_mls_invalid_commit_welcome) {
+	if (opcode == OP_BINARY && data.size() >= sizeof(dave_binary_header_t)) {
 
 		/* Debug, remove once this is working */
 		std::cout << dpp::utility::debug_dump((uint8_t*)(data.data()), data.length()) << "\n";
@@ -627,7 +625,7 @@ bool discord_voice_client::handle_frame(const std::string &data)
 							}
 						}
 					};
-					this->write(obj.dump(-1, ' ', false, json::error_handler_t::replace));
+					this->write(obj.dump(-1, ' ', false, json::error_handler_t::replace), OP_TEXT);
 				} else {
 					log(dpp::ll_debug, "Connecting new voice session (DAVE: " + std::string(dave_version == dave_version_1 ? "Enabled" : "Disabled") + ")...");
 						json obj = {
@@ -643,7 +641,7 @@ bool discord_voice_client::handle_frame(const std::string &data)
 							}
 						}
 					};
-					this->write(obj.dump(-1, ' ', false, json::error_handler_t::replace));
+					this->write(obj.dump(-1, ' ', false, json::error_handler_t::replace), OP_TEXT);
 				}
 				this->connect_time = time(nullptr);
 			}
@@ -744,7 +742,7 @@ bool discord_voice_client::handle_frame(const std::string &data)
 								}
 							}
 						}
-					}).dump(-1, ' ', false, json::error_handler_t::replace));
+					}).dump(-1, ' ', false, json::error_handler_t::replace), OP_TEXT);
 				}
 			}
 			break;
@@ -1204,7 +1202,7 @@ void discord_voice_client::one_second_timer()
 			if (!message_queue.empty()) {
 				std::string message = message_queue.front();
 				message_queue.pop_front();
-				this->write(message);
+				this->write(message, OP_TEXT);
 			}
 		}
 

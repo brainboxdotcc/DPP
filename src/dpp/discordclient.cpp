@@ -220,7 +220,7 @@ void discord_client::run()
 	this->thread_id = runner->native_handle();
 }
 
-bool discord_client::handle_frame(const std::string &buffer)
+bool discord_client::handle_frame(const std::string &buffer, ws_opcode opcode)
 {
 	std::string& data = (std::string&)buffer;
 
@@ -340,7 +340,7 @@ bool discord_client::handle_frame(const std::string &buffer)
 							}
 						}
 					};
-					this->write(jsonobj_to_string(obj));
+					this->write(jsonobj_to_string(obj), protocol == ws_etf ? OP_BINARY : OP_TEXT);
 					resumes++;
 				} else {
 					/* Full connect */
@@ -369,7 +369,7 @@ bool discord_client::handle_frame(const std::string &buffer)
 							}
 						}
 					};
-					this->write(jsonobj_to_string(obj));
+					this->write(jsonobj_to_string(obj), protocol == ws_etf ? OP_BINARY : OP_TEXT);
 					this->connect_time = creator->last_identify = time(nullptr);
 					reconnects++;
 				}
@@ -539,7 +539,7 @@ void discord_client::one_second_timer()
 					ping_start = utility::time_f();
 					last_ping_message.clear();
 				}
-				this->write(message);
+				this->write(message, protocol == ws_etf ? OP_BINARY : OP_TEXT);
 			}
 		}
 

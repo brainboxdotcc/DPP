@@ -780,7 +780,7 @@ public:
 	 * @return bool True if a frame has been handled
 	 * @throw dpp::exception If there was an error processing the frame, or connection to UDP socket failed
 	 */
-	virtual bool handle_frame(const std::string &buffer);
+	virtual bool handle_frame(const std::string &buffer, ws_opcode opcode);
 
 	/**
 	 * @brief Handle a websocket error.

@@ -483,7 +483,7 @@ public:
 	 * @param buffer The entire buffer content from the websocket client
 	 * @returns True if a frame has been handled
 	 */
-	virtual bool handle_frame(const std::string &buffer);
+	virtual bool handle_frame(const std::string &buffer, ws_opcode opcode);
 
 	/**
 	 * @brief Handle a websocket error.

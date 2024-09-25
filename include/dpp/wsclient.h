@@ -91,7 +91,12 @@ enum ws_opcode : uint8_t {
 	/**
 	 * @brief Low level pong.
 	 */
-	OP_PONG = 0x0a
+	OP_PONG = 0x0a,
+
+	/**
+	 * @brief Automatic selection of type
+	 */
+	 OP_AUTO = 0xff,
 };
 
 /**
@@ -189,7 +194,7 @@ public:
 	 * @brief Write to websocket. Encapsulates data in frames if the status is CONNECTED.
 	 * @param data The data to send.
 	 */
-	virtual void write(const std::string_view data);
+	virtual void write(const std::string_view data, ws_opcode _opcode = OP_AUTO);
 
 	/**
 	 * @brief Processes incoming frames from the SSL socket input buffer.
@@ -206,9 +211,10 @@ public:
 	 * @brief Receives raw frame content only without headers
 	 *
 	 * @param buffer The buffer contents
+	 * @param opcode Frame type, e.g. OP_TEXT, OP_BINARY
 	 * @return True if the frame was successfully handled. False if no valid frame is in the buffer.
 	 */
-	virtual bool handle_frame(const std::string& buffer);
+	virtual bool handle_frame(const std::string& buffer, ws_opcode opcode);
 
 	/**
 	 * @brief Called upon error frame.
