@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include "../../../tls_syntax/include/tls/tls_syntax.h"
+#include <tls/tls_syntax.h>
 #include <vector>
 
 namespace mlspp::bytes_ns {
