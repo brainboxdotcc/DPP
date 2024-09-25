@@ -92,7 +92,8 @@ std::shared_ptr<::mlspp::SignaturePrivateKey> GetGenericPersistedKeyPair(KeyPair
             return nullptr;
         }
 
-	std::stringstream s = (std::stringstream() << ifs.rdbuf());
+	std::stringstream s;
+	s << ifs.rdbuf();
 	curstr = s.str();
         if (!ifs) {
             DISCORD_LOG(LS_ERROR) << "Failed to read key in GetPersistedKeyPair";
