@@ -713,7 +713,7 @@ voiceconn& voiceconn::connect(snowflake guild_id) {
 		auto t = std::thread([guild_id, this]() {
 			try {
 				this->creator->log(ll_debug, "Connecting voice for guild " + std::to_string(guild_id) + " channel " + std::to_string(this->channel_id));
-				this->voiceclient = new discord_voice_client(creator->creator, this->channel_id, guild_id, this->token, this->session_id, this->websocket_hostname);
+				this->voiceclient = new discord_voice_client(creator->creator, this->channel_id, guild_id, this->token, this->session_id, this->websocket_hostname, this->dave);
 				/* Note: Spawns thread! */
 				this->voiceclient->run();
 			}

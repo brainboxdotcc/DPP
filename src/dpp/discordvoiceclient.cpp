@@ -316,7 +316,7 @@ void discord_voice_client::voice_courier_loop(discord_voice_client& client, cour
 }
 
 discord_voice_client::discord_voice_client(dpp::cluster* _cluster, snowflake _channel_id, snowflake _server_id, const std::string &_token, const std::string &_session_id, const std::string &_host, bool enable_dave)
-	: websocket_client(_host.substr(0, _host.find(":")), _host.substr(_host.find(":") + 1, _host.length()), "/?v=" + std::to_string(voice_protocol_version), OP_TEXT),
+	: websocket_client(_host.substr(0, _host.find(':')), _host.substr(_host.find(':') + 1, _host.length()), "/?v=" + std::to_string(voice_protocol_version), OP_TEXT),
 	runner(nullptr),
 	connect_time(0),
 	mixer(std::make_unique<audio_mixer>()),
@@ -490,6 +490,44 @@ bool discord_voice_client::handle_frame(const std::string &data)
 {
 	log(dpp::ll_trace, std::string("R: ") + data);
 	json j;
+
+	/**
+	 * Because all discord JSON must be valid UTF-8, if we see a packet with the 2nd character
+	 * being less than 32 (' '), then we know it is a binary MLS frame, as all the binary frame
+	 * opcodes are purposefully less than 32. We then try and parse it as MLS binary.
+	 */
+	if (data.size() >= sizeof(dave_binary_header_t) && data[2] <= voice_client_dave_mls_invalid_commit_welcome) {
+
+		/* Debug, remove once this is working */
+		std::cout << dpp::utility::debug_dump((uint8_t*)(data.data()), data.length()) << "\n";
+
+		dave_binary_header_t dave_header{};
+		std::memcpy(&dave_header, data.data(), sizeof(dave_binary_header_t));
+
+		switch (dave_header.opcode) {
+			case voice_client_dave_mls_external_sender: {
+				log(ll_debug, "voice_client_dave_mls_external_sender");
+			}
+				break;
+			case voice_client_dave_mls_proposals: {
+				log(ll_debug, "voice_client_dave_mls_proposals");
+			}
+				break;
+			case voice_client_dave_announce_commit_transaction: {
+				log(ll_debug, "voice_client_dave_announce_commit_transaction");
+			}
+				break;
+			case voice_client_dave_mls_welcome: {
+				log(ll_debug, "voice_client_dave_mls_welcome");
+			}
+				break;
+			default:
+				log(ll_debug, "Unexpected DAVE frame opcode");
+				break;
+		}
+
+		return true;
+	}
 	
 	try {
 		j = json::parse(data);
@@ -507,6 +545,7 @@ bool discord_voice_client::handle_frame(const std::string &data)
 			case voice_opcode_connection_heartbeat_ack:
 				/* These opcodes do not require a response or further action */
 			break;
+			case voice_opcode_media_sink:
 			case voice_client_flags: {
 			}
 			break;
@@ -622,8 +661,16 @@ bool discord_voice_client::handle_frame(const std::string &data)
 					}
 				}
 
-				/* This is needed to start voice receiving and make sure that the start of sending isn't cut off */
-				send_silence(20);
+				if (dave_version != dave_version_none) {
+					if (j["d"]["dave_protocol_version"] != static_cast<uint32_t>(dave_version)) {
+						log(ll_error, "We requested DAVE E2EE but didn't receive it from the server, downgrading...");
+						dave_version = dave_version_none;
+						send_silence(20);
+					}
+				} else {
+					/* This is needed to start voice receiving and make sure that the start of sending isn't cut off */
+					send_silence(20);
+				}
 
 				/* Fire on_voice_ready */
 				if (!creator->on_voice_ready.empty()) {
@@ -1166,8 +1213,12 @@ void discord_voice_client::one_second_timer()
 			if (time(nullptr) > last_heartbeat + ((heartbeat_interval / 1000.0) * 0.75)) {
 				queue_message(json({
 					{"op", voice_opcode_connection_heartbeat},
-					{"d", rand()},
-					{"seq_ack", sequence}
+					{
+						"d", {
+							{"t", rand()},
+							{"seq_ack", receive_sequence},
+						}
+					},
 				}).dump(-1, ' ', false, json::error_handler_t::replace), true);
 				last_heartbeat = time(nullptr);
 			}

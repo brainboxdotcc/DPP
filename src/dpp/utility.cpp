@@ -373,7 +373,7 @@ std::string debug_dump(uint8_t* data, size_t length) {
 			ascii.clear();
 		}
 		ascii.push_back(*ptr >= ' ' && *ptr <= '~' ? *ptr : '.');
-		out << to_hex(*ptr);
+		out << to_hex(*ptr) << " ";
 	}
 	out << "    " << ascii;
 	out << "\n";

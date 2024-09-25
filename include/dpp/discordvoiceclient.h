@@ -131,6 +131,7 @@ enum voice_websocket_opcode_t : uint8_t {
 	voice_opcode_multiple_clients_connect = 11,
 	voice_opcode_client_connect = 12,
 	voice_opcode_client_disconnect = 13,
+	voice_opcode_media_sink = 15,
 	voice_client_flags = 18,
 	voice_client_platform = 20,
 	voice_client_dave_prepare_transition = 21,
@@ -145,6 +146,22 @@ enum voice_websocket_opcode_t : uint8_t {
 	voice_client_dave_mls_welcome = 30,
 	voice_client_dave_mls_invalid_commit_welcome = 31,
 };
+
+/**
+ * @brief DAVE E2EE Binary frame header
+ */
+#pragma pack(push, 1)
+struct dave_binary_header_t {
+	/**
+	 * @brief Sequence number
+	 */
+	uint16_t seq;
+	/**
+	 * @brief Opcode type
+	 */
+	uint8_t opcode;
+};
+#pragma pack(pop)
 
 /** @brief Implements a discord voice connection.
  * Each discord_voice_client connects to one voice channel and derives from a websocket client.
@@ -456,9 +473,10 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	/**
 	 * @brief DAVE - Discord Audio Visual Encryption
 	 * Used for E2EE encryption. dave_protocol_none is
-	 * the default before negotiation.
+	 * the default right now.
+	 * @warning DAVE E2EE is an EXPERIMENTAL feature!
 	 */
-	dave_version_t dave_version{dave_version_none};
+	dave_version_t dave_version;
 
 	/**
 	 * @brief Send data to UDP socket immediately.

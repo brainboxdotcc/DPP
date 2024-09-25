@@ -27,9 +27,10 @@
 int main() {
 	using namespace std::chrono_literals;
 	char* t = getenv("DPP_UNIT_TEST_TOKEN");
-	dpp::snowflake TEST_GUILD_ID(std::string(getenv("TEST_GUILD_ID")));
-	dpp::snowflake TEST_VC_ID(std::string(getenv("TEST_VC_ID")));
-	if (t) {
+	if (t != nullptr) {
+		dpp::snowflake TEST_GUILD_ID(std::string(getenv("TEST_GUILD_ID")));
+		dpp::snowflake TEST_VC_ID(std::string(getenv("TEST_VC_ID")));
+		std::cout << "Test Guild ID: " << TEST_GUILD_ID << " Test VC ID: " << TEST_VC_ID << "\n\n";
 		dpp::cluster dave_test(t, dpp::i_default_intents | dpp::i_guild_members);
 		dave_test.set_websocket_protocol(dpp::ws_etf);
 		dave_test.on_log(dpp::utility::cout_logger());
@@ -40,6 +41,6 @@ int main() {
 				s->connect_voice(TEST_GUILD_ID, TEST_VC_ID, false, false, true);
 			}
 		});
-		dave_test.start(dpp::st_wait);
+		dave_test.start(false);
 	}
 }
