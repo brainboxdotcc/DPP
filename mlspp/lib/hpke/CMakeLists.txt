@@ -29,16 +29,12 @@ target_include_directories(${CURRENT_LIB_NAME}
     ${OPENSSL_INCLUDE_DIR}
 )
 
-###
-### Install
-###
-
-install(TARGETS ${CURRENT_LIB_NAME} EXPORT mlspp-targets)
-install(
-  DIRECTORY
-        include
-  DESTINATION
-    ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}
+# Private statically linked dependencies
+target_link_libraries(${CURRENT_LIB_NAME} PRIVATE
+        mlspp
+        mls_vectors
+        bytes
+        tls_syntax
 )
 
 target_compile_options(

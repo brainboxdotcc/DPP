@@ -101,9 +101,6 @@ target_include_directories(${LIB_NAME}
     ${OPENSSL_INCLUDE_DIR}
 )
 
-install(TARGETS ${LIB_NAME} EXPORT mlspp-targets)
-
-
 ###
 ### Exports
 ###
@@ -126,41 +123,6 @@ write_basic_package_version_file(
   ${CMAKE_CURRENT_BINARY_DIR}/${MLS_EXPORT_NAMESPACE}ConfigVersion.cmake
   VERSION ${PROJECT_VERSION}
   COMPATIBILITY SameMajorVersion)
-
-###
-### Install
-###
-
-install(
-  EXPORT
-    mlspp-targets
-  NAMESPACE
-    ${MLS_EXPORT_NAMESPACE}::
-  FILE
-    ${MLS_EXPORT_NAMESPACE}Targets.cmake
-  DESTINATION
-    ${CMAKE_INSTALL_DATADIR}/${MLS_EXPORT_NAMESPACE})
-
-install(
-  DIRECTORY
-        include
-  DESTINATION
-    ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME})
-
-install(
-  FILES
-    ${CMAKE_CURRENT_BINARY_DIR}/${MLS_EXPORT_NAMESPACE}Config.cmake
-    ${CMAKE_CURRENT_BINARY_DIR}/${MLS_EXPORT_NAMESPACE}ConfigVersion.cmake
-  DESTINATION
-    ${CMAKE_INSTALL_DATADIR}/${MLS_EXPORT_NAMESPACE})
-
-install(
-  FILES
-        LICENSE
-  DESTINATION
-    ${CMAKE_INSTALL_DATADIR}/${PROJECT_NAME}
-  RENAME
-    copyright)
 
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/lib/bytes/include")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/lib/hpke/include")

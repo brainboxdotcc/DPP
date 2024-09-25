@@ -17,18 +17,6 @@ target_include_directories(${CURRENT_LIB_NAME}
     $<INSTALL_INTERFACE:include/${PROJECT_NAME}>
 )
 
-###
-### Install
-###
-
-install(TARGETS ${CURRENT_LIB_NAME} EXPORT mlspp-targets)
-install(
-  DIRECTORY
-        include
-  DESTINATION
-    ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}
-)
-
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../../lib/bytes/include")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../../lib/hpke/include")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../../lib/mls_vectors/include")

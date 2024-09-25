@@ -12,6 +12,3 @@ target_include_directories(${CURRENT_LIB_NAME}
 ###
 
 install(TARGETS ${CURRENT_LIB_NAME} EXPORT mlspp-targets)
-install(FILES variant.hpp 
-        DESTINATION
-            ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME})
