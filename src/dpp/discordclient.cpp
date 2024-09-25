@@ -456,9 +456,14 @@ void discord_client::log(dpp::loglevel severity, const std::string &msg) const
 {
 	if (!creator->on_log.empty()) {
 		/* Pass to user if they've hooked the event */
-		dpp::log_t logmsg(nullptr, msg);
+		dpp::log_t logmsg(const_cast<discord_client*>(this), msg);
 		logmsg.severity = severity;
 		logmsg.message = msg;
+		size_t pos{0};
+		while ((pos = logmsg.message.find(token, pos)) != std::string::npos) {
+			logmsg.message.replace(pos, token.length(), "*****");
+			pos += 5;
+		}
 		creator->on_log.call(logmsg);
 	}
 }

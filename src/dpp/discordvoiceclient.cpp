@@ -666,9 +666,6 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 					send_silence(20);
 				}
 
-				/* Set the session id */
-				this->sessionid = j["d"]["media_session_id"];
-
 				/* Fire on_voice_ready */
 				if (!creator->on_voice_ready.empty()) {
 					voice_ready_t rdy(nullptr, data);
