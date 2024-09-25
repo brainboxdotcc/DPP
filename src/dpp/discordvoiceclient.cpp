@@ -719,13 +719,13 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 
 					/* Hook poll() in the ssl_client to add a new file descriptor */
 					this->fd = newfd;
-					this->custom_writeable_fd = std::bind(&discord_voice_client::want_write, this);
-					this->custom_readable_fd = std::bind(&discord_voice_client::want_read, this);
-					this->custom_writeable_ready = std::bind(&discord_voice_client::write_ready, this);
-					this->custom_readable_ready = std::bind(&discord_voice_client::read_ready, this);
+					this->custom_writeable_fd = [this] { return want_write(); };
+					this->custom_readable_fd = [this] { return want_read(); };
+					this->custom_writeable_ready = [this] { write_ready(); };
+					this->custom_readable_ready = [this] { read_ready(); };
 
 					int bound_port = 0;
-					sockaddr_in sin;
+					sockaddr_in sin{};
 					socklen_t len = sizeof(sin);
 					if (getsockname(this->fd, (sockaddr *)&sin, &len) > -1) {
 						bound_port = ntohs(sin.sin_port);
