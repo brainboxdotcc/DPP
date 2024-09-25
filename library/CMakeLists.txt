@@ -32,6 +32,8 @@ add_compile_definitions(AVX_TYPE=${AVX_TYPE})
 add_compile_options(${AVX_FLAG})
 
 if(WIN32 AND NOT MINGW)
+	# For MLSPP
+	set(OPENSSL_VERSION "1.1.1f")
 	if (NOT WINDOWS_32_BIT)
 		message("-- Building for windows with precompiled packaged dependencies")
 		#set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
@@ -46,9 +48,6 @@ if(WIN32 AND NOT MINGW)
 		link_libraries("${CMAKE_CURRENT_SOURCE_DIR}/../win32/lib/zlib.lib")
 		link_libraries("${CMAKE_CURRENT_SOURCE_DIR}/../win32/lib/libsodium.lib")
 		link_libraries("${CMAKE_CURRENT_SOURCE_DIR}/../win32/lib/opus.lib")
-
-		# For MLSPP
-		set(OPENSSL_VERSION "1.1.1f")
 
 		set(OPUS_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/../win32/include")
 		set(OPUS_LIBRARIES "${CMAKE_CURRENT_SOURCE_DIR}/../win32/lib/opus.lib")
