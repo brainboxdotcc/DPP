@@ -1,0 +1,4 @@
+#pragma once
+
+// Configurable top-level MLS namespace
+#define MLS_NAMESPACE @MLS_CXX_NAMESPACE@

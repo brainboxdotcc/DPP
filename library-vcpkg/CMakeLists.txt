@@ -1,4 +1,4 @@
-file(GLOB THE_SOURCES "${DPP_ROOT_PATH}/src/dpp/events/*.cpp" "${DPP_ROOT_PATH}/src/dpp/cluster/*.cpp" "${DPP_ROOT_PATH}/src/dpp/*.cpp" "${DPP_ROOT_PATH}/src/dpp/*.rc")
+file(GLOB THE_SOURCES "${DPP_ROOT_PATH}/src/dpp/events/*.cpp" "${DPP_ROOT_PATH}/dpp/dave/*.cpp" "${DPP_ROOT_PATH}/src/dpp/cluster/*.cpp" "${DPP_ROOT_PATH}/src/dpp/*.cpp" "${DPP_ROOT_PATH}/src/dpp/*.rc")
 
 set(LIB_NAME "${PROJECT_NAME}")
 
@@ -40,8 +40,8 @@ target_compile_options(
 	PRIVATE
 		"$<$<PLATFORM_ID:Windows>:$<$<CONFIG:Debug>:/sdl;/Od;/DEBUG;/MP;/DFD_SETSIZE=1024>>"
 		"$<$<PLATFORM_ID:Windows>:$<$<CONFIG:Release>:/O2;/Oi;/Oy;/GL;/Gy;/sdl;/MP;/DFD_SETSIZE=1024>>"
-		"$<$<PLATFORM_ID:Linux>:$<$<CONFIG:Debug>:-Wall;-Wempty-body;-Wno-psabi;-Wunknown-pragmas;-Wignored-qualifiers;-Wimplicit-fallthrough;-Wmissing-field-initializers;-Wsign-compare;-Wtype-limits;-Wuninitialized;-Wshift-negative-value;-pthread;-g;-Og;-fPIC>>"
-		"$<$<PLATFORM_ID:Linux>:$<$<CONFIG:Release>:-Wall;-Wempty-body;-Wno-psabi;-Wunknown-pragmas;-Wignored-qualifiers;-Wimplicit-fallthrough;-Wmissing-field-initializers;-Wsign-compare;-Wtype-limits;-Wuninitialized;-Wshift-negative-value;-pthread;-O3;-fPIC>>"
+		"$<$<PLATFORM_ID:Linux>:$<$<CONFIG:Debug>:-fPIC;-Wall;-Wempty-body;-Wno-psabi;-Wunknown-pragmas;-Wignored-qualifiers;-Wimplicit-fallthrough;-Wmissing-field-initializers;-Wsign-compare;-Wtype-limits;-Wuninitialized;-Wshift-negative-value;-pthread;-g;-Og;-fPIC>>"
+		"$<$<PLATFORM_ID:Linux>:$<$<CONFIG:Release>:-fPIC;-Wall;-Wempty-body;-Wno-psabi;-Wunknown-pragmas;-Wignored-qualifiers;-Wimplicit-fallthrough;-Wmissing-field-initializers;-Wsign-compare;-Wtype-limits;-Wuninitialized;-Wshift-negative-value;-pthread;-O3;-fPIC>>"
 		"${AVX_FLAG}"
 )
 
@@ -59,6 +59,11 @@ target_include_directories(
 	"$<BUILD_INTERFACE:${DPP_ROOT_PATH}/include>"
 	"$<INSTALL_INTERFACE:include>"
 )
+
+add_subdirectory("${DPP_ROOT_PATH}/mlspp" "mlspp")
+include_directories("${DPP_ROOT_PATH}/mlspp/include")
+include_directories("${DPP_ROOT_PATH}/mlspp/lib/bytes/include")
+include_directories("${DPP_ROOT_PATH}/mlspp/lib/hpke/include")
 
 set_target_properties(
 	"${LIB_NAME}" PROPERTIES
@@ -88,6 +93,16 @@ target_link_libraries(
 	$<$<TARGET_EXISTS:unofficial-sodium::sodium>:unofficial-sodium::sodium>
 	$<$<TARGET_EXISTS:ZLIB::ZLIB>:ZLIB::ZLIB>
 	$<$<TARGET_EXISTS:Threads::Threads>:Threads::Threads>
+)
+
+# Private statically linked dependencies
+target_link_libraries(
+	${LIB_NAME} PRIVATE
+	mlspp
+	mls_vectors
+	bytes
+	tls_syntax
+	hpke
 )
 
 set(CONFIG_FILE_NAME "${PROJECT_NAME}Config.cmake")

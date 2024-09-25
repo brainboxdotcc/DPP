@@ -197,7 +197,7 @@ if(MSVC)
 	endif()
 	string(REGEX REPLACE "/W[1|2|3|4]" "/W3" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 else()
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-unused-private-field -Wno-psabi -Wempty-body -Wignored-qualifiers -Wimplicit-fallthrough -Wmissing-field-initializers -Wsign-compare -Wtype-limits -Wuninitialized -Wshift-negative-value -pthread")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -Wall -Wno-unused-private-field -Wno-psabi -Wempty-body -Wignored-qualifiers -Wimplicit-fallthrough -Wmissing-field-initializers -Wsign-compare -Wtype-limits -Wuninitialized -Wshift-negative-value -pthread")
 	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Og")
 
 	if (NOT MINGW)
@@ -209,11 +209,16 @@ set(modules_dir "../src")
 
 file(GLOB subdirlist ${modules_dir}/dpp)
 
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/../mlspp" "mlspp")
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../mlspp/include")
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../mlspp/lib/bytes/include")
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../mlspp/lib/hpke/include")
+
 foreach (fullmodname ${subdirlist})
     get_filename_component(modname ${fullmodname} NAME)
     set (modsrc "")
-	
-	file(GLOB modsrc "${modules_dir}/dpp/*.cpp" "${modules_dir}/dpp/events/*.cpp" "${modules_dir}/dpp/cluster/*.cpp" "${modules_dir}/dpp/*.rc")
+
+	file(GLOB modsrc "${modules_dir}/dpp/*.cpp" "${modules_dir}/dpp/dave/*.cpp" "${modules_dir}/dpp/events/*.cpp" "${modules_dir}/dpp/cluster/*.cpp" "${modules_dir}/dpp/*.rc")
 
 	if(BUILD_SHARED_LIBS)
 		add_library(${modname} SHARED ${modsrc})
@@ -241,6 +246,7 @@ foreach (fullmodname ${subdirlist})
 	endif()
 
 	if (WIN32 AND NOT MINGW)
+
 		if (NOT WINDOWS_32_BIT)
 			target_link_libraries(${modname} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/../win32/lib/libssl.lib"
 				"${CMAKE_CURRENT_SOURCE_DIR}/../win32/lib/libcrypto.lib"
@@ -262,12 +268,23 @@ foreach (fullmodname ${subdirlist})
 		endif ()
 	endif()
 
+	# Private statically linked dependencies
+	target_link_libraries(${modname} PRIVATE
+		mlspp
+		mls_vectors
+		bytes
+		tls_syntax
+		hpke
+	)
+
 	if (HAVE_VOICE)
 		target_link_libraries(${modname} PUBLIC ${sodium_LIBRARY_RELEASE} ${OPUS_LIBRARIES})
 		
 		include_directories(${OPUS_INCLUDE_DIRS} ${sodium_INCLUDE_DIR})
 	endif()
 endforeach()
+
+
 
 target_compile_features(dpp PUBLIC cxx_std_17)
 target_compile_features(dpp PRIVATE cxx_constexpr)
