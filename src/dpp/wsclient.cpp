@@ -113,6 +113,11 @@ size_t websocket_client::fill_header(unsigned char* outbuf, size_t sendlength, w
 
 void websocket_client::write(const std::string_view data, ws_opcode _opcode)
 {
+	if ((_opcode == OP_AUTO ? this->data_opcode : _opcode) == OP_TEXT) {
+		log(dpp::ll_trace, std::string("W: ") + data.data());
+	} else {
+		log(dpp::ll_trace, "W: " + dpp::utility::debug_dump((uint8_t*)(data.data()), data.length()));
+	}
 	if (state == HTTP_HEADERS) {
 		/* Simple write */
 		ssl_client::socket_write(data);

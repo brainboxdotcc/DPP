@@ -488,7 +488,6 @@ int discord_voice_client::udp_recv(char* data, size_t max_length)
 
 bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcode)
 {
-	log(dpp::ll_trace, std::string("R: ") + data);
 	json j;
 
 	/**
@@ -496,8 +495,7 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 	 */
 	if (opcode == OP_BINARY && data.size() >= sizeof(dave_binary_header_t)) {
 
-		/* Debug, remove once this is working */
-		std::cout << dpp::utility::debug_dump((uint8_t*)(data.data()), data.length()) << "\n";
+		log(dpp::ll_trace, "R: " + dpp::utility::debug_dump((uint8_t*)(data.data()), data.length()));
 
 		dave_binary_header_t dave_header{};
 		std::memcpy(&dave_header, data.data(), sizeof(dave_binary_header_t));
@@ -528,6 +526,7 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 	}
 	
 	try {
+		log(dpp::ll_trace, std::string("R: ") + data);
 		j = json::parse(data);
 	}
 	catch (const std::exception &e) {
@@ -669,6 +668,9 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 					/* This is needed to start voice receiving and make sure that the start of sending isn't cut off */
 					send_silence(20);
 				}
+
+				/* Set the session id */
+				this->sessionid = j["d"]["media_session_id"];
 
 				/* Fire on_voice_ready */
 				if (!creator->on_voice_ready.empty()) {
