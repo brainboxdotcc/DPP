@@ -42,7 +42,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU")
   add_compile_options(-Wall)
 elseif(MSVC)
-  add_compile_options(/W4 /WX)
+  add_compile_options(/W2)
   add_definitions(-DWINDOWS)
 
   # MSVC helpfully recommends safer equivalents for things like
