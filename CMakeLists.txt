@@ -119,4 +119,6 @@ else()
 	message("-- Using bundled nlohmann::json")
 endif()
 
-target_link_libraries(dpp PRIVATE std::filesystem)
+if (NOT WIN32)
+	target_link_libraries(dpp PRIVATE std::filesystem)
+endif()
