@@ -328,7 +328,7 @@ discord_voice_client::discord_voice_client(dpp::cluster* _cluster, snowflake _ch
 	repacketizer(nullptr),
 	fd(INVALID_SOCKET),
 	sequence(0),
-	receive_sequence(0),
+	receive_sequence(-1),
 	timestamp(0),
 	packet_nonce(1),
 	last_timestamp(std::chrono::high_resolution_clock::now()),
@@ -531,6 +531,16 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 		return true;
 	}
 
+	if (j.find("seq") != j.end() && j["seq"].is_number()) {
+		/**
+		  * Save the sequence number needed for heartbeat and resume payload.
+		  *
+		  * NOTE: Contrary to the documentation, discord does not seem to send messages with sequence number
+		  * in order, should we only save the sequence if it's larger number?
+		  */
+		receive_sequence = j["seq"].get<int32_t>();
+	}
+
 	if (j.find("op") != j.end()) {
 		uint32_t op = j["op"];
 
@@ -608,6 +618,9 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 					this->heartbeat_interval = j["d"]["heartbeat_interval"].get<uint32_t>();
 				}
 
+				/* Reset receive_sequence on HELLO */
+				receive_sequence = -1;
+
 				if (!modes.empty()) {
 					log(dpp::ll_debug, "Resuming voice session " + this->sessionid + "...");
 						json obj = {
@@ -618,7 +631,7 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 								{ "server_id", std::to_string(this->server_id) },
 								{ "session_id", this->sessionid },
 								{ "token", this->token },
-								{ "seq_ack", this->sequence },
+								{ "seq_ack", this->receive_sequence },
 							}
 						}
 					};
@@ -842,9 +855,6 @@ void discord_voice_client::read_ready()
 	/* Get the sequence number of the voice UDP packet */
 	std::memcpy(&vp.seq, &buffer[2], sizeof(rtp_seq_t));
 	vp.seq = ntohs(vp.seq);
-
-	/* Used for buffered resume of receive */
-	receive_sequence = vp.seq;
 
 	/* Get the timestamp of the voice UDP packet */
 	std::memcpy(&vp.timestamp, &buffer[4], sizeof(rtp_timestamp_t));

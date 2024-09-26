@@ -410,9 +410,11 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	uint16_t sequence;
 
 	/**
-	 * @brief Last received sequence from gateway
+	 * @brief Last received sequence from gateway.
+	 *
+	 * Needed for heartbeat and resume payload.
 	 */
-	uint16_t receive_sequence;
+	int32_t receive_sequence;
 
 	/**
 	 * @brief Timestamp value used in outbound audio. Each packet
