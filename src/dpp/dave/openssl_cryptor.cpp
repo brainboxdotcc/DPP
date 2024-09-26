@@ -20,7 +20,7 @@ void PrintSSLErrors()
       nullptr);
 }
 
-BoringSSLCryptor::BoringSSLCryptor(const EncryptionKey& encryptionKey)
+OpenSSLCryptor::OpenSSLCryptor(const EncryptionKey& encryptionKey)
 {
     /*EVP_AEAD_CTX_zero(&cipherCtx_);
 
@@ -37,12 +37,12 @@ BoringSSLCryptor::BoringSSLCryptor(const EncryptionKey& encryptionKey)
     }*/
 }
 
-BoringSSLCryptor::~BoringSSLCryptor()
+OpenSSLCryptor::~OpenSSLCryptor()
 {
     //EVP_AEAD_CTX_cleanup(&cipherCtx_);
 }
 
-bool BoringSSLCryptor::Encrypt(ArrayView<uint8_t> ciphertextBufferOut,
+bool OpenSSLCryptor::Encrypt(ArrayView<uint8_t> ciphertextBufferOut,
                                ArrayView<const uint8_t> plaintextBuffer,
                                ArrayView<const uint8_t> nonceBuffer,
                                ArrayView<const uint8_t> additionalData,
@@ -77,7 +77,7 @@ bool BoringSSLCryptor::Encrypt(ArrayView<uint8_t> ciphertextBufferOut,
     return false;
 }
 
-bool BoringSSLCryptor::Decrypt(ArrayView<uint8_t> plaintextBufferOut,
+bool OpenSSLCryptor::Decrypt(ArrayView<uint8_t> plaintextBufferOut,
                                ArrayView<const uint8_t> ciphertextBuffer,
                                ArrayView<const uint8_t> tagBuffer,
                                ArrayView<const uint8_t> nonceBuffer,

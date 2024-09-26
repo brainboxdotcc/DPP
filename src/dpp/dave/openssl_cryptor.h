@@ -6,10 +6,10 @@
 namespace discord {
 namespace dave {
 
-class BoringSSLCryptor : public ICryptor {
+class OpenSSLCryptor : public ICryptor {
 public:
-    BoringSSLCryptor(const EncryptionKey& encryptionKey);
-    ~BoringSSLCryptor();
+    OpenSSLCryptor(const EncryptionKey& encryptionKey);
+    ~OpenSSLCryptor();
 
     bool IsValid() const { /*return cipherCtx_.aead != nullptr;*/ return true; }
 

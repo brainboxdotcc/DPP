@@ -6,7 +6,7 @@ namespace dave {
 
 std::unique_ptr<ICryptor> CreateCryptor(const EncryptionKey& encryptionKey)
 {
-    auto cryptor = std::make_unique<BoringSSLCryptor>(encryptionKey);
+    auto cryptor = std::make_unique<OpenSSLCryptor>(encryptionKey);
     return cryptor->IsValid() ? std::move(cryptor) : nullptr;
 }
 
