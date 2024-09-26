@@ -12,8 +12,7 @@
 
 using namespace std::chrono_literals;
 
-namespace discord {
-namespace dave {
+namespace dpp::dave {
 
 constexpr auto kStatsInterval = 10s;
 
@@ -33,10 +32,10 @@ void Encryptor::SetPassthroughMode(bool passthroughMode)
 }
 
 int Encryptor::Encrypt(MediaType mediaType,
-                       uint32_t ssrc,
-                       ArrayView<const uint8_t> frame,
-                       ArrayView<uint8_t> encryptedFrame,
-                       size_t* bytesWritten)
+		       uint32_t ssrc,
+		       array_view<const uint8_t> frame,
+		       array_view<uint8_t> encryptedFrame,
+		       size_t* bytesWritten)
 {
     if (mediaType != Audio && mediaType != Video) {
         DISCORD_LOG(LS_WARNING) << "Encrypt failed, invalid media type: "
@@ -78,15 +77,15 @@ int Encryptor::Encrypt(MediaType mediaType,
     const auto& unencryptedRanges = frameProcessor->GetUnencryptedRanges();
     auto unencryptedRangesSize = UnencryptedRangesSize(unencryptedRanges);
 
-    auto additionalData = MakeArrayView(unencryptedBytes.data(), unencryptedBytes.size());
-    auto plaintextBuffer = MakeArrayView(encryptedBytes.data(), encryptedBytes.size());
-    auto ciphertextBuffer = MakeArrayView(ciphertextBytes.data(), ciphertextBytes.size());
+    auto additionalData = make_array_view(unencryptedBytes.data(), unencryptedBytes.size());
+    auto plaintextBuffer = make_array_view(encryptedBytes.data(), encryptedBytes.size());
+    auto ciphertextBuffer = make_array_view(ciphertextBytes.data(), ciphertextBytes.size());
 
     auto frameSize = encryptedBytes.size() + unencryptedBytes.size();
-    auto tagBuffer = MakeArrayView(encryptedFrame.data() + frameSize, kAesGcm128TruncatedTagBytes);
+    auto tagBuffer = make_array_view(encryptedFrame.data() + frameSize, kAesGcm128TruncatedTagBytes);
 
     auto nonceBuffer = std::array<uint8_t, kAesGcm128NonceBytes>();
-    auto nonceBufferView = MakeArrayView<const uint8_t>(nonceBuffer.data(), nonceBuffer.size());
+    auto nonceBufferView = make_array_view<const uint8_t>(nonceBuffer.data(), nonceBuffer.size());
 
     constexpr auto MAX_CIPHERTEXT_VALIDATION_RETRIES = 10;
 
@@ -133,12 +132,12 @@ int Encryptor::Encrypt(MediaType mediaType,
 
         auto nonceSize = Leb128Size(truncatedNonce);
 
-        auto truncatedNonceBuffer = MakeArrayView(tagBuffer.end(), nonceSize);
+        auto truncatedNonceBuffer = make_array_view(tagBuffer.end(), nonceSize);
         auto unencryptedRangesBuffer =
-          MakeArrayView(truncatedNonceBuffer.end(), unencryptedRangesSize);
+		make_array_view(truncatedNonceBuffer.end(), unencryptedRangesSize);
         auto supplementalBytesBuffer =
-          MakeArrayView(unencryptedRangesBuffer.end(), sizeof(SupplementalBytesSize));
-        auto markerBytesBuffer = MakeArrayView(supplementalBytesBuffer.end(), sizeof(MagicMarker));
+		make_array_view(unencryptedRangesBuffer.end(), sizeof(SupplementalBytesSize));
+        auto markerBytesBuffer = make_array_view(supplementalBytesBuffer.end(), sizeof(MagicMarker));
 
         // write the nonce
         auto res = WriteLeb128(truncatedNonce, truncatedNonceBuffer.begin());
@@ -168,8 +167,8 @@ int Encryptor::Encrypt(MediaType mediaType,
         auto encryptedFrameBytes = reconstructedFrameSize + kAesGcm128TruncatedTagBytes +
           nonceSize + unencryptedRangesSize + sizeof(SupplementalBytesSize) + sizeof(MagicMarker);
 
-        if (codec_utils::ValidateEncryptedFrame(
-              *frameProcessor, MakeArrayView(encryptedFrame.data(), encryptedFrameBytes))) {
+        if (codec_utils::validate_encrypted_frame(
+		*frameProcessor, make_array_view(encryptedFrame.data(), encryptedFrameBytes))) {
             *bytesWritten = encryptedFrameBytes;
             break;
         }
@@ -263,14 +262,14 @@ Encryptor::CryptorAndNonce Encryptor::GetNextCryptorAndNonce()
         return {nullptr, 0};
     }
 
-    auto generation = ComputeWrappedGeneration(currentKeyGeneration_,
-                                               ++truncatedNonce_ >> kRatchetGenerationShiftBits);
+    auto generation = compute_wrapped_generation(currentKeyGeneration_,
+						 ++truncatedNonce_ >> kRatchetGenerationShiftBits);
 
     if (generation != currentKeyGeneration_ || !cryptor_) {
         currentKeyGeneration_ = generation;
 
         auto encryptionKey = keyRatchet_->GetKey(currentKeyGeneration_);
-        cryptor_ = CreateCryptor(encryptionKey);
+        cryptor_ = create_cipher(encryptionKey);
     }
 
     return {cryptor_, truncatedNonce_};
@@ -288,5 +287,5 @@ void Encryptor::UpdateCurrentProtocolVersion(ProtocolVersion version)
     }
 }
 
-} // namespace dave
-} // namespace discord
+} // namespace dpp::dave
+

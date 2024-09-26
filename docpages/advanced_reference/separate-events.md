@@ -74,4 +74,4 @@ int main() {
 
 And there we go! How tidy is that?
 
-Now, the possibilities to this are not limited. If you wish to do this twice (as I explained at first), you can simply have another class and just copy the `bot.on_message_create` line below in the `main.cpp` file and then you can change it to reference the second class, meaning you have two message events firing in two separate classes!
+now, the possibilities to this are not limited. If you wish to do this twice (as I explained at first), you can simply have another class and just copy the `bot.on_message_create` line below in the `main.cpp` file and then you can change it to reference the second class, meaning you have two message events firing in two separate classes!

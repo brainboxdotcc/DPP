@@ -54,7 +54,7 @@ enum ws_state : uint8_t {
 	HTTP_HEADERS,
 
 	/**
-	 * @brief Connected as a websocket, and "upgraded". Now talking using binary frames.
+	 * @brief Connected as a websocket, and "upgraded". now talking using binary frames.
 	 */
 	CONNECTED
 };

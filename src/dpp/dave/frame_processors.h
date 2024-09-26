@@ -7,8 +7,7 @@
 #include "common.h"
 #include "array_view.h"
 
-namespace discord {
-namespace dave {
+namespace dpp::dave {
 
 struct Range {
     size_t offset;
@@ -27,24 +26,24 @@ bool ValidateUnencryptedRanges(const Ranges& unencryptedRanges, size_t frameSize
 
 class InboundFrameProcessor {
 public:
-    void ParseFrame(ArrayView<const uint8_t> frame);
-    size_t ReconstructFrame(ArrayView<uint8_t> frame) const;
+    void ParseFrame(array_view<const uint8_t> frame);
+    size_t ReconstructFrame(array_view<uint8_t> frame) const;
 
     bool IsEncrypted() const { return isEncrypted_; }
     size_t Size() const { return originalSize_; }
     void Clear();
 
-    ArrayView<const uint8_t> GetTag() const { return tag_; }
+    array_view<const uint8_t> GetTag() const { return tag_; }
     TruncatedSyncNonce GetTruncatedNonce() const { return truncatedNonce_; }
-    ArrayView<const uint8_t> GetAuthenticatedData() const
+    array_view<const uint8_t> GetAuthenticatedData() const
     {
-        return MakeArrayView(authenticated_.data(), authenticated_.size());
+        return make_array_view(authenticated_.data(), authenticated_.size());
     }
-    ArrayView<const uint8_t> GetCiphertext() const
+    array_view<const uint8_t> GetCiphertext() const
     {
-        return MakeArrayView(ciphertext_.data(), ciphertext_.size());
+        return make_array_view(ciphertext_.data(), ciphertext_.size());
     }
-    ArrayView<uint8_t> GetPlaintext() { return MakeArrayView(plaintext_); }
+    array_view<uint8_t> GetPlaintext() { return make_array_view(plaintext_); }
 
 private:
     void AddAuthenticatedBytes(const uint8_t* data, size_t size);
@@ -52,7 +51,7 @@ private:
 
     bool isEncrypted_{false};
     size_t originalSize_{0};
-    ArrayView<const uint8_t> tag_;
+    array_view<const uint8_t> tag_;
     TruncatedSyncNonce truncatedNonce_;
     Ranges unencryptedRanges_;
     std::vector<uint8_t> authenticated_;
@@ -62,8 +61,8 @@ private:
 
 class OutboundFrameProcessor {
 public:
-    void ProcessFrame(ArrayView<const uint8_t> frame, Codec codec);
-    size_t ReconstructFrame(ArrayView<uint8_t> frame);
+    void ProcessFrame(array_view<const uint8_t> frame, Codec codec);
+    size_t ReconstructFrame(array_view<uint8_t> frame);
 
     Codec GetCodec() const { return codec_; }
     const std::vector<uint8_t>& GetUnencryptedBytes() const { return unencryptedBytes_; }
@@ -84,5 +83,5 @@ private:
     Ranges unencryptedRanges_;
 };
 
-} // namespace dave
-} // namespace discord
+} // namespace dpp::dave
+

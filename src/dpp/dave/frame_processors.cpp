@@ -10,11 +10,10 @@
 #include "leb128.h"
 
 #if defined(_MSC_VER)
-#include <intrin.h>
+	#include <intrin.h>
 #endif
 
-namespace discord {
-namespace dave {
+namespace dpp::dave {
 
 std::pair<bool, size_t> OverflowAdd(size_t a, size_t b)
 {
@@ -119,7 +118,7 @@ bool ValidateUnencryptedRanges(const Ranges& unencryptedRanges, size_t frameSize
 size_t Reconstruct(Ranges ranges,
                    const std::vector<uint8_t>& rangeBytes,
                    const std::vector<uint8_t>& otherBytes,
-                   const ArrayView<uint8_t>& output)
+                   const array_view<uint8_t>& output)
 {
     size_t frameIndex = 0;
     size_t rangeBytesIndex = 0;
@@ -171,7 +170,7 @@ void InboundFrameProcessor::Clear()
     plaintext_.clear();
 }
 
-void InboundFrameProcessor::ParseFrame(ArrayView<const uint8_t> frame)
+void InboundFrameProcessor::ParseFrame(array_view<const uint8_t> frame)
 {
     Clear();
 
@@ -212,7 +211,7 @@ void InboundFrameProcessor::ParseFrame(ArrayView<const uint8_t> frame)
     assert(frame.begin() <= supplementalBytesBuffer && supplementalBytesBuffer <= frame.end());
 
     // Read the tag
-    tag_ = MakeArrayView(supplementalBytesBuffer, kAesGcm128TruncatedTagBytes);
+    tag_ = make_array_view(supplementalBytesBuffer, kAesGcm128TruncatedTagBytes);
 
     // Read the nonce
     auto nonceBuffer = supplementalBytesBuffer + kAesGcm128TruncatedTagBytes;
@@ -272,7 +271,7 @@ void InboundFrameProcessor::ParseFrame(ArrayView<const uint8_t> frame)
     isEncrypted_ = true;
 }
 
-size_t InboundFrameProcessor::ReconstructFrame(ArrayView<uint8_t> frame) const
+size_t InboundFrameProcessor::ReconstructFrame(array_view<uint8_t> frame) const
 {
     if (!isEncrypted_) {
         DISCORD_LOG(LS_WARNING) << "Cannot reconstruct an invalid encrypted frame";
@@ -308,7 +307,7 @@ void OutboundFrameProcessor::Reset()
     unencryptedRanges_.clear();
 }
 
-void OutboundFrameProcessor::ProcessFrame(ArrayView<const uint8_t> frame, Codec codec)
+void OutboundFrameProcessor::ProcessFrame(array_view<const uint8_t> frame, Codec codec)
 {
     Reset();
 
@@ -319,22 +318,22 @@ void OutboundFrameProcessor::ProcessFrame(ArrayView<const uint8_t> frame, Codec 
     bool success = false;
     switch (codec) {
     case Codec::Opus:
-        success = codec_utils::ProcessFrameOpus(*this, frame);
+        success = codec_utils::process_frame_opus(*this, frame);
         break;
     case Codec::VP8:
-        success = codec_utils::ProcessFrameVp8(*this, frame);
+        success = codec_utils::process_frame_vp8(*this, frame);
         break;
     case Codec::VP9:
-        success = codec_utils::ProcessFrameVp9(*this, frame);
+        success = codec_utils::process_frame_vp9(*this, frame);
         break;
     case Codec::H264:
-        success = codec_utils::ProcessFrameH264(*this, frame);
+        success = codec_utils::process_frame_h264(*this, frame);
         break;
     case Codec::H265:
-        success = codec_utils::ProcessFrameH265(*this, frame);
+        success = codec_utils::process_frame_h265(*this, frame);
         break;
     case Codec::AV1:
-        success = codec_utils::ProcessFrameAv1(*this, frame);
+        success = codec_utils::process_frame_av1(*this, frame);
         break;
     default:
         assert(false && "Unsupported codec for frame encryption");
@@ -352,7 +351,7 @@ void OutboundFrameProcessor::ProcessFrame(ArrayView<const uint8_t> frame, Codec 
     ciphertextBytes_.resize(encryptedBytes_.size());
 }
 
-size_t OutboundFrameProcessor::ReconstructFrame(ArrayView<uint8_t> frame)
+size_t OutboundFrameProcessor::ReconstructFrame(array_view<uint8_t> frame)
 {
     if (unencryptedBytes_.size() + ciphertextBytes_.size() > frame.size()) {
         DISCORD_LOG(LS_WARNING) << "Frame is too small to contain the encrypted frame";
@@ -386,5 +385,5 @@ void OutboundFrameProcessor::AddEncryptedBytes(const uint8_t* bytes, size_t size
     frameIndex_ += size;
 }
 
-} // namespace dave
-} // namespace discord
+} // namespace dpp::dave
+

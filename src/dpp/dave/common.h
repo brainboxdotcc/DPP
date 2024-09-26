@@ -11,11 +11,10 @@
 #include "version.h"
 
 namespace mlspp::bytes_ns {
-struct bytes;
+	struct bytes;
 };
 
-namespace discord {
-namespace dave {
+namespace dpp::dave {
 
 using UnencryptedFrameHeaderSize = uint16_t;
 using TruncatedSyncNonce = uint32_t;
@@ -87,5 +86,5 @@ inline std::optional<T> GetOptional(V&& variant)
     }
 }
 
-} // namespace dave
-} // namespace discord
+} // namespace dpp::dave
+

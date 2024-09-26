@@ -10,7 +10,7 @@ To create a new application, take the steps as follows:
 2. Next, enter a name for the application in the pop-up and press the "Create" button.
 \image html create_application_confirm_popup.png
 In this example we named it "D++ Test Bot".
-3. Move on by click the "Bot" tab in the left-hand side of the screen. Now click the "Add Bot" button on the right and confirm that you want to add the bot to your application.
+3. Move on by click the "Bot" tab in the left-hand side of the screen. now click the "Add Bot" button on the right and confirm that you want to add the bot to your application.
 \image html create_application_add_bot.png
 On the resulting screen, you’ll note a page with information regarding your new bot. You can edit your bot name, description, and avatar here if you want to. If you wish to read the message content from messages, you need to enable the message content intent in the "Privileged Gateway Intents" section.
 \image html create_application_bot_overview.png

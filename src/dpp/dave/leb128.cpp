@@ -4,8 +4,7 @@
 // The following code was copied from the webrtc source code:
 // https://webrtc.googlesource.com/src/+/refs/heads/main/modules/rtp_rtcp/source/leb128.cc
 
-namespace discord {
-namespace dave {
+namespace dpp::dave {
 
 size_t Leb128Size(uint64_t value)
 {
@@ -56,5 +55,5 @@ size_t WriteLeb128(uint64_t value, uint8_t* buffer)
     return size;
 }
 
-} // namespace dave
-} // namespace discord
+} // namespace dpp::dave
+

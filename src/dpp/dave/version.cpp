@@ -1,7 +1,6 @@
 #include "version.h"
 
-namespace discord {
-namespace dave {
+namespace dpp::dave {
 
 constexpr ProtocolVersion CurrentDaveProtocolVersion = 1;
 
@@ -10,5 +9,5 @@ ProtocolVersion MaxSupportedProtocolVersion()
     return CurrentDaveProtocolVersion;
 }
 
-} // namespace dave
-} // namespace discord
+} // namespace dpp::dave
+

@@ -10,8 +10,7 @@
 
 using namespace std::chrono_literals;
 
-namespace discord {
-namespace dave {
+namespace dpp::dave {
 
 constexpr auto kStatsInterval = 10s;
 
@@ -36,14 +35,14 @@ void Decryptor::TransitionToPassthroughMode(bool passthroughMode, Duration trans
     }
     else {
         // Update the pass through mode expiry
-        auto maxExpiry = clock_.Now() + transitionExpiry;
+        auto maxExpiry = clock_.now() + transitionExpiry;
         allowPassThroughUntil_ = std::min(allowPassThroughUntil_, maxExpiry);
     }
 }
 
 size_t Decryptor::Decrypt(MediaType mediaType,
-                          ArrayView<const uint8_t> encryptedFrame,
-                          ArrayView<uint8_t> frame)
+			  array_view<const uint8_t> encryptedFrame,
+			  array_view<uint8_t> frame)
 {
     if (mediaType != Audio && mediaType != Video) {
         DISCORD_LOG(LS_WARNING) << "Decrypt failed, invalid media type: "
@@ -51,7 +50,7 @@ size_t Decryptor::Decrypt(MediaType mediaType,
         return 0;
     }
 
-    auto start = clock_.Now();
+    auto start = clock_.now();
 
     auto localFrame = GetOrCreateFrameProcessor();
     ScopeExit cleanup([&] { ReturnFrameProcessor(std::move(localFrame)); });
@@ -118,7 +117,7 @@ size_t Decryptor::Decrypt(MediaType mediaType,
                                 << ", pass through enabled: " << (canUsePassThrough ? "yes" : "no");
     }
 
-    auto end = clock_.Now();
+    auto end = clock_.now();
     if (end > lastStatsTime_ + kStatsInterval) {
         lastStatsTime_ = end;
         DISCORD_LOG(LS_INFO) << "Decrypted audio: " << stats_[Audio].decryptSuccessCount
@@ -132,10 +131,10 @@ size_t Decryptor::Decrypt(MediaType mediaType,
     return bytesWritten;
 }
 
-bool Decryptor::DecryptImpl(CryptorManager& cryptorManager,
-                            MediaType mediaType,
-                            InboundFrameProcessor& encryptedFrame,
-                            ArrayView<uint8_t> frame)
+bool Decryptor::DecryptImpl(aead_cipher_manager& cryptorManager,
+			    MediaType mediaType,
+			    InboundFrameProcessor& encryptedFrame,
+			    array_view<uint8_t> frame)
 {
     auto tag = encryptedFrame.GetTag();
     auto truncatedNonce = encryptedFrame.GetTruncatedNonce();
@@ -150,7 +149,7 @@ bool Decryptor::DecryptImpl(CryptorManager& cryptorManager,
            &truncatedNonce,
            kAesGcm128TruncatedSyncNonceBytes);
 
-    auto nonceBufferView = MakeArrayView<const uint8_t>(nonceBuffer.data(), nonceBuffer.size());
+    auto nonceBufferView = make_array_view<const uint8_t>(nonceBuffer.data(), nonceBuffer.size());
 
     auto generation =
       cryptorManager.ComputeWrappedGeneration(truncatedNonce >> kRatchetGenerationShiftBits);
@@ -161,7 +160,7 @@ bool Decryptor::DecryptImpl(CryptorManager& cryptorManager,
     }
 
     // Get the cryptor for this generation
-    ICryptor* cryptor = cryptorManager.GetCryptor(generation);
+    cipher_interface* cryptor = cryptorManager.GetCryptor(generation);
 
     if (!cryptor) {
         DISCORD_LOG(LS_INFO) << "Decrypt failed, no cryptor found for generation: " << generation;
@@ -186,7 +185,7 @@ size_t Decryptor::GetMaxPlaintextByteSize(MediaType mediaType, size_t encryptedF
 
 void Decryptor::UpdateCryptorManagerExpiry(Duration expiry)
 {
-    auto maxExpiryTime = clock_.Now() + expiry;
+    auto maxExpiryTime = clock_.now() + expiry;
     for (auto& cryptorManager : cryptorManagers_) {
         cryptorManager.UpdateExpiry(maxExpiryTime);
     }
@@ -217,5 +216,5 @@ void Decryptor::ReturnFrameProcessor(std::unique_ptr<InboundFrameProcessor> fram
     frameProcessors_.push_back(std::move(frameProcessor));
 }
 
-} // namespace dave
-} // namespace discord
+} // namespace dpp::dave
+

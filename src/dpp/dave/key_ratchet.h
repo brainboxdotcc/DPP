@@ -3,8 +3,7 @@
 #include <memory>
 #include "common.h"
 
-namespace discord {
-namespace dave {
+namespace dpp::dave {
 
 using KeyGeneration = uint32_t;
 
@@ -15,5 +14,5 @@ public:
     virtual void DeleteKey(KeyGeneration generation) noexcept = 0;
 };
 
-} // namespace dave
-} // namespace discord
+} // namespace dpp::dave
+

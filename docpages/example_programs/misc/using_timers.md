@@ -14,7 +14,7 @@ Now, let's make the same timer a one-shot timer, meaning it will only run once!
 
 \include{cpp} timers_example2.cpp
 
-Great! Now we've learnt the basics of timers and how to stop them!
+Great! now we've learnt the basics of timers and how to stop them!
 
 To finish off, let's make a timer that you can start and stop with commands. This example will store the timer in a map where the user is the owner of the timer!
 

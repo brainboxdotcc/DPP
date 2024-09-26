@@ -2,9 +2,7 @@
 #include <string>
 #include "util.h"
 
-namespace discord {
-namespace dave {
-namespace mls {
+namespace dpp::dave::mls {
 
 ::mlspp::Credential CreateUserCredential(const std::string& userId, ProtocolVersion version)
 {
@@ -28,6 +26,6 @@ std::string UserCredentialToString(const ::mlspp::Credential& cred, ProtocolVers
     return std::to_string(uidVal);
 }
 
-} // namespace mls
-} // namespace dave
-} // namespace discord
+} // namespace dpp::dave::mls
+
+

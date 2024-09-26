@@ -7,9 +7,7 @@
 #include "logger.h"
 #include "leb128.h"
 
-namespace discord {
-namespace dave {
-namespace codec_utils {
+namespace dpp::dave::codec_utils {
 
 UnencryptedFrameHeaderSize BytesCoveringH264PPS(const uint8_t* payload,
                                                 const uint64_t sizeRemaining)
@@ -115,13 +113,13 @@ std::optional<IndexStartCodeSizePair> FindNextH26XNaluIndex(const uint8_t* buffe
     return std::nullopt;
 }
 
-bool ProcessFrameOpus(OutboundFrameProcessor& processor, ArrayView<const uint8_t> frame)
+bool process_frame_opus(OutboundFrameProcessor& processor, array_view<const uint8_t> frame)
 {
     processor.AddEncryptedBytes(frame.data(), frame.size());
     return true;
 }
 
-bool ProcessFrameVp8(OutboundFrameProcessor& processor, ArrayView<const uint8_t> frame)
+bool process_frame_vp8(OutboundFrameProcessor& processor, array_view<const uint8_t> frame)
 {
     constexpr uint8_t kVP8KeyFrameUnencryptedBytes = 10;
     constexpr uint8_t kVP8DeltaFrameUnencryptedBytes = 1;
@@ -153,7 +151,7 @@ bool ProcessFrameVp8(OutboundFrameProcessor& processor, ArrayView<const uint8_t>
     return true;
 }
 
-bool ProcessFrameVp9(OutboundFrameProcessor& processor, ArrayView<const uint8_t> frame)
+bool process_frame_vp9(OutboundFrameProcessor& processor, array_view<const uint8_t> frame)
 {
     // payload descriptor is unencrypted in each packet
     // and includes all information the depacketizer needs
@@ -161,7 +159,7 @@ bool ProcessFrameVp9(OutboundFrameProcessor& processor, ArrayView<const uint8_t>
     return true;
 }
 
-bool ProcessFrameH264(OutboundFrameProcessor& processor, ArrayView<const uint8_t> frame)
+bool process_frame_h264(OutboundFrameProcessor& processor, array_view<const uint8_t> frame)
 {
     // minimize the amount of unencrypted header data for H264 depending on the NAL unit
     // type from WebRTC, see: src/modules/rtp_rtcp/source/rtp_format_h264.cc
@@ -226,7 +224,7 @@ bool ProcessFrameH264(OutboundFrameProcessor& processor, ArrayView<const uint8_t
     return true;
 }
 
-bool ProcessFrameH265(OutboundFrameProcessor& processor, ArrayView<const uint8_t> frame)
+bool process_frame_h265(OutboundFrameProcessor& processor, array_view<const uint8_t> frame)
 {
     // minimize the amount of unencrypted header data for H265 depending on the NAL unit
     // type from WebRTC, see: src/modules/rtp_rtcp/source/rtp_format_h265.cc
@@ -283,7 +281,7 @@ bool ProcessFrameH265(OutboundFrameProcessor& processor, ArrayView<const uint8_t
     return true;
 }
 
-bool ProcessFrameAv1(OutboundFrameProcessor& processor, ArrayView<const uint8_t> frame)
+bool process_frame_av1(OutboundFrameProcessor& processor, array_view<const uint8_t> frame)
 {
     constexpr uint8_t kAv1ObuHeaderHasExtensionMask = 0b0'0000'100;
     constexpr uint8_t kAv1ObuHeaderHasSizeMask = 0b0'0000'010;
@@ -386,7 +384,7 @@ bool ProcessFrameAv1(OutboundFrameProcessor& processor, ArrayView<const uint8_t>
     return true;
 }
 
-bool ValidateEncryptedFrame(OutboundFrameProcessor& processor, ArrayView<uint8_t> frame)
+bool validate_encrypted_frame(OutboundFrameProcessor& processor, array_view<uint8_t> frame)
 {
     auto codec = processor.GetCodec();
     if (codec != Codec::H264 && codec != Codec::H265) {
@@ -430,6 +428,6 @@ bool ValidateEncryptedFrame(OutboundFrameProcessor& processor, ArrayView<uint8_t
     return true;
 }
 
-} // namespace codec_utils
-} // namespace dave
-} // namespace discord
+} // namespace dpp::dave::codec_utils
+
+

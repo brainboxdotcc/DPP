@@ -57,10 +57,7 @@ static std::filesystem::path GetKeyStorageDirectory()
     return dir / KeyStorageDir;
 }
 
-namespace discord {
-namespace dave {
-namespace mls {
-namespace detail {
+namespace dpp::dave::mls::detail {
 
 std::shared_ptr<::mlspp::SignaturePrivateKey> GetGenericPersistedKeyPair(KeyPairContextType ctx,
                                                                          const std::string& id,
@@ -172,7 +169,7 @@ bool DeleteGenericPersistedKeyPair(KeyPairContextType ctx, const std::string& id
     return std::filesystem::remove(file, errc);
 }
 
-} // namespace detail
-} // namespace mls
-} // namespace dave
-} // namespace discord
+} // namespace dpp::dave::mls::detail
+
+
+

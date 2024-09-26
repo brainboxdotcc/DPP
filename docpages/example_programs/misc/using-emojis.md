@@ -8,7 +8,7 @@ First - Sending emojis. You have to use its mention, which depends on the type. 
 
 \include{cpp} using_emojis1.cpp
 
-Now, our bot will send our epic emojis!
+now, our bot will send our epic emojis!
 
 \image html using_emojis1.png
 

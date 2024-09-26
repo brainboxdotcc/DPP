@@ -4,8 +4,7 @@
 #include <functional>
 #include <utility>
 
-namespace discord {
-namespace dave {
+namespace dpp::dave {
 
 class [[nodiscard]] ScopeExit final {
 public:
@@ -44,5 +43,5 @@ private:
     std::function<void()> cleanup_;
 };
 
-} // namespace dave
-} // namespace discord
+} // namespace dpp::dave
+

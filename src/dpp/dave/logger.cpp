@@ -4,8 +4,7 @@
 #include <cstring>
 #include <iostream>
 
-namespace discord {
-namespace dave {
+namespace dpp::dave {
 
 std::atomic<LogSink> gLogSink = nullptr;
 
@@ -51,5 +50,5 @@ LogStreamer::~LogStreamer()
     }
 }
 
-} // namespace dave
-} // namespace discord
+} // namespace dpp::dave
+

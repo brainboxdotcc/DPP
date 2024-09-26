@@ -2,23 +2,22 @@
 
 #include <chrono>
 
-namespace discord {
-namespace dave {
+namespace dpp::dave {
 
-class IClock {
+class clock_interface {
 public:
-    using BaseClock = std::chrono::steady_clock;
-    using TimePoint = BaseClock::time_point;
-    using Duration = BaseClock::duration;
+    using base_clock = std::chrono::steady_clock;
+    using time_point = base_clock::time_point;
+    using clock_duration = base_clock::duration;
 
-    virtual ~IClock() = default;
-    virtual TimePoint Now() const = 0;
+    virtual ~clock_interface() = default;
+    virtual time_point now() const = 0;
 };
 
-class Clock : public IClock {
+class Clock : public clock_interface {
 public:
-    TimePoint Now() const override { return BaseClock::now(); }
+    time_point now() const override { return base_clock::now(); }
 };
 
-} // namespace dave
-} // namespace discord
+} // namespace dpp::dave
+

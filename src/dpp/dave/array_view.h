@@ -3,14 +3,13 @@
 #include <cassert>
 #include <vector>
 
-namespace discord {
-namespace dave {
+namespace dpp::dave {
 
 template <typename T>
-class ArrayView {
+class array_view {
 public:
-    ArrayView() = default;
-    ArrayView(T* data, size_t size)
+    array_view() = default;
+    array_view(T* data, size_t size)
       : data_(data)
       , size_(size)
     {
@@ -28,16 +27,16 @@ private:
 };
 
 template <typename T>
-inline ArrayView<T> MakeArrayView(T* data, size_t size)
+inline array_view<T> make_array_view(T* data, size_t size)
 {
-    return ArrayView<T>(data, size);
+    return array_view<T>(data, size);
 }
 
 template <typename T>
-inline ArrayView<T> MakeArrayView(std::vector<T>& data)
+inline array_view<T> make_array_view(std::vector<T>& data)
 {
-    return ArrayView<T>(data.data(), data.size());
+    return array_view<T>(data.data(), data.size());
 }
 
-} // namespace dave
-} // namespace discord
+} // namespace dpp::dave
+

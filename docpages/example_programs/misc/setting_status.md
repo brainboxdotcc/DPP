@@ -15,7 +15,7 @@ If all went well, your bot should now be online and say this on members list!
 If you want to make your bot show as Do Not Disturb, then you could change dpp::ps_online to dpp::ps_dnd.
 You can also play around with dpp::at_game, changing it to something like dpp::at_custom or dpp::at_listening!
 
-Now, let's cover setting the bot status to say `Playing with x guilds!` every two minutes.
+now, let's cover setting the bot status to say `Playing with x guilds!` every two minutes.
 
 \note This example uses timers to update the status every 2 minutes. If you aren't familiar with D++'s own timers, please read \ref using_timers "this page on timers" before you continue.
 

@@ -19,15 +19,13 @@ static const std::string SelfSignatureLabel = "DiscordSelfSignature";
 static std::string MakeKeyID(const std::string& sessionID, ::mlspp::CipherSuite suite)
 {
     return sessionID + "-" + std::to_string((uint16_t)suite.cipher_suite()) + "-" +
-      std::to_string(discord::dave::mls::KeyVersion);
+      std::to_string(dpp::dave::mls::KeyVersion);
 }
 
 static std::mutex mtx;
 static std::map<std::string, std::shared_ptr<::mlspp::SignaturePrivateKey>> map;
 
-namespace discord {
-namespace dave {
-namespace mls {
+namespace dpp::dave::mls {
 
 static std::shared_ptr<::mlspp::SignaturePrivateKey> GetPersistedKeyPair(
   KeyPairContextType ctx,
@@ -45,7 +43,7 @@ static std::shared_ptr<::mlspp::SignaturePrivateKey> GetPersistedKeyPair(
     std::shared_ptr<::mlspp::SignaturePrivateKey> ret;
 
     if (!ret) {
-        ret = ::discord::dave::mls::detail::GetGenericPersistedKeyPair(ctx, id, suite);
+        ret = ::dpp::dave::mls::detail::GetGenericPersistedKeyPair(ctx, id, suite);
     }
 
     if (!ret) {
@@ -95,9 +93,7 @@ bool DeletePersistedKeyPair(KeyPairContextType ctx,
 
     map.erase(id);
 
-    return ::discord::dave::mls::detail::DeleteGenericPersistedKeyPair(ctx, id);
+    return ::dpp::dave::mls::detail::DeleteGenericPersistedKeyPair(ctx, id);
 }
 
-} // namespace mls
-} // namespace dave
-} // namespace discord
+} // namespace dpp::dave::mls

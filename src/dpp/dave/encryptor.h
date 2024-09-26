@@ -9,13 +9,12 @@
 #include <vector>
 #include "codec_utils.h"
 #include "common.h"
-#include "cryptor.h"
+#include "cipher_interface.h"
 #include "key_ratchet.h"
 #include "frame_processors.h"
 #include "version.h"
 
-namespace discord {
-namespace dave {
+namespace dpp::dave {
 
 struct EncryptorStats {
     uint64_t passthroughCount = 0;
@@ -38,10 +37,10 @@ public:
     Codec CodecForSsrc(uint32_t ssrc);
 
     int Encrypt(MediaType mediaType,
-                uint32_t ssrc,
-                ArrayView<const uint8_t> frame,
-                ArrayView<uint8_t> encryptedFrame,
-                size_t* bytesWritten);
+		uint32_t ssrc,
+		array_view<const uint8_t> frame,
+		array_view<uint8_t> encryptedFrame,
+		size_t* bytesWritten);
 
     size_t GetMaxCiphertextByteSize(MediaType mediaType, size_t frameSize);
     EncryptorStats GetStats(MediaType mediaType) const { return stats_[mediaType]; }
@@ -57,7 +56,7 @@ private:
     std::unique_ptr<OutboundFrameProcessor> GetOrCreateFrameProcessor();
     void ReturnFrameProcessor(std::unique_ptr<OutboundFrameProcessor> frameProcessor);
 
-    using CryptorAndNonce = std::pair<std::shared_ptr<ICryptor>, TruncatedSyncNonce>;
+    using CryptorAndNonce = std::pair<std::shared_ptr<cipher_interface>, TruncatedSyncNonce>;
     CryptorAndNonce GetNextCryptorAndNonce();
 
     void UpdateCurrentProtocolVersion(ProtocolVersion version);
@@ -76,7 +75,7 @@ private:
 
     std::mutex keyGenMutex_;
     std::unique_ptr<IKeyRatchet> keyRatchet_;
-    std::shared_ptr<ICryptor> cryptor_;
+    std::shared_ptr<cipher_interface> cryptor_;
     KeyGeneration currentKeyGeneration_{0};
     TruncatedSyncNonce truncatedNonce_{0};
 
@@ -94,5 +93,5 @@ private:
     ProtocolVersion currentProtocolVersion_{MaxSupportedProtocolVersion()};
 };
 
-} // namespace dave
-} // namespace discord
+} // namespace dpp::dave
+

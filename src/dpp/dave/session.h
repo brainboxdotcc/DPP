@@ -25,9 +25,7 @@ struct SignaturePrivateKey;
 class State;
 } // namespace mlspp
 
-namespace discord {
-namespace dave {
-namespace mls {
+namespace dpp::dave::mls {
 
 struct QueuedProposal;
 
@@ -36,7 +34,7 @@ public:
     using MLSFailureCallback = std::function<void(std::string const&, std::string const&)>;
 
     Session(KeyPairContextType context,
-            std::string authSessionId,
+            const std::string& authSessionId,
             MLSFailureCallback callback) noexcept;
 
     ~Session() noexcept;
@@ -128,6 +126,6 @@ private:
     MLSFailureCallback onMLSFailureCallback_{};
 };
 
-} // namespace mls
-} // namespace dave
-} // namespace discord
+} // namespace dpp::dave::mls
+
+

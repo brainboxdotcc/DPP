@@ -9,14 +9,13 @@
 
 #include "codec_utils.h"
 #include "common.h"
-#include "cryptor.h"
+#include "cipher_interface.h"
 #include "cryptor_manager.h"
 #include "frame_processors.h"
 #include "version.h"
 #include "clock.h"
 
-namespace discord {
-namespace dave {
+namespace dpp::dave {
 
 class IKeyRatchet;
 
@@ -38,19 +37,19 @@ public:
                                      Duration transitionExpiry = kDefaultTransitionDuration);
 
     size_t Decrypt(MediaType mediaType,
-                   ArrayView<const uint8_t> encryptedFrame,
-                   ArrayView<uint8_t> frame);
+		   array_view<const uint8_t> encryptedFrame,
+		   array_view<uint8_t> frame);
 
     size_t GetMaxPlaintextByteSize(MediaType mediaType, size_t encryptedFrameSize);
     DecryptorStats GetStats(MediaType mediaType) const { return stats_[mediaType]; }
 
 private:
-    using TimePoint = IClock::TimePoint;
+    using TimePoint = clock_interface::time_point;
 
-    bool DecryptImpl(CryptorManager& cryptor,
-                     MediaType mediaType,
-                     InboundFrameProcessor& encryptedFrame,
-                     ArrayView<uint8_t> frame);
+    bool DecryptImpl(aead_cipher_manager& cryptor,
+		     MediaType mediaType,
+		     InboundFrameProcessor& encryptedFrame,
+		     array_view<uint8_t> frame);
 
     void UpdateCryptorManagerExpiry(Duration expiry);
     void CleanupExpiredCryptorManagers();
@@ -59,7 +58,7 @@ private:
     void ReturnFrameProcessor(std::unique_ptr<InboundFrameProcessor> frameProcessor);
 
     Clock clock_;
-    std::deque<CryptorManager> cryptorManagers_;
+    std::deque<aead_cipher_manager> cryptorManagers_;
 
     std::mutex frameProcessorsMutex_;
     std::vector<std::unique_ptr<InboundFrameProcessor>> frameProcessors_;
@@ -70,5 +69,5 @@ private:
     std::array<DecryptorStats, 2> stats_;
 };
 
-} // namespace dave
-} // namespace discord
+} // namespace dpp::dave
+

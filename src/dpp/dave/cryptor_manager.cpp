@@ -9,10 +9,9 @@
 
 using namespace std::chrono_literals;
 
-namespace discord {
-namespace dave {
+namespace dpp::dave {
 
-KeyGeneration ComputeWrappedGeneration(KeyGeneration oldest, KeyGeneration generation)
+KeyGeneration compute_wrapped_generation(KeyGeneration oldest, KeyGeneration generation)
 {
     // Assume generation is greater than or equal to oldest, this may be wrong in a few cases but
     // will be caught by the max generation gap check.
@@ -21,7 +20,7 @@ KeyGeneration ComputeWrappedGeneration(KeyGeneration oldest, KeyGeneration gener
     return factor * kGenerationWrap + generation;
 }
 
-BigNonce ComputeWrappedBigNonce(KeyGeneration generation, TruncatedSyncNonce nonce)
+BigNonce compute_wrapped_big_nonce(KeyGeneration generation, TruncatedSyncNonce nonce)
 {
     // Remove the generation bits from the nonce
     auto maskedNonce = nonce & ((1 << kRatchetGenerationShiftBits) - 1);
@@ -29,26 +28,26 @@ BigNonce ComputeWrappedBigNonce(KeyGeneration generation, TruncatedSyncNonce non
     return static_cast<BigNonce>(generation) << kRatchetGenerationShiftBits | maskedNonce;
 }
 
-CryptorManager::CryptorManager(const IClock& clock, std::unique_ptr<IKeyRatchet> keyRatchet)
+aead_cipher_manager::aead_cipher_manager(const clock_interface& clock, std::unique_ptr<IKeyRatchet> keyRatchet)
   : clock_(clock)
   , keyRatchet_(std::move(keyRatchet))
-  , ratchetCreation_(clock.Now())
-  , ratchetExpiry_(TimePoint::max())
+  , ratchetCreation_(clock.now())
+  , ratchetExpiry_(time_point::max())
 {
 }
 
-bool CryptorManager::CanProcessNonce(KeyGeneration generation, TruncatedSyncNonce nonce) const
+bool aead_cipher_manager::CanProcessNonce(KeyGeneration generation, TruncatedSyncNonce nonce) const
 {
     if (!newestProcessedNonce_) {
         return true;
     }
 
-    auto bigNonce = ComputeWrappedBigNonce(generation, nonce);
+    auto bigNonce = compute_wrapped_big_nonce(generation, nonce);
     return bigNonce > *newestProcessedNonce_ ||
       std::find(missingNonces_.rbegin(), missingNonces_.rend(), bigNonce) != missingNonces_.rend();
 }
 
-ICryptor* CryptorManager::GetCryptor(KeyGeneration generation)
+cipher_interface* aead_cipher_manager::GetCryptor(KeyGeneration generation)
 {
     CleanupExpiredCryptors();
 
@@ -65,7 +64,7 @@ ICryptor* CryptorManager::GetCryptor(KeyGeneration generation)
     }
 
     auto ratchetLifetimeSec =
-      std::chrono::duration_cast<std::chrono::seconds>(clock_.Now() - ratchetCreation_).count();
+      std::chrono::duration_cast<std::chrono::seconds>(clock_.now() - ratchetCreation_).count();
     auto maxLifetimeFrames = kMaxFramesPerSecond * ratchetLifetimeSec;
     auto maxLifetimeGenerations = maxLifetimeFrames >> kRatchetGenerationShiftBits;
     if (generation > maxLifetimeGenerations) {
@@ -87,9 +86,9 @@ ICryptor* CryptorManager::GetCryptor(KeyGeneration generation)
     return cryptor.get();
 }
 
-void CryptorManager::ReportCryptorSuccess(KeyGeneration generation, TruncatedSyncNonce nonce)
+void aead_cipher_manager::ReportCryptorSuccess(KeyGeneration generation, TruncatedSyncNonce nonce)
 {
-    auto bigNonce = ComputeWrappedBigNonce(generation, nonce);
+    auto bigNonce = compute_wrapped_big_nonce(generation, nonce);
 
     // Add any missing nonces to the queue
     if (!newestProcessedNonce_) {
@@ -125,7 +124,7 @@ void CryptorManager::ReportCryptorSuccess(KeyGeneration generation, TruncatedSyn
     newestGeneration_ = generation;
 
     // Update the expiry time for all old cryptors
-    const auto expiryTime = clock_.Now() + kCryptorExpiry;
+    const auto expiryTime = clock_.now() + kCryptorExpiry;
     for (auto& [gen, cryptor] : cryptors_) {
         if (gen < newestGeneration_) {
             DISCORD_LOG(LS_INFO) << "Updating expiry for cryptor, generation: " << gen;
@@ -134,37 +133,37 @@ void CryptorManager::ReportCryptorSuccess(KeyGeneration generation, TruncatedSyn
     }
 }
 
-KeyGeneration CryptorManager::ComputeWrappedGeneration(KeyGeneration generation)
+KeyGeneration aead_cipher_manager::ComputeWrappedGeneration(KeyGeneration generation)
 {
-    return ::discord::dave::ComputeWrappedGeneration(oldestGeneration_, generation);
+    return ::dpp::dave::compute_wrapped_generation(oldestGeneration_, generation);
 }
 
-CryptorManager::ExpiringCryptor CryptorManager::MakeExpiringCryptor(KeyGeneration generation)
+aead_cipher_manager::ExpiringCryptor aead_cipher_manager::MakeExpiringCryptor(KeyGeneration generation)
 {
     // Get the new key from the ratchet
     auto encryptionKey = keyRatchet_->GetKey(generation);
-    auto expiryTime = TimePoint::max();
+    auto expiryTime = time_point::max();
 
     // If we got frames out of order, we might have to create a cryptor for an old generation
     // In that case, create it with a non-infinite expiry time as we have already transitioned
     // to a newer generation
     if (generation < newestGeneration_) {
         DISCORD_LOG(LS_INFO) << "Creating cryptor for old generation: " << generation;
-        expiryTime = clock_.Now() + kCryptorExpiry;
+        expiryTime = clock_.now() + kCryptorExpiry;
     }
     else {
         DISCORD_LOG(LS_INFO) << "Creating cryptor for new generation: " << generation;
     }
 
-    return {CreateCryptor(encryptionKey), expiryTime};
+    return {create_cipher(encryptionKey), expiryTime};
 }
 
-void CryptorManager::CleanupExpiredCryptors()
+void aead_cipher_manager::CleanupExpiredCryptors()
 {
     for (auto it = cryptors_.begin(); it != cryptors_.end();) {
         auto& [generation, cryptor] = *it;
 
-        bool expired = cryptor.expiry < clock_.Now();
+        bool expired = cryptor.expiry < clock_.now();
         if (expired) {
             DISCORD_LOG(LS_INFO) << "Removing expired cryptor, generation: " << generation;
         }
@@ -180,5 +179,5 @@ void CryptorManager::CleanupExpiredCryptors()
     }
 }
 
-} // namespace dave
-} // namespace discord
+} // namespace dpp::dave
+

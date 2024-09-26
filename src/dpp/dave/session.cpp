@@ -24,9 +24,7 @@
         onMLSFailureCallback_(__FUNCTION__, reason); \
     }
 
-namespace discord {
-namespace dave {
-namespace mls {
+namespace dpp::dave::mls {
 
 struct QueuedProposal {
     ::mlspp::ValidatedContent content;
@@ -34,7 +32,7 @@ struct QueuedProposal {
 };
 
 Session::Session(KeyPairContextType context,
-                 std::string authSessionId,
+                 const std::string& authSessionId,
                  MLSFailureCallback callback) noexcept
   : signingKeyId_(authSessionId)
   , keyPairContext_(context)
@@ -780,6 +778,6 @@ void Session::ClearPendingState()
     proposalQueue_.clear();
 }
 
-} // namespace mls
-} // namespace dave
-} // namespace discord
+} // namespace dpp::dave::mls
+
+

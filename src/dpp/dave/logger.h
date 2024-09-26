@@ -3,11 +3,11 @@
 #include <sstream>
 
 #if !defined(DISCORD_LOG)
-#define DISCORD_LOG_FILE_LINE(sev, file, line) ::discord::dave::LogStreamer(sev, file, line)
-#define DISCORD_LOG(sev) DISCORD_LOG_FILE_LINE(::discord::dave::sev, __FILE__, __LINE__)
+#define DISCORD_LOG_FILE_LINE(sev, file, line) ::dpp::dave::LogStreamer(sev, file, line)
+#define DISCORD_LOG(sev) DISCORD_LOG_FILE_LINE(::dpp::dave::sev, __FILE__, __LINE__)
 #endif
-namespace discord {
-namespace dave {
+
+namespace dpp::dave {
 
 enum LoggingSeverity {
     LS_VERBOSE,
@@ -42,5 +42,5 @@ private:
     std::ostringstream stream_;
 };
 
-} // namespace dave
-} // namespace discord
+} // namespace dpp::dave
+

@@ -1,14 +1,13 @@
 #pragma once
 
-#include <stdint.h>
+#include <cstdint>
 
-namespace discord {
-namespace dave {
+namespace dpp::dave {
 
 using ProtocolVersion = uint16_t;
 using SignatureVersion = uint8_t;
 
 ProtocolVersion MaxSupportedProtocolVersion();
 
-} // namespace dave
-} // namespace discord
+} // namespace dpp::dave
+

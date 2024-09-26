@@ -12,7 +12,7 @@ This tutorial teaches you how to create a lightweight environment for D++ develo
 6. Congratulations, you've successfully installed all dependencies! Now comes the real fun: Setting up the environment! For this tutorial we'll use a as small as possible setup, so you might create a more advanced one for production bots.
 7. Create a new directory, inside your home directory, using `mkdir MyBot`. Then, you want to open that directory using `cd MyBot`.
 8. Now that you've a directory to work in, type `touch mybot.cxx` to create a file you can work in!
-9. Now, head on over to Visual Studio Code. Press `CTRL+SHIFT+P` and type `Remote-WSL: New WSL Window` (You don't have to type all of it, it will auto-suggest it!). This will bring up a new window. In the new window, choose `open folder` and choose the directory you've created prior (It should be within your home directory). Press OK and now you have your Folder opened as a Workspace!
+9. now, head on over to Visual Studio Code. Press `CTRL+SHIFT+P` and type `Remote-WSL: New WSL Window` (You don't have to type all of it, it will auto-suggest it!). This will bring up a new window. In the new window, choose `open folder` and choose the directory you've created prior (It should be within your home directory). Press OK and now you have your Folder opened as a Workspace!
 10. Add code to your CXX file (We suggest using the \ref firstbot "first bot page" if this is your first time!) and compile it by running `g++ -std=c++17 *.cxx -o bot -ldpp` in the same folder as your cxx file. This will create a "bot" file!
 11. You can now start your bot by typing `./bot`!
 

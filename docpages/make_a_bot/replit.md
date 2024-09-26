@@ -20,7 +20,7 @@ g++ -o bot main.cpp -ldpp -lpthread -L./usr/lib -I./usr/include -std=c++17
 LD_PRELOAD=./usr/lib/libdpp.so ./bot
 ```
 
-Now that your bot is running, you have to keep it online. Replit automatically puts repls to sleep after some time, so you will need to ping a webserver. Unfortunately, Replit is sometimes limiting, and this is one of the only free workarounds to this issue.
+now that your bot is running, you have to keep it online. Replit automatically puts repls to sleep after some time, so you will need to ping a webserver. Unfortunately, Replit is sometimes limiting, and this is one of the only free workarounds to this issue.
 
 1. Start a http server. This can be through any webserver, but as a simple solution, use python's built in http.server:
 ```bash

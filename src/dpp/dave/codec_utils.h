@@ -4,19 +4,17 @@
 #include "frame_processors.h"
 #include "array_view.h"
 
-namespace discord {
-namespace dave {
-namespace codec_utils {
+namespace dpp::dave::codec_utils {
 
-bool ProcessFrameOpus(OutboundFrameProcessor& processor, ArrayView<const uint8_t> frame);
-bool ProcessFrameVp8(OutboundFrameProcessor& processor, ArrayView<const uint8_t> frame);
-bool ProcessFrameVp9(OutboundFrameProcessor& processor, ArrayView<const uint8_t> frame);
-bool ProcessFrameH264(OutboundFrameProcessor& processor, ArrayView<const uint8_t> frame);
-bool ProcessFrameH265(OutboundFrameProcessor& processor, ArrayView<const uint8_t> frame);
-bool ProcessFrameAv1(OutboundFrameProcessor& processor, ArrayView<const uint8_t> frame);
+bool process_frame_opus(OutboundFrameProcessor & processor, array_view<const uint8_t> frame);
+bool process_frame_vp8(OutboundFrameProcessor & processor, array_view<const uint8_t> frame);
+bool process_frame_vp9(OutboundFrameProcessor & processor, array_view<const uint8_t> frame);
+bool process_frame_h264(OutboundFrameProcessor & processor, array_view<const uint8_t> frame);
+bool process_frame_h265(OutboundFrameProcessor & processor, array_view<const uint8_t> frame);
+bool process_frame_av1(OutboundFrameProcessor & processor, array_view<const uint8_t> frame);
 
-bool ValidateEncryptedFrame(OutboundFrameProcessor& processor, ArrayView<uint8_t> frame);
+bool validate_encrypted_frame(OutboundFrameProcessor& processor, array_view<uint8_t> frame);
 
-} // namespace codec_utils
-} // namespace dave
-} // namespace discord
+} // namespace dpp::dave::codec_utils
+
+

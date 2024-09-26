@@ -6,7 +6,7 @@ Sometimes it's simply not enough to ping someone in a server with a message, and
 
 \include{cpp} private_messaging.cpp
 
-That's it! Now, you should have something like this:
+That's it! now, you should have something like this:
 
 \image html privatemessageexample.png
 \image html privatemessageexample2.png

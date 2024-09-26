@@ -4,13 +4,11 @@
 #include <mls/credential.h>
 #include "version.h"
 
-namespace discord {
-namespace dave {
-namespace mls {
+namespace dpp::dave::mls {
 
 ::mlspp::Credential CreateUserCredential(const std::string& userId, ProtocolVersion version);
 std::string UserCredentialToString(const ::mlspp::Credential& cred, ProtocolVersion version);
 
-} // namespace mls
-} // namespace dave
-} // namespace discord
+} // namespace dpp::dave::mls
+
+

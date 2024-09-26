@@ -6,9 +6,7 @@
 
 #include "version.h"
 
-namespace discord {
-namespace dave {
-namespace mls {
+namespace dpp::dave::mls {
 
 ::mlspp::CipherSuite::ID CiphersuiteIDForProtocolVersion(ProtocolVersion version) noexcept;
 ::mlspp::CipherSuite CiphersuiteForProtocolVersion(ProtocolVersion version) noexcept;
@@ -20,6 +18,6 @@ namespace mls {
   ProtocolVersion version,
   const ::mlspp::ExternalSender& externalSender) noexcept;
 
-} // namespace mls
-} // namespace dave
-} // namespace discord
+} // namespace dpp::dave::mls
+
+

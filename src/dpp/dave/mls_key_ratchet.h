@@ -3,8 +3,7 @@
 #include <mls/key_schedule.h>
 #include "key_ratchet.h"
 
-namespace discord {
-namespace dave {
+namespace dpp::dave {
 
 class MlsKeyRatchet : public IKeyRatchet {
 public:
@@ -18,5 +17,5 @@ private:
     ::mlspp::HashRatchet hashRatchet_;
 };
 
-} // namespace dave
-} // namespace discord
+} // namespace dpp::dave
+
