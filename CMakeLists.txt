@@ -103,7 +103,7 @@ else()
 	add_subdirectory(library)
 endif()
 
-find_package(Filesystem REQUIRED)
+find_package(Filesystem)
 
 if(DPP_USE_EXTERNAL_JSON)
 	# We do nothing here, we just assume it is on the include path.
