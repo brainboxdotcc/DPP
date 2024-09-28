@@ -48,6 +48,7 @@
 #include <future>
 #include <functional>
 #include <chrono>
+#include <set>
 
 struct OpusDecoder;
 struct OpusEncoder;
@@ -57,6 +58,10 @@ namespace dpp {
 
 class audio_mixer;
 
+namespace dave::mls {
+	class Session;
+}
+
 // !TODO: change these to constexpr and rename every occurrence across the codebase
 #define AUDIO_TRACK_MARKER (uint16_t)0xFFFF
 
@@ -65,6 +70,8 @@ class audio_mixer;
 inline constexpr size_t send_audio_raw_max_length = 11520;
 
 inline constexpr size_t secret_key_size = 32;
+
+struct dave_transient_key;
 
 /*
 * @brief For holding a moving average of the number of current voice users, for applying a smooth gain ramp.
@@ -162,6 +169,12 @@ struct dave_binary_header_t {
 	 * @brief Opcode type
 	 */
 	uint8_t opcode;
+	/**
+	 * @brief Data package
+	 */
+	uint8_t package[];
+
+	std::vector<uint8_t> get_data(size_t length) const;
 };
 #pragma pack(pop)
 
@@ -373,6 +386,7 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	 * (merges frames into one packet)
 	 */
 	OpusRepacketizer* repacketizer;
+
 #else
 	/**
 	 * @brief libopus encoder
@@ -385,6 +399,12 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	 */
 	void* repacketizer;
 #endif
+
+	std::unique_ptr<dave::mls::Session> dave_session{};
+
+	std::unique_ptr<dave_transient_key> transient_key{};
+
+	std::set<std::string> dave_mls_user_list;
 
 	/**
 	 * @brief File descriptor for UDP connection
