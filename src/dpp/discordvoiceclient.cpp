@@ -695,6 +695,11 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 						});
 						transient_key = std::make_unique<dave_transient_key>();
 						dave_session->Init(dave::MaxSupportedProtocolVersion(), channel_id, creator->me.id.str(), transient_key->mls_key);
+
+						auto key_response = dave_session->GetMarshalledKeyPackage();
+						key_response.insert(key_response.begin(), voice_client_dave_mls_key_package);
+						this->write(std::string_view(reinterpret_cast<const char*>(key_response.data()), key_response.size()), OP_BINARY);
+
 					}
 				} else {
 					/* This is needed to start voice receiving and make sure that the start of sending isn't cut off */
