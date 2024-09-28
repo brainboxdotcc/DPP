@@ -699,7 +699,6 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 						auto key_response = dave_session->GetMarshalledKeyPackage();
 						key_response.insert(key_response.begin(), voice_client_dave_mls_key_package);
 						this->write(std::string_view(reinterpret_cast<const char*>(key_response.data()), key_response.size()), OP_BINARY);
-
 					}
 				} else {
 					/* This is needed to start voice receiving and make sure that the start of sending isn't cut off */

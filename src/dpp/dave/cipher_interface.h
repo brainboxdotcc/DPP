@@ -7,20 +7,21 @@
 
 namespace dpp::dave {
 
+using const_byte_view = array_view<const uint8_t>;
+using byte_view = array_view<uint8_t>;
+
 class cipher_interface {
 public:
-    virtual ~cipher_interface() = default;
+	virtual ~cipher_interface() = default;
 
-    virtual bool Encrypt(array_view<uint8_t> ciphertextBufferOut,
-			 array_view<const uint8_t> plaintextBuffer,
-			 array_view<const uint8_t> nonceBuffer,
-			 array_view<const uint8_t> additionalData,
-			 array_view<uint8_t> tagBufferOut) = 0;
-    virtual bool Decrypt(array_view<uint8_t> plaintextBufferOut,
-			 array_view<const uint8_t> ciphertextBuffer,
-			 array_view<const uint8_t> tagBuffer,
-			 array_view<const uint8_t> nonceBuffer,
-			 array_view<const uint8_t> additionalData) = 0;
+	cipher_interface() = default;
+	cipher_interface(cipher_interface&&) = delete;
+	cipher_interface(cipher_interface&) = delete;
+	cipher_interface operator=(cipher_interface&&) = delete;
+	cipher_interface operator=(cipher_interface&) = delete;
+
+	virtual bool encrypt(byte_view ciphertextBufferOut, const_byte_view plaintextBuffer, const_byte_view nonceBuffer, const_byte_view additionalData, byte_view tagBufferOut) = 0;
+	virtual bool decrypt(byte_view plaintextBufferOut, const_byte_view ciphertextBuffer, const_byte_view tagBuffer, const_byte_view nonceBuffer, const_byte_view additionalData) = 0;
 };
 
 std::unique_ptr<cipher_interface> create_cipher(const EncryptionKey& encryptionKey);

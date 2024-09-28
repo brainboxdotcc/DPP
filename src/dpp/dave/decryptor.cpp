@@ -45,7 +45,7 @@ size_t Decryptor::Decrypt(MediaType mediaType,
 			  array_view<uint8_t> frame)
 {
     if (mediaType != Audio && mediaType != Video) {
-        DISCORD_LOG(LS_WARNING) << "Decrypt failed, invalid media type: "
+        DISCORD_LOG(LS_WARNING) << "decrypt failed, invalid media type: "
                                 << static_cast<int>(mediaType);
         return 0;
     }
@@ -58,7 +58,7 @@ size_t Decryptor::Decrypt(MediaType mediaType,
     // Skip decrypting for silence frames
     if (mediaType == Audio && encryptedFrame.size() == kOpusSilencePacket.size() &&
 	std::memcmp(encryptedFrame.data(), kOpusSilencePacket.data(), kOpusSilencePacket.size()) == 0) {
-        DISCORD_LOG(LS_VERBOSE) << "Decrypt skipping silence of size: " << encryptedFrame.size();
+        DISCORD_LOG(LS_VERBOSE) << "decrypt skipping silence of size: " << encryptedFrame.size();
         if (encryptedFrame.data() != frame.data()) {
 		std::memcpy(frame.data(), encryptedFrame.data(), encryptedFrame.size());
         }
@@ -86,7 +86,7 @@ size_t Decryptor::Decrypt(MediaType mediaType,
     // If the frame is not encrypted and we can't pass it through, fail
     if (!localFrame->IsEncrypted()) {
         DISCORD_LOG(LS_INFO)
-          << "Decrypt failed, frame is not encrypted and pass through is disabled";
+          << "decrypt failed, frame is not encrypted and pass through is disabled";
         stats_[mediaType].decryptFailureCount++;
         return 0;
     }
@@ -109,7 +109,7 @@ size_t Decryptor::Decrypt(MediaType mediaType,
     }
     else {
         stats_[mediaType].decryptFailureCount++;
-        DISCORD_LOG(LS_WARNING) << "Decrypt failed, no valid cryptor found, type: "
+        DISCORD_LOG(LS_WARNING) << "decrypt failed, no valid cryptor found, type: "
                                 << (mediaType ? "video" : "audio")
                                 << ", encrypted frame size: " << encryptedFrame.size()
                                 << ", plaintext frame size: " << frame.size()
@@ -155,7 +155,7 @@ bool Decryptor::DecryptImpl(aead_cipher_manager& cryptorManager,
       cryptorManager.ComputeWrappedGeneration(truncatedNonce >> kRatchetGenerationShiftBits);
 
     if (!cryptorManager.CanProcessNonce(generation, truncatedNonce)) {
-        DISCORD_LOG(LS_INFO) << "Decrypt failed, cannot process nonce: " << truncatedNonce;
+        DISCORD_LOG(LS_INFO) << "decrypt failed, cannot process nonce: " << truncatedNonce;
         return false;
     }
 
@@ -163,12 +163,12 @@ bool Decryptor::DecryptImpl(aead_cipher_manager& cryptorManager,
     cipher_interface* cryptor = cryptorManager.GetCryptor(generation);
 
     if (!cryptor) {
-        DISCORD_LOG(LS_INFO) << "Decrypt failed, no cryptor found for generation: " << generation;
+        DISCORD_LOG(LS_INFO) << "decrypt failed, no cryptor found for generation: " << generation;
         return false;
     }
 
     // perform the decryption
-    bool success = cryptor->Decrypt(plaintext, ciphertext, tag, nonceBufferView, authenticatedData);
+    bool success = cryptor->decrypt(plaintext, ciphertext, tag, nonceBufferView, authenticatedData);
     stats_[mediaType].decryptAttempts++;
 
     if (success) {

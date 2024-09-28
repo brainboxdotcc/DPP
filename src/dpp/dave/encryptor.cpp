@@ -38,7 +38,7 @@ int Encryptor::Encrypt(MediaType mediaType,
 		       size_t* bytesWritten)
 {
     if (mediaType != Audio && mediaType != Video) {
-        DISCORD_LOG(LS_WARNING) << "Encrypt failed, invalid media type: "
+        DISCORD_LOG(LS_WARNING) << "encrypt failed, invalid media type: "
                                 << static_cast<int>(mediaType);
         return 0;
     }
@@ -114,8 +114,8 @@ int Encryptor::Encrypt(MediaType mediaType,
                kAesGcm128TruncatedSyncNonceBytes);
 
         // encrypt the plaintext, adding the unencrypted header to the tag
-        bool success = cryptor->Encrypt(
-          ciphertextBuffer, plaintextBuffer, nonceBufferView, additionalData, tagBuffer);
+        bool success = cryptor->encrypt(
+		ciphertextBuffer, plaintextBuffer, nonceBufferView, additionalData, tagBuffer);
 
         stats_[mediaType].encryptAttempts++;
         stats_[mediaType].encryptMaxAttempts =
