@@ -2,7 +2,7 @@
 
 int main() {
 	/* Setup the bot */
-	dpp::cluster bot("token", dpp::i_default_intents);
+	dpp::cluster bot("token");
 
 	bot.on_log(dpp::utility::cout_logger());
 
