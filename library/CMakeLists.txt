@@ -289,7 +289,7 @@ if(HAVE_PTHREAD_SETNAME_NP)
 endif()
 
 if(DPP_CORO)
-	message("-- ${Yellow}Enabled experimental coroutine feature${ColourReset}")
+	message("-- ${Yellow}Enabled coroutine feature${ColourReset}")
 	set(CMAKE_CXX_STANDARD 20)
 	target_compile_features(dpp PUBLIC cxx_std_20)
 	if(WIN32 AND NOT MINGW AND NOT DPP_CLANG_CL)
