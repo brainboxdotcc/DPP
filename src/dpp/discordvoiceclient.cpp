@@ -566,7 +566,12 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 			break;
 			case voice_client_dave_mls_welcome: {
 				log(ll_debug, "voice_client_dave_mls_welcome");
-				auto r = dave_session->ProcessWelcome(dave_header->get_data(data.length()), dave_mls_user_list);
+				auto user_list_with_me = dave_mls_user_list;
+				user_list_with_me.emplace(creator->me.id.str());
+				for (const auto& user : user_list_with_me) {
+					std::cout << "USER: " << user << "\n";
+				}
+				auto r = dave_session->ProcessWelcome(dave_header->get_data(data.length()), user_list_with_me);
 			}
 			break;
 			case voice_client_dave_mls_invalid_commit_welcome: {
