@@ -43,6 +43,8 @@
 	#include <sodium.h>
 	#include <opus/opus.h>
 	#include "dave/session.h"
+	#include "dave/decryptor.h"
+	#include "dave/encryptor.h"
 #else
 	struct OpusDecoder {};
 	struct OpusEncoder {};
@@ -74,6 +76,12 @@ static std::string external_ip;
 
 struct dave_transient_key {
 	std::shared_ptr<::mlspp::SignaturePrivateKey> mls_key;
+	std::vector<uint8_t> cached_commit;
+};
+
+struct dave_encryptors {
+	std::unique_ptr<dave::Encryptor> encryptor;
+	std::unique_ptr<dave::Decryptor> decryptor;
 };
 
 /**
@@ -500,21 +508,48 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 	/**
 	 * MLS frames come in as type OP_BINARY, we can also reply to them as type OP_BINARY.
 	 */
-	if (opcode == OP_BINARY && data.size() >= sizeof(dave_binary_header_t) && dave_session && transient_key && transient_key->mls_key) {
+	if (opcode == OP_BINARY && data.size() >= sizeof(dave_binary_header_t)) {
 
 		auto* dave_header = reinterpret_cast<const dave_binary_header_t*>(data.data());
 
 		switch (dave_header->opcode) {
 			case voice_client_dave_mls_external_sender: {
 				log(ll_debug, "voice_client_dave_mls_external_sender");
+
+
+				dave_session = std::make_unique<dave::mls::Session>(
+					nullptr, sessionid, [this](std::string const& s1, std::string const& s2) {
+						log(ll_debug, "Dave session constructor callback: " + s1 + ", " + s2);
+					});
+
 				dave_session->SetExternalSender(dave_header->get_data(data.length()));
+
+				transient_key = std::make_unique<dave_transient_key>();
+				dave_session->Init(dave::MaxSupportedProtocolVersion(), channel_id, creator->me.id.str(), transient_key->mls_key);
+
+				encryptors = std::make_unique<dave_encryptors>();
+				encryptors->encryptor = std::make_unique<dave::Encryptor>();
+				/**
+				 * TODO: There should be one of these per user but only one of the encryptor, above
+				 */
+				encryptors->decryptor = std::make_unique<dave::Decryptor>();
+
+				auto epoch = dave_session->GetLastEpochAuthenticator();
+
+				auto key_response = dave_session->GetMarshalledKeyPackage();
+				key_response.insert(key_response.begin(), voice_client_dave_mls_key_package);
+				this->write(std::string_view(reinterpret_cast<const char*>(key_response.data()), key_response.size()), OP_BINARY);
+
+				encryptors->encryptor->SetKeyRatchet(dave_session->GetKeyRatchet(creator->me.id.str()));
 			}
 			break;
 			case voice_client_dave_mls_proposals: {
 				log(ll_debug, "voice_client_dave_mls_proposals");
+
 				std::optional<std::vector<uint8_t>> response = dave_session->ProcessProposals(dave_header->get_data(data.length()), dave_mls_user_list);
 				if (response.has_value()) {
 					auto r = response.value();
+					transient_key->cached_commit = r;
 					r.insert(r.begin(), voice_client_dave_mls_commit_message);
 					this->write(std::string_view(reinterpret_cast<const char*>(r.data()), r.size()), OP_BINARY);
 				}
@@ -522,10 +557,20 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 			break;
 			case voice_client_dave_announce_commit_transaction: {
 				log(ll_debug, "voice_client_dave_announce_commit_transaction");
+				auto r = dave_session->ProcessCommit(transient_key->cached_commit);
+				for (const auto& user : dave_mls_user_list) {
+					log(ll_debug, "Setting decryptor key ratchet for user: " + user + ", protocol version: " + std::to_string(dave_session->GetProtocolVersion()));
+					encryptors->decryptor->TransitionToKeyRatchet(dave_session->GetKeyRatchet(user));
+				}
 			}
 			break;
 			case voice_client_dave_mls_welcome: {
 				log(ll_debug, "voice_client_dave_mls_welcome");
+				auto r = dave_session->ProcessWelcome(dave_header->get_data(data.length()), dave_mls_user_list);
+			}
+			break;
+			case voice_client_dave_mls_invalid_commit_welcome: {
+				log(ll_debug, "voice_client_dave_mls_invalid_commit_welcome");
 			}
 			break;
 			default:
@@ -638,7 +683,7 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 
 				if (!modes.empty()) {
 					log(dpp::ll_debug, "Resuming voice session " + this->sessionid + "...");
-						json obj = {
+					json obj = {
 						{ "op", voice_opcode_connection_resume },
 						{
 							"d",
@@ -688,17 +733,6 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 						log(ll_error, "We requested DAVE E2EE but didn't receive it from the server, downgrading...");
 						dave_version = dave_version_none;
 						send_silence(20);
-					} else {
-						dave_session = std::make_unique<dave::mls::Session>(
-							nullptr, sessionid, [this](std::string const& s1, std::string const& s2) {
-							log(ll_debug, "Dave session constructor callback: " + s1 + ", " + s2);
-						});
-						transient_key = std::make_unique<dave_transient_key>();
-						dave_session->Init(dave::MaxSupportedProtocolVersion(), channel_id, creator->me.id.str(), transient_key->mls_key);
-
-						auto key_response = dave_session->GetMarshalledKeyPackage();
-						key_response.insert(key_response.begin(), voice_client_dave_mls_key_package);
-						this->write(std::string_view(reinterpret_cast<const char*>(key_response.data()), key_response.size()), OP_BINARY);
 					}
 				} else {
 					/* This is needed to start voice receiving and make sure that the start of sending isn't cut off */

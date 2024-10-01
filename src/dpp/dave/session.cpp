@@ -3,6 +3,7 @@
 #include <thread>
 #include <vector>
 #include <cstring>
+#include <iostream>
 
 #include <hpke/random.h>
 #include <hpke/signature.h>
@@ -331,12 +332,18 @@ try {
     DISCORD_LOG(LS_INFO) << "Processing commit";
     DISCORD_LOG(LS_INFO) << "Commit: " << ::mlspp::bytes_ns::bytes(commit);
 
+    std::cout << "1\n";
+
     auto commitMessage = ::mlspp::tls::get<::mlspp::MLSMessage>(commit);
+
+	std::cout << "2\n";
 
     if (!CanProcessCommit(commitMessage)) {
         DISCORD_LOG(LS_ERROR) << "ProcessCommit called with unprocessable MLS commit";
         return ignored_t{};
     }
+
+	std::cout << "3\n";
 
     // in case we're the sender of this commit
     // we need to pull the cached state from our outbound cache
@@ -345,22 +352,36 @@ try {
         optionalCachedState = *(outboundCachedGroupState_.get());
     }
 
+	std::cout << "4\n";
+
     auto newState = stateWithProposals_->handle(commitMessage, optionalCachedState);
+
+	std::cout << "5\n";
 
     if (!newState) {
         DISCORD_LOG(LS_ERROR) << "MLS commit handling did not produce a new state";
         return failed_t{};
     }
 
+	std::cout << "6\n";
+
     DISCORD_LOG(LS_INFO) << "Successfully processed MLS commit, updating state; our leaf index is "
                          << newState->index().val << "; current epoch is " << newState->epoch();
 
+	std::cout << "7\n";
+
     RosterMap ret = ReplaceState(std::make_unique<::mlspp::State>(std::move(*newState)));
+
+	std::cout << "8\n";
 
     // reset the outbound cached group since we handled the commit for this epoch
     outboundCachedGroupState_.reset();
 
+	std::cout << "9\n";
+
     ClearPendingState();
+
+	std::cout << "10\n";
 
     return ret;
 }
@@ -536,7 +557,9 @@ try {
     auto ciphersuite = CiphersuiteForProtocolVersion(protocolVersion_);
 
     if (!transientKey) {
+	    std::cout << "2\n";
         if (!signingKeyId_.empty()) {
+		std::cout << "3\n";
             transientKey = GetPersistedKeyPair(keyPairContext_, signingKeyId_, protocolVersion_);
             if (!transientKey) {
                 DISCORD_LOG(LS_ERROR) << "Did not receive MLS signature private key from "
@@ -545,6 +568,7 @@ try {
             }
         }
         else {
+		std::cout << "1\n";
             transientKey = std::make_shared<::mlspp::SignaturePrivateKey>(
               ::mlspp::SignaturePrivateKey::generate(ciphersuite));
         }

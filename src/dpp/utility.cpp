@@ -361,7 +361,7 @@ std::string debug_dump(uint8_t* data, size_t length) {
 	size_t extra = addr % 16;
 	if (extra != 0) {
 		addr -= extra;
-		out << to_hex(addr);
+		out << "\n[" << to_hex(addr) << "] : ";
 	}
 	for (size_t n = 0; n < extra; ++n) {
 		out << "-- ";

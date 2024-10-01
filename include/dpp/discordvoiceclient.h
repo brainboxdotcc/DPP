@@ -72,6 +72,7 @@ inline constexpr size_t send_audio_raw_max_length = 11520;
 inline constexpr size_t secret_key_size = 32;
 
 struct dave_transient_key;
+struct dave_encryptors;
 
 /*
 * @brief For holding a moving average of the number of current voice users, for applying a smooth gain ramp.
@@ -387,6 +388,12 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	 */
 	OpusRepacketizer* repacketizer;
 
+	std::unique_ptr<dave::mls::Session> dave_session{};
+
+	std::unique_ptr<dave_transient_key> transient_key{};
+
+	std::unique_ptr<dave_encryptors> encryptors{};
+
 #else
 	/**
 	 * @brief libopus encoder
@@ -398,11 +405,13 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	 * (merges frames into one packet)
 	 */
 	void* repacketizer;
+
+	std::unique_ptr<int> dave_session{};
+
+	std::unique_ptr<int> transient_key{};
+
+	std::unique_ptr<int> encryptors{};
 #endif
-
-	std::unique_ptr<dave::mls::Session> dave_session{};
-
-	std::unique_ptr<dave_transient_key> transient_key{};
 
 	std::set<std::string> dave_mls_user_list;
 
