@@ -68,8 +68,6 @@ std::shared_ptr<::mlspp::SignaturePrivateKey> GetGenericPersistedKeyPair(KeyPair
     std::string curstr;
     std::filesystem::path dir = GetKeyStorageDirectory();
 
-    std::cout << "KSD: " << dir << "\n";
-
     if (dir.empty()) {
         DISCORD_LOG(LS_ERROR) << "Failed to determine key storage directory in GetPersistedKeyPair";
         return nullptr;
@@ -84,8 +82,6 @@ std::shared_ptr<::mlspp::SignaturePrivateKey> GetGenericPersistedKeyPair(KeyPair
     }
 
     std::filesystem::path file = dir / (id + ".key");
-
-    std::cout << "FILE: " << file << "\n";
 
     if (std::filesystem::exists(file)) {
         std::ifstream ifs(file, std::ios_base::in | std::ios_base::binary);
@@ -102,8 +98,6 @@ std::shared_ptr<::mlspp::SignaturePrivateKey> GetGenericPersistedKeyPair(KeyPair
             return nullptr;
         }
 
-	std::cout << "CURSTR: " << curstr << "\n";
-
         try {
             ret = ::mlspp::SignaturePrivateKey::from_jwk(suite, curstr);
         }
@@ -113,15 +107,12 @@ std::shared_ptr<::mlspp::SignaturePrivateKey> GetGenericPersistedKeyPair(KeyPair
         }
     }
     else {
-	    std::cout << "GEN NEW\n";
         ret = ::mlspp::SignaturePrivateKey::generate(suite);
 
         std::string newstr = ret.to_jwk(suite);
 
         std::filesystem::path tmpfile = file;
         tmpfile += ".tmp";
-
-	std::cout << "TMPFILE " << tmpfile << "\n";
 
 #ifdef _WIN32
         int fd = _wopen(tmpfile.c_str(), _O_WRONLY | _O_CREAT | _O_TRUNC, _S_IREAD | _S_IWRITE);

@@ -175,7 +175,30 @@ struct dave_binary_header_t {
 	 */
 	uint8_t package[];
 
-	std::vector<uint8_t> get_data(size_t length) const;
+	/**
+	 * Get the data package from the packed binary frame, as a vector of uint8_t
+	 * for use in the libdave functions
+	 *
+	 * @param length Length of the data, use the websocket frame size here
+	 * @return data blob
+	 */
+	[[nodiscard]] std::vector<uint8_t> get_data(size_t length) const;
+
+	/**
+	 * Get the data package from the packed binary frame for ProcessWelcome,
+	 * as a vector of uint8_t for use in the libdave functions.
+	 *
+	 * @param length Length of the data, use the websocket frame size here
+	 * @return data blob
+	 */
+	[[nodiscard]] std::vector<uint8_t> get_welcome_data(size_t length) const;
+
+	/**
+	 * Get transition ID for ProcessWelcome
+	 *
+	 * @return Transition ID
+	 */
+	[[nodiscard]] uint16_t get_welcome_transition_id() const;
 };
 #pragma pack(pop)
 

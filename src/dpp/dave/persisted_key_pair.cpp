@@ -38,7 +38,6 @@ static std::shared_ptr<::mlspp::SignaturePrivateKey> GetPersistedKeyPair(
     std::string id = MakeKeyID(sessionID, suite);
 
     if (auto it = map.find(id); it != map.end()) {
-	    std::cout << "5\n";
         return it->second;
     }
 
