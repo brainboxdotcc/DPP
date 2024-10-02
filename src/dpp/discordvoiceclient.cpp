@@ -599,9 +599,6 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 				 */
 				mls_state->privacy_code = generate_displayable_code(dave_session->GetLastEpochAuthenticator());
 				log(ll_debug, "E2EE Privacy Code: " + mls_state->privacy_code);
-				get_user_privacy_code(189759562910400512, [this](const std::string& code) {
-					log(ll_debug, "Test pairwise code: " + code);
-				});
 			}
 			break;
 			case voice_client_dave_mls_welcome: {
@@ -619,9 +616,6 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 				}
 				mls_state->privacy_code = generate_displayable_code(dave_session->GetLastEpochAuthenticator());
 				log(ll_debug, "E2EE Privacy Code: " + mls_state->privacy_code);
-				get_user_privacy_code(189759562910400512, [this](const std::string& code) {
-					log(ll_debug, "Test pairwise code: " + code);
-				});
 			}
 			break;
 			default:
