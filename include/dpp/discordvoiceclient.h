@@ -71,7 +71,7 @@ inline constexpr size_t send_audio_raw_max_length = 11520;
 
 inline constexpr size_t secret_key_size = 32;
 
-struct dave_transient_key;
+struct dave_state;
 struct dave_encryptors;
 
 /*
@@ -201,6 +201,8 @@ struct dave_binary_header_t {
 	[[nodiscard]] uint16_t get_welcome_transition_id() const;
 };
 #pragma pack(pop)
+
+using privacy_code_callback_t = std::function<void(const std::string&)>;
 
 /** @brief Implements a discord voice connection.
  * Each discord_voice_client connects to one voice channel and derives from a websocket client.
@@ -413,9 +415,7 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 
 	std::unique_ptr<dave::mls::Session> dave_session{};
 
-	std::unique_ptr<dave_transient_key> transient_key{};
-
-	std::unique_ptr<dave_encryptors> encryptors{};
+	std::unique_ptr<dave_state> mls_state{};
 
 #else
 	/**
@@ -431,9 +431,7 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 
 	std::unique_ptr<int> dave_session{};
 
-	std::unique_ptr<int> transient_key{};
-
-	std::unique_ptr<int> encryptors{};
+	std::unique_ptr<int> mls_state{};
 #endif
 
 	std::set<std::string> dave_mls_user_list;
@@ -1114,6 +1112,41 @@ public:
 	 * for a single packet from Discord's voice servers.
 	 */
 	std::string discover_ip();
+
+	/**
+	 * Returns true if end-to-end encryption is enabled
+	 * for the active voice call (Discord Audio Visual
+	 * Encryption, a.k.a. DAVE).
+	 *
+	 * @return True if end-to-end encrypted
+	 */
+	bool is_end_to_end_encrypted() const;
+
+	/**
+	 * Returns the privacy code for the end to end encryption
+	 * scheme ("DAVE"). if end-to-end encryption is not active,
+	 * or is not yet established, this will return an empty
+	 * string.
+	 *
+	 * @return A sequence of six five-digit integers which
+	 * can be matched against the Discord client, in the
+	 * privacy tab for the properties of the voice call.
+	 */
+	std::string get_privacy_code() const;
+
+	/**
+	 * Returns the privacy code for a given user by id,
+	 * if they are in the voice call, and enc-to-end encryption
+	 * is enabled.
+	 *
+	 * @param user User ID to fetch the privacy code for
+	 * @param callback Callback to call with the privacy code when
+	 * the creation of the code is complete.
+	 * @warning This call spawns a thread, as getting a user's
+	 * privacy code is a CPU-intensive and memory-intensive operation
+	 * which internally uses scrypt.
+	 */
+	void get_user_privacy_code(const dpp::snowflake user, privacy_code_callback_t callback) const;
 };
 
 } // namespace dpp
