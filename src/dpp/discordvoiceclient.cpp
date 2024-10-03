@@ -79,6 +79,7 @@ constexpr uint8_t voice_protocol_version = 8;
 static std::string external_ip;
 
 struct dave_state {
+#ifdef HAVE_VOICE
 	std::unique_ptr<dave::mls::Session> dave_session{};
 	std::shared_ptr<::mlspp::SignaturePrivateKey> mls_key;
 	std::vector<uint8_t> cached_commit;
@@ -86,6 +87,7 @@ struct dave_state {
 	std::map<dpp::snowflake, std::unique_ptr<dave::Decryptor>> decryptors;
 	std::unique_ptr<dave::Encryptor> encryptor;
 	std::string privacy_code;
+#endif
 };
 
 /**
@@ -453,6 +455,8 @@ bool discord_voice_client::is_playing() {
 
 void discord_voice_client::thread_run()
 {
+#ifdef HAVE_VOICE
+
 	utility::set_thread_name(std::string("vc/") + std::to_string(server_id));
 
 	size_t times_looped = 0;
@@ -497,12 +501,15 @@ void discord_voice_client::thread_run()
 			} while (error && !terminating);
 		}
 	} while(!terminating);
+#endif
 }
 
 void discord_voice_client::run()
 {
+#ifdef HAVE_VOICE
 	this->runner = new std::thread(&discord_voice_client::thread_run, this);
 	this->thread_id = runner->native_handle();
+#endif
 }
 
 int discord_voice_client::udp_send(const char* data, size_t length)
@@ -535,10 +542,15 @@ std::vector<uint8_t> dave_binary_header_t::get_welcome_data(size_t length) const
 }
 
 std::string discord_voice_client::get_privacy_code() const {
+#ifdef HAVE_VOICE
 	return is_end_to_end_encrypted() ? mls_state->privacy_code : "";
+#else
+	return "";
+#endif
 }
 
 void discord_voice_client::get_user_privacy_code(const dpp::snowflake user, privacy_code_callback_t callback) const {
+#ifdef HAVE_VOICE
 	if (!is_end_to_end_encrypted()) {
 		callback("");
 		return;
@@ -547,13 +559,21 @@ void discord_voice_client::get_user_privacy_code(const dpp::snowflake user, priv
 		std::cout << dpp::utility::debug_dump((uint8_t*)data.data(), data.size());
 		callback(data.size() == 64 ? generate_displayable_code(data, 45) : "");
 	});
+#else
+	callback("");
+#endif
 }
 
 bool discord_voice_client::is_end_to_end_encrypted() const {
+#ifdef HAVE_VOICE
 	return mls_state && !mls_state->privacy_code.empty();
+#else
+	return false;
+#endif
 }
 
 bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcode) {
+#ifdef HAVE_VOICE
 	json j;
 
 	/**
@@ -920,6 +940,9 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 		}
 	}
 	return true;
+#else
+	return false;
+#endif
 }
 
 discord_voice_client& discord_voice_client::pause_audio(bool pause) {
