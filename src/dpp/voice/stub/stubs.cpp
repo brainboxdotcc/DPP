@@ -27,6 +27,12 @@
 
 namespace dpp {
 
+	discord_voice_client::discord_voice_client(dpp::cluster* _cluster, snowflake _channel_id, snowflake _server_id, const std::string &_token, const std::string &_session_id, const std::string &_host, bool enable_dave)
+		: websocket_client(_host.substr(0, _host.find(':')), _host.substr(_host.find(':') + 1, _host.length()), "/?v=" + std::to_string(voice_protocol_version), OP_TEXT)
+	{
+		throw dpp::voice_exception(err_no_voice_support, "Voice support not enabled in this build of D++");
+	}
+
 	void discord_voice_client::voice_courier_loop(discord_voice_client& client, courier_shared_state_t& shared_state) {
 	}
 
@@ -87,6 +93,10 @@ namespace dpp {
 
 	size_t discord_voice_client::encode(uint8_t *input, size_t inDataSize, uint8_t *output, size_t &outDataSize) {
 		return 0;
+	}
+
+	std::string discord_voice_client::discover_ip() {
+		return "";
 	}
 
 }

@@ -420,47 +420,6 @@ uint64_t discord_voice_client::get_timescale() {
 	return timescale;
 }
 
-std::string discord_voice_client::discover_ip() {
-	dpp::socket newfd = SOCKET_ERROR;
-	unsigned char packet[74] = { 0 };
-	(*(uint16_t*)(packet)) = htons(0x01);
-	(*(uint16_t*)(packet + 2)) = htons(70);
-	(*(uint32_t*)(packet + 4)) = htonl((uint32_t)this->ssrc);
-	if ((newfd = ::socket(AF_INET, SOCK_DGRAM, 0)) >= 0) {
-		sockaddr_in servaddr{};
-		memset(&servaddr, 0, sizeof(sockaddr_in));
-		servaddr.sin_family = AF_INET;
-		servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
-		servaddr.sin_port = htons(0);
-		if (bind(newfd, (sockaddr*)&servaddr, sizeof(servaddr)) < 0) {
-			log(ll_warning, "Could not bind socket for IP discovery");
-			return "";
-		}
-		memset(&servaddr, 0, sizeof(servaddr));
-		servaddr.sin_family = AF_INET;
-		servaddr.sin_port = htons(this->port);
-		servaddr.sin_addr.s_addr = inet_addr(this->ip.c_str());
-		if (::connect(newfd, (const sockaddr*)&servaddr, sizeof(sockaddr_in)) < 0) {
-			log(ll_warning, "Could not connect socket for IP discovery");
-			return "";
-		}
-		if (::send(newfd, (const char*)packet, 74, 0) == -1) {
-			log(ll_warning, "Could not send packet for IP discovery");
-			return "";
-		}
-		if (recv(newfd, (char*)packet, 74, 0) == -1) {
-			log(ll_warning, "Could not receive packet for IP discovery");
-			return "";
-		}
-
-		close_socket(newfd);
-
-		//utility::debug_dump(packet, 74);
-		return std::string((const char*)(packet + 8));
-	}
-	return "";
-}
-
 discord_voice_client& discord_voice_client::set_iteration_interval(uint16_t interval) {
 	this->iteration_interval = interval;
 	return *this;
