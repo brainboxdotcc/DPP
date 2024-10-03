@@ -88,21 +88,6 @@ bool discord_voice_client::is_playing() {
 	return (!this->outbuf.empty());
 }
 
-int discord_voice_client::udp_send(const char* data, size_t length)
-{
-	sockaddr_in servaddr;
-	memset(&servaddr, 0, sizeof(servaddr));
-	servaddr.sin_family = AF_INET;
-	servaddr.sin_port = htons(this->port);
-	servaddr.sin_addr.s_addr = inet_addr(this->ip.c_str());
-	return (int) sendto(this->fd, data, (int)length, 0, (const sockaddr*)&servaddr, (int)sizeof(sockaddr_in));
-}
-
-int discord_voice_client::udp_recv(char* data, size_t max_length)
-{
-	return (int) recv(this->fd, data, (int)max_length, 0);
-}
-
 uint16_t dave_binary_header_t::get_welcome_transition_id() const {
 	uint16_t transition{0};
 	std::memcpy(&transition, package, sizeof(uint16_t));
@@ -181,14 +166,6 @@ discord_voice_client& discord_voice_client::stop_audio() {
 	return *this;
 }
 
-void discord_voice_client::send(const char* packet, size_t len, uint64_t duration) {
-	std::lock_guard<std::mutex> lock(this->stream_mutex);
-	voice_out_packet frame;
-	frame.packet = std::string(packet, len);
-	frame.duration = duration;
-	outbuf.emplace_back(frame);
-}
-
 dpp::utility::uptime discord_voice_client::get_uptime()
 {
 	return dpp::utility::uptime(time(nullptr) - connect_time);
@@ -197,19 +174,6 @@ dpp::utility::uptime discord_voice_client::get_uptime()
 bool discord_voice_client::is_connected()
 {
 	return (this->get_state() == CONNECTED);
-}
-
-dpp::socket discord_voice_client::want_write() {
-	std::lock_guard<std::mutex> lock(this->stream_mutex);
-	if (!this->paused && !outbuf.empty()) {
-		return fd;
-	} else {
-		return INVALID_SOCKET;
-	}
-}
-
-dpp::socket discord_voice_client::want_read() {
-	return fd;
 }
 
 void discord_voice_client::error(uint32_t errorcode)
@@ -366,56 +330,6 @@ void discord_voice_client::one_second_timer()
 			}
 		}
 	}
-}
-
-size_t discord_voice_client::encode(uint8_t *input, size_t inDataSize, uint8_t *output, size_t &outDataSize)
-{
-#if HAVE_VOICE
-	outDataSize = 0;
-	int mEncFrameBytes = 11520;
-	int mEncFrameSize = 2880;
-	if (0 == (inDataSize % mEncFrameBytes)) {
-		bool isOk = true;
-		uint8_t *out = encode_buffer;
-
-		memset(out, 0, sizeof(encode_buffer));
-		repacketizer = opus_repacketizer_init(repacketizer);
-		if (!repacketizer) {
-			log(ll_warning, "opus_repacketizer_init(): failure");
-			return outDataSize;
-		}
-		for (size_t i = 0; i < (inDataSize / mEncFrameBytes); ++ i) {
-			const opus_int16* pcm = (opus_int16*)(input + i * mEncFrameBytes);
-			int ret = opus_encode(encoder, pcm, mEncFrameSize, out, 65536);
-			if (ret > 0) {
-				int retval = opus_repacketizer_cat(repacketizer, out, ret);
-				if (retval != OPUS_OK) {
-					isOk = false;
-					log(ll_warning, "opus_repacketizer_cat(): " + std::string(opus_strerror(retval)));
-					break;
-				}
-				out += ret;
-			} else {
-				isOk = false;
-					log(ll_warning, "opus_encode(): " + std::string(opus_strerror(ret)));
-				break;
-			}
-		}
-		if (isOk) {
-			int ret = opus_repacketizer_out(repacketizer, output, 65536);
-			if (ret > 0) {
-				outDataSize = ret;
-			} else {
-				log(ll_warning, "opus_repacketizer_out(): " + std::string(opus_strerror(ret)));
-			}
-		}
-	} else {
-		throw dpp::voice_exception(err_invalid_voice_packet_length, "Invalid input data length: " + std::to_string(inDataSize) + ", must be n times of " + std::to_string(mEncFrameBytes));
-	}
-#else
-	throw dpp::voice_exception(err_no_voice_support, "Voice support not enabled in this build of D++");
-#endif
-	return outDataSize;
 }
 
 discord_voice_client& discord_voice_client::insert_marker(const std::string& metadata) {

@@ -65,4 +65,28 @@ namespace dpp {
 		return *this;
 	}
 
+	dpp::socket discord_voice_client::want_write() {
+		return INVALID_SOCKET;
+	}
+
+	dpp::socket discord_voice_client::want_read() {
+		return INVALID_SOCKET;
+	}
+
+
+	void discord_voice_client::send(const char* packet, size_t len, uint64_t duration) {
+	}
+
+	int discord_voice_client::udp_send(const char* data, size_t length) {
+		return -1;
+	}
+
+	int discord_voice_client::udp_recv(char* data, size_t max_length) {
+		return -1;
+	}
+
+	size_t discord_voice_client::encode(uint8_t *input, size_t inDataSize, uint8_t *output, size_t &outDataSize) {
+		return 0;
+	}
+
 }
