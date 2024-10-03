@@ -19,9 +19,9 @@
  * limitations under the License.
  *
  ************************************************************************************/
-
 #include <dpp/dpp.h>
 #include <iostream>
+
 #include <string>
 
 std::string get_testdata_dir() {

@@ -40,61 +40,17 @@
 #include <dpp/json.h>
 
 #ifdef HAVE_VOICE
-	#include <sodium.h>
-	#include <opus/opus.h>
-	#include "dave/session.h"
-	#include "dave/decryptor.h"
-	#include "dave/encryptor.h"
+	#include "voice/enabled/enabled.h"
 #else
-	struct OpusDecoder {};
-	struct OpusEncoder {};
-	struct OpusRepacketizer {};
-	namespace dpp::dave {
-		struct Session {};
-		struct Encryptor {};
-		struct Decryptor {};
-	};
+	#include "voice/stub/stub.h"
 #endif
 
 namespace dpp {
 
 /**
- * @brief Sample rate for OPUS (48khz)
- */
-[[maybe_unused]] constexpr int32_t opus_sample_rate_hz = 48000;
-
-/**
- * @brief Channel count for OPUS (stereo)
- */
-[[maybe_unused]] constexpr int32_t opus_channel_count = 2;
-
-/**
- * @brief Discord voice protocol version
- */
-constexpr uint8_t voice_protocol_version = 8;
-
-/**
  * @brief Our public IP address
  */
 static std::string external_ip;
-
-struct dave_state {
-#ifdef HAVE_VOICE
-	std::unique_ptr<dave::mls::Session> dave_session{};
-	std::shared_ptr<::mlspp::SignaturePrivateKey> mls_key;
-	std::vector<uint8_t> cached_commit;
-	uint64_t transition_id{0};
-	std::map<dpp::snowflake, std::unique_ptr<dave::Decryptor>> decryptors;
-	std::unique_ptr<dave::Encryptor> encryptor;
-	std::string privacy_code;
-#endif
-};
-
-/**
- * @brief Transport encryption type (libsodium)
- */
-constexpr std::string_view transport_encryption_protocol = "aead_xchacha20_poly1305_rtpsize";
-
 
 moving_averager::moving_averager(uint64_t collection_count_new) {
 	collectionCount = collection_count_new;
@@ -135,83 +91,6 @@ struct rtp_header {
 };
 
 bool discord_voice_client::sodium_initialised = false;
-
-bool discord_voice_client::voice_payload::operator<(const voice_payload& other) const {
-	if (timestamp != other.timestamp) {
-		return timestamp > other.timestamp;
-	}
-
-	constexpr rtp_seq_t wrap_around_test_boundary = 5000;
-	if ((seq < wrap_around_test_boundary && other.seq >= wrap_around_test_boundary)
-    	    || (seq >= wrap_around_test_boundary && other.seq < wrap_around_test_boundary)) {
-    		/* Match the cases where exactly one of the sequence numbers "may have"
-		 * wrapped around.
-		 *
-		 * Examples:
-		 * 1. this->seq = 65530, other.seq = 10  // Did wrap around
-		 * 2. this->seq = 5002, other.seq = 4990 // Not wrapped around
-		 *
-		 * Add 5000 to both sequence numbers to force wrap around so they can be
-		 * compared. This should be fine to do to case 2 as well, as long as the
-		 * addend (5000) is not too large to cause one of them to wrap around.
-		 *
-		 * In practice, we should be unlikely to hit the case where
-		 *
-		 *           this->seq = 65530, other.seq = 5001
-		 *
-		 * because we shouldn't receive more than 5000 payloads in one batch, unless
-		 * the voice courier thread is super slow. Also remember that the timestamp
-		 * is compared first, and payloads this far apart shouldn't have the same
-		 * timestamp.
-		 */
-
-		/* Casts here ensure the sum wraps around and not implicitly converted to
-		 * wider types.
-		 */
-		return   static_cast<rtp_seq_t>(seq + wrap_around_test_boundary)
-		       > static_cast<rtp_seq_t>(other.seq + wrap_around_test_boundary);
-	} else {
-		return seq > other.seq;
-	}
-}
-
-#ifdef HAVE_VOICE
-size_t audio_mix(discord_voice_client& client, audio_mixer& mixer, opus_int32* pcm_mix, const opus_int16* pcm, size_t park_count, int samples, int& max_samples) {
-	/* Mix the combined stream if combined audio is bound */
-	if (client.creator->on_voice_receive_combined.empty()) {
-		return 0;
-	}
-
-	/* We must upsample the data to 32 bits wide, otherwise we could overflow */
-	for (opus_int32 v = 0; v < (samples * opus_channel_count) / mixer.byte_blocks_per_register; ++v) {
-		mixer.combine_samples(pcm_mix, pcm);
-		pcm += mixer.byte_blocks_per_register;
-		pcm_mix += mixer.byte_blocks_per_register;
-	}
-	client.moving_average += park_count;
-	max_samples = (std::max)(samples, max_samples);
-	return park_count + 1;
-}
-
-std::string generate_displayable_code(const std::vector<uint8_t>& data, size_t desired_length = 30, size_t group_size = 5) {
-
-	const size_t group_modulus = std::pow(10, group_size);
-	std::stringstream result;
-
-	for (size_t i = 0; i < desired_length; i += group_size) {
-		size_t group_value{0};
-
-		for (size_t j = group_size; j > 0; --j) {
-			const size_t next_byte = data.at(i + (group_size - j));
-			group_value = (group_value << 8) | next_byte;
-		}
-		group_value %= group_modulus;
-		result << std::setw(group_size) << std::setfill('0')  << std::to_string(group_value) << " ";
-	}
-
-	return result.str();
-}
-#endif
 
 void discord_voice_client::voice_courier_loop(discord_voice_client& client, courier_shared_state_t& shared_state) {
 #ifdef HAVE_VOICE
@@ -351,63 +230,6 @@ void discord_voice_client::voice_courier_loop(discord_voice_client& client, cour
 			client.creator->on_voice_receive_combined.call(vr);
 		}
 	}
-#endif
-}
-
-discord_voice_client::discord_voice_client(dpp::cluster* _cluster, snowflake _channel_id, snowflake _server_id, const std::string &_token, const std::string &_session_id, const std::string &_host, bool enable_dave)
-	: websocket_client(_host.substr(0, _host.find(':')), _host.substr(_host.find(':') + 1, _host.length()), "/?v=" + std::to_string(voice_protocol_version), OP_TEXT),
-	runner(nullptr),
-	connect_time(0),
-	mixer(std::make_unique<audio_mixer>()),
-	port(0),
-	ssrc(0),
-	timescale(1000000),
-	paused(false),
-	encoder(nullptr),
-	repacketizer(nullptr),
-	fd(INVALID_SOCKET),
-	sequence(0),
-	receive_sequence(-1),
-	timestamp(0),
-	packet_nonce(1),
-	last_timestamp(std::chrono::high_resolution_clock::now()),
-	sending(false),
-	tracks(0),
-	dave_version(enable_dave ? dave_version_1 : dave_version_none),
-	creator(_cluster),
-	terminating(false),
-	heartbeat_interval(0),
-	last_heartbeat(time(nullptr)),
-	token(_token),
-	sessionid(_session_id),
-	server_id(_server_id),
-	channel_id(_channel_id)
-{
-#if HAVE_VOICE
-	if (!discord_voice_client::sodium_initialised) {
-		if (sodium_init() < 0) {
-			throw dpp::voice_exception(err_sodium, "discord_voice_client::discord_voice_client; sodium_init() failed");
-		}
-		discord_voice_client::sodium_initialised = true;
-	}
-	int opusError = 0;
-	encoder = opus_encoder_create(opus_sample_rate_hz, opus_channel_count, OPUS_APPLICATION_VOIP, &opusError);
-	if (opusError) {
-		throw dpp::voice_exception(err_opus, "discord_voice_client::discord_voice_client; opus_encoder_create() failed");
-	}
-	repacketizer = opus_repacketizer_create();
-	if (!repacketizer) {
-		throw dpp::voice_exception(err_opus, "discord_voice_client::discord_voice_client; opus_repacketizer_create() failed");
-	}
-	try {
-		this->connect();
-	}
-	catch (std::exception&) {
-		cleanup();
-		throw;
-	}
-#else
-	throw dpp::voice_exception(err_no_voice_support, "Voice support not enabled in this build of D++");
 #endif
 }
 

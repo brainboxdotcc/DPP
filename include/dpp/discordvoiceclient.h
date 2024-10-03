@@ -56,6 +56,22 @@ struct OpusRepacketizer;
 
 namespace dpp {
 
+/**
+ * @brief Sample rate for OPUS (48khz)
+ */
+[[maybe_unused]] inline constexpr int32_t opus_sample_rate_hz = 48000;
+
+/**
+ * @brief Channel count for OPUS (stereo)
+ */
+[[maybe_unused]] inline constexpr int32_t opus_channel_count = 2;
+
+/**
+ * @brief Discord voice protocol version
+ */
+[[maybe_unused]] inline constexpr uint8_t voice_protocol_version = 8;
+
+
 class audio_mixer;
 
 namespace dave::mls {
