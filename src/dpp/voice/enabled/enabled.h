@@ -49,9 +49,7 @@
 #include <functional>
 #include <chrono>
 #include <iostream>
-#include <iomanip>
 #include <set>
-#include <sstream>
 #include <dpp/discordvoiceclient.h>
 #include <sodium.h>
 #include <opus/opus.h>
