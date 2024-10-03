@@ -61,4 +61,5 @@ namespace dpp::dave {
 };
 namespace dpp {
 	struct dave_state {};
+	struct audio_mixer {};
 }
