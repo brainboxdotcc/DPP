@@ -1,4 +1,11 @@
-file(GLOB THE_SOURCES "${DPP_ROOT_PATH}/src/dpp/events/*.cpp" "${DPP_ROOT_PATH}/dpp/dave/*.cpp" "${DPP_ROOT_PATH}/src/dpp/cluster/*.cpp" "${DPP_ROOT_PATH}/src/dpp/*.cpp" "${DPP_ROOT_PATH}/src/dpp/*.rc")
+add_compile_definitions(HAVE_VOICE)
+
+if (HAVE_VOICE)
+	file(GLOB THE_SOURCES "${DPP_ROOT_PATH}/src/dpp/events/*.cpp" "${DPP_ROOT_PATH}/dpp/dave/*.cpp" "${DPP_ROOT_PATH}/src/dpp/cluster/*.cpp" "${DPP_ROOT_PATH}/src/dpp/*.cpp" "${DPP_ROOT_PATH}/src/dpp/*.rc")
+else()
+	file(GLOB THE_SOURCES "${DPP_ROOT_PATH}/src/dpp/events/*.cpp" "${DPP_ROOT_PATH}/src/dpp/cluster/*.cpp" "${DPP_ROOT_PATH}/src/dpp/*.cpp" "${DPP_ROOT_PATH}/src/dpp/*.rc")
+endif()
+
 
 set(LIB_NAME "${PROJECT_NAME}")
 
@@ -62,10 +69,12 @@ target_include_directories(
 	"$<INSTALL_INTERFACE:include>"
 )
 
-add_subdirectory("${DPP_ROOT_PATH}/mlspp" "mlspp")
-include_directories("${DPP_ROOT_PATH}/mlspp/include")
-include_directories("${DPP_ROOT_PATH}/mlspp/lib/bytes/include")
-include_directories("${DPP_ROOT_PATH}/mlspp/lib/hpke/include")
+if (HAVE_VOICE)
+	add_subdirectory("${DPP_ROOT_PATH}/mlspp" "mlspp")
+	include_directories("${DPP_ROOT_PATH}/mlspp/include")
+	include_directories("${DPP_ROOT_PATH}/mlspp/lib/bytes/include")
+	include_directories("${DPP_ROOT_PATH}/mlspp/lib/hpke/include")
+endif()
 
 set_target_properties(
 	"${LIB_NAME}" PROPERTIES
@@ -77,8 +86,6 @@ target_link_options(
 	"${LIB_NAME}" PUBLIC
 	"$<$<PLATFORM_ID:Windows>:$<$<CONFIG:Debug>:/DEBUG>>"
 )
-
-add_compile_definitions(HAVE_VOICE)
 
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(OpenSSL REQUIRED)
@@ -97,15 +104,17 @@ target_link_libraries(
 	$<$<TARGET_EXISTS:Threads::Threads>:Threads::Threads>
 )
 
-# Private statically linked dependencies
-target_link_libraries(
-	${LIB_NAME} PRIVATE
-	mlspp
-	mls_vectors
-	bytes
-	tls_syntax
-	hpke
-)
+if (HAVE_VOICE)
+	# Private statically linked dependencies
+	target_link_libraries(
+		${LIB_NAME} PRIVATE
+		mlspp
+		mls_vectors
+		bytes
+		tls_syntax
+		hpke
+	)
+endif()
 
 set(CONFIG_FILE_NAME "${PROJECT_NAME}Config.cmake")
 set(EXPORTED_TARGETS_NAME "${PROJECT_NAME}Targets")

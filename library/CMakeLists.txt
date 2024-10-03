@@ -211,16 +211,22 @@ set(modules_dir "../src")
 
 file(GLOB subdirlist ${modules_dir}/dpp)
 
-add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/../mlspp" "mlspp")
-include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../mlspp/include")
-include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../mlspp/lib/bytes/include")
-include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../mlspp/lib/hpke/include")
+if (HAVE_VOICE)
+	add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/../mlspp" "mlspp")
+	include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../mlspp/include")
+	include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../mlspp/lib/bytes/include")
+	include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../mlspp/lib/hpke/include")
+endif()
 
 foreach (fullmodname ${subdirlist})
     get_filename_component(modname ${fullmodname} NAME)
     set (modsrc "")
 
-	file(GLOB modsrc "${modules_dir}/dpp/*.cpp" "${modules_dir}/dpp/dave/*.cpp" "${modules_dir}/dpp/events/*.cpp" "${modules_dir}/dpp/cluster/*.cpp" "${modules_dir}/dpp/*.rc")
+	if (HAVE_VOICE)
+		file(GLOB modsrc "${modules_dir}/dpp/*.cpp" "${modules_dir}/dpp/dave/*.cpp" "${modules_dir}/dpp/events/*.cpp" "${modules_dir}/dpp/cluster/*.cpp" "${modules_dir}/dpp/*.rc")
+	else()
+		file(GLOB modsrc "${modules_dir}/dpp/*.cpp" "${modules_dir}/dpp/events/*.cpp" "${modules_dir}/dpp/cluster/*.cpp" "${modules_dir}/dpp/*.rc")
+	endif()
 
 	if(BUILD_SHARED_LIBS)
 		add_library(${modname} SHARED ${modsrc})
@@ -270,14 +276,16 @@ foreach (fullmodname ${subdirlist})
 		endif ()
 	endif()
 
-	# Private statically linked dependencies
-	target_link_libraries(${modname} PRIVATE
-		mlspp
-		mls_vectors
-		bytes
-		tls_syntax
-		hpke
-	)
+	if (HAVE_VOICE)
+		# Private statically linked dependencies
+		target_link_libraries(${modname} PRIVATE
+			mlspp
+			mls_vectors
+			bytes
+			tls_syntax
+			hpke
+		)
+	endif()
 
 	if (HAVE_VOICE)
 		target_link_libraries(${modname} PUBLIC ${sodium_LIBRARY_RELEASE} ${OPUS_LIBRARIES})
