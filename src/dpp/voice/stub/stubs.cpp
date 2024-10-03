@@ -20,20 +20,51 @@
  *
  ************************************************************************************/
 
-#include <string_view>
-#include <iostream>
 #include <fstream>
-#include <algorithm>
-#include <cmath>
 #include <dpp/exception.h>
 #include <dpp/isa_detection.h>
 #include <dpp/discordvoiceclient.h>
-#include <dpp/json.h>
+
+#include "stub.h"
 
 namespace dpp {
 
-bool discord_voice_client::voice_payload::operator<(const voice_payload& other) const {
-	return false;
-}
+	void discord_voice_client::voice_courier_loop(discord_voice_client& client, courier_shared_state_t& shared_state) {
+	}
+
+	void discord_voice_client::cleanup(){
+	}
+
+	void discord_voice_client::run() {
+	}
+
+	void discord_voice_client::thread_run() {
+	}
+
+	bool discord_voice_client::voice_payload::operator<(const voice_payload& other) const {
+		return false;
+	}
+
+	bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcode) {
+		return false;
+	}
+
+	void discord_voice_client::read_ready() {
+	}
+
+	void discord_voice_client::write_ready() {
+	}
+
+	discord_voice_client& discord_voice_client::send_audio_raw(uint16_t* audio_data, const size_t length)  {
+		return *this;
+	}
+
+	discord_voice_client& discord_voice_client::send_audio_opus(uint8_t* opus_packet, const size_t length) {
+		return *this;
+	}
+
+	discord_voice_client& discord_voice_client::send_audio_opus(uint8_t* opus_packet, const size_t length, uint64_t duration) {
+		return *this;
+	}
 
 }

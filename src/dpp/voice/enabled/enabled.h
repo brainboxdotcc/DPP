@@ -56,6 +56,16 @@
 #include "../../dave/decryptor.h"
 #include "../../dave/encryptor.h"
 
+#ifdef _WIN32
+#include <WinSock2.h>
+	#include <WS2tcpip.h>
+	#include <io.h>
+#else
+	#include <arpa/inet.h>
+	#include <netinet/in.h>
+	#include <sys/socket.h>
+#endif
+
 namespace dpp {
 
 struct dave_state {
@@ -66,6 +76,19 @@ struct dave_state {
 	std::map<dpp::snowflake, std::unique_ptr<dave::Decryptor>> decryptors;
 	std::unique_ptr<dave::Encryptor> encryptor;
 	std::string privacy_code;
+};
+
+/**
+ * @brief Represents an RTP packet. Size should always be exactly 12.
+ */
+struct rtp_header {
+	uint16_t constant;
+	uint16_t sequence;
+	uint32_t timestamp;
+	uint32_t ssrc;
+
+	rtp_header(uint16_t _seq, uint32_t _ts, uint32_t _ssrc) : constant(htons(0x8078)), sequence(htons(_seq)), timestamp(htonl(_ts)), ssrc(htonl(_ssrc)) {
+	}
 };
 
 /**

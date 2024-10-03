@@ -549,6 +549,13 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	dave_version_t dave_version;
 
 	/**
+	 * @brief Our public IP address
+	 */
+	static std::string external_ip;
+
+
+
+		/**
 	 * @brief Send data to UDP socket immediately.
 	 * 
 	 * @param data data to send
