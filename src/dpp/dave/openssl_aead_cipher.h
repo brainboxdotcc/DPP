@@ -7,17 +7,9 @@
 
 namespace dpp::dave {
 
-class openssl_aead_cipher : public cipher_interface {
+class openssl_aead_cipher : public cipher_interface { // NOLINT
 public:
 	openssl_aead_cipher(const EncryptionKey& encryptionKey);
-
-	/**
-	 * Explicitly not copyable
-	 */
-	openssl_aead_cipher(openssl_aead_cipher&&) = delete;
-	openssl_aead_cipher(openssl_aead_cipher&) = delete;
-	openssl_aead_cipher operator=(openssl_aead_cipher&&) = delete;
-	openssl_aead_cipher operator=(openssl_aead_cipher&) = delete;
 
 	~openssl_aead_cipher() override;
 
