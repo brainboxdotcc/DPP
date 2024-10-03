@@ -49,7 +49,11 @@
 	struct OpusDecoder {};
 	struct OpusEncoder {};
 	struct OpusRepacketizer {};
-	struct dpp::dave::Session {};
+	namespace dpp::dave {
+		struct Session {};
+		struct Encryptor {};
+		struct Decryptor {};
+	};
 #endif
 
 namespace dpp {
