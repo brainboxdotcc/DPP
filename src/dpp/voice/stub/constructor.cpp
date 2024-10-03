@@ -20,13 +20,8 @@
  *
  ************************************************************************************/
 
-#include <iostream>
-#include <fstream>
 #include <dpp/exception.h>
-#include <dpp/isa_detection.h>
 #include <dpp/discordvoiceclient.h>
-
-#include "../../dave/encryptor.h"
 
 #include "stub.h"
 
