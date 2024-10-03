@@ -48,6 +48,7 @@
 #include <future>
 #include <functional>
 #include <chrono>
+#include <iostream>
 #include <set>
 #include <dpp/discordvoiceclient.h>
 #include <sodium.h>
