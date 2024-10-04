@@ -63,7 +63,7 @@ digraph "Example Directory" {
 		"Discord" -> "HTTP/1.1 204 No Content...";
 		"Discord" -> "HTTP/1.1 101 Switching Protocols";
 		
-		label = "now, we're waiting for a response from Discord.\nIf we receive 204, we'll start initiating voiceconn. However, if we receive 101, then we can do all the voice stuff.";
+		label = "Now, we're waiting for a response from Discord.\nIf we receive 204, we'll start initiating voiceconn. However, if we receive 101, then we can do all the voice stuff.";
 	}
 	
 	subgraph cluster_4 {
