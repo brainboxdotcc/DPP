@@ -19,7 +19,7 @@
  * @note Based on code by Krystian Stasiowski
  * (https://github.com/sdkrystian)
  */
-template<typename IN, typename OUT> OUT* convert_to(IN* ptr)
+template<typename IN, typename OUT> OUT convert_to(IN ptr)
 {
-	return std::launder(static_cast<OUT*>(std::memmove(ptr, ptr, sizeof(OUT))));
+	return std::launder(static_cast<OUT>(std::memmove(ptr, ptr, sizeof(OUT))));
 }
