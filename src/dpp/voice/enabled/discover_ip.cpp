@@ -109,7 +109,9 @@ std::string discord_voice_client::discover_ip() {
 			return "";
 		}
 		/* Wait one second for receipt of IP detection packet response */
-		pollfd pfd = { .fd = socket.fd, .events = POLLIN, .revents = 0 };
+		pollfd pfd{};
+		pfd.fd = socket.fd;
+		pfd.events = POLLIN;
 		int ret = ::poll(&pfd, 1, discovery_timeout);
 		switch (ret) {
 			case -1:
