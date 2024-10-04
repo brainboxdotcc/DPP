@@ -76,15 +76,6 @@ public:
     }
     ProtocolVersion GetProtocolVersion() const { return currentProtocolVersion_; }
 
-private:
-    std::unique_ptr<OutboundFrameProcessor> GetOrCreateFrameProcessor();
-    void ReturnFrameProcessor(std::unique_ptr<OutboundFrameProcessor> frameProcessor);
-
-    using CryptorAndNonce = std::pair<std::shared_ptr<cipher_interface>, TruncatedSyncNonce>;
-    CryptorAndNonce GetNextCryptorAndNonce();
-
-    void UpdateCurrentProtocolVersion(ProtocolVersion version);
-
     enum ResultCode {
         Success,
         UninitializedContext,
@@ -94,6 +85,15 @@ private:
         FinalizationFailure,
         TagAppendFailure
     };
+
+private:
+    std::unique_ptr<OutboundFrameProcessor> GetOrCreateFrameProcessor();
+    void ReturnFrameProcessor(std::unique_ptr<OutboundFrameProcessor> frameProcessor);
+
+    using CryptorAndNonce = std::pair<std::shared_ptr<cipher_interface>, TruncatedSyncNonce>;
+    CryptorAndNonce GetNextCryptorAndNonce();
+
+    void UpdateCurrentProtocolVersion(ProtocolVersion version);
 
     std::atomic_bool passthroughMode_{false};
 

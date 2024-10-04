@@ -26,6 +26,7 @@
 #include <dpp/discordvoiceclient.h>
 
 #include <opus/opus.h>
+#include "../../dave/array_view.h"
 #include "../../dave/encryptor.h"
 
 #include "enabled.h"
@@ -66,9 +67,7 @@ discord_voice_client& discord_voice_client::send_audio_raw(uint16_t* audio_data,
 	opus_int32 encoded_audio_max_length = (opus_int32)length;
 	std::vector<uint8_t> encoded_audio(encoded_audio_max_length);
 	size_t encoded_audio_length = encoded_audio_max_length;
-
 	encoded_audio_length = this->encode((uint8_t*)audio_data, length, encoded_audio.data(), encoded_audio_length);
-
 	send_audio_opus(encoded_audio.data(), encoded_audio_length);
 	return *this;
 }
@@ -125,7 +124,29 @@ discord_voice_client& discord_voice_client::send_audio_opus(uint8_t* opus_packet
 	/* Append the 4 byte nonce to the resulting payload */
 	std::memcpy(payload.data() + payload.size() - sizeof(noncel), &noncel, sizeof(noncel));
 
-	this->send(reinterpret_cast<const char*>(payload.data()), payload.size(), duration);
+	if (this->is_end_to_end_encrypted()) {
+
+		std::vector<uint8_t> encrypted_buffer;
+		encrypted_buffer.resize(payload.size() * 2);
+		size_t out_size{0};
+
+		auto result = this->mls_state->encryptor->Encrypt(
+			dave::MediaType::Audio,
+			ssrc,
+			dave::make_array_view<const uint8_t>(payload.data(), payload.size()),
+			dave::make_array_view(encrypted_buffer),
+			&out_size
+		);
+		if (result != dave::Encryptor::ResultCode::Success) {
+			log(ll_warning, "DAVE Encryption failure: " + std::to_string(result));
+		} else {
+			std::cout << "In size: " << payload.size() << " enc: " << out_size << "\n";
+			this->send(reinterpret_cast<const char *>(encrypted_buffer.data()), out_size, duration);
+		}
+	} else {
+		this->send(reinterpret_cast<const char *>(payload.data()), payload.size(), duration);
+	}
+
 	timestamp += frame_size;
 
 	/* Increment for next packet */

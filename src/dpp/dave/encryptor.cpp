@@ -258,7 +258,7 @@ Codec Encryptor::CodecForSsrc(uint32_t ssrc)
         return existingCodecIt->second;
     }
     else {
-        return Codec::Unknown;
+        return Codec::Opus;
     }
 }
 

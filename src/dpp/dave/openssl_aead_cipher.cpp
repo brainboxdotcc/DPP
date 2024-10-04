@@ -23,6 +23,7 @@
 #include <openssl/err.h>
 #include <openssl/evp.h>
 #include <bytes/bytes.h>
+#include <iostream>
 #include "common.h"
 #include "logger.h"
 

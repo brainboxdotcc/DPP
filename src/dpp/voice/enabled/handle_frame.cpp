@@ -50,7 +50,7 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 				mls_state->encryptor = std::make_unique<dave::Encryptor>();
 				mls_state->decryptors.clear();
 			}
-				break;
+			break;
 			case voice_client_dave_mls_proposals: {
 				log(ll_debug, "voice_client_dave_mls_proposals");
 
@@ -62,7 +62,7 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 					this->write(std::string_view(reinterpret_cast<const char*>(r.data()), r.size()), OP_BINARY);
 				}
 			}
-				break;
+			break;
 			case voice_client_dave_announce_commit_transaction: {
 				log(ll_debug, "voice_client_dave_announce_commit_transaction");
 				auto r = mls_state->dave_session->ProcessCommit(mls_state->cached_commit);
@@ -82,8 +82,15 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 				 */
 				mls_state->privacy_code = generate_displayable_code(mls_state->dave_session->GetLastEpochAuthenticator());
 				log(ll_debug, "E2EE Privacy Code: " + mls_state->privacy_code);
+
+				if (!creator->on_voice_ready.empty()) {
+					voice_ready_t rdy(nullptr, data);
+					rdy.voice_client = this;
+					rdy.voice_channel_id = this->channel_id;
+					creator->on_voice_ready.call(rdy);
+				}
 			}
-				break;
+			break;
 			case voice_client_dave_mls_welcome: {
 				this->mls_state->transition_id = dave_header->get_welcome_transition_id();
 				log(ll_debug, "voice_client_dave_mls_welcome with transition id " + std::to_string(this->mls_state->transition_id));
@@ -99,12 +106,19 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 				}
 				mls_state->privacy_code = generate_displayable_code(mls_state->dave_session->GetLastEpochAuthenticator());
 				log(ll_debug, "E2EE Privacy Code: " + mls_state->privacy_code);
+
+				if (!creator->on_voice_ready.empty()) {
+					voice_ready_t rdy(nullptr, data);
+					rdy.voice_client = this;
+					rdy.voice_channel_id = this->channel_id;
+					creator->on_voice_ready.call(rdy);
+				}
 			}
-				break;
+			break;
 			default:
 				log(ll_debug, "Unexpected DAVE frame opcode");
 				log(dpp::ll_trace, "R: " + dpp::utility::debug_dump((uint8_t*)(data.data()), data.length()));
-				break;
+			break;
 		}
 
 		return true;
@@ -136,30 +150,29 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 			/* Ping acknowledgement */
 			case voice_opcode_connection_heartbeat_ack:
 				/* These opcodes do not require a response or further action */
-				break;
+			break;
 			case voice_opcode_media_sink:
 			case voice_client_flags: {
 			}
-				break;
+			break;
 			case voice_client_platform: {
 				voice_client_platform_t vcp(nullptr, data);
 				vcp.voice_client = this;
 				vcp.user_id = snowflake_not_null(&j["d"], "user_id");
 				vcp.platform = static_cast<client_platform_t>(int8_not_null(&j["d"], "platform"));
 				creator->on_voice_client_platform.call(vcp);
-
 			}
-				break;
+			break;
 			case voice_opcode_multiple_clients_connect: {
 				dave_mls_user_list = j["d"]["user_ids"];
 				log(ll_debug, "Number of clients in voice channel: " + std::to_string(dave_mls_user_list.size()));
 			}
-				break;
+			break;
 			case voice_client_dave_mls_invalid_commit_welcome: {
 				this->mls_state->transition_id = j["d"]["transition_id"];
 				log(ll_debug, "voice_client_dave_mls_invalid_commit_welcome transition id " + std::to_string(this->mls_state->transition_id));
 			}
-				break;
+			break;
 			case voice_client_dave_execute_transition: {
 				log(ll_debug, "voice_client_dave_execute_transition");
 				this->mls_state->transition_id = j["d"]["transition_id"];
@@ -174,14 +187,14 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 				};
 				this->write(obj.dump(-1, ' ', false, json::error_handler_t::replace), OP_TEXT);
 			}
-				break;
-				/* "The protocol only uses this opcode to indicate when a downgrade to protocol version 0 is upcoming." */
+			break;
+			/* "The protocol only uses this opcode to indicate when a downgrade to protocol version 0 is upcoming." */
 			case voice_client_dave_prepare_transition: {
 				uint64_t transition_id = j["d"]["transition_id"];
 				uint64_t protocol_version = j["d"]["protocol_version"];
 				log(ll_debug, "voice_client_dave_prepare_transition version=" + std::to_string(protocol_version) + " for transition " + std::to_string(transition_id));
 			}
-				break;
+			break;
 			case voice_client_dave_prepare_epoch: {
 				uint64_t protocol_version = j["d"]["protocol_version"];
 				uint64_t epoch = j["d"]["epoch"];
@@ -191,8 +204,8 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 					mls_state->dave_session->Init(dave::MaxSupportedProtocolVersion(), channel_id, creator->me.id.str(), mls_state->mls_key);
 				}
 			}
-				break;
-				/* Client Disconnect */
+			break;
+			/* Client Disconnect */
 			case voice_opcode_client_disconnect: {
 				if (j.find("d") != j.end() && j["d"].find("user_id") != j["d"].end() && !j["d"]["user_id"].is_null()) {
 					snowflake u_id = snowflake_not_null(&j["d"], "user_id");
@@ -211,10 +224,10 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 					}
 				}
 			}
-				break;
-				/* Speaking */
+			break;
+			/* Speaking */
 			case voice_opcode_client_speaking:
-				/* Client Connect (doesn't seem to work) */
+			/* Client Connect (doesn't seem to work) */
 			case voice_opcode_client_connect: {
 				if (j.find("d") != j.end()
 				    && j["d"].find("user_id") != j["d"].end() && !j["d"]["user_id"].is_null()
@@ -232,12 +245,12 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 					}
 				}
 			}
-				break;
-				/* Voice resume */
+			break;
+			/* Voice resume */
 			case voice_opcode_connection_resumed:
 				log(ll_debug, "Voice connection resumed");
-				break;
-				/* Voice HELLO */
+			break;
+			/* Voice HELLO */
 			case voice_opcode_connection_hello: {
 				if (j.find("d") != j.end() && j["d"].find("heartbeat_interval") != j["d"].end() && !j["d"]["heartbeat_interval"].is_null()) {
 					this->heartbeat_interval = j["d"]["heartbeat_interval"].get<uint32_t>();
@@ -280,8 +293,8 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 				}
 				this->connect_time = time(nullptr);
 			}
-				break;
-				/* Session description */
+			break;
+			/* Session description */
 			case voice_opcode_connection_description: {
 				json &d = j["d"];
 				size_t ofs = 0;
@@ -292,6 +305,9 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 					}
 				}
 				has_secret_key = true;
+
+				/* Reset packet_nonce */
+				packet_nonce = 1;
 
 				if (dave_version != dave_version_none) {
 					if (j["d"]["dave_protocol_version"] != static_cast<uint32_t>(dave_version)) {
@@ -313,21 +329,17 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 				} else {
 					/* This is needed to start voice receiving and make sure that the start of sending isn't cut off */
 					send_silence(20);
+					/* Fire on_voice_ready */
+					if (!creator->on_voice_ready.empty()) {
+						voice_ready_t rdy(nullptr, data);
+						rdy.voice_client = this;
+						rdy.voice_channel_id = this->channel_id;
+						creator->on_voice_ready.call(rdy);
+					}
 				}
-
-				/* Fire on_voice_ready */
-				if (!creator->on_voice_ready.empty()) {
-					voice_ready_t rdy(nullptr, data);
-					rdy.voice_client = this;
-					rdy.voice_channel_id = this->channel_id;
-					creator->on_voice_ready.call(rdy);
-				}
-
-				/* Reset packet_nonce */
-				packet_nonce = 1;
 			}
-				break;
-				/* Voice ready */
+			break;
+			/* Voice ready */
 			case voice_opcode_connection_ready: {
 				/* Video stream stuff comes in this frame too, but we can't use it (YET!) */
 				json &d = j["d"];
@@ -372,25 +384,25 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 					}
 
 					this->write(json({
-								 { "op", voice_opcode_connection_select_protocol },
-								 { "d", {
-										 { "protocol", "udp" },
-										 { "data", {
-												   { "address", discover_ip() },
-												   { "port", bound_port },
-												   { "mode", transport_encryption_protocol }
-											   }
-										 }
-									 }
-								 }
-							 }).dump(-1, ' ', false, json::error_handler_t::replace), OP_TEXT);
+						{ "op", voice_opcode_connection_select_protocol },
+							{ "d", {
+								{ "protocol", "udp" },
+								{ "data", {
+									{ "address", discover_ip() },
+										{ "port", bound_port },
+										{ "mode", transport_encryption_protocol }
+									}
+								}
+							}
+						}
+					}).dump(-1, ' ', false, json::error_handler_t::replace), OP_TEXT);
 				}
 			}
-				break;
+			break;
 			default: {
 				log(ll_debug, "Unknown voice opcode " + std::to_string(op) + ": " + data);
 			}
-				break;
+			break;
 		}
 	}
 	return true;
