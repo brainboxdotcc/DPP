@@ -240,6 +240,13 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	std::shared_mutex queue_mutex;
 
 	/**
+	 * @brief Our public IP address
+	 *
+	 * Use discord_voice_client::discover_ip() to access this value
+	 */
+	std::string external_ip;
+
+	/**
 	 * @brief Queue of outbound messages
 	 */
 	std::deque<std::string> message_queue;
@@ -549,13 +556,6 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	dave_version_t dave_version;
 
 	/**
-	 * @brief Our public IP address
-	 */
-	static std::string external_ip;
-
-
-
-		/**
 	 * @brief Send data to UDP socket immediately.
 	 * 
 	 * @param data data to send

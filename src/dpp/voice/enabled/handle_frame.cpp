@@ -340,8 +340,6 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 				}
 				log(ll_debug, "Voice websocket established; UDP endpoint: " + ip + ":" + std::to_string(port) + " [ssrc=" + std::to_string(ssrc) + "] with " + std::to_string(modes.size()) + " modes");
 
-				external_ip = discover_ip();
-
 				dpp::socket newfd;
 				if ((newfd = ::socket(AF_INET, SOCK_DGRAM, 0)) >= 0) {
 
@@ -373,14 +371,12 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 						bound_port = ntohs(sin.sin_port);
 					}
 
-					log(ll_debug, "External IP address: " + external_ip);
-
 					this->write(json({
 								 { "op", voice_opcode_connection_select_protocol },
 								 { "d", {
 										 { "protocol", "udp" },
 										 { "data", {
-												   { "address", external_ip },
+												   { "address", discover_ip() },
 												   { "port", bound_port },
 												   { "mode", transport_encryption_protocol }
 											   }

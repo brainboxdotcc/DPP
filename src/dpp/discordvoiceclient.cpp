@@ -71,7 +71,6 @@ moving_averager::operator float() {
 }
 
 bool discord_voice_client::sodium_initialised = false;
-std::string discord_voice_client::external_ip;
 
 discord_voice_client::~discord_voice_client()
 {
