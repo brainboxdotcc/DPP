@@ -22,7 +22,6 @@
 
 #include <dpp/exception.h>
 #include <dpp/discordvoiceclient.h>
-#include <dpp/convert_to.h>
 #include "enabled.h"
 
 #ifdef _WIN32
@@ -92,7 +91,7 @@ std::string discord_voice_client::discover_ip() {
 		servaddr.sin_family = AF_INET;
 		servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
 		servaddr.sin_port = htons(0);
-		if (bind(socket.fd, convert_to<sockaddr_in*, const sockaddr*>(&servaddr), sizeof(servaddr)) < 0) {
+		if (bind(socket.fd, (const sockaddr*)(&servaddr), sizeof(servaddr)) < 0) {
 			log(ll_warning, "Could not bind socket for IP discovery");
 			return "";
 		}
@@ -100,11 +99,11 @@ std::string discord_voice_client::discover_ip() {
 		servaddr.sin_family = AF_INET;
 		servaddr.sin_port = htons(this->port);
 		servaddr.sin_addr.s_addr = inet_addr(this->ip.c_str());
-		if (::connect(socket.fd, convert_to<sockaddr_in*, const sockaddr*>(&servaddr), sizeof(sockaddr_in)) < 0) {
+		if (::connect(socket.fd, (const sockaddr*)(&servaddr), sizeof(sockaddr_in)) < 0) {
 			log(ll_warning, "Could not connect socket for IP discovery");
 			return "";
 		}
-		if (::send(socket.fd, convert_to<ip_discovery_packet*, const char*>(&discovery), sizeof(discovery), 0) == -1) {
+		if (::send(socket.fd, (const char*)(&discovery), sizeof(discovery), 0) == -1) {
 			log(ll_warning, "Could not send packet for IP discovery");
 			return "";
 		}
@@ -121,7 +120,7 @@ std::string discord_voice_client::discover_ip() {
 				log(ll_warning, "Timed out in IP discovery");
 				return "";
 			default:
-				if (recv(socket.fd, convert_to<ip_discovery_packet*, char*>(&discovery), sizeof(discovery), 0) == -1) {
+				if (recv(socket.fd, (char*)(&discovery), sizeof(discovery), 0) == -1) {
 					log(ll_warning, "Could not receive packet for IP discovery");
 					return "";
 				}
