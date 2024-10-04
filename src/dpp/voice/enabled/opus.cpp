@@ -148,6 +148,8 @@ discord_voice_client& discord_voice_client::send_audio_opus(uint8_t* opus_packet
 	/* Append the 4 byte nonce to the resulting payload */
 	std::memcpy(payload.data() + payload.size() - sizeof(noncel), &noncel, sizeof(noncel));
 
+	this->send(reinterpret_cast<const char *>(payload.data()), payload.size(), duration);
+
 	timestamp += frame_size;
 
 	/* Increment for next packet */
