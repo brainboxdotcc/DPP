@@ -10,7 +10,7 @@ Now, you can open your `main.cpp` file. If you have code there, then you're one 
 
 \include{cpp} firstbot.cpp
 
-now, you can go ahead and hit the green "Run" button in the top-right to run the bot.
+Now, you can go ahead and hit the green "Run" button in the top-right to run the bot.
 
 **Congratulations, you've successfully set up a bot!**
 

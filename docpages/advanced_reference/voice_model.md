@@ -109,6 +109,26 @@ digraph "Example Directory" {
 		"HTTP/1.1 101 Switching Protocols" -> "discord_voice_client::handle_frame";
 		
 		label = "Do the voice stuff.";
+
+        "discord_voice_client::handle_frame"-> "DAVE enabled";
+        "discord_voice_client::handle_frame"-> "DAVE disabled";
+        "DAVE disabled"->"discord_voice_client::send_audio_*()";
+ "discord_voice_client::send_audio_*()" -> "Dave encryption on";
+ "discord_voice_client::send_audio_*()" -> "Dave encryption off";
+ "Dave encryption on" -> "AES AEAD encryption\nof OPUS stream\nusing ratchet";
+ "AES AEAD encryption\nof OPUS stream\nusing ratchet" -> "SODIUM encryption (xchacha20_poly1305_aead)";
+  "Dave encryption off" -> "SODIUM encryption (xchacha20_poly1305_aead)";
+ "SODIUM encryption (xchacha20_poly1305_aead)" -> "UDP sendto";
+ "UDP sendto" -> "Discord RTP server";
+ "DAVE enabled" -> "MLS send key package";
+ "MLS send key package" -> "MLS receive external sender";
+ "MLS receive external sender" -> "MLS proposals";
+ "MLS proposals" -> "MLS Welcome";
+ "MLS proposals" -> "MLS Commit";
+ "MLS Commit" -> "DAVE begin transition";
+ "MLS Welcome" -> "DAVE begin transition";
+ "DAVE begin transition" -> "Dave execute transition";
+ "Dave execute transition" -> "discord_voice_client::send_audio_*()";
 	}
     
 	"Your bot" -> "guild::connect_member_voice";
