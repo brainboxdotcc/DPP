@@ -39,7 +39,7 @@ To add D++ to a Visual Studio project, using **Visual Studio 2019** or **Visual 
 12. Again within the same window, go to the input section, under the linker category, and add '**dpp.lib;**' to the start of the libraries to include, as shown below:
 \image html zip_vsproj_11.png
 
-13. now you can paste some code into the editor, completely replacing the 'hello world' application that Visual Studio made for you. The example code here is the basic bot from the first example on this site. You should at this point also double check that the architecture you have selected (in this case x86) matches the version of the dll/lib files you downloaded from the website. This is **important** as if you mismatch them the compilation will just fail.
+13. Now you can paste some code into the editor, completely replacing the 'hello world' application that Visual Studio made for you. The example code here is the basic bot from the first example on this site. You should at this point also double check that the architecture you have selected (in this case x86) matches the version of the dll/lib files you downloaded from the website. This is **important** as if you mismatch them the compilation will just fail.
 \image html zip_vsproj_12.png
 
 14. Go to the build menu and choose Build Solution (A handy shortcut for this is to just press **F7**):

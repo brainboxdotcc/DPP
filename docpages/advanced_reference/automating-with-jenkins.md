@@ -49,7 +49,7 @@ Making sure you have your project files in the workspace directory (you can see 
 
 Running the builds is the same as any other time, but we'll still cover it! However, we won't cover running it in background and whatnot, that part is completely down to you.
 
-First, you need to get into the `jenkins` user. If you're like me and don't have the Jenkins user password, you can login with your normal login (that has sudo perms) and do `sudo su - jenkins`. Once logged in, you'll be in `/var/lib/jenkins/`. From here, you'll want to do `cd workspace/DiscordBot/` (make sure to replace "DiscordBot" with your bot's name. Remember, you can tab-complete this) and then `cd build`. now, you can simply do `./DiscordBot`!
+First, you need to get into the `jenkins` user. If you're like me and don't have the Jenkins user password, you can login with your normal login (that has sudo perms) and do `sudo su - jenkins`. Once logged in, you'll be in `/var/lib/jenkins/`. From here, you'll want to do `cd workspace/DiscordBot/` (make sure to replace "DiscordBot" with your bot's name. Remember, you can tab-complete this) and then `cd build`. Now, you can simply do `./DiscordBot`!
 
 \warning If you are going to be running the bot at the same time as builds, I would heavily advise that you copy the bot (if it's not statically linked, then copy the entire build directory) to a different location. This is so you can pick and choose when the bot gets updated (and even means you can run experimental builds as opposed to stable builds) but also means you avoid any risk of the bot crashing during build (as Jenkins will be overwriting your executable and libraries).
 

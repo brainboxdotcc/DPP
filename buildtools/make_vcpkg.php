@@ -42,7 +42,7 @@ $sha512 = $vcpkg->firstBuild(
     $vcpkg->constructPortAndVersionFile()
 );
 if (!empty($sha512)) {
-    /* now check out master */
+    /* Now check out master */
     if (!$vcpkg->checkoutRepository()) {
         exit(1);
     }

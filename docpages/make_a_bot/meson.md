@@ -61,6 +61,6 @@ meson setup builddir
 meson compile -C builddir
 ```
 
-now, your Meson project should be all setup!
+Now, your Meson project should be all setup!
 
 **Have fun!**

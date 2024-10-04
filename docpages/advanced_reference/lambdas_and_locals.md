@@ -8,7 +8,7 @@ It is important to remember that when you put a lambda callback onto a function 
 
 To explain this situation and how it causes issues, I'd like you to imagine the age-old magic trick, where a magician sets a fine table full of cutlery, pots, pans and wine. He indicates to the audience that this is authentic, then with a whip of his wrist, he whips the tablecloth away, leaving the cutlery and other tableware in place (if he is any good as a magician!)
 
-now imagine the following code scenario. We will describe this code scenario as the magic trick above, in the steps below:
+Now imagine the following code scenario. We will describe this code scenario as the magic trick above, in the steps below:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~cpp
 bot.on_message_create([&bot](const dpp::message_create_t & event) {

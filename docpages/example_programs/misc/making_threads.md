@@ -26,7 +26,7 @@ After that, you'll be able to see your bot send a message in your thread!
 
 Those of you who are familar with sending messages in regular channels may have also noticed that sending messages to threads is the same as sending a general message. This is because threads are basically channels with a couple more features!
 
-now, we're going to cover how to lock a thread! With this, you'll also learn how to edit threads in general, meaning you can go forward and learn how to change even more stuff about threads, as much as your heart desires!
+Now, we're going to cover how to lock a thread! With this, you'll also learn how to edit threads in general, meaning you can go forward and learn how to change even more stuff about threads, as much as your heart desires!
 
 \include{cpp} making_threads3.cpp
 
