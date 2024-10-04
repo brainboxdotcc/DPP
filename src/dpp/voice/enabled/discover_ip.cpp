@@ -103,7 +103,7 @@ std::string discord_voice_client::discover_ip() {
 			log(ll_warning, "Could not connect socket for IP discovery");
 			return "";
 		}
-		if (::send(socket.fd, &discovery, sizeof(discovery), 0) == -1) {
+		if (::send(socket.fd, (const char*)&discovery, sizeof(discovery), 0) == -1) {
 			log(ll_warning, "Could not send packet for IP discovery");
 			return "";
 		}
@@ -120,7 +120,7 @@ std::string discord_voice_client::discover_ip() {
 				log(ll_warning, "Timed out in IP discovery");
 				return "";
 			default:
-				if (recv(socket.fd, &discovery, sizeof(discovery), 0) == -1) {
+				if (recv(socket.fd, (char*)&discovery, sizeof(discovery), 0) == -1) {
 					log(ll_warning, "Could not receive packet for IP discovery");
 					return "";
 				}
