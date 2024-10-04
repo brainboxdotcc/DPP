@@ -89,6 +89,30 @@ discord_voice_client& discord_voice_client::send_audio_opus(uint8_t* opus_packet
 	encoded_audio.reserve(length);
 	memcpy(encoded_audio.data(), opus_packet, length);
 
+	if (this->is_end_to_end_encrypted()) {
+
+		std::vector<uint8_t> encrypted_buffer(encoded_audio.size() * 2);
+		size_t out_size{0};
+
+		auto result = this->mls_state->encryptor->Encrypt(
+			dave::MediaType::Audio,
+			ssrc,
+			dave::make_array_view<const uint8_t>(encoded_audio.data(), length),
+			dave::make_array_view(encrypted_buffer),
+			&out_size
+		);
+		encrypted_buffer.resize(out_size);
+		if (result != dave::Encryptor::ResultCode::Success) {
+			log(ll_warning, "DAVE Encryption failure: " + std::to_string(result));
+		} else {
+			std::cout << "Encrypted " << encrypted_buffer.size() << " plain opus " << encoded_audio.size() << "\n";
+			encoded_audio = encrypted_buffer;
+			encoded_audio_length = encoded_audio.size();
+			std::cout << "New plain opus " << encoded_audio.size() << "\n";
+		}
+
+	}
+
 	++sequence;
 	rtp_header header(sequence, timestamp, (uint32_t)ssrc);
 
@@ -123,29 +147,6 @@ discord_voice_client& discord_voice_client::send_audio_opus(uint8_t* opus_packet
 
 	/* Append the 4 byte nonce to the resulting payload */
 	std::memcpy(payload.data() + payload.size() - sizeof(noncel), &noncel, sizeof(noncel));
-
-	if (this->is_end_to_end_encrypted()) {
-
-		std::vector<uint8_t> encrypted_buffer;
-		encrypted_buffer.resize(payload.size() * 2);
-		size_t out_size{0};
-
-		auto result = this->mls_state->encryptor->Encrypt(
-			dave::MediaType::Audio,
-			ssrc,
-			dave::make_array_view<const uint8_t>(payload.data(), payload.size()),
-			dave::make_array_view(encrypted_buffer),
-			&out_size
-		);
-		if (result != dave::Encryptor::ResultCode::Success) {
-			log(ll_warning, "DAVE Encryption failure: " + std::to_string(result));
-		} else {
-			std::cout << "In size: " << payload.size() << " enc: " << out_size << "\n";
-			this->send(reinterpret_cast<const char *>(encrypted_buffer.data()), out_size, duration);
-		}
-	} else {
-		this->send(reinterpret_cast<const char *>(payload.data()), payload.size(), duration);
-	}
 
 	timestamp += frame_size;
 
