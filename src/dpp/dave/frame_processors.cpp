@@ -183,40 +183,40 @@ size_t Reconstruct(Ranges ranges,
     return frameIndex;
 }
 
-void InboundFrameProcessor::Clear()
+void inbound_frame_processor::Clear()
 {
     isEncrypted_ = false;
     originalSize_ = 0;
-    truncatedNonce_ = std::numeric_limits<TruncatedSyncNonce>::max();
+    truncatedNonce_ = std::numeric_limits<truncated_sync_nonce>::max();
     unencryptedRanges_.clear();
     authenticated_.clear();
     ciphertext_.clear();
     plaintext_.clear();
 }
 
-void InboundFrameProcessor::ParseFrame(array_view<const uint8_t> frame)
+void inbound_frame_processor::ParseFrame(array_view<const uint8_t> frame)
 {
     Clear();
 
     constexpr auto MinSupplementalBytesSize =
-      kAesGcm128TruncatedTagBytes + sizeof(SupplementalBytesSize) + sizeof(MagicMarker);
+	    kAesGcm128TruncatedTagBytes + sizeof(supplemental_bytes_size) + sizeof(magic_marker);
     if (frame.size() < MinSupplementalBytesSize) {
         DISCORD_LOG(LS_WARNING) << "Encrypted frame is too small to contain min supplemental bytes";
         return;
     }
 
     // Check the frame ends with the magic marker
-    auto magicMarkerBuffer = frame.end() - sizeof(MagicMarker);
-    if (memcmp(magicMarkerBuffer, &kMarkerBytes, sizeof(MagicMarker)) != 0) {
+    auto magicMarkerBuffer = frame.end() - sizeof(magic_marker);
+    if (memcmp(magicMarkerBuffer, &kMarkerBytes, sizeof(magic_marker)) != 0) {
         return;
     }
 
     // Read the supplemental bytes size
-    SupplementalBytesSize supplementalBytesSize;
-    auto supplementalBytesSizeBuffer = magicMarkerBuffer - sizeof(SupplementalBytesSize);
+    supplemental_bytes_size supplementalBytesSize;
+    auto supplementalBytesSizeBuffer = magicMarkerBuffer - sizeof(supplemental_bytes_size);
     assert(frame.begin() <= supplementalBytesSizeBuffer &&
            supplementalBytesSizeBuffer <= frame.end());
-    memcpy(&supplementalBytesSize, supplementalBytesSizeBuffer, sizeof(SupplementalBytesSize));
+    memcpy(&supplementalBytesSize, supplementalBytesSizeBuffer, sizeof(supplemental_bytes_size));
 
     // Check the frame is large enough to contain the supplemental bytes
     if (frame.size() < supplementalBytesSize) {
@@ -295,7 +295,7 @@ void InboundFrameProcessor::ParseFrame(array_view<const uint8_t> frame)
     isEncrypted_ = true;
 }
 
-size_t InboundFrameProcessor::ReconstructFrame(array_view<uint8_t> frame) const
+size_t inbound_frame_processor::ReconstructFrame(array_view<uint8_t> frame) const
 {
     if (!isEncrypted_) {
         DISCORD_LOG(LS_WARNING) << "Cannot reconstruct an invalid encrypted frame";
@@ -310,13 +310,13 @@ size_t InboundFrameProcessor::ReconstructFrame(array_view<uint8_t> frame) const
     return Reconstruct(unencryptedRanges_, authenticated_, plaintext_, frame);
 }
 
-void InboundFrameProcessor::AddAuthenticatedBytes(const uint8_t* data, size_t size)
+void inbound_frame_processor::AddAuthenticatedBytes(const uint8_t* data, size_t size)
 {
     authenticated_.resize(authenticated_.size() + size);
     memcpy(authenticated_.data() + authenticated_.size() - size, data, size);
 }
 
-void InboundFrameProcessor::AddCiphertextBytes(const uint8_t* data, size_t size)
+void inbound_frame_processor::AddCiphertextBytes(const uint8_t* data, size_t size)
 {
     ciphertext_.resize(ciphertext_.size() + size);
     memcpy(ciphertext_.data() + ciphertext_.size() - size, data, size);

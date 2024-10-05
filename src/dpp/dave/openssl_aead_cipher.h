@@ -30,7 +30,7 @@ namespace dpp::dave {
 
 class openssl_aead_cipher : public cipher_interface { // NOLINT
 public:
-	openssl_aead_cipher(const EncryptionKey& encryptionKey);
+	openssl_aead_cipher(const encryption_key& encryptionKey);
 
 	~openssl_aead_cipher() override;
 

@@ -38,7 +38,7 @@ public:
     virtual time_point now() const = 0;
 };
 
-class Clock : public clock_interface {
+class clock : public clock_interface {
 public:
     time_point now() const override { return base_clock::now(); }
 };

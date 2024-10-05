@@ -27,7 +27,7 @@
 
 namespace dpp::dave {
 
-std::unique_ptr<cipher_interface> create_cipher(const EncryptionKey& encryptionKey)
+std::unique_ptr<cipher_interface> create_cipher(const encryption_key& encryptionKey)
 {
     auto cipher = std::make_unique<openssl_aead_cipher>(encryptionKey);
     return cipher->is_valid() ? std::move(cipher) : nullptr;

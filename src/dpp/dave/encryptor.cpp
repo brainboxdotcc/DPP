@@ -160,8 +160,8 @@ int encryptor::encrypt(media_type mediaType,
         auto unencryptedRangesBuffer =
 		make_array_view(truncatedNonceBuffer.end(), unencryptedRangesSize);
         auto supplementalBytesBuffer =
-		make_array_view(unencryptedRangesBuffer.end(), sizeof(SupplementalBytesSize));
-        auto markerBytesBuffer = make_array_view(supplementalBytesBuffer.end(), sizeof(MagicMarker));
+		make_array_view(unencryptedRangesBuffer.end(), sizeof(supplemental_bytes_size));
+        auto markerBytesBuffer = make_array_view(supplementalBytesBuffer.end(), sizeof(magic_marker));
 
         // write the nonce
         auto res = WriteLeb128(truncatedNonce, truncatedNonceBuffer.begin());
@@ -181,15 +181,15 @@ int encryptor::encrypt(media_type mediaType,
         }
 
         // write the supplemental bytes size
-        SupplementalBytesSize supplementalBytes =
+        supplemental_bytes_size supplementalBytes =
           kSupplementalBytes + nonceSize + unencryptedRangesSize;
-	std::memcpy(supplementalBytesBuffer.data(), &supplementalBytes, sizeof(SupplementalBytesSize));
+	std::memcpy(supplementalBytesBuffer.data(), &supplementalBytes, sizeof(supplemental_bytes_size));
 
         // write the marker bytes, ends the frame
-	std::memcpy(markerBytesBuffer.data(), &kMarkerBytes, sizeof(MagicMarker));
+	std::memcpy(markerBytesBuffer.data(), &kMarkerBytes, sizeof(magic_marker));
 
         auto encryptedFrameBytes = reconstructedFrameSize + kAesGcm128TruncatedTagBytes +
-          nonceSize + unencryptedRangesSize + sizeof(SupplementalBytesSize) + sizeof(MagicMarker);
+				   nonceSize + unencryptedRangesSize + sizeof(supplemental_bytes_size) + sizeof(magic_marker);
 
         if (codec_utils::validate_encrypted_frame(
 		*frameProcessor, make_array_view(encryptedFrame.data(), encryptedFrameBytes))) {

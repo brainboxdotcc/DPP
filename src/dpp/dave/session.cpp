@@ -351,7 +351,7 @@ bool Session::CanProcessCommit(const ::mlspp::MLSMessage& commit) noexcept
     return true;
 }
 
-RosterVariant Session::ProcessCommit(std::vector<uint8_t> commit) noexcept
+roster_variant Session::ProcessCommit(std::vector<uint8_t> commit) noexcept
 try {
     DISCORD_LOG(LS_INFO) << "Processing commit";
     DISCORD_LOG(LS_INFO) << "Commit: " << ::mlspp::bytes_ns::bytes(commit);
@@ -380,7 +380,7 @@ try {
     DISCORD_LOG(LS_INFO) << "Successfully processed MLS commit, updating state; our leaf index is "
                          << newState->index().val << "; current epoch is " << newState->epoch();
 
-    RosterMap ret = ReplaceState(std::make_unique<::mlspp::State>(std::move(*newState)));
+    roster_map ret = ReplaceState(std::make_unique<::mlspp::State>(std::move(*newState)));
 
     // reset the outbound cached group since we handled the commit for this epoch
     outboundCachedGroupState_.reset();
@@ -395,7 +395,7 @@ catch (const std::exception& e) {
     return failed_t{};
 }
 
-std::optional<RosterMap> Session::ProcessWelcome(
+std::optional<roster_map> Session::ProcessWelcome(
   std::vector<uint8_t> welcome,
   std::set<std::string> const& recognizedUserIDs) noexcept
 try {
@@ -440,7 +440,7 @@ try {
                          << newState->index().val << "; current epoch is " << newState->epoch();
 
     // make the verified state our new (and only) state
-    RosterMap ret = ReplaceState(std::move(newState));
+    roster_map ret = ReplaceState(std::move(newState));
 
     // clear out any pending state for creating/joining a group
     ClearPendingState();
@@ -453,9 +453,9 @@ catch (const std::exception& e) {
     return std::nullopt;
 }
 
-RosterMap Session::ReplaceState(std::unique_ptr<::mlspp::State>&& state)
+roster_map Session::ReplaceState(std::unique_ptr<::mlspp::State>&& state)
 {
-    RosterMap newRoster;
+    roster_map newRoster;
     for (const ::mlspp::LeafNode& node : state->roster()) {
         if (node.credential.type() != ::mlspp::CredentialType::basic) {
             continue;
@@ -466,7 +466,7 @@ RosterMap Session::ReplaceState(std::unique_ptr<::mlspp::State>&& state)
         newRoster[FromBigEndianBytes(cred.identity)] = node.signature_key.data.as_vec();
     }
 
-    RosterMap changeMap;
+    roster_map changeMap;
 
     std::set_difference(newRoster.begin(),
                         newRoster.end(),
@@ -475,11 +475,11 @@ RosterMap Session::ReplaceState(std::unique_ptr<::mlspp::State>&& state)
                         std::inserter(changeMap, changeMap.end()));
 
     struct MissingItemWrapper {
-        RosterMap& changeMap_;
+        roster_map& changeMap_;
 
-        using iterator = RosterMap::iterator;
-        using const_iterator = RosterMap::const_iterator;
-        using value_type = RosterMap::value_type;
+        using iterator = roster_map::iterator;
+        using const_iterator = roster_map::const_iterator;
+        using value_type = roster_map::value_type;
 
         iterator insert(const_iterator it, const value_type& value)
         {

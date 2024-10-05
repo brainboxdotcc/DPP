@@ -91,7 +91,7 @@ discord_voice_client& discord_voice_client::send_audio_opus(uint8_t* opus_packet
 
 	if (this->is_end_to_end_encrypted()) {
 
-		std::vector<uint8_t> encrypted_buffer(encoded_audio.size() * 2);
+		std::vector<uint8_t> encrypted_buffer(this->mls_state->encryptor->get_max_ciphertext_byte_size(dave::media_type::media_audio, length));
 		size_t out_size{0};
 
 		auto result = this->mls_state->encryptor->encrypt(

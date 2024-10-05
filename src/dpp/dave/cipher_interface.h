@@ -42,7 +42,7 @@ public:
 	virtual bool decrypt(byte_view plaintextBufferOut, const_byte_view ciphertextBuffer, const_byte_view tagBuffer, const_byte_view nonceBuffer, const_byte_view additionalData) = 0;
 };
 
-std::unique_ptr<cipher_interface> create_cipher(const EncryptionKey& encryptionKey);
+std::unique_ptr<cipher_interface> create_cipher(const encryption_key& encryptionKey);
 
 } // namespace dpp::dave
 

@@ -34,7 +34,7 @@ public:
     MlsKeyRatchet(::mlspp::CipherSuite suite, bytes baseSecret) noexcept;
     ~MlsKeyRatchet() noexcept override;
 
-    EncryptionKey GetKey(KeyGeneration generation) noexcept override;
+    encryption_key GetKey(KeyGeneration generation) noexcept override;
     void DeleteKey(KeyGeneration generation) noexcept override;
 
 private:

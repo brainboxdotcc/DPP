@@ -40,12 +40,12 @@ namespace mlspp::bytes_ns {
 
 namespace dpp::dave {
 
-using UnencryptedFrameHeaderSize = uint16_t;
-using TruncatedSyncNonce = uint32_t;
-using MagicMarker = uint16_t;
-using EncryptionKey = ::mlspp::bytes_ns::bytes;
-using TransitionId = uint16_t;
-using SupplementalBytesSize = uint8_t;
+using unencrypted_frame_header_size = uint16_t;
+using truncated_sync_nonce = uint32_t;
+using magic_marker = uint16_t;
+using encryption_key = ::mlspp::bytes_ns::bytes;
+using transition_id = uint16_t;
+using supplemental_bytes_size = uint8_t;
 
 enum media_type : uint8_t { media_audio, media_video };
 enum Codec : uint8_t { Unknown, Opus, VP8, VP9, H264, H265, AV1 };
@@ -59,25 +59,22 @@ struct ignored_t {};
 // Map of ID-key pairs.
 // In ProcessCommit, this lists IDs whose keys have been added, changed, or removed;
 // an empty value value means a key was removed.
-using RosterMap = std::map<uint64_t, std::vector<uint8_t>>;
+using roster_map = std::map<uint64_t, std::vector<uint8_t>>;
 
 // Return type for functions producing RosterMap or hard or soft failures
-using RosterVariant = std::variant<failed_t, ignored_t, RosterMap>;
+using roster_variant = std::variant<failed_t, ignored_t, roster_map>;
 
-constexpr MagicMarker kMarkerBytes = 0xFAFA;
+constexpr magic_marker kMarkerBytes = 0xFAFA;
 
 // Layout constants
 constexpr size_t kAesGcm128KeyBytes = 16;
 constexpr size_t kAesGcm128NonceBytes = 12;
 constexpr size_t kAesGcm128TruncatedSyncNonceBytes = 4;
-constexpr size_t kAesGcm128TruncatedSyncNonceOffset =
-  kAesGcm128NonceBytes - kAesGcm128TruncatedSyncNonceBytes;
+constexpr size_t kAesGcm128TruncatedSyncNonceOffset = kAesGcm128NonceBytes - kAesGcm128TruncatedSyncNonceBytes;
 constexpr size_t kAesGcm128TruncatedTagBytes = 8;
 constexpr size_t kRatchetGenerationBytes = 1;
-constexpr size_t kRatchetGenerationShiftBits =
-  8 * (kAesGcm128TruncatedSyncNonceBytes - kRatchetGenerationBytes);
-constexpr size_t kSupplementalBytes =
-  kAesGcm128TruncatedTagBytes + sizeof(SupplementalBytesSize) + sizeof(MagicMarker);
+constexpr size_t kRatchetGenerationShiftBits = 8 * (kAesGcm128TruncatedSyncNonceBytes - kRatchetGenerationBytes);
+constexpr size_t kSupplementalBytes = kAesGcm128TruncatedTagBytes + sizeof(supplemental_bytes_size) + sizeof(magic_marker);
 constexpr size_t kTransformPaddingBytes = 64;
 
 // Timing constants
@@ -94,8 +91,7 @@ constexpr auto kMaxFramesPerSecond = 50 + 2 * 60; // 50 audio frames + 2 * 60fps
 constexpr std::array<uint8_t, 3> kOpusSilencePacket = {0xF8, 0xFF, 0xFE};
 
 // Utility routine for variant return types
-template <class T, class V>
-inline std::optional<T> GetOptional(V&& variant)
+template <class T, class V> inline std::optional<T> get_optional(V&& variant)
 {
     if (auto map = std::get_if<T>(&variant)) {
         if constexpr (std::is_rvalue_reference_v<decltype(variant)>) {

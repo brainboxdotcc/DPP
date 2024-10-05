@@ -80,9 +80,9 @@ public:
       std::vector<uint8_t> proposals,
       std::set<std::string> const& recognizedUserIDs) noexcept;
 
-    RosterVariant ProcessCommit(std::vector<uint8_t> commit) noexcept;
+    roster_variant ProcessCommit(std::vector<uint8_t> commit) noexcept;
 
-    std::optional<RosterMap> ProcessWelcome(
+    std::optional<roster_map> ProcessWelcome(
       std::vector<uint8_t> welcome,
       std::set<std::string> const& recognizedUserIDs) noexcept;
 
@@ -115,7 +115,7 @@ private:
 
     bool CanProcessCommit(const ::mlspp::MLSMessage& commit) noexcept;
 
-    RosterMap ReplaceState(std::unique_ptr<::mlspp::State>&& state);
+    roster_map ReplaceState(std::unique_ptr<::mlspp::State>&& state);
 
     void ClearPendingState();
 
@@ -142,7 +142,7 @@ private:
     std::unique_ptr<::mlspp::State> outboundCachedGroupState_;
 
     std::unique_ptr<::mlspp::State> currentState_;
-    RosterMap roster_;
+    roster_map roster_;
 
     std::unique_ptr<::mlspp::State> stateWithProposals_;
     std::list<QueuedProposal> proposalQueue_;

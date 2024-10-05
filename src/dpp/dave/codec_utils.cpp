@@ -33,8 +33,8 @@
 
 namespace dpp::dave::codec_utils {
 
-UnencryptedFrameHeaderSize BytesCoveringH264PPS(const uint8_t* payload,
-                                                const uint64_t sizeRemaining)
+unencrypted_frame_header_size BytesCoveringH264PPS(const uint8_t* payload,
+						   const uint64_t sizeRemaining)
 {
     // the payload starts with three exponential golomb encoded values
     // (first_mb_in_slice, sps_id, pps_id)

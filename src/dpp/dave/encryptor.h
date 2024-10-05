@@ -85,7 +85,7 @@ private:
     std::unique_ptr<OutboundFrameProcessor> get_or_create_frame_processor();
     void return_frame_processor(std::unique_ptr<OutboundFrameProcessor> frameProcessor);
 
-    using cryptor_and_nonce = std::pair<std::shared_ptr<cipher_interface>, TruncatedSyncNonce>;
+    using cryptor_and_nonce = std::pair<std::shared_ptr<cipher_interface>, truncated_sync_nonce>;
     cryptor_and_nonce get_next_cryptor_and_nonce();
 
     void update_current_protocol_version(ProtocolVersion version);
@@ -96,7 +96,7 @@ private:
     std::unique_ptr<IKeyRatchet> keyRatchet_;
     std::shared_ptr<cipher_interface> cryptor_;
     KeyGeneration currentKeyGeneration_{0};
-    TruncatedSyncNonce truncatedNonce_{0};
+    truncated_sync_nonce truncatedNonce_{0};
 
     std::mutex frameProcessorsMutex_;
     std::vector<std::unique_ptr<OutboundFrameProcessor>> frameProcessors_;

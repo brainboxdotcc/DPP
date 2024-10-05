@@ -39,7 +39,7 @@ void PrintSSLErrors()
       nullptr);
 }
 
-openssl_aead_cipher::openssl_aead_cipher(const EncryptionKey& encryptionKey) :
+openssl_aead_cipher::openssl_aead_cipher(const encryption_key& encryptionKey) :
 	cipherCtx_(EVP_CIPHER_CTX_new()),
 	key_(std::vector(encryptionKey.data(), encryptionKey.data() + encryptionKey.size())) {
 }

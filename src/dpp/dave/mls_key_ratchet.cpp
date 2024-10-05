@@ -37,7 +37,7 @@ MlsKeyRatchet::MlsKeyRatchet(::mlspp::CipherSuite suite, bytes baseSecret) noexc
 
 MlsKeyRatchet::~MlsKeyRatchet() noexcept = default;
 
-EncryptionKey MlsKeyRatchet::GetKey(KeyGeneration generation) noexcept
+encryption_key MlsKeyRatchet::GetKey(KeyGeneration generation) noexcept
 {
     DISCORD_LOG(LS_INFO) << "Retrieving key for generation " << generation << " from HashRatchet";
 

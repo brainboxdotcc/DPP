@@ -44,12 +44,12 @@ KeyGeneration compute_wrapped_generation(KeyGeneration oldest, KeyGeneration gen
     return factor * kGenerationWrap + generation;
 }
 
-BigNonce compute_wrapped_big_nonce(KeyGeneration generation, TruncatedSyncNonce nonce)
+big_nonce compute_wrapped_big_nonce(KeyGeneration generation, truncated_sync_nonce nonce)
 {
     // Remove the generation bits from the nonce
     auto maskedNonce = nonce & ((1 << kRatchetGenerationShiftBits) - 1);
     // Add the wrapped generation bits back in
-    return static_cast<BigNonce>(generation) << kRatchetGenerationShiftBits | maskedNonce;
+    return static_cast<big_nonce>(generation) << kRatchetGenerationShiftBits | maskedNonce;
 }
 
 aead_cipher_manager::aead_cipher_manager(const clock_interface& clock, std::unique_ptr<IKeyRatchet> keyRatchet)
@@ -60,7 +60,7 @@ aead_cipher_manager::aead_cipher_manager(const clock_interface& clock, std::uniq
 {
 }
 
-bool aead_cipher_manager::CanProcessNonce(KeyGeneration generation, TruncatedSyncNonce nonce) const
+bool aead_cipher_manager::can_process_nonce(KeyGeneration generation, truncated_sync_nonce nonce) const
 {
     if (!newestProcessedNonce_) {
         return true;
@@ -71,9 +71,9 @@ bool aead_cipher_manager::CanProcessNonce(KeyGeneration generation, TruncatedSyn
       std::find(missingNonces_.rbegin(), missingNonces_.rend(), bigNonce) != missingNonces_.rend();
 }
 
-cipher_interface* aead_cipher_manager::GetCryptor(KeyGeneration generation)
+cipher_interface* aead_cipher_manager::get_cipher(KeyGeneration generation)
 {
-    CleanupExpiredCryptors();
+	cleanup_expired_ciphers();
 
     if (generation < oldestGeneration_) {
         DISCORD_LOG(LS_INFO) << "Received frame with old generation: " << generation
@@ -102,7 +102,7 @@ cipher_interface* aead_cipher_manager::GetCryptor(KeyGeneration generation)
     auto it = cryptors_.find(generation);
     if (it == cryptors_.end()) {
         // We don't have a cryptor for this generation, create one
-        std::tie(it, std::ignore) = cryptors_.emplace(generation, MakeExpiringCryptor(generation));
+        std::tie(it, std::ignore) = cryptors_.emplace(generation, make_expiring_cipher(generation));
     }
 
     // Return a non-owning pointer to the cryptor
@@ -110,7 +110,7 @@ cipher_interface* aead_cipher_manager::GetCryptor(KeyGeneration generation)
     return cryptor.get();
 }
 
-void aead_cipher_manager::ReportCryptorSuccess(KeyGeneration generation, TruncatedSyncNonce nonce)
+void aead_cipher_manager::report_cipher_success(KeyGeneration generation, truncated_sync_nonce nonce)
 {
     auto bigNonce = compute_wrapped_big_nonce(generation, nonce);
 
@@ -157,12 +157,12 @@ void aead_cipher_manager::ReportCryptorSuccess(KeyGeneration generation, Truncat
     }
 }
 
-KeyGeneration aead_cipher_manager::ComputeWrappedGeneration(KeyGeneration generation)
+KeyGeneration aead_cipher_manager::compute_wrapped_generation(KeyGeneration generation)
 {
     return ::dpp::dave::compute_wrapped_generation(oldestGeneration_, generation);
 }
 
-aead_cipher_manager::ExpiringCryptor aead_cipher_manager::MakeExpiringCryptor(KeyGeneration generation)
+aead_cipher_manager::expiring_cipher aead_cipher_manager::make_expiring_cipher(KeyGeneration generation)
 {
     // Get the new key from the ratchet
     auto encryptionKey = keyRatchet_->GetKey(generation);
@@ -182,7 +182,7 @@ aead_cipher_manager::ExpiringCryptor aead_cipher_manager::MakeExpiringCryptor(Ke
     return {create_cipher(encryptionKey), expiryTime};
 }
 
-void aead_cipher_manager::CleanupExpiredCryptors()
+void aead_cipher_manager::cleanup_expired_ciphers()
 {
     for (auto it = cryptors_.begin(); it != cryptors_.end();) {
         auto& [generation, cryptor] = *it;

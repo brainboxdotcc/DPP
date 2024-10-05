@@ -48,7 +48,7 @@ uint8_t DeserializeUnencryptedRanges(const uint8_t*& buffer,
                                      Ranges& unencryptedRanges);
 bool ValidateUnencryptedRanges(const Ranges& unencryptedRanges, size_t frameSize);
 
-class InboundFrameProcessor {
+class inbound_frame_processor {
 public:
     void ParseFrame(array_view<const uint8_t> frame);
     size_t ReconstructFrame(array_view<uint8_t> frame) const;
@@ -58,7 +58,7 @@ public:
     void Clear();
 
     array_view<const uint8_t> GetTag() const { return tag_; }
-    TruncatedSyncNonce GetTruncatedNonce() const { return truncatedNonce_; }
+    truncated_sync_nonce GetTruncatedNonce() const { return truncatedNonce_; }
     array_view<const uint8_t> GetAuthenticatedData() const
     {
         return make_array_view(authenticated_.data(), authenticated_.size());
@@ -76,7 +76,7 @@ private:
     bool isEncrypted_{false};
     size_t originalSize_{0};
     array_view<const uint8_t> tag_;
-    TruncatedSyncNonce truncatedNonce_;
+    truncated_sync_nonce truncatedNonce_;
     Ranges unencryptedRanges_;
     std::vector<uint8_t> authenticated_;
     std::vector<uint8_t> ciphertext_;
