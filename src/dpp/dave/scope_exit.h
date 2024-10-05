@@ -32,39 +32,39 @@ namespace dpp::dave {
 
 class [[nodiscard]] ScopeExit final {
 public:
-    template <typename Cleanup>
-    explicit ScopeExit(Cleanup&& cleanup)
-      : cleanup_{std::forward<Cleanup>(cleanup)}
-    {
-    }
+	template <typename Cleanup>
+	explicit ScopeExit(Cleanup&& cleanup)
+	  : cleanup_{std::forward<Cleanup>(cleanup)}
+	{
+	}
 
-    ScopeExit(ScopeExit&& rhs)
-      : cleanup_{std::move(rhs.cleanup_)}
-    {
-        rhs.cleanup_ = nullptr;
-    }
+	ScopeExit(ScopeExit&& rhs)
+	  : cleanup_{std::move(rhs.cleanup_)}
+	{
+		rhs.cleanup_ = nullptr;
+	}
 
-    ~ScopeExit()
-    {
-        if (cleanup_) {
-            cleanup_();
-        }
-    }
+	~ScopeExit()
+	{
+		if (cleanup_) {
+			cleanup_();
+		}
+	}
 
-    ScopeExit& operator=(ScopeExit&& rhs)
-    {
-        cleanup_ = std::move(rhs.cleanup_);
-        rhs.cleanup_ = nullptr;
-        return *this;
-    }
+	ScopeExit& operator=(ScopeExit&& rhs)
+	{
+		cleanup_ = std::move(rhs.cleanup_);
+		rhs.cleanup_ = nullptr;
+		return *this;
+	}
 
-    void Dismiss() { cleanup_ = nullptr; }
+	void Dismiss() { cleanup_ = nullptr; }
 
 private:
-    ScopeExit(ScopeExit const&) = delete;
-    ScopeExit& operator=(ScopeExit const&) = delete;
+	ScopeExit(ScopeExit const&) = delete;
+	ScopeExit& operator=(ScopeExit const&) = delete;
 
-    std::function<void()> cleanup_;
+	std::function<void()> cleanup_;
 };
 
 } // namespace dpp::dave

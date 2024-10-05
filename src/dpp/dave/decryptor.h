@@ -44,53 +44,53 @@ namespace dpp::dave {
 class IKeyRatchet;
 
 struct decryption_stats {
-    uint64_t passthroughs = 0;
-    uint64_t decrypt_success = 0;
-    uint64_t decrypt_failure = 0;
-    uint64_t decrypt_duration = 0;
-    uint64_t decrypt_attempts = 0;
+	uint64_t passthroughs = 0;
+	uint64_t decrypt_success = 0;
+	uint64_t decrypt_failure = 0;
+	uint64_t decrypt_duration = 0;
+	uint64_t decrypt_attempts = 0;
 };
 
 class decryptor {
 public:
-    using Duration = std::chrono::seconds;
+	using Duration = std::chrono::seconds;
 
-    void transition_to_key_ratchet(std::unique_ptr<IKeyRatchet> keyRatchet,
+	void transition_to_key_ratchet(std::unique_ptr<IKeyRatchet> keyRatchet,
 				   Duration transitionExpiry = DEFAULT_TRANSITION_EXPIRY);
-    void transition_to_passthrough_mode(bool passthroughMode,
+	void transition_to_passthrough_mode(bool passthroughMode,
 					Duration transitionExpiry = DEFAULT_TRANSITION_EXPIRY);
 
-    size_t decrypt(media_type mediaType,
+	size_t decrypt(media_type mediaType,
 		   array_view<const uint8_t> encryptedFrame,
 		   array_view<uint8_t> frame);
 
-    size_t get_max_plaintext_byte_size(media_type mediaType, size_t encryptedFrameSize);
-    decryption_stats get_stats(media_type mediaType) const { return stats_[mediaType]; }
+	size_t get_max_plaintext_byte_size(media_type mediaType, size_t encryptedFrameSize);
+	decryption_stats get_stats(media_type mediaType) const { return stats_[mediaType]; }
 
 private:
-    using time_point = clock_interface::time_point;
+	using time_point = clock_interface::time_point;
 
-    bool decrypt_impl(aead_cipher_manager& cipher_manager,
-		      media_type mediaType,
-		      inbound_frame_processor& encryptedFrame,
-		      array_view<uint8_t> frame);
+	bool decrypt_impl(aead_cipher_manager& cipher_manager,
+			  media_type mediaType,
+			  inbound_frame_processor& encryptedFrame,
+			  array_view<uint8_t> frame);
 
-    void update_cryptor_manager_expiry(Duration expiry);
-    void cleanup_expired_cryptor_managers();
+	void update_cryptor_manager_expiry(Duration expiry);
+	void cleanup_expired_cryptor_managers();
 
-    std::unique_ptr<inbound_frame_processor> get_or_create_frame_processor();
-    void return_frame_processor(std::unique_ptr<inbound_frame_processor> frameProcessor);
+	std::unique_ptr<inbound_frame_processor> get_or_create_frame_processor();
+	void return_frame_processor(std::unique_ptr<inbound_frame_processor> frameProcessor);
 
-    clock clock_;
-    std::deque<aead_cipher_manager> cryptorManagers_;
+	clock clock_;
+	std::deque<aead_cipher_manager> cryptorManagers_;
 
-    std::mutex frameProcessorsMutex_;
-    std::vector<std::unique_ptr<inbound_frame_processor>> frameProcessors_;
+	std::mutex frameProcessorsMutex_;
+	std::vector<std::unique_ptr<inbound_frame_processor>> frameProcessors_;
 
-    time_point allowPassThroughUntil_{time_point::min()};
+	time_point allowPassThroughUntil_{time_point::min()};
 
-    time_point lastStatsTime_{time_point::min()};
-    std::array<decryption_stats, 2> stats_;
+	time_point lastStatsTime_{time_point::min()};
+	std::array<decryption_stats, 2> stats_;
 };
 
 } // namespace dpp::dave

@@ -41,75 +41,75 @@
 namespace dpp::dave {
 
 struct encryption_stats {
-    uint64_t passthroughs = 0;
-    uint64_t encrypt_success = 0;
-    uint64_t encrypt_failure = 0;
-    uint64_t encrypt_duration = 0;
-    uint64_t encrypt_attempts = 0;
-    uint64_t encrypt_max_attempts = 0;
+	uint64_t passthroughs = 0;
+	uint64_t encrypt_success = 0;
+	uint64_t encrypt_failure = 0;
+	uint64_t encrypt_duration = 0;
+	uint64_t encrypt_attempts = 0;
+	uint64_t encrypt_max_attempts = 0;
 };
 
 class encryptor {
 public:
-    void set_key_ratchet(std::unique_ptr<IKeyRatchet> keyRatchet);
-    void set_passthrough_mode(bool passthroughMode);
+	void set_key_ratchet(std::unique_ptr<IKeyRatchet> keyRatchet);
+	void set_passthrough_mode(bool passthroughMode);
 
-    bool has_key_ratchet() const { return keyRatchet_ != nullptr; }
-    bool is_passthrough_mode() const { return passthroughMode_; }
+	bool has_key_ratchet() const { return keyRatchet_ != nullptr; }
+	bool is_passthrough_mode() const { return passthroughMode_; }
 
-    void assign_ssrc_to_codec(uint32_t ssrc, Codec codecType);
-    Codec codec_for_ssrc(uint32_t ssrc);
+	void assign_ssrc_to_codec(uint32_t ssrc, Codec codecType);
+	Codec codec_for_ssrc(uint32_t ssrc);
 
-    int encrypt(media_type mediaType,
+	int encrypt(media_type mediaType,
 		uint32_t ssrc,
 		array_view<const uint8_t> frame,
 		array_view<uint8_t> encryptedFrame,
 		size_t* bytesWritten);
 
-    size_t get_max_ciphertext_byte_size(media_type mediaType, size_t frameSize);
-    encryption_stats get_stats(media_type mediaType) const { return stats_[mediaType]; }
+	size_t get_max_ciphertext_byte_size(media_type mediaType, size_t frameSize);
+	encryption_stats get_stats(media_type mediaType) const { return stats_[mediaType]; }
 
-    using protocol_version_changed_callback = std::function<void()>;
-    void set_protocol_version_changed_callback(protocol_version_changed_callback callback)
-    {
-        protocolVersionChangedCallback_ = std::move(callback);
-    }
-    ProtocolVersion get_protocol_version() const { return currentProtocolVersion_; }
+	using protocol_version_changed_callback = std::function<void()>;
+	void set_protocol_version_changed_callback(protocol_version_changed_callback callback)
+	{
+		protocolVersionChangedCallback_ = std::move(callback);
+	}
+	ProtocolVersion get_protocol_version() const { return currentProtocolVersion_; }
 
-    enum result_code : uint8_t {
-        rc_success,
-        rc_encryption_failure,
-    };
+	enum result_code : uint8_t {
+		rc_success,
+		rc_encryption_failure,
+	};
 
 private:
-    std::unique_ptr<outbound_frame_processor> get_or_create_frame_processor();
-    void return_frame_processor(std::unique_ptr<outbound_frame_processor> frameProcessor);
+	std::unique_ptr<outbound_frame_processor> get_or_create_frame_processor();
+	void return_frame_processor(std::unique_ptr<outbound_frame_processor> frameProcessor);
 
-    using cryptor_and_nonce = std::pair<std::shared_ptr<cipher_interface>, truncated_sync_nonce>;
-    cryptor_and_nonce get_next_cryptor_and_nonce();
+	using cryptor_and_nonce = std::pair<std::shared_ptr<cipher_interface>, truncated_sync_nonce>;
+	cryptor_and_nonce get_next_cryptor_and_nonce();
 
-    void update_current_protocol_version(ProtocolVersion version);
+	void update_current_protocol_version(ProtocolVersion version);
 
-    std::atomic_bool passthroughMode_{false};
+	std::atomic_bool passthroughMode_{false};
 
-    std::mutex keyGenMutex_;
-    std::unique_ptr<IKeyRatchet> keyRatchet_;
-    std::shared_ptr<cipher_interface> cryptor_;
-    KeyGeneration currentKeyGeneration_{0};
-    truncated_sync_nonce truncatedNonce_{0};
+	std::mutex keyGenMutex_;
+	std::unique_ptr<IKeyRatchet> keyRatchet_;
+	std::shared_ptr<cipher_interface> cryptor_;
+	KeyGeneration currentKeyGeneration_{0};
+	truncated_sync_nonce truncatedNonce_{0};
 
-    std::mutex frameProcessorsMutex_;
-    std::vector<std::unique_ptr<outbound_frame_processor>> frameProcessors_;
+	std::mutex frameProcessorsMutex_;
+	std::vector<std::unique_ptr<outbound_frame_processor>> frameProcessors_;
 
-    using SsrcCodecPair = std::pair<uint32_t, Codec>;
-    std::vector<SsrcCodecPair> ssrcCodecPairs_;
+	using SsrcCodecPair = std::pair<uint32_t, Codec>;
+	std::vector<SsrcCodecPair> ssrcCodecPairs_;
 
-    using TimePoint = std::chrono::time_point<std::chrono::steady_clock>;
-    TimePoint lastStatsTime_{TimePoint::min()};
-    std::array<encryption_stats, 2> stats_;
+	using TimePoint = std::chrono::time_point<std::chrono::steady_clock>;
+	TimePoint lastStatsTime_{TimePoint::min()};
+	std::array<encryption_stats, 2> stats_;
 
-    protocol_version_changed_callback protocolVersionChangedCallback_;
-    ProtocolVersion currentProtocolVersion_{MaxSupportedProtocolVersion()};
+	protocol_version_changed_callback protocolVersionChangedCallback_;
+	ProtocolVersion currentProtocolVersion_{MaxSupportedProtocolVersion()};
 };
 
 } // namespace dpp::dave

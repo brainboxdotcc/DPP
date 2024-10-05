@@ -39,23 +39,23 @@ MlsKeyRatchet::~MlsKeyRatchet() noexcept = default;
 
 encryption_key MlsKeyRatchet::GetKey(KeyGeneration generation) noexcept
 {
-    DISCORD_LOG(LS_INFO) << "Retrieving key for generation " << generation << " from HashRatchet";
+	DISCORD_LOG(LS_INFO) << "Retrieving key for generation " << generation << " from HashRatchet";
 
-    try {
-        auto keyAndNonce = hashRatchet_.get(generation);
-        assert(keyAndNonce.key.size() >= AES_GCM_128_KEY_BYTES);
-        return std::move(keyAndNonce.key.as_vec());
-    }
-    catch (const std::exception& e) {
-        DISCORD_LOG(LS_ERROR) << "Failed to retrieve key for generation " << generation << ": "
-                              << e.what();
-        return {};
-    }
+	try {
+		auto keyAndNonce = hashRatchet_.get(generation);
+		assert(keyAndNonce.key.size() >= AES_GCM_128_KEY_BYTES);
+		return std::move(keyAndNonce.key.as_vec());
+	}
+	catch (const std::exception& e) {
+		DISCORD_LOG(LS_ERROR) << "Failed to retrieve key for generation " << generation << ": "
+							  << e.what();
+		return {};
+	}
 }
 
 void MlsKeyRatchet::DeleteKey(KeyGeneration generation) noexcept
 {
-    hashRatchet_.erase(generation);
+	hashRatchet_.erase(generation);
 }
 
 } // namespace dpp::dave

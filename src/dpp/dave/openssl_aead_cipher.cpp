@@ -31,12 +31,12 @@ namespace dpp::dave {
 
 void PrintSSLErrors()
 {
-    ERR_print_errors_cb(
-      [](const char* str, size_t len, void* ctx) -> int {
-          DISCORD_LOG(LS_ERROR) << std::string(str, len);
-          return 1;
-      },
-      nullptr);
+	ERR_print_errors_cb(
+	  [](const char* str, size_t len, void* ctx) -> int {
+		  DISCORD_LOG(LS_ERROR) << std::string(str, len);
+		  return 1;
+	  },
+	  nullptr);
 }
 
 openssl_aead_cipher::openssl_aead_cipher(const encryption_key& encryptionKey) :

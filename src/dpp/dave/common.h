@@ -93,17 +93,17 @@ constexpr std::array<uint8_t, 3> OPUS_SILENCE_PACKET = {0xF8, 0xFF, 0xFE};
 // Utility routine for variant return types
 template <class T, class V> inline std::optional<T> get_optional(V&& variant)
 {
-    if (auto map = std::get_if<T>(&variant)) {
-        if constexpr (std::is_rvalue_reference_v<decltype(variant)>) {
-            return std::move(*map);
-        }
-        else {
-            return *map;
-        }
-    }
-    else {
-        return std::nullopt;
-    }
+	if (auto map = std::get_if<T>(&variant)) {
+		if constexpr (std::is_rvalue_reference_v<decltype(variant)>) {
+			return std::move(*map);
+		}
+		else {
+			return *map;
+		}
+	}
+	else {
+		return std::nullopt;
+	}
 }
 
 } // namespace dpp::dave

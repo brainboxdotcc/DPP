@@ -30,7 +30,7 @@ constexpr ProtocolVersion CurrentDaveProtocolVersion = 1;
 
 ProtocolVersion MaxSupportedProtocolVersion()
 {
-    return CurrentDaveProtocolVersion;
+	return CurrentDaveProtocolVersion;
 }
 
 } // namespace dpp::dave

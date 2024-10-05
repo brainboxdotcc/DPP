@@ -47,21 +47,21 @@ namespace dpp::dave::mls {
 using KeyPairContextType = const char *;
 
 std::shared_ptr<::mlspp::SignaturePrivateKey> GetPersistedKeyPair(KeyPairContextType ctx,
-                                                                  const std::string& sessionID,
-                                                                  ProtocolVersion version);
+																  const std::string& sessionID,
+																  ProtocolVersion version);
 
 struct KeyAndSelfSignature {
-    std::vector<uint8_t> key;
-    std::vector<uint8_t> signature;
+	std::vector<uint8_t> key;
+	std::vector<uint8_t> signature;
 };
 
 KeyAndSelfSignature GetPersistedPublicKey(KeyPairContextType ctx,
-                                          const std::string& sessionID,
-                                          SignatureVersion version);
+										  const std::string& sessionID,
+										  SignatureVersion version);
 
 bool DeletePersistedKeyPair(KeyPairContextType ctx,
-                            const std::string& sessionID,
-                            SignatureVersion version);
+							const std::string& sessionID,
+							SignatureVersion version);
 
 constexpr unsigned KeyVersion = 1;
 

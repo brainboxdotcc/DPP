@@ -31,14 +31,14 @@ namespace dpp::dave {
 
 class MlsKeyRatchet : public IKeyRatchet {
 public:
-    MlsKeyRatchet(::mlspp::CipherSuite suite, bytes baseSecret) noexcept;
-    ~MlsKeyRatchet() noexcept override;
+	MlsKeyRatchet(::mlspp::CipherSuite suite, bytes baseSecret) noexcept;
+	~MlsKeyRatchet() noexcept override;
 
-    encryption_key GetKey(KeyGeneration generation) noexcept override;
-    void DeleteKey(KeyGeneration generation) noexcept override;
+	encryption_key GetKey(KeyGeneration generation) noexcept override;
+	void DeleteKey(KeyGeneration generation) noexcept override;
 
 private:
-    ::mlspp::HashRatchet hashRatchet_;
+	::mlspp::HashRatchet hashRatchet_;
 };
 
 } // namespace dpp::dave
