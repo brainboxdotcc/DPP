@@ -95,7 +95,7 @@ public:
 	void add_encrypted_bytes(const uint8_t* bytes, size_t size);
 
 private:
-	codec codec_{codec::Unknown};
+	codec codec_{codec::cd_unknown};
 	size_t frameIndex_{0};
 	std::vector<uint8_t> unencryptedBytes_;
 	std::vector<uint8_t> encryptedBytes_;

@@ -258,7 +258,7 @@ codec encryptor::codec_for_ssrc(uint32_t ssrc)
 		return existingCodecIt->second;
 	}
 	else {
-		return codec::Opus;
+		return codec::cd_opus;
 	}
 }
 

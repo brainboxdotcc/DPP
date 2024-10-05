@@ -411,7 +411,7 @@ bool process_frame_av1(outbound_frame_processor& processor, array_view<const uin
 bool validate_encrypted_frame(outbound_frame_processor& processor, array_view<uint8_t> frame)
 {
 	auto codec = processor.get_codec();
-	if (codec != codec::H264 && codec != codec::H265) {
+	if (codec != codec::cd_h264 && codec != codec::cd_h265) {
 		return true;
 	}
 

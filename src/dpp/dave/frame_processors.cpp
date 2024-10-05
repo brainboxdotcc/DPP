@@ -324,7 +324,7 @@ void inbound_frame_processor::add_ciphertext_bytes(const uint8_t* data, size_t s
 
 void outbound_frame_processor::reset()
 {
-	codec_ = codec::Unknown;
+	codec_ = codec::cd_unknown;
 	frameIndex_ = 0;
 	unencryptedBytes_.clear();
 	encryptedBytes_.clear();
@@ -341,22 +341,22 @@ void outbound_frame_processor::process_frame(array_view<const uint8_t> frame, co
 
 	bool success = false;
 	switch (codec) {
-	case codec::Opus:
+	case codec::cd_opus:
 		success = codec_utils::process_frame_opus(*this, frame);
 		break;
-	case codec::VP8:
+	case codec::cd_vp8:
 		success = codec_utils::process_frame_vp8(*this, frame);
 		break;
-	case codec::VP9:
+	case codec::cd_vp9:
 		success = codec_utils::process_frame_vp9(*this, frame);
 		break;
-	case codec::H264:
+	case codec::cd_h264:
 		success = codec_utils::process_frame_h264(*this, frame);
 		break;
-	case codec::H265:
+	case codec::cd_h265:
 		success = codec_utils::process_frame_h265(*this, frame);
 		break;
-	case codec::AV1:
+	case codec::cd_av1:
 		success = codec_utils::process_frame_av1(*this, frame);
 		break;
 	default:
