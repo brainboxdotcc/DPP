@@ -94,15 +94,15 @@ discord_voice_client& discord_voice_client::send_audio_opus(uint8_t* opus_packet
 		std::vector<uint8_t> encrypted_buffer(encoded_audio.size() * 2);
 		size_t out_size{0};
 
-		auto result = this->mls_state->encryptor->Encrypt(
-			dave::MediaType::Audio,
+		auto result = this->mls_state->encryptor->encrypt(
+			dave::media_type::media_audio,
 			ssrc,
 			dave::make_array_view<const uint8_t>(encoded_audio.data(), length),
 			dave::make_array_view(encrypted_buffer),
 			&out_size
 		);
 		encrypted_buffer.resize(out_size);
-		if (result != dave::Encryptor::ResultCode::Success) {
+		if (result != dave::encryptor::result_code::rc_success) {
 			log(ll_warning, "DAVE Encryption failure: " + std::to_string(result));
 		} else {
 			encoded_audio = encrypted_buffer;

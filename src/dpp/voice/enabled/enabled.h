@@ -75,8 +75,8 @@ struct dave_state {
 	std::shared_ptr<::mlspp::SignaturePrivateKey> mls_key;
 	std::vector<uint8_t> cached_commit;
 	uint64_t transition_id{0};
-	std::map<dpp::snowflake, std::unique_ptr<dave::Decryptor>> decryptors;
-	std::unique_ptr<dave::Encryptor> encryptor;
+	std::map<dpp::snowflake, std::unique_ptr<dave::decryptor>> decryptors;
+	std::unique_ptr<dave::encryptor> encryptor;
 	std::string privacy_code;
 };
 

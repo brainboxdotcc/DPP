@@ -51,7 +51,7 @@ struct DecryptorStats {
     uint64_t decryptAttempts = 0;
 };
 
-class Decryptor {
+class decryptor {
 public:
     using Duration = std::chrono::seconds;
 
@@ -60,18 +60,18 @@ public:
     void TransitionToPassthroughMode(bool passthroughMode,
                                      Duration transitionExpiry = kDefaultTransitionDuration);
 
-    size_t decrypt(MediaType mediaType,
+    size_t decrypt(media_type mediaType,
 		   array_view<const uint8_t> encryptedFrame,
 		   array_view<uint8_t> frame);
 
-    size_t GetMaxPlaintextByteSize(MediaType mediaType, size_t encryptedFrameSize);
-    DecryptorStats GetStats(MediaType mediaType) const { return stats_[mediaType]; }
+    size_t GetMaxPlaintextByteSize(media_type mediaType, size_t encryptedFrameSize);
+    DecryptorStats GetStats(media_type mediaType) const { return stats_[mediaType]; }
 
 private:
     using TimePoint = clock_interface::time_point;
 
     bool DecryptImpl(aead_cipher_manager& cryptor,
-		     MediaType mediaType,
+		     media_type mediaType,
 		     InboundFrameProcessor& encryptedFrame,
 		     array_view<uint8_t> frame);
 

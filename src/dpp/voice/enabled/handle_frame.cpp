@@ -47,7 +47,7 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 
 				mls_state->dave_session->SetExternalSender(dave_header->get_data(data.length()));
 
-				mls_state->encryptor = std::make_unique<dave::Encryptor>();
+				mls_state->encryptor = std::make_unique<dave::encryptor>();
 				mls_state->decryptors.clear();
 			}
 			break;
@@ -69,10 +69,10 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 				for (const auto& user : dave_mls_user_list) {
 					log(ll_debug, "Setting decryptor key ratchet for user: " + user + ", protocol version: " + std::to_string(mls_state->dave_session->GetProtocolVersion()));
 					dpp::snowflake u{user};
-					mls_state->decryptors.emplace(u, std::make_unique<dpp::dave::Decryptor>());
+					mls_state->decryptors.emplace(u, std::make_unique<dpp::dave::decryptor>());
 					mls_state->decryptors.find(u)->second->TransitionToKeyRatchet(mls_state->dave_session->GetKeyRatchet(user));
 				}
-				mls_state->encryptor->SetKeyRatchet(mls_state->dave_session->GetKeyRatchet(creator->me.id.str()));
+				mls_state->encryptor->set_key_ratchet(mls_state->dave_session->GetKeyRatchet(creator->me.id.str()));
 
 				/**
 				 * https://www.ietf.org/archive/id/draft-ietf-mls-protocol-14.html#name-epoch-authenticators
@@ -99,10 +99,10 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 					for (const auto& user : dave_mls_user_list) {
 						log(ll_debug, "Setting decryptor key ratchet for user: " + user + ", protocol version: " + std::to_string(mls_state->dave_session->GetProtocolVersion()));
 						dpp::snowflake u{user};
-						mls_state->decryptors.emplace(u, std::make_unique<dpp::dave::Decryptor>());
+						mls_state->decryptors.emplace(u, std::make_unique<dpp::dave::decryptor>());
 						mls_state->decryptors.find(u)->second->TransitionToKeyRatchet(mls_state->dave_session->GetKeyRatchet(user));
 					}
-					mls_state->encryptor->SetKeyRatchet(mls_state->dave_session->GetKeyRatchet(creator->me.id.str()));
+					mls_state->encryptor->set_key_ratchet(mls_state->dave_session->GetKeyRatchet(creator->me.id.str()));
 				}
 				mls_state->privacy_code = generate_displayable_code(mls_state->dave_session->GetLastEpochAuthenticator());
 				log(ll_debug, "E2EE Privacy Code: " + mls_state->privacy_code);

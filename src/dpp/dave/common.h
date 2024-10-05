@@ -47,7 +47,7 @@ using EncryptionKey = ::mlspp::bytes_ns::bytes;
 using TransitionId = uint16_t;
 using SupplementalBytesSize = uint8_t;
 
-enum MediaType : uint8_t { Audio, Video };
+enum media_type : uint8_t { media_audio, media_video };
 enum Codec : uint8_t { Unknown, Opus, VP8, VP9, H264, H265, AV1 };
 
 // Returned in std::variant when a message is hard-rejected and should trigger a reset

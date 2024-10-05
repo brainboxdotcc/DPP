@@ -40,60 +40,55 @@
 
 namespace dpp::dave {
 
-struct EncryptorStats {
-    uint64_t passthroughCount = 0;
-    uint64_t encryptSuccessCount = 0;
-    uint64_t encryptFailureCount = 0;
-    uint64_t encryptDuration = 0;
-    uint64_t encryptAttempts = 0;
-    uint64_t encryptMaxAttempts = 0;
+struct encryption_stats {
+    uint64_t passthroughs = 0;
+    uint64_t encrypt_success = 0;
+    uint64_t encrypt_failure = 0;
+    uint64_t encrypt_duration = 0;
+    uint64_t encrypt_attempts = 0;
+    uint64_t encrypt_max_attempts = 0;
 };
 
-class Encryptor {
+class encryptor {
 public:
-    void SetKeyRatchet(std::unique_ptr<IKeyRatchet> keyRatchet);
-    void SetPassthroughMode(bool passthroughMode);
+    void set_key_ratchet(std::unique_ptr<IKeyRatchet> keyRatchet);
+    void set_passthrough_mode(bool passthroughMode);
 
-    bool HasKeyRatchet() const { return keyRatchet_ != nullptr; }
-    bool IsPassthroughMode() const { return passthroughMode_; }
+    bool has_key_ratchet() const { return keyRatchet_ != nullptr; }
+    bool is_passthrough_mode() const { return passthroughMode_; }
 
-    void AssignSsrcToCodec(uint32_t ssrc, Codec codecType);
-    Codec CodecForSsrc(uint32_t ssrc);
+    void assign_ssrc_to_codec(uint32_t ssrc, Codec codecType);
+    Codec codec_for_ssrc(uint32_t ssrc);
 
-    int Encrypt(MediaType mediaType,
+    int encrypt(media_type mediaType,
 		uint32_t ssrc,
 		array_view<const uint8_t> frame,
 		array_view<uint8_t> encryptedFrame,
 		size_t* bytesWritten);
 
-    size_t GetMaxCiphertextByteSize(MediaType mediaType, size_t frameSize);
-    EncryptorStats GetStats(MediaType mediaType) const { return stats_[mediaType]; }
+    size_t get_max_ciphertext_byte_size(media_type mediaType, size_t frameSize);
+    encryption_stats get_stats(media_type mediaType) const { return stats_[mediaType]; }
 
-    using ProtocolVersionChangedCallback = std::function<void()>;
-    void SetProtocolVersionChangedCallback(ProtocolVersionChangedCallback callback)
+    using protocol_version_changed_callback = std::function<void()>;
+    void set_protocol_version_changed_callback(protocol_version_changed_callback callback)
     {
         protocolVersionChangedCallback_ = std::move(callback);
     }
-    ProtocolVersion GetProtocolVersion() const { return currentProtocolVersion_; }
+    ProtocolVersion get_protocol_version() const { return currentProtocolVersion_; }
 
-    enum ResultCode {
-        Success,
-        UninitializedContext,
-        InitializationFailure,
-        UnsupportedCodec,
-        EncryptionFailure,
-        FinalizationFailure,
-        TagAppendFailure
+    enum result_code : uint8_t {
+        rc_success,
+        rc_encryption_failure,
     };
 
 private:
-    std::unique_ptr<OutboundFrameProcessor> GetOrCreateFrameProcessor();
-    void ReturnFrameProcessor(std::unique_ptr<OutboundFrameProcessor> frameProcessor);
+    std::unique_ptr<OutboundFrameProcessor> get_or_create_frame_processor();
+    void return_frame_processor(std::unique_ptr<OutboundFrameProcessor> frameProcessor);
 
-    using CryptorAndNonce = std::pair<std::shared_ptr<cipher_interface>, TruncatedSyncNonce>;
-    CryptorAndNonce GetNextCryptorAndNonce();
+    using cryptor_and_nonce = std::pair<std::shared_ptr<cipher_interface>, TruncatedSyncNonce>;
+    cryptor_and_nonce get_next_cryptor_and_nonce();
 
-    void UpdateCurrentProtocolVersion(ProtocolVersion version);
+    void update_current_protocol_version(ProtocolVersion version);
 
     std::atomic_bool passthroughMode_{false};
 
@@ -111,9 +106,9 @@ private:
 
     using TimePoint = std::chrono::time_point<std::chrono::steady_clock>;
     TimePoint lastStatsTime_{TimePoint::min()};
-    std::array<EncryptorStats, 2> stats_;
+    std::array<encryption_stats, 2> stats_;
 
-    ProtocolVersionChangedCallback protocolVersionChangedCallback_;
+    protocol_version_changed_callback protocolVersionChangedCallback_;
     ProtocolVersion currentProtocolVersion_{MaxSupportedProtocolVersion()};
 };
 

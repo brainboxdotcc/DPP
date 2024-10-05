@@ -151,7 +151,7 @@ void discord_voice_client::read_ready()
 		auto decryptor = mls_state->decryptors.find(vp.vr->user_id);
 		if (decryptor != mls_state->decryptors.end()) {
 			size_t enc_len = decryptor->second->decrypt(
-				dave::MediaType::Audio,
+				dave::media_type::media_audio,
 				dave::make_array_view<const uint8_t>(opus_packet, opus_packet_len),
 				dave::make_array_view(frame)
 			);

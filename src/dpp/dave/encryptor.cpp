@@ -40,7 +40,7 @@ namespace dpp::dave {
 
 constexpr auto kStatsInterval = 10s;
 
-void Encryptor::SetKeyRatchet(std::unique_ptr<IKeyRatchet> keyRatchet)
+void encryptor::set_key_ratchet(std::unique_ptr<IKeyRatchet> keyRatchet)
 {
     std::lock_guard<std::mutex> lock(keyGenMutex_);
     keyRatchet_ = std::move(keyRatchet);
@@ -49,19 +49,19 @@ void Encryptor::SetKeyRatchet(std::unique_ptr<IKeyRatchet> keyRatchet)
     truncatedNonce_ = 0;
 }
 
-void Encryptor::SetPassthroughMode(bool passthroughMode)
+void encryptor::set_passthrough_mode(bool passthroughMode)
 {
     passthroughMode_ = passthroughMode;
-    UpdateCurrentProtocolVersion(passthroughMode ? 0 : MaxSupportedProtocolVersion());
+	update_current_protocol_version(passthroughMode ? 0 : MaxSupportedProtocolVersion());
 }
 
-int Encryptor::Encrypt(MediaType mediaType,
+int encryptor::encrypt(media_type mediaType,
 		       uint32_t ssrc,
 		       array_view<const uint8_t> frame,
 		       array_view<uint8_t> encryptedFrame,
 		       size_t* bytesWritten)
 {
-    if (mediaType != Audio && mediaType != Video) {
+    if (mediaType != media_audio && mediaType != media_video) {
         DISCORD_LOG(LS_WARNING) << "encrypt failed, invalid media type: "
                                 << static_cast<int>(mediaType);
         return 0;
@@ -71,26 +71,26 @@ int Encryptor::Encrypt(MediaType mediaType,
         // Pass frame through without encrypting
 	std::memcpy(encryptedFrame.data(), frame.data(), frame.size());
         *bytesWritten = frame.size();
-        stats_[mediaType].passthroughCount++;
-        return ResultCode::Success;
+        stats_[mediaType].passthroughs++;
+        return result_code::rc_success;
     }
 
     {
         std::lock_guard<std::mutex> lock(keyGenMutex_);
         if (!keyRatchet_) {
-            stats_[mediaType].encryptFailureCount++;
-            return ResultCode::EncryptionFailure;
+            stats_[mediaType].encrypt_failure++;
+            return result_code::rc_encryption_failure;
         }
     }
 
     auto start = std::chrono::steady_clock::now();
-    auto result = ResultCode::Success;
+    auto result = result_code::rc_success;
 
     // write the codec identifier
-    auto codec = CodecForSsrc(ssrc);
+    auto codec = codec_for_ssrc(ssrc);
 
-    auto frameProcessor = GetOrCreateFrameProcessor();
-    ScopeExit cleanup([&] { ReturnFrameProcessor(std::move(frameProcessor)); });
+    auto frameProcessor = get_or_create_frame_processor();
+    ScopeExit cleanup([&] { return_frame_processor(std::move(frameProcessor)); });
 
     frameProcessor->ProcessFrame(frame, codec);
 
@@ -124,10 +124,10 @@ int Encryptor::Encrypt(MediaType mediaType,
     // which can remove start codes from the last 1 or 2 bytes of the nonce
     // and the two bytes of the unencrypted header bytes
     for (auto attempt = 1; attempt <= MAX_CIPHERTEXT_VALIDATION_RETRIES; ++attempt) {
-        auto [cryptor, truncatedNonce] = GetNextCryptorAndNonce();
+        auto [cryptor, truncatedNonce] = get_next_cryptor_and_nonce();
 
         if (!cryptor) {
-            result = ResultCode::EncryptionFailure;
+            result = result_code::rc_encryption_failure;
             break;
         }
 
@@ -141,13 +141,13 @@ int Encryptor::Encrypt(MediaType mediaType,
         bool success = cryptor->encrypt(
 		ciphertextBuffer, plaintextBuffer, nonceBufferView, additionalData, tagBuffer);
 
-        stats_[mediaType].encryptAttempts++;
-        stats_[mediaType].encryptMaxAttempts =
-          std::max(stats_[mediaType].encryptMaxAttempts, (uint64_t)attempt);
+        stats_[mediaType].encrypt_attempts++;
+        stats_[mediaType].encrypt_max_attempts =
+          std::max(stats_[mediaType].encrypt_max_attempts, (uint64_t)attempt);
 
         if (!success) {
             assert(false && "Failed to encrypt frame");
-            result = ResultCode::EncryptionFailure;
+            result = result_code::rc_encryption_failure;
             break;
         }
 
@@ -167,7 +167,7 @@ int Encryptor::Encrypt(MediaType mediaType,
         auto res = WriteLeb128(truncatedNonce, truncatedNonceBuffer.begin());
         if (res != nonceSize) {
             assert(false && "Failed to write truncated nonce");
-            result = ResultCode::EncryptionFailure;
+            result = result_code::rc_encryption_failure;
             break;
         }
 
@@ -176,7 +176,7 @@ int Encryptor::Encrypt(MediaType mediaType,
           unencryptedRanges, unencryptedRangesBuffer.begin(), unencryptedRangesBuffer.size());
         if (res != unencryptedRangesSize) {
             assert(false && "Failed to write unencrypted ranges");
-            result = ResultCode::EncryptionFailure;
+            result = result_code::rc_encryption_failure;
             break;
         }
 
@@ -198,41 +198,41 @@ int Encryptor::Encrypt(MediaType mediaType,
         }
         else if (attempt >= MAX_CIPHERTEXT_VALIDATION_RETRIES) {
             assert(false && "Failed to validate encrypted section for codec");
-            result = ResultCode::EncryptionFailure;
+            result = result_code::rc_encryption_failure;
             break;
         }
     }
 
     auto now = std::chrono::steady_clock::now();
-    stats_[mediaType].encryptDuration +=
+    stats_[mediaType].encrypt_duration +=
       std::chrono::duration_cast<std::chrono::microseconds>(now - start).count();
-    if (result == ResultCode::Success) {
-        stats_[mediaType].encryptSuccessCount++;
+    if (result == result_code::rc_success) {
+        stats_[mediaType].encrypt_success++;
     }
     else {
-        stats_[mediaType].encryptFailureCount++;
+        stats_[mediaType].encrypt_failure++;
     }
 
     if (now > lastStatsTime_ + kStatsInterval) {
         lastStatsTime_ = now;
-        DISCORD_LOG(LS_INFO) << "Encrypted audio: " << stats_[Audio].encryptSuccessCount
-                             << ", video: " << stats_[Video].encryptSuccessCount
-                             << ". Failed audio: " << stats_[Audio].encryptFailureCount
-                             << ", video: " << stats_[Video].encryptFailureCount;
+        DISCORD_LOG(LS_INFO) << "Encrypted audio: " << stats_[media_audio].encrypt_success
+                             << ", video: " << stats_[media_video].encrypt_success
+                             << ". Failed audio: " << stats_[media_audio].encrypt_failure
+                             << ", video: " << stats_[media_video].encrypt_failure;
         DISCORD_LOG(LS_INFO) << "Last encrypted frame, type: "
-                             << (mediaType == Audio ? "audio" : "video") << ", ssrc: " << ssrc
+                             << (mediaType == media_audio ? "audio" : "video") << ", ssrc: " << ssrc
                              << ", size: " << frame.size();
     }
 
     return result;
 }
 
-size_t Encryptor::GetMaxCiphertextByteSize(MediaType mediaType, size_t frameSize)
+size_t encryptor::get_max_ciphertext_byte_size(media_type mediaType, size_t frameSize)
 {
     return frameSize + kSupplementalBytes + kTransformPaddingBytes;
 }
 
-void Encryptor::AssignSsrcToCodec(uint32_t ssrc, Codec codecType)
+void encryptor::assign_ssrc_to_codec(uint32_t ssrc, Codec codecType)
 {
     auto existingCodecIt = std::find_if(
       ssrcCodecPairs_.begin(), ssrcCodecPairs_.end(), [ssrc](const SsrcCodecPair& pair) {
@@ -247,7 +247,7 @@ void Encryptor::AssignSsrcToCodec(uint32_t ssrc, Codec codecType)
     }
 }
 
-Codec Encryptor::CodecForSsrc(uint32_t ssrc)
+Codec encryptor::codec_for_ssrc(uint32_t ssrc)
 {
     auto existingCodecIt = std::find_if(
       ssrcCodecPairs_.begin(), ssrcCodecPairs_.end(), [ssrc](const SsrcCodecPair& pair) {
@@ -262,7 +262,7 @@ Codec Encryptor::CodecForSsrc(uint32_t ssrc)
     }
 }
 
-std::unique_ptr<OutboundFrameProcessor> Encryptor::GetOrCreateFrameProcessor()
+std::unique_ptr<OutboundFrameProcessor> encryptor::get_or_create_frame_processor()
 {
     std::lock_guard<std::mutex> lock(frameProcessorsMutex_);
     if (frameProcessors_.empty()) {
@@ -273,13 +273,13 @@ std::unique_ptr<OutboundFrameProcessor> Encryptor::GetOrCreateFrameProcessor()
     return frameProcessor;
 }
 
-void Encryptor::ReturnFrameProcessor(std::unique_ptr<OutboundFrameProcessor> frameProcessor)
+void encryptor::return_frame_processor(std::unique_ptr<OutboundFrameProcessor> frameProcessor)
 {
     std::lock_guard<std::mutex> lock(frameProcessorsMutex_);
     frameProcessors_.push_back(std::move(frameProcessor));
 }
 
-Encryptor::CryptorAndNonce Encryptor::GetNextCryptorAndNonce()
+encryptor::cryptor_and_nonce encryptor::get_next_cryptor_and_nonce()
 {
     std::lock_guard<std::mutex> lock(keyGenMutex_);
     if (!keyRatchet_) {
@@ -299,7 +299,7 @@ Encryptor::CryptorAndNonce Encryptor::GetNextCryptorAndNonce()
     return {cryptor_, truncatedNonce_};
 }
 
-void Encryptor::UpdateCurrentProtocolVersion(ProtocolVersion version)
+void encryptor::update_current_protocol_version(ProtocolVersion version)
 {
     if (version == currentProtocolVersion_) {
         return;

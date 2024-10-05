@@ -38,8 +38,8 @@ namespace dpp::dave {
 
 constexpr auto kStatsInterval = 10s;
 
-void Decryptor::TransitionToKeyRatchet(std::unique_ptr<IKeyRatchet> keyRatchet,
-                                       Duration transitionExpiry)
+void decryptor::TransitionToKeyRatchet(std::unique_ptr<IKeyRatchet> keyRatchet,
+				       Duration transitionExpiry)
 {
     DISCORD_LOG(LS_INFO) << "Transitioning to new key ratchet: " << keyRatchet.get()
                          << ", expiry: " << transitionExpiry.count();
@@ -52,7 +52,7 @@ void Decryptor::TransitionToKeyRatchet(std::unique_ptr<IKeyRatchet> keyRatchet,
     }
 }
 
-void Decryptor::TransitionToPassthroughMode(bool passthroughMode, Duration transitionExpiry)
+void decryptor::TransitionToPassthroughMode(bool passthroughMode, Duration transitionExpiry)
 {
     if (passthroughMode) {
         allowPassThroughUntil_ = TimePoint::max();
@@ -64,11 +64,11 @@ void Decryptor::TransitionToPassthroughMode(bool passthroughMode, Duration trans
     }
 }
 
-size_t Decryptor::decrypt(MediaType mediaType,
+size_t decryptor::decrypt(media_type mediaType,
 			  array_view<const uint8_t> encryptedFrame,
 			  array_view<uint8_t> frame)
 {
-    if (mediaType != Audio && mediaType != Video) {
+    if (mediaType != media_audio && mediaType != media_video) {
         DISCORD_LOG(LS_WARNING) << "decrypt failed, invalid media type: "
                                 << static_cast<int>(mediaType);
         return 0;
@@ -80,7 +80,7 @@ size_t Decryptor::decrypt(MediaType mediaType,
     ScopeExit cleanup([&] { ReturnFrameProcessor(std::move(localFrame)); });
 
     // Skip decrypting for silence frames
-    if (mediaType == Audio && encryptedFrame.size() == kOpusSilencePacket.size() &&
+    if (mediaType == media_audio && encryptedFrame.size() == kOpusSilencePacket.size() &&
 	std::memcmp(encryptedFrame.data(), kOpusSilencePacket.data(), kOpusSilencePacket.size()) == 0) {
         DISCORD_LOG(LS_VERBOSE) << "decrypt skipping silence of size: " << encryptedFrame.size();
         if (encryptedFrame.data() != frame.data()) {
@@ -144,10 +144,10 @@ size_t Decryptor::decrypt(MediaType mediaType,
     auto end = clock_.now();
     if (end > lastStatsTime_ + kStatsInterval) {
         lastStatsTime_ = end;
-        DISCORD_LOG(LS_INFO) << "Decrypted audio: " << stats_[Audio].decryptSuccessCount
-                             << ", video: " << stats_[Video].decryptSuccessCount
-                             << ". Failed audio: " << stats_[Audio].decryptFailureCount
-                             << ", video: " << stats_[Video].decryptFailureCount;
+        DISCORD_LOG(LS_INFO) << "Decrypted audio: " << stats_[media_audio].decryptSuccessCount
+                             << ", video: " << stats_[media_video].decryptSuccessCount
+                             << ". Failed audio: " << stats_[media_audio].decryptFailureCount
+                             << ", video: " << stats_[media_video].decryptFailureCount;
     }
     stats_[mediaType].decryptDuration +=
       std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
@@ -155,8 +155,8 @@ size_t Decryptor::decrypt(MediaType mediaType,
     return bytesWritten;
 }
 
-bool Decryptor::DecryptImpl(aead_cipher_manager& cryptorManager,
-			    MediaType mediaType,
+bool decryptor::DecryptImpl(aead_cipher_manager& cryptorManager,
+			    media_type mediaType,
 			    InboundFrameProcessor& encryptedFrame,
 			    array_view<uint8_t> frame)
 {
@@ -202,12 +202,12 @@ bool Decryptor::DecryptImpl(aead_cipher_manager& cryptorManager,
     return success;
 }
 
-size_t Decryptor::GetMaxPlaintextByteSize(MediaType mediaType, size_t encryptedFrameSize)
+size_t decryptor::GetMaxPlaintextByteSize(media_type mediaType, size_t encryptedFrameSize)
 {
     return encryptedFrameSize;
 }
 
-void Decryptor::UpdateCryptorManagerExpiry(Duration expiry)
+void decryptor::UpdateCryptorManagerExpiry(Duration expiry)
 {
     auto maxExpiryTime = clock_.now() + expiry;
     for (auto& cryptorManager : cryptorManagers_) {
@@ -215,7 +215,7 @@ void Decryptor::UpdateCryptorManagerExpiry(Duration expiry)
     }
 }
 
-void Decryptor::CleanupExpiredCryptorManagers()
+void decryptor::CleanupExpiredCryptorManagers()
 {
     while (!cryptorManagers_.empty() && cryptorManagers_.front().IsExpired()) {
         DISCORD_LOG(LS_INFO) << "Removing expired cryptor manager.";
@@ -223,7 +223,7 @@ void Decryptor::CleanupExpiredCryptorManagers()
     }
 }
 
-std::unique_ptr<InboundFrameProcessor> Decryptor::GetOrCreateFrameProcessor()
+std::unique_ptr<InboundFrameProcessor> decryptor::GetOrCreateFrameProcessor()
 {
     std::lock_guard<std::mutex> lock(frameProcessorsMutex_);
     if (frameProcessors_.empty()) {
@@ -234,7 +234,7 @@ std::unique_ptr<InboundFrameProcessor> Decryptor::GetOrCreateFrameProcessor()
     return frameProcessor;
 }
 
-void Decryptor::ReturnFrameProcessor(std::unique_ptr<InboundFrameProcessor> frameProcessor)
+void decryptor::ReturnFrameProcessor(std::unique_ptr<InboundFrameProcessor> frameProcessor)
 {
     std::lock_guard<std::mutex> lock(frameProcessorsMutex_);
     frameProcessors_.push_back(std::move(frameProcessor));

@@ -56,8 +56,8 @@ struct OpusEncoder {};
 struct OpusRepacketizer {};
 namespace dpp::dave {
 	struct Session {};
-	struct Encryptor {};
-	struct Decryptor {};
+	struct encryptor {};
+	struct decryptor {};
 };
 namespace dpp {
 	struct dave_state {};
