@@ -561,9 +561,7 @@ try {
     auto ciphersuite = CiphersuiteForProtocolVersion(protocolVersion_);
 
     if (!transientKey) {
-	    std::cout << "2\n";
         if (!signingKeyId_.empty()) {
-		std::cout << "3\n";
             transientKey = GetPersistedKeyPair(keyPairContext_, signingKeyId_, protocolVersion_);
             if (!transientKey) {
                 DISCORD_LOG(LS_ERROR) << "Did not receive MLS signature private key from "
@@ -572,7 +570,6 @@ try {
             }
         }
         else {
-		std::cout << "1\n";
             transientKey = std::make_shared<::mlspp::SignaturePrivateKey>(
               ::mlspp::SignaturePrivateKey::generate(ciphersuite));
         }

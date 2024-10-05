@@ -105,10 +105,8 @@ discord_voice_client& discord_voice_client::send_audio_opus(uint8_t* opus_packet
 		if (result != dave::Encryptor::ResultCode::Success) {
 			log(ll_warning, "DAVE Encryption failure: " + std::to_string(result));
 		} else {
-			std::cout << "Encrypted " << encrypted_buffer.size() << " plain opus " << encoded_audio.size() << "\n";
 			encoded_audio = encrypted_buffer;
 			encoded_audio_length = encoded_audio.size();
-			std::cout << "New plain opus " << encoded_audio.size() << "\n";
 		}
 
 	}
