@@ -199,7 +199,7 @@ void inbound_frame_processor::ParseFrame(array_view<const uint8_t> frame)
     Clear();
 
     constexpr auto MinSupplementalBytesSize =
-	    kAesGcm128TruncatedTagBytes + sizeof(supplemental_bytes_size) + sizeof(magic_marker);
+	    AES_GCM_127_TRUNCATED_TAG_BYTES + sizeof(supplemental_bytes_size) + sizeof(magic_marker);
     if (frame.size() < MinSupplementalBytesSize) {
         DISCORD_LOG(LS_WARNING) << "Encrypted frame is too small to contain min supplemental bytes";
         return;
@@ -207,7 +207,7 @@ void inbound_frame_processor::ParseFrame(array_view<const uint8_t> frame)
 
     // Check the frame ends with the magic marker
     auto magicMarkerBuffer = frame.end() - sizeof(magic_marker);
-    if (memcmp(magicMarkerBuffer, &kMarkerBytes, sizeof(magic_marker)) != 0) {
+    if (memcmp(magicMarkerBuffer, &MARKER_BYTES, sizeof(magic_marker)) != 0) {
         return;
     }
 
@@ -235,10 +235,10 @@ void inbound_frame_processor::ParseFrame(array_view<const uint8_t> frame)
     assert(frame.begin() <= supplementalBytesBuffer && supplementalBytesBuffer <= frame.end());
 
     // Read the tag
-    tag_ = make_array_view(supplementalBytesBuffer, kAesGcm128TruncatedTagBytes);
+    tag_ = make_array_view(supplementalBytesBuffer, AES_GCM_127_TRUNCATED_TAG_BYTES);
 
     // Read the nonce
-    auto nonceBuffer = supplementalBytesBuffer + kAesGcm128TruncatedTagBytes;
+    auto nonceBuffer = supplementalBytesBuffer + AES_GCM_127_TRUNCATED_TAG_BYTES;
     assert(frame.begin() <= nonceBuffer && nonceBuffer <= frame.end());
     auto readAt = nonceBuffer;
     auto end = supplementalBytesSizeBuffer;

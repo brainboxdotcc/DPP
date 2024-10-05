@@ -106,9 +106,9 @@ int encryptor::encrypt(media_type mediaType,
     auto ciphertextBuffer = make_array_view(ciphertextBytes.data(), ciphertextBytes.size());
 
     auto frameSize = encryptedBytes.size() + unencryptedBytes.size();
-    auto tagBuffer = make_array_view(encryptedFrame.data() + frameSize, kAesGcm128TruncatedTagBytes);
+    auto tagBuffer = make_array_view(encryptedFrame.data() + frameSize, AES_GCM_127_TRUNCATED_TAG_BYTES);
 
-    auto nonceBuffer = std::array<uint8_t, kAesGcm128NonceBytes>();
+    auto nonceBuffer = std::array<uint8_t, AES_GCM_128_NONCE_BYTES>();
     auto nonceBufferView = make_array_view<const uint8_t>(nonceBuffer.data(), nonceBuffer.size());
 
     constexpr auto MAX_CIPHERTEXT_VALIDATION_RETRIES = 10;
@@ -133,9 +133,9 @@ int encryptor::encrypt(media_type mediaType,
 
         // write the truncated nonce to our temporary full nonce array
         // (since the encryption call expects a full size nonce)
-        std::memcpy(nonceBuffer.data() + kAesGcm128TruncatedSyncNonceOffset,
-               &truncatedNonce,
-               kAesGcm128TruncatedSyncNonceBytes);
+        std::memcpy(nonceBuffer.data() + AES_GCM_128_TRUNCATED_SYNC_NONCE_OFFSET,
+		    &truncatedNonce,
+		    AES_GCM_128_TRUNCATED_SYNC_NONCE_BYTES);
 
         // encrypt the plaintext, adding the unencrypted header to the tag
         bool success = cryptor->encrypt(
@@ -182,13 +182,13 @@ int encryptor::encrypt(media_type mediaType,
 
         // write the supplemental bytes size
         supplemental_bytes_size supplementalBytes =
-          kSupplementalBytes + nonceSize + unencryptedRangesSize;
+		SUPPLEMENTAL_BYTES + nonceSize + unencryptedRangesSize;
 	std::memcpy(supplementalBytesBuffer.data(), &supplementalBytes, sizeof(supplemental_bytes_size));
 
         // write the marker bytes, ends the frame
-	std::memcpy(markerBytesBuffer.data(), &kMarkerBytes, sizeof(magic_marker));
+	std::memcpy(markerBytesBuffer.data(), &MARKER_BYTES, sizeof(magic_marker));
 
-        auto encryptedFrameBytes = reconstructedFrameSize + kAesGcm128TruncatedTagBytes +
+        auto encryptedFrameBytes = reconstructedFrameSize + AES_GCM_127_TRUNCATED_TAG_BYTES +
 				   nonceSize + unencryptedRangesSize + sizeof(supplemental_bytes_size) + sizeof(magic_marker);
 
         if (codec_utils::validate_encrypted_frame(
@@ -229,7 +229,7 @@ int encryptor::encrypt(media_type mediaType,
 
 size_t encryptor::get_max_ciphertext_byte_size(media_type mediaType, size_t frameSize)
 {
-    return frameSize + kSupplementalBytes + kTransformPaddingBytes;
+    return frameSize + SUPPLEMENTAL_BYTES + TRANSFORM_PADDING_BYTES;
 }
 
 void encryptor::assign_ssrc_to_codec(uint32_t ssrc, Codec codecType)
@@ -287,7 +287,7 @@ encryptor::cryptor_and_nonce encryptor::get_next_cryptor_and_nonce()
     }
 
     auto generation = compute_wrapped_generation(currentKeyGeneration_,
-						 ++truncatedNonce_ >> kRatchetGenerationShiftBits);
+						 ++truncatedNonce_ >> RATCHET_GENERATION_SHIFT_BITS);
 
     if (generation != currentKeyGeneration_ || !cryptor_) {
         currentKeyGeneration_ = generation;

@@ -80,8 +80,8 @@ size_t decryptor::decrypt(media_type mediaType,
     ScopeExit cleanup([&] { return_frame_processor(std::move(localFrame)); });
 
     // Skip decrypting for silence frames
-    if (mediaType == media_audio && encryptedFrame.size() == kOpusSilencePacket.size() &&
-	std::memcmp(encryptedFrame.data(), kOpusSilencePacket.data(), kOpusSilencePacket.size()) == 0) {
+    if (mediaType == media_audio && encryptedFrame.size() == OPUS_SILENCE_PACKET.size() &&
+	std::memcmp(encryptedFrame.data(), OPUS_SILENCE_PACKET.data(), OPUS_SILENCE_PACKET.size()) == 0) {
         DISCORD_LOG(LS_VERBOSE) << "decrypt skipping silence of size: " << encryptedFrame.size();
         if (encryptedFrame.data() != frame.data()) {
 		std::memcpy(frame.data(), encryptedFrame.data(), encryptedFrame.size());
@@ -168,15 +168,15 @@ bool decryptor::decrypt_impl(aead_cipher_manager& cipher_manager,
     auto plaintext = encryptedFrame.GetPlaintext();
 
     // expand the truncated nonce to the full sized one needed for decryption
-    auto nonceBuffer = std::array<uint8_t, kAesGcm128NonceBytes>();
-    memcpy(nonceBuffer.data() + kAesGcm128TruncatedSyncNonceOffset,
-           &truncatedNonce,
-           kAesGcm128TruncatedSyncNonceBytes);
+    auto nonceBuffer = std::array<uint8_t, AES_GCM_128_NONCE_BYTES>();
+    memcpy(nonceBuffer.data() + AES_GCM_128_TRUNCATED_SYNC_NONCE_OFFSET,
+	   &truncatedNonce,
+	   AES_GCM_128_TRUNCATED_SYNC_NONCE_BYTES);
 
     auto nonceBufferView = make_array_view<const uint8_t>(nonceBuffer.data(), nonceBuffer.size());
 
     auto generation =
-	    cipher_manager.compute_wrapped_generation(truncatedNonce >> kRatchetGenerationShiftBits);
+	    cipher_manager.compute_wrapped_generation(truncatedNonce >> RATCHET_GENERATION_SHIFT_BITS);
 
     if (!cipher_manager.can_process_nonce(generation, truncatedNonce)) {
         DISCORD_LOG(LS_INFO) << "decrypt failed, cannot process nonce: " << truncatedNonce;

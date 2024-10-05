@@ -56,9 +56,9 @@ public:
     using Duration = std::chrono::seconds;
 
     void transition_to_key_ratchet(std::unique_ptr<IKeyRatchet> keyRatchet,
-				   Duration transitionExpiry = kDefaultTransitionDuration);
+				   Duration transitionExpiry = DEFAULT_TRANSITION_EXPIRY);
     void transition_to_passthrough_mode(bool passthroughMode,
-					Duration transitionExpiry = kDefaultTransitionDuration);
+					Duration transitionExpiry = DEFAULT_TRANSITION_EXPIRY);
 
     size_t decrypt(media_type mediaType,
 		   array_view<const uint8_t> encryptedFrame,

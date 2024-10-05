@@ -60,7 +60,7 @@ bool openssl_aead_cipher::encrypt(byte_view ciphertextBufferOut, const_byte_view
 	/*
 	 * Set IV length
 	 */
-	if (EVP_CIPHER_CTX_ctrl(cipherCtx_, EVP_CTRL_GCM_SET_IVLEN, kAesGcm128NonceBytes, nullptr) == 0) {
+	if (EVP_CIPHER_CTX_ctrl(cipherCtx_, EVP_CTRL_GCM_SET_IVLEN, AES_GCM_128_NONCE_BYTES, nullptr) == 0) {
 		PrintSSLErrors();
 		return false;
 	}
@@ -99,7 +99,7 @@ bool openssl_aead_cipher::encrypt(byte_view ciphertextBufferOut, const_byte_view
 	}
 
 	/* Get the tag */
-	if (EVP_CIPHER_CTX_ctrl(cipherCtx_, EVP_CTRL_GCM_GET_TAG, kAesGcm128TruncatedTagBytes, tagBufferOut.data()) == 0) {
+	if (EVP_CIPHER_CTX_ctrl(cipherCtx_, EVP_CTRL_GCM_GET_TAG, AES_GCM_127_TRUNCATED_TAG_BYTES, tagBufferOut.data()) == 0) {
 		PrintSSLErrors();
 		return false;
 	}
@@ -118,7 +118,7 @@ bool openssl_aead_cipher::decrypt(byte_view plaintextBufferOut, const_byte_view 
 	}
 
 	/* Set IV length. Not necessary if this is 12 bytes (96 bits) */
-	if (EVP_CIPHER_CTX_ctrl(cipherCtx_, EVP_CTRL_GCM_SET_IVLEN, kAesGcm128NonceBytes, nullptr) == 0) {
+	if (EVP_CIPHER_CTX_ctrl(cipherCtx_, EVP_CTRL_GCM_SET_IVLEN, AES_GCM_128_NONCE_BYTES, nullptr) == 0) {
 		PrintSSLErrors();
 		return false;	
 	}
@@ -148,7 +148,7 @@ bool openssl_aead_cipher::decrypt(byte_view plaintextBufferOut, const_byte_view 
 	}
 
 	/* Set expected tag value. Works in OpenSSL 1.0.1d and later */
-	if (EVP_CIPHER_CTX_ctrl(cipherCtx_, EVP_CTRL_GCM_SET_TAG, kAesGcm128TruncatedTagBytes, (void*)tagBuffer.data()) == 0) {
+	if (EVP_CIPHER_CTX_ctrl(cipherCtx_, EVP_CTRL_GCM_SET_TAG, AES_GCM_127_TRUNCATED_TAG_BYTES, (void*)tagBuffer.data()) == 0) {
 		PrintSSLErrors();
 		return false;
 	}

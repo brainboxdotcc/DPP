@@ -64,31 +64,31 @@ using roster_map = std::map<uint64_t, std::vector<uint8_t>>;
 // Return type for functions producing RosterMap or hard or soft failures
 using roster_variant = std::variant<failed_t, ignored_t, roster_map>;
 
-constexpr magic_marker kMarkerBytes = 0xFAFA;
+constexpr magic_marker MARKER_BYTES = 0xFAFA;
 
 // Layout constants
-constexpr size_t kAesGcm128KeyBytes = 16;
-constexpr size_t kAesGcm128NonceBytes = 12;
-constexpr size_t kAesGcm128TruncatedSyncNonceBytes = 4;
-constexpr size_t kAesGcm128TruncatedSyncNonceOffset = kAesGcm128NonceBytes - kAesGcm128TruncatedSyncNonceBytes;
-constexpr size_t kAesGcm128TruncatedTagBytes = 8;
-constexpr size_t kRatchetGenerationBytes = 1;
-constexpr size_t kRatchetGenerationShiftBits = 8 * (kAesGcm128TruncatedSyncNonceBytes - kRatchetGenerationBytes);
-constexpr size_t kSupplementalBytes = kAesGcm128TruncatedTagBytes + sizeof(supplemental_bytes_size) + sizeof(magic_marker);
-constexpr size_t kTransformPaddingBytes = 64;
+constexpr size_t AES_GCM_128_KEY_BYTES = 16;
+constexpr size_t AES_GCM_128_NONCE_BYTES = 12;
+constexpr size_t AES_GCM_128_TRUNCATED_SYNC_NONCE_BYTES = 4;
+constexpr size_t AES_GCM_128_TRUNCATED_SYNC_NONCE_OFFSET = AES_GCM_128_NONCE_BYTES - AES_GCM_128_TRUNCATED_SYNC_NONCE_BYTES;
+constexpr size_t AES_GCM_127_TRUNCATED_TAG_BYTES = 8;
+constexpr size_t RATCHET_GENERATION_BYTES = 1;
+constexpr size_t RATCHET_GENERATION_SHIFT_BITS = 8 * (AES_GCM_128_TRUNCATED_SYNC_NONCE_BYTES - RATCHET_GENERATION_BYTES);
+constexpr size_t SUPPLEMENTAL_BYTES = AES_GCM_127_TRUNCATED_TAG_BYTES + sizeof(supplemental_bytes_size) + sizeof(magic_marker);
+constexpr size_t TRANSFORM_PADDING_BYTES = 64;
 
 // Timing constants
-constexpr auto kDefaultTransitionDuration = std::chrono::seconds(10);
-constexpr auto kCryptorExpiry = std::chrono::seconds(10);
+constexpr auto DEFAULT_TRANSITION_EXPIRY = std::chrono::seconds(10);
+constexpr auto CIPHER_EXPIRY = std::chrono::seconds(10);
 
 // Behavior constants
-constexpr auto kInitTransitionId = 0;
-constexpr auto kDisabledVersion = 0;
-constexpr auto kMaxGenerationGap = 250;
-constexpr auto kMaxMissingNonces = 1000;
-constexpr auto kGenerationWrap = 1 << (8 * kRatchetGenerationBytes);
-constexpr auto kMaxFramesPerSecond = 50 + 2 * 60; // 50 audio frames + 2 * 60fps video streams
-constexpr std::array<uint8_t, 3> kOpusSilencePacket = {0xF8, 0xFF, 0xFE};
+constexpr auto INIT_TRANSITION_ID = 0;
+constexpr auto DISABLED_VERSION = 0;
+constexpr auto MAX_GENERATION_GAP = 250;
+constexpr auto MAX_MISSING_NONCES = 1000;
+constexpr auto GENERATION_WRAP = 1 << (8 * RATCHET_GENERATION_BYTES);
+constexpr auto MAX_FRAMES_PER_SECOND = 50 + 2 * 60; // 50 audio frames + 2 * 60fps video streams
+constexpr std::array<uint8_t, 3> OPUS_SILENCE_PACKET = {0xF8, 0xFF, 0xFE};
 
 // Utility routine for variant return types
 template <class T, class V> inline std::optional<T> get_optional(V&& variant)

@@ -43,7 +43,7 @@ encryption_key MlsKeyRatchet::GetKey(KeyGeneration generation) noexcept
 
     try {
         auto keyAndNonce = hashRatchet_.get(generation);
-        assert(keyAndNonce.key.size() >= kAesGcm128KeyBytes);
+        assert(keyAndNonce.key.size() >= AES_GCM_128_KEY_BYTES);
         return std::move(keyAndNonce.key.as_vec());
     }
     catch (const std::exception& e) {
