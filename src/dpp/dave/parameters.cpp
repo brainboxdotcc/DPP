@@ -31,22 +31,22 @@ namespace dpp::dave::mls {
 	return ::mlspp::CipherSuite::ID::P256_AES128GCM_SHA256_P256;
 }
 
-::mlspp::CipherSuite CiphersuiteForProtocolVersion(protocol_version version) noexcept
+::mlspp::CipherSuite ciphersuite_for_protocol_version(protocol_version version) noexcept
 {
 	return ::mlspp::CipherSuite{ciphersuite_id_for_protocol_version(version)};
 }
 
-::mlspp::CipherSuite::ID CiphersuiteIDForSignatureVersion(signature_version version) noexcept
+::mlspp::CipherSuite::ID ciphersuite_id_for_signature_version(signature_version version) noexcept
 {
 	return ::mlspp::CipherSuite::ID::P256_AES128GCM_SHA256_P256;
 }
 
-::mlspp::CipherSuite CiphersuiteForSignatureVersion(signature_version version) noexcept
+::mlspp::CipherSuite ciphersuite_for_signature_version(signature_version version) noexcept
 {
 	return ::mlspp::CipherSuite{ciphersuite_id_for_protocol_version(version)};
 }
 
-::mlspp::Capabilities LeafNodeCapabilitiesForProtocolVersion(protocol_version version) noexcept
+::mlspp::Capabilities leaf_node_capabilities_for_protocol_version(protocol_version version) noexcept
 {
 	auto capabilities = ::mlspp::Capabilities::create_default();
 
@@ -56,12 +56,12 @@ namespace dpp::dave::mls {
 	return capabilities;
 }
 
-::mlspp::ExtensionList LeafNodeExtensionsForProtocolVersion(protocol_version version) noexcept
+::mlspp::ExtensionList leaf_node_extensions_for_protocol_version(protocol_version version) noexcept
 {
 	return ::mlspp::ExtensionList{};
 }
 
-::mlspp::ExtensionList GroupExtensionsForProtocolVersion(
+::mlspp::ExtensionList group_extensions_for_protocol_version(
 	protocol_version version,
 	const ::mlspp::ExternalSender& externalSender) noexcept
 {

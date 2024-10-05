@@ -68,7 +68,7 @@ uint64_t read_leb128(const uint8_t*& readAt, const uint8_t* end)
 	return 0;
 }
 
-size_t WriteLeb128(uint64_t value, uint8_t* buffer)
+size_t write_leb128(uint64_t value, uint8_t* buffer)
 {
 	int size = 0;
 	while (value >= 0x80) {

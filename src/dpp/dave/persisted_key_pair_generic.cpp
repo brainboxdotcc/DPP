@@ -84,7 +84,7 @@ static std::filesystem::path GetKeyStorageDirectory()
 
 namespace dpp::dave::mls::detail {
 
-std::shared_ptr<::mlspp::SignaturePrivateKey> GetGenericPersistedKeyPair(key_pair_context_type ctx,
+std::shared_ptr<::mlspp::SignaturePrivateKey> get_generic_persisted_key_pair(key_pair_context_type ctx,
 									 const std::string& id,
 									 ::mlspp::CipherSuite suite)
 {
@@ -179,7 +179,7 @@ std::shared_ptr<::mlspp::SignaturePrivateKey> GetGenericPersistedKeyPair(key_pai
 
 }
 
-bool DeleteGenericPersistedKeyPair(key_pair_context_type ctx, const std::string& id)
+bool delete_generic_persisted_key_pair(key_pair_context_type ctx, const std::string& id)
 {
 	std::error_code errc;
 	std::filesystem::path dir = GetKeyStorageDirectory();
