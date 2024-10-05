@@ -38,30 +38,30 @@
 #include "version.h"
 
 namespace mlspp {
-struct AuthenticatedContent;
-struct Credential;
-struct ExternalSender;
-struct HPKEPrivateKey;
-struct KeyPackage;
-struct LeafNode;
-struct MLSMessage;
-struct SignaturePrivateKey;
-class State;
+	struct AuthenticatedContent;
+	struct Credential;
+	struct ExternalSender;
+	struct HPKEPrivateKey;
+	struct KeyPackage;
+	struct LeafNode;
+	struct MLSMessage;
+	struct SignaturePrivateKey;
+	class State;
 } // namespace mlspp
 
 namespace dpp::dave::mls {
 
 struct QueuedProposal;
 
-class Session {
+class session {
 public:
-	using MLSFailureCallback = std::function<void(std::string const&, std::string const&)>;
+	using mls_failure_callback = std::function<void(std::string const&, std::string const&)>;
 
-	Session(key_pair_context_type context,
+	session(key_pair_context_type context,
 		const std::string& authSessionId,
-		MLSFailureCallback callback) noexcept;
+		mls_failure_callback callback) noexcept;
 
-	~Session() noexcept;
+	~session() noexcept;
 
 	void Init(protocol_version version,
 		  uint64_t groupId,
@@ -147,7 +147,7 @@ private:
 	std::unique_ptr<::mlspp::State> stateWithProposals_;
 	std::list<QueuedProposal> proposalQueue_;
 
-	MLSFailureCallback onMLSFailureCallback_{};
+	mls_failure_callback onMLSFailureCallback_{};
 };
 
 } // namespace dpp::dave::mls

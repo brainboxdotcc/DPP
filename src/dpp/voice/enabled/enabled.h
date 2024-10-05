@@ -71,7 +71,7 @@
 namespace dpp {
 
 struct dave_state {
-	std::unique_ptr<dave::mls::Session> dave_session{};
+	std::unique_ptr<dave::mls::session> dave_session{};
 	std::shared_ptr<::mlspp::SignaturePrivateKey> mls_key;
 	std::vector<uint8_t> cached_commit;
 	uint64_t transition_id{0};

@@ -75,7 +75,7 @@ namespace dpp {
 class audio_mixer;
 
 namespace dave::mls {
-	class Session;
+	class session;
 }
 
 // !TODO: change these to constexpr and rename every occurrence across the codebase

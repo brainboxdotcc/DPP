@@ -317,7 +317,7 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 					}
 
 					mls_state = std::make_unique<dave_state>();
-					mls_state->dave_session = std::make_unique<dave::mls::Session>(
+					mls_state->dave_session = std::make_unique<dave::mls::session>(
 						nullptr, "" /* sessionid */, [this](std::string const& s1, std::string const& s2) {
 							log(ll_debug, "Dave session constructor callback: " + s1 + ", " + s2);
 						});
