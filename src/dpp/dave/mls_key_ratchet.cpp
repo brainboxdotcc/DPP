@@ -30,14 +30,14 @@
 
 namespace dpp::dave {
 
-MlsKeyRatchet::MlsKeyRatchet(::mlspp::CipherSuite suite, bytes baseSecret) noexcept
+mls_key_ratchet::mls_key_ratchet(::mlspp::CipherSuite suite, bytes baseSecret) noexcept
   : hashRatchet_(suite, std::move(baseSecret))
 {
 }
 
-MlsKeyRatchet::~MlsKeyRatchet() noexcept = default;
+mls_key_ratchet::~mls_key_ratchet() noexcept = default;
 
-encryption_key MlsKeyRatchet::get_key(key_generation generation) noexcept
+encryption_key mls_key_ratchet::get_key(key_generation generation) noexcept
 {
 	DISCORD_LOG(LS_INFO) << "Retrieving key for generation " << generation << " from HashRatchet";
 
@@ -53,7 +53,7 @@ encryption_key MlsKeyRatchet::get_key(key_generation generation) noexcept
 	}
 }
 
-void MlsKeyRatchet::delete_key(key_generation generation) noexcept
+void mls_key_ratchet::delete_key(key_generation generation) noexcept
 {
 	hashRatchet_.erase(generation);
 }

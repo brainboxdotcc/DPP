@@ -33,20 +33,16 @@
 
 namespace dpp::dave {
 
-struct Range {
+struct range {
 	size_t offset;
 	size_t size;
 };
-using Ranges = std::vector<Range>;
+using ranges = std::vector<range>;
 
-uint8_t UnencryptedRangesSize(const Ranges& unencryptedRanges);
-uint8_t SerializeUnencryptedRanges(const Ranges& unencryptedRanges,
-								   uint8_t* buffer,
-								   size_t bufferSize);
-uint8_t DeserializeUnencryptedRanges(const uint8_t*& buffer,
-									 const size_t bufferSize,
-									 Ranges& unencryptedRanges);
-bool ValidateUnencryptedRanges(const Ranges& unencryptedRanges, size_t frameSize);
+uint8_t unencrypted_ranges_size(const ranges& unencryptedRanges);
+uint8_t serialize_unencrypted_ranges(const ranges& unencryptedRanges, uint8_t* buffer, size_t bufferSize);
+uint8_t deserialize_unencrypted_ranges(const uint8_t*& buffer, const size_t bufferSize, ranges& unencryptedRanges);
+bool validate_unencrypted_ranges(const ranges& unencryptedRanges, size_t frameSize);
 
 class inbound_frame_processor {
 public:
@@ -77,7 +73,7 @@ private:
 	size_t originalSize_{0};
 	array_view<const uint8_t> tag_;
 	truncated_sync_nonce truncatedNonce_;
-	Ranges unencryptedRanges_;
+	ranges unencryptedRanges_;
 	std::vector<uint8_t> authenticated_;
 	std::vector<uint8_t> ciphertext_;
 	std::vector<uint8_t> plaintext_;
@@ -85,26 +81,26 @@ private:
 
 class outbound_frame_processor {
 public:
-	void process_frame(array_view<const uint8_t> frame, Codec codec);
+	void process_frame(array_view<const uint8_t> frame, codec codec);
 	size_t reconstruct_frame(array_view<uint8_t> frame);
 
-	[[nodiscard]] Codec get_codec() const { return codec_; }
+	[[nodiscard]] codec get_codec() const { return codec_; }
 	[[nodiscard]] const std::vector<uint8_t>& get_unencrypted_bytes() const { return unencryptedBytes_; }
 	[[nodiscard]] const std::vector<uint8_t>& get_encrypted_bytes() const { return encryptedBytes_; }
 	[[nodiscard]] std::vector<uint8_t>& get_ciphertext_bytes() { return ciphertextBytes_; }
-	[[nodiscard]] const Ranges& get_unencrypted_ranges() const { return unencryptedRanges_; }
+	[[nodiscard]] const ranges& get_unencrypted_ranges() const { return unencryptedRanges_; }
 
 	void reset();
 	void add_unencrypted_bytes(const uint8_t* bytes, size_t size);
 	void add_encrypted_bytes(const uint8_t* bytes, size_t size);
 
 private:
-	Codec codec_{Codec::Unknown};
+	codec codec_{codec::Unknown};
 	size_t frameIndex_{0};
 	std::vector<uint8_t> unencryptedBytes_;
 	std::vector<uint8_t> encryptedBytes_;
 	std::vector<uint8_t> ciphertextBytes_;
-	Ranges unencryptedRanges_;
+	ranges unencryptedRanges_;
 };
 
 } // namespace dpp::dave

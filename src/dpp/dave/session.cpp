@@ -80,7 +80,7 @@ void session::init(protocol_version version,
 	DISCORD_LOG(LS_INFO) << "Initializing MLS session with protocol version " << version
 			     << " and group ID " << groupId;
 	protocolVersion_ = version;
-	groupId_ = std::move(BigEndianBytesFrom(groupId).as_vec());
+	groupId_ = std::move(big_endian_bytes_from(groupId).as_vec());
 
 	init_leaf_node(selfUserId, transientKey);
 
@@ -270,7 +270,7 @@ catch (const std::exception& e) {
 bool session::is_recognized_user_id(const ::mlspp::Credential& cred,
 				    std::set<std::string> const& recognizedUserIDs) const
 {
-	std::string uid = UserCredentialToString(cred, protocolVersion_);
+	std::string uid = user_credential_to_string(cred, protocolVersion_);
 	if (uid.empty()) {
 		DISCORD_LOG(LS_ERROR) << "Attempted to verify credential of unexpected type";
 		return false;
@@ -463,7 +463,7 @@ roster_map session::replace_state(std::unique_ptr<::mlspp::State>&& state)
 
 		const auto& cred = node.credential.template get<::mlspp::BasicCredential>();
 
-		newRoster[FromBigEndianBytes(cred.identity)] = node.signature_key.data.as_vec();
+		newRoster[from_big_endian_bytes(cred.identity)] = node.signature_key.data.as_vec();
 	}
 
 	roster_map changeMap;
@@ -577,7 +577,7 @@ try {
 
 	selfSigPrivateKey_ = transientKey;
 
-	auto selfCredential = CreateUserCredential(selfUserId, protocolVersion_);
+	auto selfCredential = create_user_credential(selfUserId, protocolVersion_);
 
 	selfHPKEPrivateKey_ =
 	  std::make_unique<::mlspp::HPKEPrivateKey>(::mlspp::HPKEPrivateKey::generate(ciphersuite));
@@ -700,7 +700,7 @@ std::unique_ptr<key_ratchet_interface> session::get_key_ratchet(std::string cons
 
 	// this assumes the MLS ciphersuite produces a kAesGcm128KeyBytes sized key
 	// would need to be updated to a different ciphersuite if there's a future mismatch
-	return std::make_unique<MlsKeyRatchet>(currentState_->cipher_suite(), std::move(baseSecret));
+	return std::make_unique<mls_key_ratchet>(currentState_->cipher_suite(), std::move(baseSecret));
 }
 
 void session::get_pairwise_fingerprint(uint16_t version,

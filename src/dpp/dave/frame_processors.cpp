@@ -52,7 +52,7 @@ std::pair<bool, size_t> OverflowAdd(size_t a, size_t b)
 	return {didOverflow, res};
 }
 
-uint8_t UnencryptedRangesSize(const Ranges& unencryptedRanges)
+uint8_t unencrypted_ranges_size(const ranges& unencryptedRanges)
 {
 	size_t size = 0;
 	for (const auto& range : unencryptedRanges) {
@@ -64,9 +64,9 @@ uint8_t UnencryptedRangesSize(const Ranges& unencryptedRanges)
 	return static_cast<uint8_t>(size);
 }
 
-uint8_t SerializeUnencryptedRanges(const Ranges& unencryptedRanges,
-								   uint8_t* buffer,
-								   size_t bufferSize)
+uint8_t serialize_unencrypted_ranges(const ranges& unencryptedRanges,
+				     uint8_t* buffer,
+				     size_t bufferSize)
 {
 	auto writeAt = buffer;
 	auto end = buffer + bufferSize;
@@ -83,9 +83,9 @@ uint8_t SerializeUnencryptedRanges(const Ranges& unencryptedRanges,
 	return writeAt - buffer;
 }
 
-uint8_t DeserializeUnencryptedRanges(const uint8_t*& readAt,
-									 const size_t bufferSize,
-									 Ranges& unencryptedRanges)
+uint8_t deserialize_unencrypted_ranges(const uint8_t*& readAt,
+				       const size_t bufferSize,
+				       ranges& unencryptedRanges)
 {
 	auto start = readAt;
 	auto end = readAt + bufferSize;
@@ -112,7 +112,7 @@ uint8_t DeserializeUnencryptedRanges(const uint8_t*& readAt,
 	return readAt - start;
 }
 
-bool ValidateUnencryptedRanges(const Ranges& unencryptedRanges, size_t frameSize)
+bool validate_unencrypted_ranges(const ranges& unencryptedRanges, size_t frameSize)
 {
 	if (unencryptedRanges.empty()) {
 		return true;
@@ -139,10 +139,10 @@ bool ValidateUnencryptedRanges(const Ranges& unencryptedRanges, size_t frameSize
 	return true;
 }
 
-size_t Reconstruct(Ranges ranges,
-				   const std::vector<uint8_t>& rangeBytes,
-				   const std::vector<uint8_t>& otherBytes,
-				   const array_view<uint8_t>& output)
+size_t Reconstruct(ranges ranges,
+		   const std::vector<uint8_t>& rangeBytes,
+		   const std::vector<uint8_t>& otherBytes,
+		   const array_view<uint8_t>& output)
 {
 	size_t frameIndex = 0;
 	size_t rangeBytesIndex = 0;
@@ -251,13 +251,13 @@ void inbound_frame_processor::parse_frame(array_view<const uint8_t> frame)
 	// Read the unencrypted ranges
 	assert(nonceBuffer <= readAt && readAt <= end);
 	auto unencryptedRangesSize = end - readAt;
-	DeserializeUnencryptedRanges(readAt, unencryptedRangesSize, unencryptedRanges_);
+	deserialize_unencrypted_ranges(readAt, unencryptedRangesSize, unencryptedRanges_);
 	if (readAt == nullptr) {
 		DISCORD_LOG(LS_WARNING) << "Failed to read unencrypted ranges";
 		return;
 	}
 
-	if (!ValidateUnencryptedRanges(unencryptedRanges_, frame.size())) {
+	if (!validate_unencrypted_ranges(unencryptedRanges_, frame.size())) {
 		DISCORD_LOG(LS_WARNING) << "Invalid unencrypted ranges";
 		return;
 	}
@@ -324,14 +324,14 @@ void inbound_frame_processor::add_ciphertext_bytes(const uint8_t* data, size_t s
 
 void outbound_frame_processor::reset()
 {
-	codec_ = Codec::Unknown;
+	codec_ = codec::Unknown;
 	frameIndex_ = 0;
 	unencryptedBytes_.clear();
 	encryptedBytes_.clear();
 	unencryptedRanges_.clear();
 }
 
-void outbound_frame_processor::process_frame(array_view<const uint8_t> frame, Codec codec)
+void outbound_frame_processor::process_frame(array_view<const uint8_t> frame, codec codec)
 {
 	reset();
 
@@ -341,22 +341,22 @@ void outbound_frame_processor::process_frame(array_view<const uint8_t> frame, Co
 
 	bool success = false;
 	switch (codec) {
-	case Codec::Opus:
+	case codec::Opus:
 		success = codec_utils::process_frame_opus(*this, frame);
 		break;
-	case Codec::VP8:
+	case codec::VP8:
 		success = codec_utils::process_frame_vp8(*this, frame);
 		break;
-	case Codec::VP9:
+	case codec::VP9:
 		success = codec_utils::process_frame_vp9(*this, frame);
 		break;
-	case Codec::H264:
+	case codec::H264:
 		success = codec_utils::process_frame_h264(*this, frame);
 		break;
-	case Codec::H265:
+	case codec::H265:
 		success = codec_utils::process_frame_h265(*this, frame);
 		break;
-	case Codec::AV1:
+	case codec::AV1:
 		success = codec_utils::process_frame_av1(*this, frame);
 		break;
 	default:

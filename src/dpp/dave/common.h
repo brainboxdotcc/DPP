@@ -48,7 +48,7 @@ using transition_id = uint16_t;
 using supplemental_bytes_size = uint8_t;
 
 enum media_type : uint8_t { media_audio, media_video };
-enum Codec : uint8_t { Unknown, Opus, VP8, VP9, H264, H265, AV1 };
+enum codec : uint8_t { Unknown, Opus, VP8, VP9, H264, H265, AV1 };
 
 // Returned in std::variant when a message is hard-rejected and should trigger a reset
 struct failed_t {};

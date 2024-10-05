@@ -30,39 +30,39 @@
 
 namespace dpp::dave {
 
-class [[nodiscard]] ScopeExit final {
+class [[nodiscard]] scope_exit final {
 public:
 	template <typename Cleanup>
-	explicit ScopeExit(Cleanup&& cleanup)
+	explicit scope_exit(Cleanup&& cleanup)
 	  : cleanup_{std::forward<Cleanup>(cleanup)}
 	{
 	}
 
-	ScopeExit(ScopeExit&& rhs)
+	scope_exit(scope_exit&& rhs)
 	  : cleanup_{std::move(rhs.cleanup_)}
 	{
 		rhs.cleanup_ = nullptr;
 	}
 
-	~ScopeExit()
+	~scope_exit()
 	{
 		if (cleanup_) {
 			cleanup_();
 		}
 	}
 
-	ScopeExit& operator=(ScopeExit&& rhs)
+	scope_exit& operator=(scope_exit&& rhs)
 	{
 		cleanup_ = std::move(rhs.cleanup_);
 		rhs.cleanup_ = nullptr;
 		return *this;
 	}
 
-	void Dismiss() { cleanup_ = nullptr; }
+	void dismiss() { cleanup_ = nullptr; }
 
 private:
-	ScopeExit(ScopeExit const&) = delete;
-	ScopeExit& operator=(ScopeExit const&) = delete;
+	scope_exit(scope_exit const&) = delete;
+	scope_exit& operator=(scope_exit const&) = delete;
 
 	std::function<void()> cleanup_;
 };

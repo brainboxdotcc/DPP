@@ -29,8 +29,8 @@
 
 namespace dpp::dave::mls {
 
-::mlspp::bytes_ns::bytes BigEndianBytesFrom(uint64_t value) noexcept;
-uint64_t FromBigEndianBytes(const ::mlspp::bytes_ns::bytes& value) noexcept;
+::mlspp::bytes_ns::bytes big_endian_bytes_from(uint64_t value) noexcept;
+uint64_t from_big_endian_bytes(const ::mlspp::bytes_ns::bytes& value) noexcept;
 
 } // namespace dpp::dave::mls
 

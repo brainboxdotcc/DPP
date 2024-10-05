@@ -77,7 +77,7 @@ size_t decryptor::decrypt(media_type mediaType,
 	auto start = clock_.now();
 
 	auto localFrame = get_or_create_frame_processor();
-	ScopeExit cleanup([&] { return_frame_processor(std::move(localFrame)); });
+	scope_exit cleanup([&] { return_frame_processor(std::move(localFrame)); });
 
 	// Skip decrypting for silence frames
 	if (mediaType == media_audio && encryptedFrame.size() == OPUS_SILENCE_PACKET.size() &&

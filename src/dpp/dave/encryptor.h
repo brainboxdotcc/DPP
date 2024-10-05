@@ -57,8 +57,8 @@ public:
 	bool has_key_ratchet() const { return keyRatchet_ != nullptr; }
 	bool is_passthrough_mode() const { return passthroughMode_; }
 
-	void assign_ssrc_to_codec(uint32_t ssrc, Codec codecType);
-	Codec codec_for_ssrc(uint32_t ssrc);
+	void assign_ssrc_to_codec(uint32_t ssrc, codec codecType);
+	codec codec_for_ssrc(uint32_t ssrc);
 
 	int encrypt(media_type mediaType,
 		uint32_t ssrc,
@@ -101,7 +101,7 @@ private:
 	std::mutex frameProcessorsMutex_;
 	std::vector<std::unique_ptr<outbound_frame_processor>> frameProcessors_;
 
-	using SsrcCodecPair = std::pair<uint32_t, Codec>;
+	using SsrcCodecPair = std::pair<uint32_t, codec>;
 	std::vector<SsrcCodecPair> ssrcCodecPairs_;
 
 	using TimePoint = std::chrono::time_point<std::chrono::steady_clock>;

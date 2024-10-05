@@ -90,7 +90,7 @@ int encryptor::encrypt(media_type mediaType,
 	auto codec = codec_for_ssrc(ssrc);
 
 	auto frameProcessor = get_or_create_frame_processor();
-	ScopeExit cleanup([&] { return_frame_processor(std::move(frameProcessor)); });
+	scope_exit cleanup([&] { return_frame_processor(std::move(frameProcessor)); });
 
 	frameProcessor->process_frame(frame, codec);
 
@@ -99,7 +99,7 @@ int encryptor::encrypt(media_type mediaType,
 	auto& ciphertextBytes = frameProcessor->get_ciphertext_bytes();
 
 	const auto& unencryptedRanges = frameProcessor->get_unencrypted_ranges();
-	auto unencryptedRangesSize = UnencryptedRangesSize(unencryptedRanges);
+	auto unencryptedRangesSize = unencrypted_ranges_size(unencryptedRanges);
 
 	auto additionalData = make_array_view(unencryptedBytes.data(), unencryptedBytes.size());
 	auto plaintextBuffer = make_array_view(encryptedBytes.data(), encryptedBytes.size());
@@ -172,8 +172,8 @@ int encryptor::encrypt(media_type mediaType,
 		}
 
 		// write the unencrypted ranges
-		res = SerializeUnencryptedRanges(
-		  unencryptedRanges, unencryptedRangesBuffer.begin(), unencryptedRangesBuffer.size());
+		res = serialize_unencrypted_ranges(
+			unencryptedRanges, unencryptedRangesBuffer.begin(), unencryptedRangesBuffer.size());
 		if (res != unencryptedRangesSize) {
 			assert(false && "Failed to write unencrypted ranges");
 			result = result_code::rc_encryption_failure;
@@ -232,7 +232,7 @@ size_t encryptor::get_max_ciphertext_byte_size(media_type mediaType, size_t fram
 	return frameSize + SUPPLEMENTAL_BYTES + TRANSFORM_PADDING_BYTES;
 }
 
-void encryptor::assign_ssrc_to_codec(uint32_t ssrc, Codec codecType)
+void encryptor::assign_ssrc_to_codec(uint32_t ssrc, codec codecType)
 {
 	auto existingCodecIt = std::find_if(
 	  ssrcCodecPairs_.begin(), ssrcCodecPairs_.end(), [ssrc](const SsrcCodecPair& pair) {
@@ -247,7 +247,7 @@ void encryptor::assign_ssrc_to_codec(uint32_t ssrc, Codec codecType)
 	}
 }
 
-Codec encryptor::codec_for_ssrc(uint32_t ssrc)
+codec encryptor::codec_for_ssrc(uint32_t ssrc)
 {
 	auto existingCodecIt = std::find_if(
 	  ssrcCodecPairs_.begin(), ssrcCodecPairs_.end(), [ssrc](const SsrcCodecPair& pair) {
@@ -258,7 +258,7 @@ Codec encryptor::codec_for_ssrc(uint32_t ssrc)
 		return existingCodecIt->second;
 	}
 	else {
-		return Codec::Opus;
+		return codec::Opus;
 	}
 }
 

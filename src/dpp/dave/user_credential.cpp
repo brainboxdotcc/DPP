@@ -28,16 +28,16 @@
 
 namespace dpp::dave::mls {
 
-::mlspp::Credential CreateUserCredential(const std::string& userId, protocol_version version)
+::mlspp::Credential create_user_credential(const std::string& userId, protocol_version version)
 {
 	// convert the string user ID to a big endian uint64_t
 	auto userID = std::stoull(userId);
-	auto credentialBytes = BigEndianBytesFrom(userID);
+	auto credentialBytes = big_endian_bytes_from(userID);
 
 	return ::mlspp::Credential::basic(credentialBytes);
 }
 
-std::string UserCredentialToString(const ::mlspp::Credential& cred, protocol_version version)
+std::string user_credential_to_string(const ::mlspp::Credential& cred, protocol_version version)
 {
 	if (cred.type() != ::mlspp::CredentialType::basic) {
 		return "";
@@ -45,7 +45,7 @@ std::string UserCredentialToString(const ::mlspp::Credential& cred, protocol_ver
 
 	const auto& basic = cred.template get<::mlspp::BasicCredential>();
 
-	auto uidVal = FromBigEndianBytes(basic.identity);
+	auto uidVal = from_big_endian_bytes(basic.identity);
 
 	return std::to_string(uidVal);
 }
