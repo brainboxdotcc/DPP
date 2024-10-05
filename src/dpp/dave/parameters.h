@@ -32,14 +32,14 @@
 
 namespace dpp::dave::mls {
 
-::mlspp::CipherSuite::ID CiphersuiteIDForProtocolVersion(ProtocolVersion version) noexcept;
-::mlspp::CipherSuite CiphersuiteForProtocolVersion(ProtocolVersion version) noexcept;
-::mlspp::CipherSuite::ID CiphersuiteIDForSignatureVersion(SignatureVersion version) noexcept;
-::mlspp::CipherSuite CiphersuiteForSignatureVersion(SignatureVersion version) noexcept;
-::mlspp::Capabilities LeafNodeCapabilitiesForProtocolVersion(ProtocolVersion version) noexcept;
-::mlspp::ExtensionList LeafNodeExtensionsForProtocolVersion(ProtocolVersion version) noexcept;
-::mlspp::ExtensionList GroupExtensionsForProtocolVersion(
-  ProtocolVersion version,
+::mlspp::CipherSuite::ID ciphersuite_id_for_protocol_version(protocol_version version) noexcept;
+::mlspp::CipherSuite ciphersuite_for_protocol_version(protocol_version version) noexcept;
+::mlspp::CipherSuite::ID ciphersuite_id_for_signature_version(signature_version version) noexcept;
+::mlspp::CipherSuite ciphersuite_for_signature_version(signature_version version) noexcept;
+::mlspp::Capabilities leaf_node_capabilities_for_protocol_version(protocol_version version) noexcept;
+::mlspp::ExtensionList leaf_node_extensions_for_protocol_version(protocol_version version) noexcept;
+::mlspp::ExtensionList group_extensions_for_protocol_version(
+	protocol_version version,
   const ::mlspp::ExternalSender& externalSender) noexcept;
 
 } // namespace dpp::dave::mls

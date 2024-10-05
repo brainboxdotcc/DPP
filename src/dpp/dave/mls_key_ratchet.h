@@ -29,13 +29,13 @@
 
 namespace dpp::dave {
 
-class MlsKeyRatchet : public IKeyRatchet {
+class MlsKeyRatchet : public key_ratchet_interface {
 public:
 	MlsKeyRatchet(::mlspp::CipherSuite suite, bytes baseSecret) noexcept;
 	~MlsKeyRatchet() noexcept override;
 
-	encryption_key GetKey(KeyGeneration generation) noexcept override;
-	void DeleteKey(KeyGeneration generation) noexcept override;
+	encryption_key get_key(key_generation generation) noexcept override;
+	void delete_key(key_generation generation) noexcept override;
 
 private:
 	::mlspp::HashRatchet hashRatchet_;

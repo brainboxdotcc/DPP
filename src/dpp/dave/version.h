@@ -28,10 +28,10 @@
 
 namespace dpp::dave {
 
-using ProtocolVersion = uint16_t;
-using SignatureVersion = uint8_t;
+using protocol_version = uint16_t;
+using signature_version = uint8_t;
 
-ProtocolVersion MaxSupportedProtocolVersion();
+protocol_version max_protocol_version();
 
 } // namespace dpp::dave
 

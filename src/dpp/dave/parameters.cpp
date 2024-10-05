@@ -26,44 +26,44 @@
 
 namespace dpp::dave::mls {
 
-::mlspp::CipherSuite::ID CiphersuiteIDForProtocolVersion(ProtocolVersion version) noexcept
+::mlspp::CipherSuite::ID ciphersuite_id_for_protocol_version(protocol_version version) noexcept
 {
 	return ::mlspp::CipherSuite::ID::P256_AES128GCM_SHA256_P256;
 }
 
-::mlspp::CipherSuite CiphersuiteForProtocolVersion(ProtocolVersion version) noexcept
+::mlspp::CipherSuite CiphersuiteForProtocolVersion(protocol_version version) noexcept
 {
-	return ::mlspp::CipherSuite{CiphersuiteIDForProtocolVersion(version)};
+	return ::mlspp::CipherSuite{ciphersuite_id_for_protocol_version(version)};
 }
 
-::mlspp::CipherSuite::ID CiphersuiteIDForSignatureVersion(SignatureVersion version) noexcept
+::mlspp::CipherSuite::ID CiphersuiteIDForSignatureVersion(signature_version version) noexcept
 {
 	return ::mlspp::CipherSuite::ID::P256_AES128GCM_SHA256_P256;
 }
 
-::mlspp::CipherSuite CiphersuiteForSignatureVersion(SignatureVersion version) noexcept
+::mlspp::CipherSuite CiphersuiteForSignatureVersion(signature_version version) noexcept
 {
-	return ::mlspp::CipherSuite{CiphersuiteIDForProtocolVersion(version)};
+	return ::mlspp::CipherSuite{ciphersuite_id_for_protocol_version(version)};
 }
 
-::mlspp::Capabilities LeafNodeCapabilitiesForProtocolVersion(ProtocolVersion version) noexcept
+::mlspp::Capabilities LeafNodeCapabilitiesForProtocolVersion(protocol_version version) noexcept
 {
 	auto capabilities = ::mlspp::Capabilities::create_default();
 
-	capabilities.cipher_suites = {CiphersuiteIDForProtocolVersion(version)};
+	capabilities.cipher_suites = {ciphersuite_id_for_protocol_version(version)};
 	capabilities.credentials = {::mlspp::CredentialType::basic};
 
 	return capabilities;
 }
 
-::mlspp::ExtensionList LeafNodeExtensionsForProtocolVersion(ProtocolVersion version) noexcept
+::mlspp::ExtensionList LeafNodeExtensionsForProtocolVersion(protocol_version version) noexcept
 {
 	return ::mlspp::ExtensionList{};
 }
 
 ::mlspp::ExtensionList GroupExtensionsForProtocolVersion(
-  ProtocolVersion version,
-  const ::mlspp::ExternalSender& externalSender) noexcept
+	protocol_version version,
+	const ::mlspp::ExternalSender& externalSender) noexcept
 {
 	auto extensionList = ::mlspp::ExtensionList{};
 

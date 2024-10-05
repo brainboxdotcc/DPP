@@ -56,8 +56,8 @@ uint8_t UnencryptedRangesSize(const Ranges& unencryptedRanges)
 {
 	size_t size = 0;
 	for (const auto& range : unencryptedRanges) {
-		size += Leb128Size(range.offset);
-		size += Leb128Size(range.size);
+		size += leb128_size(range.offset);
+		size += leb128_size(range.size);
 	}
 	assert(size <= std::numeric_limits<uint8_t>::max() &&
 		   "Unencrypted ranges size exceeds 255 bytes");
@@ -71,14 +71,14 @@ uint8_t SerializeUnencryptedRanges(const Ranges& unencryptedRanges,
 	auto writeAt = buffer;
 	auto end = buffer + bufferSize;
 	for (const auto& range : unencryptedRanges) {
-		auto rangeSize = Leb128Size(range.offset) + Leb128Size(range.size);
+		auto rangeSize = leb128_size(range.offset) + leb128_size(range.size);
 		if (rangeSize > static_cast<size_t>(end - writeAt)) {
 			assert(false && "Buffer is too small to serialize unencrypted ranges");
 			break;
 		}
 
-		writeAt += WriteLeb128(range.offset, writeAt);
-		writeAt += WriteLeb128(range.size, writeAt);
+		writeAt += write_leb128(range.offset, writeAt);
+		writeAt += write_leb128(range.size, writeAt);
 	}
 	return writeAt - buffer;
 }
@@ -90,12 +90,12 @@ uint8_t DeserializeUnencryptedRanges(const uint8_t*& readAt,
 	auto start = readAt;
 	auto end = readAt + bufferSize;
 	while (readAt < end) {
-		size_t offset = ReadLeb128(readAt, end);
+		size_t offset = read_leb128(readAt, end);
 		if (readAt == nullptr) {
 			break;
 		}
 
-		size_t size = ReadLeb128(readAt, end);
+		size_t size = read_leb128(readAt, end);
 		if (readAt == nullptr) {
 			break;
 		}
@@ -242,7 +242,7 @@ void inbound_frame_processor::parse_frame(array_view<const uint8_t> frame)
 	assert(frame.begin() <= nonceBuffer && nonceBuffer <= frame.end());
 	auto readAt = nonceBuffer;
 	auto end = supplementalBytesSizeBuffer;
-	truncatedNonce_ = ReadLeb128(readAt, end);
+	truncatedNonce_ = read_leb128(readAt, end);
 	if (readAt == nullptr) {
 		DISCORD_LOG(LS_WARNING) << "Failed to read truncated nonce";
 		return;

@@ -30,8 +30,8 @@
 
 namespace dpp::dave::mls {
 
-::mlspp::Credential CreateUserCredential(const std::string& userId, ProtocolVersion version);
-std::string UserCredentialToString(const ::mlspp::Credential& cred, ProtocolVersion version);
+::mlspp::Credential CreateUserCredential(const std::string& userId, protocol_version version);
+std::string UserCredentialToString(const ::mlspp::Credential& cred, protocol_version version);
 
 } // namespace dpp::dave::mls
 

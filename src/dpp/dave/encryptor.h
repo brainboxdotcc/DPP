@@ -51,7 +51,7 @@ struct encryption_stats {
 
 class encryptor {
 public:
-	void set_key_ratchet(std::unique_ptr<IKeyRatchet> keyRatchet);
+	void set_key_ratchet(std::unique_ptr<key_ratchet_interface> keyRatchet);
 	void set_passthrough_mode(bool passthroughMode);
 
 	bool has_key_ratchet() const { return keyRatchet_ != nullptr; }
@@ -74,7 +74,7 @@ public:
 	{
 		protocolVersionChangedCallback_ = std::move(callback);
 	}
-	ProtocolVersion get_protocol_version() const { return currentProtocolVersion_; }
+	protocol_version get_protocol_version() const { return currentProtocolVersion_; }
 
 	enum result_code : uint8_t {
 		rc_success,
@@ -88,14 +88,14 @@ private:
 	using cryptor_and_nonce = std::pair<std::shared_ptr<cipher_interface>, truncated_sync_nonce>;
 	cryptor_and_nonce get_next_cryptor_and_nonce();
 
-	void update_current_protocol_version(ProtocolVersion version);
+	void update_current_protocol_version(protocol_version version);
 
 	std::atomic_bool passthroughMode_{false};
 
 	std::mutex keyGenMutex_;
-	std::unique_ptr<IKeyRatchet> keyRatchet_;
+	std::unique_ptr<key_ratchet_interface> keyRatchet_;
 	std::shared_ptr<cipher_interface> cryptor_;
-	KeyGeneration currentKeyGeneration_{0};
+	key_generation currentKeyGeneration_{0};
 	truncated_sync_nonce truncatedNonce_{0};
 
 	std::mutex frameProcessorsMutex_;
@@ -109,7 +109,7 @@ private:
 	std::array<encryption_stats, 2> stats_;
 
 	protocol_version_changed_callback protocolVersionChangedCallback_;
-	ProtocolVersion currentProtocolVersion_{MaxSupportedProtocolVersion()};
+	protocol_version currentProtocolVersion_{max_protocol_version()};
 };
 
 } // namespace dpp::dave

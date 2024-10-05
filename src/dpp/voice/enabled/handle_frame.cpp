@@ -201,7 +201,7 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 				log(ll_debug, "voice_client_dave_prepare_epoch version=" + std::to_string(protocol_version) + " for epoch " + std::to_string(epoch));
 				if (epoch == 1) {
 					mls_state->dave_session->Reset();
-					mls_state->dave_session->Init(dave::MaxSupportedProtocolVersion(), channel_id, creator->me.id.str(), mls_state->mls_key);
+					mls_state->dave_session->Init(dave::max_protocol_version(), channel_id, creator->me.id.str(), mls_state->mls_key);
 				}
 			}
 			break;
@@ -321,7 +321,7 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 						nullptr, "" /* sessionid */, [this](std::string const& s1, std::string const& s2) {
 							log(ll_debug, "Dave session constructor callback: " + s1 + ", " + s2);
 						});
-					mls_state->dave_session->Init(dave::MaxSupportedProtocolVersion(), channel_id, creator->me.id.str(), mls_state->mls_key);
+					mls_state->dave_session->Init(dave::max_protocol_version(), channel_id, creator->me.id.str(), mls_state->mls_key);
 					auto key_response = mls_state->dave_session->GetMarshalledKeyPackage();
 					key_response.insert(key_response.begin(), voice_client_dave_mls_key_package);
 					this->write(std::string_view(reinterpret_cast<const char*>(key_response.data()), key_response.size()), OP_BINARY);

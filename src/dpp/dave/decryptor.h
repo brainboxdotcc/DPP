@@ -41,7 +41,7 @@
 
 namespace dpp::dave {
 
-class IKeyRatchet;
+class key_ratchet_interface;
 
 struct decryption_stats {
 	uint64_t passthroughs = 0;
@@ -55,7 +55,7 @@ class decryptor {
 public:
 	using Duration = std::chrono::seconds;
 
-	void transition_to_key_ratchet(std::unique_ptr<IKeyRatchet> keyRatchet,
+	void transition_to_key_ratchet(std::unique_ptr<key_ratchet_interface> keyRatchet,
 				   Duration transitionExpiry = DEFAULT_TRANSITION_EXPIRY);
 	void transition_to_passthrough_mode(bool passthroughMode,
 					Duration transitionExpiry = DEFAULT_TRANSITION_EXPIRY);

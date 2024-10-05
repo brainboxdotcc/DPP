@@ -29,13 +29,13 @@
 
 namespace dpp::dave {
 
-using KeyGeneration = uint32_t;
+using key_generation = uint32_t;
 
-class IKeyRatchet {
+class key_ratchet_interface {
 public:
-	virtual ~IKeyRatchet() noexcept = default;
-	virtual encryption_key GetKey(KeyGeneration generation) noexcept = 0;
-	virtual void DeleteKey(KeyGeneration generation) noexcept = 0;
+	virtual ~key_ratchet_interface() noexcept = default;
+	virtual encryption_key get_key(key_generation generation) noexcept = 0;
+	virtual void delete_key(key_generation generation) noexcept = 0;
 };
 
 } // namespace dpp::dave

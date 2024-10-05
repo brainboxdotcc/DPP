@@ -32,7 +32,7 @@
 
 namespace dpp::dave {
 
-size_t Leb128Size(uint64_t value)
+size_t leb128_size(uint64_t value)
 {
 	int size = 0;
 	while (value >= 0x80) {
@@ -42,7 +42,7 @@ size_t Leb128Size(uint64_t value)
 	return size + 1;
 }
 
-uint64_t ReadLeb128(const uint8_t*& readAt, const uint8_t* end)
+uint64_t read_leb128(const uint8_t*& readAt, const uint8_t* end)
 {
 	uint64_t value = 0;
 	int fillBits = 0;

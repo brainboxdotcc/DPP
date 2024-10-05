@@ -38,7 +38,7 @@ namespace dpp::dave {
 
 constexpr auto kStatsInterval = 10s;
 
-void decryptor::transition_to_key_ratchet(std::unique_ptr<IKeyRatchet> keyRatchet,
+void decryptor::transition_to_key_ratchet(std::unique_ptr<key_ratchet_interface> keyRatchet,
 					  Duration transitionExpiry)
 {
 	DISCORD_LOG(LS_INFO) << "Transitioning to new key ratchet: " << keyRatchet.get()

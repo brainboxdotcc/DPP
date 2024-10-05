@@ -40,7 +40,7 @@ namespace dpp::dave {
 
 constexpr auto kStatsInterval = 10s;
 
-void encryptor::set_key_ratchet(std::unique_ptr<IKeyRatchet> keyRatchet)
+void encryptor::set_key_ratchet(std::unique_ptr<key_ratchet_interface> keyRatchet)
 {
 	std::lock_guard<std::mutex> lock(keyGenMutex_);
 	keyRatchet_ = std::move(keyRatchet);
@@ -52,7 +52,7 @@ void encryptor::set_key_ratchet(std::unique_ptr<IKeyRatchet> keyRatchet)
 void encryptor::set_passthrough_mode(bool passthroughMode)
 {
 	passthroughMode_ = passthroughMode;
-	update_current_protocol_version(passthroughMode ? 0 : MaxSupportedProtocolVersion());
+	update_current_protocol_version(passthroughMode ? 0 : max_protocol_version());
 }
 
 int encryptor::encrypt(media_type mediaType,
@@ -154,7 +154,7 @@ int encryptor::encrypt(media_type mediaType,
 		auto reconstructedFrameSize = frameProcessor->reconstruct_frame(encryptedFrame);
 		assert(reconstructedFrameSize == frameSize && "Failed to reconstruct frame");
 
-		auto nonceSize = Leb128Size(truncatedNonce);
+		auto nonceSize = leb128_size(truncatedNonce);
 
 		auto truncatedNonceBuffer = make_array_view(tagBuffer.end(), nonceSize);
 		auto unencryptedRangesBuffer =
@@ -164,7 +164,7 @@ int encryptor::encrypt(media_type mediaType,
 		auto markerBytesBuffer = make_array_view(supplementalBytesBuffer.end(), sizeof(magic_marker));
 
 		// write the nonce
-		auto res = WriteLeb128(truncatedNonce, truncatedNonceBuffer.begin());
+		auto res = write_leb128(truncatedNonce, truncatedNonceBuffer.begin());
 		if (res != nonceSize) {
 			assert(false && "Failed to write truncated nonce");
 			result = result_code::rc_encryption_failure;
@@ -292,14 +292,14 @@ encryptor::cryptor_and_nonce encryptor::get_next_cryptor_and_nonce()
 	if (generation != currentKeyGeneration_ || !cryptor_) {
 		currentKeyGeneration_ = generation;
 
-		auto encryptionKey = keyRatchet_->GetKey(currentKeyGeneration_);
+		auto encryptionKey = keyRatchet_->get_key(currentKeyGeneration_);
 		cryptor_ = create_cipher(encryptionKey);
 	}
 
 	return {cryptor_, truncatedNonce_};
 }
 
-void encryptor::update_current_protocol_version(ProtocolVersion version)
+void encryptor::update_current_protocol_version(protocol_version version)
 {
 	if (version == currentProtocolVersion_) {
 		return;

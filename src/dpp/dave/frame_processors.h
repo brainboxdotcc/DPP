@@ -59,15 +59,15 @@ public:
 
 	[[nodiscard]] array_view<const uint8_t> get_tag() const { return tag_; }
 	[[nodiscard]] truncated_sync_nonce get_truncated_nonce() const { return truncatedNonce_; }
-	array_view<const uint8_t> get_authenticated_data() const
+	[[nodiscard]] array_view<const uint8_t> get_authenticated_data() const
 	{
 		return make_array_view(authenticated_.data(), authenticated_.size());
 	}
-	array_view<const uint8_t> GetCiphertext() const
+	[[nodiscard]] array_view<const uint8_t> GetCiphertext() const
 	{
 		return make_array_view(ciphertext_.data(), ciphertext_.size());
 	}
-	array_view<uint8_t> get_plaintext() { return make_array_view(plaintext_); }
+	[[nodiscard]] array_view<uint8_t> get_plaintext() { return make_array_view(plaintext_); }
 
 private:
 	void add_authenticated_bytes(const uint8_t* data, size_t size);
@@ -88,7 +88,7 @@ public:
 	void process_frame(array_view<const uint8_t> frame, Codec codec);
 	size_t reconstruct_frame(array_view<uint8_t> frame);
 
-	Codec get_codec() const { return codec_; }
+	[[nodiscard]] Codec get_codec() const { return codec_; }
 	[[nodiscard]] const std::vector<uint8_t>& get_unencrypted_bytes() const { return unencryptedBytes_; }
 	[[nodiscard]] const std::vector<uint8_t>& get_encrypted_bytes() const { return encryptedBytes_; }
 	[[nodiscard]] std::vector<uint8_t>& get_ciphertext_bytes() { return ciphertextBytes_; }

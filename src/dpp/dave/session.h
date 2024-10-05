@@ -57,20 +57,20 @@ class Session {
 public:
 	using MLSFailureCallback = std::function<void(std::string const&, std::string const&)>;
 
-	Session(KeyPairContextType context,
-			const std::string& authSessionId,
-			MLSFailureCallback callback) noexcept;
+	Session(key_pair_context_type context,
+		const std::string& authSessionId,
+		MLSFailureCallback callback) noexcept;
 
 	~Session() noexcept;
 
-	void Init(ProtocolVersion version,
-			  uint64_t groupId,
-			  std::string const& selfUserId,
-			  std::shared_ptr<::mlspp::SignaturePrivateKey>& transientKey) noexcept;
+	void Init(protocol_version version,
+		  uint64_t groupId,
+		  std::string const& selfUserId,
+		  std::shared_ptr<::mlspp::SignaturePrivateKey>& transientKey) noexcept;
 	void Reset() noexcept;
 
-	void SetProtocolVersion(ProtocolVersion version) noexcept;
-	ProtocolVersion GetProtocolVersion() const noexcept { return protocolVersion_; }
+	void SetProtocolVersion(protocol_version version) noexcept;
+	protocol_version GetProtocolVersion() const noexcept { return protocolVersion_; }
 
 	std::vector<uint8_t> GetLastEpochAuthenticator() const noexcept;
 
@@ -88,7 +88,7 @@ public:
 
 	std::vector<uint8_t> GetMarshalledKeyPackage() noexcept;
 
-	std::unique_ptr<IKeyRatchet> GetKeyRatchet(std::string const& userId) const noexcept;
+	std::unique_ptr<key_ratchet_interface> GetKeyRatchet(std::string const& userId) const noexcept;
 
 	using PairwiseFingerprintCallback = std::function<void(std::vector<uint8_t> const&)>;
 
@@ -121,11 +121,11 @@ private:
 
 	inline static const std::string USER_MEDIA_KEY_BASE_LABEL = "Discord Secure Frames v0";
 
-	ProtocolVersion protocolVersion_;
+	protocol_version protocolVersion_;
 	std::vector<uint8_t> groupId_;
 	std::string signingKeyId_;
 	std::string selfUserId_;
-	KeyPairContextType keyPairContext_{nullptr};
+	key_pair_context_type keyPairContext_{nullptr};
 
 	std::unique_ptr<::mlspp::LeafNode> selfLeafNode_;
 	std::shared_ptr<::mlspp::SignaturePrivateKey> selfSigPrivateKey_;

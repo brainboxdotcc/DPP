@@ -28,7 +28,7 @@
 
 namespace dpp::dave::mls {
 
-::mlspp::Credential CreateUserCredential(const std::string& userId, ProtocolVersion version)
+::mlspp::Credential CreateUserCredential(const std::string& userId, protocol_version version)
 {
 	// convert the string user ID to a big endian uint64_t
 	auto userID = std::stoull(userId);
@@ -37,7 +37,7 @@ namespace dpp::dave::mls {
 	return ::mlspp::Credential::basic(credentialBytes);
 }
 
-std::string UserCredentialToString(const ::mlspp::Credential& cred, ProtocolVersion version)
+std::string UserCredentialToString(const ::mlspp::Credential& cred, protocol_version version)
 {
 	if (cred.type() != ::mlspp::CredentialType::basic) {
 		return "";

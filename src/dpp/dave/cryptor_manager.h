@@ -36,25 +36,25 @@
 
 namespace dpp::dave {
 
-KeyGeneration compute_wrapped_generation(KeyGeneration oldest, KeyGeneration generation);
+key_generation compute_wrapped_generation(key_generation oldest, key_generation generation);
 
 using big_nonce = uint64_t;
-big_nonce compute_wrapped_big_nonce(KeyGeneration generation, truncated_sync_nonce nonce);
+big_nonce compute_wrapped_big_nonce(key_generation generation, truncated_sync_nonce nonce);
 
 class aead_cipher_manager {
 public:
 	using time_point = typename clock_interface::time_point;
 
-	aead_cipher_manager(const clock_interface& clock, std::unique_ptr<IKeyRatchet> keyRatchet);
+	aead_cipher_manager(const clock_interface& clock, std::unique_ptr<key_ratchet_interface> keyRatchet);
 
 	void update_expiry(time_point expiry) { ratchetExpiry_ = expiry; }
 	bool is_expired() const { return clock_.now() > ratchetExpiry_; }
 
-	bool can_process_nonce(KeyGeneration generation, truncated_sync_nonce nonce) const;
-	KeyGeneration compute_wrapped_generation(KeyGeneration generation);
+	bool can_process_nonce(key_generation generation, truncated_sync_nonce nonce) const;
+	key_generation compute_wrapped_generation(key_generation generation);
 
-	cipher_interface* get_cipher(KeyGeneration generation);
-	void report_cipher_success(KeyGeneration generation, truncated_sync_nonce nonce);
+	cipher_interface* get_cipher(key_generation generation);
+	void report_cipher_success(key_generation generation, truncated_sync_nonce nonce);
 
 private:
 	struct expiring_cipher {
@@ -62,17 +62,17 @@ private:
 		time_point expiry;
 	};
 
-	expiring_cipher make_expiring_cipher(KeyGeneration generation);
+	expiring_cipher make_expiring_cipher(key_generation generation);
 	void cleanup_expired_ciphers();
 
 	const clock_interface& clock_;
-	std::unique_ptr<IKeyRatchet> keyRatchet_;
-	std::unordered_map<KeyGeneration, expiring_cipher> cryptors_;
+	std::unique_ptr<key_ratchet_interface> keyRatchet_;
+	std::unordered_map<key_generation, expiring_cipher> cryptors_;
 
 	time_point ratchetCreation_;
 	time_point ratchetExpiry_;
-	KeyGeneration oldestGeneration_{0};
-	KeyGeneration newestGeneration_{0};
+	key_generation oldestGeneration_{0};
+	key_generation newestGeneration_{0};
 
 	std::optional<big_nonce> newestProcessedNonce_;
 	std::deque<big_nonce> missingNonces_;

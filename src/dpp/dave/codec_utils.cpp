@@ -343,7 +343,7 @@ bool process_frame_av1(outbound_frame_processor& processor, array_view<const uin
 			// Read payload size
 			const uint8_t* start = frame.data() + i;
 			const uint8_t* ptr = start;
-			obuPayloadSize = ReadLeb128(ptr, frame.end());
+			obuPayloadSize = read_leb128(ptr, frame.end());
 			if (!ptr) {
 				// Malformed frame
 				assert(false && "Malformed AV1 frame: invalid LEB128 size");
@@ -395,8 +395,8 @@ bool process_frame_av1(outbound_frame_processor& processor, array_view<const uin
 				// The AMD AV1 encoder may pad LEB128 encoded sizes with a zero byte which the
 				// webrtc packetizer removes. To prevent the packetizer from changing the frame,
 				// we sanitize the size by re-writing it ourselves
-				uint8_t leb128Buffer[Leb128MaxSize];
-				size_t additionalBytesToWrite = WriteLeb128(obuPayloadSize, leb128Buffer);
+				uint8_t leb128Buffer[LEB128_MAX_SIZE];
+				size_t additionalBytesToWrite = write_leb128(obuPayloadSize, leb128Buffer);
 			processor.add_unencrypted_bytes(leb128Buffer, additionalBytesToWrite);
 			}
 

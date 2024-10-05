@@ -56,9 +56,9 @@ struct QueuedProposal {
 	::mlspp::bytes_ns::bytes ref;
 };
 
-Session::Session(KeyPairContextType context,
-				 const std::string& authSessionId,
-				 MLSFailureCallback callback) noexcept
+Session::Session(key_pair_context_type context,
+		 const std::string& authSessionId,
+		 MLSFailureCallback callback) noexcept
   : signingKeyId_(authSessionId)
   , keyPairContext_(context)
   , onMLSFailureCallback_(std::move(callback))
@@ -68,10 +68,10 @@ Session::Session(KeyPairContextType context,
 
 Session::~Session() noexcept = default;
 
-void Session::Init(ProtocolVersion protocolVersion,
-				   uint64_t groupId,
-				   std::string const& selfUserId,
-				   std::shared_ptr<::mlspp::SignaturePrivateKey>& transientKey) noexcept
+void Session::Init(protocol_version protocolVersion,
+		   uint64_t groupId,
+		   std::string const& selfUserId,
+		   std::shared_ptr<::mlspp::SignaturePrivateKey>& transientKey) noexcept
 {
 	Reset();
 
@@ -100,7 +100,7 @@ void Session::Reset() noexcept
 	groupId_.clear();
 }
 
-void Session::SetProtocolVersion(ProtocolVersion version) noexcept
+void Session::SetProtocolVersion(protocol_version version) noexcept
 {
 	if (version != protocolVersion_) {
 		// when we need to retain backwards compatibility
@@ -558,14 +558,14 @@ bool Session::VerifyWelcomeState(::mlspp::State const& state,
 void Session::InitLeafNode(std::string const& selfUserId,
 						   std::shared_ptr<::mlspp::SignaturePrivateKey>& transientKey) noexcept
 try {
-	auto ciphersuite = CiphersuiteForProtocolVersion(protocolVersion_);
+	auto ciphersuite = ciphersuite_for_protocol_version(protocolVersion_);
 
 	if (!transientKey) {
 		if (!signingKeyId_.empty()) {
-			transientKey = GetPersistedKeyPair(keyPairContext_, signingKeyId_, protocolVersion_);
+			transientKey = get_persisted_key_pair(keyPairContext_, signingKeyId_, protocolVersion_);
 			if (!transientKey) {
 				DISCORD_LOG(LS_ERROR) << "Did not receive MLS signature private key from "
-										 "GetPersistedKeyPair; aborting";
+										 "get_persisted_key_pair; aborting";
 				return;
 			}
 		}
@@ -584,13 +584,13 @@ try {
 
 	selfLeafNode_ =
 	  std::make_unique<::mlspp::LeafNode>(ciphersuite,
-										  selfHPKEPrivateKey_->public_key,
-										  selfSigPrivateKey_->public_key,
-										  std::move(selfCredential),
-										  LeafNodeCapabilitiesForProtocolVersion(protocolVersion_),
-										  ::mlspp::Lifetime::create_default(),
-										  LeafNodeExtensionsForProtocolVersion(protocolVersion_),
-										  *selfSigPrivateKey_);
+					      selfHPKEPrivateKey_->public_key,
+					      selfSigPrivateKey_->public_key,
+					      std::move(selfCredential),
+					      leaf_node_capabilities_for_protocol_version(protocolVersion_),
+					      ::mlspp::Lifetime::create_default(),
+					      leaf_node_extensions_for_protocol_version(protocolVersion_),
+					      *selfSigPrivateKey_);
 
 	DISCORD_LOG(LS_INFO) << "Created MLS leaf node";
 }
@@ -606,17 +606,17 @@ try {
 		return;
 	}
 
-	auto ciphersuite = CiphersuiteForProtocolVersion(protocolVersion_);
+	auto ciphersuite = ciphersuite_for_protocol_version(protocolVersion_);
 
 	joinInitPrivateKey_ =
 	  std::make_unique<::mlspp::HPKEPrivateKey>(::mlspp::HPKEPrivateKey::generate(ciphersuite));
 
 	joinKeyPackage_ =
 	  std::make_unique<::mlspp::KeyPackage>(ciphersuite,
-											joinInitPrivateKey_->public_key,
-											*selfLeafNode_,
-											LeafNodeExtensionsForProtocolVersion(protocolVersion_),
-											*selfSigPrivateKey_);
+						joinInitPrivateKey_->public_key,
+						*selfLeafNode_,
+						leaf_node_extensions_for_protocol_version(protocolVersion_),
+						*selfSigPrivateKey_);
 
 	DISCORD_LOG(LS_INFO) << "Generated key package: "
 						 << ::mlspp::bytes_ns::bytes(::mlspp::tls::marshal(*joinKeyPackage_));
@@ -645,15 +645,15 @@ try {
 
 	DISCORD_LOG(LS_INFO) << "Creating a pending MLS group";
 
-	auto ciphersuite = CiphersuiteForProtocolVersion(protocolVersion_);
+	auto ciphersuite = ciphersuite_for_protocol_version(protocolVersion_);
 
 	pendingGroupState_ = std::make_unique<::mlspp::State>(
-	  groupId_,
-	  ciphersuite,
-	  *selfHPKEPrivateKey_,
-	  *selfSigPrivateKey_,
-	  *selfLeafNode_,
-	  GroupExtensionsForProtocolVersion(protocolVersion_, *externalSender_));
+		groupId_,
+		ciphersuite,
+		*selfHPKEPrivateKey_,
+		*selfSigPrivateKey_,
+		*selfLeafNode_,
+		group_extensions_for_protocol_version(protocolVersion_, *externalSender_));
 
 	DISCORD_LOG(LS_INFO) << "Created a pending MLS group";
 }
@@ -682,7 +682,7 @@ catch (const std::exception& e) {
 	return {};
 }
 
-std::unique_ptr<IKeyRatchet> Session::GetKeyRatchet(std::string const& userId) const noexcept
+std::unique_ptr<key_ratchet_interface> Session::GetKeyRatchet(std::string const& userId) const noexcept
 {
 	if (!currentState_) {
 		DISCORD_LOG(LS_ERROR) << "Cannot get key ratchet without an established MLS group";

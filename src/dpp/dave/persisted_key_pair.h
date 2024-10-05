@@ -44,24 +44,24 @@ struct SignaturePrivateKey;
 
 namespace dpp::dave::mls {
 
-using KeyPairContextType = const char *;
+using key_pair_context_type = const char *;
 
-std::shared_ptr<::mlspp::SignaturePrivateKey> GetPersistedKeyPair(KeyPairContextType ctx,
-																  const std::string& sessionID,
-																  ProtocolVersion version);
+std::shared_ptr<::mlspp::SignaturePrivateKey> get_persisted_key_pair(key_pair_context_type ctx,
+								     const std::string& sessionID,
+								     protocol_version version);
 
 struct KeyAndSelfSignature {
 	std::vector<uint8_t> key;
 	std::vector<uint8_t> signature;
 };
 
-KeyAndSelfSignature GetPersistedPublicKey(KeyPairContextType ctx,
-										  const std::string& sessionID,
-										  SignatureVersion version);
+KeyAndSelfSignature get_persisted_public_key(key_pair_context_type ctx,
+					     const std::string& sessionID,
+					     signature_version version);
 
-bool DeletePersistedKeyPair(KeyPairContextType ctx,
-							const std::string& sessionID,
-							SignatureVersion version);
+bool delete_persisted_key_pair(key_pair_context_type ctx,
+			       const std::string& sessionID,
+			       signature_version version);
 
 constexpr unsigned KeyVersion = 1;
 
@@ -73,8 +73,8 @@ namespace dpp {
 	namespace dave {
 		namespace mls {
 			namespace detail {
-				std::shared_ptr<::mlspp::SignaturePrivateKey> GetGenericPersistedKeyPair(KeyPairContextType ctx, const std::string& id, ::mlspp::CipherSuite suite);
-				bool DeleteGenericPersistedKeyPair(KeyPairContextType ctx, const std::string& id);
+				std::shared_ptr<::mlspp::SignaturePrivateKey> get_generic_persisted_key_pair(key_pair_context_type ctx, const std::string& id, ::mlspp::CipherSuite suite);
+				bool delete_generic_persisted_key_pair(key_pair_context_type ctx, const std::string& id);
 			}
 		}
 	}

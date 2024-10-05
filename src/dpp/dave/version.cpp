@@ -26,9 +26,9 @@
 
 namespace dpp::dave {
 
-constexpr ProtocolVersion CurrentDaveProtocolVersion = 1;
+constexpr protocol_version CurrentDaveProtocolVersion = 1;
 
-ProtocolVersion MaxSupportedProtocolVersion()
+protocol_version max_protocol_version()
 {
 	return CurrentDaveProtocolVersion;
 }
