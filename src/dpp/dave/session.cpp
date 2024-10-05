@@ -68,30 +68,30 @@ session::session(key_pair_context_type context,
 
 session::~session() noexcept = default;
 
-void session::Init(protocol_version protocolVersion,
+void session::init(protocol_version version,
 		   uint64_t groupId,
 		   std::string const& selfUserId,
 		   std::shared_ptr<::mlspp::SignaturePrivateKey>& transientKey) noexcept
 {
-	Reset();
+	reset();
 
 	selfUserId_ = selfUserId;
 
-	DISCORD_LOG(LS_INFO) << "Initializing MLS session with protocol version " << protocolVersion
-						 << " and group ID " << groupId;
-	protocolVersion_ = protocolVersion;
+	DISCORD_LOG(LS_INFO) << "Initializing MLS session with protocol version " << version
+			     << " and group ID " << groupId;
+	protocolVersion_ = version;
 	groupId_ = std::move(BigEndianBytesFrom(groupId).as_vec());
 
-	InitLeafNode(selfUserId, transientKey);
+	init_leaf_node(selfUserId, transientKey);
 
-	CreatePendingGroup();
+	create_pending_group();
 }
 
-void session::Reset() noexcept
+void session::reset() noexcept
 {
 	DISCORD_LOG(LS_INFO) << "Resetting MLS session";
 
-	ClearPendingState();
+	clear_pending_state();
 
 	currentState_.reset();
 	outboundCachedGroupState_.reset();
@@ -100,7 +100,7 @@ void session::Reset() noexcept
 	groupId_.clear();
 }
 
-void session::SetProtocolVersion(protocol_version version) noexcept
+void session::set_protocol_version(protocol_version version) noexcept
 {
 	if (version != protocolVersion_) {
 		// when we need to retain backwards compatibility
@@ -110,7 +110,7 @@ void session::SetProtocolVersion(protocol_version version) noexcept
 	}
 }
 
-std::vector<uint8_t> session::GetLastEpochAuthenticator() const noexcept
+std::vector<uint8_t> session::get_last_epoch_authenticator() const noexcept
 {
 	if (!currentState_) {
 		DISCORD_LOG(LS_ERROR) << "Cannot get epoch authenticator without an established MLS group";
@@ -120,7 +120,7 @@ std::vector<uint8_t> session::GetLastEpochAuthenticator() const noexcept
 	return std::move(currentState_->epoch_authenticator().as_vec());
 }
 
-void session::SetExternalSender(const std::vector<uint8_t>& marshalledExternalSender) noexcept
+void session::set_external_sender(const std::vector<uint8_t> &externalSenderPackage) noexcept
 try {
 	if (currentState_) {
 		DISCORD_LOG(LS_ERROR) << "Cannot set external sender after joining/creating an MLS group";
@@ -129,13 +129,13 @@ try {
 
 	DISCORD_LOG(LS_INFO) << "Unmarshalling MLS external sender";
 
-	DISCORD_LOG(LS_INFO) << "Sender: " << ::mlspp::bytes_ns::bytes(marshalledExternalSender);
+	DISCORD_LOG(LS_INFO) << "Sender: " << ::mlspp::bytes_ns::bytes(externalSenderPackage);
 
 	externalSender_ = std::make_unique<::mlspp::ExternalSender>(
-	  ::mlspp::tls::get<::mlspp::ExternalSender>(marshalledExternalSender));
+	  ::mlspp::tls::get<::mlspp::ExternalSender>(externalSenderPackage));
 
 	if (!groupId_.empty()) {
-		CreatePendingGroup();
+		create_pending_group();
 	}
 }
 catch (const std::exception& e) {
@@ -144,7 +144,7 @@ catch (const std::exception& e) {
 	return;
 }
 
-std::optional<std::vector<uint8_t>> session::ProcessProposals(
+std::optional<std::vector<uint8_t>> session::process_proposals(
   std::vector<uint8_t> proposals,
   std::set<std::string> const& recognizedUserIDs) noexcept
 try {
@@ -208,9 +208,9 @@ try {
 		for (const auto& proposalMessage : messages) {
 			auto validatedMessage = stateWithProposals_->unwrap(proposalMessage);
 
-			if (!ValidateProposalMessage(validatedMessage.authenticated_content(),
-										 *stateWithProposals_,
-										 recognizedUserIDs)) {
+			if (!validate_proposal_message(validatedMessage.authenticated_content(),
+						       *stateWithProposals_,
+						       recognizedUserIDs)) {
 				return std::nullopt;
 			}
 
@@ -267,8 +267,8 @@ catch (const std::exception& e) {
 	return std::nullopt;
 }
 
-bool session::IsRecognizedUserID(const ::mlspp::Credential& cred,
-				 std::set<std::string> const& recognizedUserIDs) const
+bool session::is_recognized_user_id(const ::mlspp::Credential& cred,
+				    std::set<std::string> const& recognizedUserIDs) const
 {
 	std::string uid = UserCredentialToString(cred, protocolVersion_);
 	if (uid.empty()) {
@@ -284,9 +284,9 @@ bool session::IsRecognizedUserID(const ::mlspp::Credential& cred,
 	return true;
 }
 
-bool session::ValidateProposalMessage(::mlspp::AuthenticatedContent const& message,
-				      ::mlspp::State const& targetState,
-				      std::set<std::string> const& recognizedUserIDs) const
+bool session::validate_proposal_message(::mlspp::AuthenticatedContent const& message,
+					::mlspp::State const& targetState,
+					std::set<std::string> const& recognizedUserIDs) const
 {
 	if (message.wire_format != ::mlspp::WireFormat::mls_public_message) {
 		DISCORD_LOG(LS_ERROR) << "MLS proposal message must be PublicMessage";
@@ -302,7 +302,7 @@ bool session::ValidateProposalMessage(::mlspp::AuthenticatedContent const& messa
 	}
 
 	if (message.content.content_type() != ::mlspp::ContentType::proposal) {
-		DISCORD_LOG(LS_ERROR) << "ProcessProposals called with non-proposal message";
+		DISCORD_LOG(LS_ERROR) << "process_proposals called with non-proposal message";
 		TRACK_MLS_ERROR("Unexpected message type");
 		return false;
 	}
@@ -318,7 +318,7 @@ bool session::ValidateProposalMessage(::mlspp::AuthenticatedContent const& messa
 	case ::mlspp::ProposalType::add: {
 		const auto& credential =
 		  ::mlspp::tls::var::get<::mlspp::Add>(proposal.content).key_package.leaf_node.credential;
-		if (!IsRecognizedUserID(credential, recognizedUserIDs)) {
+		if (!is_recognized_user_id(credential, recognizedUserIDs)) {
 			DISCORD_LOG(LS_ERROR) << "MLS add proposal must be for recognized user";
 			TRACK_MLS_ERROR("Unexpected user ID in add proposal");
 			return false;
@@ -337,7 +337,7 @@ bool session::ValidateProposalMessage(::mlspp::AuthenticatedContent const& messa
 	return true;
 }
 
-bool session::CanProcessCommit(const ::mlspp::MLSMessage& commit) noexcept
+bool session::can_process_commit(const ::mlspp::MLSMessage& commit) noexcept
 {
 	if (!stateWithProposals_) {
 		return false;
@@ -351,15 +351,15 @@ bool session::CanProcessCommit(const ::mlspp::MLSMessage& commit) noexcept
 	return true;
 }
 
-roster_variant session::ProcessCommit(std::vector<uint8_t> commit) noexcept
+roster_variant session::process_commit(std::vector<uint8_t> commit) noexcept
 try {
 	DISCORD_LOG(LS_INFO) << "Processing commit";
 	DISCORD_LOG(LS_INFO) << "Commit: " << ::mlspp::bytes_ns::bytes(commit);
 
 	auto commitMessage = ::mlspp::tls::get<::mlspp::MLSMessage>(commit);
 
-	if (!CanProcessCommit(commitMessage)) {
-		DISCORD_LOG(LS_ERROR) << "ProcessCommit called with unprocessable MLS commit";
+	if (!can_process_commit(commitMessage)) {
+		DISCORD_LOG(LS_ERROR) << "process_commit called with unprocessable MLS commit";
 		return ignored_t{};
 	}
 
@@ -380,12 +380,12 @@ try {
 	DISCORD_LOG(LS_INFO) << "Successfully processed MLS commit, updating state; our leaf index is "
 						 << newState->index().val << "; current epoch is " << newState->epoch();
 
-	roster_map ret = ReplaceState(std::make_unique<::mlspp::State>(std::move(*newState)));
+	roster_map ret = replace_state(std::make_unique<::mlspp::State>(std::move(*newState)));
 
 	// reset the outbound cached group since we handled the commit for this epoch
 	outboundCachedGroupState_.reset();
 
-	ClearPendingState();
+	clear_pending_state();
 
 	return ret;
 }
@@ -395,11 +395,11 @@ catch (const std::exception& e) {
 	return failed_t{};
 }
 
-std::optional<roster_map> session::ProcessWelcome(
+std::optional<roster_map> session::process_welcome(
   std::vector<uint8_t> welcome,
   std::set<std::string> const& recognizedUserIDs) noexcept
 try {
-	if (!HasCryptographicStateForWelcome()) {
+	if (!has_cryptographic_state_for_welcome()) {
 		DISCORD_LOG(LS_ERROR) << "Missing local crypto state necessary to process MLS welcome";
 		return std::nullopt;
 	}
@@ -430,7 +430,7 @@ try {
 	  std::map<::mlspp::bytes_ns::bytes, ::mlspp::bytes_ns::bytes>());
 
 	// perform application-level verification of the new state
-	if (!VerifyWelcomeState(*newState, recognizedUserIDs)) {
+	if (!verify_welcome_state(*newState, recognizedUserIDs)) {
 		DISCORD_LOG(LS_ERROR) << "Group received in MLS welcome is not valid";
 
 		return std::nullopt;
@@ -440,10 +440,10 @@ try {
 						 << newState->index().val << "; current epoch is " << newState->epoch();
 
 	// make the verified state our new (and only) state
-	roster_map ret = ReplaceState(std::move(newState));
+	roster_map ret = replace_state(std::move(newState));
 
 	// clear out any pending state for creating/joining a group
-	ClearPendingState();
+	clear_pending_state();
 
 	return ret;
 }
@@ -453,7 +453,7 @@ catch (const std::exception& e) {
 	return std::nullopt;
 }
 
-roster_map session::ReplaceState(std::unique_ptr<::mlspp::State>&& state)
+roster_map session::replace_state(std::unique_ptr<::mlspp::State>&& state)
 {
 	roster_map newRoster;
 	for (const ::mlspp::LeafNode& node : state->roster()) {
@@ -505,13 +505,13 @@ roster_map session::ReplaceState(std::unique_ptr<::mlspp::State>&& state)
 	return changeMap;
 }
 
-bool session::HasCryptographicStateForWelcome() const noexcept
+bool session::has_cryptographic_state_for_welcome() const noexcept
 {
 	return joinKeyPackage_ && joinInitPrivateKey_ && selfSigPrivateKey_ && selfHPKEPrivateKey_;
 }
 
-bool session::VerifyWelcomeState(::mlspp::State const& state,
-				 std::set<std::string> const& recognizedUserIDs) const
+bool session::verify_welcome_state(::mlspp::State const& state,
+				   std::set<std::string> const& recognizedUserIDs) const
 {
 	if (!externalSender_) {
 		DISCORD_LOG(LS_ERROR) << "Cannot verify MLS welcome without an external sender";
@@ -545,7 +545,7 @@ bool session::VerifyWelcomeState(::mlspp::State const& state,
 	// before all in-flight proposals were handled.
 
 	for (const auto& leaf : state.roster()) {
-		if (!IsRecognizedUserID(leaf.credential, recognizedUserIDs)) {
+		if (!is_recognized_user_id(leaf.credential, recognizedUserIDs)) {
 			DISCORD_LOG(LS_ERROR) << "MLS welcome lists unrecognized user ID";
 			// TRACK_MLS_ERROR("Welcome message lists unrecognized user ID");
 			// return false;
@@ -555,8 +555,8 @@ bool session::VerifyWelcomeState(::mlspp::State const& state,
 	return true;
 }
 
-void session::InitLeafNode(std::string const& selfUserId,
-			   std::shared_ptr<::mlspp::SignaturePrivateKey>& transientKey) noexcept
+void session::init_leaf_node(std::string const& selfUserId,
+			     std::shared_ptr<::mlspp::SignaturePrivateKey>& transientKey) noexcept
 try {
 	auto ciphersuite = ciphersuite_for_protocol_version(protocolVersion_);
 
@@ -599,7 +599,7 @@ catch (const std::exception& e) {
 	TRACK_MLS_ERROR(e.what());
 }
 
-void session::ResetJoinKeyPackage() noexcept
+void session::reset_join_key_package() noexcept
 try {
 	if (!selfLeafNode_) {
 		DISCORD_LOG(LS_ERROR) << "Cannot initialize join key package without a leaf node";
@@ -626,7 +626,7 @@ catch (const std::exception& e) {
 	TRACK_MLS_ERROR(e.what());
 }
 
-void session::CreatePendingGroup() noexcept
+void session::create_pending_group() noexcept
 try {
 	if (groupId_.empty()) {
 		DISCORD_LOG(LS_ERROR) << "Cannot create MLS group without a group ID";
@@ -663,11 +663,11 @@ catch (const std::exception& e) {
 	return;
 }
 
-std::vector<uint8_t> session::GetMarshalledKeyPackage() noexcept
+std::vector<uint8_t> session::get_marshalled_key_package() noexcept
 try {
 	// key packages are not meant to be re-used
 	// so every time the client asks for a key package we create a new one
-	ResetJoinKeyPackage();
+	reset_join_key_package();
 
 	if (!joinKeyPackage_) {
 		DISCORD_LOG(LS_ERROR) << "Cannot marshal an uninitialized key package";
@@ -682,7 +682,7 @@ catch (const std::exception& e) {
 	return {};
 }
 
-std::unique_ptr<key_ratchet_interface> session::GetKeyRatchet(std::string const& userId) const noexcept
+std::unique_ptr<key_ratchet_interface> session::get_key_ratchet(std::string const& userId) const noexcept
 {
 	if (!currentState_) {
 		DISCORD_LOG(LS_ERROR) << "Cannot get key ratchet without an established MLS group";
@@ -703,9 +703,9 @@ std::unique_ptr<key_ratchet_interface> session::GetKeyRatchet(std::string const&
 	return std::make_unique<MlsKeyRatchet>(currentState_->cipher_suite(), std::move(baseSecret));
 }
 
-void session::GetPairwiseFingerprint(uint16_t version,
-				     std::string const& userId,
-				     PairwiseFingerprintCallback callback) const noexcept
+void session::get_pairwise_fingerprint(uint16_t version,
+				       std::string const& userId,
+				       pairwise_fingerprint_callback callback) const noexcept
 try {
 	if (!currentState_ || !selfSigPrivateKey_) {
 		throw std::invalid_argument("No established MLS group");
@@ -787,7 +787,7 @@ catch (const std::exception& e) {
 	callback({});
 }
 
-void session::ClearPendingState()
+void session::clear_pending_state()
 {
 	pendingGroupState_.reset();
 	pendingGroupCommit_.reset();

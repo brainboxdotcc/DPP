@@ -114,8 +114,8 @@ void discord_voice_client::get_user_privacy_code(const dpp::snowflake user, priv
 		callback("");
 		return;
 	}
-	mls_state->dave_session->GetPairwiseFingerprint(0x0000, user.str(), [callback](const std::vector<uint8_t>& data) {
-		std::cout << dpp::utility::debug_dump((uint8_t*)data.data(), data.size());
+	mls_state->dave_session->get_pairwise_fingerprint(0x0000, user.str(), [callback](const std::vector<uint8_t> &data) {
+		std::cout << dpp::utility::debug_dump((uint8_t *) data.data(), data.size());
 		callback(data.size() == 64 ? generate_displayable_code(data, 45) : "");
 	});
 #else

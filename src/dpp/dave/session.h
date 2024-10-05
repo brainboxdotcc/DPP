@@ -63,61 +63,61 @@ public:
 
 	~session() noexcept;
 
-	void Init(protocol_version version,
+	void init(protocol_version version,
 		  uint64_t groupId,
 		  std::string const& selfUserId,
 		  std::shared_ptr<::mlspp::SignaturePrivateKey>& transientKey) noexcept;
-	void Reset() noexcept;
+	void reset() noexcept;
 
-	void SetProtocolVersion(protocol_version version) noexcept;
-	protocol_version GetProtocolVersion() const noexcept { return protocolVersion_; }
+	void set_protocol_version(protocol_version version) noexcept;
+	[[nodiscard]] protocol_version get_protocol_version() const noexcept { return protocolVersion_; }
 
-	std::vector<uint8_t> GetLastEpochAuthenticator() const noexcept;
+	[[nodiscard]] std::vector<uint8_t> get_last_epoch_authenticator() const noexcept;
 
-	void SetExternalSender(std::vector<uint8_t> const& externalSenderPackage) noexcept;
+	void set_external_sender(std::vector<uint8_t> const& externalSenderPackage) noexcept;
 
-	std::optional<std::vector<uint8_t>> ProcessProposals(
+	std::optional<std::vector<uint8_t>> process_proposals(
 	  std::vector<uint8_t> proposals,
 	  std::set<std::string> const& recognizedUserIDs) noexcept;
 
-	roster_variant ProcessCommit(std::vector<uint8_t> commit) noexcept;
+	roster_variant process_commit(std::vector<uint8_t> commit) noexcept;
 
-	std::optional<roster_map> ProcessWelcome(
+	std::optional<roster_map> process_welcome(
 	  std::vector<uint8_t> welcome,
 	  std::set<std::string> const& recognizedUserIDs) noexcept;
 
-	std::vector<uint8_t> GetMarshalledKeyPackage() noexcept;
+	std::vector<uint8_t> get_marshalled_key_package() noexcept;
 
-	std::unique_ptr<key_ratchet_interface> GetKeyRatchet(std::string const& userId) const noexcept;
+	[[nodiscard]] std::unique_ptr<key_ratchet_interface> get_key_ratchet(std::string const& userId) const noexcept;
 
-	using PairwiseFingerprintCallback = std::function<void(std::vector<uint8_t> const&)>;
+	using pairwise_fingerprint_callback = std::function<void(std::vector<uint8_t> const&)>;
 
-	void GetPairwiseFingerprint(uint16_t version,
-								std::string const& userId,
-								PairwiseFingerprintCallback callback) const noexcept;
+	void get_pairwise_fingerprint(uint16_t version,
+				      std::string const& userId,
+				      pairwise_fingerprint_callback callback) const noexcept;
 
 private:
-	void InitLeafNode(std::string const& selfUserId,
-					  std::shared_ptr<::mlspp::SignaturePrivateKey>& transientKey) noexcept;
-	void ResetJoinKeyPackage() noexcept;
+	void init_leaf_node(std::string const& selfUserId,
+			    std::shared_ptr<::mlspp::SignaturePrivateKey>& transientKey) noexcept;
+	void reset_join_key_package() noexcept;
 
-	void CreatePendingGroup() noexcept;
+	void create_pending_group() noexcept;
 
-	bool HasCryptographicStateForWelcome() const noexcept;
+	bool has_cryptographic_state_for_welcome() const noexcept;
 
-	bool IsRecognizedUserID(const ::mlspp::Credential& cred,
-							std::set<std::string> const& recognizedUserIDs) const;
-	bool ValidateProposalMessage(::mlspp::AuthenticatedContent const& message,
-								 ::mlspp::State const& targetState,
-								 std::set<std::string> const& recognizedUserIDs) const;
-	bool VerifyWelcomeState(::mlspp::State const& state,
-							std::set<std::string> const& recognizedUserIDs) const;
+	bool is_recognized_user_id(const ::mlspp::Credential& cred,
+				   std::set<std::string> const& recognizedUserIDs) const;
+	bool validate_proposal_message(::mlspp::AuthenticatedContent const& message,
+				       ::mlspp::State const& targetState,
+				       std::set<std::string> const& recognizedUserIDs) const;
+	bool verify_welcome_state(::mlspp::State const& state,
+				  std::set<std::string> const& recognizedUserIDs) const;
 
-	bool CanProcessCommit(const ::mlspp::MLSMessage& commit) noexcept;
+	bool can_process_commit(const ::mlspp::MLSMessage& commit) noexcept;
 
-	roster_map ReplaceState(std::unique_ptr<::mlspp::State>&& state);
+	roster_map replace_state(std::unique_ptr<::mlspp::State>&& state);
 
-	void ClearPendingState();
+	void clear_pending_state();
 
 	inline static const std::string USER_MEDIA_KEY_BASE_LABEL = "Discord Secure Frames v0";
 
