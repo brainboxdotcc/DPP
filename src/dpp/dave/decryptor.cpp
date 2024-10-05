@@ -64,7 +64,7 @@ void Decryptor::TransitionToPassthroughMode(bool passthroughMode, Duration trans
     }
 }
 
-size_t Decryptor::Decrypt(MediaType mediaType,
+size_t Decryptor::decrypt(MediaType mediaType,
 			  array_view<const uint8_t> encryptedFrame,
 			  array_view<uint8_t> frame)
 {

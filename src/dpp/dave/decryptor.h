@@ -60,7 +60,7 @@ public:
     void TransitionToPassthroughMode(bool passthroughMode,
                                      Duration transitionExpiry = kDefaultTransitionDuration);
 
-    size_t Decrypt(MediaType mediaType,
+    size_t decrypt(MediaType mediaType,
 		   array_view<const uint8_t> encryptedFrame,
 		   array_view<uint8_t> frame);
 

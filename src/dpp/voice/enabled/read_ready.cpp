@@ -26,7 +26,7 @@
 #include <dpp/discordvoiceclient.h>
 
 #include <opus/opus.h>
-#include "../../dave/encryptor.h"
+#include "../../dave/decryptor.h"
 
 #include "enabled.h"
 
@@ -141,6 +141,25 @@ void discord_voice_client::read_ready()
 		/* Skip previously encrypted RTP Header Extension */
 		opus_packet += ext_len;
 		opus_packet_len -= ext_len;
+	}
+
+	/**
+	 * If DAVE is enabled, use the user's ratchet to decrypt the OPUS audio data
+	 */
+	if (is_end_to_end_encrypted()) {
+		auto decryptor = mls_state->decryptors.find(vp.vr->user_id);
+		if (decryptor != mls_state->decryptors.end()) {
+			std::vector<uint8_t> frame(opus_packet_len * 2);
+			size_t enc_len = decryptor->second->decrypt(
+				dave::MediaType::Audio,
+				dave::make_array_view<const uint8_t>(opus_packet, opus_packet_len),
+				dave::make_array_view(frame)
+			);
+			if (enc_len > 0) {
+				opus_packet = frame.data();
+				opus_packet_len = enc_len;
+			}
+		}
 	}
 
 	/*
