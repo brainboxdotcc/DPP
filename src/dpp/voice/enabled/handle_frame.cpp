@@ -309,11 +309,13 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 				/* Reset packet_nonce */
 				packet_nonce = 1;
 
+				bool ready_now = false;
+
 				if (dave_version != dave_version_none) {
 					if (j["d"]["dave_protocol_version"] != static_cast<uint32_t>(dave_version)) {
 						log(ll_error, "We requested DAVE E2EE but didn't receive it from the server, downgrading...");
 						dave_version = dave_version_none;
-						send_silence(20);
+						ready_now = true;
 					}
 
 					mls_state = std::make_unique<dave_state>();
@@ -326,7 +328,9 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 					key_response.insert(key_response.begin(), voice_client_dave_mls_key_package);
 					this->write(std::string_view(reinterpret_cast<const char*>(key_response.data()), key_response.size()), OP_BINARY);
 
-				} else {
+				}
+
+				if (ready_now) {
 					/* This is needed to start voice receiving and make sure that the start of sending isn't cut off */
 					send_silence(20);
 					/* Fire on_voice_ready */
