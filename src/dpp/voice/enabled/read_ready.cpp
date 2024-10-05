@@ -146,10 +146,10 @@ void discord_voice_client::read_ready()
 	/**
 	 * If DAVE is enabled, use the user's ratchet to decrypt the OPUS audio data
 	 */
+	std::vector<uint8_t> frame(opus_packet_len * 2);
 	if (is_end_to_end_encrypted()) {
 		auto decryptor = mls_state->decryptors.find(vp.vr->user_id);
 		if (decryptor != mls_state->decryptors.end()) {
-			std::vector<uint8_t> frame(opus_packet_len * 2);
 			size_t enc_len = decryptor->second->decrypt(
 				dave::MediaType::Audio,
 				dave::make_array_view<const uint8_t>(opus_packet, opus_packet_len),
