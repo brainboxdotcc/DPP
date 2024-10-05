@@ -622,6 +622,15 @@ discord_client& discord_client::connect_voice(snowflake guild_id, snowflake chan
 			return *this;
 		}
 	}
+
+	if (enable_dave) {
+		/* Disable dave if we're connecting to stage channel */
+		auto *c = find_channel(channel_id);
+		if (c != nullptr && c->is_stage_channel()) {
+			enable_dave = false;
+		}
+	}
+
 	connecting_voice_channels[guild_id] = std::make_unique<voiceconn>(this, channel_id, enable_dave);
 	/* Once sent, this expects two events (in any order) on the websocket:
 	* VOICE_SERVER_UPDATE and VOICE_STATUS_UPDATE
