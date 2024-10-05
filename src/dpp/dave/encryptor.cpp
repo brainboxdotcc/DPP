@@ -92,13 +92,13 @@ int encryptor::encrypt(media_type mediaType,
     auto frameProcessor = get_or_create_frame_processor();
     ScopeExit cleanup([&] { return_frame_processor(std::move(frameProcessor)); });
 
-    frameProcessor->ProcessFrame(frame, codec);
+	frameProcessor->process_frame(frame, codec);
 
-    const auto& unencryptedBytes = frameProcessor->GetUnencryptedBytes();
-    const auto& encryptedBytes = frameProcessor->GetEncryptedBytes();
-    auto& ciphertextBytes = frameProcessor->GetCiphertextBytes();
+    const auto& unencryptedBytes = frameProcessor->get_unencrypted_bytes();
+    const auto& encryptedBytes = frameProcessor->get_encrypted_bytes();
+    auto& ciphertextBytes = frameProcessor->get_ciphertext_bytes();
 
-    const auto& unencryptedRanges = frameProcessor->GetUnencryptedRanges();
+    const auto& unencryptedRanges = frameProcessor->get_unencrypted_ranges();
     auto unencryptedRangesSize = UnencryptedRangesSize(unencryptedRanges);
 
     auto additionalData = make_array_view(unencryptedBytes.data(), unencryptedBytes.size());
@@ -151,7 +151,7 @@ int encryptor::encrypt(media_type mediaType,
             break;
         }
 
-        auto reconstructedFrameSize = frameProcessor->ReconstructFrame(encryptedFrame);
+        auto reconstructedFrameSize = frameProcessor->reconstruct_frame(encryptedFrame);
         assert(reconstructedFrameSize == frameSize && "Failed to reconstruct frame");
 
         auto nonceSize = Leb128Size(truncatedNonce);
@@ -262,18 +262,18 @@ Codec encryptor::codec_for_ssrc(uint32_t ssrc)
     }
 }
 
-std::unique_ptr<OutboundFrameProcessor> encryptor::get_or_create_frame_processor()
+std::unique_ptr<outbound_frame_processor> encryptor::get_or_create_frame_processor()
 {
     std::lock_guard<std::mutex> lock(frameProcessorsMutex_);
     if (frameProcessors_.empty()) {
-        return std::make_unique<OutboundFrameProcessor>();
+        return std::make_unique<outbound_frame_processor>();
     }
     auto frameProcessor = std::move(frameProcessors_.back());
     frameProcessors_.pop_back();
     return frameProcessor;
 }
 
-void encryptor::return_frame_processor(std::unique_ptr<OutboundFrameProcessor> frameProcessor)
+void encryptor::return_frame_processor(std::unique_ptr<outbound_frame_processor> frameProcessor)
 {
     std::lock_guard<std::mutex> lock(frameProcessorsMutex_);
     frameProcessors_.push_back(std::move(frameProcessor));

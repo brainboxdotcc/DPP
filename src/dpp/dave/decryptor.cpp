@@ -95,11 +95,11 @@ size_t decryptor::decrypt(media_type mediaType,
     // Process the incoming frame
     // This will check whether it looks like a valid encrypted frame
     // and if so it will parse it into its different components
-    localFrame->ParseFrame(encryptedFrame);
+	localFrame->parse_frame(encryptedFrame);
 
     // If the frame is not encrypted and we can pass it through, do it
     bool canUsePassThrough = allowPassThroughUntil_ > start;
-    if (!localFrame->IsEncrypted() && canUsePassThrough) {
+    if (!localFrame->is_encrypted() && canUsePassThrough) {
         if (encryptedFrame.data() != frame.data()) {
 		std::memcpy(frame.data(), encryptedFrame.data(), encryptedFrame.size());
         }
@@ -108,7 +108,7 @@ size_t decryptor::decrypt(media_type mediaType,
     }
 
     // If the frame is not encrypted and we can't pass it through, fail
-    if (!localFrame->IsEncrypted()) {
+    if (!localFrame->is_encrypted()) {
         DISCORD_LOG(LS_INFO)
           << "decrypt failed, frame is not encrypted and pass through is disabled";
         stats_[mediaType].decrypt_failure++;
@@ -129,7 +129,7 @@ size_t decryptor::decrypt(media_type mediaType,
     size_t bytesWritten = 0;
     if (success) {
         stats_[mediaType].decrypt_success++;
-        bytesWritten = localFrame->ReconstructFrame(frame);
+        bytesWritten = localFrame->reconstruct_frame(frame);
     }
     else {
         stats_[mediaType].decrypt_failure++;
@@ -160,12 +160,12 @@ bool decryptor::decrypt_impl(aead_cipher_manager& cipher_manager,
 			     inbound_frame_processor& encryptedFrame,
 			     array_view<uint8_t> frame)
 {
-    auto tag = encryptedFrame.GetTag();
-    auto truncatedNonce = encryptedFrame.GetTruncatedNonce();
+    auto tag = encryptedFrame.get_tag();
+    auto truncatedNonce = encryptedFrame.get_truncated_nonce();
 
-    auto authenticatedData = encryptedFrame.GetAuthenticatedData();
+    auto authenticatedData = encryptedFrame.get_authenticated_data();
     auto ciphertext = encryptedFrame.GetCiphertext();
-    auto plaintext = encryptedFrame.GetPlaintext();
+    auto plaintext = encryptedFrame.get_plaintext();
 
     // expand the truncated nonce to the full sized one needed for decryption
     auto nonceBuffer = std::array<uint8_t, AES_GCM_128_NONCE_BYTES>();

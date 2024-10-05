@@ -137,13 +137,13 @@ std::optional<IndexStartCodeSizePair> FindNextH26XNaluIndex(const uint8_t* buffe
     return std::nullopt;
 }
 
-bool process_frame_opus(OutboundFrameProcessor& processor, array_view<const uint8_t> frame)
+bool process_frame_opus(outbound_frame_processor& processor, array_view<const uint8_t> frame)
 {
-    processor.AddEncryptedBytes(frame.data(), frame.size());
+	processor.add_encrypted_bytes(frame.data(), frame.size());
     return true;
 }
 
-bool process_frame_vp8(OutboundFrameProcessor& processor, array_view<const uint8_t> frame)
+bool process_frame_vp8(outbound_frame_processor& processor, array_view<const uint8_t> frame)
 {
     constexpr uint8_t kVP8KeyFrameUnencryptedBytes = 10;
     constexpr uint8_t kVP8DeltaFrameUnencryptedBytes = 1;
@@ -169,21 +169,21 @@ bool process_frame_vp8(OutboundFrameProcessor& processor, array_view<const uint8
         unencryptedHeaderBytes = kVP8DeltaFrameUnencryptedBytes;
     }
 
-    processor.AddUnencryptedBytes(frame.data(), unencryptedHeaderBytes);
-    processor.AddEncryptedBytes(frame.data() + unencryptedHeaderBytes,
-                                frame.size() - unencryptedHeaderBytes);
+	processor.add_unencrypted_bytes(frame.data(), unencryptedHeaderBytes);
+	processor.add_encrypted_bytes(frame.data() + unencryptedHeaderBytes,
+				      frame.size() - unencryptedHeaderBytes);
     return true;
 }
 
-bool process_frame_vp9(OutboundFrameProcessor& processor, array_view<const uint8_t> frame)
+bool process_frame_vp9(outbound_frame_processor& processor, array_view<const uint8_t> frame)
 {
     // payload descriptor is unencrypted in each packet
     // and includes all information the depacketizer needs
-    processor.AddEncryptedBytes(frame.data(), frame.size());
+	processor.add_encrypted_bytes(frame.data(), frame.size());
     return true;
 }
 
-bool process_frame_h264(OutboundFrameProcessor& processor, array_view<const uint8_t> frame)
+bool process_frame_h264(outbound_frame_processor& processor, array_view<const uint8_t> frame)
 {
     // minimize the amount of unencrypted header data for H264 depending on the NAL unit
     // type from WebRTC, see: src/modules/rtp_rtcp/source/rtp_format_h264.cc
@@ -215,7 +215,7 @@ bool process_frame_h264(OutboundFrameProcessor& processor, array_view<const uint
 
         // Because WebRTC will convert them all start codes to 4-byte on the receiver side
         // always write a long start code and then the NAL unit
-        processor.AddUnencryptedBytes(kH26XNaluLongStartCode, sizeof(kH26XNaluLongStartCode));
+	    processor.add_unencrypted_bytes(kH26XNaluLongStartCode, sizeof(kH26XNaluLongStartCode));
 
         auto nextNaluIndexPair =
           FindNextH26XNaluIndex(frame.data(), frame.size(), nalUnitStartIndex);
@@ -230,16 +230,16 @@ bool process_frame_h264(OutboundFrameProcessor& processor, array_view<const uint
             auto nalUnitPPSBytes = BytesCoveringH264PPS(frame.data() + nalUnitPayloadStart,
                                                         frame.size() - nalUnitPayloadStart);
 
-            processor.AddUnencryptedBytes(frame.data() + nalUnitStartIndex,
-                                          kH264NalUnitHeaderSize + nalUnitPPSBytes);
-            processor.AddEncryptedBytes(
-              frame.data() + nalUnitStartIndex + kH264NalUnitHeaderSize + nalUnitPPSBytes,
-              nextNaluStart - nalUnitStartIndex - kH264NalUnitHeaderSize - nalUnitPPSBytes);
+		processor.add_unencrypted_bytes(frame.data() + nalUnitStartIndex,
+						kH264NalUnitHeaderSize + nalUnitPPSBytes);
+		processor.add_encrypted_bytes(
+			frame.data() + nalUnitStartIndex + kH264NalUnitHeaderSize + nalUnitPPSBytes,
+			nextNaluStart - nalUnitStartIndex - kH264NalUnitHeaderSize - nalUnitPPSBytes);
         }
         else {
             // copy the whole NAL unit
-            processor.AddUnencryptedBytes(frame.data() + nalUnitStartIndex,
-                                          nextNaluStart - nalUnitStartIndex);
+		processor.add_unencrypted_bytes(frame.data() + nalUnitStartIndex,
+						nextNaluStart - nalUnitStartIndex);
         }
 
         naluIndexPair = nextNaluIndexPair;
@@ -248,7 +248,7 @@ bool process_frame_h264(OutboundFrameProcessor& processor, array_view<const uint
     return true;
 }
 
-bool process_frame_h265(OutboundFrameProcessor& processor, array_view<const uint8_t> frame)
+bool process_frame_h265(outbound_frame_processor& processor, array_view<const uint8_t> frame)
 {
     // minimize the amount of unencrypted header data for H265 depending on the NAL unit
     // type from WebRTC, see: src/modules/rtp_rtcp/source/rtp_format_h265.cc
@@ -279,7 +279,7 @@ bool process_frame_h265(OutboundFrameProcessor& processor, array_view<const uint
 
         // Because WebRTC will convert them all start codes to 4-byte on the receiver side
         // always write a long start code and then the NAL unit
-        processor.AddUnencryptedBytes(kH26XNaluLongStartCode, sizeof(kH26XNaluLongStartCode));
+	    processor.add_unencrypted_bytes(kH26XNaluLongStartCode, sizeof(kH26XNaluLongStartCode));
 
         auto nextNaluIndexPair =
           FindNextH26XNaluIndex(frame.data(), frame.size(), nalUnitStartIndex);
@@ -289,14 +289,14 @@ bool process_frame_h265(OutboundFrameProcessor& processor, array_view<const uint
 
         if (nalType < kH265NalTypeVclCutoff) {
             // found a VCL NAL, encrypt the payload only
-            processor.AddUnencryptedBytes(frame.data() + nalUnitStartIndex, kH265NalUnitHeaderSize);
-            processor.AddEncryptedBytes(frame.data() + nalUnitStartIndex + kH265NalUnitHeaderSize,
-                                        nextNaluStart - nalUnitStartIndex - kH265NalUnitHeaderSize);
+		processor.add_unencrypted_bytes(frame.data() + nalUnitStartIndex, kH265NalUnitHeaderSize);
+		processor.add_encrypted_bytes(frame.data() + nalUnitStartIndex + kH265NalUnitHeaderSize,
+					      nextNaluStart - nalUnitStartIndex - kH265NalUnitHeaderSize);
         }
         else {
             // copy the whole NAL unit
-            processor.AddUnencryptedBytes(frame.data() + nalUnitStartIndex,
-                                          nextNaluStart - nalUnitStartIndex);
+		processor.add_unencrypted_bytes(frame.data() + nalUnitStartIndex,
+						nextNaluStart - nalUnitStartIndex);
         }
 
         naluIndexPair = nextNaluIndexPair;
@@ -305,7 +305,7 @@ bool process_frame_h265(OutboundFrameProcessor& processor, array_view<const uint
     return true;
 }
 
-bool process_frame_av1(OutboundFrameProcessor& processor, array_view<const uint8_t> frame)
+bool process_frame_av1(outbound_frame_processor& processor, array_view<const uint8_t> frame)
 {
     constexpr uint8_t kAv1ObuHeaderHasExtensionMask = 0b0'0000'100;
     constexpr uint8_t kAv1ObuHeaderHasSizeMask = 0b0'0000'010;
@@ -382,11 +382,11 @@ bool process_frame_av1(OutboundFrameProcessor& processor, array_view<const uint8
             }
 
             // write the OBU header unencrypted
-            processor.AddUnencryptedBytes(&obuHeader, sizeof(obuHeader));
+		processor.add_unencrypted_bytes(&obuHeader, sizeof(obuHeader));
             if (obuHasExtension) {
                 // write the extension byte unencrypted
-                processor.AddUnencryptedBytes(frame.data() + obuHeaderIndex + sizeof(obuHeader),
-                                              kObuExtensionSizeBytes);
+		    processor.add_unencrypted_bytes(frame.data() + obuHeaderIndex + sizeof(obuHeader),
+						    kObuExtensionSizeBytes);
             }
 
             // write the OBU payload size unencrypted if it was present and we didn't rewrite
@@ -397,20 +397,20 @@ bool process_frame_av1(OutboundFrameProcessor& processor, array_view<const uint8
                 // we sanitize the size by re-writing it ourselves
                 uint8_t leb128Buffer[Leb128MaxSize];
                 size_t additionalBytesToWrite = WriteLeb128(obuPayloadSize, leb128Buffer);
-                processor.AddUnencryptedBytes(leb128Buffer, additionalBytesToWrite);
+		    processor.add_unencrypted_bytes(leb128Buffer, additionalBytesToWrite);
             }
 
             // add the OBU payload, encrypted
-            processor.AddEncryptedBytes(frame.data() + obuPayloadIndex, obuPayloadSize);
+		processor.add_encrypted_bytes(frame.data() + obuPayloadIndex, obuPayloadSize);
         }
     }
 
     return true;
 }
 
-bool validate_encrypted_frame(OutboundFrameProcessor& processor, array_view<uint8_t> frame)
+bool validate_encrypted_frame(outbound_frame_processor& processor, array_view<uint8_t> frame)
 {
-    auto codec = processor.GetCodec();
+    auto codec = processor.get_codec();
     if (codec != Codec::H264 && codec != Codec::H265) {
         return true;
     }
@@ -418,7 +418,7 @@ bool validate_encrypted_frame(OutboundFrameProcessor& processor, array_view<uint
     static_assert(kH26XNaluShortStartSequenceSize - 1 >= 0, "Padding will overflow!");
     constexpr size_t Padding = kH26XNaluShortStartSequenceSize - 1;
 
-    const auto& unencryptedRanges = processor.GetUnencryptedRanges();
+    const auto& unencryptedRanges = processor.get_unencrypted_ranges();
 
     // H264 and H265 ciphertexts cannot contain a 3 or 4 byte start code {0, 0, 1}
     // otherwise the packetizer gets confused

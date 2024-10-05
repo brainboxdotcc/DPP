@@ -183,7 +183,7 @@ size_t Reconstruct(Ranges ranges,
     return frameIndex;
 }
 
-void inbound_frame_processor::Clear()
+void inbound_frame_processor::clear()
 {
     isEncrypted_ = false;
     originalSize_ = 0;
@@ -194,9 +194,9 @@ void inbound_frame_processor::Clear()
     plaintext_.clear();
 }
 
-void inbound_frame_processor::ParseFrame(array_view<const uint8_t> frame)
+void inbound_frame_processor::parse_frame(array_view<const uint8_t> frame)
 {
-    Clear();
+    clear();
 
     constexpr auto MinSupplementalBytesSize =
 	    AES_GCM_127_TRUNCATED_TAG_BYTES + sizeof(supplemental_bytes_size) + sizeof(magic_marker);
@@ -275,16 +275,16 @@ void inbound_frame_processor::ParseFrame(array_view<const uint8_t> frame)
         auto encryptedBytes = range.offset - frameIndex;
         if (encryptedBytes > 0) {
             assert(frameIndex + encryptedBytes <= frame.size());
-            AddCiphertextBytes(frame.data() + frameIndex, encryptedBytes);
+		add_ciphertext_bytes(frame.data() + frameIndex, encryptedBytes);
         }
 
         assert(range.offset + range.size <= frame.size());
-        AddAuthenticatedBytes(frame.data() + range.offset, range.size);
+	    add_authenticated_bytes(frame.data() + range.offset, range.size);
         frameIndex = range.offset + range.size;
     }
     auto actualFrameSize = frame.size() - supplementalBytesSize;
     if (frameIndex < actualFrameSize) {
-        AddCiphertextBytes(frame.data() + frameIndex, actualFrameSize - frameIndex);
+	    add_ciphertext_bytes(frame.data() + frameIndex, actualFrameSize - frameIndex);
     }
 
     // Make sure the plaintext buffer is the same size as the ciphertext buffer
@@ -295,7 +295,7 @@ void inbound_frame_processor::ParseFrame(array_view<const uint8_t> frame)
     isEncrypted_ = true;
 }
 
-size_t inbound_frame_processor::ReconstructFrame(array_view<uint8_t> frame) const
+size_t inbound_frame_processor::reconstruct_frame(array_view<uint8_t> frame) const
 {
     if (!isEncrypted_) {
         DISCORD_LOG(LS_WARNING) << "Cannot reconstruct an invalid encrypted frame";
@@ -310,19 +310,19 @@ size_t inbound_frame_processor::ReconstructFrame(array_view<uint8_t> frame) cons
     return Reconstruct(unencryptedRanges_, authenticated_, plaintext_, frame);
 }
 
-void inbound_frame_processor::AddAuthenticatedBytes(const uint8_t* data, size_t size)
+void inbound_frame_processor::add_authenticated_bytes(const uint8_t* data, size_t size)
 {
     authenticated_.resize(authenticated_.size() + size);
     memcpy(authenticated_.data() + authenticated_.size() - size, data, size);
 }
 
-void inbound_frame_processor::AddCiphertextBytes(const uint8_t* data, size_t size)
+void inbound_frame_processor::add_ciphertext_bytes(const uint8_t* data, size_t size)
 {
     ciphertext_.resize(ciphertext_.size() + size);
     memcpy(ciphertext_.data() + ciphertext_.size() - size, data, size);
 }
 
-void OutboundFrameProcessor::Reset()
+void outbound_frame_processor::reset()
 {
     codec_ = Codec::Unknown;
     frameIndex_ = 0;
@@ -331,9 +331,9 @@ void OutboundFrameProcessor::Reset()
     unencryptedRanges_.clear();
 }
 
-void OutboundFrameProcessor::ProcessFrame(array_view<const uint8_t> frame, Codec codec)
+void outbound_frame_processor::process_frame(array_view<const uint8_t> frame, Codec codec)
 {
-    Reset();
+	reset();
 
     codec_ = codec;
     unencryptedBytes_.reserve(frame.size());
@@ -369,13 +369,13 @@ void OutboundFrameProcessor::ProcessFrame(array_view<const uint8_t> frame, Codec
         unencryptedBytes_.clear();
         encryptedBytes_.clear();
         unencryptedRanges_.clear();
-        AddEncryptedBytes(frame.data(), frame.size());
+	    add_encrypted_bytes(frame.data(), frame.size());
     }
 
     ciphertextBytes_.resize(encryptedBytes_.size());
 }
 
-size_t OutboundFrameProcessor::ReconstructFrame(array_view<uint8_t> frame)
+size_t outbound_frame_processor::reconstruct_frame(array_view<uint8_t> frame)
 {
     if (unencryptedBytes_.size() + ciphertextBytes_.size() > frame.size()) {
         DISCORD_LOG(LS_WARNING) << "Frame is too small to contain the encrypted frame";
@@ -385,7 +385,7 @@ size_t OutboundFrameProcessor::ReconstructFrame(array_view<uint8_t> frame)
     return Reconstruct(unencryptedRanges_, unencryptedBytes_, ciphertextBytes_, frame);
 }
 
-void OutboundFrameProcessor::AddUnencryptedBytes(const uint8_t* bytes, size_t size)
+void outbound_frame_processor::add_unencrypted_bytes(const uint8_t* bytes, size_t size)
 {
     if (!unencryptedRanges_.empty() &&
         unencryptedRanges_.back().offset + unencryptedRanges_.back().size == frameIndex_) {
@@ -402,7 +402,7 @@ void OutboundFrameProcessor::AddUnencryptedBytes(const uint8_t* bytes, size_t si
     frameIndex_ += size;
 }
 
-void OutboundFrameProcessor::AddEncryptedBytes(const uint8_t* bytes, size_t size)
+void outbound_frame_processor::add_encrypted_bytes(const uint8_t* bytes, size_t size)
 {
     encryptedBytes_.resize(encryptedBytes_.size() + size);
     memcpy(encryptedBytes_.data() + encryptedBytes_.size() - size, bytes, size);

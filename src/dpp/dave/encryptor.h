@@ -82,8 +82,8 @@ public:
     };
 
 private:
-    std::unique_ptr<OutboundFrameProcessor> get_or_create_frame_processor();
-    void return_frame_processor(std::unique_ptr<OutboundFrameProcessor> frameProcessor);
+    std::unique_ptr<outbound_frame_processor> get_or_create_frame_processor();
+    void return_frame_processor(std::unique_ptr<outbound_frame_processor> frameProcessor);
 
     using cryptor_and_nonce = std::pair<std::shared_ptr<cipher_interface>, truncated_sync_nonce>;
     cryptor_and_nonce get_next_cryptor_and_nonce();
@@ -99,7 +99,7 @@ private:
     truncated_sync_nonce truncatedNonce_{0};
 
     std::mutex frameProcessorsMutex_;
-    std::vector<std::unique_ptr<OutboundFrameProcessor>> frameProcessors_;
+    std::vector<std::unique_ptr<outbound_frame_processor>> frameProcessors_;
 
     using SsrcCodecPair = std::pair<uint32_t, Codec>;
     std::vector<SsrcCodecPair> ssrcCodecPairs_;

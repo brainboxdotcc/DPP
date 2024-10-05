@@ -50,16 +50,16 @@ bool ValidateUnencryptedRanges(const Ranges& unencryptedRanges, size_t frameSize
 
 class inbound_frame_processor {
 public:
-    void ParseFrame(array_view<const uint8_t> frame);
-    size_t ReconstructFrame(array_view<uint8_t> frame) const;
+    void parse_frame(array_view<const uint8_t> frame);
+    [[nodiscard]] size_t reconstruct_frame(array_view<uint8_t> frame) const;
 
-    bool IsEncrypted() const { return isEncrypted_; }
-    size_t Size() const { return originalSize_; }
-    void Clear();
+    [[nodiscard]] bool is_encrypted() const { return isEncrypted_; }
+    [[nodiscard]] size_t size() const { return originalSize_; }
+    void clear();
 
-    array_view<const uint8_t> GetTag() const { return tag_; }
-    truncated_sync_nonce GetTruncatedNonce() const { return truncatedNonce_; }
-    array_view<const uint8_t> GetAuthenticatedData() const
+    [[nodiscard]] array_view<const uint8_t> get_tag() const { return tag_; }
+    [[nodiscard]] truncated_sync_nonce get_truncated_nonce() const { return truncatedNonce_; }
+    array_view<const uint8_t> get_authenticated_data() const
     {
         return make_array_view(authenticated_.data(), authenticated_.size());
     }
@@ -67,11 +67,11 @@ public:
     {
         return make_array_view(ciphertext_.data(), ciphertext_.size());
     }
-    array_view<uint8_t> GetPlaintext() { return make_array_view(plaintext_); }
+    array_view<uint8_t> get_plaintext() { return make_array_view(plaintext_); }
 
 private:
-    void AddAuthenticatedBytes(const uint8_t* data, size_t size);
-    void AddCiphertextBytes(const uint8_t* data, size_t size);
+    void add_authenticated_bytes(const uint8_t* data, size_t size);
+    void add_ciphertext_bytes(const uint8_t* data, size_t size);
 
     bool isEncrypted_{false};
     size_t originalSize_{0};
@@ -83,20 +83,20 @@ private:
     std::vector<uint8_t> plaintext_;
 };
 
-class OutboundFrameProcessor {
+class outbound_frame_processor {
 public:
-    void ProcessFrame(array_view<const uint8_t> frame, Codec codec);
-    size_t ReconstructFrame(array_view<uint8_t> frame);
+    void process_frame(array_view<const uint8_t> frame, Codec codec);
+    size_t reconstruct_frame(array_view<uint8_t> frame);
 
-    Codec GetCodec() const { return codec_; }
-    const std::vector<uint8_t>& GetUnencryptedBytes() const { return unencryptedBytes_; }
-    const std::vector<uint8_t>& GetEncryptedBytes() const { return encryptedBytes_; }
-    std::vector<uint8_t>& GetCiphertextBytes() { return ciphertextBytes_; }
-    const Ranges& GetUnencryptedRanges() const { return unencryptedRanges_; }
+    Codec get_codec() const { return codec_; }
+    [[nodiscard]] const std::vector<uint8_t>& get_unencrypted_bytes() const { return unencryptedBytes_; }
+    [[nodiscard]] const std::vector<uint8_t>& get_encrypted_bytes() const { return encryptedBytes_; }
+    [[nodiscard]] std::vector<uint8_t>& get_ciphertext_bytes() { return ciphertextBytes_; }
+    [[nodiscard]] const Ranges& get_unencrypted_ranges() const { return unencryptedRanges_; }
 
-    void Reset();
-    void AddUnencryptedBytes(const uint8_t* bytes, size_t size);
-    void AddEncryptedBytes(const uint8_t* bytes, size_t size);
+    void reset();
+    void add_unencrypted_bytes(const uint8_t* bytes, size_t size);
+    void add_encrypted_bytes(const uint8_t* bytes, size_t size);
 
 private:
     Codec codec_{Codec::Unknown};
