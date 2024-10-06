@@ -354,7 +354,8 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 					}
 					if (mls_state->dave_session == nullptr) {
 						mls_state->dave_session = std::make_unique<dave::mls::session>(
-							nullptr, "" /* sessionid */, [this](std::string const& s1, std::string const& s2) {
+							*creator,
+							nullptr, "", [this](std::string const& s1, std::string const& s2) {
 								log(ll_debug, "Dave session constructor callback: " + s1 + ", " + s2);
 							});
 						mls_state->dave_session->init(dave::max_protocol_version(), channel_id, creator->me.id.str(), mls_state->mls_key);

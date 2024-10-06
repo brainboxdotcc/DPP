@@ -29,13 +29,10 @@
 #include <cstring>
 #include <iostream>
 
-#include <hpke/random.h>
-#include <hpke/signature.h>
 #include <mls/crypto.h>
 #include <mls/messages.h>
 #include <mls/state.h>
-
-#include "logger.h"
+#include <dpp/cluster.h>
 #include "mls_key_ratchet.h"
 #include "user_credential.h"
 #include "parameters.h"
@@ -56,29 +53,21 @@ struct queued_proposal {
 	::mlspp::bytes_ns::bytes ref;
 };
 
-session::session(key_pair_context_type context,
-		 const std::string& authSessionId,
-		 mls_failure_callback callback) noexcept
-  : signingKeyId_(authSessionId)
-  , keyPairContext_(context)
-  , onMLSFailureCallback_(std::move(callback))
+session::session(dpp::cluster& cluster, key_pair_context_type context, const std::string& authSessionId, mls_failure_callback callback) noexcept
+  : signingKeyId_(authSessionId), keyPairContext_(context), onMLSFailureCallback_(std::move(callback)), creator(cluster)
 {
-	DISCORD_LOG(LS_INFO) << "Creating a new MLS session";
+	creator.log(dpp::ll_debug, "Creating a new MLS session");
 }
 
 session::~session() noexcept = default;
 
-void session::init(protocol_version version,
-		   uint64_t groupId,
-		   std::string const& selfUserId,
-		   std::shared_ptr<::mlspp::SignaturePrivateKey>& transientKey) noexcept
+void session::init(protocol_version version, uint64_t groupId, std::string const& selfUserId, std::shared_ptr<::mlspp::SignaturePrivateKey>& transientKey) noexcept
 {
 	reset();
 
 	selfUserId_ = selfUserId;
 
-	DISCORD_LOG(LS_INFO) << "Initializing MLS session with protocol version " << version
-			     << " and group ID " << groupId;
+	creator.log(dpp::ll_debug, "Initializing MLS session with protocol version " + std::to_string(version) + " and group ID " + std::to_string(groupId));
 	protocolVersion_ = version;
 	groupId_ = std::move(big_endian_bytes_from(groupId).as_vec());
 
@@ -89,7 +78,7 @@ void session::init(protocol_version version,
 
 void session::reset() noexcept
 {
-	DISCORD_LOG(LS_INFO) << "Resetting MLS session";
+	creator.log(dpp::ll_debug, "Resetting MLS session");
 
 	clear_pending_state();
 
@@ -113,7 +102,7 @@ void session::set_protocol_version(protocol_version version) noexcept
 std::vector<uint8_t> session::get_last_epoch_authenticator() const noexcept
 {
 	if (!currentState_) {
-		DISCORD_LOG(LS_ERROR) << "Cannot get epoch authenticator without an established MLS group";
+		creator.log(dpp::ll_debug, "Cannot get epoch authenticator without an established MLS group");
 		return {};
 	}
 
@@ -123,13 +112,11 @@ std::vector<uint8_t> session::get_last_epoch_authenticator() const noexcept
 void session::set_external_sender(const std::vector<uint8_t> &externalSenderPackage) noexcept
 try {
 	if (currentState_) {
-		DISCORD_LOG(LS_ERROR) << "Cannot set external sender after joining/creating an MLS group";
+		creator.log(dpp::ll_warning, "Cannot set external sender after joining/creating an MLS group");
 		return;
 	}
 
-	DISCORD_LOG(LS_INFO) << "Unmarshalling MLS external sender";
-
-	DISCORD_LOG(LS_INFO) << "Sender: " << ::mlspp::bytes_ns::bytes(externalSenderPackage);
+	creator.log(dpp::ll_debug, "Unmarshalling MLS external sender");
 
 	externalSender_ = std::make_unique<::mlspp::ExternalSender>(
 	  ::mlspp::tls::get<::mlspp::ExternalSender>(externalSenderPackage));
@@ -139,7 +126,7 @@ try {
 	}
 }
 catch (const std::exception& e) {
-	DISCORD_LOG(LS_ERROR) << "Failed to unmarshal external sender: " << e.what();
+	creator.log(dpp::ll_error, "Failed to unmarshal external sender: " + std::string(e.what()));
 	TRACK_MLS_ERROR(e.what());
 	return;
 }
@@ -149,8 +136,7 @@ std::optional<std::vector<uint8_t>> session::process_proposals(
   std::set<std::string> const& recognizedUserIDs) noexcept
 try {
 	if (!pendingGroupState_ && !currentState_) {
-		DISCORD_LOG(LS_ERROR)
-		  << "Cannot process proposals without any pending or established MLS group state";
+		creator.log(dpp::ll_debug, "Cannot process proposals without any pending or established MLS group state");
 		return std::nullopt;
 	}
 
@@ -159,16 +145,16 @@ try {
 		  pendingGroupState_ ? *pendingGroupState_ : *currentState_);
 	}
 
-	DISCORD_LOG(LS_INFO) << "Processing MLS proposals message of " << proposals.size() << " bytes";
-
-	DISCORD_LOG(LS_INFO) << "Proposals: " << ::mlspp::bytes_ns::bytes(proposals);
+	creator.log(dpp::ll_debug, "Processing MLS proposals message of " + std::to_string(proposals.size()) + " bytes");
 
 	::mlspp::tls::istream inStream(proposals);
 
 	bool isRevoke = false;
 	inStream >> isRevoke;
 
-	DISCORD_LOG(LS_INFO) << "Revoking: " << isRevoke;
+	if (isRevoke) {
+		creator.log(dpp::ll_trace, "Revoking from proposals");
+	}
 
 	const auto suite = stateWithProposals_->cipher_suite();
 
@@ -187,7 +173,7 @@ try {
 			}
 
 			if (!found) {
-				DISCORD_LOG(LS_ERROR) << "Cannot revoke unrecognized proposal ref";
+				creator.log(dpp::ll_debug, "Cannot revoke unrecognized proposal ref");
 				TRACK_MLS_ERROR("Unrecognized proposal revocation");
 				return std::nullopt;
 			}
@@ -239,8 +225,7 @@ try {
 	auto [commitMessage, welcomeMessage, newState] =
 	  stateWithProposals_->commit(commitSecret, commitOpts, {});
 
-	DISCORD_LOG(LS_INFO)
-	  << "Prepared commit/welcome/next state for MLS group from received proposals";
+	creator.log(dpp::ll_debug, "Prepared commit/welcome/next state for MLS group from received proposals");
 
 	// combine the commit and welcome messages into a single buffer
 	auto outStream = ::mlspp::tls::ostream();
@@ -257,58 +242,53 @@ try {
 	// cache the outbound state in case we're the winning sender
 	outboundCachedGroupState_ = std::make_unique<::mlspp::State>(std::move(newState));
 
-	DISCORD_LOG(LS_INFO) << "Output: " << ::mlspp::bytes_ns::bytes(outStream.bytes());
 
 	return outStream.bytes();
 }
 catch (const std::exception& e) {
-	DISCORD_LOG(LS_ERROR) << "Failed to parse MLS proposals: " << e.what();
+	creator.log(dpp::ll_warning, "Failed to parse MLS proposals: " + std::string(e.what()));
 	TRACK_MLS_ERROR(e.what());
 	return std::nullopt;
 }
 
-bool session::is_recognized_user_id(const ::mlspp::Credential& cred,
-				    std::set<std::string> const& recognizedUserIDs) const
+bool session::is_recognized_user_id(const ::mlspp::Credential& cred, std::set<std::string> const& recognizedUserIDs) const
 {
 	std::string uid = user_credential_to_string(cred, protocolVersion_);
 	if (uid.empty()) {
-		DISCORD_LOG(LS_ERROR) << "Attempted to verify credential of unexpected type";
+		creator.log(dpp::ll_warning, "Attempted to verify credential of unexpected type");
 		return false;
 	}
 
 	if (recognizedUserIDs.find(uid) == recognizedUserIDs.end()) {
-		DISCORD_LOG(LS_ERROR) << "Attempted to verify credential for unrecognized user ID: " << uid;
+		creator.log(dpp::ll_warning, "Attempted to verify credential for unrecognized user ID: " + uid);
 		return false;
 	}
 
 	return true;
 }
 
-bool session::validate_proposal_message(::mlspp::AuthenticatedContent const& message,
-					::mlspp::State const& targetState,
-					std::set<std::string> const& recognizedUserIDs) const
+bool session::validate_proposal_message(::mlspp::AuthenticatedContent const& message, ::mlspp::State const& targetState, std::set<std::string> const& recognizedUserIDs) const
 {
 	if (message.wire_format != ::mlspp::WireFormat::mls_public_message) {
-		DISCORD_LOG(LS_ERROR) << "MLS proposal message must be PublicMessage";
+		creator.log(dpp::ll_warning, "MLS proposal message must be PublicMessage");
 		TRACK_MLS_ERROR("Invalid proposal wire format");
 		return false;
 	}
 
 	if (message.content.epoch != targetState.epoch()) {
-		DISCORD_LOG(LS_ERROR) << "MLS proposal message must be for current epoch ("
-							  << message.content.epoch << " != " << targetState.epoch() << ")";
+		creator.log(dpp::ll_warning, "MLS proposal message must be for current epoch (" + std::to_string(message.content.epoch) + " != " + std::to_string(targetState.epoch()) + ")");
 		TRACK_MLS_ERROR("Proposal epoch mismatch");
 		return false;
 	}
 
 	if (message.content.content_type() != ::mlspp::ContentType::proposal) {
-		DISCORD_LOG(LS_ERROR) << "process_proposals called with non-proposal message";
+		creator.log(dpp::ll_warning, "process_proposals called with non-proposal message");
 		TRACK_MLS_ERROR("Unexpected message type");
 		return false;
 	}
 
 	if (message.content.sender.sender_type() != ::mlspp::SenderType::external) {
-		DISCORD_LOG(LS_ERROR) << "MLS proposal must be from external sender";
+		creator.log(dpp::ll_warning, "MLS proposal must be from external sender");
 		TRACK_MLS_ERROR("Unexpected proposal sender type");
 		return false;
 	}
@@ -319,7 +299,7 @@ bool session::validate_proposal_message(::mlspp::AuthenticatedContent const& mes
 		const auto& credential =
 		  ::mlspp::tls::var::get<::mlspp::Add>(proposal.content).key_package.leaf_node.credential;
 		if (!is_recognized_user_id(credential, recognizedUserIDs)) {
-			DISCORD_LOG(LS_ERROR) << "MLS add proposal must be for recognized user";
+			creator.log(dpp::ll_warning, "MLS proposal must be for recognised user");
 			TRACK_MLS_ERROR("Unexpected user ID in add proposal");
 			return false;
 		}
@@ -329,7 +309,7 @@ bool session::validate_proposal_message(::mlspp::AuthenticatedContent const& mes
 		// Remove proposals are always allowed (mlspp will validate that it's a recognized user)
 		break;
 	default:
-		DISCORD_LOG(LS_ERROR) << "MLS proposal must be add or remove";
+		creator.log(dpp::ll_warning, "MLS proposal must be add or remove");
 		TRACK_MLS_ERROR("Unexpected proposal type");
 		return false;
 	}
@@ -344,7 +324,7 @@ bool session::can_process_commit(const ::mlspp::MLSMessage& commit) noexcept
 	}
 
 	if (commit.group_id() != groupId_) {
-		DISCORD_LOG(LS_ERROR) << "MLS commit message was for unexpected group";
+		creator.log(dpp::ll_warning, "MLS commit message was for unexpected group");
 		return false;
 	}
 
@@ -353,13 +333,12 @@ bool session::can_process_commit(const ::mlspp::MLSMessage& commit) noexcept
 
 roster_variant session::process_commit(std::vector<uint8_t> commit) noexcept
 try {
-	DISCORD_LOG(LS_INFO) << "Processing commit";
-	DISCORD_LOG(LS_INFO) << "Commit: " << ::mlspp::bytes_ns::bytes(commit);
+	creator.log(dpp::ll_debug, "Processing commit");
 
 	auto commitMessage = ::mlspp::tls::get<::mlspp::MLSMessage>(commit);
 
 	if (!can_process_commit(commitMessage)) {
-		DISCORD_LOG(LS_ERROR) << "process_commit called with unprocessable MLS commit";
+		creator.log(dpp::ll_warning, "process_commit called with unprocessable MLS commit");
 		return ignored_t{};
 	}
 
@@ -373,12 +352,11 @@ try {
 	auto newState = stateWithProposals_->handle(commitMessage, optionalCachedState);
 
 	if (!newState) {
-		DISCORD_LOG(LS_ERROR) << "MLS commit handling did not produce a new state";
+		creator.log(dpp::ll_warning, "MLS commit handling did not produce a new state");
 		return failed_t{};
 	}
 
-	DISCORD_LOG(LS_INFO) << "Successfully processed MLS commit, updating state; our leaf index is "
-						 << newState->index().val << "; current epoch is " << newState->epoch();
+	creator.log(dpp::ll_debug, "Successfully processed MLS commit, updating state; our leaf index is " + std::to_string(newState->index().val) + "; current epoch is " + std::to_string(newState->epoch()));
 
 	roster_map ret = replace_state(std::make_unique<::mlspp::State>(std::move(*newState)));
 
@@ -390,7 +368,7 @@ try {
 	return ret;
 }
 catch (const std::exception& e) {
-	DISCORD_LOG(LS_ERROR) << "Failed to process MLS commit: " << e.what();
+	creator.log(dpp::ll_warning, "Failed to process MLS commit: " + std::string(e.what()));
 	TRACK_MLS_ERROR(e.what());
 	return failed_t{};
 }
@@ -400,21 +378,19 @@ std::optional<roster_map> session::process_welcome(
   std::set<std::string> const& recognizedUserIDs) noexcept
 try {
 	if (!has_cryptographic_state_for_welcome()) {
-		DISCORD_LOG(LS_ERROR) << "Missing local crypto state necessary to process MLS welcome";
+		creator.log(dpp::ll_warning, "Missing local crypto state necessary to process MLS welcome");
 		return std::nullopt;
 	}
 
 	if (!externalSender_) {
-		DISCORD_LOG(LS_ERROR) << "Cannot process MLS welcome without an external sender";
+		creator.log(dpp::ll_warning, "Cannot process MLS welcome without an external sender");
 		return std::nullopt;
 	}
 
 	if (currentState_) {
-		DISCORD_LOG(LS_ERROR) << "Cannot process MLS welcome after joining/creating an MLS group";
+		creator.log(dpp::ll_warning, "Cannot process MLS welcome after joining/creating an MLS group");
 		return std::nullopt;
 	}
-
-	DISCORD_LOG(LS_INFO) << "Processing welcome: " << ::mlspp::bytes_ns::bytes(welcome);
 
 	// unmarshal the incoming welcome
 	auto unmarshalledWelcome = ::mlspp::tls::get<::mlspp::Welcome>(welcome);
@@ -431,13 +407,11 @@ try {
 
 	// perform application-level verification of the new state
 	if (!verify_welcome_state(*newState, recognizedUserIDs)) {
-		DISCORD_LOG(LS_ERROR) << "Group received in MLS welcome is not valid";
-
+		creator.log(dpp::ll_warning, "Group received in MLS welcome is not valid");
 		return std::nullopt;
 	}
 
-	DISCORD_LOG(LS_INFO) << "Successfully welcomed to MLS Group, our leaf index is "
-						 << newState->index().val << "; current epoch is " << newState->epoch();
+	creator.log(dpp::ll_debug, "Successfully welcomed to MLS Group, our leaf index is " + std::to_string(newState->index().val) + "; current epoch is " + std::to_string(newState->epoch()));
 
 	// make the verified state our new (and only) state
 	roster_map ret = replace_state(std::move(newState));
@@ -448,7 +422,7 @@ try {
 	return ret;
 }
 catch (const std::exception& e) {
-	DISCORD_LOG(LS_ERROR) << "Failed to create group state from MLS welcome: " << e.what();
+	creator.log(dpp::ll_warning, "Failed to create group state from MLS welcome: " + std::string(e.what()));
 	TRACK_MLS_ERROR(e.what());
 	return std::nullopt;
 }
@@ -514,27 +488,26 @@ bool session::verify_welcome_state(::mlspp::State const& state,
 				   std::set<std::string> const& recognizedUserIDs) const
 {
 	if (!externalSender_) {
-		DISCORD_LOG(LS_ERROR) << "Cannot verify MLS welcome without an external sender";
+		creator.log(dpp::ll_warning, "Cannot verify MLS welcome without an external sender");
 		TRACK_MLS_ERROR("Missing external sender when processing Welcome");
 		return false;
 	}
 
 	auto ext = state.extensions().template find<mlspp::ExternalSendersExtension>();
 	if (!ext) {
-		DISCORD_LOG(LS_ERROR) << "MLS welcome missing external senders extension";
+		creator.log(dpp::ll_warning, "MLS welcome missing external senders extension");
 		TRACK_MLS_ERROR("Welcome message missing external sender extension");
 		return false;
 	}
 
 	if (ext->senders.size() != 1) {
-		DISCORD_LOG(LS_ERROR) << "MLS welcome lists unexpected number of external senders: "
-							  << ext->senders.size();
+		creator.log(dpp::ll_warning, "MLS welcome lists unexpected number of external senders: " + std::to_string(ext->senders.size()));
 		TRACK_MLS_ERROR("Welcome message lists unexpected external sender count");
 		return false;
 	}
 
 	if (ext->senders.front() != *externalSender_) {
-		DISCORD_LOG(LS_ERROR) << "MLS welcome lists unexpected external sender";
+		creator.log(dpp::ll_warning, "MLS welcome lists unexpected external sender");
 		TRACK_MLS_ERROR("Welcome message lists unexpected external sender");
 		return false;
 	}
@@ -546,9 +519,7 @@ bool session::verify_welcome_state(::mlspp::State const& state,
 
 	for (const auto& leaf : state.roster()) {
 		if (!is_recognized_user_id(leaf.credential, recognizedUserIDs)) {
-			DISCORD_LOG(LS_ERROR) << "MLS welcome lists unrecognized user ID";
-			// TRACK_MLS_ERROR("Welcome message lists unrecognized user ID");
-			// return false;
+			creator.log(dpp::ll_warning, "MLS welcome lists unrecognized user ID");
 		}
 	}
 
@@ -564,8 +535,7 @@ try {
 		if (!signingKeyId_.empty()) {
 			transientKey = get_persisted_key_pair(keyPairContext_, signingKeyId_, protocolVersion_);
 			if (!transientKey) {
-				DISCORD_LOG(LS_ERROR) << "Did not receive MLS signature private key from "
-										 "get_persisted_key_pair; aborting";
+				creator.log(dpp::ll_warning, "Did not receive MLS signature private key from get_persisted_key_pair; aborting");
 				return;
 			}
 		}
@@ -592,17 +562,17 @@ try {
 					      leaf_node_extensions_for_protocol_version(protocolVersion_),
 					      *selfSigPrivateKey_);
 
-	DISCORD_LOG(LS_INFO) << "Created MLS leaf node";
+	creator.log(dpp::ll_debug, "Created MLS leaf node");
 }
 catch (const std::exception& e) {
-	DISCORD_LOG(LS_INFO) << "Failed to initialize MLS leaf node: " << e.what();
+	creator.log(dpp::ll_warning, "Failed to initialize MLS leaf node: " + std::string(e.what()));
 	TRACK_MLS_ERROR(e.what());
 }
 
 void session::reset_join_key_package() noexcept
 try {
 	if (!selfLeafNode_) {
-		DISCORD_LOG(LS_ERROR) << "Cannot initialize join key package without a leaf node";
+		creator.log(dpp::ll_warning, "Cannot initialize join key package without a leaf node");
 		return;
 	}
 
@@ -617,33 +587,30 @@ try {
 						*selfLeafNode_,
 						leaf_node_extensions_for_protocol_version(protocolVersion_),
 						*selfSigPrivateKey_);
-
-	DISCORD_LOG(LS_INFO) << "Generated key package: "
-						 << ::mlspp::bytes_ns::bytes(::mlspp::tls::marshal(*joinKeyPackage_));
 }
 catch (const std::exception& e) {
-	DISCORD_LOG(LS_ERROR) << "Failed to initialize join key package: " << e.what();
+	creator.log(dpp::ll_warning, "Failed to initialize join key package: " + std::string(e.what()));
 	TRACK_MLS_ERROR(e.what());
 }
 
 void session::create_pending_group() noexcept
 try {
 	if (groupId_.empty()) {
-		DISCORD_LOG(LS_ERROR) << "Cannot create MLS group without a group ID";
+		creator.log(dpp::ll_warning, "Cannot create MLS group without a group ID");
 		return;
 	}
 
 	if (!externalSender_) {
-		DISCORD_LOG(LS_ERROR) << "Cannot create MLS group without ExternalSender";
+		creator.log(dpp::ll_warning, "Cannot create MLS group without ExternalSender");
 		return;
 	}
 
 	if (!selfLeafNode_) {
-		DISCORD_LOG(LS_ERROR) << "Cannot create MLS group without self leaf node";
+		creator.log(dpp::ll_warning, "Cannot create MLS group without self leaf node");
 		return;
 	}
 
-	DISCORD_LOG(LS_INFO) << "Creating a pending MLS group";
+	creator.log(dpp::ll_debug, "Creating a pending MLS group");
 
 	auto ciphersuite = ciphersuite_for_protocol_version(protocolVersion_);
 
@@ -655,10 +622,10 @@ try {
 		*selfLeafNode_,
 		group_extensions_for_protocol_version(protocolVersion_, *externalSender_));
 
-	DISCORD_LOG(LS_INFO) << "Created a pending MLS group";
+	creator.log(dpp::ll_debug, "Created a pending MLS group");
 }
 catch (const std::exception& e) {
-	DISCORD_LOG(LS_ERROR) << "Failed to create MLS group: " << e.what();
+	creator.log(dpp::ll_warning, "Failed to create MLS group: " + std::string(e.what()));
 	TRACK_MLS_ERROR(e.what());
 	return;
 }
@@ -670,14 +637,14 @@ try {
 	reset_join_key_package();
 
 	if (!joinKeyPackage_) {
-		DISCORD_LOG(LS_ERROR) << "Cannot marshal an uninitialized key package";
+		creator.log(dpp::ll_warning, "Cannot marshal an uninitialized key package");
 		return {};
 	}
 
 	return ::mlspp::tls::marshal(*joinKeyPackage_);
 }
 catch (const std::exception& e) {
-	DISCORD_LOG(LS_ERROR) << "Failed to marshal join key package: " << e.what();
+	creator.log(dpp::ll_warning, "Failed to marshal join key package: " + std::string(e.what()));
 	TRACK_MLS_ERROR(e.what());
 	return {};
 }
@@ -685,7 +652,7 @@ catch (const std::exception& e) {
 std::unique_ptr<key_ratchet_interface> session::get_key_ratchet(std::string const& userId) const noexcept
 {
 	if (!currentState_) {
-		DISCORD_LOG(LS_ERROR) << "Cannot get key ratchet without an established MLS group";
+		creator.log(dpp::ll_warning, "Cannot get key ratchet without an established MLS group");
 		return nullptr;
 	}
 
@@ -783,7 +750,7 @@ try {
 	}).detach();
 }
 catch (const std::exception& e) {
-	DISCORD_LOG(LS_ERROR) << "Failed to generate pairwise fingerprint: " << e.what();
+	creator.log(dpp::ll_warning, "Failed to generate pairwise fingerprint: " + std::string(e.what()));
 	callback({});
 }
 

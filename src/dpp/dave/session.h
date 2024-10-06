@@ -49,6 +49,10 @@ namespace mlspp {
 	class State;
 } // namespace mlspp
 
+namespace dpp {
+	class cluster;
+}
+
 namespace dpp::dave::mls {
 
 struct queued_proposal;
@@ -69,7 +73,7 @@ public:
 	 * @param authSessionId auth session id (set to empty string to use a transient key pair)
 	 * @param callback callback for failure
 	 */
-	session(key_pair_context_type context, const std::string& authSessionId, mls_failure_callback callback) noexcept;
+	session(dpp::cluster& cluster, key_pair_context_type context, const std::string& authSessionId, mls_failure_callback callback) noexcept;
 
 	/**
 	 * @brief Destructor
@@ -270,6 +274,11 @@ private:
 	std::list<queued_proposal> proposalQueue_;
 
 	mls_failure_callback onMLSFailureCallback_{};
+
+	/**
+	 * @brief DPP Cluster, used for logging
+	 */
+	dpp::cluster& creator;
 };
 
 } // namespace dpp::dave::mls
