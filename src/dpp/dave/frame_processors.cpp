@@ -71,7 +71,6 @@ uint8_t serialize_unencrypted_ranges(const ranges& unencryptedRanges,
 	for (const auto& range : unencryptedRanges) {
 		auto rangeSize = leb128_size(range.offset) + leb128_size(range.size);
 		if (rangeSize > static_cast<size_t>(end - writeAt)) {
-			throw dpp::length_exception("Buffer is too small to serialize unencrypted ranges");
 			break;
 		}
 

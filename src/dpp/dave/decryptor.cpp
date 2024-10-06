@@ -164,7 +164,7 @@ bool decryptor::decrypt_impl(aead_cipher_manager& cipher_manager,
 	auto truncatedNonce = encryptedFrame.get_truncated_nonce();
 
 	auto authenticatedData = encryptedFrame.get_authenticated_data();
-	auto ciphertext = encryptedFrame.GetCiphertext();
+	auto ciphertext = encryptedFrame.get_ciphertext();
 	auto plaintext = encryptedFrame.get_plaintext();
 
 	// expand the truncated nonce to the full sized one needed for decryption
