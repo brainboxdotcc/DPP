@@ -28,33 +28,83 @@
 
 namespace dpp::dave {
 
-template <typename T>
-class array_view {
+/**
+ * @brief This is a simple wrapper around a range of values, e.g. a vector or array.
+ * It is only constant if type T is constant.
+ * @tparam T Type in array or vector
+ */
+template <typename T> class array_view {
 public:
+	/**
+	 * @brief Default constructor
+	 */
 	array_view() = default;
+
+	/**
+	 * @brief Construct array_view with data and size of data
+	 * @param data data pointer to array
+	 * @param size size of array
+	 */
 	array_view(T* data, size_t size)
 	  : data_(data)
 	  , size_(size)
 	{
 	}
 
+	/**
+	 * @brief Get size of view
+	 * @return size
+	 */
 	size_t size() const { return size_; }
+
+	/**
+	 * @brief Get data of view from first element
+	 * @return data
+	 */
 	T* data() const { return data_; }
 
+	/**
+	 * @brief Get start of view, first element
+	 * @return first element
+	 */
 	T* begin() const { return data_; }
+
+	/**
+	 * @brief Get ending iterator of view, 1+last element
+	 * @return end of view
+	 */
 	T* end() const { return data_ + size_; }
 
 private:
+	/**
+	 * @brief array data
+	 */
 	T* data_ = nullptr;
+	/**
+	 * @brief Array size
+	 */
 	size_t size_ = 0;
 };
 
+/**
+ * @brief Construct new array view from C style array
+ * @tparam T array member type
+ * @param data pointer to array
+ * @param size size of array
+ * @return array_view
+ */
 template <typename T>
 inline array_view<T> make_array_view(T* data, size_t size)
 {
 	return array_view<T>(data, size);
 }
 
+/**
+ * @brief Construct new array view from vector
+ * @tparam T vector member type
+ * @param data vector
+ * @return array_view
+ */
 template <typename T>
 inline array_view<T> make_array_view(std::vector<T>& data)
 {
