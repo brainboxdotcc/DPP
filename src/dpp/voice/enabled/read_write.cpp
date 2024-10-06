@@ -32,9 +32,9 @@ dpp::socket discord_voice_client::want_write() {
 	std::lock_guard<std::mutex> lock(this->stream_mutex);
 	if (!this->paused && !outbuf.empty()) {
 		return fd;
-	} else {
-		return INVALID_SOCKET;
 	}
+	return INVALID_SOCKET;
+
 }
 
 dpp::socket discord_voice_client::want_read() {
@@ -56,12 +56,19 @@ int discord_voice_client::udp_send(const char* data, size_t length) {
 	servaddr.sin_family = AF_INET;
 	servaddr.sin_port = htons(this->port);
 	servaddr.sin_addr.s_addr = inet_addr(this->ip.c_str());
-	return (int) sendto(this->fd, data, (int)length, 0, (const sockaddr*)&servaddr, (int)sizeof(sockaddr_in));
+	return static_cast<int>(sendto(
+		this->fd,
+		data,
+		static_cast<int>(length),
+		0,
+		reinterpret_cast<const sockaddr*>(&servaddr),
+		static_cast<int>(sizeof(sockaddr_in))
+	));
 }
 
 int discord_voice_client::udp_recv(char* data, size_t max_length)
 {
-	return (int) recv(this->fd, data, (int)max_length, 0);
+	return static_cast<int>(recv(this->fd, data, static_cast<int>(max_length), 0));
 }
 
 }

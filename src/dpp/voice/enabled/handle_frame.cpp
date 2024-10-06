@@ -121,7 +121,7 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 			break;
 			default:
 				log(ll_debug, "Unexpected DAVE frame opcode");
-				log(dpp::ll_trace, "R: " + dpp::utility::debug_dump((uint8_t*)(data.data()), data.length()));
+				log(dpp::ll_trace, "R: " + dpp::utility::debug_dump(reinterpret_cast<const uint8_t*>(data.data()), data.length()));
 			break;
 		}
 
@@ -390,7 +390,7 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 				}
 				log(ll_debug, "Voice websocket established; UDP endpoint: " + ip + ":" + std::to_string(port) + " [ssrc=" + std::to_string(ssrc) + "] with " + std::to_string(modes.size()) + " modes");
 
-				dpp::socket newfd;
+				dpp::socket newfd = 0;
 				if ((newfd = ::socket(AF_INET, SOCK_DGRAM, 0)) >= 0) {
 
 					sockaddr_in servaddr{};
@@ -399,7 +399,7 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 					servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
 					servaddr.sin_port = htons(0);
 
-					if (bind(newfd, (sockaddr*)&servaddr, sizeof(servaddr)) < 0) {
+					if (bind(newfd, reinterpret_cast<sockaddr*>(&servaddr), sizeof(servaddr)) < 0) {
 						throw dpp::connection_exception(err_bind_failure, "Can't bind() client UDP socket");
 					}
 
@@ -417,7 +417,7 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 					int bound_port = 0;
 					sockaddr_in sin{};
 					socklen_t len = sizeof(sin);
-					if (getsockname(this->fd, (sockaddr *)&sin, &len) > -1) {
+					if (getsockname(this->fd, reinterpret_cast<sockaddr *>(&sin), &len) > -1) {
 						bound_port = ntohs(sin.sin_port);
 					}
 

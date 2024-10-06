@@ -24,10 +24,7 @@
 #include <dpp/exception.h>
 #include <dpp/isa_detection.h>
 #include <dpp/discordvoiceclient.h>
-
-#include <opus/opus.h>
 #include "../../dave/encryptor.h"
-
 #include "enabled.h"
 
 namespace dpp {

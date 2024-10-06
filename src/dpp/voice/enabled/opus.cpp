@@ -43,7 +43,7 @@ discord_voice_client& discord_voice_client::send_audio_raw(uint16_t* audio_data,
 	}
 
 	if (length > send_audio_raw_max_length) {
-		std::string s_audio_data((const char*)audio_data, length);
+		std::string s_audio_data(reinterpret_cast<const char*>(audio_data), length);
 
 		while (s_audio_data.length() > send_audio_raw_max_length) {
 			std::string packet(s_audio_data.substr(0, send_audio_raw_max_length));
@@ -51,23 +51,23 @@ discord_voice_client& discord_voice_client::send_audio_raw(uint16_t* audio_data,
 
 			s_audio_data.erase(s_audio_data.begin(), s_audio_data.begin() + packet_size);
 
-			send_audio_raw((uint16_t*)packet.data(), packet_size);
+			send_audio_raw(reinterpret_cast<uint16_t*>(packet.data()), packet_size);
 		}
 
 		return *this;
 	}
 
 	if (length < send_audio_raw_max_length) {
-		std::string packet((const char*)audio_data, length);
+		std::string packet(reinterpret_cast<const char*>(audio_data), length);
 		packet.resize(send_audio_raw_max_length, 0);
 
-		return send_audio_raw((uint16_t*)packet.data(), packet.size());
+		return send_audio_raw(reinterpret_cast<uint16_t*>(packet.data()), packet.size());
 	}
 
 	opus_int32 encoded_audio_max_length = (opus_int32)length;
 	std::vector<uint8_t> encoded_audio(encoded_audio_max_length);
 	size_t encoded_audio_length = encoded_audio_max_length;
-	encoded_audio_length = this->encode((uint8_t*)audio_data, length, encoded_audio.data(), encoded_audio_length);
+	encoded_audio_length = this->encode(reinterpret_cast<uint8_t*>(audio_data), length, encoded_audio.data(), encoded_audio_length);
 	send_audio_opus(encoded_audio.data(), encoded_audio_length);
 	return *this;
 }
@@ -172,7 +172,7 @@ size_t discord_voice_client::encode(uint8_t *input, size_t inDataSize, uint8_t *
 			return outDataSize;
 		}
 		for (size_t i = 0; i < (inDataSize / mEncFrameBytes); ++ i) {
-			const opus_int16* pcm = (opus_int16*)(input + i * mEncFrameBytes);
+			const opus_int16* pcm = reinterpret_cast<opus_int16*>(input + i * mEncFrameBytes);
 			int ret = opus_encode(encoder, pcm, mEncFrameSize, out, 65536);
 			if (ret > 0) {
 				int retval = opus_repacketizer_cat(repacketizer, out, ret);

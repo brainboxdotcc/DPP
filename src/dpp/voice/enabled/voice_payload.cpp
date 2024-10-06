@@ -20,30 +20,10 @@
  *
  ************************************************************************************/
 
-#ifdef _WIN32
-#include <WinSock2.h>
-	#include <WS2tcpip.h>
-	#include <io.h>
-#else
-	#include <arpa/inet.h>
-	#include <netinet/in.h>
-	#include <sys/socket.h>
-#endif
-#include <string_view>
-#include <iostream>
 #include <fstream>
-#include <algorithm>
-#include <cmath>
 #include <dpp/exception.h>
 #include <dpp/isa_detection.h>
 #include <dpp/discordvoiceclient.h>
-#include <dpp/json.h>
-
-#include <sodium.h>
-#include <opus/opus.h>
-#include "../../dave/session.h"
-#include "../../dave/decryptor.h"
-#include "../../dave/encryptor.h"
 
 namespace dpp {
 

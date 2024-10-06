@@ -35,7 +35,7 @@ namespace dpp {
 void discord_voice_client::read_ready()
 {
 	uint8_t buffer[65535];
-	int packet_size = this->udp_recv((char*)buffer, sizeof(buffer));
+	int packet_size = this->udp_recv(reinterpret_cast<char*>(buffer), sizeof(buffer));
 
 	bool receive_handler_is_empty = creator->on_voice_receive.empty() && creator->on_voice_receive_combined.empty();
 	if (packet_size <= 0 || receive_handler_is_empty) {
@@ -67,7 +67,7 @@ void discord_voice_client::read_ready()
 
 	voice_payload vp{0, // seq, populate later
 			 0, // timestamp, populate later
-			 std::make_unique<voice_receive_t>(nullptr, std::string((char*)buffer, packet_size))};
+			 std::make_unique<voice_receive_t>(nullptr, std::string(reinterpret_cast<char*>(buffer), packet_size))};
 
 	vp.vr->voice_client = this;
 
