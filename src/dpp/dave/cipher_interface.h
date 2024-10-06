@@ -31,17 +31,55 @@
 
 namespace dpp::dave {
 
+/**
+ * @brief An array_view constant array of bytes
+ */
 using const_byte_view = array_view<const uint8_t>;
+
+/**
+ * @brief An array_view non-constant array of bytes
+ */
 using byte_view = array_view<uint8_t>;
 
+/**
+ * @brief Represents a block cipher with AEAD used to encrypt or decrypt
+ * audio and video frames in the DAVE protocol.
+ */
 class cipher_interface { // NOLINT
 public:
+	/**
+	 * @brief Default destructor
+	 */
 	virtual ~cipher_interface() = default;
 
+	/**
+	 * @brief Encrypt audio or video
+	 * @param ciphertextBufferOut Output buffer of ciphertext
+	 * @param plaintextBuffer Input buffer for plaintext
+	 * @param nonceBuffer Input nonce/IV
+	 * @param additionalData Additional data for GCM AEAD encryption
+	 * @param tagBufferOut AEAD Tag for verification
+	 * @return true if encryption succeeded, false if it failed
+	 */
 	virtual bool encrypt(byte_view ciphertextBufferOut, const_byte_view plaintextBuffer, const_byte_view nonceBuffer, const_byte_view additionalData, byte_view tagBufferOut) = 0;
+
+	/**
+	 * @brief Decrypt audio or video
+	 * @param plaintextBufferOut Output buffer for plaintext
+	 * @param ciphertextBuffer Input buffer for ciphetext
+	 * @param tagBuffer AEAD Tag for verification
+	 * @param nonceBuffer Nonce/IV
+	 * @param additionalData Additional data for GCM AEAD encryption
+	 * @return true if decryption succeeded, false if it failed
+	 */
 	virtual bool decrypt(byte_view plaintextBufferOut, const_byte_view ciphertextBuffer, const_byte_view tagBuffer, const_byte_view nonceBuffer, const_byte_view additionalData) = 0;
 };
 
+/**
+ * @brief Factory function to create new cipher interface of the best supported type for DAVE
+ * @param encryptionKey encryption key
+ * @return an instance of a class derived from cipher_interface
+ */
 std::unique_ptr<cipher_interface> create_cipher(const encryption_key& encryptionKey);
 
 } // namespace dpp::dave
