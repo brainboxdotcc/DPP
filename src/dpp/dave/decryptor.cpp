@@ -39,7 +39,7 @@ namespace dpp::dave {
 constexpr auto kStatsInterval = 10s;
 
 void decryptor::transition_to_key_ratchet(std::unique_ptr<key_ratchet_interface> keyRatchet,
-					  Duration transitionExpiry)
+					  duration transitionExpiry)
 {
 	DISCORD_LOG(LS_INFO) << "Transitioning to new key ratchet: " << keyRatchet.get()
 						 << ", expiry: " << transitionExpiry.count();
@@ -52,7 +52,7 @@ void decryptor::transition_to_key_ratchet(std::unique_ptr<key_ratchet_interface>
 	}
 }
 
-void decryptor::transition_to_passthrough_mode(bool passthroughMode, Duration transitionExpiry)
+void decryptor::transition_to_passthrough_mode(bool passthroughMode, duration transitionExpiry)
 {
 	if (passthroughMode) {
 		allowPassThroughUntil_ = time_point::max();
@@ -207,7 +207,7 @@ size_t decryptor::get_max_plaintext_byte_size(media_type mediaType, size_t encry
 	return encryptedFrameSize;
 }
 
-void decryptor::update_cryptor_manager_expiry(Duration expiry)
+void decryptor::update_cryptor_manager_expiry(duration expiry)
 {
 	auto maxExpiryTime = clock_.now() + expiry;
 	for (auto& cryptorManager : cryptorManagers_) {

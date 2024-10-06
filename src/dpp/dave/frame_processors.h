@@ -33,10 +33,17 @@
 
 namespace dpp::dave {
 
+/**
+ * @brief Range inside a frame
+ */
 struct range {
 	size_t offset;
 	size_t size;
 };
+
+/**
+ * @brief Vector of ranges in a frame
+ */
 using ranges = std::vector<range>;
 
 uint8_t unencrypted_ranges_size(const ranges& unencryptedRanges);

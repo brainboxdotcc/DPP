@@ -40,54 +40,177 @@
 
 namespace dpp::dave {
 
+/**
+ * @brief Encryption stats
+ */
 struct encryption_stats {
+	/**
+	 * @brief Number of passthrough packets
+	 */
 	uint64_t passthroughs = 0;
+	/**
+	 * @brief Number of encryption successes
+	 */
 	uint64_t encrypt_success = 0;
+	/**
+	 * @brief Number of encryption failures
+	 */
 	uint64_t encrypt_failure = 0;
+	/**
+	 * @brief Duration encrypted
+	 */
 	uint64_t encrypt_duration = 0;
+	/**
+	 * @brief Number of encryption atempts
+	 */
 	uint64_t encrypt_attempts = 0;
+	/**
+	 * @brief Maximum attempts at encryption
+	 */
 	uint64_t encrypt_max_attempts = 0;
 };
 
 class encryptor {
 public:
+	/**
+	 * @brief Return codes for encryptor::encrypt
+	 */
+	enum result_code : uint8_t {
+		/**
+		 * @brief Successful encryption
+		 */
+		rc_success,
+		/**
+		 * @brief Encryption failure
+		 */
+		rc_encryption_failure,
+	};
+
+	/**
+	 * @brief Set key ratchet for encryptor, this should be the bot's ratchet.
+	 * @param keyRatchet Bot's key ratchet
+	 */
 	void set_key_ratchet(std::unique_ptr<key_ratchet_interface> keyRatchet);
+
+	/**
+	 * @brief Set encryption to passthrough mode
+	 * @param passthroughMode true to enable passthrough mode, false to disable
+	 */
 	void set_passthrough_mode(bool passthroughMode);
 
-	bool has_key_ratchet() const { return keyRatchet_ != nullptr; }
-	bool is_passthrough_mode() const { return passthroughMode_; }
+	/**
+	 * @brief True if key ratchet assigned
+	 * @return key ratchet is assigned
+	 */
+	bool has_key_ratchet() const {
+		return keyRatchet_ != nullptr;
+	}
 
+	/**
+	 * @brief True if is in passthrough mode
+	 * @return is in passthrough mode
+	 */
+	bool is_passthrough_mode() const {
+		return passthroughMode_;
+	}
+
+	/**
+	 * @brief Assign SSRC to codec
+	 * @note This is unused - all SSRC are assumed to be OPUS for bots at present.
+	 * @param ssrc RTP SSRC
+	 * @param codecType Codec type
+	 */
 	void assign_ssrc_to_codec(uint32_t ssrc, codec codecType);
+
+	/**
+	 * @brief Get codec for RTP SSRC
+	 * @note This is unused - all SSRC are assumed to be OPUS for bots at present.
+	 * @param ssrc RTP SSRC
+	 * @return always returns OPUS as bots can only send/receive audio at present
+	 */
 	codec codec_for_ssrc(uint32_t ssrc);
 
-	int encrypt(media_type mediaType,
+	/**
+	 * @brief Encrypt plaintext opus frames
+	 * @param mediaType media type, should always be audio
+	 * @param ssrc RTP SSRC
+	 * @param frame Frame plaintext
+	 * @param encryptedFrame Encrypted frame
+	 * @param bytesWritten Number of bytes written to the encrypted buffer
+	 * @return Status code for encryption
+	 */
+	encryptor::result_code encrypt(media_type mediaType,
 		uint32_t ssrc,
 		array_view<const uint8_t> frame,
 		array_view<uint8_t> encryptedFrame,
 		size_t* bytesWritten);
 
+	/**
+	 * @brief Get maximum possible ciphertext size for a plaintext buffer
+	 * @param mediaType media type, should always be audio for bots
+	 * @param frameSize frame size of plaintext buffer
+	 * @return size of ciphertext buffer to allocate
+	 */
 	size_t get_max_ciphertext_byte_size(media_type mediaType, size_t frameSize);
-	encryption_stats get_stats(media_type mediaType) const { return stats_[mediaType]; }
 
+	/**
+	 * @brief Get encryption stats
+	 * @param mediaType media type
+	 * @return encryption stats
+	 */
+	encryption_stats get_stats(media_type mediaType) const {
+		return stats_[mediaType];
+	}
+
+	/**
+	 * @brief Protocol version changed callback
+	 */
 	using protocol_version_changed_callback = std::function<void()>;
-	void set_protocol_version_changed_callback(protocol_version_changed_callback callback)
-	{
+
+	/**
+	 * @brief Set protocol version changed callback
+	 * @param callback Callback to set
+	 */
+	void set_protocol_version_changed_callback(protocol_version_changed_callback callback) {
 		protocolVersionChangedCallback_ = std::move(callback);
 	}
-	protocol_version get_protocol_version() const { return currentProtocolVersion_; }
 
-	enum result_code : uint8_t {
-		rc_success,
-		rc_encryption_failure,
-	};
+	/**
+	 * @brief Get protocol version
+	 * @return protocol version
+	 */
+	protocol_version get_protocol_version() const {
+		return currentProtocolVersion_;
+	}
 
 private:
+	/**
+	 * @brief Get the current frame processor or create a new one
+	 * @return Frame processor
+	 */
 	std::unique_ptr<outbound_frame_processor> get_or_create_frame_processor();
+
+	/**
+	 * @brief Return frame processor
+	 * @param frameProcessor frame processor
+	 */
 	void return_frame_processor(std::unique_ptr<outbound_frame_processor> frameProcessor);
 
+	/**
+	 * @brief Pair of cryptor and nonce pointers
+	 */
 	using cryptor_and_nonce = std::pair<std::shared_ptr<cipher_interface>, truncated_sync_nonce>;
+
+	/**
+	 * @brief Get cryptor and nonce
+	 * @return cryptor and nonce
+	 */
 	cryptor_and_nonce get_next_cryptor_and_nonce();
 
+	/**
+	 * @brief Change protocol version
+	 * @param version new protocol version
+	 */
 	void update_current_protocol_version(protocol_version version);
 
 	std::atomic_bool passthroughMode_{false};

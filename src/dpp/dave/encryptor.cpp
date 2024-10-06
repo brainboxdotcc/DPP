@@ -56,7 +56,7 @@ void encryptor::set_passthrough_mode(bool passthroughMode)
 	update_current_protocol_version(passthroughMode ? 0 : max_protocol_version());
 }
 
-int encryptor::encrypt(media_type mediaType,
+encryptor::result_code encryptor::encrypt(media_type mediaType,
 			   uint32_t ssrc,
 			   array_view<const uint8_t> frame,
 			   array_view<uint8_t> encryptedFrame,
@@ -65,7 +65,7 @@ int encryptor::encrypt(media_type mediaType,
 	if (mediaType != media_audio && mediaType != media_video) {
 		DISCORD_LOG(LS_WARNING) << "encrypt failed, invalid media type: "
 								<< static_cast<int>(mediaType);
-		return 0;
+		return result_code::rc_encryption_failure;
 	}
 
 	if (passthroughMode_) {
