@@ -20,15 +20,10 @@
  *
  ************************************************************************************/
 
-#include <string_view>
-#include <fstream>
 #include <dpp/exception.h>
 #include <dpp/isa_detection.h>
 #include <dpp/discordvoiceclient.h>
-
-#include <opus/opus.h>
 #include "../../dave/encryptor.h"
-
 #include "enabled.h"
 
 namespace dpp {
@@ -70,4 +65,4 @@ int discord_voice_client::udp_recv(char* data, size_t max_length)
 }
 
 
-}
+
