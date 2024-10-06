@@ -64,5 +64,4 @@ int discord_voice_client::udp_recv(char* data, size_t max_length)
 	return (int) recv(this->fd, data, (int)max_length, 0);
 }
 
-
-
+}
