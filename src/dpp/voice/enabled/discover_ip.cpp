@@ -62,7 +62,7 @@ struct ip_discovery_packet {
 #pragma pack(pop)
 
 /**
- * Allocates a dpp::socket, closing it on destruction
+ * @brief Allocates a dpp::socket, closing it on destruction
  */
 struct raii_socket {
 	dpp::socket fd;
