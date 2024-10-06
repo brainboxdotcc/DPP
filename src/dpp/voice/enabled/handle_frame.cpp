@@ -107,12 +107,16 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 				mls_state->privacy_code = generate_displayable_code(mls_state->dave_session->get_last_epoch_authenticator());
 				log(ll_debug, "E2EE Privacy Code: " + mls_state->privacy_code);
 
-				if (!creator->on_voice_ready.empty()) {
-					voice_ready_t rdy(nullptr, data);
-					rdy.voice_client = this;
-					rdy.voice_channel_id = this->channel_id;
-					creator->on_voice_ready.call(rdy);
-				}
+				json obj = {
+					{ "op", voice_client_dave_transition_ready },
+					{
+					  "d",
+						{
+							{ "transition_id", this->mls_state->transition_id },
+						}
+					}
+				};
+				this->write(obj.dump(-1, ' ', false, json::error_handler_t::replace), OP_TEXT);
 			}
 			break;
 			default:
@@ -176,6 +180,32 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 			case voice_client_dave_execute_transition: {
 				log(ll_debug, "voice_client_dave_execute_transition");
 				this->mls_state->transition_id = j["d"]["transition_id"];
+
+				if (this->mls_state->pending_transition.is_pending) {
+					if (this->mls_state->transition_id != this->mls_state->pending_transition.id) {
+						log(ll_debug, "voice_client_dave_execute_transition unexpected transition_id, we never received voice_client_dave_prepare_transition event with this id: " + std::to_string(this->mls_state->pending_transition.id));
+					} else {
+						dave_version = this->mls_state->pending_transition.protocol_version == 1 ? dave_version_1 : dave_version_none;
+
+						if (this->mls_state->pending_transition.protocol_version != 0 && dave_version == dave_version_none) {
+							log(ll_debug, "voice_client_dave_execute_transition unexpected protocol version: " + std::to_string(this->mls_state->pending_transition.protocol_version)+ " in transition " + std::to_string(this->mls_state->pending_transition.id));
+						}
+
+						this->mls_state->privacy_code.clear();
+						this->dave_mls_user_list.clear();
+
+						this->mls_state->pending_transition.is_pending = false;
+					}
+				}
+			}
+			break;
+			/* "The protocol only uses this opcode to indicate when a downgrade to protocol version 0 is upcoming." */
+			case voice_client_dave_prepare_transition: {
+				uint64_t transition_id = j["d"]["transition_id"];
+				uint64_t protocol_version = j["d"]["protocol_version"];
+				this->mls_state->pending_transition = {transition_id, protocol_version, true};
+				log(ll_debug, "voice_client_dave_prepare_transition version=" + std::to_string(protocol_version) + " for transition " + std::to_string(transition_id));
+
 				json obj = {
 					{ "op", voice_client_dave_transition_ready },
 					{
@@ -188,13 +218,6 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 				this->write(obj.dump(-1, ' ', false, json::error_handler_t::replace), OP_TEXT);
 			}
 			break;
-			/* "The protocol only uses this opcode to indicate when a downgrade to protocol version 0 is upcoming." */
-			case voice_client_dave_prepare_transition: {
-				uint64_t transition_id = j["d"]["transition_id"];
-				uint64_t protocol_version = j["d"]["protocol_version"];
-				log(ll_debug, "voice_client_dave_prepare_transition version=" + std::to_string(protocol_version) + " for transition " + std::to_string(transition_id));
-			}
-			break;
 			case voice_client_dave_prepare_epoch: {
 				uint64_t protocol_version = j["d"]["protocol_version"];
 				uint64_t epoch = j["d"]["epoch"];
@@ -202,6 +225,9 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 				if (epoch == 1) {
 					mls_state->dave_session->reset();
 					mls_state->dave_session->init(dave::max_protocol_version(), channel_id, creator->me.id.str(), mls_state->mls_key);
+					auto key_response = mls_state->dave_session->get_marshalled_key_package();
+					key_response.insert(key_response.begin(), voice_client_dave_mls_key_package);
+					this->write(std::string_view(reinterpret_cast<const char*>(key_response.data()), key_response.size()), OP_BINARY);
 				}
 			}
 			break;
@@ -214,6 +240,11 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 
 					if (it != ssrc_map.end()) {
 						ssrc_map.erase(it);
+					}
+
+					auto it_dave = dave_mls_user_list.find(j["d"]["user_id"]);
+					if (it_dave != dave_mls_user_list.end()) {
+						dave_mls_user_list.erase(it_dave);
 					}
 
 					if (!creator->on_voice_client_disconnect.empty()) {
@@ -318,16 +349,19 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 						ready_now = true;
 					}
 
-					mls_state = std::make_unique<dave_state>();
-					mls_state->dave_session = std::make_unique<dave::mls::session>(
-						nullptr, "" /* sessionid */, [this](std::string const& s1, std::string const& s2) {
-							log(ll_debug, "Dave session constructor callback: " + s1 + ", " + s2);
-						});
-					mls_state->dave_session->init(dave::max_protocol_version(), channel_id, creator->me.id.str(), mls_state->mls_key);
+					if (mls_state == nullptr) {
+						mls_state = std::make_unique<dave_state>();
+					}
+					if (mls_state->dave_session == nullptr) {
+						mls_state->dave_session = std::make_unique<dave::mls::session>(
+							nullptr, "" /* sessionid */, [this](std::string const& s1, std::string const& s2) {
+								log(ll_debug, "Dave session constructor callback: " + s1 + ", " + s2);
+							});
+						mls_state->dave_session->init(dave::max_protocol_version(), channel_id, creator->me.id.str(), mls_state->mls_key);
+					}
 					auto key_response = mls_state->dave_session->get_marshalled_key_package();
 					key_response.insert(key_response.begin(), voice_client_dave_mls_key_package);
 					this->write(std::string_view(reinterpret_cast<const char*>(key_response.data()), key_response.size()), OP_BINARY);
-
 				}
 
 				if (ready_now) {

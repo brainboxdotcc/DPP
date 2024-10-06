@@ -125,7 +125,13 @@ void discord_voice_client::get_user_privacy_code(const dpp::snowflake user, priv
 
 bool discord_voice_client::is_end_to_end_encrypted() const {
 #ifdef HAVE_VOICE
-	return mls_state && !mls_state->privacy_code.empty();
+	if (mls_state == nullptr) {
+		return false;
+	}
+
+	bool has_pending_downgrade = mls_state->pending_transition.is_pending && mls_state->pending_transition.protocol_version != dave_version_1;
+
+	return !has_pending_downgrade && !mls_state->privacy_code.empty();
 #else
 	return false;
 #endif
