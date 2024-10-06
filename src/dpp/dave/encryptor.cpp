@@ -26,6 +26,7 @@
 #include <algorithm>
 #include <cstring>
 #include <bytes/bytes.h>
+#include <dpp/exception.h>
 #include "common.h"
 #include "cryptor_manager.h"
 #include "logger.h"
@@ -146,13 +147,11 @@ int encryptor::encrypt(media_type mediaType,
 		  std::max(stats_[mediaType].encrypt_max_attempts, (uint64_t)attempt);
 
 		if (!success) {
-			assert(false && "Failed to encrypt frame");
 			result = result_code::rc_encryption_failure;
 			break;
 		}
 
 		auto reconstructedFrameSize = frameProcessor->reconstruct_frame(encryptedFrame);
-		assert(reconstructedFrameSize == frameSize && "Failed to reconstruct frame");
 
 		auto nonceSize = leb128_size(truncatedNonce);
 
@@ -166,7 +165,6 @@ int encryptor::encrypt(media_type mediaType,
 		// write the nonce
 		auto res = write_leb128(truncatedNonce, truncatedNonceBuffer.begin());
 		if (res != nonceSize) {
-			assert(false && "Failed to write truncated nonce");
 			result = result_code::rc_encryption_failure;
 			break;
 		}
@@ -175,7 +173,6 @@ int encryptor::encrypt(media_type mediaType,
 		res = serialize_unencrypted_ranges(
 			unencryptedRanges, unencryptedRangesBuffer.begin(), unencryptedRangesBuffer.size());
 		if (res != unencryptedRangesSize) {
-			assert(false && "Failed to write unencrypted ranges");
 			result = result_code::rc_encryption_failure;
 			break;
 		}
@@ -197,7 +194,6 @@ int encryptor::encrypt(media_type mediaType,
 			break;
 		}
 		else if (attempt >= MAX_CIPHERTEXT_VALIDATION_RETRIES) {
-			assert(false && "Failed to validate encrypted section for codec");
 			result = result_code::rc_encryption_failure;
 			break;
 		}

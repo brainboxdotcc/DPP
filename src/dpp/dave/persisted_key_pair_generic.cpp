@@ -22,7 +22,6 @@
  * Copyright (c) 2024 Discord, Licensed under MIT
  *
  ************************************************************************************/
-#include <cassert>
 #include <filesystem>
 #include <fstream>
 #include <sstream>

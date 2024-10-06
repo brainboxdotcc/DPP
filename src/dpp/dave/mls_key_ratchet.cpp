@@ -23,9 +23,6 @@
  *
  ************************************************************************************/
 #include "mls_key_ratchet.h"
-
-#include <cassert>
-
 #include "logger.h"
 
 namespace dpp::dave {
@@ -43,7 +40,6 @@ encryption_key mls_key_ratchet::get_key(key_generation generation) noexcept
 
 	try {
 		auto keyAndNonce = hashRatchet_.get(generation);
-		assert(keyAndNonce.key.size() >= AES_GCM_128_KEY_BYTES);
 		return std::move(keyAndNonce.key.as_vec());
 	}
 	catch (const std::exception& e) {

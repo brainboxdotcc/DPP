@@ -23,11 +23,11 @@
  *
  ************************************************************************************/
 #include "frame_processors.h"
-#include <cassert>
 #include <limits>
 #include <optional>
 #include <memory>
 #include <cstring>
+#include <dpp/exception.h>
 #include "codec_utils.h"
 #include "logger.h"
 #include "array_view.h"
@@ -59,8 +59,6 @@ uint8_t unencrypted_ranges_size(const ranges& unencryptedRanges)
 		size += leb128_size(range.offset);
 		size += leb128_size(range.size);
 	}
-	assert(size <= std::numeric_limits<uint8_t>::max() &&
-		   "Unencrypted ranges size exceeds 255 bytes");
 	return static_cast<uint8_t>(size);
 }
 
@@ -73,7 +71,7 @@ uint8_t serialize_unencrypted_ranges(const ranges& unencryptedRanges,
 	for (const auto& range : unencryptedRanges) {
 		auto rangeSize = leb128_size(range.offset) + leb128_size(range.size);
 		if (rangeSize > static_cast<size_t>(end - writeAt)) {
-			assert(false && "Buffer is too small to serialize unencrypted ranges");
+			throw dpp::length_exception("Buffer is too small to serialize unencrypted ranges");
 			break;
 		}
 
@@ -149,16 +147,12 @@ size_t Reconstruct(ranges ranges,
 	size_t otherBytesIndex = 0;
 
 	const auto CopyRangeBytes = [&](size_t size) {
-		assert(rangeBytesIndex + size <= rangeBytes.size());
-		assert(frameIndex + size <= output.size());
-	std::memcpy(output.data() + frameIndex, rangeBytes.data() + rangeBytesIndex, size);
+		std::memcpy(output.data() + frameIndex, rangeBytes.data() + rangeBytesIndex, size);
 		rangeBytesIndex += size;
 		frameIndex += size;
 	};
 
 	const auto CopyOtherBytes = [&](size_t size) {
-		assert(otherBytesIndex + size <= otherBytes.size());
-		assert(frameIndex + size <= output.size());
 		std::memcpy(output.data() + frameIndex, otherBytes.data() + otherBytesIndex, size);
 		otherBytesIndex += size;
 		frameIndex += size;
@@ -175,10 +169,6 @@ size_t Reconstruct(ranges ranges,
 	if (otherBytesIndex < otherBytes.size()) {
 		CopyOtherBytes(otherBytes.size() - otherBytesIndex);
 	}
-
-	assert(rangeBytesIndex == rangeBytes.size());
-	assert(otherBytesIndex == otherBytes.size());
-	assert(frameIndex <= output.size());
 
 	return frameIndex;
 }
@@ -214,8 +204,6 @@ void inbound_frame_processor::parse_frame(array_view<const uint8_t> frame)
 	// Read the supplemental bytes size
 	supplemental_bytes_size supplementalBytesSize;
 	auto supplementalBytesSizeBuffer = magicMarkerBuffer - sizeof(supplemental_bytes_size);
-	assert(frame.begin() <= supplementalBytesSizeBuffer &&
-		   supplementalBytesSizeBuffer <= frame.end());
 	memcpy(&supplementalBytesSize, supplementalBytesSizeBuffer, sizeof(supplemental_bytes_size));
 
 	// Check the frame is large enough to contain the supplemental bytes
@@ -232,14 +220,12 @@ void inbound_frame_processor::parse_frame(array_view<const uint8_t> frame)
 	}
 
 	auto supplementalBytesBuffer = frame.end() - supplementalBytesSize;
-	assert(frame.begin() <= supplementalBytesBuffer && supplementalBytesBuffer <= frame.end());
 
 	// Read the tag
 	tag_ = make_array_view(supplementalBytesBuffer, AES_GCM_127_TRUNCATED_TAG_BYTES);
 
 	// Read the nonce
 	auto nonceBuffer = supplementalBytesBuffer + AES_GCM_127_TRUNCATED_TAG_BYTES;
-	assert(frame.begin() <= nonceBuffer && nonceBuffer <= frame.end());
 	auto readAt = nonceBuffer;
 	auto end = supplementalBytesSizeBuffer;
 	truncatedNonce_ = read_leb128(readAt, end);
@@ -249,7 +235,6 @@ void inbound_frame_processor::parse_frame(array_view<const uint8_t> frame)
 	}
 
 	// Read the unencrypted ranges
-	assert(nonceBuffer <= readAt && readAt <= end);
 	auto unencryptedRangesSize = end - readAt;
 	deserialize_unencrypted_ranges(readAt, unencryptedRangesSize, unencryptedRanges_);
 	if (readAt == nullptr) {
@@ -274,11 +259,9 @@ void inbound_frame_processor::parse_frame(array_view<const uint8_t> frame)
 	for (const auto& range : unencryptedRanges_) {
 		auto encryptedBytes = range.offset - frameIndex;
 		if (encryptedBytes > 0) {
-			assert(frameIndex + encryptedBytes <= frame.size());
-		add_ciphertext_bytes(frame.data() + frameIndex, encryptedBytes);
+			add_ciphertext_bytes(frame.data() + frameIndex, encryptedBytes);
 		}
 
-		assert(range.offset + range.size <= frame.size());
 		add_authenticated_bytes(frame.data() + range.offset, range.size);
 		frameIndex = range.offset + range.size;
 	}
@@ -360,8 +343,7 @@ void outbound_frame_processor::process_frame(array_view<const uint8_t> frame, co
 		success = codec_utils::process_frame_av1(*this, frame);
 		break;
 	default:
-		assert(false && "Unsupported codec for frame encryption");
-		break;
+		throw dpp::logic_exception("Unsupported codec for frame encryption");
 	}
 
 	if (!success) {

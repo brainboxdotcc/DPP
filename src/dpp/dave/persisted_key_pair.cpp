@@ -24,7 +24,6 @@
  ************************************************************************************/
 #include "persisted_key_pair.h"
 
-#include <cassert>
 #include <filesystem>
 #include <fstream>
 #include <sstream>

@@ -24,9 +24,9 @@
  ************************************************************************************/
 #include "codec_utils.h"
 
-#include <cassert>
 #include <limits>
 #include <optional>
+#include <dpp/exception.h>
 
 #include "logger.h"
 #include "leb128.h"
@@ -69,8 +69,7 @@ unencrypted_frame_header_size BytesCoveringH264PPS(const uint8_t* payload,
 			++payloadBitIndex;
 
 			if (zeroBitCount >= 32) {
-				assert(false && "Unexpectedly large exponential golomb encoded value");
-				return 0;
+				throw dpp::length_exception("Unexpectedly large exponential golomb encoded value");
 			}
 		}
 		else {
@@ -200,9 +199,7 @@ bool process_frame_h264(outbound_frame_processor& processor, array_view<const ui
 	// so we need to look at the first NAL units to determine how many bytes
 	// the packetizer/depacketizer will need into the payload
 	if (frame.size() < kH26XNaluShortStartSequenceSize + kH264NalUnitHeaderSize) {
-		assert(false && "H264 frame is too small to contain a NAL unit");
-		DISCORD_LOG(LS_WARNING) << "H264 frame is too small to contain a NAL unit";
-		return false;
+		throw dpp::length_exception("H264 frame is too small to contain a NAL unit");
 	}
 
 	auto naluIndexPair = FindNextH26XNaluIndex(frame.data(), frame.size());
@@ -263,9 +260,7 @@ bool process_frame_h265(outbound_frame_processor& processor, array_view<const ui
 	// so we need to look at the first NAL units to determine how many bytes
 	// the packetizer/depacketizer will need into the payload
 	if (frame.size() < kH26XNaluShortStartSequenceSize + kH265NalUnitHeaderSize) {
-		assert(false && "H265 frame is too small to contain a NAL unit");
-		DISCORD_LOG(LS_WARNING) << "H265 frame is too small to contain a NAL unit";
-		return false;
+		throw dpp::length_exception("H265 frame is too small to contain a NAL unit");
 	}
 
 	// look for NAL unit 3 or 4 byte start code
@@ -333,9 +328,7 @@ bool process_frame_av1(outbound_frame_processor& processor, array_view<const uin
 
 		if (i >= frame.size()) {
 			// Malformed frame
-			assert(false && "Malformed AV1 frame: header overflows frame");
-			DISCORD_LOG(LS_WARNING) << "Malformed AV1 frame: header overflows frame";
-			return false;
+			throw dpp::logic_exception("Malformed AV1 frame: header overflows frame");
 		}
 
 		size_t obuPayloadSize = 0;
@@ -346,9 +339,7 @@ bool process_frame_av1(outbound_frame_processor& processor, array_view<const uin
 			obuPayloadSize = read_leb128(ptr, frame.end());
 			if (!ptr) {
 				// Malformed frame
-				assert(false && "Malformed AV1 frame: invalid LEB128 size");
-				DISCORD_LOG(LS_WARNING) << "Malformed AV1 frame: invalid LEB128 size";
-				return false;
+				throw dpp::logic_exception("Malformed AV1 frame: invalid LEB128 size");
 			}
 			i += ptr - start;
 		}
@@ -361,9 +352,7 @@ bool process_frame_av1(outbound_frame_processor& processor, array_view<const uin
 
 		if (i + obuPayloadSize > frame.size()) {
 			// Malformed frame
-			assert(false && "Malformed AV1 frame: payload overflows frame");
-			DISCORD_LOG(LS_WARNING) << "Malformed AV1 frame: payload overflows frame";
-			return false;
+			throw dpp::logic_exception("Malformed AV1 frame: payload overflows frame");
 		}
 
 		i += obuPayloadSize;
@@ -415,7 +404,6 @@ bool validate_encrypted_frame(outbound_frame_processor& processor, array_view<ui
 		return true;
 	}
 
-	static_assert(kH26XNaluShortStartSequenceSize - 1 >= 0, "Padding will overflow!");
 	constexpr size_t Padding = kH26XNaluShortStartSequenceSize - 1;
 
 	const auto& unencryptedRanges = processor.get_unencrypted_ranges();

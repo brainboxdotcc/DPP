@@ -24,7 +24,6 @@
  ************************************************************************************/
 #pragma once
 
-#include <cassert>
 #include <vector>
 
 namespace dpp::dave {
