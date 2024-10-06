@@ -51,7 +51,7 @@
 
 namespace dpp::dave::mls {
 
-struct QueuedProposal {
+struct queued_proposal {
 	::mlspp::ValidatedContent content;
 	::mlspp::bytes_ns::bytes ref;
 };

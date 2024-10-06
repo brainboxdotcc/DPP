@@ -28,9 +28,20 @@
 
 namespace dpp::dave {
 
+/**
+ * @brief Protocol Version ID
+ */
 using protocol_version = uint16_t;
+
+/**
+ * @brief Signature version ID
+ */
 using signature_version = uint8_t;
 
+/**
+ * @brief Get maximum supported protocol version
+ * @return maximum protocol version
+ */
 protocol_version max_protocol_version();
 
 } // namespace dpp::dave

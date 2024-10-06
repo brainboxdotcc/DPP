@@ -30,20 +30,33 @@
 
 namespace dpp::dave {
 
+/**
+ * @brief Calls a lambda when the class goes out of scope
+ */
 class [[nodiscard]] scope_exit final {
 public:
-	template <typename Cleanup>
-	explicit scope_exit(Cleanup&& cleanup)
+	/**
+	 * Create new scope_exit with a lambda
+	 * @tparam Cleanup lambda type
+	 * @param cleanup lambda
+	 */
+	template <typename Cleanup> explicit scope_exit(Cleanup&& cleanup)
 	  : cleanup_{std::forward<Cleanup>(cleanup)}
 	{
 	}
 
-	scope_exit(scope_exit&& rhs)
-	  : cleanup_{std::move(rhs.cleanup_)}
+	/**
+	 * @brief Move constructor
+	 * @param rhs other object
+	 */
+	scope_exit(scope_exit&& rhs) : cleanup_{std::move(rhs.cleanup_)}
 	{
 		rhs.cleanup_ = nullptr;
 	}
 
+	/**
+	 * @brief Calls lambda
+	 */
 	~scope_exit()
 	{
 		if (cleanup_) {
@@ -51,6 +64,11 @@ public:
 		}
 	}
 
+	/**
+	 * @brief move assignment
+	 * @param rhs other object
+	 * @return self
+	 */
 	scope_exit& operator=(scope_exit&& rhs)
 	{
 		cleanup_ = std::move(rhs.cleanup_);
@@ -58,12 +76,26 @@ public:
 		return *this;
 	}
 
+	/**
+	 * @brief Clear the lambda so it isn't called
+	 */
 	void dismiss() { cleanup_ = nullptr; }
 
 private:
+	/**
+	 * @brief Deleted copy constructor
+	 */
 	scope_exit(scope_exit const&) = delete;
+
+	/**
+	 * @brief Deleted assignment operator
+	 * @return
+	 */
 	scope_exit& operator=(scope_exit const&) = delete;
 
+	/**
+	 * @brief Lambda to call
+	 */
 	std::function<void()> cleanup_;
 };
 

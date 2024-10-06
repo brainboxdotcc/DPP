@@ -29,7 +29,18 @@
 
 namespace dpp::dave::mls {
 
+/**
+ * @brief Convert uint64_t to bytes
+ * @param value 64 bit value
+ * @return bytes
+ */
 ::mlspp::bytes_ns::bytes big_endian_bytes_from(uint64_t value) noexcept;
+
+/**
+ * @brief Convert uint64_t to bytes
+ * @param value bytes
+ * @return 64 bit value
+ */
 uint64_t from_big_endian_bytes(const ::mlspp::bytes_ns::bytes& value) noexcept;
 
 } // namespace dpp::dave::mls
