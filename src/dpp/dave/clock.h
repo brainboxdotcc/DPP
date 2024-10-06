@@ -66,7 +66,7 @@ public:
 class clock : public clock_interface {
 public:
 	/**
-	 * Get current time
+	 * @brief Get current time
 	 * @return current time
 	 */
 	time_point now() const override {

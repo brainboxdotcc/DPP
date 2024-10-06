@@ -49,7 +49,7 @@ add_compile_definitions(AVX_TYPE=${AVX_TYPE})
 add_compile_options(${AVX_FLAG})
 
 if(WIN32 AND NOT MINGW)
-	# For MLSPP
+	# Fake an ssl version number to satisfy MLSPP
 	set(OPENSSL_VERSION "1.1.1f")
 	if (NOT WINDOWS_32_BIT)
 		message("-- Building for windows with precompiled packaged dependencies")

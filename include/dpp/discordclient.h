@@ -481,6 +481,7 @@ public:
 	/**
 	 * @brief Handle JSON from the websocket.
 	 * @param buffer The entire buffer content from the websocket client
+	 * @param opcode The type of frame, e.g. text or binary
 	 * @returns True if a frame has been handled
 	 */
 	virtual bool handle_frame(const std::string &buffer, ws_opcode opcode);

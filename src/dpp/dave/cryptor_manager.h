@@ -60,7 +60,7 @@ big_nonce compute_wrapped_big_nonce(key_generation generation, truncated_sync_no
 /**
  * @brief A manager to handle whichever cipher is best for the current version of DAVE
  *
- * his will currently instantiate an AES 128 GCM AEAD cipher.
+ * This will currently instantiate an AES 128 GCM AEAD cipher.
  */
 class aead_cipher_manager {
 public:

@@ -36,7 +36,7 @@
 namespace dpp::dave::codec_utils {
 
 /**
- * process opus audio frame
+ * @brief process opus audio frame
  * @param processor outbound frame processor
  * @param frame frame bytes
  * @return true if frame could be processed
@@ -44,7 +44,7 @@ namespace dpp::dave::codec_utils {
 bool process_frame_opus(outbound_frame_processor & processor, array_view<const uint8_t> frame);
 
 /**
- * process VP8 video frame
+ * @brief process VP8 video frame
  * @param processor outbound frame processor
  * @param frame frame bytes
  * @return true if frame could be processed
@@ -52,7 +52,7 @@ bool process_frame_opus(outbound_frame_processor & processor, array_view<const u
 bool process_frame_vp8(outbound_frame_processor & processor, array_view<const uint8_t> frame);
 
 /**
- * process VP9 video frame
+ * @brief process VP9 video frame
  * @param processor outbound frame processor
  * @param frame frame bytes
  * @return true if frame could be processed
@@ -60,7 +60,7 @@ bool process_frame_vp8(outbound_frame_processor & processor, array_view<const ui
 bool process_frame_vp9(outbound_frame_processor & processor, array_view<const uint8_t> frame);
 
 /**
- * process H264 video frame
+ * @brief process H264 video frame
  * @param processor outbound frame processor
  * @param frame frame bytes
  * @return true if frame could be processed
@@ -68,7 +68,7 @@ bool process_frame_vp9(outbound_frame_processor & processor, array_view<const ui
 bool process_frame_h264(outbound_frame_processor & processor, array_view<const uint8_t> frame);
 
 /**
- * process opus frame
+ * @brief process opus frame
  * @param processor outbound frame processor
  * @param frame frame bytes
  * @return true if frame could be processed
@@ -76,7 +76,7 @@ bool process_frame_h264(outbound_frame_processor & processor, array_view<const u
 bool process_frame_h265(outbound_frame_processor & processor, array_view<const uint8_t> frame);
 
 /**
- * process opus frame
+ * @brief process opus frame
  * @param processor outbound frame processor
  * @param frame frame bytes
  * @return true if frame could be processed
@@ -84,7 +84,7 @@ bool process_frame_h265(outbound_frame_processor & processor, array_view<const u
 bool process_frame_av1(outbound_frame_processor & processor, array_view<const uint8_t> frame);
 
 /**
- * Check if encrypted frame is valid
+ * @brief Check if encrypted frame is valid
  * @param processor outbound frame processor
  * @param frame frame to validate
  * @return true if frame could be validated

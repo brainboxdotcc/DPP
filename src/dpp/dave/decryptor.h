@@ -103,7 +103,7 @@ public:
 					    duration transitionExpiry = DEFAULT_TRANSITION_EXPIRY);
 
 	/**
-	 * Decrypt a frame
+	 * @brief Decrypt a frame
 	 *
 	 * @param mediaType type of media, audio or video
 	 * @param encryptedFrame encrypted frame bytes
@@ -123,7 +123,7 @@ public:
 	size_t get_max_plaintext_byte_size(media_type mediaType, size_t encryptedFrameSize);
 
 	/**
-	 * Get decryption stats
+	 * @brief Get decryption stats
 	 * @param mediaType media type, audio or video
 	 * @return decryption stats
 	 */
@@ -144,10 +144,7 @@ private:
 	 * @param frame decrypted frame data
 	 * @return True if decryption succeeded
 	 */
-	bool decrypt_impl(aead_cipher_manager& cipher_manager,
-			  media_type mediaType,
-			  inbound_frame_processor& encryptedFrame,
-			  array_view<uint8_t> frame);
+	bool decrypt_impl(aead_cipher_manager& cipher_manager, media_type mediaType, inbound_frame_processor& encryptedFrame, array_view<uint8_t> frame);
 
 	/**
 	 * @brief Update expiry for an instance of the manager

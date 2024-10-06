@@ -54,7 +54,7 @@ enum ws_state : uint8_t {
 	HTTP_HEADERS,
 
 	/**
-	 * @brief Connected as a websocket, and "upgraded". now talking using binary frames.
+	 * @brief Connected as a websocket, and "upgraded". Now talking using binary frames.
 	 */
 	CONNECTED
 };
@@ -193,6 +193,8 @@ public:
 	/**
 	 * @brief Write to websocket. Encapsulates data in frames if the status is CONNECTED.
 	 * @param data The data to send.
+	 * @param _opcode The opcode of the data to send, either binary or text. The default
+	 * is to use the socket's opcode as set in the constructor.
 	 */
 	virtual void write(const std::string_view data, ws_opcode _opcode = OP_AUTO);
 

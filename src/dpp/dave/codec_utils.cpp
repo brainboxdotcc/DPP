@@ -90,9 +90,7 @@ constexpr uint8_t kH26XNaluShortStartSequenceSize = 3;
 
 using IndexStartCodeSizePair = std::pair<size_t, size_t>;
 
-std::optional<IndexStartCodeSizePair> FindNextH26XNaluIndex(const uint8_t* buffer,
-															const size_t bufferSize,
-															const size_t searchStartIndex = 0)
+std::optional<IndexStartCodeSizePair> FindNextH26XNaluIndex(const uint8_t* buffer, const size_t bufferSize, const size_t searchStartIndex = 0)
 {
 	constexpr uint8_t kH26XStartCodeHighestPossibleValue = 1;
 	constexpr uint8_t kH26XStartCodeEndByteValue = 1;

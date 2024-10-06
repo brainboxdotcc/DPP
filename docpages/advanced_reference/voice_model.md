@@ -26,7 +26,7 @@ during the MLS negotiation which was carried out earlier. All valid participants
 their ratchets, to decrypt the OPUS audio.
 
 Regardless of if DAVE is enabled or not, the OPUS stream (encrypted by DAVE, or "plaintext") is placed into an RTP packet, and then encrypted using the shared secret
-given by the websocket, known only to you and Discord, using the chacha20 poly1305 cipher.
+given by the websocket, known only to you and Discord, using the xchacha20 poly1305 cipher.
 
 The completed packet, potentially with two separate layers of encryption (one with a key only you and Discord know, and one with a key only you and participants in the
 voice chat know!), plus opus encoded audio is sent on its way via UDP to the RTP server, where Discord promptly distribute it to all participants in the chat.

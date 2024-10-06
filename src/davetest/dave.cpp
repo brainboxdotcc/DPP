@@ -21,9 +21,7 @@
  ************************************************************************************/
 #include <dpp/dpp.h>
 #include <iostream>
-#include <cstring>
 #include <string>
-#include "../../src/dpp/dave/common.h"
 
 std::string get_testdata_dir() {
 	char *env_var = getenv("TEST_DATA_DIR");

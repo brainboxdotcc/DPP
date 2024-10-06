@@ -24,6 +24,13 @@ export TEST_USER_ID="826535422381391913"
 export TEST_EVENT_ID="909928577951203360"
 ```
 
+You may also optionally set:
+```bash
+export TEST_DATA_DIR="/path/to/test/data"
+```
+If you wish to have test data (Robot.pcm etc) in a different location than two directories above the unit test program. If you do not specify
+this environment variable the default will be used.
+
 Then, after cloning and building DPP, run `cd build && ctest -VV` for unit test cases. 
 
 If you do not specify the `DPP_UNIT_TEST_TOKEN` environment variable, a subset of the tests will run which do not require discord connectivity.

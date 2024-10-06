@@ -854,6 +854,7 @@ public:
 	/**
 	 * @brief Handle JSON from the websocket.
 	 * @param buffer The entire buffer content from the websocket client
+	 * @param opcode Frame type, e.g. OP_TEXT, OP_BINARY
 	 * @return bool True if a frame has been handled
 	 * @throw dpp::exception If there was an error processing the frame, or connection to UDP socket failed
 	 */
@@ -1132,7 +1133,7 @@ public:
 	std::string discover_ip();
 
 	/**
-	 * Returns true if end-to-end encryption is enabled
+	 * @brief Returns true if end-to-end encryption is enabled
 	 * for the active voice call (Discord Audio Visual
 	 * Encryption, a.k.a. DAVE).
 	 *
@@ -1141,7 +1142,7 @@ public:
 	bool is_end_to_end_encrypted() const;
 
 	/**
-	 * Returns the privacy code for the end to end encryption
+	 * @brief Returns the privacy code for the end to end encryption
 	 * scheme ("DAVE"). if end-to-end encryption is not active,
 	 * or is not yet established, this will return an empty
 	 * string.
@@ -1153,7 +1154,7 @@ public:
 	std::string get_privacy_code() const;
 
 	/**
-	 * Returns the privacy code for a given user by id,
+	 * @brief Returns the privacy code for a given user by id,
 	 * if they are in the voice call, and enc-to-end encryption
 	 * is enabled.
 	 *
