@@ -28,19 +28,50 @@
 
 namespace dpp::dave {
 
+/**
+ * @brief An interface for a wrapper around chrono clocks
+ */
 class clock_interface {
 public:
+	/**
+	 * @brief chrono steady clock
+	 */
 	using base_clock = std::chrono::steady_clock;
+
+	/**
+	 * @brief time point on a steady clock
+	 */
 	using time_point = base_clock::time_point;
+
+	/**
+	 * @brief duration on a steady clock
+	 */
 	using clock_duration = base_clock::duration;
 
+	/**
+	 * @brief Default destructor
+	 */
 	virtual ~clock_interface() = default;
+
+	/**
+	 * @brief Get current time
+	 * @return current time
+	 */
 	virtual time_point now() const = 0;
 };
 
+/**
+ * @brief Chrono clock class
+ */
 class clock : public clock_interface {
 public:
-	time_point now() const override { return base_clock::now(); }
+	/**
+	 * Get current time
+	 * @return current time
+	 */
+	time_point now() const override {
+		return base_clock::now();
+	}
 };
 
 } // namespace dpp::dave

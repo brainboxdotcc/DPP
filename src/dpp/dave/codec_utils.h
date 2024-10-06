@@ -28,15 +28,67 @@
 #include "frame_processors.h"
 #include "array_view.h"
 
+/**
+ * @brief Functions for processing specific frame types.
+ * Different types of audio/video frames have different rules for what parts of it
+ * must remain unencrypted to allow for routing and processing further up the chain.
+ */
 namespace dpp::dave::codec_utils {
 
+/**
+ * process opus audio frame
+ * @param processor outbound frame processor
+ * @param frame frame bytes
+ * @return true if frame could be processed
+ */
 bool process_frame_opus(outbound_frame_processor & processor, array_view<const uint8_t> frame);
+
+/**
+ * process VP8 video frame
+ * @param processor outbound frame processor
+ * @param frame frame bytes
+ * @return true if frame could be processed
+ */
 bool process_frame_vp8(outbound_frame_processor & processor, array_view<const uint8_t> frame);
+
+/**
+ * process VP9 video frame
+ * @param processor outbound frame processor
+ * @param frame frame bytes
+ * @return true if frame could be processed
+ */
 bool process_frame_vp9(outbound_frame_processor & processor, array_view<const uint8_t> frame);
+
+/**
+ * process H264 video frame
+ * @param processor outbound frame processor
+ * @param frame frame bytes
+ * @return true if frame could be processed
+ */
 bool process_frame_h264(outbound_frame_processor & processor, array_view<const uint8_t> frame);
+
+/**
+ * process opus frame
+ * @param processor outbound frame processor
+ * @param frame frame bytes
+ * @return true if frame could be processed
+ */
 bool process_frame_h265(outbound_frame_processor & processor, array_view<const uint8_t> frame);
+
+/**
+ * process opus frame
+ * @param processor outbound frame processor
+ * @param frame frame bytes
+ * @return true if frame could be processed
+ */
 bool process_frame_av1(outbound_frame_processor & processor, array_view<const uint8_t> frame);
 
+/**
+ * Check if encrypted frame is valid
+ * @param processor outbound frame processor
+ * @param frame frame to validate
+ * @return true if frame could be validated
+ */
 bool validate_encrypted_frame(outbound_frame_processor& processor, array_view<uint8_t> frame);
 
 } // namespace dpp::dave::codec_utils

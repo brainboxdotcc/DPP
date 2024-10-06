@@ -144,7 +144,9 @@
 		"moai",
 		"xbps",
 		"chacha20",
-		"chacha"
+		"chacha",
+		"nullopt",
+		"chrono"
 	],
 	"flagWords": [
 		"hte"

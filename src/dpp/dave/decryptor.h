@@ -51,6 +51,9 @@ struct decryption_stats {
 	uint64_t decrypt_attempts = 0;
 };
 
+/**
+ * @brief Decryptor, decrypts encrypted frames
+ */
 class decryptor {
 public:
 	using Duration = std::chrono::seconds;
