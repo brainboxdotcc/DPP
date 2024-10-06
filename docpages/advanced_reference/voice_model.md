@@ -31,6 +31,8 @@ given by the websocket, known only to you and Discord, using the chacha20 poly13
 The completed packet, potentially with two separate layers of encryption (one with a key only you and Discord know, and one with a key only you and participants in the
 voice chat know!), plus opus encoded audio is sent on its way via UDP to the RTP server, where Discord promptly distribute it to all participants in the chat.
 
+\image html audioframe.svg
+
 After reading all this, go get a coffee or something, you deserve it! ☕
 
 # Flow Diagram
