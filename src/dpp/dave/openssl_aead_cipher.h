@@ -28,23 +28,65 @@
 
 namespace dpp::dave {
 
+/**
+ * @brief OpenSSL AES 128 GCM AEAD cipher
+ *
+ * Replaces the boringSSL AES cipher in the Discord implementation, so we don't
+ * have a conflicting dependency.
+ */
 class openssl_aead_cipher : public cipher_interface { // NOLINT
 public:
+	/**
+	 * @brief constructor
+	 * @param encryptionKey encryption key
+	 */
 	openssl_aead_cipher(const encryption_key& encryptionKey);
 
+	/**
+	 * @brief Destructor
+	 */
 	~openssl_aead_cipher() override;
 
+	/**
+	 * @brief Returns true if valid
+	 * @return True if valid
+	 */
 	[[nodiscard]] bool inline is_valid() const {
 		return cipherCtx_ != nullptr;
 	}
 
+	/**
+	 * @brief Encrypt plaintext to ciphertext and authenticate it with tag/AAD
+	 * @param ciphertextBufferOut ciphertext
+	 * @param plaintextBuffer plaintext
+	 * @param nonceBuffer nonce/IV
+	 * @param additionalData additional authenticated data
+	 * @param tagBufferOut tag
+	 * @return True if encryption succeeded
+	 */
 	bool encrypt(byte_view ciphertextBufferOut, const_byte_view plaintextBuffer, const_byte_view nonceBuffer, const_byte_view additionalData, byte_view tagBufferOut) override;
+
+	/**
+	 * @brief Decrypt ciphertext to plaintext if it authenticates with tag/AAD
+	 * @param plaintextBufferOut plaintext
+	 * @param ciphertextBuffer ciphertext
+	 * @param tagBuffer tag
+	 * @param nonceBuffer nonce/IV
+	 * @param additionalData additional authenticated data
+	 * @return True if decryption succeeded
+	 */
 	bool decrypt(byte_view plaintextBufferOut, const_byte_view ciphertextBuffer, const_byte_view tagBuffer, const_byte_view nonceBuffer, const_byte_view additionalData) override;
 
 private:
-	EVP_CIPHER_CTX* cipherCtx_;  // Using EVP_CIPHER_CTX instead of EVP_AEAD_CTX
-	std::vector<uint8_t> key_;
+	/**
+	 * @brief Using EVP_CIPHER_CTX instead of EVP_AEAD_CTX
+	 */
+	EVP_CIPHER_CTX* cipherCtx_;
 
+	/**
+	 * @brief Encryption/decryption key
+	 */
+	std::vector<uint8_t> key_;
 };
 
 } // namespace dpp::dave

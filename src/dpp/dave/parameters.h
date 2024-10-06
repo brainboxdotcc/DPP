@@ -32,16 +32,54 @@
 
 namespace dpp::dave::mls {
 
+/**
+ * @brief Get ciphersuite id for protocol version
+ * @param version protocol version
+ * @return ciphersuite id
+ */
 ::mlspp::CipherSuite::ID ciphersuite_id_for_protocol_version(protocol_version version) noexcept;
+
+/**
+ * @brief Get ciphersuite for protocol version
+ * @param version protocol version
+ * @return ciphersuite
+ */
 ::mlspp::CipherSuite ciphersuite_for_protocol_version(protocol_version version) noexcept;
+
+/**
+ * @brief Get ciphersuite id for signature version
+ * @param version signature version
+ * @return Ciphersuite id
+ */
 ::mlspp::CipherSuite::ID ciphersuite_id_for_signature_version(signature_version version) noexcept;
+
+/**
+ * @brief Get ciphersuite for singnature version
+ * @param version signature version
+ * @return Ciphersuite
+ */
 ::mlspp::CipherSuite ciphersuite_for_signature_version(signature_version version) noexcept;
+
+/**
+ * @brief Get leaf node capabilities for protocol version
+ * @param version protocol version
+ * @return capabilities
+ */
 ::mlspp::Capabilities leaf_node_capabilities_for_protocol_version(protocol_version version) noexcept;
+
+/**
+ * @brief Get leaf node extensions for protocol version
+ * @param version protocol version
+ * @return extension list
+ */
 ::mlspp::ExtensionList leaf_node_extensions_for_protocol_version(protocol_version version) noexcept;
-::mlspp::ExtensionList group_extensions_for_protocol_version(
-	protocol_version version,
-  const ::mlspp::ExternalSender& externalSender) noexcept;
+
+/**
+ * @brief Get group extensions for protocol version
+ * @param version protocol bersion
+ * @param externalSender external sender
+ * @return extension list
+ */
+::mlspp::ExtensionList group_extensions_for_protocol_version(protocol_version version, const ::mlspp::ExternalSender& externalSender) noexcept;
 
 } // namespace dpp::dave::mls
-
-

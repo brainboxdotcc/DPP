@@ -146,7 +146,8 @@
 		"chacha20",
 		"chacha",
 		"nullopt",
-		"chrono"
+		"chrono",
+		"ciphersuite"
 	],
 	"flagWords": [
 		"hte"

@@ -29,15 +29,40 @@
 
 namespace dpp::dave {
 
-class mls_key_ratchet : public key_ratchet_interface {
+/**
+ * @brief An implementation of the key ratchet using MLS
+ */
+class mls_key_ratchet : public key_ratchet_interface { // NOLINT
 public:
+	/**
+	 * @brief Constructor
+	 * @param suite MLS ciphersuite to use
+	 * @param baseSecret base secret
+	 */
 	mls_key_ratchet(::mlspp::CipherSuite suite, bytes baseSecret) noexcept;
+
+	/**
+	 * @brief Destructor
+	 */
 	~mls_key_ratchet() noexcept override;
 
+	/**
+	 * @brief Gey key for ratchet
+	 * @param generation current generation
+	 * @return encryption key
+	 */
 	encryption_key get_key(key_generation generation) noexcept override;
+
+	/**
+	 * Delete key for ratchet
+	 * @param generation current generation
+	 */
 	void delete_key(key_generation generation) noexcept override;
 
 private:
+	/**
+	 * @brief MLS hash ratchet
+	 */
 	::mlspp::HashRatchet hashRatchet_;
 };
 

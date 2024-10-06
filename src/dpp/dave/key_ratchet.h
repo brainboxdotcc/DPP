@@ -29,12 +29,34 @@
 
 namespace dpp::dave {
 
+/**
+ * @brief Key generation number
+ */
 using key_generation = uint32_t;
 
-class key_ratchet_interface {
+/**
+ * @brief Represents the interface used for a key ratchet.
+ * A key ratchet is a way of propogating key pairs up the tree used by MLS
+ * so we dont have to store O(n^n) key combinations.
+ */
+class key_ratchet_interface { // NOLINT
 public:
+	/**
+	 * @brief Default destructor
+	 */
 	virtual ~key_ratchet_interface() noexcept = default;
+
+	/**
+	 * @brief Get key for ratchet
+	 * @param generation current generation number
+	 * @return encryption key
+	 */
 	virtual encryption_key get_key(key_generation generation) noexcept = 0;
+
+	/**
+	 * @brief Delete key for ratchet
+	 * @param generation current generation number
+	 */
 	virtual void delete_key(key_generation generation) noexcept = 0;
 };
 
