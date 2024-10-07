@@ -45,7 +45,7 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 			case voice_client_dave_mls_external_sender: {
 				log(ll_debug, "voice_client_dave_mls_external_sender");
 
-				mls_state->dave_session->set_external_sender(dave_header.get_data(data.length()));
+				mls_state->dave_session->set_external_sender(dave_header.get_data());
 
 				mls_state->encryptor = std::make_unique<dave::encryptor>();
 				mls_state->decryptors.clear();
@@ -54,7 +54,7 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 			case voice_client_dave_mls_proposals: {
 				log(ll_debug, "voice_client_dave_mls_proposals");
 
-				std::optional<std::vector<uint8_t>> response = mls_state->dave_session->process_proposals(dave_header.get_data(data.length()), dave_mls_user_list);
+				std::optional<std::vector<uint8_t>> response = mls_state->dave_session->process_proposals(dave_header.get_data(), dave_mls_user_list);
 				if (response.has_value()) {
 					auto r = response.value();
 					mls_state->cached_commit = r;
@@ -94,7 +94,7 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 			case voice_client_dave_mls_welcome: {
 				this->mls_state->transition_id = dave_header.get_transition_id();
 				log(ll_debug, "voice_client_dave_mls_welcome with transition id " + std::to_string(this->mls_state->transition_id));
-				auto r = mls_state->dave_session->process_welcome(dave_header.get_data(data.length()), dave_mls_user_list);
+				auto r = mls_state->dave_session->process_welcome(dave_header.get_data(), dave_mls_user_list);
 				if (r.has_value()) {
 					for (const auto& user : dave_mls_user_list) {
 						log(ll_debug, "Setting decryptor key ratchet for user: " + user + ", protocol version: " + std::to_string(mls_state->dave_session->get_protocol_version()));
