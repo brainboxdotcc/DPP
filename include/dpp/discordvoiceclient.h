@@ -217,6 +217,14 @@ struct dave_binary_header_t {
 };
 #pragma pack(pop)
 
+/**
+ * @brief A callback for obtaining a user's privacy code.
+ * The privacy code is returned as the parameter to the function.
+ *
+ * This is a callback function because DAVE requires use of a very resource
+ * intensive SCRYPT call, which uses lots of ram and cpu and take significant
+ * time.
+ */
 using privacy_code_callback_t = std::function<void(const std::string&)>;
 
 /** @brief Implements a discord voice connection.
@@ -435,6 +443,10 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	 */
 	OpusRepacketizer* repacketizer;
 
+	/**
+	 * @brief This holds the state information for DAVE E2EE.
+	 * it is only allocated if E2EE is active on the voice channel.
+	 */
 	std::unique_ptr<dave_state> mls_state;
 
 #else
@@ -449,9 +461,17 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	 */
 	void* repacketizer;
 
+	/**
+	 * @brief This holds the state information for DAVE E2EE.
+	 * it is only allocated if E2EE is active on the voice channel.
+	 */
 	std::unique_ptr<int> mls_state{};
 #endif
 
+	/**
+	 * @brief The list of users that have E2EE potentially enabled for
+	 * DAVE protocol.
+	 */
 	std::set<std::string> dave_mls_user_list;
 
 	/**
