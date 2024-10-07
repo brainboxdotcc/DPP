@@ -82,7 +82,7 @@ discord_voice_client::discord_voice_client(dpp::cluster* _cluster, snowflake _ch
 	try {
 		this->connect();
 	}
-	catch (std::exception&) {
+	catch (...) {
 		cleanup();
 		throw;
 	}
