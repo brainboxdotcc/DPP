@@ -116,7 +116,7 @@ void websocket_client::write(const std::string_view data, ws_opcode _opcode)
 	if ((_opcode == OP_AUTO ? this->data_opcode : _opcode) == OP_TEXT) {
 		log(dpp::ll_trace, std::string("W: ") + data.data());
 	} else {
-		log(dpp::ll_trace, "W: " + dpp::utility::debug_dump((uint8_t*)(data.data()), data.length()));
+		log(dpp::ll_trace, "W: <binary frame> size=" + std::to_string(data.length()));
 	}
 	if (state == HTTP_HEADERS) {
 		/* Simple write */

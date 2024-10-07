@@ -65,9 +65,7 @@ moving_averager::operator float() {
 		}
 		return returnData / static_cast<float>(values.size());
 	}
-	else {
-		return 0.0f;
-	}
+	return 0.0f;
 }
 
 bool discord_voice_client::sodium_initialised = false;
@@ -86,18 +84,25 @@ bool discord_voice_client::is_playing() {
 	return (!this->outbuf.empty());
 }
 
-uint16_t dave_binary_header_t::get_welcome_transition_id() const {
-	uint16_t transition{0};
-	std::memcpy(&transition, package, sizeof(uint16_t));
-	return ntohs(transition);
+uint16_t dave_binary_header_t::get_transition_id() const {
+	if (opcode != voice_client_dave_mls_welcome) {
+		throw dpp::logic_exception("Can't get transition ID from buffer that is not of type voice_client_dave_mls_welcome(30)");
+	}
+	return transition_id;
+}
+
+dave_binary_header_t::dave_binary_header_t(const std::string& buffer) {
+	if (buffer.length() < 5) {
+		throw dpp::length_exception("DAVE binary buffer too short (<5)");
+	}
+	seq = (buffer[0] << 8) | buffer[1];
+	opcode = buffer[2];
+	transition_id = (buffer[3] << 8) | buffer[4];
+	package.assign(buffer.begin() + (opcode == voice_client_dave_mls_welcome ? 5 : 3), buffer.end());
 }
 
 std::vector<uint8_t> dave_binary_header_t::get_data(size_t length) const {
-	return std::vector<uint8_t>(package, package + length - sizeof(dave_binary_header_t));
-}
-
-std::vector<uint8_t> dave_binary_header_t::get_welcome_data(size_t length) const {
-	return std::vector<uint8_t>(package + sizeof(uint16_t), package + length - sizeof(dave_binary_header_t));
+	return package;
 }
 
 std::string discord_voice_client::get_privacy_code() const {

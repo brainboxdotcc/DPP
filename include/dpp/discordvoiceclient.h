@@ -175,20 +175,28 @@ enum voice_websocket_opcode_t : uint8_t {
 /**
  * @brief DAVE E2EE Binary frame header
  */
-#pragma pack(push, 1)
 struct dave_binary_header_t {
 	/**
 	 * @brief Sequence number
 	 */
 	uint16_t seq;
+
 	/**
 	 * @brief Opcode type
 	 */
 	uint8_t opcode;
+
 	/**
-	 * @brief Data package
+	 * @brief Data package, an opaque structure passed to the
+	 * Discord libdave functions.
 	 */
-	uint8_t package[];
+	std::vector<uint8_t> package;
+
+	/**
+	 * @brief Fill binary header from inbound buffer
+	 * @param buffer inbound websocket buffer
+	 */
+	dave_binary_header_t(const std::string& buffer);
 
 	/**
 	 * Get the data package from the packed binary frame, as a vector of uint8_t
@@ -200,22 +208,19 @@ struct dave_binary_header_t {
 	[[nodiscard]] std::vector<uint8_t> get_data(size_t length) const;
 
 	/**
-	 * Get the data package from the packed binary frame for process_welcome,
-	 * as a vector of uint8_t for use in the libdave functions.
-	 *
-	 * @param length Length of the data, use the websocket frame size here
-	 * @return data blob
-	 */
-	[[nodiscard]] std::vector<uint8_t> get_welcome_data(size_t length) const;
-
-	/**
 	 * Get transition ID for process_welcome
 	 *
 	 * @return Transition ID
 	 */
-	[[nodiscard]] uint16_t get_welcome_transition_id() const;
+	[[nodiscard]] uint16_t get_transition_id() const;
+
+private:
+	/**
+	 * @brief Transition id, only valid when the opcode is
+	 * welcome state. Use get_transition_id() to obtain value.
+	 */
+	uint16_t transition_id;
 };
-#pragma pack(pop)
 
 /**
  * @brief A callback for obtaining a user's privacy code.
