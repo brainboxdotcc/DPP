@@ -27,14 +27,11 @@
 #include <limits>
 #include <optional>
 #include <dpp/exception.h>
-
-#include "logger.h"
 #include "leb128.h"
 
 namespace dpp::dave::codec_utils {
 
-unencrypted_frame_header_size BytesCoveringH264PPS(const uint8_t* payload,
-						   const uint64_t sizeRemaining)
+unencrypted_frame_header_size BytesCoveringH264PPS(const uint8_t* payload, const uint64_t sizeRemaining)
 {
 	// the payload starts with three exponential golomb encoded values
 	// (first_mb_in_slice, sps_id, pps_id)
@@ -212,29 +209,23 @@ bool process_frame_h264(outbound_frame_processor& processor, array_view<const ui
 		// always write a long start code and then the NAL unit
 		processor.add_unencrypted_bytes(kH26XNaluLongStartCode, sizeof(kH26XNaluLongStartCode));
 
-		auto nextNaluIndexPair =
-		  FindNextH26XNaluIndex(frame.data(), frame.size(), nalUnitStartIndex);
-		auto nextNaluStart = nextNaluIndexPair.has_value()
-		  ? nextNaluIndexPair->first - nextNaluIndexPair->second
-		  : frame.size();
+		auto nextNaluIndexPair = FindNextH26XNaluIndex(frame.data(), frame.size(), nalUnitStartIndex);
+		auto nextNaluStart = nextNaluIndexPair.has_value() ? nextNaluIndexPair->first - nextNaluIndexPair->second : frame.size();
 
 		if (nalType == kH264NalTypeSlice || nalType == kH264NalTypeIdr) {
 			// once we've hit a slice or an IDR
 			// we just need to cover getting to the PPS ID
 			auto nalUnitPayloadStart = nalUnitStartIndex + kH264NalUnitHeaderSize;
-			auto nalUnitPPSBytes = BytesCoveringH264PPS(frame.data() + nalUnitPayloadStart,
-														frame.size() - nalUnitPayloadStart);
+			auto nalUnitPPSBytes = BytesCoveringH264PPS(frame.data() + nalUnitPayloadStart, frame.size() - nalUnitPayloadStart);
 
-		processor.add_unencrypted_bytes(frame.data() + nalUnitStartIndex,
-						kH264NalUnitHeaderSize + nalUnitPPSBytes);
+		processor.add_unencrypted_bytes(frame.data() + nalUnitStartIndex, kH264NalUnitHeaderSize + nalUnitPPSBytes);
 		processor.add_encrypted_bytes(
 			frame.data() + nalUnitStartIndex + kH264NalUnitHeaderSize + nalUnitPPSBytes,
 			nextNaluStart - nalUnitStartIndex - kH264NalUnitHeaderSize - nalUnitPPSBytes);
 		}
 		else {
 			// copy the whole NAL unit
-		processor.add_unencrypted_bytes(frame.data() + nalUnitStartIndex,
-						nextNaluStart - nalUnitStartIndex);
+		processor.add_unencrypted_bytes(frame.data() + nalUnitStartIndex, nextNaluStart - nalUnitStartIndex);
 		}
 
 		naluIndexPair = nextNaluIndexPair;
@@ -274,22 +265,16 @@ bool process_frame_h265(outbound_frame_processor& processor, array_view<const ui
 		// always write a long start code and then the NAL unit
 		processor.add_unencrypted_bytes(kH26XNaluLongStartCode, sizeof(kH26XNaluLongStartCode));
 
-		auto nextNaluIndexPair =
-		  FindNextH26XNaluIndex(frame.data(), frame.size(), nalUnitStartIndex);
-		auto nextNaluStart = nextNaluIndexPair.has_value()
-		  ? nextNaluIndexPair->first - nextNaluIndexPair->second
-		  : frame.size();
+		auto nextNaluIndexPair = FindNextH26XNaluIndex(frame.data(), frame.size(), nalUnitStartIndex);
+		auto nextNaluStart = nextNaluIndexPair.has_value() ? nextNaluIndexPair->first - nextNaluIndexPair->second : frame.size();
 
 		if (nalType < kH265NalTypeVclCutoff) {
 			// found a VCL NAL, encrypt the payload only
-		processor.add_unencrypted_bytes(frame.data() + nalUnitStartIndex, kH265NalUnitHeaderSize);
-		processor.add_encrypted_bytes(frame.data() + nalUnitStartIndex + kH265NalUnitHeaderSize,
-						  nextNaluStart - nalUnitStartIndex - kH265NalUnitHeaderSize);
-		}
-		else {
+			processor.add_unencrypted_bytes(frame.data() + nalUnitStartIndex, kH265NalUnitHeaderSize);
+			processor.add_encrypted_bytes(frame.data() + nalUnitStartIndex + kH265NalUnitHeaderSize, nextNaluStart - nalUnitStartIndex - kH265NalUnitHeaderSize);
+		} else {
 			// copy the whole NAL unit
-		processor.add_unencrypted_bytes(frame.data() + nalUnitStartIndex,
-						nextNaluStart - nalUnitStartIndex);
+			processor.add_unencrypted_bytes(frame.data() + nalUnitStartIndex, nextNaluStart - nalUnitStartIndex);
 		}
 
 		naluIndexPair = nextNaluIndexPair;
@@ -372,8 +357,7 @@ bool process_frame_av1(outbound_frame_processor& processor, array_view<const uin
 		processor.add_unencrypted_bytes(&obuHeader, sizeof(obuHeader));
 			if (obuHasExtension) {
 				// write the extension byte unencrypted
-			processor.add_unencrypted_bytes(frame.data() + obuHeaderIndex + sizeof(obuHeader),
-							kObuExtensionSizeBytes);
+				processor.add_unencrypted_bytes(frame.data() + obuHeaderIndex + sizeof(obuHeader), kObuExtensionSizeBytes);
 			}
 
 			// write the OBU payload size unencrypted if it was present and we didn't rewrite
@@ -384,11 +368,11 @@ bool process_frame_av1(outbound_frame_processor& processor, array_view<const uin
 				// we sanitize the size by re-writing it ourselves
 				uint8_t leb128Buffer[LEB128_MAX_SIZE];
 				size_t additionalBytesToWrite = write_leb128(obuPayloadSize, leb128Buffer);
-			processor.add_unencrypted_bytes(leb128Buffer, additionalBytesToWrite);
+				processor.add_unencrypted_bytes(leb128Buffer, additionalBytesToWrite);
 			}
 
 			// add the OBU payload, encrypted
-		processor.add_encrypted_bytes(frame.data() + obuPayloadIndex, obuPayloadSize);
+			processor.add_encrypted_bytes(frame.data() + obuPayloadIndex, obuPayloadSize);
 		}
 	}
 

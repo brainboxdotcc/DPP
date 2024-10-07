@@ -28,8 +28,7 @@
 
 namespace dpp::dave::mls {
 
-::mlspp::Credential create_user_credential(const std::string& userId, protocol_version version)
-{
+::mlspp::Credential create_user_credential(const std::string& userId, protocol_version version) {
 	// convert the string user ID to a big endian uint64_t
 	auto userID = std::stoull(userId);
 	auto credentialBytes = big_endian_bytes_from(userID);
@@ -37,8 +36,7 @@ namespace dpp::dave::mls {
 	return ::mlspp::Credential::basic(credentialBytes);
 }
 
-std::string user_credential_to_string(const ::mlspp::Credential& cred, protocol_version version)
-{
+std::string user_credential_to_string(const ::mlspp::Credential& cred, protocol_version version) {
 	if (cred.type() != ::mlspp::CredentialType::basic) {
 		return "";
 	}

@@ -26,8 +26,7 @@
 
 namespace dpp::dave::mls {
 
-::mlspp::bytes_ns::bytes big_endian_bytes_from(uint64_t value) noexcept
-{
+::mlspp::bytes_ns::bytes big_endian_bytes_from(uint64_t value) noexcept {
 	auto buffer = ::mlspp::bytes_ns::bytes();
 	buffer.reserve(sizeof(value));
 
@@ -38,8 +37,7 @@ namespace dpp::dave::mls {
 	return buffer;
 }
 
-uint64_t from_big_endian_bytes(const ::mlspp::bytes_ns::bytes& buffer) noexcept
-{
+uint64_t from_big_endian_bytes(const ::mlspp::bytes_ns::bytes& buffer) noexcept {
 	uint64_t val = 0;
 
 	if (buffer.size() <= sizeof(val)) {

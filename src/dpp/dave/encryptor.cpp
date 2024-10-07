@@ -27,9 +27,9 @@
 #include <cstring>
 #include <bytes/bytes.h>
 #include <dpp/exception.h>
+#include <dpp/cluster.h>
 #include "common.h"
 #include "cryptor_manager.h"
-#include "logger.h"
 #include "codec_utils.h"
 #include "array_view.h"
 #include "leb128.h"
@@ -63,8 +63,7 @@ encryptor::result_code encryptor::encrypt(media_type mediaType,
 			   size_t* bytesWritten)
 {
 	if (mediaType != media_audio && mediaType != media_video) {
-		DISCORD_LOG(LS_WARNING) << "encrypt failed, invalid media type: "
-								<< static_cast<int>(mediaType);
+		creator.log(dpp::ll_warning, "encrypt failed, invalid media type: " + std::to_string(static_cast<int>(mediaType)));
 		return result_code::rc_encryption_failure;
 	}
 
@@ -209,17 +208,6 @@ encryptor::result_code encryptor::encrypt(media_type mediaType,
 		stats_[mediaType].encrypt_failure++;
 	}
 
-	if (now > lastStatsTime_ + kStatsInterval) {
-		lastStatsTime_ = now;
-		DISCORD_LOG(LS_INFO) << "Encrypted audio: " << stats_[media_audio].encrypt_success
-							 << ", video: " << stats_[media_video].encrypt_success
-							 << ". Failed audio: " << stats_[media_audio].encrypt_failure
-							 << ", video: " << stats_[media_video].encrypt_failure;
-		DISCORD_LOG(LS_INFO) << "Last encrypted frame, type: "
-							 << (mediaType == media_audio ? "audio" : "video") << ", ssrc: " << ssrc
-							 << ", size: " << frame.size();
-	}
-
 	return result;
 }
 
@@ -262,7 +250,7 @@ std::unique_ptr<outbound_frame_processor> encryptor::get_or_create_frame_process
 {
 	std::lock_guard<std::mutex> lock(frameProcessorsMutex_);
 	if (frameProcessors_.empty()) {
-		return std::make_unique<outbound_frame_processor>();
+		return std::make_unique<outbound_frame_processor>(creator);
 	}
 	auto frameProcessor = std::move(frameProcessors_.back());
 	frameProcessors_.pop_back();
@@ -289,7 +277,7 @@ encryptor::cryptor_and_nonce encryptor::get_next_cryptor_and_nonce()
 		currentKeyGeneration_ = generation;
 
 		auto encryptionKey = keyRatchet_->get_key(currentKeyGeneration_);
-		cryptor_ = create_cipher(encryptionKey);
+		cryptor_ = create_cipher(creator, encryptionKey);
 	}
 
 	return {cryptor_, truncatedNonce_};

@@ -26,11 +26,11 @@
 
 namespace dpp::dave {
 
-constexpr protocol_version CurrentDaveProtocolVersion = 1;
+constexpr protocol_version current_dave_protocol_version = 1;
 
 protocol_version max_protocol_version()
 {
-	return CurrentDaveProtocolVersion;
+	return current_dave_protocol_version;
 }
 
 } // namespace dpp::dave

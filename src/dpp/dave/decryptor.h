@@ -39,6 +39,10 @@
 #include "version.h"
 #include "clock.h"
 
+namespace dpp {
+	class cluster;
+}
+
 namespace dpp::dave {
 
 class key_ratchet_interface;
@@ -74,6 +78,12 @@ struct decryption_stats {
  */
 class decryptor {
 public:
+	/**
+	 * @brief Constructor
+	 * @param cl Creator
+	 */
+	decryptor(dpp::cluster& cl) : creator(cl) { };
+
 	/**
 	 * @brief Chrono duration
 	 */
@@ -179,6 +189,11 @@ private:
 
 	time_point lastStatsTime_{time_point::min()};
 	std::array<decryption_stats, 2> stats_;
+
+	/**
+	 * @brief DPP Cluster, used for logging
+	 */
+	dpp::cluster& creator;
 };
 
 } // namespace dpp::dave

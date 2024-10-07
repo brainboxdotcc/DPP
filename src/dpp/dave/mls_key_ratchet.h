@@ -27,6 +27,10 @@
 #include <mls/key_schedule.h>
 #include "key_ratchet.h"
 
+namespace dpp {
+	class cluster;
+}
+
 namespace dpp::dave {
 
 /**
@@ -39,7 +43,7 @@ public:
 	 * @param suite MLS ciphersuite to use
 	 * @param baseSecret base secret
 	 */
-	mls_key_ratchet(::mlspp::CipherSuite suite, bytes baseSecret) noexcept;
+	mls_key_ratchet(dpp::cluster& cl, ::mlspp::CipherSuite suite, bytes baseSecret) noexcept;
 
 	/**
 	 * @brief Destructor
@@ -64,6 +68,11 @@ private:
 	 * @brief MLS hash ratchet
 	 */
 	::mlspp::HashRatchet hashRatchet_;
+
+	/**
+	 * @brief DPP Cluster, used for logging
+	 */
+	dpp::cluster& creator;
 };
 
 } // namespace dpp::dave

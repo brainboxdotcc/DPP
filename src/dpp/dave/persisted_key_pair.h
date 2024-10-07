@@ -37,6 +37,10 @@
 #include "parameters.h"
 #include "version.h"
 
+namespace dpp {
+	class cluster;
+}
+
 namespace mlspp {
 	struct SignaturePrivateKey;
 };
@@ -55,7 +59,7 @@ using key_pair_context_type = const char *;
  * @param version Protocol version
  * @return MLS signature private key
  */
-std::shared_ptr<::mlspp::SignaturePrivateKey> get_persisted_key_pair(key_pair_context_type ctx, const std::string& sessionID, protocol_version version);
+std::shared_ptr<::mlspp::SignaturePrivateKey> get_persisted_key_pair(dpp::cluster& creator, key_pair_context_type ctx, const std::string& sessionID, protocol_version version);
 
 /**
  * @brief self signed signature and key
@@ -78,7 +82,7 @@ struct KeyAndSelfSignature {
  * @param version protocol version
  * @return Key and self signature
  */
-KeyAndSelfSignature get_persisted_public_key(key_pair_context_type ctx, const std::string& sessionID, signature_version version);
+KeyAndSelfSignature get_persisted_public_key(dpp::cluster& creator, key_pair_context_type ctx, const std::string& sessionID, signature_version version);
 
 /**
  * @brief Delete persisted key pair
@@ -87,7 +91,7 @@ KeyAndSelfSignature get_persisted_public_key(key_pair_context_type ctx, const st
  * @param version protocol version
  * @return true if deleted
  */
-bool delete_persisted_key_pair(key_pair_context_type ctx, const std::string& sessionID, signature_version version);
+bool delete_persisted_key_pair(dpp::cluster& creator, key_pair_context_type ctx, const std::string& sessionID, signature_version version);
 
 /**
  * @brief Key version for DAVE
@@ -102,7 +106,7 @@ namespace detail {
 	 * @param suite ciphersuite
 	 * @return signature and private key
 	 */
-	std::shared_ptr<::mlspp::SignaturePrivateKey> get_generic_persisted_key_pair(key_pair_context_type ctx, const std::string& id, ::mlspp::CipherSuite suite);
+	std::shared_ptr<::mlspp::SignaturePrivateKey> get_generic_persisted_key_pair(dpp::cluster& creator, key_pair_context_type ctx, const std::string& id, ::mlspp::CipherSuite suite);
 
 	/**
 	 * Delete generic persisted key pair
@@ -110,7 +114,7 @@ namespace detail {
 	 * @param id id
 	 * @return true if deleted
 	 */
-	bool delete_generic_persisted_key_pair(key_pair_context_type ctx, const std::string& id);
+	bool delete_generic_persisted_key_pair(dpp::cluster& creator, key_pair_context_type ctx, const std::string& id);
 } // namespace dpp::dave::mls::detail
 
 } // namespace dpp::dave::mls

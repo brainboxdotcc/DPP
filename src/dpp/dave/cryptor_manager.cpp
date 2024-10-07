@@ -23,13 +23,10 @@
  *
  ************************************************************************************/
 #include "cryptor_manager.h"
-
 #include <limits>
-
 #include "key_ratchet.h"
-#include "logger.h"
-
 #include <bytes/bytes.h>
+#include <dpp/cluster.h>
 
 using namespace std::chrono_literals;
 
@@ -52,11 +49,12 @@ big_nonce compute_wrapped_big_nonce(key_generation generation, truncated_sync_no
 	return static_cast<big_nonce>(generation) << RATCHET_GENERATION_SHIFT_BITS | maskedNonce;
 }
 
-aead_cipher_manager::aead_cipher_manager(const clock_interface& clock, std::unique_ptr<key_ratchet_interface> keyRatchet)
+aead_cipher_manager::aead_cipher_manager(dpp::cluster& cl, const clock_interface& clock, std::unique_ptr<key_ratchet_interface> keyRatchet)
   : clock_(clock)
   , keyRatchet_(std::move(keyRatchet))
   , ratchetCreation_(clock.now())
   , ratchetExpiry_(time_point::max())
+  , creator(cl)
 {
 }
 
@@ -76,14 +74,12 @@ cipher_interface* aead_cipher_manager::get_cipher(key_generation generation)
 	cleanup_expired_ciphers();
 
 	if (generation < oldestGeneration_) {
-		DISCORD_LOG(LS_INFO) << "Received frame with old generation: " << generation
-							 << ", oldest generation: " << oldestGeneration_;
+		creator.log(dpp::ll_trace, "Received frame with old generation: " + std::to_string(generation) + ", oldest generation: " + std::to_string(oldestGeneration_));
 		return nullptr;
 	}
 
 	if (generation > newestGeneration_ + MAX_GENERATION_GAP) {
-		DISCORD_LOG(LS_INFO) << "Received frame with future generation: " << generation
-							 << ", newest generation: " << newestGeneration_;
+		creator.log(dpp::ll_trace, "Received frame with future generation: " + std::to_string(generation) + ", newest generation: " + std::to_string(newestGeneration_));
 		return nullptr;
 	}
 
@@ -92,10 +88,7 @@ cipher_interface* aead_cipher_manager::get_cipher(key_generation generation)
 	auto maxLifetimeFrames = MAX_FRAMES_PER_SECOND * ratchetLifetimeSec;
 	auto maxLifetimeGenerations = maxLifetimeFrames >> RATCHET_GENERATION_SHIFT_BITS;
 	if (generation > maxLifetimeGenerations) {
-		DISCORD_LOG(LS_INFO) << "Received frame with generation " << generation
-							 << " beyond ratchet max lifetime generations: "
-							 << maxLifetimeGenerations
-							 << ", ratchet lifetime: " << ratchetLifetimeSec << "s";
+		creator.log(dpp::ll_debug, "Received frame with generation " + std::to_string(generation) + " beyond ratchet max lifetime generations: " + std::to_string(maxLifetimeGenerations) + ", ratchet lifetime: " + std::to_string(ratchetLifetimeSec) + "s");
 		return nullptr;
 	}
 
@@ -144,14 +137,14 @@ void aead_cipher_manager::report_cipher_success(key_generation generation, trunc
 	if (generation <= newestGeneration_ || cryptors_.find(generation) == cryptors_.end()) {
 		return;
 	}
-	DISCORD_LOG(LS_INFO) << "Reporting cryptor success, generation: " << generation;
+	creator.log(dpp::ll_trace, "Reporting cryptor success, generation: " + std::to_string(generation));
 	newestGeneration_ = generation;
 
 	// Update the expiry time for all old cryptors
 	const auto expiryTime = clock_.now() + CIPHER_EXPIRY;
 	for (auto& [gen, cryptor] : cryptors_) {
 		if (gen < newestGeneration_) {
-			DISCORD_LOG(LS_INFO) << "Updating expiry for cryptor, generation: " << gen;
+			creator.log(dpp::ll_trace, "Updating expiry for cryptor, generation: " + std::to_string(gen));
 			cryptor.expiry = std::min(cryptor.expiry, expiryTime);
 		}
 	}
@@ -172,14 +165,14 @@ aead_cipher_manager::expiring_cipher aead_cipher_manager::make_expiring_cipher(k
 	// In that case, create it with a non-infinite expiry time as we have already transitioned
 	// to a newer generation
 	if (generation < newestGeneration_) {
-		DISCORD_LOG(LS_INFO) << "Creating cryptor for old generation: " << generation;
+		creator.log(dpp::ll_debug, "Creating cryptor for old generation: " + std::to_string(generation));
 		expiryTime = clock_.now() + CIPHER_EXPIRY;
 	}
 	else {
-		DISCORD_LOG(LS_INFO) << "Creating cryptor for new generation: " << generation;
+		creator.log(dpp::ll_debug, "Creating cryptor for new generation: " + std::to_string(generation));
 	}
 
-	return {create_cipher(encryptionKey), expiryTime};
+	return {create_cipher(creator, encryptionKey), expiryTime};
 }
 
 void aead_cipher_manager::cleanup_expired_ciphers()
@@ -189,15 +182,14 @@ void aead_cipher_manager::cleanup_expired_ciphers()
 
 		bool expired = cryptor.expiry < clock_.now();
 		if (expired) {
-			DISCORD_LOG(LS_INFO) << "Removing expired cryptor, generation: " << generation;
+			creator.log(dpp::ll_trace, "Removing expired cryptor, generation: " + std::to_string(generation));
 		}
 
 		it = expired ? cryptors_.erase(it) : ++it;
 	}
 
-	while (oldestGeneration_ < newestGeneration_ &&
-		   cryptors_.find(oldestGeneration_) == cryptors_.end()) {
-		DISCORD_LOG(LS_INFO) << "Deleting key for old generation: " << oldestGeneration_;
+	while (oldestGeneration_ < newestGeneration_ && cryptors_.find(oldestGeneration_) == cryptors_.end()) {
+		creator.log(dpp::ll_trace, "Deleting key for old generation: " + std::to_string(oldestGeneration_));
 		keyRatchet_->delete_key(oldestGeneration_);
 		++oldestGeneration_;
 	}

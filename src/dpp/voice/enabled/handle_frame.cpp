@@ -47,7 +47,7 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 
 				mls_state->dave_session->set_external_sender(dave_header.get_data());
 
-				mls_state->encryptor = std::make_unique<dave::encryptor>();
+				mls_state->encryptor = std::make_unique<dave::encryptor>(*creator);
 				mls_state->decryptors.clear();
 			}
 			break;
@@ -69,7 +69,7 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 				for (const auto& user : dave_mls_user_list) {
 					log(ll_debug, "Setting decryptor key ratchet for user: " + user + ", protocol version: " + std::to_string(mls_state->dave_session->get_protocol_version()));
 					dpp::snowflake u{user};
-					mls_state->decryptors.emplace(u, std::make_unique<dpp::dave::decryptor>());
+					mls_state->decryptors.emplace(u, std::make_unique<dpp::dave::decryptor>(*creator));
 					mls_state->decryptors.find(u)->second->transition_to_key_ratchet(mls_state->dave_session->get_key_ratchet(user));
 				}
 				mls_state->encryptor->set_key_ratchet(mls_state->dave_session->get_key_ratchet(creator->me.id.str()));
@@ -99,7 +99,7 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 					for (const auto& user : dave_mls_user_list) {
 						log(ll_debug, "Setting decryptor key ratchet for user: " + user + ", protocol version: " + std::to_string(mls_state->dave_session->get_protocol_version()));
 						dpp::snowflake u{user};
-						mls_state->decryptors.emplace(u, std::make_unique<dpp::dave::decryptor>());
+						mls_state->decryptors.emplace(u, std::make_unique<dpp::dave::decryptor>(*creator));
 						mls_state->decryptors.find(u)->second->transition_to_key_ratchet(mls_state->dave_session->get_key_ratchet(user));
 					}
 					mls_state->encryptor->set_key_ratchet(mls_state->dave_session->get_key_ratchet(creator->me.id.str()));

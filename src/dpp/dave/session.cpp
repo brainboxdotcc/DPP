@@ -41,9 +41,9 @@
 
 #include "openssl/evp.h"
 
-#define TRACK_MLS_ERROR(reason)					  \
-	if (onMLSFailureCallback_) {					 \
-		onMLSFailureCallback_(__FUNCTION__, reason); \
+#define TRACK_MLS_ERROR(reason)					\
+	if (onMLSFailureCallback_) {				\
+		onMLSFailureCallback_(__FUNCTION__, reason);	\
 	}
 
 namespace dpp::dave::mls {
@@ -61,8 +61,7 @@ session::session(dpp::cluster& cluster, key_pair_context_type context, const std
 
 session::~session() noexcept = default;
 
-void session::init(protocol_version version, uint64_t groupId, std::string const& selfUserId, std::shared_ptr<::mlspp::SignaturePrivateKey>& transientKey) noexcept
-{
+void session::init(protocol_version version, uint64_t groupId, std::string const& selfUserId, std::shared_ptr<::mlspp::SignaturePrivateKey>& transientKey) noexcept {
 	reset();
 
 	selfUserId_ = selfUserId;
@@ -76,8 +75,7 @@ void session::init(protocol_version version, uint64_t groupId, std::string const
 	create_pending_group();
 }
 
-void session::reset() noexcept
-{
+void session::reset() noexcept {
 	creator.log(dpp::ll_debug, "Resetting MLS session");
 
 	clear_pending_state();
@@ -89,8 +87,7 @@ void session::reset() noexcept
 	groupId_.clear();
 }
 
-void session::set_protocol_version(protocol_version version) noexcept
-{
+void session::set_protocol_version(protocol_version version) noexcept {
 	if (version != protocolVersion_) {
 		// when we need to retain backwards compatibility
 		// there may be some changes to the MLS objects required here
@@ -99,13 +96,11 @@ void session::set_protocol_version(protocol_version version) noexcept
 	}
 }
 
-std::vector<uint8_t> session::get_last_epoch_authenticator() const noexcept
-{
+std::vector<uint8_t> session::get_last_epoch_authenticator() const noexcept {
 	if (!currentState_) {
 		creator.log(dpp::ll_debug, "Cannot get epoch authenticator without an established MLS group");
 		return {};
 	}
-
 	return std::move(currentState_->epoch_authenticator().as_vec());
 }
 
@@ -131,9 +126,7 @@ catch (const std::exception& e) {
 	return;
 }
 
-std::optional<std::vector<uint8_t>> session::process_proposals(
-  std::vector<uint8_t> proposals,
-  std::set<std::string> const& recognizedUserIDs) noexcept
+std::optional<std::vector<uint8_t>> session::process_proposals(std::vector<uint8_t> proposals, std::set<std::string> const& recognizedUserIDs) noexcept
 try {
 	if (!pendingGroupState_ && !currentState_) {
 		creator.log(dpp::ll_debug, "Cannot process proposals without any pending or established MLS group state");
@@ -267,8 +260,7 @@ bool session::is_recognized_user_id(const ::mlspp::Credential& cred, std::set<st
 	return true;
 }
 
-bool session::validate_proposal_message(::mlspp::AuthenticatedContent const& message, ::mlspp::State const& targetState, std::set<std::string> const& recognizedUserIDs) const
-{
+bool session::validate_proposal_message(::mlspp::AuthenticatedContent const& message, ::mlspp::State const& targetState, std::set<std::string> const& recognizedUserIDs) const {
 	if (message.wire_format != ::mlspp::WireFormat::mls_public_message) {
 		creator.log(dpp::ll_warning, "MLS proposal message must be PublicMessage");
 		TRACK_MLS_ERROR("Invalid proposal wire format");
@@ -526,14 +518,13 @@ bool session::verify_welcome_state(::mlspp::State const& state,
 	return true;
 }
 
-void session::init_leaf_node(std::string const& selfUserId,
-			     std::shared_ptr<::mlspp::SignaturePrivateKey>& transientKey) noexcept
+void session::init_leaf_node(std::string const& selfUserId, std::shared_ptr<::mlspp::SignaturePrivateKey>& transientKey) noexcept
 try {
 	auto ciphersuite = ciphersuite_for_protocol_version(protocolVersion_);
 
 	if (!transientKey) {
 		if (!signingKeyId_.empty()) {
-			transientKey = get_persisted_key_pair(keyPairContext_, signingKeyId_, protocolVersion_);
+			transientKey = get_persisted_key_pair(creator, keyPairContext_, signingKeyId_, protocolVersion_);
 			if (!transientKey) {
 				creator.log(dpp::ll_warning, "Did not receive MLS signature private key from get_persisted_key_pair; aborting");
 				return;
@@ -549,18 +540,11 @@ try {
 
 	auto selfCredential = create_user_credential(selfUserId, protocolVersion_);
 
-	selfHPKEPrivateKey_ =
-	  std::make_unique<::mlspp::HPKEPrivateKey>(::mlspp::HPKEPrivateKey::generate(ciphersuite));
+	selfHPKEPrivateKey_ = std::make_unique<::mlspp::HPKEPrivateKey>(::mlspp::HPKEPrivateKey::generate(ciphersuite));
 
-	selfLeafNode_ =
-	  std::make_unique<::mlspp::LeafNode>(ciphersuite,
-					      selfHPKEPrivateKey_->public_key,
-					      selfSigPrivateKey_->public_key,
-					      std::move(selfCredential),
-					      leaf_node_capabilities_for_protocol_version(protocolVersion_),
-					      ::mlspp::Lifetime::create_default(),
-					      leaf_node_extensions_for_protocol_version(protocolVersion_),
-					      *selfSigPrivateKey_);
+	selfLeafNode_ = std::make_unique<::mlspp::LeafNode>(ciphersuite, selfHPKEPrivateKey_->public_key, selfSigPrivateKey_->public_key, std::move(selfCredential),
+					leaf_node_capabilities_for_protocol_version(protocolVersion_), ::mlspp::Lifetime::create_default(),
+					leaf_node_extensions_for_protocol_version(protocolVersion_), *selfSigPrivateKey_);
 
 	creator.log(dpp::ll_debug, "Created MLS leaf node");
 }
@@ -667,7 +651,7 @@ std::unique_ptr<key_ratchet_interface> session::get_key_ratchet(std::string cons
 
 	// this assumes the MLS ciphersuite produces a kAesGcm128KeyBytes sized key
 	// would need to be updated to a different ciphersuite if there's a future mismatch
-	return std::make_unique<mls_key_ratchet>(currentState_->cipher_suite(), std::move(baseSecret));
+	return std::make_unique<mls_key_ratchet>(creator, currentState_->cipher_suite(), std::move(baseSecret));
 }
 
 void session::get_pairwise_fingerprint(uint16_t version,

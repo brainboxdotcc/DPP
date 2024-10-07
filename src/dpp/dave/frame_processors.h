@@ -31,6 +31,10 @@
 #include "common.h"
 #include "array_view.h"
 
+namespace dpp {
+	class cluster;
+}
+
 namespace dpp::dave {
 
 /**
@@ -84,6 +88,12 @@ bool validate_unencrypted_ranges(const ranges& unencryptedRanges, size_t frameSi
  */
 class inbound_frame_processor {
 public:
+	/**
+	 * @brief Create inbound frame processor
+	 * @param _creator creating cluster
+	 */
+	inbound_frame_processor(dpp::cluster& _creator) : creator(_creator) { };
+
 	/**
 	 * @brief Parse inbound frame
 	 * @param frame frame bytes
@@ -179,6 +189,11 @@ private:
 	std::vector<uint8_t> authenticated_;
 	std::vector<uint8_t> ciphertext_;
 	std::vector<uint8_t> plaintext_;
+
+	/**
+	 * @brief DPP Cluster, used for logging
+	 */
+	dpp::cluster& creator;
 };
 
 /**
@@ -186,6 +201,12 @@ private:
  */
 class outbound_frame_processor {
 public:
+	/**
+	 * @brief Create outbound frame processor
+	 * @param _creator creating cluster
+	 */
+	outbound_frame_processor(dpp::cluster& _creator) : creator(_creator) { };
+
 	/**
 	 * @brief Process outbound frame
 	 * @param frame frame data
@@ -266,6 +287,11 @@ private:
 	std::vector<uint8_t> encryptedBytes_;
 	std::vector<uint8_t> ciphertextBytes_;
 	ranges unencryptedRanges_;
+
+	/**
+	 * @brief DPP Cluster, used for logging
+	 */
+	dpp::cluster& creator;
 };
 
 } // namespace dpp::dave

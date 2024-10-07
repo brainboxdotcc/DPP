@@ -38,6 +38,10 @@
 #include "frame_processors.h"
 #include "version.h"
 
+namespace dpp {
+	class cluster;
+}
+
 namespace dpp::dave {
 
 /**
@@ -72,6 +76,12 @@ struct encryption_stats {
 
 class encryptor {
 public:
+	/**
+ * @brief Constructor
+ * @param cl Creator
+ */
+	encryptor(dpp::cluster& cl) : creator(cl) { };
+
 	/**
 	 * @brief Return codes for encryptor::encrypt
 	 */
@@ -233,6 +243,11 @@ private:
 
 	protocol_version_changed_callback protocolVersionChangedCallback_;
 	protocol_version currentProtocolVersion_{max_protocol_version()};
+
+	/**
+	 * @brief DPP Cluster, used for logging
+	 */
+	dpp::cluster& creator;
 };
 
 } // namespace dpp::dave
