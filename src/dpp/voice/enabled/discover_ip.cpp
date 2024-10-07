@@ -42,24 +42,95 @@ namespace dpp {
  * https://discord.com/developers/docs/topics/voice-connections#ip-discovery
  */
 
-#pragma pack(push, 1)
+/**
+ * @brief Represents an IP discovery packet sent to Discord or received
+ * from Discord.
+ */
 struct ip_discovery_packet {
+
+	/**
+	 * @brief Maximum size of packet
+	 */
+	static constexpr int DISCOVERY_PACKET_SIZE = 74;
+
+	/**
+	 * @brief Maximum length of IP address string
+	 */
+	static constexpr int ADDRESS_BUFFER_SIZE = 64;
+
+	/**
+	 * @brief Type of packet
+	 */
 	uint16_t type;
+
+	/**
+	 * @brief Length of packet
+	 */
 	uint16_t length;
+
+	/**
+	 * @brief SSRC of sender
+	 */
 	uint32_t ssrc;
-	char address[64]{0}; // NOLINT
+
+	/**
+	 * @brief Address buffer, contains IP address in returned packet
+	 */
+	char address[ADDRESS_BUFFER_SIZE]{0}; // NOLINT
+
+	/**
+	 * @brief Port number, contains port in returned packet
+	 */
 	uint16_t port;
 
+	/**
+	 * @brief Construct discovery packet from inbound recv() buffer contents
+	 * @param packet_buffer recv buffer contents of at least ADDRESS_BUFFER_SIZE bytes
+	 */
+	ip_discovery_packet(char* packet_buffer)
+		: type(ntohs(packet_buffer[0] << 8 | packet_buffer[1])),
+		length(ntohs(packet_buffer[2] << 8 | packet_buffer[3])),
+		ssrc(ntohl(packet_buffer[4] << 24 | packet_buffer[5] << 16 | packet_buffer[6] << 8 | packet_buffer[7])),
+		port(ntohs(packet_buffer[72] << 8 | packet_buffer[73]))
+	{
+		std::memcpy(address, packet_buffer + 8, ADDRESS_BUFFER_SIZE);
+	}
+
+	/**
+	 * @brief Build a const char* buffer for sending with send() to make a request
+	 * @return char buffer
+	 */
+	const std::array<char, DISCOVERY_PACKET_SIZE> build_buffer() {
+		std::array<char, DISCOVERY_PACKET_SIZE> buffer{0};
+		buffer[0] = ((type & 0xff00) >> 8) & 0xff;
+		buffer[1] = type & 0xff;
+		buffer[2] = (length & 0xff00) >> 8;
+		buffer[3] = length & 0xff;
+		buffer[4] = ((ssrc & 0xff000000) >> 24) & 0xff;
+		buffer[5] = ((ssrc & 0x00ff0000) >> 16) & 0xff;
+		buffer[6] = ((ssrc & 0x0000ff00) >> 8) & 0xff;
+		buffer[7] = ssrc & 0x000000ff;
+		return buffer;
+	}
+
+	/**
+	 * @brief Deleted default constructor
+	 */
 	ip_discovery_packet() = delete;
 
+	/**
+	 * @brief Build a request packet for a given SSRC.
+	 * type and length will be initialised correctly and the address
+	 * buffer will be zeroed.
+	 * @param _ssrc SSRC value
+	 */
 	ip_discovery_packet(uint32_t _ssrc) :
-		/* Packet length header is size of header minus type and length fields, usually 70 bytes */
-		type(htons(0x01)), length(htons(sizeof(ip_discovery_packet) - sizeof(type) - sizeof(length))),
-		ssrc(htonl(_ssrc)), port(0) {
-		std::memset(&address, 0, sizeof(address));
+		/* Packet length is size of header minus type and length fields, usually 70 bytes */
+		type(0x01), length(DISCOVERY_PACKET_SIZE - sizeof(type) - sizeof(length)),
+		ssrc(_ssrc), port(0) {
+		std::memset(&address, 0, ADDRESS_BUFFER_SIZE);
 	}
 };
-#pragma pack(pop)
 
 /**
  * @brief Allocates a dpp::socket, closing it on destruction
@@ -103,7 +174,7 @@ std::string discord_voice_client::discover_ip() {
 			log(ll_warning, "Could not connect socket for IP discovery");
 			return "";
 		}
-		if (::send(socket.fd, reinterpret_cast<const char*>(&discovery), sizeof(discovery), 0) == -1) {
+		if (::send(socket.fd, discovery.build_buffer().data(), ip_discovery_packet::DISCOVERY_PACKET_SIZE, 0) == -1) {
 			log(ll_warning, "Could not send packet for IP discovery");
 			return "";
 		}
@@ -120,13 +191,14 @@ std::string discord_voice_client::discover_ip() {
 				log(ll_warning, "Timed out in IP discovery");
 				return "";
 			default:
-				if (recv(socket.fd, reinterpret_cast<char*>(&discovery), sizeof(discovery), 0) == -1) {
+				char buffer[ip_discovery_packet::DISCOVERY_PACKET_SIZE]{0};
+				if (recv(socket.fd, &buffer, sizeof(buffer), 0) == -1) {
 					log(ll_warning, "Could not receive packet for IP discovery");
 					return "";
 				}
-				break;
+				ip_discovery_packet inbound_packet(buffer);
+				return {inbound_packet.address};
 		}
-		return {discovery.address};
 	}
 	return {};
 }
