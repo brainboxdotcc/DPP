@@ -192,7 +192,7 @@ std::string discord_voice_client::discover_ip() {
 				return "";
 			default:
 				char buffer[ip_discovery_packet::DISCOVERY_PACKET_SIZE]{0};
-				if (recv(socket.fd, &buffer, sizeof(buffer), 0) == -1) {
+				if (recv(socket.fd, buffer, sizeof(buffer), 0) == -1) {
 					log(ll_warning, "Could not receive packet for IP discovery");
 					return "";
 				}
