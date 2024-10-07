@@ -103,6 +103,8 @@ else()
 	add_subdirectory(library)
 endif()
 
+find_package(Filesystem)
+
 if(DPP_USE_EXTERNAL_JSON)
 	# We do nothing here, we just assume it is on the include path.
 	# nlohmann::json's cmake stuff does all kinds of weird, and is more hassle than it's worth.
@@ -115,4 +117,8 @@ else()
 	# fussy, this is an older version because trying to use v3.11.2 gave a bunch of parse errors
 	# that made no sense, it seems they may have changed their parsing rules somehow.
 	message("-- Using bundled nlohmann::json")
+endif()
+
+if (NOT WIN32)
+	target_link_libraries(dpp PRIVATE std::filesystem)
 endif()

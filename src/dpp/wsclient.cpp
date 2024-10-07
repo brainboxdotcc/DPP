@@ -61,7 +61,7 @@ void websocket_client::connect()
 {
 	state = HTTP_HEADERS;
 	/* Send headers synchronously */
-	this->write(
+	this->socket_write(
 		"GET " + this->path + " HTTP/1.1\r\n"
 		"Host: " + this->hostname + "\r\n"
 		"pragma: no-cache\r\n"
@@ -73,7 +73,7 @@ void websocket_client::connect()
 	);
 }
 
-bool websocket_client::handle_frame(const std::string& buffer)
+bool websocket_client::handle_frame(const std::string& buffer, ws_opcode opcode)
 {
 	/* This is a stub for classes that derive the websocket client */
 	return true;
@@ -111,17 +111,22 @@ size_t websocket_client::fill_header(unsigned char* outbuf, size_t sendlength, w
 }
 
 
-void websocket_client::write(const std::string_view data)
+void websocket_client::write(const std::string_view data, ws_opcode _opcode)
 {
+	if ((_opcode == OP_AUTO ? this->data_opcode : _opcode) == OP_TEXT) {
+		log(dpp::ll_trace, std::string("W: ") + data.data());
+	} else {
+		log(dpp::ll_trace, "W: <binary frame> size=" + std::to_string(data.length()));
+	}
 	if (state == HTTP_HEADERS) {
 		/* Simple write */
-		ssl_client::write(data);
+		ssl_client::socket_write(data);
 	} else {
 		unsigned char out[MAXHEADERSIZE];
-		size_t s = this->fill_header(out, data.length(), this->data_opcode);
+		size_t s = this->fill_header(out, data.length(), _opcode == OP_AUTO ? this->data_opcode : _opcode);
 		std::string header((const char*)out, s);
-		ssl_client::write(header);
-		ssl_client::write(data);
+		ssl_client::socket_write(header);
+		ssl_client::socket_write(data);
 	}
 }
 
@@ -175,7 +180,7 @@ bool websocket_client::handle_buffer(std::string& buffer)
 		}
 	} else if (state == CONNECTED) {
 		/* Process packets until we can't (buffer will erase data until parseheader returns false) */
-		while (this->parseheader(buffer)){}
+		while (this->parseheader(buffer)) { }
 	}
 
 	return true;
@@ -249,7 +254,7 @@ bool websocket_client::parseheader(std::string& data)
 				handle_ping(data.substr(payloadstartoffset, len));
 			} else if ((opcode & ~WS_FINBIT) != OP_PONG) { /* Otherwise, handle everything else apart from a PONG. */
 				/* Pass this frame to the deriving class */
-				this->handle_frame(data.substr(payloadstartoffset, len));
+				this->handle_frame(data.substr(payloadstartoffset, len), static_cast<ws_opcode>(opcode & ~WS_FINBIT));
 			}
 
 			/* Remove this frame from the input buffer */
@@ -286,8 +291,8 @@ void websocket_client::one_second_timer()
 		std::string payload = "keepalive";
 		size_t s = this->fill_header(out, payload.length(), OP_PING);
 		std::string header((const char*)out, s);
-		ssl_client::write(header);
-		ssl_client::write(payload);
+		ssl_client::socket_write(header);
+		ssl_client::socket_write(payload);
 	}
 }
 
@@ -297,8 +302,8 @@ void websocket_client::handle_ping(const std::string &payload)
 	unsigned char out[MAXHEADERSIZE];
 	size_t s = this->fill_header(out, payload.length(), OP_PONG);
 	std::string header((const char*)out, s);
-	ssl_client::write(header);
-	ssl_client::write(payload);
+	ssl_client::socket_write(header);
+	ssl_client::socket_write(payload);
 }
 
 void websocket_client::send_close_packet()
@@ -312,8 +317,8 @@ void websocket_client::send_close_packet()
 
 	size_t s = this->fill_header(out, payload.length(), OP_CLOSE);
 	std::string header((const char*)out, s);
-	ssl_client::write(header);
-	ssl_client::write(payload);
+	ssl_client::socket_write(header);
+	ssl_client::socket_write(payload);
 }
 
 void websocket_client::error(uint32_t errorcode)

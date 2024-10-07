@@ -445,7 +445,16 @@ public:
 	 */
 	event_router_t<voice_state_update_t> on_voice_state_update;
 
-	
+	/**
+	 * @brief on voice client platform event
+	 * After a client connects, or on joining a vc, you will receive the platform type of each client. This is either desktop
+	 * or mobile.
+	 *
+	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
+	 * The function signature for this event takes a single `const` reference of type voice_client_disconnect_t&, and returns void.
+	 */
+	event_router_t<voice_client_platform_t> on_voice_client_platform;
+
 	/**
 	 * @brief on voice client disconnect event
 	 *

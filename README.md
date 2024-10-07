@@ -150,15 +150,17 @@ Other compilers may work (either newer versions of those listed above, or differ
 
 ### External Dependencies (You must install these)
 
-* [OpenSSL](https://openssl.org/) (whichever `-dev` package comes with your OS)
-* [zlib](https://zlib.net) (whichever `-dev` package comes with your OS)
+* [OpenSSL](https://openssl.org/) (For HTTPS, will use whichever `-dev` package comes with your OS)
+* [zlib](https://zlib.net) (For websocket compression, will use whichever `-dev` package comes with your OS)
 
 #### Optional Dependencies
 
-For voice support you require both of:
-* [libopus](https://www.opus-codec.org)
-* [libsodium](https://libsodium.org/)
+For **voice support** you require both of:
+* [libopus](https://www.opus-codec.org) (For audio encoding/decoding)
+* [libsodium](https://libsodium.org/) (For transport layer encryption)
+* Note that our **windows zips** come packaged with copies of both libraries - you do not need to install them yourself!
 
 ### Included Dependencies (Packaged with the library)
 
-* [JSON for Modern C++](https://json.nlohmann.me/)
+* [JSON for Modern C++](https://json.nlohmann.me/) (You can bring your own nlohmann::json into D++ by setting a CMAKE flag)
+* [MLS++](https://github.com/cisco/mlspp) (This is statically compiled into the library if voice support is enabled)

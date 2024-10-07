@@ -355,25 +355,25 @@ image_data&& icon::as_image_data() && {
 	return std::move(std::get<image_data>(hash_or_data));
 }
 
-std::string debug_dump(uint8_t* data, size_t length) {
+std::string debug_dump(const uint8_t* data, size_t length) {
 	std::ostringstream out;
 	size_t addr = (size_t)data;
 	size_t extra = addr % 16;
 	if (extra != 0) {
 		addr -= extra;
-		out << to_hex(addr);
+		out << "\n[" << to_hex(addr) << "] : ";
 	}
 	for (size_t n = 0; n < extra; ++n) {
 		out << "-- ";
 	}
 	std::string ascii;
-	for (uint8_t* ptr = data; ptr < data + length; ++ptr) {
+	for (const uint8_t* ptr = data; ptr < data + length; ++ptr) {
 		if (((size_t)ptr % 16) == 0) {
 			out << ascii << "\n[" << to_hex((size_t)ptr) << "] : ";
 			ascii.clear();
 		}
 		ascii.push_back(*ptr >= ' ' && *ptr <= '~' ? *ptr : '.');
-		out << to_hex(*ptr);
+		out << to_hex(*ptr) << " ";
 	}
 	out << "    " << ascii;
 	out << "\n";

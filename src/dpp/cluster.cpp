@@ -154,6 +154,11 @@ void cluster::log(dpp::loglevel severity, const std::string &msg) const {
 		dpp::log_t logmsg(nullptr, msg);
 		logmsg.severity = severity;
 		logmsg.message = msg;
+		size_t pos{0};
+		while ((pos = logmsg.message.find(token, pos)) != std::string::npos) {
+			logmsg.message.replace(pos, token.length(), "*****");
+			pos += 5;
+		}
 		on_log.call(logmsg);
 	}
 }
