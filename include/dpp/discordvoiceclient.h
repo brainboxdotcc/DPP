@@ -201,11 +201,10 @@ struct dave_binary_header_t {
 	/**
 	 * Get the data package from the packed binary frame, as a vector of uint8_t
 	 * for use in the libdave functions
-	 *
-	 * @param length Length of the data, use the websocket frame size here
+
 	 * @return data blob
 	 */
-	[[nodiscard]] std::vector<uint8_t> get_data(size_t length) const;
+	[[nodiscard]] std::vector<uint8_t> get_data() const;
 
 	/**
 	 * Get transition ID for process_welcome

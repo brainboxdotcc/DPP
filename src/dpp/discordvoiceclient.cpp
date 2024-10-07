@@ -101,7 +101,7 @@ dave_binary_header_t::dave_binary_header_t(const std::string& buffer) {
 	package.assign(buffer.begin() + (opcode == voice_client_dave_mls_welcome ? 5 : 3), buffer.end());
 }
 
-std::vector<uint8_t> dave_binary_header_t::get_data(size_t length) const {
+std::vector<uint8_t> dave_binary_header_t::get_data() const {
 	return package;
 }
 
