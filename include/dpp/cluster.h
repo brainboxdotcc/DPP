@@ -514,7 +514,6 @@ public:
 	 */
 	bool unregister_command(const std::string& name);
 
-
 	/**
 	 * @brief on voice state update event
 	 *
