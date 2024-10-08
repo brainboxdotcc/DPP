@@ -493,7 +493,7 @@ public:
 	std::enable_if_t<std::is_same_v<std::invoke_result_t<F, const slashcommand_handler_t&>, dpp::task<void>>, bool>
 	register_command(const std::string& name, F&& handler){
 		std::unique_lock lk(named_commands_mutex);
-		auto [_, inserted] = named_commands.try_emplace(name, handler);
+		auto [_, inserted] = named_commands.try_emplace(name, std::forward<F>(handler));
 		return inserted;
 	};
 #endif
