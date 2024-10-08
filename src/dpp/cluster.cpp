@@ -514,5 +514,4 @@ bool cluster::unregister_command(const std::string &name) {
 	return named_commands.erase(name) == 1;
 }
 
-
 };
