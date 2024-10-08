@@ -126,12 +126,12 @@ cluster::cluster(const std::string &_token, uint32_t _intents, uint32_t _shards,
 	on_slashcommand([this](const slashcommand_t& event) -> task<void> {
 		slashcommand_handler_variant copy;
 		{
-		 std::shared_lock lk(named_commands_mutex);
-		 auto it = named_commands.find(event.command.get_command_name());
-		 if (it == named_commands.end()) {
-			 co_return;
-		 }
-		  copy = it->second;
+			std::shared_lock lk(named_commands_mutex);
+			auto it = named_commands.find(event.command.get_command_name());
+			if (it == named_commands.end()) {
+				co_return;
+			}
+			copy = it->second;
 		}
 		if (std::holds_alternative<co_slashcommand_handler_t>(copy)) {
 			co_await std::get<co_slashcommand_handler_t>(copy)(event);
@@ -144,12 +144,12 @@ cluster::cluster(const std::string &_token, uint32_t _intents, uint32_t _shards,
 	on_slashcommand([this](const slashcommand_t& event) {
 		slashcommand_handler_t copy;
 		{
-		 std::shared_lock lk(named_commands_mutex);
-		 auto it = named_commands.find(event.command.get_command_name());
-		 if (it == named_commands.end()) {
-			 return;
-		 }
-		  copy = it->second;
+			std::shared_lock lk(named_commands_mutex);
+			auto it = named_commands.find(event.command.get_command_name());
+			if (it == named_commands.end()) {
+				return;
+			}
+			copy = it->second;
 		}
 		copy(event);
 	});
