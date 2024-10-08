@@ -736,7 +736,7 @@ uint32_t DPP_EXPORT hsl(int h, int s, int l);
  * @param data The start of the data to display
  * @param length The length of data to display
  */
-std::string DPP_EXPORT debug_dump(uint8_t* data, size_t length);
+std::string DPP_EXPORT debug_dump(const uint8_t* data, size_t length);
 
 /**
  * @brief Returns the length of a UTF-8 string in codepoints.

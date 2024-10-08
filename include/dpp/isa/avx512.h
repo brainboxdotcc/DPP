@@ -24,6 +24,8 @@
 
 #include <immintrin.h>
 #include <numeric>
+#include <cstdint>
+#include <limits>
 
 namespace dpp {
 

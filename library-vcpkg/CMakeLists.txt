@@ -1,4 +1,29 @@
-file(GLOB THE_SOURCES "${DPP_ROOT_PATH}/src/dpp/events/*.cpp" "${DPP_ROOT_PATH}/src/dpp/cluster/*.cpp" "${DPP_ROOT_PATH}/src/dpp/*.cpp" "${DPP_ROOT_PATH}/src/dpp/*.rc")
+#
+# D++ (DPP), The Lightweight C++ Discord Library
+#
+# Copyright 2021 Craig Edwards <support@brainbox.cc>
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+add_compile_definitions(HAVE_VOICE)
+
+if (HAVE_VOICE)
+	file(GLOB THE_SOURCES "${DPP_ROOT_PATH}/src/dpp/events/*.cpp" "${modules_dir}/dpp/voice/enabled/*.cpp" "${DPP_ROOT_PATH}/dpp/dave/*.cpp" "${DPP_ROOT_PATH}/src/dpp/cluster/*.cpp" "${DPP_ROOT_PATH}/src/dpp/*.cpp" "${DPP_ROOT_PATH}/src/dpp/*.rc")
+else()
+	file(GLOB THE_SOURCES "${DPP_ROOT_PATH}/src/dpp/events/*.cpp" "${modules_dir}/dpp/voice/stub/*.cpp" "${DPP_ROOT_PATH}/src/dpp/cluster/*.cpp" "${DPP_ROOT_PATH}/src/dpp/*.cpp" "${DPP_ROOT_PATH}/src/dpp/*.rc")
+endif()
+
 
 set(LIB_NAME "${PROJECT_NAME}")
 
@@ -31,6 +56,8 @@ if(WIN32)
 	add_compile_definitions(WIN32_LEAN_AND_MEAN)
 	add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
 	add_compile_definitions(_CRT_NONSTDC_NO_DEPRECATE)
+	# Fake an ssl version number to satisfy MLSPP
+	set(OPENSSL_VERSION "1.1.1f")
 endif()
 
 target_compile_options(
@@ -40,8 +67,8 @@ target_compile_options(
 	PRIVATE
 		"$<$<PLATFORM_ID:Windows>:$<$<CONFIG:Debug>:/sdl;/Od;/DEBUG;/MP;/DFD_SETSIZE=1024>>"
 		"$<$<PLATFORM_ID:Windows>:$<$<CONFIG:Release>:/O2;/Oi;/Oy;/GL;/Gy;/sdl;/MP;/DFD_SETSIZE=1024>>"
-		"$<$<PLATFORM_ID:Linux>:$<$<CONFIG:Debug>:-Wall;-Wempty-body;-Wno-psabi;-Wunknown-pragmas;-Wignored-qualifiers;-Wimplicit-fallthrough;-Wmissing-field-initializers;-Wsign-compare;-Wtype-limits;-Wuninitialized;-Wshift-negative-value;-pthread;-g;-Og;-fPIC>>"
-		"$<$<PLATFORM_ID:Linux>:$<$<CONFIG:Release>:-Wall;-Wempty-body;-Wno-psabi;-Wunknown-pragmas;-Wignored-qualifiers;-Wimplicit-fallthrough;-Wmissing-field-initializers;-Wsign-compare;-Wtype-limits;-Wuninitialized;-Wshift-negative-value;-pthread;-O3;-fPIC>>"
+		"$<$<PLATFORM_ID:Linux>:$<$<CONFIG:Debug>:-fPIC;-Wall;-Wempty-body;-Wno-psabi;-Wunknown-pragmas;-Wignored-qualifiers;-Wimplicit-fallthrough;-Wmissing-field-initializers;-Wsign-compare;-Wtype-limits;-Wuninitialized;-Wshift-negative-value;-pthread;-g;-Og;-fPIC>>"
+		"$<$<PLATFORM_ID:Linux>:$<$<CONFIG:Release>:-fPIC;-Wall;-Wempty-body;-Wno-psabi;-Wunknown-pragmas;-Wignored-qualifiers;-Wimplicit-fallthrough;-Wmissing-field-initializers;-Wsign-compare;-Wtype-limits;-Wuninitialized;-Wshift-negative-value;-pthread;-O3;-fPIC>>"
 		"${AVX_FLAG}"
 )
 
@@ -60,6 +87,13 @@ target_include_directories(
 	"$<INSTALL_INTERFACE:include>"
 )
 
+if (HAVE_VOICE)
+	add_subdirectory("${DPP_ROOT_PATH}/mlspp" "mlspp")
+	include_directories("${DPP_ROOT_PATH}/mlspp/include")
+	include_directories("${DPP_ROOT_PATH}/mlspp/lib/bytes/include")
+	include_directories("${DPP_ROOT_PATH}/mlspp/lib/hpke/include")
+endif()
+
 set_target_properties(
 	"${LIB_NAME}" PROPERTIES
 	OUTPUT_NAME "dpp"
@@ -70,8 +104,6 @@ target_link_options(
 	"${LIB_NAME}" PUBLIC
 	"$<$<PLATFORM_ID:Windows>:$<$<CONFIG:Debug>:/DEBUG>>"
 )
-
-add_compile_definitions(HAVE_VOICE)
 
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(OpenSSL REQUIRED)
@@ -89,6 +121,18 @@ target_link_libraries(
 	$<$<TARGET_EXISTS:ZLIB::ZLIB>:ZLIB::ZLIB>
 	$<$<TARGET_EXISTS:Threads::Threads>:Threads::Threads>
 )
+
+if (HAVE_VOICE)
+	# Private statically linked dependencies
+	target_link_libraries(
+		${LIB_NAME} PRIVATE
+		mlspp
+		mls_vectors
+		bytes
+		tls_syntax
+		hpke
+	)
+endif()
 
 set(CONFIG_FILE_NAME "${PROJECT_NAME}Config.cmake")
 set(EXPORTED_TARGETS_NAME "${PROJECT_NAME}Targets")

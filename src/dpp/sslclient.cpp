@@ -379,7 +379,7 @@ void ssl_client::connect()
 	}
 }
 
-void ssl_client::write(const std::string_view data)
+void ssl_client::socket_write(const std::string_view data)
 {
 	/* If we are in nonblocking mode, append to the buffer,
 	 * otherwise just use SSL_write directly. The only time we

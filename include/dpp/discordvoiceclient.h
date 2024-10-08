@@ -48,6 +48,7 @@
 #include <future>
 #include <functional>
 #include <chrono>
+#include <set>
 
 struct OpusDecoder;
 struct OpusEncoder;
@@ -55,7 +56,27 @@ struct OpusRepacketizer;
 
 namespace dpp {
 
+/**
+ * @brief Sample rate for OPUS (48khz)
+ */
+[[maybe_unused]] inline constexpr int32_t opus_sample_rate_hz = 48000;
+
+/**
+ * @brief Channel count for OPUS (stereo)
+ */
+[[maybe_unused]] inline constexpr int32_t opus_channel_count = 2;
+
+/**
+ * @brief Discord voice protocol version
+ */
+[[maybe_unused]] inline constexpr uint8_t voice_protocol_version = 8;
+
+
 class audio_mixer;
+
+namespace dave::mls {
+	class session;
+}
 
 // !TODO: change these to constexpr and rename every occurrence across the codebase
 #define AUDIO_TRACK_MARKER (uint16_t)0xFFFF
@@ -63,6 +84,10 @@ class audio_mixer;
 #define AUDIO_OVERLAP_SLEEP_SAMPLES 30
 
 inline constexpr size_t send_audio_raw_max_length = 11520;
+
+inline constexpr size_t secret_key_size = 32;
+
+struct dave_state;
 
 /*
 * @brief For holding a moving average of the number of current voice users, for applying a smooth gain ramp.
@@ -100,6 +125,112 @@ struct DPP_EXPORT voice_out_packet {
 	uint64_t duration;
 };
 
+/**
+ * @brief Supported DAVE (Discord Audio Visual Encryption) protocol versions
+ */
+enum dave_version_t : uint8_t {
+	/**
+	 * @brief DAVE disabled (default for now)
+	 */
+	dave_version_none = 0,
+	/**
+	 * @brief DAVE enabled, version 1 (E2EE encryption on top of sodium)
+	 */
+	dave_version_1 = 1,
+};
+
+/**
+ * @brief Discord voice websocket opcode types
+ */
+enum voice_websocket_opcode_t : uint8_t {
+	voice_opcode_connection_identify = 0,
+	voice_opcode_connection_select_protocol = 1,
+	voice_opcode_connection_ready = 2,
+	voice_opcode_connection_heartbeat = 3,
+	voice_opcode_connection_description = 4,
+	voice_opcode_client_speaking = 5,
+	voice_opcode_connection_heartbeat_ack = 6,
+	voice_opcode_connection_resume = 7,
+	voice_opcode_connection_hello = 8,
+	voice_opcode_connection_resumed = 9,
+	voice_opcode_multiple_clients_connect = 11,
+	voice_opcode_client_connect = 12,
+	voice_opcode_client_disconnect = 13,
+	voice_opcode_media_sink = 15,
+	voice_client_flags = 18,
+	voice_client_platform = 20,
+	voice_client_dave_prepare_transition = 21,
+	voice_client_dave_execute_transition = 22,
+	voice_client_dave_transition_ready = 23,
+	voice_client_dave_prepare_epoch = 24,
+	voice_client_dave_mls_external_sender = 25,
+	voice_client_dave_mls_key_package = 26,
+	voice_client_dave_mls_proposals = 27,
+	voice_client_dave_mls_commit_message = 28,
+	voice_client_dave_announce_commit_transaction = 29,
+	voice_client_dave_mls_welcome = 30,
+	voice_client_dave_mls_invalid_commit_welcome = 31,
+};
+
+/**
+ * @brief DAVE E2EE Binary frame header
+ */
+struct dave_binary_header_t {
+	/**
+	 * @brief Sequence number
+	 */
+	uint16_t seq;
+
+	/**
+	 * @brief Opcode type
+	 */
+	uint8_t opcode;
+
+	/**
+	 * @brief Data package, an opaque structure passed to the
+	 * Discord libdave functions.
+	 */
+	std::vector<uint8_t> package;
+
+	/**
+	 * @brief Fill binary header from inbound buffer
+	 * @param buffer inbound websocket buffer
+	 */
+	dave_binary_header_t(const std::string& buffer);
+
+	/**
+	 * Get the data package from the packed binary frame, as a vector of uint8_t
+	 * for use in the libdave functions
+
+	 * @return data blob
+	 */
+	[[nodiscard]] std::vector<uint8_t> get_data() const;
+
+	/**
+	 * Get transition ID for process_welcome
+	 *
+	 * @return Transition ID
+	 */
+	[[nodiscard]] uint16_t get_transition_id() const;
+
+private:
+	/**
+	 * @brief Transition id, only valid when the opcode is
+	 * welcome state. Use get_transition_id() to obtain value.
+	 */
+	uint16_t transition_id;
+};
+
+/**
+ * @brief A callback for obtaining a user's privacy code.
+ * The privacy code is returned as the parameter to the function.
+ *
+ * This is a callback function because DAVE requires use of a very resource
+ * intensive SCRYPT call, which uses lots of ram and cpu and take significant
+ * time.
+ */
+using privacy_code_callback_t = std::function<void(const std::string&)>;
+
 /** @brief Implements a discord voice connection.
  * Each discord_voice_client connects to one voice channel and derives from a websocket client.
  */
@@ -119,6 +250,13 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	 * @brief Mutex for message queue
 	 */
 	std::shared_mutex queue_mutex;
+
+	/**
+	 * @brief Our public IP address
+	 *
+	 * Use discord_voice_client::discover_ip() to access this value
+	 */
+	std::string external_ip;
 
 	/**
 	 * @brief Queue of outbound messages
@@ -308,6 +446,13 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	 * (merges frames into one packet)
 	 */
 	OpusRepacketizer* repacketizer;
+
+	/**
+	 * @brief This holds the state information for DAVE E2EE.
+	 * it is only allocated if E2EE is active on the voice channel.
+	 */
+	std::unique_ptr<dave_state> mls_state;
+
 #else
 	/**
 	 * @brief libopus encoder
@@ -319,7 +464,19 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	 * (merges frames into one packet)
 	 */
 	void* repacketizer;
+
+	/**
+	 * @brief This holds the state information for DAVE E2EE.
+	 * it is only allocated if E2EE is active on the voice channel.
+	 */
+	std::unique_ptr<int> mls_state{};
 #endif
+
+	/**
+	 * @brief The list of users that have E2EE potentially enabled for
+	 * DAVE protocol.
+	 */
+	std::set<std::string> dave_mls_user_list;
 
 	/**
 	 * @brief File descriptor for UDP connection
@@ -328,16 +485,28 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 
 	/**
 	 * @brief Secret key for encrypting voice.
-	 * If it has been sent, this is non-null and points to a 
-	 * sequence of exactly 32 bytes.
+	 * If it has been sent, this contains a sequence of exactly 32 bytes
+	 * (secret_key_size) and has_secret_key is set to true.
 	 */
-	uint8_t* secret_key;
+	std::array<uint8_t, secret_key_size> secret_key;
+
+	/**
+	 * @brief True if the voice client has a secret key
+	 */
+	bool has_secret_key{false};
 
 	/**
 	 * @brief Sequence number of outbound audio. This is incremented
 	 * once per frame sent.
 	 */
 	uint16_t sequence;
+
+	/**
+	 * @brief Last received sequence from gateway.
+	 *
+	 * Needed for heartbeat and resume payload.
+	 */
+	int32_t receive_sequence;
 
 	/**
 	 * @brief Timestamp value used in outbound audio. Each packet
@@ -401,6 +570,14 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	 * @brief Encoding buffer for opus repacketizer and encode
 	 */
 	uint8_t encode_buffer[65536];
+
+	/**
+	 * @brief DAVE - Discord Audio Visual Encryption
+	 * Used for E2EE encryption. dave_protocol_none is
+	 * the default right now.
+	 * @warning DAVE E2EE is an EXPERIMENTAL feature!
+	 */
+	dave_version_t dave_version;
 
 	/**
 	 * @brief Send data to UDP socket immediately.
@@ -687,9 +864,11 @@ public:
 	 * @param _token The voice session token to use for identifying to the websocket
 	 * @param _session_id The voice session id to identify with
 	 * @param _host The voice server hostname to connect to (hostname:port format)
+	 * @param enable_dave Enable DAVE E2EE
 	 * @throw dpp::voice_exception Sodium or Opus failed to initialise, or D++ is not compiled with voice support
+	 * @warning DAVE E2EE is an EXPERIMENTAL feature!
 	 */
-	discord_voice_client(dpp::cluster* _cluster, snowflake _channel_id, snowflake _server_id, const std::string &_token, const std::string &_session_id, const std::string &_host);
+	discord_voice_client(dpp::cluster* _cluster, snowflake _channel_id, snowflake _server_id, const std::string &_token, const std::string &_session_id, const std::string &_host, bool enable_dave = false);
 
 	/**
 	 * @brief Destroy the discord voice client object
@@ -699,10 +878,11 @@ public:
 	/**
 	 * @brief Handle JSON from the websocket.
 	 * @param buffer The entire buffer content from the websocket client
+	 * @param opcode Frame type, e.g. OP_TEXT, OP_BINARY
 	 * @return bool True if a frame has been handled
 	 * @throw dpp::exception If there was an error processing the frame, or connection to UDP socket failed
 	 */
-	virtual bool handle_frame(const std::string &buffer);
+	virtual bool handle_frame(const std::string &buffer, ws_opcode opcode);
 
 	/**
 	 * @brief Handle a websocket error.
@@ -975,6 +1155,41 @@ public:
 	 * for a single packet from Discord's voice servers.
 	 */
 	std::string discover_ip();
+
+	/**
+	 * @brief Returns true if end-to-end encryption is enabled
+	 * for the active voice call (Discord Audio Visual
+	 * Encryption, a.k.a. DAVE).
+	 *
+	 * @return True if end-to-end encrypted
+	 */
+	bool is_end_to_end_encrypted() const;
+
+	/**
+	 * @brief Returns the privacy code for the end to end encryption
+	 * scheme ("DAVE"). if end-to-end encryption is not active,
+	 * or is not yet established, this will return an empty
+	 * string.
+	 *
+	 * @return A sequence of six five-digit integers which
+	 * can be matched against the Discord client, in the
+	 * privacy tab for the properties of the voice call.
+	 */
+	std::string get_privacy_code() const;
+
+	/**
+	 * @brief Returns the privacy code for a given user by id,
+	 * if they are in the voice call, and enc-to-end encryption
+	 * is enabled.
+	 *
+	 * @param user User ID to fetch the privacy code for
+	 * @param callback Callback to call with the privacy code when
+	 * the creation of the code is complete.
+	 * @warning This call spawns a thread, as getting a user's
+	 * privacy code is a CPU-intensive and memory-intensive operation
+	 * which internally uses scrypt.
+	 */
+	void get_user_privacy_code(const dpp::snowflake user, privacy_code_callback_t callback) const;
 };
 
 } // namespace dpp

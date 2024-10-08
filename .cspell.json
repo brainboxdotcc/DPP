@@ -142,7 +142,12 @@
 		"khanda",
 		"oclock",
 		"moai",
-		"xbps"
+		"xbps",
+		"chacha20",
+		"chacha",
+		"nullopt",
+		"chrono",
+		"ciphersuite"
 	],
 	"flagWords": [
 		"hte"

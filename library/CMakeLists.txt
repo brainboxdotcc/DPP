@@ -1,3 +1,20 @@
+#
+# D++ (DPP), The Lightweight C++ Discord Library
+#
+# Copyright 2021 Craig Edwards <support@brainbox.cc>
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 # Check for various C functions
 check_cxx_symbol_exists(prctl "sys/prctl.h" HAVE_PRCTL)
 check_cxx_symbol_exists(pthread_setname_np "pthread.h" HAVE_PTHREAD_SETNAME_NP)
@@ -32,6 +49,8 @@ add_compile_definitions(AVX_TYPE=${AVX_TYPE})
 add_compile_options(${AVX_FLAG})
 
 if(WIN32 AND NOT MINGW)
+	# Fake an ssl version number to satisfy MLSPP
+	set(OPENSSL_VERSION "1.1.1f")
 	if (NOT WINDOWS_32_BIT)
 		message("-- Building for windows with precompiled packaged dependencies")
 		#set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
@@ -197,7 +216,7 @@ if(MSVC)
 	endif()
 	string(REGEX REPLACE "/W[1|2|3|4]" "/W3" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 else()
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-unused-private-field -Wno-psabi -Wempty-body -Wignored-qualifiers -Wimplicit-fallthrough -Wmissing-field-initializers -Wsign-compare -Wtype-limits -Wuninitialized -Wshift-negative-value -pthread")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -Wall -Wno-unused-private-field -Wno-psabi -Wempty-body -Wignored-qualifiers -Wimplicit-fallthrough -Wmissing-field-initializers -Wsign-compare -Wtype-limits -Wuninitialized -Wshift-negative-value -pthread")
 	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Og")
 
 	if (NOT MINGW)
@@ -209,11 +228,22 @@ set(modules_dir "../src")
 
 file(GLOB subdirlist ${modules_dir}/dpp)
 
+if (HAVE_VOICE)
+	add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/../mlspp" "mlspp")
+	include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../mlspp/include")
+	include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../mlspp/lib/bytes/include")
+	include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../mlspp/lib/hpke/include")
+endif()
+
 foreach (fullmodname ${subdirlist})
     get_filename_component(modname ${fullmodname} NAME)
     set (modsrc "")
-	
-	file(GLOB modsrc "${modules_dir}/dpp/*.cpp" "${modules_dir}/dpp/events/*.cpp" "${modules_dir}/dpp/cluster/*.cpp" "${modules_dir}/dpp/*.rc")
+
+	if (HAVE_VOICE)
+		file(GLOB modsrc "${modules_dir}/dpp/*.cpp" "${modules_dir}/dpp/voice/enabled/*.cpp" "${modules_dir}/dpp/dave/*.cpp" "${modules_dir}/dpp/events/*.cpp" "${modules_dir}/dpp/cluster/*.cpp" "${modules_dir}/dpp/*.rc")
+	else()
+		file(GLOB modsrc "${modules_dir}/dpp/*.cpp" "${modules_dir}/dpp/voice/stub/*.cpp" "${modules_dir}/dpp/events/*.cpp" "${modules_dir}/dpp/cluster/*.cpp" "${modules_dir}/dpp/*.rc")
+	endif()
 
 	if(BUILD_SHARED_LIBS)
 		add_library(${modname} SHARED ${modsrc})
@@ -241,6 +271,7 @@ foreach (fullmodname ${subdirlist})
 	endif()
 
 	if (WIN32 AND NOT MINGW)
+
 		if (NOT WINDOWS_32_BIT)
 			target_link_libraries(${modname} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/../win32/lib/libssl.lib"
 				"${CMAKE_CURRENT_SOURCE_DIR}/../win32/lib/libcrypto.lib"
@@ -263,11 +294,24 @@ foreach (fullmodname ${subdirlist})
 	endif()
 
 	if (HAVE_VOICE)
+		# Private statically linked dependencies
+		target_link_libraries(${modname} PRIVATE
+			mlspp
+			mls_vectors
+			bytes
+			tls_syntax
+			hpke
+		)
+	endif()
+
+	if (HAVE_VOICE)
 		target_link_libraries(${modname} PUBLIC ${sodium_LIBRARY_RELEASE} ${OPUS_LIBRARIES})
 		
 		include_directories(${OPUS_INCLUDE_DIRS} ${sodium_INCLUDE_DIR})
 	endif()
 endforeach()
+
+
 
 target_compile_features(dpp PUBLIC cxx_std_17)
 target_compile_features(dpp PRIVATE cxx_constexpr)
@@ -289,7 +333,7 @@ if(HAVE_PTHREAD_SETNAME_NP)
 endif()
 
 if(DPP_CORO)
-	message("-- ${Yellow}Enabled experimental coroutine feature${ColourReset}")
+	message("-- ${Yellow}Enabled coroutine feature${ColourReset}")
 	set(CMAKE_CXX_STANDARD 20)
 	target_compile_features(dpp PUBLIC cxx_std_20)
 	if(WIN32 AND NOT MINGW AND NOT DPP_CLANG_CL)
