@@ -27,7 +27,7 @@ D++ is a lightweight and efficient library for **Discord** written in **modern C
 * Sharding and clustering (Many shards, one process: specify the number of shards, or let the library decide)
 * Highly optimised ETF (Erlang Term Format) support for very fast websocket throughput
 * [Slash Commands/Interactions support](https://dpp.dev/slashcommands.html)
-* [Voice support](https://dpp.dev/soundboard.html) (sending **and** receiving audio) with DAVE(https://daveprotocol.com) End-To-End Encryption
+* [Voice support](https://dpp.dev/soundboard.html) (sending **and** receiving audio) with [DAVE](https://daveprotocol.com) End-To-End Encryption
 * The entire Discord API is available for use in the library
 * Stable [Windows support](https://dpp.dev/buildwindows.html)
 * Ready-made compiled packages for Windows, Raspberry Pi (ARM64/ARM7/ARMv6), Debian x86/x64, and RPM based distributions
