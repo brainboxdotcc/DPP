@@ -129,7 +129,7 @@ cluster::cluster(const std::string &_token, uint32_t _intents, uint32_t _shards,
 		 std::shared_lock lk(named_commands_mutex);
 		 auto it = named_commands.find(event.command.get_command_name());
 		 if (it == named_commands.end()) {
-			 co_return;  // Command not found
+			 co_return;
 		 }
 		  copy = it->second;
 		}
@@ -147,7 +147,7 @@ cluster::cluster(const std::string &_token, uint32_t _intents, uint32_t _shards,
 		 std::shared_lock lk(named_commands_mutex);
 		 auto it = named_commands.find(event.command.get_command_name());
 		 if (it == named_commands.end()) {
-			 return;  // Command not found
+			 return;
 		 }
 		  copy = it->second;
 		}
