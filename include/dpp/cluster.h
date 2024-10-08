@@ -495,7 +495,7 @@ public:
 		std::unique_lock lk(named_commands_mutex);
 		if (named_commands.count(name) != 0) {
 			return false;
-			}
+		}
 		named_commands.emplace(name, handler);
 		return true;
 	};
