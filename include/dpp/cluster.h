@@ -489,7 +489,16 @@ public:
 	 * @return bool Returns `true` if the command was registered successfully, or `false` if
 	 * the command with the same name already exists.
 	 */
-	bool co_register_command(const std::string& name, const co_slashcommand_handler_t handler);
+	template <typename F>
+	std::enable_if_t<std::is_same_v<std::invoke_result_t<F, const slashcommand_handler_t&>, dpp::task<void>>, bool>
+	register_command(const std::string& name, F&& handler){
+		std::unique_lock lk(named_commands_mutex);
+		if (named_commands.count(name) != 0) {
+			return false;
+			}
+		named_commands.emplace(name, handler);
+		return true;
+	};
 #endif
 
 	/**

@@ -509,17 +509,6 @@ bool cluster::register_command(const std::string &name, const slashcommand_handl
 	return true;
 }
 
-#ifdef DPP_CORO
-bool cluster::co_register_command(const std::string& name, const co_slashcommand_handler_t handler) {
-	std::unique_lock lk(named_commands_mutex);
-	if (named_commands.count(name) != 0) {
-		return false;
-	}
-	named_commands.emplace(name, handler);
-	return true;
-}
-#endif
-
 bool cluster::unregister_command(const std::string &name) {
 	std::unique_lock lk(named_commands_mutex);
 	return named_commands.erase(name) == 1;
