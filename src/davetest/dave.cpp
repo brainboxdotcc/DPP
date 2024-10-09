@@ -71,6 +71,9 @@ int main() {
 		if (v && v->is_ready()) {
 			v->send_audio_raw((uint16_t*)testaudio.data(), testaudio.size());
 		}
+		dave_test.start_timer([v, &testaudio](auto) {
+			v->send_audio_raw((uint16_t*)testaudio.data(), testaudio.size());
+		}, 15);
 	});
 
 

@@ -25,11 +25,63 @@
 #include <dpp/isa_detection.h>
 #include <dpp/discordvoiceclient.h>
 #include <dpp/json.h>
+#include <chrono>
 #include "../../dave/encryptor.h"
 
 #include "enabled.h"
 
 namespace dpp {
+
+using namespace std::chrono_literals;
+
+/**
+ * @brief How long to wait after deriving new key ratchets to expire the old ones
+ */
+constexpr dave::decryptor::duration RATCHET_EXPIRY = 10s;
+
+void discord_voice_client::update_ratchets(bool force) {
+
+	if (!force && !is_end_to_end_encrypted()) {
+		/* Ratchet update not forced, and not already established DAVE MLS, bail here */
+		return;
+	}
+
+	/**
+	 * Update everyone's ratchets including the bot. Whenever a new user joins or a user leaves, this invalidates
+	 * all the old ratchets and they are replaced with new ones and the old ones are invalidated after RATCHET_EXPIRY seconds.
+	 */
+	log(ll_debug, "Updating MLS ratchets for " + std::to_string(dave_mls_user_list.size() + 1) + " user(s)");
+	for (const auto& user : dave_mls_user_list) {
+		log(ll_debug, "Setting decryptor key ratchet for user: " + user + ", protocol version: " + std::to_string(mls_state->dave_session->get_protocol_version()));
+		dpp::snowflake u{user};
+		decryptor_list::iterator decryptor;
+		if (force) {
+			/* Forced update of all ratchets (new group) - erase all snowflakes if they exist, insert new ones */
+			mls_state->decryptors.erase(u);
+			auto [iter, inserted] = mls_state->decryptors.emplace(u, std::make_unique<dpp::dave::decryptor>(*creator));
+			decryptor = iter;
+		} else {
+			/* New user join/old user leave - insert new ratchets if they don't exist */
+			decryptor = mls_state->decryptors.find(u);
+			if (decryptor == mls_state->decryptors.end()) {
+				auto [iter, inserted] = mls_state->decryptors.emplace(u, std::make_unique<dpp::dave::decryptor>(*creator));
+				decryptor = iter;
+			}
+		}
+		decryptor->second->transition_to_key_ratchet(mls_state->dave_session->get_key_ratchet(user), RATCHET_EXPIRY);
+	}
+	/* No expiry on sender! It's up to the receiver to decide when to discard their old keys */
+	mls_state->encryptor->set_key_ratchet(mls_state->dave_session->get_key_ratchet(creator->me.id.str()));
+
+	/**
+	 * https://www.ietf.org/archive/id/draft-ietf-mls-protocol-14.html#name-epoch-authenticators
+	 * 9.7. Epoch Authenticators
+	 * The main MLS key schedule provides a per-epoch epoch_authenticator. If one member of the group is being impersonated by an active attacker,
+	 * the epoch_authenticator computed by their client will differ from those computed by the other group members.
+	 */
+	mls_state->privacy_code = generate_displayable_code(mls_state->dave_session->get_last_epoch_authenticator());
+	log(ll_info, "New E2EE Privacy Code: " + mls_state->privacy_code);
+}
 
 bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcode) {
 	json j;
@@ -66,23 +118,7 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 			case voice_client_dave_announce_commit_transaction: {
 				log(ll_debug, "voice_client_dave_announce_commit_transaction");
 				auto r = mls_state->dave_session->process_commit(mls_state->cached_commit);
-				for (const auto& user : dave_mls_user_list) {
-					log(ll_debug, "Setting decryptor key ratchet for user: " + user + ", protocol version: " + std::to_string(mls_state->dave_session->get_protocol_version()));
-					dpp::snowflake u{user};
-					mls_state->decryptors.emplace(u, std::make_unique<dpp::dave::decryptor>(*creator));
-					mls_state->decryptors.find(u)->second->transition_to_key_ratchet(mls_state->dave_session->get_key_ratchet(user));
-				}
-				mls_state->encryptor->set_key_ratchet(mls_state->dave_session->get_key_ratchet(creator->me.id.str()));
-
-				/**
-				 * https://www.ietf.org/archive/id/draft-ietf-mls-protocol-14.html#name-epoch-authenticators
-				 * 9.7. Epoch Authenticators
-				 * The main MLS key schedule provides a per-epoch epoch_authenticator. If one member of the group is being impersonated by an active attacker,
-				 * the epoch_authenticator computed by their client will differ from those computed by the other group members.
-				 */
-				mls_state->privacy_code = generate_displayable_code(mls_state->dave_session->get_last_epoch_authenticator());
-				log(ll_debug, "E2EE Privacy Code: " + mls_state->privacy_code);
-
+				update_ratchets(true);
 				if (!creator->on_voice_ready.empty()) {
 					voice_ready_t rdy(nullptr, data);
 					rdy.voice_client = this;
@@ -96,27 +132,18 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 				log(ll_debug, "voice_client_dave_mls_welcome with transition id " + std::to_string(this->mls_state->transition_id));
 				auto r = mls_state->dave_session->process_welcome(dave_header.get_data(), dave_mls_user_list);
 				if (r.has_value()) {
-					for (const auto& user : dave_mls_user_list) {
-						log(ll_debug, "Setting decryptor key ratchet for user: " + user + ", protocol version: " + std::to_string(mls_state->dave_session->get_protocol_version()));
-						dpp::snowflake u{user};
-						mls_state->decryptors.emplace(u, std::make_unique<dpp::dave::decryptor>(*creator));
-						mls_state->decryptors.find(u)->second->transition_to_key_ratchet(mls_state->dave_session->get_key_ratchet(user));
-					}
-					mls_state->encryptor->set_key_ratchet(mls_state->dave_session->get_key_ratchet(creator->me.id.str()));
-				}
-				mls_state->privacy_code = generate_displayable_code(mls_state->dave_session->get_last_epoch_authenticator());
-				log(ll_debug, "E2EE Privacy Code: " + mls_state->privacy_code);
-
-				json obj = {
-					{ "op", voice_client_dave_transition_ready },
-					{
-					  "d",
+					update_ratchets(true);
+					json obj = {
+						{ "op", voice_client_dave_transition_ready },
 						{
-							{ "transition_id", this->mls_state->transition_id },
+						  "d",
+							{
+								{ "transition_id", this->mls_state->transition_id },
+							}
 						}
-					}
-				};
-				this->write(obj.dump(-1, ' ', false, json::error_handler_t::replace), OP_TEXT);
+					};
+					this->write(obj.dump(-1, ' ', false, json::error_handler_t::replace), OP_TEXT);
+				}
 			}
 			break;
 			default:
@@ -170,6 +197,8 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 			case voice_opcode_multiple_clients_connect: {
 				dave_mls_user_list = j["d"]["user_ids"];
 				log(ll_debug, "Number of clients in voice channel: " + std::to_string(dave_mls_user_list.size()));
+				/* Ongoing MLS session, update everyone's ratchets and VC privacy code */
+				update_ratchets();
 			}
 			break;
 			case voice_client_dave_mls_invalid_commit_welcome: {
@@ -235,8 +264,7 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 			case voice_opcode_client_disconnect: {
 				if (j.find("d") != j.end() && j["d"].find("user_id") != j["d"].end() && !j["d"]["user_id"].is_null()) {
 					snowflake u_id = snowflake_not_null(&j["d"], "user_id");
-					auto it = std::find_if(ssrc_map.begin(), ssrc_map.end(),
-							       [&u_id](const auto & p) { return p.second == u_id; });
+					auto it = std::find_if(ssrc_map.begin(), ssrc_map.end(), [&u_id](const auto & p) { return p.second == u_id; });
 
 					if (it != ssrc_map.end()) {
 						ssrc_map.erase(it);
@@ -244,8 +272,13 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 
 					auto it_dave = dave_mls_user_list.find(j["d"]["user_id"]);
 					if (it_dave != dave_mls_user_list.end()) {
+						/* Ongoing MLS session, update everyone's ratchets and VC privacy code */
 						dave_mls_user_list.erase(it_dave);
 					}
+					/* Remove this user's key ratchet */
+					mls_state->decryptors.erase(u_id);
+					/* Update all remaining ratchets */
+					update_ratchets();
 
 					if (!creator->on_voice_client_disconnect.empty()) {
 						voice_client_disconnect_t vcd(nullptr, data);
@@ -257,9 +290,7 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 			}
 			break;
 			/* Speaking */
-			case voice_opcode_client_speaking:
-			/* Client Connect (doesn't seem to work) */
-			case voice_opcode_client_connect: {
+			case voice_opcode_client_speaking: {
 				if (j.find("d") != j.end()
 				    && j["d"].find("user_id") != j["d"].end() && !j["d"]["user_id"].is_null()
 				    && j["d"].find("ssrc") != j["d"].end() && !j["d"]["ssrc"].is_null() && j["d"]["ssrc"].is_number_integer()) {
