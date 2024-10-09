@@ -96,6 +96,14 @@ struct dave_state {
 	 */
 	uint64_t transition_id{0};
 	/**
+	 * @brief True when we have a sending ratchet
+	 */
+	bool have_sending_ratchet{false};
+	/**
+	 * @brief Have sent ready event to listeners
+	 */
+	bool done_ready{false};
+	/**
 	 * @brief Details of upcoming transition
 	 */
 	struct {

@@ -478,6 +478,11 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	std::set<std::string> dave_mls_user_list;
 
 	/**
+	 * @brief The list of users that just joined for DAVE
+	 */
+	std::set<std::string> dave_mls_new_user_list;
+
+		/**
 	 * @brief File descriptor for UDP connection
 	 */
 	dpp::socket fd;
