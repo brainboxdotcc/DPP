@@ -154,7 +154,6 @@ enum voice_websocket_opcode_t : uint8_t {
 	voice_opcode_connection_hello = 8,
 	voice_opcode_connection_resumed = 9,
 	voice_opcode_multiple_clients_connect = 11,
-	voice_opcode_client_connect = 12,
 	voice_opcode_client_disconnect = 13,
 	voice_opcode_media_sink = 15,
 	voice_client_flags = 18,
@@ -479,6 +478,11 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	std::set<std::string> dave_mls_user_list;
 
 	/**
+	 * @brief The list of users that just joined for DAVE
+	 */
+	std::set<std::string> dave_mls_new_user_list;
+
+		/**
 	 * @brief File descriptor for UDP connection
 	 */
 	dpp::socket fd;
@@ -677,6 +681,12 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	 * @throw dpp::voice_exception If data length to encode is invalid or voice support not compiled into D++
 	 */
 	size_t encode(uint8_t *input, size_t inDataSize, uint8_t *output, size_t &outDataSize);
+
+	/**
+	 * Updates DAVE MLS ratchets for users in the VC
+	 * @param force True to force updating of ratchets regardless of state
+	 */
+	void update_ratchets(bool force = false);
 
 public:
 

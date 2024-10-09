@@ -36,8 +36,7 @@ namespace dpp::dave {
 
 constexpr auto kStatsInterval = 10s;
 
-void decryptor::transition_to_key_ratchet(std::unique_ptr<key_ratchet_interface> keyRatchet,
-					  duration transitionExpiry)
+void decryptor::transition_to_key_ratchet(std::unique_ptr<key_ratchet_interface> keyRatchet, duration transitionExpiry)
 {
 	if (keyRatchet) {
 		creator.log(dpp::ll_trace, "Transitioning to new key ratchet, expiry: " + std::to_string(transitionExpiry.count()));
