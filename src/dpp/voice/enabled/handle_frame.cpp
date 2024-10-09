@@ -41,6 +41,21 @@ constexpr dave::decryptor::duration RATCHET_EXPIRY = 10s;
 
 void discord_voice_client::update_ratchets(bool force) {
 
+	if (!mls_state || !mls_state->dave_session) {
+		return;
+	}
+
+	/**
+	 * https://www.ietf.org/archive/id/draft-ietf-mls-protocol-14.html#name-epoch-authenticators
+	 * 9.7. Epoch Authenticators
+	 * The main MLS key schedule provides a per-epoch epoch_authenticator. If one member of the group is being impersonated by an active attacker,
+	 * the epoch_authenticator computed by their client will differ from those computed by the other group members.
+	 */
+	mls_state->privacy_code = generate_displayable_code(mls_state->dave_session->get_last_epoch_authenticator());
+	if (!mls_state->privacy_code.empty()) {
+		log(ll_info, "New E2EE Privacy Code: " + mls_state->privacy_code);
+	}
+
 	if (!force && !is_end_to_end_encrypted()) {
 		/* Ratchet update not forced, and not already established DAVE MLS, bail here */
 		return;
@@ -52,18 +67,25 @@ void discord_voice_client::update_ratchets(bool force) {
 	 */
 	log(ll_debug, "Updating MLS ratchets for " + std::to_string(dave_mls_user_list.size() + 1) + " user(s)");
 	for (const auto& user : dave_mls_user_list) {
-		log(ll_debug, "Setting decryptor key ratchet for user: " + user + ", protocol version: " + std::to_string(mls_state->dave_session->get_protocol_version()));
 		dpp::snowflake u{user};
+		if (u == creator->me.id) {
+			continue;
+		}
 		decryptor_list::iterator decryptor;
 		if (force) {
 			/* Forced update of all ratchets (new group) - erase all snowflakes if they exist, insert new ones */
-			mls_state->decryptors.erase(u);
+			if (mls_state->decryptors.erase(u) == 1) {
+				log(ll_debug, "Replacing decryptor key ratchet for EXISTING user: " + user + ", protocol version: " + std::to_string(mls_state->dave_session->get_protocol_version()));
+			} else {
+				log(ll_debug, "Inserting decryptor key ratchet for NEW user: " + user + ", protocol version: " + std::to_string(mls_state->dave_session->get_protocol_version()));
+			}
 			auto [iter, inserted] = mls_state->decryptors.emplace(u, std::make_unique<dpp::dave::decryptor>(*creator));
 			decryptor = iter;
 		} else {
 			/* New user join/old user leave - insert new ratchets if they don't exist */
 			decryptor = mls_state->decryptors.find(u);
 			if (decryptor == mls_state->decryptors.end()) {
+				log(ll_debug, "Inserting decryptor key ratchet for NEW user: " + user + ", protocol version: " + std::to_string(mls_state->dave_session->get_protocol_version()));
 				auto [iter, inserted] = mls_state->decryptors.emplace(u, std::make_unique<dpp::dave::decryptor>(*creator));
 				decryptor = iter;
 			}
@@ -71,16 +93,10 @@ void discord_voice_client::update_ratchets(bool force) {
 		decryptor->second->transition_to_key_ratchet(mls_state->dave_session->get_key_ratchet(user), RATCHET_EXPIRY);
 	}
 	/* No expiry on sender! It's up to the receiver to decide when to discard their old keys */
-	mls_state->encryptor->set_key_ratchet(mls_state->dave_session->get_key_ratchet(creator->me.id.str()));
-
-	/**
-	 * https://www.ietf.org/archive/id/draft-ietf-mls-protocol-14.html#name-epoch-authenticators
-	 * 9.7. Epoch Authenticators
-	 * The main MLS key schedule provides a per-epoch epoch_authenticator. If one member of the group is being impersonated by an active attacker,
-	 * the epoch_authenticator computed by their client will differ from those computed by the other group members.
-	 */
-	mls_state->privacy_code = generate_displayable_code(mls_state->dave_session->get_last_epoch_authenticator());
-	log(ll_info, "New E2EE Privacy Code: " + mls_state->privacy_code);
+	if (mls_state->encryptor) {
+		log(ll_debug, "Setting key ratchet for sending audio...");
+		mls_state->encryptor->set_key_ratchet(mls_state->dave_session->get_key_ratchet(creator->me.id.str()));
+	}
 }
 
 bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcode) {
@@ -128,21 +144,29 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 			}
 			break;
 			case voice_client_dave_mls_welcome: {
+				bool is_ready = !get_privacy_code().empty();
 				this->mls_state->transition_id = dave_header.get_transition_id();
 				log(ll_debug, "voice_client_dave_mls_welcome with transition id " + std::to_string(this->mls_state->transition_id));
+				dave_mls_user_list.erase(creator->me.id.str());
 				auto r = mls_state->dave_session->process_welcome(dave_header.get_data(), dave_mls_user_list);
-				if (r.has_value()) {
-					update_ratchets(true);
-					json obj = {
-						{ "op", voice_client_dave_transition_ready },
+				update_ratchets(true);
+				json obj = {
+					{ "op", voice_client_dave_transition_ready },
+					{
+					  "d",
 						{
-						  "d",
-							{
-								{ "transition_id", this->mls_state->transition_id },
-							}
+							{ "transition_id", this->mls_state->transition_id },
 						}
-					};
-					this->write(obj.dump(-1, ' ', false, json::error_handler_t::replace), OP_TEXT);
+					}
+				};
+				this->write(obj.dump(-1, ' ', false, json::error_handler_t::replace), OP_TEXT);
+				if (!is_ready) {
+					if (!creator->on_voice_ready.empty()) {
+						voice_ready_t rdy(nullptr, data);
+						rdy.voice_client = this;
+						rdy.voice_channel_id = this->channel_id;
+						creator->on_voice_ready.call(rdy);
+					}
 				}
 			}
 			break;
