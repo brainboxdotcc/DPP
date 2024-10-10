@@ -52,7 +52,6 @@
 #include <iostream>
 #include <set>
 #include <dpp/discordvoiceclient.h>
-#include <sodium.h>
 #include <opus/opus.h>
 #include "../../dave/session.h"
 #include "../../dave/decryptor.h"
@@ -99,7 +98,7 @@ struct rtp_header {
 };
 
 /**
-* @brief Transport encryption type (libsodium)
+* @brief Transport encryption type (libssl)
 */
 constexpr std::string_view transport_encryption_protocol = "aead_xchacha20_poly1305_rtpsize";
 
@@ -108,3 +107,48 @@ std::string generate_displayable_code(const std::vector<uint8_t> &data, size_t d
 size_t audio_mix(discord_voice_client &client, audio_mixer &mixer, opus_int32 *pcm_mix, const opus_int16 *pcm, size_t park_count, int samples, int &max_samples);
 
 }
+
+/**
+ * @brief OpenSSL based reimplementation of sodium's crypto_aead_xchacha20poly1305_ietf_encrypt
+ * @note Parameters and types are intended to match sodium as to be a drop-in replacement.
+ * @param c Ciphertext + Tag output
+ * @param clen Ciphertext length output
+ * @param m Message (plaintext) input
+ * @param mlen Message length
+ * @param ad Additional authenticated data (AAD)
+ * @param adlen Authenticated data length
+ * @param nsec Secret nonce (optional, nullptr to not use)
+ * @param npub Public nonce (24 bytes)
+ * @param k Key (32 bytes)
+ * @return 0 on success, -1 on error
+ */
+int ssl_crypto_aead_xchacha20poly1305_ietf_encrypt(unsigned char *c, unsigned long long *clen, const unsigned char *m, unsigned long long mlen, const unsigned char *ad, unsigned long long adlen, const unsigned char *nsec, const unsigned char *npub, const unsigned char *k);
+
+/**
+ * @brief OpenSSL based reimplementation of sodium's crypto_aead_xchacha20poly1305_ietf_decrypt
+ * @note Parameters and types are intended to match sodium as to be a drop-in replacement.
+ * @param m Message (plaintext) output
+ * @param mlen message length output
+ * @param nsec Secret nonce (optional, nullptr to not use)
+ * @param c Ciphertext + Tag input
+ * @param clen Ciphertext length
+ * @param ad Additional authenticated data (AAD)
+ * @param adlen Additional authenticated data length
+ * @param npub Public nonce (24 bytes)
+ * @param k Key (32 bytes)
+ * @return 0 on success, -1 on error
+ */
+int ssl_crypto_aead_xchacha20poly1305_ietf_decrypt(unsigned char *m, unsigned long long *mlen, unsigned char *nsec, const unsigned char *c, unsigned long long clen, const unsigned char *ad, unsigned long long adlen, const unsigned char *npub, const unsigned char *k);
+
+/**
+ * @brief Size of public nonce (24 bytes)
+ * @note This constant is a drop-in replacement for one in libsodium
+ */
+inline constexpr unsigned int ssl_crypto_aead_xchacha20poly1305_ietf_NPUBBYTES = 24U;
+
+/**
+ * @brief AAD size
+ * @note This constant is a drop-in replacement for one in libsodium
+ */
+inline constexpr unsigned int ssl_crypto_aead_xchacha20poly1305_IETF_ABYTES = 16U;
+

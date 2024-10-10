@@ -68,8 +68,6 @@ moving_averager::operator float() {
 	return 0.0f;
 }
 
-bool discord_voice_client::sodium_initialised = false;
-
 discord_voice_client::~discord_voice_client()
 {
 	cleanup();

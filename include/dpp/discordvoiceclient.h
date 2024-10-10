@@ -134,7 +134,7 @@ enum dave_version_t : uint8_t {
 	 */
 	dave_version_none = 0,
 	/**
-	 * @brief DAVE enabled, version 1 (E2EE encryption on top of sodium)
+	 * @brief DAVE enabled, version 1 (E2EE encryption on top of openssl)
 	 */
 	dave_version_1 = 1,
 };
@@ -686,12 +686,6 @@ public:
 	class dpp::cluster* creator;
 
 	/**
-	 * @brief This needs to be static, we only initialise libsodium once per program start,
-	 * so initialising it on first use in a voice connection is best.
-	 */
-	static bool sodium_initialised;
-
-	/**
 	 * @brief True when the thread is shutting down
 	 */
 	bool terminating;
@@ -865,7 +859,7 @@ public:
 	 * @param _session_id The voice session id to identify with
 	 * @param _host The voice server hostname to connect to (hostname:port format)
 	 * @param enable_dave Enable DAVE E2EE
-	 * @throw dpp::voice_exception Sodium or Opus failed to initialise, or D++ is not compiled with voice support
+	 * @throw dpp::voice_exception Opus failed to initialise, or D++ is not compiled with voice support
 	 * @warning DAVE E2EE is an EXPERIMENTAL feature!
 	 */
 	discord_voice_client(dpp::cluster* _cluster, snowflake _channel_id, snowflake _server_id, const std::string &_token, const std::string &_session_id, const std::string &_host, bool enable_dave = false);
@@ -900,7 +894,7 @@ public:
 	 * 
 	 * You should send an audio packet of `send_audio_raw_max_length` (11520) bytes.
 	 * Note that this function can be costly as it has to opus encode
-	 * the PCM audio on the fly, and also encrypt it with libsodium.
+	 * the PCM audio on the fly, and also encrypt it with openssl.
 	 * 
 	 * @note Because this function encrypts and encodes packets before
 	 * pushing them onto the output queue, if you have a complete stream
@@ -940,7 +934,7 @@ public:
 	 * Some containers such as .ogg may contain OPUS
 	 * encoded data already. In this case, we don't need to encode the
 	 * frames using opus here. We can bypass the codec, only applying 
-	 * libsodium to the stream.
+	 * openssl to the stream.
 	 * 
 	 * @param opus_packet Opus packets. Discord expects opus frames 
 	 * to be encoded at 48000Hz
@@ -968,7 +962,7 @@ public:
 	 * Some containers such as .ogg may contain OPUS
 	 * encoded data already. In this case, we don't need to encode the
 	 * frames using opus here. We can bypass the codec, only applying 
-	 * libsodium to the stream.
+	 * opens to the stream.
 	 * 
 	 * Duration is calculated internally
 	 * 

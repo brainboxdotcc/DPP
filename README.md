@@ -155,10 +155,9 @@ Other compilers may work (either newer versions of those listed above, or differ
 
 #### Optional Dependencies
 
-For **voice support** you require both of:
+For **voice support** you require:
 * [libopus](https://www.opus-codec.org) (For audio encoding/decoding)
-* [libsodium](https://libsodium.org/) (For transport layer encryption)
-* Note that our **windows zips** come packaged with copies of both libraries - you do not need to install them yourself!
+* Note that our **windows zips** come packaged with copies of this library - you do not need to install it yourself!
 
 ### Included Dependencies (Packaged with the library)
 

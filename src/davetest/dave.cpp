@@ -71,13 +71,16 @@ int main() {
 		if (v && v->is_ready()) {
 			v->send_audio_raw((uint16_t*)testaudio.data(), testaudio.size());
 		}
+		dave_test.start_timer([v, &testaudio](auto) {
+			v->send_audio_raw((uint16_t*)testaudio.data(), testaudio.size());
+		}, 15);
 	});
 
 
 	dave_test.on_guild_create([&](const dpp::guild_create_t & event) {
 		if (event.created->id == TEST_GUILD_ID) {
 			dpp::discord_client* s = dave_test.get_shard(0);
-			bool muted = false, deaf = false, enable_dave = true;
+			bool muted = false, deaf = false, enable_dave = false;
 			s->connect_voice(TEST_GUILD_ID, TEST_VC_ID, muted, deaf, enable_dave);
 		}
 	});

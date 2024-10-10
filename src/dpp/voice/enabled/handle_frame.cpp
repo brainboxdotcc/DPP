@@ -363,6 +363,8 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 					auto key_response = mls_state->dave_session->get_marshalled_key_package();
 					key_response.insert(key_response.begin(), voice_client_dave_mls_key_package);
 					this->write(std::string_view(reinterpret_cast<const char*>(key_response.data()), key_response.size()), OP_BINARY);
+				} else {
+					ready_now = true;
 				}
 
 				if (ready_now) {

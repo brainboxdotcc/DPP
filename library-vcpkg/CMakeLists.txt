@@ -108,7 +108,6 @@ target_link_options(
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(OpenSSL REQUIRED)
 find_package(Opus CONFIG REQUIRED)
-find_package(unofficial-sodium CONFIG REQUIRED)
 find_package(ZLIB REQUIRED)
 
 target_link_libraries(
@@ -117,7 +116,6 @@ target_link_libraries(
 	$<$<TARGET_EXISTS:OpenSSL::SSL>:OpenSSL::SSL>
 	$<$<TARGET_EXISTS:OpenSSL::Crypto>:OpenSSL::Crypto>
 	$<$<TARGET_EXISTS:Opus::opus>:Opus::opus>
-	$<$<TARGET_EXISTS:unofficial-sodium::sodium>:unofficial-sodium::sodium>
 	$<$<TARGET_EXISTS:ZLIB::ZLIB>:ZLIB::ZLIB>
 	$<$<TARGET_EXISTS:Threads::Threads>:Threads::Threads>
 )

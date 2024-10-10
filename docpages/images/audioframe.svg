@@ -173,7 +173,7 @@
          sodipodi:role="line"
          id="tspan3010"
          x="748.91284"
-         y="835.92316">DAVE (AES 128 GCM AEAD)</tspan></text>
+         y="835.92316">DAVE OPUS AUDIO (AES 128 GCM AEAD)</tspan></text>
     <text
        xml:space="preserve"
        style="font-size:48px;text-align:start;text-anchor:start;opacity:1;fill:#000000;fill-opacity:1;stroke:#ffffff;stroke-opacity:1"
@@ -183,7 +183,7 @@
          sodipodi:role="line"
          id="tspan3862"
          x="743.3595"
-         y="912.60059">SODIUM (CHACHA20 POLY1305)</tspan></text>
+         y="912.60059">RTP CONTENT (CHACHA20 POLY1305 AEAD)</tspan></text>
     <text
        xml:space="preserve"
        style="font-size:48px;text-align:start;text-anchor:start;opacity:1;fill:#000000;fill-opacity:1;stroke:#ffffff;stroke-opacity:1"
