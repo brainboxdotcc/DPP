@@ -80,7 +80,7 @@ int main() {
 	dave_test.on_guild_create([&](const dpp::guild_create_t & event) {
 		if (event.created->id == TEST_GUILD_ID) {
 			dpp::discord_client* s = dave_test.get_shard(0);
-			bool muted = false, deaf = false, enable_dave = false;
+			bool muted = false, deaf = false, enable_dave = true;
 			s->connect_voice(TEST_GUILD_ID, TEST_VC_ID, muted, deaf, enable_dave);
 		}
 	});
