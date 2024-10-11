@@ -129,7 +129,7 @@ if (BUILD_VOICE_SUPPORT)
 		include("${CMAKE_CURRENT_SOURCE_DIR}/../cmake/FindOpus.cmake")
 	endif()
 
-	if(DEFINED OPUS_FOUND)
+	if(HAVE_OPUS_OPUS_H)
 		message("-- Found Opus ${Green}${OPUS_LIBRARIES}${ColourReset}")
 		add_compile_definitions(HAVE_VOICE)
 		set(HAVE_VOICE 1)
