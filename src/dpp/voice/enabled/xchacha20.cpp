@@ -28,9 +28,6 @@
 #include <cstdint>
 #include <dpp/exception.h>
 #include "enabled.h"
-#if _MSC_VER
-	#include <stdlib.h>
-#endif
 
 /**
  * @brief ChaCha static constant
@@ -58,11 +55,7 @@ constexpr size_t CHACHA_NONCE_SIZE = 12;
  * @return shifted value
  */
 constexpr uint32_t rotl_u32(uint32_t value, int shift) {
-#if _MSC_VER
-	return _rotl(value, shift);
-#else
 	return (value << shift) | (value >> ((-shift) & 31));
-#endif
 }
 
 /**
