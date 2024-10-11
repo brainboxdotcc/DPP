@@ -120,7 +120,7 @@ void discord_voice_client::read_ready()
 
 	uint8_t decrypted[65535] = { 0 };
 	unsigned long long opus_packet_len  = 0;
-	if (crypto_aead_xchacha20poly1305_ietf_decrypt(
+	if (ssl_crypto_aead_xchacha20poly1305_ietf_decrypt(
 		decrypted, &opus_packet_len,
 		nullptr,
 		ciphertext, ciphertext_len,

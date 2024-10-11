@@ -29,8 +29,6 @@
 #include <dpp/isa_detection.h>
 #include <dpp/discordvoiceclient.h>
 #include <dpp/json.h>
-
-#include <sodium.h>
 #include <opus/opus.h>
 
 namespace dpp {

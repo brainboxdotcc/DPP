@@ -6,7 +6,6 @@
   "license": "Apache-2.0",
   "supports": "(windows & !static & !uwp) | linux | osx",
   "dependencies": [
-    "libsodium",
     "nlohmann-json",
     "openssl",
     "opus",

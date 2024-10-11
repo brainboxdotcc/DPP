@@ -11,7 +11,7 @@ initial connection to this secondary websocket. Every connection to a voice chan
 Once connected to this websocket, the library negotiates which protocols it supports and what encryption schemes to use. If you enabled DAVE (Discord's end-to-end
 encryption scheme) this is negotiated first. An MLS (message layer security) group is joined or created. If you did not enable DAVE, this step is bypassed.
 
-The secondary websocket then gives the library a shared encryption secret and the hostname of an RTP server, which is used to encrypt RTP packets using libsodium.
+The secondary websocket then gives the library a shared encryption secret and the hostname of an RTP server, which is used to encrypt RTP packets using libssl.
 This is stored for later.
 
 The next step is to send an initial packet to the RTP server so that the library can detect the public IP where the bot is running. Once the RTP server replies,
@@ -153,9 +153,9 @@ digraph "Example Directory" {
  "discord_voice_client::send_audio_*()" -> "Dave encryption on";
  "discord_voice_client::send_audio_*()" -> "Dave encryption off";
  "Dave encryption on" -> "AES AEAD encryption\nof OPUS stream\nusing ratchet";
- "AES AEAD encryption\nof OPUS stream\nusing ratchet" -> "SODIUM encryption (xchacha20_poly1305_aead)";
-  "Dave encryption off" -> "SODIUM encryption (xchacha20_poly1305_aead)";
- "SODIUM encryption (xchacha20_poly1305_aead)" -> "UDP sendto";
+ "AES AEAD encryption\nof OPUS stream\nusing ratchet" -> "XChaCha20-Poly1305 encryption";
+ "Dave encryption off" -> "XChaCha20-Poly1305 encryption";
+ "XChaCha20-Poly1305 encryption" -> "UDP sendto";
  "UDP sendto" -> "Discord RTP server";
  "DAVE enabled" -> "MLS send key package";
  "MLS send key package" -> "MLS receive external sender";

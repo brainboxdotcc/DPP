@@ -24,7 +24,6 @@
 #include <dpp/exception.h>
 #include <dpp/isa_detection.h>
 #include <dpp/discordvoiceclient.h>
-
 #include <opus/opus.h>
 #include "../../dave/array_view.h"
 #include "../../dave/encryptor.h"
@@ -115,9 +114,10 @@ discord_voice_client& discord_voice_client::send_audio_opus(uint8_t* opus_packet
 	rtp_header header(sequence, timestamp, (uint32_t)ssrc);
 
 	/* Expected payload size is unencrypted header + encrypted opus packet + unencrypted 32 bit nonce */
-	size_t packet_siz = sizeof(header) + (encoded_audio_length + crypto_aead_xchacha20poly1305_IETF_ABYTES) + sizeof(packet_nonce);
+	size_t packet_siz = sizeof(header) + (encoded_audio_length + ssl_crypto_aead_xchacha20poly1305_IETF_ABYTES) + sizeof(packet_nonce);
 
 	std::vector<uint8_t> payload(packet_siz);
+	std::vector<uint8_t> payload2(packet_siz);
 
 	/* Set RTP header */
 	std::memcpy(payload.data(), &header, sizeof(header));
@@ -126,13 +126,14 @@ discord_voice_client& discord_voice_client::send_audio_opus(uint8_t* opus_packet
 	uint32_t noncel = htonl(packet_nonce);
 
 	/* 24 byte is needed for encrypting, discord just want 4 byte so just fill up the rest with null */
-	unsigned char encrypt_nonce[crypto_aead_xchacha20poly1305_ietf_NPUBBYTES] = { '\0' };
+	unsigned char encrypt_nonce[ssl_crypto_aead_xchacha20poly1305_ietf_NPUBBYTES] = { '\0' };
 	memcpy(encrypt_nonce, &noncel, sizeof(noncel));
 
-	/* Execute */
-	crypto_aead_xchacha20poly1305_ietf_encrypt(
+	  /* Execute */
+	unsigned long long int clen{0};
+	if (ssl_crypto_aead_xchacha20poly1305_ietf_encrypt(
 		payload.data() + sizeof(header),
-		nullptr,
+		&clen,
 		encoded_audio.data(),
 		encoded_audio_length,
 		/* The RTP Header as Additional Data */
@@ -141,7 +142,9 @@ discord_voice_client& discord_voice_client::send_audio_opus(uint8_t* opus_packet
 		nullptr,
 		static_cast<const unsigned char*>(encrypt_nonce),
 		secret_key.data()
-	);
+	) != 0) {
+		log(dpp::ll_debug, "XChaCha20 Encryption failed");
+	}
 
 	/* Append the 4 byte nonce to the resulting payload */
 	std::memcpy(payload.data() + payload.size() - sizeof(noncel), &noncel, sizeof(noncel));

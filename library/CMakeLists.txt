@@ -63,17 +63,12 @@ if(WIN32 AND NOT MINGW)
 		link_libraries("${CMAKE_CURRENT_SOURCE_DIR}/../win32/lib/libssl.lib")
 		link_libraries("${CMAKE_CURRENT_SOURCE_DIR}/../win32/lib/libcrypto.lib")
 		link_libraries("${CMAKE_CURRENT_SOURCE_DIR}/../win32/lib/zlib.lib")
-		link_libraries("${CMAKE_CURRENT_SOURCE_DIR}/../win32/lib/libsodium.lib")
 		link_libraries("${CMAKE_CURRENT_SOURCE_DIR}/../win32/lib/opus.lib")
 
 		set(OPUS_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/../win32/include")
 		set(OPUS_LIBRARIES "${CMAKE_CURRENT_SOURCE_DIR}/../win32/lib/opus.lib")
-		set(sodium_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../win32/include")
-		set(sodium_LIBRARY_DEBUG "${CMAKE_CURRENT_SOURCE_DIR}/../win32/lib/libsodium.lib")
-		set(sodium_LIBRARY_RELEASE "${CMAKE_CURRENT_SOURCE_DIR}/../win32/lib/libsodium.lib")
 		set(HAVE_OPUS_OPUS_H "${CMAKE_CURRENT_SOURCE_DIR}/../win32/include/opus/opus.h")
 		set(OPUS_FOUND 1)
-		SET(sodium_VERSION_STRING "win32 bundled")
 
 		include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../win32/include")
 
@@ -123,7 +118,6 @@ if(NOT BUILD_SHARED_LIBS)
 		endif()
 		
 		set(OPENSSL_USE_STATIC_LIBS ON)
-		set(sodium_USE_STATIC_LIBS ON)
 		set(OPUS_USE_STATIC_LIBS TRUE)
 	else()
 		message(WARNING "-- Building of static library not supported on non UNIX systems.")
@@ -132,30 +126,19 @@ endif()
 
 if (BUILD_VOICE_SUPPORT)
 	if (MINGW OR NOT WIN32)
-		find_package(PkgConfig QUIET)
-		if(PKG_CONFIG_FOUND)
-			include("${CMAKE_CURRENT_SOURCE_DIR}/../cmake/FindSodium.cmake")
-		else()
-			message("-- Could not detect ${Green}libsodium${ColourReset} due to missing ${Green}pkgconfig${ColourReset}. VOICE support will be ${Red}disabled${ColourReset}")
-		endif()
-      		include("${CMAKE_CURRENT_SOURCE_DIR}/../cmake/FindOpus.cmake")
+		include("${CMAKE_CURRENT_SOURCE_DIR}/../cmake/FindOpus.cmake")
 	endif()
 
-	if(DEFINED OPUS_FOUND)
+	if(HAVE_OPUS_OPUS_H)
 		message("-- Found Opus ${Green}${OPUS_LIBRARIES}${ColourReset}")
-		if((WIN32 OR PKG_CONFIG_FOUND) AND DEFINED sodium_VERSION_STRING AND DEFINED sodium_LIBRARY_RELEASE)
-			add_compile_definitions(HAVE_VOICE)
-		
-			message("-- Sodium ${Green}${sodium_VERSION_STRING}${ColourReset}")
-		
-			set(HAVE_VOICE 1)
-		endif()
+		add_compile_definitions(HAVE_VOICE)
+		set(HAVE_VOICE 1)
 	endif()
 
 	if(HAVE_VOICE)
-		message("-- Detected ${Green}libsodium${ColourReset} and ${Green}libopus${ColourReset}. VOICE support will be ${Green}enabled${ColourReset}")
+		message("-- Detected ${Green}libopus${ColourReset}. VOICE support will be ${Green}enabled${ColourReset}")
 	else(HAVE_VOICE)
-		message("-- Could not detect ${Green}libsodium${ColourReset} and/or ${Green}libopus${ColourReset}. VOICE support will be ${Red}disabled${ColourReset}")
+		message("-- Could not detect ${Green}libopus${ColourReset}. VOICE support will be ${Red}disabled${ColourReset}")
 	endif(HAVE_VOICE)
 else()
 	message("-- Voice support disabled by cmake option")
@@ -275,13 +258,11 @@ foreach (fullmodname ${subdirlist})
 		if (NOT WINDOWS_32_BIT)
 			target_link_libraries(${modname} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/../win32/lib/libssl.lib"
 				"${CMAKE_CURRENT_SOURCE_DIR}/../win32/lib/libcrypto.lib"
-				"${CMAKE_CURRENT_SOURCE_DIR}/../win32/lib/libsodium.lib"
 				"${CMAKE_CURRENT_SOURCE_DIR}/../win32/lib/opus.lib"
 				"${CMAKE_CURRENT_SOURCE_DIR}/../win32/lib/zlib.lib")
 		else()
 			target_link_libraries(${modname} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/../win32/32/lib/libssl.lib"
 				"${CMAKE_CURRENT_SOURCE_DIR}/../win32/32/lib/libcrypto.lib"
-				"${CMAKE_CURRENT_SOURCE_DIR}/../win32/32/lib/libsodium.lib"
 				"${CMAKE_CURRENT_SOURCE_DIR}/../win32/32/lib/opus.lib"
 				"${CMAKE_CURRENT_SOURCE_DIR}/../win32/32/lib/zlib.lib")
 		endif()
@@ -305,9 +286,8 @@ foreach (fullmodname ${subdirlist})
 	endif()
 
 	if (HAVE_VOICE)
-		target_link_libraries(${modname} PUBLIC ${sodium_LIBRARY_RELEASE} ${OPUS_LIBRARIES})
-		
-		include_directories(${OPUS_INCLUDE_DIRS} ${sodium_INCLUDE_DIR})
+		target_link_libraries(${modname} PUBLIC ${OPUS_LIBRARIES})
+		include_directories(${OPUS_INCLUDE_DIRS})
 	endif()
 endforeach()
 
@@ -425,13 +405,11 @@ if(WIN32 AND NOT MINGW)
 		configure_file("${CMAKE_CURRENT_SOURCE_DIR}/../win32/bin/zlib1.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
 		configure_file("${CMAKE_CURRENT_SOURCE_DIR}/../win32/bin/libcrypto-1_1-x64.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
 		configure_file("${CMAKE_CURRENT_SOURCE_DIR}/../win32/bin/libssl-1_1-x64.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
-		configure_file("${CMAKE_CURRENT_SOURCE_DIR}/../win32/bin/libsodium.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
 		configure_file("${CMAKE_CURRENT_SOURCE_DIR}/../win32/bin/opus.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
 	else()
 		configure_file("${CMAKE_CURRENT_SOURCE_DIR}/../win32/32/bin/zlib1.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
 		configure_file("${CMAKE_CURRENT_SOURCE_DIR}/../win32/32/bin/libcrypto-1_1.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
 		configure_file("${CMAKE_CURRENT_SOURCE_DIR}/../win32/32/bin/libssl-1_1.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
-		configure_file("${CMAKE_CURRENT_SOURCE_DIR}/../win32/32/bin/libsodium.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
 		configure_file("${CMAKE_CURRENT_SOURCE_DIR}/../win32/32/bin/opus.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
 	endif()
 endif()

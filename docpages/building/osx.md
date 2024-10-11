@@ -15,10 +15,10 @@ brew install openssl pkgconfig
 
 \note Usually, you do not need pkgconfig. However, it seems that it throws errors about openssl without.
 
-For voice support, additional dependencies are required:
+For voice support, additional dependency is required:
 
 ```bash
-brew install libsodium opus
+brew install opus
 ```
 
 ## 3. Build Source Code
