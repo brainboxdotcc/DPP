@@ -77,6 +77,8 @@ You can find more examples in our [example page](https://dpp.dev/example-program
 
 ## 💻 Supported Systems
 
+We support the following OS families, as long as they are still officially supported by their provider. **We will provide no support for operating systems past end-of-life**.
+
 ### Linux
 
 The library runs ideally on **Linux**.
