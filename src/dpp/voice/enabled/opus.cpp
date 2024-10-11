@@ -117,7 +117,6 @@ discord_voice_client& discord_voice_client::send_audio_opus(uint8_t* opus_packet
 	size_t packet_siz = sizeof(header) + (encoded_audio_length + ssl_crypto_aead_xchacha20poly1305_IETF_ABYTES) + sizeof(packet_nonce);
 
 	std::vector<uint8_t> payload(packet_siz);
-	std::vector<uint8_t> payload2(packet_siz);
 
 	/* Set RTP header */
 	std::memcpy(payload.data(), &header, sizeof(header));
