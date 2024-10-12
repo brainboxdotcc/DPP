@@ -29,4 +29,4 @@ namespace dpp {
 
 using json = nlohmann::json;
 
-}
+} // namespace dpp
