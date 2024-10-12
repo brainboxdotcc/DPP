@@ -91,4 +91,4 @@ void to_json(nlohmann::json& j, const thread_metadata& tmdata) {
 	j["invitable"] = tmdata.invitable;
 }
 
-}
+} // namespace dpp
