@@ -106,7 +106,7 @@ discord_voice_client& discord_voice_client::send_audio_opus(uint8_t* opus_packet
 			log(ll_warning, "DAVE Encryption failure: " + std::to_string(result));
 		} else {
 			encoded_audio = encrypted_buffer;
-			encoded_audio_length = encoded_audio.size();
+			encoded_audio_length = encrypted_buffer.size();
 		}
 	}
 

@@ -85,8 +85,9 @@ bool discord_voice_client::is_playing() {
 }
 
 uint16_t dave_binary_header_t::get_transition_id() const {
-	if (opcode != voice_client_dave_mls_welcome) {
-		throw dpp::logic_exception("Can't get transition ID from buffer that is not of type voice_client_dave_mls_welcome(30)");
+	bool has_transition_id = opcode == voice_client_dave_mls_welcome || opcode == voice_client_dave_announce_commit_transition;
+	if (!has_transition_id) {
+		throw dpp::logic_exception("Can't get transition ID from buffer that is not of type voice_client_dave_announce_commit_transition(29) or voice_client_dave_mls_welcome(30)");
 	}
 	return transition_id;
 }
@@ -98,7 +99,9 @@ dave_binary_header_t::dave_binary_header_t(const std::string& buffer) {
 	seq = (buffer[0] << 8) | buffer[1];
 	opcode = buffer[2];
 	transition_id = (buffer[3] << 8) | buffer[4];
-	package.assign(buffer.begin() + (opcode == voice_client_dave_mls_welcome ? 5 : 3), buffer.end());
+
+	bool has_transition_id = opcode == voice_client_dave_mls_welcome || opcode == voice_client_dave_announce_commit_transition;
+	package.assign(buffer.begin() + (has_transition_id ? 5 : 3), buffer.end());
 }
 
 std::vector<uint8_t> dave_binary_header_t::get_data() const {

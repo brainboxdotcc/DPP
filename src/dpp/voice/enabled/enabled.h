@@ -96,10 +96,6 @@ struct dave_state {
 	 */
 	uint64_t transition_id{0};
 	/**
-	 * @brief True when we have a sending ratchet
-	 */
-	bool have_sending_ratchet{false};
-	/**
 	 * @brief Have sent ready event to listeners
 	 */
 	bool done_ready{false};
@@ -133,6 +129,11 @@ struct dave_state {
 	 * MLS group is not established.
 	 */
 	std::string privacy_code;
+
+	/**
+	 * @brief Cached roster map.
+	 */
+    dave::roster_map cached_roster_map;
 };
 
 /**
