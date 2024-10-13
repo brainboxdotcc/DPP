@@ -177,5 +177,4 @@ For **voice support** you require:
   </a>
 </div>
 
-  
 **Happy Coding 💻 and we look forward to your contributions during **Hacktoberfest 2024**! 🎃**
