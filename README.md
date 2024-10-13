@@ -165,3 +165,16 @@ For **voice support** you require:
 
 * [JSON for Modern C++](https://json.nlohmann.me/) (You can bring your own nlohmann::json into D++ by setting a CMAKE flag)
 * [MLS++](https://github.com/cisco/mlspp) (This is statically compiled into the library if voice support is enabled)
+
+## 👀 Our Contributors
+
+- We extend our heartfelt gratitude for your invaluable contribution to our project! Your efforts play a pivotal role in elevating DPP to greater heights.
+- Make sure you show some love by giving ⭐ to our repository.
+
+<div align="center">
+  <a href="https://github.com/brainboxdotcc/DPP">
+    <img src="https://contrib.rocks/image?repo=brainboxdotcc/DPP&&max=1000" />
+  </a>
+</div>
+
+**Happy Coding 💻 and we look forward to your contributions during **Hacktoberfest 2024**! 🎃**
