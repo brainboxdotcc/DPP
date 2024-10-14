@@ -629,4 +629,3 @@ void discord_voice_client::process_mls_group_rosters(const dave::roster_map &rma
 
 }
 
-// vim: sw=4 noet
