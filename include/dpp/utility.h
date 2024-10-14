@@ -574,7 +574,7 @@ double DPP_EXPORT time_f();
 /**
  * @brief Returns true if D++ was built with voice support
  * 
- * @return bool True if voice support is compiled in (libsodium/libopus) 
+ * @return bool True if voice support is compiled in (libopus)
  */
 bool DPP_EXPORT has_voice();
 

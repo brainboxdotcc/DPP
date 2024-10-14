@@ -84,7 +84,7 @@ jobs:
           sudo apt-add-repository -y "deb http://apt.llvm.org/$osname/ llvm-toolchain-$osname-${{ matrix.cfg.version }} main"
 
       - name: Install apt packages
-        run: sudo sed -i 's/azure\.//' /etc/apt/sources.list && sudo apt update && sudo apt-get install -y ${{ matrix.cfg.package }} pkg-config libsodium-dev libopus-dev zlib1g-dev rpm
+        run: sudo sed -i 's/azure\.//' /etc/apt/sources.list && sudo apt update && sudo apt-get install -y ${{ matrix.cfg.package }} pkg-config libopus-dev zlib1g-dev rpm
 
       - name: Generate CMake
         run: cmake -B build -DDPP_NO_VCPKG=ON -DAVX_TYPE=AVX0 -DCMAKE_BUILD_TYPE=Release ${{matrix.cfg.cmake-flags}}
@@ -150,7 +150,7 @@ jobs:
           xcode-version: ${{ matrix.cfg.xcode-version }}
 
       - name: Install homebrew packages
-        run: brew install cmake make libsodium opus openssl pkg-config
+        run: brew install cmake make opus openssl pkg-config
 
       - name: Generate CMake
         run: cmake -B build -DDPP_NO_VCPKG=ON -DCMAKE_BUILD_TYPE=Release -DDPP_CORO=ON -DAVX_TYPE=AVX0

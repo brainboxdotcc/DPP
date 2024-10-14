@@ -170,7 +170,6 @@ file(COPY "${CMAKE_CURRENT_LIST_DIR}/usage" DESTINATION "${CURRENT_PACKAGES_DIR}
   "license": "Apache-2.0",
   "supports": "((windows & !static & !uwp) | linux | osx)",
   "dependencies": [
-    "libsodium",
     "nlohmann-json",
     "openssl",
     "opus",

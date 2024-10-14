@@ -26,11 +26,8 @@
 #include <dpp/exception.h>
 #include <dpp/isa_detection.h>
 #include <dpp/discordvoiceclient.h>
-
-#include <sodium.h>
 #include <opus/opus.h>
 #include "../../dave/encryptor.h"
-
 #include "enabled.h"
 
 namespace dpp {
@@ -64,12 +61,6 @@ discord_voice_client::discord_voice_client(dpp::cluster* _cluster, snowflake _ch
 	server_id(_server_id),
 	channel_id(_channel_id)
 {
-	if (!discord_voice_client::sodium_initialised) {
-		if (sodium_init() < 0) {
-			throw dpp::voice_exception(err_sodium, "discord_voice_client::discord_voice_client; sodium_init() failed");
-		}
-		discord_voice_client::sodium_initialised = true;
-	}
 	int opusError = 0;
 	encoder = opus_encoder_create(opus_sample_rate_hz, opus_channel_count, OPUS_APPLICATION_VOIP, &opusError);
 	if (opusError) {

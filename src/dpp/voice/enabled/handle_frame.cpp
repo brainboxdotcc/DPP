@@ -394,23 +394,27 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 				bool ready_now = false;
 
 				if (dave_version != dave_version_none) {
+					/* DAVE ready later */
 					if (j["d"]["dave_protocol_version"] != static_cast<uint32_t>(dave_version)) {
 						log(ll_error, "We requested DAVE E2EE but didn't receive it from the server, downgrading...");
 						dave_version = dave_version_none;
 						ready_now = true;
+					} else {
+						if (mls_state == nullptr) {
+							mls_state = std::make_unique<dave_state>();
+						}
+						if (mls_state->dave_session == nullptr) {
+							mls_state->dave_session = std::make_unique<dave::mls::session>(
+								*creator,
+								nullptr, "", [this](std::string const &s1, std::string const &s2) {
+									log(ll_debug, "DAVE: " + s1 + ", " + s2);
+								});
+						}
+						this->reinit_dave_mls_group();
 					}
-
-					if (mls_state == nullptr) {
-						mls_state = std::make_unique<dave_state>();
-					}
-					if (mls_state->dave_session == nullptr) {
-						mls_state->dave_session = std::make_unique<dave::mls::session>(
-							*creator,
-							nullptr, "", [this](std::string const& s1, std::string const& s2) {
-								log(ll_debug, "Dave session constructor callback: " + s1 + ", " + s2);
-							});
-					}
-					this->reinit_dave_mls_group();
+				} else {
+					/* Non-DAVE ready immediately */
+					ready_now = true;
 				}
 
 				if (ready_now) {

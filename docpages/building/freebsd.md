@@ -12,18 +12,10 @@ pkg install cmake
 
 ## 2. Install Voice Dependencies (Optional)
 
-If you wish to use voice support, you'll need to install opus and libsodium:
+If you wish to use voice support, you'll need to install opus:
 
-First, you need to install opus.
 ```bash
 cd /usr/ports/audio/opus
-make && make install
-```
-
-Then, you need to install libsodium.
-
-```bash
-cd /usr/ports/security/libsodium
 make && make install
 ```
 

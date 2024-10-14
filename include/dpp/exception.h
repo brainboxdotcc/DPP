@@ -31,7 +31,7 @@ namespace dpp {
  * @brief Exception error codes possible for dpp::exception::code()
  * 
  * This list is a combined list of Discord's error codes, HTTP error codes, 
- * zlib, opus, sodium and C library codes (e.g. DNS, socket etc). You may 
+ * zlib, opus and C library codes (e.g. DNS, socket etc). You may
  * use these to easily identify a type of exception without having to resort
  * to string comparison against dpp::exception::what()
  * 
@@ -98,7 +98,6 @@ enum exception_error_code {
 	err_no_voice_support = 29,
 	err_invalid_voice_packet_length = 30,
 	err_opus = 31,
-	err_sodium = 32,
 	err_etf = 33,
 	err_cache = 34,
 	err_icon_size = 35,
@@ -591,6 +590,8 @@ public:
 	derived_exception(file_exception, exception);
 	derived_exception(connection_exception, exception);
 	derived_exception(voice_exception, exception);
+	derived_exception(encryption_exception, voice_exception);
+	derived_exception(decryption_exception, voice_exception);
 	derived_exception(rest_exception, exception);
 	derived_exception(invalid_token_exception, rest_exception);
 	derived_exception(length_exception, exception);

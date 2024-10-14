@@ -253,7 +253,7 @@ struct DPP_EXPORT command_info_t {
  * functions.
  * @deprecated commandhandler and message commands are deprecated and dpp::slashcommand is encouraged as a replacement.
  */
-class DPP_EXPORT commandhandler {
+class DPP_EXPORT DPP_DEPRECATED("commandhandler should not be used. Please consider using dpp::cluster::register_command instead.") commandhandler {
 private:
 	/**
 	 * @brief List of guild commands to bulk register
