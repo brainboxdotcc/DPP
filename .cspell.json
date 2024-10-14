@@ -147,7 +147,8 @@
 		"chacha",
 		"nullopt",
 		"chrono",
-		"ciphersuite"
+		"ciphersuite",
+		"rmap"
 	],
 	"flagWords": [
 		"hte"
