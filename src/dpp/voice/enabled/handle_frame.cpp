@@ -514,9 +514,9 @@ void discord_voice_client::ready_for_transition(const std::string &data) {
 	this->write(obj.dump(-1, ' ', false, json::error_handler_t::replace), OP_TEXT);
 	this->mls_state->pending_transition.id = this->mls_state->transition_id;
 
-	/* When the included transition ID is 0, the transition is for (re)initialization and it can be executed immediately. */
+	/* When the included transition ID is 0, the transition is for (re)initialization, and it can be executed immediately. */
 	if (this->mls_state->transition_id == 0) {
-		/* Mark state ready and update rachets the first time */
+		/* Mark state ready and update ratchets the first time */
 		update_ratchets();
 	}
 

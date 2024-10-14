@@ -1208,6 +1208,8 @@ public:
 	 * Fires Voice Ready event when appropriate.
 	 *
 	 * https://daveprotocol.com/#commit-handling
+	 *
+	 * @param data Websocket frame data
 	 */
 	void ready_for_transition(const std::string &data);
 
@@ -1232,8 +1234,9 @@ public:
 
 	/**
 	 * @brief Process roster map from commit/welcome.
+	 * @param rmap Roster map
 	 */
-	void process_mls_group_rosters(const std::map<unsigned long, std::vector<unsigned char>> &rmap);
+	void process_mls_group_rosters(const std::map<uint64_t, std::vector<uint8_t>>& rmap);
 };
 
 } // namespace dpp
