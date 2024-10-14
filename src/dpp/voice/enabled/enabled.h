@@ -88,17 +88,9 @@ struct dave_state {
 	 */
 	std::shared_ptr<::mlspp::SignaturePrivateKey> mls_key;
 	/**
-	 * @brief Cached commit package for use in welcome
-	 */
-	std::vector<uint8_t> cached_commit;
-	/**
 	 * @brief Current transition ID
 	 */
 	uint64_t transition_id{0};
-	/**
-	 * @brief True when we have a sending ratchet
-	 */
-	bool have_sending_ratchet{false};
 	/**
 	 * @brief Have sent ready event to listeners
 	 */
@@ -133,6 +125,11 @@ struct dave_state {
 	 * MLS group is not established.
 	 */
 	std::string privacy_code;
+
+	/**
+	 * @brief Cached roster map to track rosters changes.
+	 */
+	dave::roster_map cached_roster_map;
 };
 
 /**
