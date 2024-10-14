@@ -69,19 +69,66 @@
 
 namespace dpp {
 
+/**
+ * @brief A list of MLS decryptors for decrypting inbound audio from users by snowflake id
+ */
+using decryptor_list = std::map<snowflake, std::unique_ptr<dave::decryptor>>;
+
+/**
+ * @brief Holds all internal DAVE E2EE encryption state
+ */
 struct dave_state {
+	/**
+	 * @brief libdave session
+	 */
 	std::unique_ptr<dave::mls::session> dave_session{};
+	/**
+	 * @brief Our key package
+	 */
 	std::shared_ptr<::mlspp::SignaturePrivateKey> mls_key;
-	std::vector<uint8_t> cached_commit;
+	/**
+	 * @brief Current transition ID
+	 */
 	uint64_t transition_id{0};
+	/**
+	 * @brief Have sent ready event to listeners
+	 */
+	bool done_ready{false};
+	/**
+	 * @brief Details of upcoming transition
+	 */
 	struct {
+		/**
+		 * @brief pending next transition ID
+		 */
 		uint64_t id{0};
+		/**
+		 * @brief New upcoming protocol version
+		 */
 		uint64_t protocol_version{0};
+		/**
+		 * @brief True if transition is pending
+		 */
 		bool is_pending{false};
 	} pending_transition;
-	std::map<dpp::snowflake, std::unique_ptr<dave::decryptor>> decryptors;
+	/**
+	 * @brief Decryptors for inbound audio streams
+	 */
+	decryptor_list decryptors;
+	/**
+	 * @brief Encryptor for outbound audio stream
+	 */
 	std::unique_ptr<dave::encryptor> encryptor;
+	/**
+	 * @brief Current privacy code, or empty string if
+	 * MLS group is not established.
+	 */
 	std::string privacy_code;
+
+	/**
+	 * @brief Cached roster map to track rosters changes.
+	 */
+	dave::roster_map cached_roster_map;
 };
 
 /**

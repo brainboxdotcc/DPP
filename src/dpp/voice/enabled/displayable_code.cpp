@@ -31,6 +31,10 @@ namespace dpp {
 
 std::string generate_displayable_code(const std::vector<uint8_t> &data, size_t desired_length = 30, size_t group_size = 5) {
 
+	if (data.empty()) {
+		return "";
+	}
+
 	const size_t group_modulus = std::pow(10, group_size);
 	std::stringstream result;
 
