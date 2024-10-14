@@ -365,9 +365,7 @@ catch (const std::exception& e) {
 	return failed_t{};
 }
 
-std::optional<roster_map> session::process_welcome(
-  std::vector<uint8_t> welcome,
-  std::set<std::string> const& recognizedUserIDs) noexcept
+std::optional<roster_map> session::process_welcome(std::vector<uint8_t> welcome, std::set<std::string> const& recognizedUserIDs) noexcept
 try {
 	if (!has_cryptographic_state_for_welcome()) {
 		creator.log(dpp::ll_warning, "Missing local crypto state necessary to process MLS welcome");

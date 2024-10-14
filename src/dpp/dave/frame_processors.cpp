@@ -39,6 +39,26 @@
 
 namespace dpp::dave {
 
+#if defined(_MSC_VER) && (defined(_M_ARM) || defined(_M_ARM64))
+	/**
+	 * @brief ARM does not have a builtin for overflow detecting add
+	 * This implements a non-UB version of that.
+	 * @param carry_in Input carry from previous add
+	 * @param a First operand
+	 * @param b Second operand
+	 * @param result Output result
+	 * @return True if overflow occured, false if it didn't
+	 */
+	inline uint8_t addcarry_size_t(size_t carry_in, size_t a, size_t b, size_t* result) {
+		size_t partial_sum = a + b;
+		uint8_t carry1 = (partial_sum < a);
+		size_t final_sum = partial_sum + carry_in;
+		uint8_t carry2 = (final_sum < partial_sum);
+		*result = final_sum;
+		return carry1 || carry2;
+	}
+#endif
+
 std::pair<bool, size_t> OverflowAdd(size_t a, size_t b)
 {
 	size_t res;
@@ -46,6 +66,8 @@ std::pair<bool, size_t> OverflowAdd(size_t a, size_t b)
 	bool didOverflow = _addcarry_u64(0, a, b, &res);
 #elif defined(_MSC_VER) && defined(_M_IX86)
 	bool didOverflow = _addcarry_u32(0, a, b, &res);
+#elif defined(_MSC_VER) && (defined(_M_ARM) || defined(_M_ARM64))
+	bool didOverflow = addcarry_size_t(0, a, b, &res);
 #else
 	bool didOverflow = __builtin_add_overflow(a, b, &res);
 #endif

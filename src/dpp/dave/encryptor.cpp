@@ -39,8 +39,6 @@ using namespace std::chrono_literals;
 
 namespace dpp::dave {
 
-constexpr auto kStatsInterval = 10s;
-
 void encryptor::set_key_ratchet(std::unique_ptr<key_ratchet_interface> keyRatchet)
 {
 	std::lock_guard<std::mutex> lock(keyGenMutex_);
@@ -56,12 +54,7 @@ void encryptor::set_passthrough_mode(bool passthroughMode)
 	update_current_protocol_version(passthroughMode ? 0 : max_protocol_version());
 }
 
-encryptor::result_code encryptor::encrypt(media_type mediaType,
-			   uint32_t ssrc,
-			   array_view<const uint8_t> frame,
-			   array_view<uint8_t> encryptedFrame,
-			   size_t* bytesWritten)
-{
+encryptor::result_code encryptor::encrypt(media_type mediaType, uint32_t ssrc, array_view<const uint8_t> frame, array_view<uint8_t> encryptedFrame, size_t* bytesWritten) {
 	if (mediaType != media_audio && mediaType != media_video) {
 		creator.log(dpp::ll_warning, "encrypt failed, invalid media type: " + std::to_string(static_cast<int>(mediaType)));
 		return result_code::rc_encryption_failure;
@@ -270,8 +263,7 @@ encryptor::cryptor_and_nonce encryptor::get_next_cryptor_and_nonce()
 		return {nullptr, 0};
 	}
 
-	auto generation = compute_wrapped_generation(currentKeyGeneration_,
-						 ++truncatedNonce_ >> RATCHET_GENERATION_SHIFT_BITS);
+	auto generation = compute_wrapped_generation(currentKeyGeneration_, ++truncatedNonce_ >> RATCHET_GENERATION_SHIFT_BITS);
 
 	if (generation != currentKeyGeneration_ || !cryptor_) {
 		currentKeyGeneration_ = generation;
