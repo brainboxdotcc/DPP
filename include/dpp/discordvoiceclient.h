@@ -478,9 +478,10 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	std::set<std::string> dave_mls_user_list;
 
 	/**
-	 * @brief The list of users that just joined for DAVE
+	 * @brief The list of users that have left the voice channel but
+	 * not yet removed from MLS group.
 	 */
-	std::set<std::string> dave_mls_new_user_list;
+	std::set<std::string> dave_mls_pending_remove_list;
 
 	/**
 	 * @brief File descriptor for UDP connection
@@ -582,11 +583,6 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	 * @warning DAVE E2EE is an EXPERIMENTAL feature!
 	 */
 	dave_version_t dave_version;
-
-	/**
-	 * @brief Current dave session key generation.
-	 */
-	uint32_t dave_current_epoch;
 
 	/**
 	 * @brief Send data to UDP socket immediately.
@@ -1206,7 +1202,7 @@ public:
 	 */
 	void get_user_privacy_code(const dpp::snowflake user, privacy_code_callback_t callback) const;
 
-	/*
+	/**
 	 * @brief Notify gateway ready for a DAVE transition.
 	 *
 	 * Fires Voice Ready event when appropriate.
@@ -1225,18 +1221,19 @@ public:
 
 	/**
 	 * @brief Execute pending protocol upgrade/downgrade to/from dave.
+	 * @return true if did an upgrade/downgrade
 	 */
-	void execute_pending_upgrade_downgrade();
+	bool execute_pending_upgrade_downgrade();
 
 	/**
 	 * @brief Reset dave session and prepare initial session group.
 	 */
-    void reinit_dave_mls_group();
+	void reinit_dave_mls_group();
 
 	/**
 	 * @brief Process roster map from commit/welcome.
 	 */
-    void process_mls_group_rosters(const std::map<unsigned long, std::vector<unsigned char>> &rmap);
+	void process_mls_group_rosters(const std::map<unsigned long, std::vector<unsigned char>> &rmap);
 };
 
 } // namespace dpp

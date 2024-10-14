@@ -55,7 +55,6 @@ discord_voice_client::discord_voice_client(dpp::cluster* _cluster, snowflake _ch
 	sending(false),
 	tracks(0),
 	dave_version(enable_dave ? dave_version_1 : dave_version_none),
-	dave_current_epoch(0),
 	creator(_cluster),
 	terminating(false),
 	heartbeat_interval(0),

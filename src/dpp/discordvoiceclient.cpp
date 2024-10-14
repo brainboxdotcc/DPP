@@ -132,13 +132,17 @@ void discord_voice_client::get_user_privacy_code(const dpp::snowflake user, priv
 
 bool discord_voice_client::is_end_to_end_encrypted() const {
 #ifdef HAVE_VOICE
-	if (mls_state == nullptr) {
+	if (mls_state == nullptr || mls_state->encryptor == nullptr) {
 		return false;
 	}
 
 	bool has_pending_downgrade = mls_state->pending_transition.is_pending && mls_state->pending_transition.protocol_version != dave_version_1;
 
-	return !has_pending_downgrade && !mls_state->privacy_code.empty();
+	/* 
+	 * A dave_version 0 should be enough to know we're in non-e2ee session, we should also check for pending downgrade and
+	 * whether session encryptor actually has key rachet set to encrypt opus packets.
+	 */
+	return !has_pending_downgrade && dave_version != dave_version_none && mls_state->encryptor->has_key_ratchet();
 #else
 	return false;
 #endif
