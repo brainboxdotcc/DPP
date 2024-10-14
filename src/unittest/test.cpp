@@ -2085,9 +2085,10 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 
 					// delete the voice channel
 					try {
-						dpp::sync<dpp::channel>(&bot, &dpp::cluster::channel_delete, createdChannel.id);
+						dpp::sync<dpp::confirmation>(&bot, &dpp::cluster::channel_delete, createdChannel.id);
 						set_test(VOICE_CHANNEL_DELETE, true);
 					} catch (dpp::rest_exception &exception) {
+						bot.log(dpp::ll_warning, "Exception: " + std::string(exception.what()));
 						set_test(VOICE_CHANNEL_DELETE, false);
 					}
 				}
@@ -2302,9 +2303,10 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 					set_test(ROLE_EDIT, false);
 				}
 				try {
-					dpp::sync<dpp::role>(&bot, &dpp::cluster::role_delete, TEST_GUILD_ID, createdRole.id);
+					dpp::sync<dpp::confirmation>(&bot, &dpp::cluster::role_delete, TEST_GUILD_ID, createdRole.id);
 					set_test(ROLE_DELETE, true);
 				} catch (dpp::rest_exception &exception) {
+					bot.log(dpp::ll_warning, "Exception: " + std::string(exception.what()));
 					set_test(ROLE_DELETE, false);
 				}
 			}
