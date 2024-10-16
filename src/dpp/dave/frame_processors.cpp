@@ -39,91 +39,109 @@
 
 namespace dpp::dave {
 
-std::pair<bool, size_t> OverflowAdd(size_t a, size_t b)
+#if defined(_MSC_VER) && (defined(_M_ARM) || defined(_M_ARM64))
+	/**
+	 * @brief ARM does not have a builtin for overflow detecting add
+	 * This implements a non-UB version of that.
+	 * @param carry_in Input carry from previous add
+	 * @param a First operand
+	 * @param b Second operand
+	 * @param result Output result
+	 * @return True if overflow occured, false if it didn't
+	 */
+	inline uint8_t addcarry_size_t(size_t carry_in, size_t a, size_t b, size_t* result) {
+		size_t partial_sum = a + b;
+		uint8_t carry1 = (partial_sum < a);
+		size_t final_sum = partial_sum + carry_in;
+		uint8_t carry2 = (final_sum < partial_sum);
+		*result = final_sum;
+		return carry1 || carry2;
+	}
+#endif
+
+std::pair<bool, size_t> overflow_add(size_t a, size_t b)
 {
 	size_t res;
 #if defined(_MSC_VER) && defined(_M_X64)
 	bool didOverflow = _addcarry_u64(0, a, b, &res);
 #elif defined(_MSC_VER) && defined(_M_IX86)
 	bool didOverflow = _addcarry_u32(0, a, b, &res);
+#elif defined(_MSC_VER) && (defined(_M_ARM) || defined(_M_ARM64))
+	bool didOverflow = addcarry_size_t(0, a, b, &res);
 #else
 	bool didOverflow = __builtin_add_overflow(a, b, &res);
 #endif
 	return {didOverflow, res};
 }
 
-uint8_t unencrypted_ranges_size(const ranges& unencryptedRanges)
+uint8_t unencrypted_ranges_size(const ranges& unencrypted_ranges)
 {
 	size_t size = 0;
-	for (const auto& range : unencryptedRanges) {
+	for (const auto& range : unencrypted_ranges) {
 		size += leb128_size(range.offset);
 		size += leb128_size(range.size);
 	}
 	return static_cast<uint8_t>(size);
 }
 
-uint8_t serialize_unencrypted_ranges(const ranges& unencryptedRanges,
-				     uint8_t* buffer,
-				     size_t bufferSize)
+uint8_t serialize_unencrypted_ranges(const ranges& unencrypted_ranges, uint8_t* buffer, size_t buffer_size)
 {
-	auto writeAt = buffer;
-	auto end = buffer + bufferSize;
-	for (const auto& range : unencryptedRanges) {
-		auto rangeSize = leb128_size(range.offset) + leb128_size(range.size);
-		if (rangeSize > static_cast<size_t>(end - writeAt)) {
+	auto write_at = buffer;
+	auto end = buffer + buffer_size;
+	for (const auto& range : unencrypted_ranges) {
+		auto range_size = leb128_size(range.offset) + leb128_size(range.size);
+		if (range_size > static_cast<size_t>(end - write_at)) {
 			break;
 		}
 
-		writeAt += write_leb128(range.offset, writeAt);
-		writeAt += write_leb128(range.size, writeAt);
+		write_at += write_leb128(range.offset, write_at);
+		write_at += write_leb128(range.size, write_at);
 	}
-	return writeAt - buffer;
+	return static_cast<uint8_t>(write_at - buffer);
 }
 
-uint8_t deserialize_unencrypted_ranges(const uint8_t*& readAt,
-				       const size_t bufferSize,
-				       ranges& unencryptedRanges)
+uint8_t deserialize_unencrypted_ranges(const uint8_t*& read_at, const uint8_t buffer_size, ranges& unencrypted_ranges)
 {
-	auto start = readAt;
-	auto end = readAt + bufferSize;
-	while (readAt < end) {
-		size_t offset = read_leb128(readAt, end);
-		if (readAt == nullptr) {
+	auto start = read_at;
+	auto end = read_at + buffer_size;
+	while (read_at < end) {
+		size_t offset = read_leb128(read_at, end);
+		if (read_at == nullptr) {
 			break;
 		}
 
-		size_t size = read_leb128(readAt, end);
-		if (readAt == nullptr) {
+		size_t size = read_leb128(read_at, end);
+		if (read_at == nullptr) {
 			break;
 		}
-		unencryptedRanges.push_back({offset, size});
+		unencrypted_ranges.push_back({offset, size});
 	}
 
-	if (readAt != end) {
-		unencryptedRanges.clear();
-		readAt = nullptr;
+	if (read_at != end) {
+		unencrypted_ranges.clear();
+		read_at = nullptr;
 		return 0;
 	}
 
-	return readAt - start;
+	return static_cast<uint8_t>(read_at - start);
 }
 
-bool validate_unencrypted_ranges(const ranges& unencryptedRanges, size_t frameSize)
+bool validate_unencrypted_ranges(const ranges& unencrypted_ranges, size_t frame_size)
 {
-	if (unencryptedRanges.empty()) {
+	if (unencrypted_ranges.empty()) {
 		return true;
 	}
 
 	// validate that the ranges are in order and don't overlap
-	for (auto i = 0u; i < unencryptedRanges.size(); ++i) {
-		auto current = unencryptedRanges[i];
+	for (auto i = 0u; i < unencrypted_ranges.size(); ++i) {
+		auto current = unencrypted_ranges[i];
 		// The current range should not overflow into the next range
 		// or if it is the last range, the end of the frame
-		auto maxEnd =
-		  i + 1 < unencryptedRanges.size() ? unencryptedRanges[i + 1].offset : frameSize;
+		auto max_end =
+		  i + 1 < unencrypted_ranges.size() ? unencrypted_ranges[i + 1].offset : frame_size;
 
-		auto [didOverflow, currentEnd] = OverflowAdd(current.offset, current.size);
-		if (didOverflow || currentEnd > maxEnd) {
+		auto [did_overflow, current_end] = overflow_add(current.offset, current.size);
+		if (did_overflow || current_end > max_end) {
 			return false;
 		}
 	}
@@ -131,189 +149,185 @@ bool validate_unencrypted_ranges(const ranges& unencryptedRanges, size_t frameSi
 	return true;
 }
 
-size_t Reconstruct(ranges ranges,
-		   const std::vector<uint8_t>& rangeBytes,
-		   const std::vector<uint8_t>& otherBytes,
-		   const array_view<uint8_t>& output)
+size_t do_reconstruct(ranges ranges, const std::vector<uint8_t>& range_bytes, const std::vector<uint8_t>& other_bytes, const array_view<uint8_t>& output)
 {
-	size_t frameIndex = 0;
-	size_t rangeBytesIndex = 0;
-	size_t otherBytesIndex = 0;
+	size_t frame_index = 0;
+	size_t range_bytes_index = 0;
+	size_t other_bytes_index = 0;
 
-	const auto CopyRangeBytes = [&](size_t size) {
-		std::memcpy(output.data() + frameIndex, rangeBytes.data() + rangeBytesIndex, size);
-		rangeBytesIndex += size;
-		frameIndex += size;
+	const auto copy_range_bytes = [&](size_t size) {
+		std::memcpy(output.data() + frame_index, range_bytes.data() + range_bytes_index, size);
+		range_bytes_index += size;
+		frame_index += size;
 	};
 
-	const auto CopyOtherBytes = [&](size_t size) {
-		std::memcpy(output.data() + frameIndex, otherBytes.data() + otherBytesIndex, size);
-		otherBytesIndex += size;
-		frameIndex += size;
+	const auto copy_other_bytes = [&](size_t size) {
+		std::memcpy(output.data() + frame_index, other_bytes.data() + other_bytes_index, size);
+		other_bytes_index += size;
+		frame_index += size;
 	};
 
 	for (const auto& range : ranges) {
-		if (range.offset > frameIndex) {
-			CopyOtherBytes(range.offset - frameIndex);
+		if (range.offset > frame_index) {
+			copy_other_bytes(range.offset - frame_index);
 		}
 
-		CopyRangeBytes(range.size);
+		copy_range_bytes(range.size);
 	}
 
-	if (otherBytesIndex < otherBytes.size()) {
-		CopyOtherBytes(otherBytes.size() - otherBytesIndex);
+	if (other_bytes_index < other_bytes.size()) {
+		copy_other_bytes(other_bytes.size() - other_bytes_index);
 	}
 
-	return frameIndex;
+	return frame_index;
 }
 
 void inbound_frame_processor::clear()
 {
-	isEncrypted_ = false;
-	originalSize_ = 0;
-	truncatedNonce_ = std::numeric_limits<truncated_sync_nonce>::max();
-	unencryptedRanges_.clear();
-	authenticated_.clear();
-	ciphertext_.clear();
-	plaintext_.clear();
+	encrypted = false;
+	original_size = 0;
+	truncated_nonce = std::numeric_limits<truncated_sync_nonce>::max();
+	unencrypted_ranges.clear();
+	authenticated.clear();
+	ciphertext.clear();
+	plaintext.clear();
 }
 
 void inbound_frame_processor::parse_frame(array_view<const uint8_t> frame)
 {
 	clear();
 
-	constexpr auto MinSupplementalBytesSize =
-		AES_GCM_127_TRUNCATED_TAG_BYTES + sizeof(supplemental_bytes_size) + sizeof(magic_marker);
-	if (frame.size() < MinSupplementalBytesSize) {
+	constexpr auto min_supplemental_bytes_size = AES_GCM_127_TRUNCATED_TAG_BYTES + sizeof(supplemental_bytes_size) + sizeof(magic_marker);
+	if (frame.size() < min_supplemental_bytes_size) {
 		creator.log(dpp::ll_warning, "Encrypted frame is too small to contain min supplemental bytes");
 		return;
 	}
 
 	// Check the frame ends with the magic marker
-	auto magicMarkerBuffer = frame.end() - sizeof(magic_marker);
-	if (memcmp(magicMarkerBuffer, &MARKER_BYTES, sizeof(magic_marker)) != 0) {
+	auto magic_marker_buffer = frame.end() - sizeof(magic_marker);
+	if (memcmp(magic_marker_buffer, &MARKER_BYTES, sizeof(magic_marker)) != 0) {
 		return;
 	}
 
 	// Read the supplemental bytes size
-	supplemental_bytes_size supplementalBytesSize;
-	auto supplementalBytesSizeBuffer = magicMarkerBuffer - sizeof(supplemental_bytes_size);
-	memcpy(&supplementalBytesSize, supplementalBytesSizeBuffer, sizeof(supplemental_bytes_size));
+	supplemental_bytes_size bytes_size;
+	auto bytes_size_buffer = magic_marker_buffer - sizeof(supplemental_bytes_size);
+	memcpy(&bytes_size, bytes_size_buffer, sizeof(supplemental_bytes_size));
 
 	// Check the frame is large enough to contain the supplemental bytes
-	if (frame.size() < supplementalBytesSize) {
+	if (frame.size() < bytes_size) {
 		creator.log(dpp::ll_warning, "Encrypted frame is too small to contain supplemental bytes");
 		return;
 	}
 
 	// Check that supplemental bytes size is large enough to contain the supplemental bytes
-	if (supplementalBytesSize < MinSupplementalBytesSize) {
+	if (bytes_size < min_supplemental_bytes_size) {
 		creator.log(dpp::ll_warning, "Supplemental bytes size is too small to contain supplemental bytes");
 		return;
 	}
 
-	auto supplementalBytesBuffer = frame.end() - supplementalBytesSize;
+	auto supplemental_bytes_buffer = frame.end() - bytes_size;
 
 	// Read the tag
-	tag_ = make_array_view(supplementalBytesBuffer, AES_GCM_127_TRUNCATED_TAG_BYTES);
+	tag = make_array_view(supplemental_bytes_buffer, AES_GCM_127_TRUNCATED_TAG_BYTES);
 
 	// Read the nonce
-	auto nonceBuffer = supplementalBytesBuffer + AES_GCM_127_TRUNCATED_TAG_BYTES;
-	auto readAt = nonceBuffer;
-	auto end = supplementalBytesSizeBuffer;
-	truncatedNonce_ = read_leb128(readAt, end);
-	if (readAt == nullptr) {
+	auto nonce_buffer = supplemental_bytes_buffer + AES_GCM_127_TRUNCATED_TAG_BYTES;
+	auto read_at = nonce_buffer;
+	auto end = bytes_size_buffer;
+	truncated_nonce = static_cast<uint32_t>(read_leb128(read_at, end));
+	if (read_at == nullptr) {
 		creator.log(dpp::ll_warning, "Failed to read truncated nonce");
 		return;
 	}
 
 	// Read the unencrypted ranges
-	auto unencryptedRangesSize = end - readAt;
-	deserialize_unencrypted_ranges(readAt, unencryptedRangesSize, unencryptedRanges_);
-	if (readAt == nullptr) {
+	auto ranges_size = static_cast<uint8_t>(end - read_at);
+	deserialize_unencrypted_ranges(read_at, ranges_size, unencrypted_ranges);
+	if (read_at == nullptr) {
 		creator.log(dpp::ll_warning, "Failed to read unencrypted ranges");
 		return;
 	}
 
-	if (!validate_unencrypted_ranges(unencryptedRanges_, frame.size())) {
+	if (!validate_unencrypted_ranges(unencrypted_ranges, frame.size())) {
 		creator.log(dpp::ll_warning, "Invalid unencrypted ranges");
 		return;
 	}
 
 	// This is overly aggressive but will keep reallocations to a minimum
-	authenticated_.reserve(frame.size());
-	ciphertext_.reserve(frame.size());
-	plaintext_.reserve(frame.size());
+	authenticated.reserve(frame.size());
+	ciphertext.reserve(frame.size());
+	plaintext.reserve(frame.size());
 
-	originalSize_ = frame.size();
+	original_size = frame.size();
 
 	// Split the frame into authenticated and ciphertext bytes
-	size_t frameIndex = 0;
-	for (const auto& range : unencryptedRanges_) {
-		auto encryptedBytes = range.offset - frameIndex;
-		if (encryptedBytes > 0) {
-			add_ciphertext_bytes(frame.data() + frameIndex, encryptedBytes);
+	size_t frame_index = 0;
+	for (const auto& range : unencrypted_ranges) {
+		auto encrypted_bytes = range.offset - frame_index;
+		if (encrypted_bytes > 0) {
+			add_ciphertext_bytes(frame.data() + frame_index, encrypted_bytes);
 		}
 
 		add_authenticated_bytes(frame.data() + range.offset, range.size);
-		frameIndex = range.offset + range.size;
+		frame_index = range.offset + range.size;
 	}
-	auto actualFrameSize = frame.size() - supplementalBytesSize;
-	if (frameIndex < actualFrameSize) {
-		add_ciphertext_bytes(frame.data() + frameIndex, actualFrameSize - frameIndex);
+	auto actual_frame_size = frame.size() - bytes_size;
+	if (frame_index < actual_frame_size) {
+		add_ciphertext_bytes(frame.data() + frame_index, actual_frame_size - frame_index);
 	}
 
 	// Make sure the plaintext buffer is the same size as the ciphertext buffer
-	plaintext_.resize(ciphertext_.size());
+	plaintext.resize(ciphertext.size());
 
 	// We've successfully parsed the frame
 	// Mark the frame as encrypted
-	isEncrypted_ = true;
+	encrypted = true;
 }
 
 size_t inbound_frame_processor::reconstruct_frame(array_view<uint8_t> frame) const
 {
-	if (!isEncrypted_) {
+	if (!encrypted) {
 		creator.log(dpp::ll_warning, "Cannot reconstruct an invalid encrypted frame");
 		return 0;
 	}
 
-	if (authenticated_.size() + plaintext_.size() > frame.size()) {
+	if (authenticated.size() + plaintext.size() > frame.size()) {
 		creator.log(dpp::ll_warning, "Frame is too small to contain the decrypted frame");
 		return 0;
 	}
 
-	return Reconstruct(unencryptedRanges_, authenticated_, plaintext_, frame);
+	return do_reconstruct(unencrypted_ranges, authenticated, plaintext, frame);
 }
 
 void inbound_frame_processor::add_authenticated_bytes(const uint8_t* data, size_t size)
 {
-	authenticated_.resize(authenticated_.size() + size);
-	memcpy(authenticated_.data() + authenticated_.size() - size, data, size);
+	authenticated.resize(authenticated.size() + size);
+	memcpy(authenticated.data() + authenticated.size() - size, data, size);
 }
 
 void inbound_frame_processor::add_ciphertext_bytes(const uint8_t* data, size_t size)
 {
-	ciphertext_.resize(ciphertext_.size() + size);
-	memcpy(ciphertext_.data() + ciphertext_.size() - size, data, size);
+	ciphertext.resize(ciphertext.size() + size);
+	memcpy(ciphertext.data() + ciphertext.size() - size, data, size);
 }
 
 void outbound_frame_processor::reset()
 {
-	codec_ = codec::cd_unknown;
-	frameIndex_ = 0;
-	unencryptedBytes_.clear();
-	encryptedBytes_.clear();
-	unencryptedRanges_.clear();
+	frame_codec = codec::cd_unknown;
+	frame_index = 0;
+	unencrypted_bytes.clear();
+	encrypted_bytes.clear();
+	unencrypted_ranges.clear();
 }
 
 void outbound_frame_processor::process_frame(array_view<const uint8_t> frame, codec codec)
 {
 	reset();
 
-	codec_ = codec;
-	unencryptedBytes_.reserve(frame.size());
-	encryptedBytes_.reserve(frame.size());
+	frame_codec = codec;
+	unencrypted_bytes.reserve(frame.size());
+	encrypted_bytes.reserve(frame.size());
 
 	bool success = false;
 	switch (codec) {
@@ -340,49 +354,47 @@ void outbound_frame_processor::process_frame(array_view<const uint8_t> frame, co
 	}
 
 	if (!success) {
-		frameIndex_ = 0;
-		unencryptedBytes_.clear();
-		encryptedBytes_.clear();
-		unencryptedRanges_.clear();
+		frame_index = 0;
+		unencrypted_bytes.clear();
+		encrypted_bytes.clear();
+		unencrypted_ranges.clear();
 		add_encrypted_bytes(frame.data(), frame.size());
 	}
 
-	ciphertextBytes_.resize(encryptedBytes_.size());
+	ciphertext_bytes.resize(encrypted_bytes.size());
 }
 
 size_t outbound_frame_processor::reconstruct_frame(array_view<uint8_t> frame)
 {
-	if (unencryptedBytes_.size() + ciphertextBytes_.size() > frame.size()) {
+	if (unencrypted_bytes.size() + ciphertext_bytes.size() > frame.size()) {
 		creator.log(dpp::ll_warning, "Frame is too small to contain the encrypted frame");
 		return 0;
 	}
 
-	return Reconstruct(unencryptedRanges_, unencryptedBytes_, ciphertextBytes_, frame);
+	return do_reconstruct(unencrypted_ranges, unencrypted_bytes, ciphertext_bytes, frame);
 }
 
 void outbound_frame_processor::add_unencrypted_bytes(const uint8_t* bytes, size_t size)
 {
-	if (!unencryptedRanges_.empty() &&
-		unencryptedRanges_.back().offset + unencryptedRanges_.back().size == frameIndex_) {
+	if (!unencrypted_ranges.empty() &&
+	    unencrypted_ranges.back().offset + unencrypted_ranges.back().size == frame_index) {
 		// extend the last range
-		unencryptedRanges_.back().size += size;
-	}
-	else {
+		unencrypted_ranges.back().size += size;
+	} else {
 		// add a new range (offset, size)
-		unencryptedRanges_.push_back({frameIndex_, size});
+		unencrypted_ranges.push_back({frame_index, size});
 	}
 
-	unencryptedBytes_.resize(unencryptedBytes_.size() + size);
-	memcpy(unencryptedBytes_.data() + unencryptedBytes_.size() - size, bytes, size);
-	frameIndex_ += size;
+	unencrypted_bytes.resize(unencrypted_bytes.size() + size);
+	memcpy(unencrypted_bytes.data() + unencrypted_bytes.size() - size, bytes, size);
+	frame_index += size;
 }
 
 void outbound_frame_processor::add_encrypted_bytes(const uint8_t* bytes, size_t size)
 {
-	encryptedBytes_.resize(encryptedBytes_.size() + size);
-	memcpy(encryptedBytes_.data() + encryptedBytes_.size() - size, bytes, size);
-	frameIndex_ += size;
+	encrypted_bytes.resize(encrypted_bytes.size() + size);
+	memcpy(encrypted_bytes.data() + encrypted_bytes.size() - size, bytes, size);
+	frame_index += size;
 }
 
-} // namespace dpp::dave
-
+}

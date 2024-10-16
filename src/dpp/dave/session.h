@@ -47,7 +47,7 @@ namespace mlspp {
 	struct MLSMessage;
 	struct SignaturePrivateKey;
 	class State;
-} // namespace mlspp
+}
 
 namespace dpp {
 	class cluster;
@@ -70,10 +70,10 @@ public:
 	/**
 	 * @brief Constructor
 	 * @param context key pair context (set to nullptr to use a transient key pair)
-	 * @param authSessionId auth session id (set to empty string to use a transient key pair)
+	 * @param auth_session_id auth session id (set to empty string to use a transient key pair)
 	 * @param callback callback for failure
 	 */
-	session(dpp::cluster& cluster, key_pair_context_type context, const std::string& authSessionId, mls_failure_callback callback) noexcept;
+	session(dpp::cluster& cluster, key_pair_context_type context, const std::string& auth_session_id, mls_failure_callback callback) noexcept;
 
 	/**
 	 * @brief Destructor
@@ -86,11 +86,11 @@ public:
 	 * whilst preserving other state set by the constructor.
 	 *
 	 * @param version protocol version
-	 * @param groupId group id (channel id)
-	 * @param selfUserId bot's user id
-	 * @param transientKey transient private key
+	 * @param group_id group id (channel id)
+	 * @param self_user_id bot's user id
+	 * @param transient_key transient private key
 	 */
-	void init(protocol_version version, uint64_t groupId, std::string const& selfUserId, std::shared_ptr<::mlspp::SignaturePrivateKey>& transientKey) noexcept;
+	void init(protocol_version version, uint64_t group_id, std::string const& self_user_id, std::shared_ptr<::mlspp::SignaturePrivateKey>& transient_key) noexcept;
 
 	/**
 	 * @brief Reset the session to defaults
@@ -108,7 +108,7 @@ public:
 	 * @return protocol version
 	 */
 	[[nodiscard]] protocol_version get_protocol_version() const noexcept {
-		return protocolVersion_;
+		return session_protocol_version;
 	}
 
 	/**
@@ -119,17 +119,17 @@ public:
 
 	/**
 	 * @brief Set external sender from external sender opcode
-	 * @param externalSenderPackage external sender package
+	 * @param external_sender_package external sender package
 	 */
-	void set_external_sender(std::vector<uint8_t> const& externalSenderPackage) noexcept;
+	void set_external_sender(std::vector<uint8_t> const& external_sender_package) noexcept;
 
 	/**
 	 * @brief Process proposals from proposals opcode
 	 * @param proposals proposals blob from websocket
-	 * @param recognizedUserIDs list of recognised user IDs
+	 * @param recognised_user_ids list of recognised user IDs
 	 * @return optional vector to send in reply as commit welcome
 	 */
-	std::optional<std::vector<uint8_t>> process_proposals(std::vector<uint8_t> proposals, std::set<std::string> const& recognizedUserIDs) noexcept;
+	std::optional<std::vector<uint8_t>> process_proposals(std::vector<uint8_t> proposals, std::set<std::string> const& recognised_user_ids) noexcept;
 
 	/**
 	 * @brief Process commit message from discord websocket
@@ -141,10 +141,10 @@ public:
 	/**
 	 * @brief Process welcome blob
 	 * @param welcome welcome blob from discord
-	 * @param recognizedUserIDs Recognised user ID list
+	 * @param recognised_user_ids Recognised user ID list
 	 * @return roster list of people in the vc
 	 */
-	std::optional<roster_map> process_welcome(std::vector<uint8_t> welcome, std::set<std::string> const& recognizedUserIDs) noexcept;
+	std::optional<roster_map> process_welcome(std::vector<uint8_t> welcome, std::set<std::string> const& recognised_user_ids) noexcept;
 
 	/**
 	 * @brief Get the bot user's key package for sending to websocket
@@ -154,10 +154,10 @@ public:
 
 	/**
 	 * @brief Get key ratchet for a user (including the bot)
-	 * @param userId User id to get ratchet for
+	 * @param user_id User id to get ratchet for
 	 * @return The user's key ratchet for use in an encryptor or decryptor
 	 */
-	[[nodiscard]] std::unique_ptr<key_ratchet_interface> get_key_ratchet(std::string const& userId) const noexcept;
+	[[nodiscard]] std::unique_ptr<key_ratchet_interface> get_key_ratchet(std::string const& user_id) const noexcept;
 
 	/**
 	 * @brief callback for completion of pairwise fingerprint
@@ -169,18 +169,18 @@ public:
 	 * @warning This uses SCRYPT and is extremely resource intensive. It will spawn a thread
 	 * which will call your callback on completion.
 	 * @param version Should always be 0x00
-	 * @param userId User ID to get fingerprint for
+	 * @param user_id User ID to get fingerprint for
 	 * @param callback Callback for completion
 	 */
-	void get_pairwise_fingerprint(uint16_t version, std::string const& userId, pairwise_fingerprint_callback callback) const noexcept;
+	void get_pairwise_fingerprint(uint16_t version, std::string const& user_id, pairwise_fingerprint_callback callback) const noexcept;
 
 private:
 	/**
 	 * @brief Initialise leaf node
-	 * @param selfUserId Bot user id
-	 * @param transientKey Transient key
+	 * @param self_user_id Bot user id
+	 * @param transient_key Transient key
 	 */
-	void init_leaf_node(std::string const& selfUserId, std::shared_ptr<::mlspp::SignaturePrivateKey>& transientKey) noexcept;
+	void init_leaf_node(std::string const& self_user_id, std::shared_ptr<::mlspp::SignaturePrivateKey>& transient_key) noexcept;
 
 	/**
 	 * @brief Reset join key
@@ -201,27 +201,27 @@ private:
 	/**
 	 * @brief Check if user ID is valid
 	 * @param cred MLS credential
-	 * @param recognizedUserIDs list of recognised user IDs
+	 * @param recognised_user_ids list of recognised user IDs
 	 * @return
 	 */
-	[[nodiscard]] bool is_recognized_user_id(const ::mlspp::Credential& cred, std::set<std::string> const& recognizedUserIDs) const;
+	[[nodiscard]] bool is_recognized_user_id(const ::mlspp::Credential& cred, std::set<std::string> const& recognised_user_ids) const;
 
 	/**
 	 * @brief Validate proposals message
 	 * @param message authenticated content message
-	 * @param targetState new state
-	 * @param recognizedUserIDs recognised list of user IDs
+	 * @param target_state new state
+	 * @param recognised_user_ids recognised list of user IDs
 	 * @return true if validated
 	 */
-	[[nodiscard]] bool validate_proposal_message(::mlspp::AuthenticatedContent const& message, ::mlspp::State const& targetState, std::set<std::string> const& recognizedUserIDs) const;
+	[[nodiscard]] bool validate_proposal_message(::mlspp::AuthenticatedContent const& message, ::mlspp::State const& target_state, std::set<std::string> const& recognised_user_ids) const;
 
 	/**
 	 * @brief Verify that welcome state is valid
 	 * @param state current state
-	 * @param recognizedUserIDs list of recognised user IDs
+	 * @param recognised_user_ids list of recognised user IDs
 	 * @return
 	 */
-	[[nodiscard]] bool verify_welcome_state(::mlspp::State const& state, std::set<std::string> const& recognizedUserIDs) const;
+	[[nodiscard]] bool verify_welcome_state(::mlspp::State const& state, std::set<std::string> const& recognised_user_ids) const;
 
 	/**
 	 * @brief Check if can process a commit now
@@ -247,33 +247,100 @@ private:
 	 */
 	inline static const std::string USER_MEDIA_KEY_BASE_LABEL = "Discord Secure Frames v0";
 
-	protocol_version protocolVersion_;
-	std::vector<uint8_t> groupId_;
-	std::string signingKeyId_;
-	std::string selfUserId_;
-	key_pair_context_type keyPairContext_{nullptr};
+	/**
+	 * @brief DAVE protocol version for the session
+	 */
+	protocol_version session_protocol_version;
 
-	std::unique_ptr<::mlspp::LeafNode> selfLeafNode_;
-	std::shared_ptr<::mlspp::SignaturePrivateKey> selfSigPrivateKey_;
-	std::unique_ptr<::mlspp::HPKEPrivateKey> selfHPKEPrivateKey_;
+	/**
+	 * @brief Session group ID (voice channel id)
+	 */
+	std::vector<uint8_t> session_group_id;
 
-	std::unique_ptr<::mlspp::HPKEPrivateKey> joinInitPrivateKey_;
-	std::unique_ptr<::mlspp::KeyPackage> joinKeyPackage_;
+	/**
+	 * @brief Signing key id
+	 */
+	std::string signing_key_id;
 
-	std::unique_ptr<::mlspp::ExternalSender> externalSender_;
+	/**
+	 * @brief The bot's user snowflake ID
+	 */
+	std::string bot_user_id;
 
-	std::unique_ptr<::mlspp::State> pendingGroupState_;
-	std::unique_ptr<::mlspp::MLSMessage> pendingGroupCommit_;
+	/**
+	 * @brief The bot's key pair context
+	 */
+	key_pair_context_type key_pair_context{nullptr};
 
-	std::unique_ptr<::mlspp::State> outboundCachedGroupState_;
+	/**
+	 * @brief Our leaf node in the ratchet tree
+	 */
+	std::unique_ptr<::mlspp::LeafNode> self_leaf_node;
 
-	std::unique_ptr<::mlspp::State> currentState_;
-	roster_map roster_;
+	/**
+	 * @brief The bots signature private key
+	 */
+	std::shared_ptr<::mlspp::SignaturePrivateKey> signature_private_key;
 
-	std::unique_ptr<::mlspp::State> stateWithProposals_;
-	std::list<queued_proposal> proposalQueue_;
+	/**
+	 * @brief HPKE private key
+	 */
+	std::unique_ptr<::mlspp::HPKEPrivateKey> hpke_private_key;
 
-	mls_failure_callback onMLSFailureCallback_{};
+	/**
+	 * @brief Private key for join initialisation
+	 */
+	std::unique_ptr<::mlspp::HPKEPrivateKey> join_init_private_key;
+
+	/**
+	 * @brief Join key package
+	 */
+	std::unique_ptr<::mlspp::KeyPackage> join_key_package;
+
+	/**
+	 * @brief MLS External sender (the discord voice gateway server)
+	 */
+	std::unique_ptr<::mlspp::ExternalSender> mls_external_sender;
+
+	/**
+	 * @brief Pending MLS group state
+	 */
+	std::unique_ptr<::mlspp::State> pending_group_state;
+
+	/**
+	 * @brief Pending MLS group commit
+	 */
+	std::unique_ptr<::mlspp::MLSMessage> pending_group_commit;
+
+	/**
+	 * @brief Outbound cached group state
+	 */
+	std::unique_ptr<::mlspp::State> outbound_cached_group_state;
+
+	/**
+	 * @brief Current MLS state
+	 */
+	std::unique_ptr<::mlspp::State> current_state;
+
+	/**
+	 * @brief Participant roster, all users who are in the VC with dave enabled
+	 */
+	roster_map roster;
+
+	/**
+	 * @brief Current state containing proposals
+	 */
+	std::unique_ptr<::mlspp::State> state_with_proposals;
+
+	/**
+	 * @brief Queue of proposals to process
+	 */
+	std::list<queued_proposal> proposal_queue;
+
+	/**
+	 * @brief Function to call on failure, if any
+	 */
+	mls_failure_callback failure_callback{};
 
 	/**
 	 * @brief DPP Cluster, used for logging
@@ -281,6 +348,4 @@ private:
 	dpp::cluster& creator;
 };
 
-} // namespace dpp::dave::mls
-
-
+}

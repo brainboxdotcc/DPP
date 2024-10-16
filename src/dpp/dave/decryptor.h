@@ -94,50 +94,48 @@ public:
 	 * of the session. Once you have a key ratchet, you can derive the key, and decrypt that
 	 * user's audio/video.
 	 *
-	 * @param keyRatchet Key ratchet
-	 * @param transitionExpiry Transition expiry. Old keys last this long before being withdrawn
+	 * @param key_ratchet Key ratchet
+	 * @param transition_expiry Transition expiry. Old keys last this long before being withdrawn
 	 * in preference of this new one.
 	 */
-	void transition_to_key_ratchet(std::unique_ptr<key_ratchet_interface> keyRatchet,
-				       duration transitionExpiry = DEFAULT_TRANSITION_EXPIRY);
+	void transition_to_key_ratchet(std::unique_ptr<key_ratchet_interface> key_ratchet, duration transition_expiry = DEFAULT_TRANSITION_EXPIRY);
 
 	/**
 	 * @brief Transition to passthrough mode
 	 *
 	 * Passthrough mode occurs when a non-DAVE user connects to the VC.
 	 *
-	 * @param passthroughMode True to enable passthrough mode
-	 * @param transitionExpiry Expiry for the transition
+	 * @param passthrough_mode True to enable passthrough mode
+	 * @param transition_expiry Expiry for the transition
 	 */
-	void transition_to_passthrough_mode(bool passthroughMode,
-					    duration transitionExpiry = DEFAULT_TRANSITION_EXPIRY);
+	void transition_to_passthrough_mode(bool passthrough_mode, duration transition_expiry = DEFAULT_TRANSITION_EXPIRY);
 
 	/**
 	 * @brief Decrypt a frame
 	 *
-	 * @param mediaType type of media, audio or video
-	 * @param encryptedFrame encrypted frame bytes
+	 * @param this_media_type type of media, audio or video
+	 * @param encrypted_frame encrypted frame bytes
 	 * @param frame plaintext output
 	 * @return size of decrypted frame, or 0 if failure
 	 */
-	size_t decrypt(media_type mediaType,
-		   array_view<const uint8_t> encryptedFrame,
-		   array_view<uint8_t> frame);
+	size_t decrypt(media_type this_media_type, array_view<const uint8_t> encrypted_frame, array_view<uint8_t> frame);
 
 	/**
 	 * @brief Get maximum possible decrypted size of frame from an encrypted frame
-	 * @param mediaType type of media
-	 * @param encryptedFrameSize encrypted frame size
+	 * @param this_media_type type of media
+	 * @param encrypted_frame_size encrypted frame size
 	 * @return size of plaintext buffer required
 	 */
-	size_t get_max_plaintext_byte_size(media_type mediaType, size_t encryptedFrameSize);
+	size_t get_max_plaintext_byte_size(media_type this_media_type, size_t encrypted_frame_size);
 
 	/**
 	 * @brief Get decryption stats
-	 * @param mediaType media type, audio or video
+	 * @param this_media_type media type, audio or video
 	 * @return decryption stats
 	 */
-	decryption_stats get_stats(media_type mediaType) const { return stats_[mediaType]; }
+	decryption_stats get_stats(media_type this_media_type) const {
+		return stats[this_media_type];
+	}
 
 private:
 	/**
@@ -149,12 +147,12 @@ private:
 	 * @brief Decryption implementation
 	 *
 	 * @param cipher_manager cipher manager
-	 * @param mediaType  media time, audio or video
-	 * @param encryptedFrame  encrypted frame data
+	 * @param this_media_type  media type, audio or video
+	 * @param encrypted_frame  encrypted frame data
 	 * @param frame decrypted frame data
 	 * @return True if decryption succeeded
 	 */
-	bool decrypt_impl(aead_cipher_manager& cipher_manager, media_type mediaType, inbound_frame_processor& encryptedFrame, array_view<uint8_t> frame);
+	bool decrypt_impl(aead_cipher_manager& cipher_manager, media_type this_media_type, inbound_frame_processor& encrypted_frame, array_view<uint8_t> frame);
 
 	/**
 	 * @brief Update expiry for an instance of the manager
@@ -175,20 +173,44 @@ private:
 
 	/**
 	 * Return frame processor
-	 * @param frameProcessor frame processor
+	 * @param frame_processor frame processor
 	 */
-	void return_frame_processor(std::unique_ptr<inbound_frame_processor> frameProcessor);
+	void return_frame_processor(std::unique_ptr<inbound_frame_processor> frame_processor);
 
-	clock clock_;
-	std::deque<aead_cipher_manager> cryptorManagers_;
+	/**
+	 * @brief Chrono clock
+	 */
+	clock current_clock;
 
-	std::mutex frameProcessorsMutex_;
-	std::vector<std::unique_ptr<inbound_frame_processor>> frameProcessors_;
+	/**
+	 * @brief Cryptor manager list
+	 */
+	std::deque<aead_cipher_manager> cryptor_managers;
 
-	time_point allowPassThroughUntil_{time_point::min()};
+	/**
+	 * @brief Mutex for thread safety of frame processor list
+	 */
+	std::mutex frame_processors_mutex;
 
-	time_point lastStatsTime_{time_point::min()};
-	std::array<decryption_stats, 2> stats_;
+	/**
+	 * @brief List of frame processors
+	 */
+	std::vector<std::unique_ptr<inbound_frame_processor>> frame_processors;
+
+	/**
+	 * @brief Passthrough expiry time
+	 */
+	time_point allow_pass_through_until{time_point::min()};
+
+	/**
+	 * @brief Last stats generation time
+	 */
+	time_point last_stats_time{time_point::min()};
+
+	/**
+	 * @brief Stats for audio and video decryption
+	 */
+	std::array<decryption_stats, 2> stats;
 
 	/**
 	 * @brief DPP Cluster, used for logging
@@ -196,5 +218,4 @@ private:
 	dpp::cluster& creator;
 };
 
-} // namespace dpp::dave
-
+}

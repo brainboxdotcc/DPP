@@ -42,29 +42,29 @@ size_t leb128_size(uint64_t value)
 	return size + 1;
 }
 
-uint64_t read_leb128(const uint8_t*& readAt, const uint8_t* end)
+uint64_t read_leb128(const uint8_t*& read_at, const uint8_t* end)
 {
 	uint64_t value = 0;
-	int fillBits = 0;
-	while (readAt != end && fillBits < 64 - 7) {
-		uint8_t leb128Byte = *readAt;
-		value |= uint64_t{leb128Byte & 0x7Fu} << fillBits;
-		++readAt;
-		fillBits += 7;
-		if ((leb128Byte & 0x80) == 0) {
+	int fill_bits = 0;
+	while (read_at != end && fill_bits < 64 - 7) {
+		uint8_t leb_128_byte = *read_at;
+		value |= uint64_t{leb_128_byte & 0x7Fu} << fill_bits;
+		++read_at;
+		fill_bits += 7;
+		if ((leb_128_byte & 0x80) == 0) {
 			return value;
 		}
 	}
 	// Read 9 bytes and didn't find the terminator byte. Check if 10th byte
 	// is that terminator, however to fit result into uint64_t it may carry only
 	// single bit.
-	if (readAt != end && *readAt <= 1) {
-		value |= uint64_t{*readAt} << fillBits;
-		++readAt;
+	if (read_at != end && *read_at <= 1) {
+		value |= uint64_t{*read_at} << fill_bits;
+		++read_at;
 		return value;
 	}
 	// Failed to find terminator leb128 byte.
-	readAt = nullptr;
+	read_at = nullptr;
 	return 0;
 }
 
@@ -76,10 +76,9 @@ size_t write_leb128(uint64_t value, uint8_t* buffer)
 		++size;
 		value >>= 7;
 	}
-	buffer[size] = value;
+	buffer[size] = static_cast<uint8_t>(value);
 	++size;
 	return size;
 }
 
-} // namespace dpp::dave
-
+}

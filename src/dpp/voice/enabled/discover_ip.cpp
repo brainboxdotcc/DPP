@@ -39,12 +39,10 @@
 namespace dpp {
 
 /**
- * https://discord.com/developers/docs/topics/voice-connections#ip-discovery
- */
-
-/**
  * @brief Represents an IP discovery packet sent to Discord or received
  * from Discord.
+ *
+ * https://discord.com/developers/docs/topics/voice-connections#ip-discovery
  */
 struct ip_discovery_packet {
 
@@ -132,20 +130,6 @@ struct ip_discovery_packet {
 	}
 };
 
-/**
- * @brief Allocates a dpp::socket, closing it on destruction
- */
-struct raii_socket {
-	dpp::socket fd;
-
-	raii_socket() : fd(::socket(AF_INET, SOCK_DGRAM, 0)) { };
-	raii_socket(raii_socket&) = delete;
-	raii_socket(raii_socket&&) = delete;
-	raii_socket operator=(raii_socket&) = delete;
-	raii_socket operator=(raii_socket&&) = delete;
-	~raii_socket() { close_socket(fd); };
-};
-
 constexpr int discovery_timeout = 1000;
 
 std::string discord_voice_client::discover_ip() {
@@ -158,19 +142,13 @@ std::string discord_voice_client::discover_ip() {
 	ip_discovery_packet discovery(this->ssrc);
 
 	if (socket.fd >= 0) {
-		sockaddr_in servaddr{};
-		servaddr.sin_family = AF_INET;
-		servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
-		servaddr.sin_port = htons(0);
-		if (bind(socket.fd, reinterpret_cast<const sockaddr*>(&servaddr), sizeof(servaddr)) < 0) {
+		address_t bind_any;
+		if (bind(socket.fd, bind_any.get_socket_address(), bind_any.size()) < 0) {
 			log(ll_warning, "Could not bind socket for IP discovery");
 			return "";
 		}
-		memset(&servaddr, 0, sizeof(servaddr));
-		servaddr.sin_family = AF_INET;
-		servaddr.sin_port = htons(this->port);
-		servaddr.sin_addr.s_addr = inet_addr(this->ip.c_str());
-		if (::connect(socket.fd, reinterpret_cast<const sockaddr*>(&servaddr), sizeof(sockaddr_in)) < 0) {
+		address_t bind_port(this->ip, this->port);
+		if (::connect(socket.fd, bind_port.get_socket_address(), bind_port.size()) < 0) {
 			log(ll_warning, "Could not connect socket for IP discovery");
 			return "";
 		}

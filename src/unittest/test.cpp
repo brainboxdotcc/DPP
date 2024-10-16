@@ -2052,7 +2052,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 					.set_user_limit(99);
 				dpp::channel createdChannel;
 				try {
-					createdChannel = bot.channel_create_sync(channel1);
+					createdChannel = dpp::sync<dpp::channel>(&bot, &dpp::cluster::channel_create, channel1);
 				} catch (dpp::rest_exception &exception) {
 					set_test(VOICE_CHANNEL_CREATE, false);
 				}
@@ -2075,7 +2075,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 						}
 					}
 					try {
-						dpp::channel edited = bot.channel_edit_sync(createdChannel);
+						dpp::channel edited = dpp::sync<dpp::channel>(&bot, &dpp::cluster::channel_edit, createdChannel);
 						if (edited.name == "foobar2" && edited.user_limit == 2) {
 							set_test(VOICE_CHANNEL_EDIT, true);
 						}
@@ -2085,9 +2085,10 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 
 					// delete the voice channel
 					try {
-						bot.channel_delete_sync(createdChannel.id);
+						dpp::sync<dpp::confirmation>(&bot, &dpp::cluster::channel_delete, createdChannel.id);
 						set_test(VOICE_CHANNEL_DELETE, true);
 					} catch (dpp::rest_exception &exception) {
+						bot.log(dpp::ll_warning, "Exception: " + std::string(exception.what()));
 						set_test(VOICE_CHANNEL_DELETE, false);
 					}
 				}
@@ -2280,7 +2281,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 				r.colour = dpp::colors::moon_yellow;
 				dpp::role createdRole;
 				try {
-					createdRole = bot.role_create_sync(r);
+					createdRole = dpp::sync<dpp::role>(&bot, &dpp::cluster::role_create, r);
 					if (createdRole.name == r.name &&
 						createdRole.has_move_members() &&
 						createdRole.flags & dpp::r_mentionable &&
@@ -2294,7 +2295,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 				createdRole.name = "Test-Role-Edited";
 				createdRole.colour = dpp::colors::light_sea_green;
 				try {
-					dpp::role edited = bot.role_edit_sync(createdRole);
+					dpp::role edited = dpp::sync<dpp::role>(&bot, &dpp::cluster::role_edit, createdRole);
 					if (createdRole.id == edited.id && edited.name == "Test-Role-Edited") {
 						set_test(ROLE_EDIT, true);
 					}
@@ -2302,9 +2303,10 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 					set_test(ROLE_EDIT, false);
 				}
 				try {
-					bot.role_delete_sync(TEST_GUILD_ID, createdRole.id);
+					dpp::sync<dpp::confirmation>(&bot, &dpp::cluster::role_delete, TEST_GUILD_ID, createdRole.id);
 					set_test(ROLE_DELETE, true);
 				} catch (dpp::rest_exception &exception) {
+					bot.log(dpp::ll_warning, "Exception: " + std::string(exception.what()));
 					set_test(ROLE_DELETE, false);
 				}
 			}
@@ -2335,7 +2337,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 
 		set_test(USER_GET_CACHED_PRESENT, false);
 		try {
-			dpp::user_identified u = bot.user_get_cached_sync(TEST_USER_ID);
+			dpp::user_identified u = dpp::sync<dpp::user_identified>(&bot, &dpp::cluster::user_get_cached, TEST_USER_ID);
 			set_test(USER_GET_CACHED_PRESENT, (u.id == TEST_USER_ID));
 		}
 		catch (const std::exception&) {
@@ -2350,7 +2352,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 			 * If this becomes not true any more, we'll pick another well known
 			 * user ID.
 			 */
-			dpp::user_identified u = bot.user_get_cached_sync(90339695967350784);
+			dpp::user_identified u = dpp::sync<dpp::user_identified>(&bot, &dpp::cluster::user_get_cached, 90339695967350784);
 			set_test(USER_GET_CACHED_ABSENT, (u.id == dpp::snowflake(90339695967350784)));
 		}
 		catch (const std::exception&) {

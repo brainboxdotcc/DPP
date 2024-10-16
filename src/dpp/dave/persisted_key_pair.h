@@ -55,11 +55,11 @@ using key_pair_context_type = const char *;
 /**
  * @brief Get persisted key pair
  * @param ctx context (pass nullptr to generate transient key)
- * @param sessionID session id (pass empty string to generate transient key)
+ * @param session_id session id (pass empty string to generate transient key)
  * @param version Protocol version
  * @return MLS signature private key
  */
-std::shared_ptr<::mlspp::SignaturePrivateKey> get_persisted_key_pair(dpp::cluster& creator, key_pair_context_type ctx, const std::string& sessionID, protocol_version version);
+std::shared_ptr<::mlspp::SignaturePrivateKey> get_persisted_key_pair(dpp::cluster& creator, key_pair_context_type ctx, const std::string& session_id, protocol_version version);
 
 /**
  * @brief self signed signature and key
@@ -78,20 +78,20 @@ struct KeyAndSelfSignature {
 /**
  * @brief Get persisted public key
  * @param ctx context (set to nullptr to get transient key)
- * @param sessionID session id (set to empty string to get transient key)
+ * @param session_id session id (set to empty string to get transient key)
  * @param version protocol version
  * @return Key and self signature
  */
-KeyAndSelfSignature get_persisted_public_key(dpp::cluster& creator, key_pair_context_type ctx, const std::string& sessionID, signature_version version);
+KeyAndSelfSignature get_persisted_public_key(dpp::cluster& creator, key_pair_context_type ctx, const std::string& session_id, signature_version version);
 
 /**
  * @brief Delete persisted key pair
  * @param ctx context
- * @param sessionID session ID
+ * @param session_id session ID
  * @param version protocol version
  * @return true if deleted
  */
-bool delete_persisted_key_pair(dpp::cluster& creator, key_pair_context_type ctx, const std::string& sessionID, signature_version version);
+bool delete_persisted_key_pair(dpp::cluster& creator, key_pair_context_type ctx, const std::string& session_id, signature_version version);
 
 /**
  * @brief Key version for DAVE
@@ -115,9 +115,6 @@ namespace detail {
 	 * @return true if deleted
 	 */
 	bool delete_generic_persisted_key_pair(dpp::cluster& creator, key_pair_context_type ctx, const std::string& id);
-} // namespace dpp::dave::mls::detail
+}
 
-} // namespace dpp::dave::mls
-
-
-
+}

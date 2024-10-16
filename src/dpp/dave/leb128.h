@@ -50,11 +50,11 @@ size_t leb128_size(uint64_t value);
 /**
  * @brief Reads leb128 encoded value and advance read_at by number of bytes consumed.
  * Sets read_at to nullptr on error.
- * @param readAt start position
+ * @param read_at start position
  * @param end end position
  * @return decoded value
  */
-uint64_t read_leb128(const uint8_t*& readAt, const uint8_t* end);
+uint64_t read_leb128(const uint8_t*& read_at, const uint8_t* end);
 
 /**
  * @brief Encodes `value` in leb128 format. Assumes buffer has size of
@@ -65,5 +65,4 @@ uint64_t read_leb128(const uint8_t*& readAt, const uint8_t* end);
  */
 size_t write_leb128(uint64_t value, uint8_t* buffer);
 
-} // namespace dpp::dave
-
+}

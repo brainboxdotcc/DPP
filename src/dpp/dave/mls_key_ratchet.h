@@ -41,9 +41,9 @@ public:
 	/**
 	 * @brief Constructor
 	 * @param suite MLS ciphersuite to use
-	 * @param baseSecret base secret
+	 * @param base_secret base secret
 	 */
-	mls_key_ratchet(dpp::cluster& cl, ::mlspp::CipherSuite suite, bytes baseSecret) noexcept;
+	mls_key_ratchet(dpp::cluster& cl, ::mlspp::CipherSuite suite, bytes base_secret) noexcept;
 
 	/**
 	 * @brief Destructor
@@ -67,7 +67,7 @@ private:
 	/**
 	 * @brief MLS hash ratchet
 	 */
-	::mlspp::HashRatchet hashRatchet_;
+	::mlspp::HashRatchet ratchet;
 
 	/**
 	 * @brief DPP Cluster, used for logging
@@ -75,5 +75,5 @@ private:
 	dpp::cluster& creator;
 };
 
-} // namespace dpp::dave
+}
 
