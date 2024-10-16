@@ -291,8 +291,6 @@ foreach (fullmodname ${subdirlist})
 	endif()
 endforeach()
 
-
-
 target_compile_features(dpp PUBLIC cxx_std_17)
 target_compile_features(dpp PRIVATE cxx_constexpr)
 target_compile_features(dpp PRIVATE cxx_auto_type)
