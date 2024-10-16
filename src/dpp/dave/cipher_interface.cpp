@@ -34,5 +34,4 @@ std::unique_ptr<cipher_interface> create_cipher(dpp::cluster& cl, const encrypti
 	return cipher->is_valid() ? std::move(cipher) : nullptr;
 }
 
-} // namespace dpp::dave
-
+}

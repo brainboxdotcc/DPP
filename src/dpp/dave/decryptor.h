@@ -177,15 +177,39 @@ private:
 	 */
 	void return_frame_processor(std::unique_ptr<inbound_frame_processor> frame_processor);
 
+	/**
+	 * @brief Chrono clock
+	 */
 	clock current_clock;
+
+	/**
+	 * @brief Cryptor manager list
+	 */
 	std::deque<aead_cipher_manager> cryptor_managers;
 
+	/**
+	 * @brief Mutex for thread safety of frame processor list
+	 */
 	std::mutex frame_processors_mutex;
+
+	/**
+	 * @brief List of frame processors
+	 */
 	std::vector<std::unique_ptr<inbound_frame_processor>> frame_processors;
 
+	/**
+	 * @brief Passthrough expiry time
+	 */
 	time_point allow_pass_through_until{time_point::min()};
 
+	/**
+	 * @brief Last stats generation time
+	 */
 	time_point last_stats_time{time_point::min()};
+
+	/**
+	 * @brief Stats for audio and video decryption
+	 */
 	std::array<decryption_stats, 2> stats;
 
 	/**

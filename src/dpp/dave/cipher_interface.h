@@ -99,5 +99,4 @@ protected:
  */
 std::unique_ptr<cipher_interface> create_cipher(dpp::cluster& cl, const encryption_key& key);
 
-} // namespace dpp::dave
-
+}

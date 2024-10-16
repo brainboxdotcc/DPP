@@ -39,12 +39,10 @@
 namespace dpp {
 
 /**
- * https://discord.com/developers/docs/topics/voice-connections#ip-discovery
- */
-
-/**
  * @brief Represents an IP discovery packet sent to Discord or received
  * from Discord.
+ *
+ * https://discord.com/developers/docs/topics/voice-connections#ip-discovery
  */
 struct ip_discovery_packet {
 

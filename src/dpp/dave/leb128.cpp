@@ -76,7 +76,7 @@ size_t write_leb128(uint64_t value, uint8_t* buffer)
 		++size;
 		value >>= 7;
 	}
-	buffer[size] = value;
+	buffer[size] = static_cast<uint8_t>(value);
 	++size;
 	return size;
 }

@@ -149,16 +149,49 @@ private:
 	 */
 	void cleanup_expired_ciphers();
 
+	/**
+	 * @brief chrono clock
+	 */
 	const clock_interface& current_clock;
+
+	/**
+	 * @brief key ratchet for cryptor
+	 */
 	std::unique_ptr<key_ratchet_interface> current_key_ratchet;
+
+	/**
+	 * @brief Cryptor for each generation with expiry
+	 */
 	std::unordered_map<key_generation, expiring_cipher> cryptor_generations;
 
+	/**
+	 * @brief Time ratchet was created
+	 */
 	time_point ratchet_creation;
+
+	/**
+	 * @brief Time ratchet expired
+	 */
 	time_point ratchet_expiry;
+
+	/**
+	 * @brief Oldest generation for ratchet
+	 */
 	key_generation oldest_generation{0};
+
+	/**
+	 * @brief Newest generation for ratchet
+	 */
 	key_generation newest_generation{0};
 
+	/**
+	 * @brief Newest nonce
+	 */
 	std::optional<big_nonce> newest_processed_nonce;
+
+	/**
+	 * @brief List of missing nonces from sequence
+	 */
 	std::deque<big_nonce> missing_nonces;
 
 	/**

@@ -77,9 +77,9 @@ struct encryption_stats {
 class encryptor {
 public:
 	/**
- * @brief Constructor
- * @param cl Creator
- */
+	 * @brief Constructor
+	 * @param cl Creator
+	 */
 	encryptor(dpp::cluster& cl) : creator(cl) { };
 
 	/**
@@ -219,25 +219,79 @@ private:
 	 */
 	void update_current_protocol_version(protocol_version version);
 
+	/**
+	 * @brief True if passthrough is enabled
+	 */
 	std::atomic_bool passthrough_mode_enable{false};
 
+	/**
+	 * @brief Key generation mutex for thread safety
+	 */
 	std::mutex key_gen_mutex;
+
+	/**
+	 * @brief Current encryption (send) ratchet
+	 */
 	std::unique_ptr<key_ratchet_interface> ratchet;
+
+	/**
+	 * @brief Current encryption cipher
+	 */
 	std::shared_ptr<cipher_interface> cryptor;
+
+	/**
+	 * @brief Current key generation number
+	 */
 	key_generation current_key_generation{0};
+
+	/**
+	 * @brief Current truncated sync nonce
+	 */
 	truncated_sync_nonce truncated_nonce{0};
 
+	/**
+	 * @brief Frame processor list mutex
+	 */
 	std::mutex frame_processors_mutex;
+
+	/**
+	 * @brief List of outbound frame processors
+	 */
 	std::vector<std::unique_ptr<outbound_frame_processor>> frame_processors;
 
+	/**
+	 * @brief A pair of 32 bit SSRC and codec in use for that SSRC
+	 */
 	using ssrc_codec_pair = std::pair<uint32_t, codec>;
+
+	/**
+	 * @brief List of codec pairs for SSRCs
+	 */
 	std::vector<ssrc_codec_pair> ssrc_codec_pairs;
 
+	/**
+	 * @brief A chrono time point
+	 */
 	using time_point = std::chrono::time_point<std::chrono::steady_clock>;
+
+	/**
+	 * @brief Last time stats were updated
+	 */
 	time_point last_stats_time{time_point::min()};
+
+	/**
+	 * @brief Stores audio/video encryption stats
+	 */
 	std::array<encryption_stats, 2> stats;
 
+	/**
+	 * @brief Callback for version change, if any
+	 */
 	protocol_version_changed_callback changed_callback;
+
+	/**
+	 * Current protocol version supported
+	 */
 	protocol_version current_protocol_version{max_protocol_version()};
 
 	/**

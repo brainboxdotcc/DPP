@@ -31,8 +31,7 @@
 
 namespace dpp::dave::codec_utils {
 
-unencrypted_frame_header_size BytesCoveringH264PPS(const uint8_t* payload, const uint64_t size_remaining)
-{
+unencrypted_frame_header_size bytes_covering_h264_pps(const uint8_t* payload, const uint64_t size_remaining) {
 	// the payload starts with three exponential golomb encoded values
 	// (first_mb_in_slice, sps_id, pps_id)
 	// the depacketizer needs the pps_id unencrypted
@@ -77,7 +76,12 @@ unencrypted_frame_header_size BytesCoveringH264PPS(const uint8_t* payload, const
 	}
 
 	// return the number of bytes that covers the last exp golomb encoded value
-	return (payload_bit_index / 8) + 1;
+	auto result = (payload_bit_index / 8) + 1;
+	if (result > std::numeric_limits<unencrypted_frame_header_size>::max()) {
+		// bytes covering H264 PPS result cannot fit into unencrypted frame header size
+		return 0;
+	}
+	return static_cast<unencrypted_frame_header_size>(result);
 }
 
 const uint8_t nalu_long_start_code[] = {0, 0, 0, 1};
@@ -208,7 +212,7 @@ bool process_frame_h264(outbound_frame_processor& processor, array_view<const ui
 			// once we've hit a slice or an IDR
 			// we just need to cover getting to the PPS ID
 			auto nal_unit_payload_start = nal_unit_start_index + nal_unit_header_size;
-			auto nal_unit_pps_bytes = BytesCoveringH264PPS(frame.data() + nal_unit_payload_start, frame.size() - nal_unit_payload_start);
+			auto nal_unit_pps_bytes = bytes_covering_h264_pps(frame.data() + nal_unit_payload_start, frame.size() - nal_unit_payload_start);
 
 		processor.add_unencrypted_bytes(frame.data() + nal_unit_start_index, nal_unit_header_size + nal_unit_pps_bytes);
 		processor.add_encrypted_bytes(frame.data() + nal_unit_start_index + nal_unit_header_size + nal_unit_pps_bytes, next_nalu_start - nal_unit_start_index - nal_unit_header_size - nal_unit_pps_bytes);

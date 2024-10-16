@@ -91,6 +91,4 @@ bool process_frame_av1(outbound_frame_processor & processor, array_view<const ui
  */
 bool validate_encrypted_frame(outbound_frame_processor& processor, array_view<uint8_t> frame);
 
-} // namespace dpp::dave::codec_utils
-
-
+}
