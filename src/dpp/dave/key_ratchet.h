@@ -60,5 +60,4 @@ public:
 	virtual void delete_key(key_generation generation) noexcept = 0;
 };
 
-} // namespace dpp::dave
-
+}

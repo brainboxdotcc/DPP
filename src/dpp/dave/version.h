@@ -44,5 +44,4 @@ using signature_version = uint8_t;
  */
 protocol_version max_protocol_version();
 
-} // namespace dpp::dave
-
+}

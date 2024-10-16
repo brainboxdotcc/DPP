@@ -52,36 +52,36 @@ using ranges = std::vector<range>;
 
 /**
  * @brief Get total size of unencrypted ranges
- * @param unencryptedRanges unencrypted ranges
+ * @param unencrypted_ranges unencrypted ranges
  * @return size
  */
-uint8_t unencrypted_ranges_size(const ranges& unencryptedRanges);
+uint8_t unencrypted_ranges_size(const ranges& unencrypted_ranges);
 
 /**
  * @brief Serialise unencrypted ranges
- * @param unencryptedRanges unencrypted ranges
+ * @param unencrypted_ranges unencrypted ranges
  * @param buffer buffer to serialise to
- * @param bufferSize size of buffer
+ * @param buffer_size size of buffer
  * @return size of ranges written
  */
-uint8_t serialize_unencrypted_ranges(const ranges& unencryptedRanges, uint8_t* buffer, size_t bufferSize);
+uint8_t serialize_unencrypted_ranges(const ranges& unencrypted_ranges, uint8_t* buffer, size_t buffer_size);
 
 /**
  * @brief Deserialise unencrypted ranges
- * @param buffer buffer to write to
- * @param bufferSize buffer size
- * @param unencryptedRanges unencrypted ranges to write to
+ * @param read_at buffer to write to
+ * @param buffer_size buffer size
+ * @param unencrypted_ranges unencrypted ranges to write to
  * @return size of unencrypted ranges written
  */
-uint8_t deserialize_unencrypted_ranges(const uint8_t*& buffer, const size_t bufferSize, ranges& unencryptedRanges);
+uint8_t deserialize_unencrypted_ranges(const uint8_t*& read_at, const size_t buffer_size, ranges& unencrypted_ranges);
 
 /**
  * @brief Validate unencrypted ranges
- * @param unencryptedRanges unencrypted ranges
- * @param frameSize frame size
+ * @param unencrypted_ranges unencrypted ranges
+ * @param frame_size frame size
  * @return true if validated
  */
-bool validate_unencrypted_ranges(const ranges& unencryptedRanges, size_t frameSize);
+bool validate_unencrypted_ranges(const ranges& unencrypted_ranges, size_t frame_size);
 
 /**
  * @brief Processes inbound frames from the decryptor
@@ -112,7 +112,7 @@ public:
 	 * @return is encrypted
 	 */
 	[[nodiscard]] bool is_encrypted() const {
-		return isEncrypted_;
+		return encrypted;
 	}
 
 	/**
@@ -120,7 +120,7 @@ public:
 	 * @return Original frame size
 	 */
 	[[nodiscard]] size_t size() const {
-		return originalSize_;
+		return original_size;
 	}
 
 	/**
@@ -133,7 +133,7 @@ public:
 	 * @return AEAD tag
 	 */
 	[[nodiscard]] array_view<const uint8_t> get_tag() const {
-		return tag_;
+		return tag;
 	}
 
 	/**
@@ -141,7 +141,7 @@ public:
 	 * @return truncated sync nonce
 	 */
 	[[nodiscard]] truncated_sync_nonce get_truncated_nonce() const {
-		return truncatedNonce_;
+		return truncated_nonce;
 	}
 
 	/**
@@ -149,7 +149,7 @@ public:
 	 * @return AEAD auth data
 	 */
 	[[nodiscard]] array_view<const uint8_t> get_authenticated_data() const {
-		return make_array_view(authenticated_.data(), authenticated_.size());
+		return make_array_view(authenticated.data(), authenticated.size());
 	}
 
 	/**
@@ -157,14 +157,16 @@ public:
 	 * @return Ciphertext view
 	 */
 	[[nodiscard]] array_view<const uint8_t> get_ciphertext() const {
-		return make_array_view(ciphertext_.data(), ciphertext_.size());
+		return make_array_view(ciphertext.data(), ciphertext.size());
 	}
 
 	/**
 	 * @brief Get plain text
 	 * @return Plain text view
 	 */
-	[[nodiscard]] array_view<uint8_t> get_plaintext() { return make_array_view(plaintext_); }
+	[[nodiscard]] array_view<uint8_t> get_plaintext() {
+		return make_array_view(plaintext);
+	}
 
 private:
 	/**
@@ -181,14 +183,14 @@ private:
 	 */
 	void add_ciphertext_bytes(const uint8_t* data, size_t size);
 
-	bool isEncrypted_{false};
-	size_t originalSize_{0};
-	array_view<const uint8_t> tag_;
-	truncated_sync_nonce truncatedNonce_;
-	ranges unencryptedRanges_;
-	std::vector<uint8_t> authenticated_;
-	std::vector<uint8_t> ciphertext_;
-	std::vector<uint8_t> plaintext_;
+	bool encrypted{false};
+	size_t original_size{0};
+	array_view<const uint8_t> tag;
+	truncated_sync_nonce truncated_nonce;
+	ranges unencrypted_ranges;
+	std::vector<uint8_t> authenticated;
+	std::vector<uint8_t> ciphertext;
+	std::vector<uint8_t> plaintext;
 
 	/**
 	 * @brief DPP Cluster, used for logging
@@ -215,7 +217,7 @@ public:
 	void process_frame(array_view<const uint8_t> frame, codec codec);
 
 	/**
-	 * @brief Reconstruct frame
+	 * @brief do_reconstruct frame
 	 * @param frame frame data
 	 * @return size of reconstructed frame
 	 */
@@ -226,7 +228,7 @@ public:
 	 * @return codec
 	 */
 	[[nodiscard]] codec get_codec() const {
-		return codec_;
+		return frame_codec;
 	}
 
 	/**
@@ -234,7 +236,7 @@ public:
 	 * @return unencrypted bytes
 	 */
 	[[nodiscard]] const std::vector<uint8_t>& get_unencrypted_bytes() const {
-		return unencryptedBytes_;
+		return unencrypted_bytes;
 	}
 
 	/**
@@ -242,7 +244,7 @@ public:
 	 * @return Encrypted bytes
 	 */
 	[[nodiscard]] const std::vector<uint8_t>& get_encrypted_bytes() const {
-		return encryptedBytes_;
+		return encrypted_bytes;
 	}
 
 	/**
@@ -250,7 +252,7 @@ public:
 	 * @return ciphertext bytes
 	 */
 	[[nodiscard]] std::vector<uint8_t>& get_ciphertext_bytes() {
-		return ciphertextBytes_;
+		return ciphertext_bytes;
 	}
 
 	/**
@@ -258,7 +260,7 @@ public:
 	 * @return unencrypted bytes
 	 */
 	[[nodiscard]] const ranges& get_unencrypted_ranges() const {
-		return unencryptedRanges_;
+		return unencrypted_ranges;
 	}
 
 	/**
@@ -281,12 +283,12 @@ public:
 	void add_encrypted_bytes(const uint8_t* bytes, size_t size);
 
 private:
-	codec codec_{codec::cd_unknown};
-	size_t frameIndex_{0};
-	std::vector<uint8_t> unencryptedBytes_;
-	std::vector<uint8_t> encryptedBytes_;
-	std::vector<uint8_t> ciphertextBytes_;
-	ranges unencryptedRanges_;
+	codec frame_codec{codec::cd_unknown};
+	size_t frame_index{0};
+	std::vector<uint8_t> unencrypted_bytes;
+	std::vector<uint8_t> encrypted_bytes;
+	std::vector<uint8_t> ciphertext_bytes;
+	ranges unencrypted_ranges;
 
 	/**
 	 * @brief DPP Cluster, used for logging
@@ -294,5 +296,4 @@ private:
 	dpp::cluster& creator;
 };
 
-} // namespace dpp::dave
-
+}

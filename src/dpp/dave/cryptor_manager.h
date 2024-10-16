@@ -77,16 +77,16 @@ public:
 	 * @brief Constructor
 	 * @param cl Creating cluster
 	 * @param clock chrono clock
-	 * @param keyRatchet key ratchet for cipher
+	 * @param key_ratchet key ratchet for cipher
 	 */
-	aead_cipher_manager(dpp::cluster& cl, const clock_interface& clock, std::unique_ptr<key_ratchet_interface> keyRatchet);
+	aead_cipher_manager(dpp::cluster& cl, const clock_interface& clock, std::unique_ptr<key_ratchet_interface> key_ratchet);
 
 	/**
 	 * @brief Update cipher expiry
 	 * @param expiry expiry time
 	 */
 	void update_expiry(time_point expiry) {
-		ratchetExpiry_ = expiry;
+		ratchet_expiry = expiry;
 	}
 
 	/**
@@ -94,7 +94,7 @@ public:
 	 * @return true if expired
 	 */
 	bool is_expired() const {
-		return clock_.now() > ratchetExpiry_;
+		return current_clock.now() > ratchet_expiry;
 	}
 
 	/**
@@ -149,17 +149,17 @@ private:
 	 */
 	void cleanup_expired_ciphers();
 
-	const clock_interface& clock_;
-	std::unique_ptr<key_ratchet_interface> keyRatchet_;
-	std::unordered_map<key_generation, expiring_cipher> cryptors_;
+	const clock_interface& current_clock;
+	std::unique_ptr<key_ratchet_interface> current_key_ratchet;
+	std::unordered_map<key_generation, expiring_cipher> cryptor_generations;
 
-	time_point ratchetCreation_;
-	time_point ratchetExpiry_;
-	key_generation oldestGeneration_{0};
-	key_generation newestGeneration_{0};
+	time_point ratchet_creation;
+	time_point ratchet_expiry;
+	key_generation oldest_generation{0};
+	key_generation newest_generation{0};
 
-	std::optional<big_nonce> newestProcessedNonce_;
-	std::deque<big_nonce> missingNonces_;
+	std::optional<big_nonce> newest_processed_nonce;
+	std::deque<big_nonce> missing_nonces;
 
 	/**
 	 * @brief DPP Cluster, used for logging

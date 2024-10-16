@@ -32,11 +32,11 @@ namespace dpp::dave::mls {
 
 /**
  * @brief Create user credentials
- * @param userId user id
+ * @param user_id user id
  * @param version protocol version
  * @return
  */
-::mlspp::Credential create_user_credential(const std::string& userId, protocol_version version);
+::mlspp::Credential create_user_credential(const std::string& user_id, protocol_version version);
 
 /**
  * @brief Convert user credentials to string
@@ -46,6 +46,5 @@ namespace dpp::dave::mls {
  */
 std::string user_credential_to_string(const ::mlspp::Credential& cred, protocol_version version);
 
-} // namespace dpp::dave::mls
-
+}
 

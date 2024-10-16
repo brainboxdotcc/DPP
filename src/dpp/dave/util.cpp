@@ -49,6 +49,4 @@ uint64_t from_big_endian_bytes(const ::mlspp::bytes_ns::bytes& buffer) noexcept 
 	return val;
 }
 
-} // namespace dpp::dave::mls
-
-
+}
