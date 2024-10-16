@@ -73,7 +73,7 @@ uint8_t serialize_unencrypted_ranges(const ranges& unencrypted_ranges, uint8_t* 
  * @param unencrypted_ranges unencrypted ranges to write to
  * @return size of unencrypted ranges written
  */
-uint8_t deserialize_unencrypted_ranges(const uint8_t*& read_at, const size_t buffer_size, ranges& unencrypted_ranges);
+uint8_t deserialize_unencrypted_ranges(const uint8_t*& read_at, const uint8_t buffer_size, ranges& unencrypted_ranges);
 
 /**
  * @brief Validate unencrypted ranges

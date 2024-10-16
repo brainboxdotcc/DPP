@@ -59,7 +59,7 @@ namespace dpp::dave {
 	}
 #endif
 
-std::pair<bool, size_t> OverflowAdd(size_t a, size_t b)
+std::pair<bool, size_t> overflow_add(size_t a, size_t b)
 {
 	size_t res;
 #if defined(_MSC_VER) && defined(_M_X64)
@@ -97,10 +97,10 @@ uint8_t serialize_unencrypted_ranges(const ranges& unencrypted_ranges, uint8_t* 
 		write_at += write_leb128(range.offset, write_at);
 		write_at += write_leb128(range.size, write_at);
 	}
-	return write_at - buffer;
+	return static_cast<uint8_t>(write_at - buffer);
 }
 
-uint8_t deserialize_unencrypted_ranges(const uint8_t*& read_at, const size_t buffer_size, ranges& unencrypted_ranges)
+uint8_t deserialize_unencrypted_ranges(const uint8_t*& read_at, const uint8_t buffer_size, ranges& unencrypted_ranges)
 {
 	auto start = read_at;
 	auto end = read_at + buffer_size;
@@ -123,7 +123,7 @@ uint8_t deserialize_unencrypted_ranges(const uint8_t*& read_at, const size_t buf
 		return 0;
 	}
 
-	return read_at - start;
+	return static_cast<uint8_t>(read_at - start);
 }
 
 bool validate_unencrypted_ranges(const ranges& unencrypted_ranges, size_t frame_size)
@@ -140,7 +140,7 @@ bool validate_unencrypted_ranges(const ranges& unencrypted_ranges, size_t frame_
 		auto max_end =
 		  i + 1 < unencrypted_ranges.size() ? unencrypted_ranges[i + 1].offset : frame_size;
 
-		auto [did_overflow, current_end] = OverflowAdd(current.offset, current.size);
+		auto [did_overflow, current_end] = overflow_add(current.offset, current.size);
 		if (did_overflow || current_end > max_end) {
 			return false;
 		}
@@ -197,8 +197,7 @@ void inbound_frame_processor::parse_frame(array_view<const uint8_t> frame)
 {
 	clear();
 
-	constexpr auto min_supplemental_bytes_size =
-		AES_GCM_127_TRUNCATED_TAG_BYTES + sizeof(supplemental_bytes_size) + sizeof(magic_marker);
+	constexpr auto min_supplemental_bytes_size = AES_GCM_127_TRUNCATED_TAG_BYTES + sizeof(supplemental_bytes_size) + sizeof(magic_marker);
 	if (frame.size() < min_supplemental_bytes_size) {
 		creator.log(dpp::ll_warning, "Encrypted frame is too small to contain min supplemental bytes");
 		return;
@@ -236,14 +235,14 @@ void inbound_frame_processor::parse_frame(array_view<const uint8_t> frame)
 	auto nonce_buffer = supplemental_bytes_buffer + AES_GCM_127_TRUNCATED_TAG_BYTES;
 	auto read_at = nonce_buffer;
 	auto end = bytes_size_buffer;
-	truncated_nonce = read_leb128(read_at, end);
+	truncated_nonce = static_cast<uint32_t>(read_leb128(read_at, end));
 	if (read_at == nullptr) {
 		creator.log(dpp::ll_warning, "Failed to read truncated nonce");
 		return;
 	}
 
 	// Read the unencrypted ranges
-	auto ranges_size = end - read_at;
+	auto ranges_size = static_cast<uint8_t>(end - read_at);
 	deserialize_unencrypted_ranges(read_at, ranges_size, unencrypted_ranges);
 	if (read_at == nullptr) {
 		creator.log(dpp::ll_warning, "Failed to read unencrypted ranges");

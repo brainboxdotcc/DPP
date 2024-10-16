@@ -164,7 +164,14 @@ encryptor::result_code encryptor::encrypt(media_type this_media_type, uint32_t s
 		}
 
 		// write the supplemental bytes size
-		supplemental_bytes_size supplemental_bytes = SUPPLEMENTAL_BYTES + size + ranges_size;
+		uint64_t supplemental_bytes_large = SUPPLEMENTAL_BYTES + size + ranges_size;
+
+		if (supplemental_bytes_large > std::numeric_limits<supplemental_bytes_size>::max()) {
+			result = rc_encryption_failure;
+			break;
+		}
+
+		supplemental_bytes_size supplemental_bytes = supplemental_bytes_large;
 		std::memcpy(supplemental_bytes_buffer.data(), &supplemental_bytes, sizeof(supplemental_bytes_size));
 
 		// write the marker bytes, ends the frame
