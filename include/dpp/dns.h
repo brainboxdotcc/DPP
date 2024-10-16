@@ -31,6 +31,8 @@
 #include <sys/types.h>
 #include <string>
 #include <unordered_map>
+#include <cstring>
+#include <dpp/socket.h>
 
 namespace dpp {
 
@@ -40,23 +42,42 @@ namespace dpp {
 	 */
 	struct dns_cache_entry {
 		/**
-		 * @brief Resolved address information
+		 * @brief Resolved address metadata
 		 */
 		addrinfo addr;
 
 		/**
-		 * @brief Socket address.
-		 * Discord only supports ipv4, but sockaddr_in6 is larger
-		 * than sockaddr_in, sockaddr_storage will hold either. This
-		 * means that if discord ever do support ipv6 we just flip
-		 * one value in dns.cpp and that should be all that is needed.
+		 * @brief Resolved address as string.
+		 * The metadata is needed to know what type of address it is.
+		 * Do not do silly stuff like just looking to see if '.' is in it!
 		 */
-		sockaddr_storage ai_addr;
+		std::string resolved_addr;
 
 		/**
 		 * @brief Time at which this cache entry is invalidated
 		 */
 		time_t expire_timestamp;
+
+		/**
+		 * @brief Get address length
+		 * @return address length
+		 */
+		[[nodiscard]] int size() const;
+
+		/**
+		 * @brief Get the address_t that corresponds to this cache entry
+		 * for use when connecting with ::connect()
+		 * @param port Port number to connect to
+		 * @return address_t prefilled with the IP and port number
+		 */
+		[[nodiscard]] const address_t get_connecting_address(uint16_t port) const;
+
+		/**
+		 * @brief Allocate a socket file descriptor for the given dns address
+		 * @return File descriptor ready for calling connect(), or INVALID_SOCKET
+		 * on failure.
+		 */
+		[[nodiscard]] socket make_connecting_socket() const;
 	};
 
 	/**
@@ -73,4 +94,4 @@ namespace dpp {
 	 * @throw dpp::connection_exception On failure to resolve hostname
 	 */
 	const dns_cache_entry* resolve_hostname(const std::string& hostname, const std::string& port);
-} // namespace dpp
+}
