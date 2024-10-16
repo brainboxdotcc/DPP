@@ -44,58 +44,53 @@ key_generation compute_wrapped_generation(key_generation oldest, key_generation 
 big_nonce compute_wrapped_big_nonce(key_generation generation, truncated_sync_nonce nonce)
 {
 	// Remove the generation bits from the nonce
-	auto maskedNonce = nonce & ((1 << RATCHET_GENERATION_SHIFT_BITS) - 1);
+	auto masked_nonce = nonce & ((1 << RATCHET_GENERATION_SHIFT_BITS) - 1);
 	// Add the wrapped generation bits back in
-	return static_cast<big_nonce>(generation) << RATCHET_GENERATION_SHIFT_BITS | maskedNonce;
+	return static_cast<big_nonce>(generation) << RATCHET_GENERATION_SHIFT_BITS | masked_nonce;
 }
 
-aead_cipher_manager::aead_cipher_manager(dpp::cluster& cl, const clock_interface& clock, std::unique_ptr<key_ratchet_interface> keyRatchet)
-  : clock_(clock)
-  , keyRatchet_(std::move(keyRatchet))
-  , ratchetCreation_(clock.now())
-  , ratchetExpiry_(time_point::max())
-  , creator(cl)
-{
+aead_cipher_manager::aead_cipher_manager(dpp::cluster& cl, const clock_interface& clock, std::unique_ptr<key_ratchet_interface> key_ratchet)
+ : current_clock(clock), current_key_ratchet(std::move(key_ratchet)), ratchet_creation(clock.now()), ratchet_expiry(time_point::max()), creator(cl) {
 }
 
 bool aead_cipher_manager::can_process_nonce(key_generation generation, truncated_sync_nonce nonce) const
 {
-	if (!newestProcessedNonce_) {
+	if (!newest_processed_nonce) {
 		return true;
 	}
 
-	auto bigNonce = compute_wrapped_big_nonce(generation, nonce);
-	return bigNonce > *newestProcessedNonce_ ||
-	  std::find(missingNonces_.rbegin(), missingNonces_.rend(), bigNonce) != missingNonces_.rend();
+	auto wrapped_big_nonce = compute_wrapped_big_nonce(generation, nonce);
+	return wrapped_big_nonce > *newest_processed_nonce ||
+	       std::find(missing_nonces.rbegin(), missing_nonces.rend(), wrapped_big_nonce) != missing_nonces.rend();
 }
 
 cipher_interface* aead_cipher_manager::get_cipher(key_generation generation)
 {
 	cleanup_expired_ciphers();
 
-	if (generation < oldestGeneration_) {
-		creator.log(dpp::ll_trace, "Received frame with old generation: " + std::to_string(generation) + ", oldest generation: " + std::to_string(oldestGeneration_));
+	if (generation < oldest_generation) {
+		creator.log(dpp::ll_trace, "Received frame with old generation: " + std::to_string(generation) + ", oldest generation: " + std::to_string(oldest_generation));
 		return nullptr;
 	}
 
-	if (generation > newestGeneration_ + MAX_GENERATION_GAP) {
-		creator.log(dpp::ll_trace, "Received frame with future generation: " + std::to_string(generation) + ", newest generation: " + std::to_string(newestGeneration_));
+	if (generation > newest_generation + MAX_GENERATION_GAP) {
+		creator.log(dpp::ll_trace, "Received frame with future generation: " + std::to_string(generation) + ", newest generation: " + std::to_string(newest_generation));
 		return nullptr;
 	}
 
-	auto ratchetLifetimeSec =
-	  std::chrono::duration_cast<std::chrono::seconds>(clock_.now() - ratchetCreation_).count();
-	auto maxLifetimeFrames = MAX_FRAMES_PER_SECOND * ratchetLifetimeSec;
-	auto maxLifetimeGenerations = maxLifetimeFrames >> RATCHET_GENERATION_SHIFT_BITS;
-	if (generation > maxLifetimeGenerations) {
-		creator.log(dpp::ll_debug, "Received frame with generation " + std::to_string(generation) + " beyond ratchet max lifetime generations: " + std::to_string(maxLifetimeGenerations) + ", ratchet lifetime: " + std::to_string(ratchetLifetimeSec) + "s");
+	auto ratchet_lifetime_sec =
+	  std::chrono::duration_cast<std::chrono::seconds>(current_clock.now() - ratchet_creation).count();
+	auto max_lifetime_frames = MAX_FRAMES_PER_SECOND * ratchet_lifetime_sec;
+	auto max_lifetime_generations = max_lifetime_frames >> RATCHET_GENERATION_SHIFT_BITS;
+	if (generation > max_lifetime_generations) {
+		creator.log(dpp::ll_debug, "Received frame with generation " + std::to_string(generation) + " beyond ratchet max lifetime generations: " + std::to_string(max_lifetime_generations) + ", ratchet lifetime: " + std::to_string(ratchet_lifetime_sec) + "s");
 		return nullptr;
 	}
 
-	auto it = cryptors_.find(generation);
-	if (it == cryptors_.end()) {
+	auto it = cryptor_generations.find(generation);
+	if (it == cryptor_generations.end()) {
 		// We don't have a cryptor for this generation, create one
-		std::tie(it, std::ignore) = cryptors_.emplace(generation, make_expiring_cipher(generation));
+		std::tie(it, std::ignore) = cryptor_generations.emplace(generation, make_expiring_cipher(generation));
 	}
 
 	// Return a non-owning pointer to the cryptor
@@ -105,95 +100,94 @@ cipher_interface* aead_cipher_manager::get_cipher(key_generation generation)
 
 void aead_cipher_manager::report_cipher_success(key_generation generation, truncated_sync_nonce nonce)
 {
-	auto bigNonce = compute_wrapped_big_nonce(generation, nonce);
+	auto wrapped_big_nonce = compute_wrapped_big_nonce(generation, nonce);
 
 	// Add any missing nonces to the queue
-	if (!newestProcessedNonce_) {
-		newestProcessedNonce_ = bigNonce;
+	if (!newest_processed_nonce) {
+		newest_processed_nonce = wrapped_big_nonce;
 	}
-	else if (bigNonce > *newestProcessedNonce_) {
-		auto oldestMissingNonce = bigNonce > MAX_MISSING_NONCES ? bigNonce - MAX_MISSING_NONCES : 0;
+	else if (wrapped_big_nonce > *newest_processed_nonce) {
+		auto oldest_missing_nonce = wrapped_big_nonce > MAX_MISSING_NONCES ? wrapped_big_nonce - MAX_MISSING_NONCES : 0;
 
-		while (!missingNonces_.empty() && missingNonces_.front() < oldestMissingNonce) {
-			missingNonces_.pop_front();
+		while (!missing_nonces.empty() && missing_nonces.front() < oldest_missing_nonce) {
+			missing_nonces.pop_front();
 		}
 
 		// If we're missing a lot, we don't want to add everything since newestProcessedNonce_
-		auto missingRangeStart = std::max(oldestMissingNonce, *newestProcessedNonce_ + 1);
-		for (auto i = missingRangeStart; i < bigNonce; ++i) {
-			missingNonces_.push_back(i);
+		auto missing_range_start = std::max(oldest_missing_nonce, *newest_processed_nonce + 1);
+		for (auto i = missing_range_start; i < wrapped_big_nonce; ++i) {
+			missing_nonces.push_back(i);
 		}
 
 		// Update the newest processed nonce
-		newestProcessedNonce_ = bigNonce;
+		newest_processed_nonce = wrapped_big_nonce;
 	}
 	else {
-		auto it = std::find(missingNonces_.begin(), missingNonces_.end(), bigNonce);
-		if (it != missingNonces_.end()) {
-			missingNonces_.erase(it);
+		auto it = std::find(missing_nonces.begin(), missing_nonces.end(), wrapped_big_nonce);
+		if (it != missing_nonces.end()) {
+			missing_nonces.erase(it);
 		}
 	}
 
-	if (generation <= newestGeneration_ || cryptors_.find(generation) == cryptors_.end()) {
+	if (generation <= newest_generation || cryptor_generations.find(generation) == cryptor_generations.end()) {
 		return;
 	}
 	creator.log(dpp::ll_trace, "Reporting cryptor success, generation: " + std::to_string(generation));
-	newestGeneration_ = generation;
+	newest_generation = generation;
 
 	// Update the expiry time for all old cryptors
-	const auto expiryTime = clock_.now() + CIPHER_EXPIRY;
-	for (auto& [gen, cryptor] : cryptors_) {
-		if (gen < newestGeneration_) {
+	const auto expiry_time = current_clock.now() + CIPHER_EXPIRY;
+	for (auto& [gen, cryptor] : cryptor_generations) {
+		if (gen < newest_generation) {
 			creator.log(dpp::ll_trace, "Updating expiry for cryptor, generation: " + std::to_string(gen));
-			cryptor.expiry = std::min(cryptor.expiry, expiryTime);
+			cryptor.expiry = std::min(cryptor.expiry, expiry_time);
 		}
 	}
 }
 
 key_generation aead_cipher_manager::compute_wrapped_generation(key_generation generation)
 {
-	return ::dpp::dave::compute_wrapped_generation(oldestGeneration_, generation);
+	return ::dpp::dave::compute_wrapped_generation(oldest_generation, generation);
 }
 
 aead_cipher_manager::expiring_cipher aead_cipher_manager::make_expiring_cipher(key_generation generation)
 {
 	// Get the new key from the ratchet
-	auto encryptionKey = keyRatchet_->get_key(generation);
-	auto expiryTime = time_point::max();
+	auto key = current_key_ratchet->get_key(generation);
+	auto expiry_time = time_point::max();
 
 	// If we got frames out of order, we might have to create a cryptor for an old generation
 	// In that case, create it with a non-infinite expiry time as we have already transitioned
 	// to a newer generation
-	if (generation < newestGeneration_) {
+	if (generation < newest_generation) {
 		creator.log(dpp::ll_debug, "Creating cryptor for old generation: " + std::to_string(generation));
-		expiryTime = clock_.now() + CIPHER_EXPIRY;
+		expiry_time = current_clock.now() + CIPHER_EXPIRY;
 	}
 	else {
 		creator.log(dpp::ll_debug, "Creating cryptor for new generation: " + std::to_string(generation));
 	}
 
-	return {create_cipher(creator, encryptionKey), expiryTime};
+	return {create_cipher(creator, key), expiry_time};
 }
 
 void aead_cipher_manager::cleanup_expired_ciphers()
 {
-	for (auto it = cryptors_.begin(); it != cryptors_.end();) {
+	for (auto it = cryptor_generations.begin(); it != cryptor_generations.end();) {
 		auto& [generation, cryptor] = *it;
 
-		bool expired = cryptor.expiry < clock_.now();
+		bool expired = cryptor.expiry < current_clock.now();
 		if (expired) {
 			creator.log(dpp::ll_trace, "Removing expired cryptor, generation: " + std::to_string(generation));
 		}
 
-		it = expired ? cryptors_.erase(it) : ++it;
+		it = expired ? cryptor_generations.erase(it) : ++it;
 	}
 
-	while (oldestGeneration_ < newestGeneration_ && cryptors_.find(oldestGeneration_) == cryptors_.end()) {
-		creator.log(dpp::ll_trace, "Deleting key for old generation: " + std::to_string(oldestGeneration_));
-		keyRatchet_->delete_key(oldestGeneration_);
-		++oldestGeneration_;
+	while (oldest_generation < newest_generation && cryptor_generations.find(oldest_generation) == cryptor_generations.end()) {
+		creator.log(dpp::ll_trace, "Deleting key for old generation: " + std::to_string(oldest_generation));
+		current_key_ratchet->delete_key(oldest_generation);
+		++oldest_generation;
 	}
 }
 
-} // namespace dpp::dave
-
+}
