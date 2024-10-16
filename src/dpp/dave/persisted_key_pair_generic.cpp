@@ -106,9 +106,9 @@ std::shared_ptr<::mlspp::SignaturePrivateKey> get_generic_persisted_key_pair(dpp
 			return nullptr;
 		}
 
-	std::stringstream s;
-	s << ifs.rdbuf();
-	curstr = s.str();
+		std::stringstream s;
+		s << ifs.rdbuf();
+		curstr = s.str();
 		if (!ifs) {
 			creator.log(dpp::ll_warning, "Failed to read key in get_persisted_key_pair");
 			return nullptr;
@@ -141,7 +141,7 @@ std::shared_ptr<::mlspp::SignaturePrivateKey> get_generic_persisted_key_pair(dpp
 		}
 
 #ifdef _WIN32
-		ssize_t written = _write(fd, newstr.c_str(), newstr.size());
+		int written = _write(fd, newstr.c_str(), newstr.size());
 		_close(fd);
 #else
 		ssize_t written = write(fd, newstr.c_str(), newstr.size());
