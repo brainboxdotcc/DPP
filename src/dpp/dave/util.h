@@ -43,6 +43,4 @@ namespace dpp::dave::mls {
  */
 uint64_t from_big_endian_bytes(const ::mlspp::bytes_ns::bytes& value) noexcept;
 
-} // namespace dpp::dave::mls
-
-
+}

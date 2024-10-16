@@ -61,17 +61,13 @@ namespace dpp::dave::mls {
 	return ::mlspp::ExtensionList{};
 }
 
-::mlspp::ExtensionList group_extensions_for_protocol_version(
-	protocol_version version,
-	const ::mlspp::ExternalSender& externalSender) noexcept
+::mlspp::ExtensionList group_extensions_for_protocol_version(protocol_version version, const ::mlspp::ExternalSender& external_sender) noexcept
 {
-	auto extensionList = ::mlspp::ExtensionList{};
-
-	extensionList.add(::mlspp::ExternalSendersExtension{{
-	  {externalSender.signature_key, externalSender.credential},
+	auto extension_list = ::mlspp::ExtensionList{};
+	extension_list.add(::mlspp::ExternalSendersExtension{{
+	  {external_sender.signature_key, external_sender.credential},
 	}});
-
-	return extensionList;
+	return extension_list;
 }
 
 } // namespace dpp::dave::mls

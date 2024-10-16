@@ -77,9 +77,9 @@ namespace dpp::dave::mls {
 /**
  * @brief Get group extensions for protocol version
  * @param version protocol bersion
- * @param externalSender external sender
+ * @param external_sender external sender
  * @return extension list
  */
-::mlspp::ExtensionList group_extensions_for_protocol_version(protocol_version version, const ::mlspp::ExternalSender& externalSender) noexcept;
+::mlspp::ExtensionList group_extensions_for_protocol_version(protocol_version version, const ::mlspp::ExternalSender& external_sender) noexcept;
 
 } // namespace dpp::dave::mls
