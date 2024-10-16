@@ -64,25 +64,25 @@ public:
 
 	/**
 	 * @brief Encrypt audio or video
-	 * @param ciphertextBufferOut Output buffer of ciphertext
-	 * @param plaintextBuffer Input buffer for plaintext
-	 * @param nonceBuffer Input nonce/IV
-	 * @param additionalData Additional data for GCM AEAD encryption
-	 * @param tagBufferOut AEAD Tag for verification
+	 * @param ciphertext_buffer_out Output buffer of ciphertext
+	 * @param plaintext_buffer Input buffer for plaintext
+	 * @param nonce_buffer Input nonce/IV
+	 * @param additional_data Additional data for GCM AEAD encryption
+	 * @param tag_buffer_out AEAD Tag for verification
 	 * @return true if encryption succeeded, false if it failed
 	 */
-	virtual bool encrypt(byte_view ciphertextBufferOut, const_byte_view plaintextBuffer, const_byte_view nonceBuffer, const_byte_view additionalData, byte_view tagBufferOut) = 0;
+	virtual bool encrypt(byte_view ciphertext_buffer_out, const_byte_view plaintext_buffer, const_byte_view nonce_buffer, const_byte_view additional_data, byte_view tag_buffer_out) = 0;
 
 	/**
 	 * @brief Decrypt audio or video
-	 * @param plaintextBufferOut Output buffer for plaintext
-	 * @param ciphertextBuffer Input buffer for ciphetext
-	 * @param tagBuffer AEAD Tag for verification
-	 * @param nonceBuffer Nonce/IV
-	 * @param additionalData Additional data for GCM AEAD encryption
+	 * @param plaintext_buffer_out Output buffer for plaintext
+	 * @param ciphertext_buffer Input buffer for ciphetext
+	 * @param tag_buffer AEAD Tag for verification
+	 * @param nonce_buffer Nonce/IV
+	 * @param additional_data Additional data for GCM AEAD encryption
 	 * @return true if decryption succeeded, false if it failed
 	 */
-	virtual bool decrypt(byte_view plaintextBufferOut, const_byte_view ciphertextBuffer, const_byte_view tagBuffer, const_byte_view nonceBuffer, const_byte_view additionalData) = 0;
+	virtual bool decrypt(byte_view plaintext_buffer_out, const_byte_view ciphertext_buffer, const_byte_view tag_buffer, const_byte_view nonce_buffer, const_byte_view additional_data) = 0;
 
 protected:
 
@@ -94,10 +94,10 @@ protected:
 
 /**
  * @brief Factory function to create new cipher interface of the best supported type for DAVE
- * @param encryptionKey encryption key
+ * @param key encryption key
  * @return an instance of a class derived from cipher_interface
  */
-std::unique_ptr<cipher_interface> create_cipher(dpp::cluster& cl, const encryption_key& encryptionKey);
+std::unique_ptr<cipher_interface> create_cipher(dpp::cluster& cl, const encryption_key& key);
 
 } // namespace dpp::dave
 
