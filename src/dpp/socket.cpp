@@ -18,29 +18,46 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * This folder is a modified fork of libdave, https://github.com/discord/libdave
- * Copyright (c) 2024 Discord, Licensed under MIT
- *
  ************************************************************************************/
-#pragma once
 
-#include <string>
-#include <bytes/bytes.h>
+#include <dpp/socket.h>
+#include <dpp/sslclient.h>
+#include <cstring>
 
-namespace dpp::dave::mls {
+namespace dpp {
 
-/**
- * @brief Convert uint64_t to bytes
- * @param value 64 bit value
- * @return bytes
- */
-::mlspp::bytes_ns::bytes big_endian_bytes_from(uint64_t value) noexcept;
+address_t::address_t(const std::string_view ip, uint16_t port) {
+	sockaddr_in address{};
+	address.sin_family = AF_INET;
+	address.sin_port = htons(port);
+	address.sin_addr.s_addr = inet_addr(ip.data());
+	std::memcpy(&socket_addr, &address, sizeof(address));
+}
 
-/**
- * @brief Convert uint64_t to bytes
- * @param value bytes
- * @return 64 bit value
- */
-uint64_t from_big_endian_bytes(const ::mlspp::bytes_ns::bytes& value) noexcept;
+sockaddr* address_t::get_socket_address() {
+	return &socket_addr;
+}
+
+size_t address_t::size() {
+	return sizeof(sockaddr_in);
+}
+
+uint16_t address_t::get_port(socket fd) {
+	socklen_t len = size();
+	if (getsockname(fd, &socket_addr, &len) > -1) {
+		sockaddr_in sin{};
+		std::memcpy(&sin, &socket_addr, sizeof(sockaddr_in));
+		return ntohs(sin.sin_port);
+	}
+	return 0;
+}
+
+raii_socket::raii_socket() : fd(::socket(AF_INET, SOCK_DGRAM, 0)) {
+}
+
+raii_socket::~raii_socket() {
+	close_socket(fd);
+}
+
 
 }

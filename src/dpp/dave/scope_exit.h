@@ -40,27 +40,23 @@ public:
 	 * @tparam Cleanup lambda type
 	 * @param cleanup lambda
 	 */
-	template <typename Cleanup> explicit scope_exit(Cleanup&& cleanup)
-	  : cleanup_{std::forward<Cleanup>(cleanup)}
-	{
+	template <typename Cleanup> explicit scope_exit(Cleanup&& cleanup) : exit_function{std::forward<Cleanup>(cleanup)} {
 	}
 
 	/**
 	 * @brief Move constructor
 	 * @param rhs other object
 	 */
-	scope_exit(scope_exit&& rhs) : cleanup_{std::move(rhs.cleanup_)}
-	{
-		rhs.cleanup_ = nullptr;
+	scope_exit(scope_exit&& rhs) : exit_function{std::move(rhs.exit_function)} {
+		rhs.exit_function = nullptr;
 	}
 
 	/**
 	 * @brief Calls lambda
 	 */
-	~scope_exit()
-	{
-		if (cleanup_) {
-			cleanup_();
+	~scope_exit() {
+		if (exit_function) {
+			exit_function();
 		}
 	}
 
@@ -69,17 +65,18 @@ public:
 	 * @param rhs other object
 	 * @return self
 	 */
-	scope_exit& operator=(scope_exit&& rhs)
-	{
-		cleanup_ = std::move(rhs.cleanup_);
-		rhs.cleanup_ = nullptr;
+	scope_exit& operator=(scope_exit&& rhs) {
+		exit_function = std::move(rhs.exit_function);
+		rhs.exit_function = nullptr;
 		return *this;
 	}
 
 	/**
 	 * @brief Clear the lambda so it isn't called
 	 */
-	void dismiss() { cleanup_ = nullptr; }
+	void dismiss() {
+		exit_function = nullptr;
+	}
 
 private:
 	/**
@@ -96,8 +93,7 @@ private:
 	/**
 	 * @brief Lambda to call
 	 */
-	std::function<void()> cleanup_;
+	std::function<void()> exit_function;
 };
 
-} // namespace dpp::dave
-
+}

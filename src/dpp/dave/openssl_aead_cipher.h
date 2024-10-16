@@ -44,9 +44,9 @@ public:
 	/**
 	 * @brief constructor
 	 * @param _creator Creator
-	 * @param encryptionKey encryption key
+	 * @param key encryption key
 	 */
-	openssl_aead_cipher(dpp::cluster& _creator, const encryption_key& encryptionKey);
+	openssl_aead_cipher(dpp::cluster& _creator, const encryption_key& key);
 
 	/**
 	 * @brief Destructor
@@ -58,41 +58,41 @@ public:
 	 * @return True if valid
 	 */
 	[[nodiscard]] bool inline is_valid() const {
-		return cipherCtx_ != nullptr;
+		return ssl_context != nullptr;
 	}
 
 	/**
 	 * @brief Encrypt plaintext to ciphertext and authenticate it with tag/AAD
-	 * @param ciphertextBufferOut ciphertext
-	 * @param plaintextBuffer plaintext
-	 * @param nonceBuffer nonce/IV
-	 * @param additionalData additional authenticated data
-	 * @param tagBufferOut tag
+	 * @param ciphertext_buffer_out ciphertext
+	 * @param plaintext_buffer plaintext
+	 * @param nonce_buffer nonce/IV
+	 * @param additional_data additional authenticated data
+	 * @param tag_buffer_out tag
 	 * @return True if encryption succeeded
 	 */
-	bool encrypt(byte_view ciphertextBufferOut, const_byte_view plaintextBuffer, const_byte_view nonceBuffer, const_byte_view additionalData, byte_view tagBufferOut) override;
+	bool encrypt(byte_view ciphertext_buffer_out, const_byte_view plaintext_buffer, const_byte_view nonce_buffer, const_byte_view additional_data, byte_view tag_buffer_out) override;
 
 	/**
 	 * @brief Decrypt ciphertext to plaintext if it authenticates with tag/AAD
-	 * @param plaintextBufferOut plaintext
-	 * @param ciphertextBuffer ciphertext
-	 * @param tagBuffer tag
-	 * @param nonceBuffer nonce/IV
-	 * @param additionalData additional authenticated data
+	 * @param plaintext_buffer_out plaintext
+	 * @param ciphertext_buffer ciphertext
+	 * @param tag_buffer tag
+	 * @param nonce_buffer nonce/IV
+	 * @param additional_data additional authenticated data
 	 * @return True if decryption succeeded
 	 */
-	bool decrypt(byte_view plaintextBufferOut, const_byte_view ciphertextBuffer, const_byte_view tagBuffer, const_byte_view nonceBuffer, const_byte_view additionalData) override;
+	bool decrypt(byte_view plaintext_buffer_out, const_byte_view ciphertext_buffer, const_byte_view tag_buffer, const_byte_view nonce_buffer, const_byte_view additional_data) override;
 
 private:
 	/**
 	 * @brief Using EVP_CIPHER_CTX instead of EVP_AEAD_CTX
 	 */
-	EVP_CIPHER_CTX* cipherCtx_;
+	EVP_CIPHER_CTX* ssl_context;
 
 	/**
 	 * @brief Encryption/decryption key
 	 */
-	std::vector<uint8_t> key_;
+	std::vector<uint8_t> aes_key;
 };
 
 } // namespace dpp::dave

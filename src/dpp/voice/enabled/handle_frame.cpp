@@ -437,6 +437,8 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 				this->ip = d["ip"].get<std::string>();
 				this->port = d["port"].get<uint16_t>();
 				this->ssrc = d["ssrc"].get<uint64_t>();
+				destination = address_t(this->ip, this->port);
+
 				// Modes
 				for (auto & m : d["modes"]) {
 					this->modes.push_back(m.get<std::string>());
@@ -446,13 +448,8 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 				dpp::socket newfd = 0;
 				if ((newfd = ::socket(AF_INET, SOCK_DGRAM, 0)) >= 0) {
 
-					sockaddr_in servaddr{};
-					memset(&servaddr, 0, sizeof(sockaddr_in));
-					servaddr.sin_family = AF_INET;
-					servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
-					servaddr.sin_port = htons(0);
-
-					if (bind(newfd, reinterpret_cast<sockaddr*>(&servaddr), sizeof(servaddr)) < 0) {
+					address_t bind_any;
+					if (bind(newfd, bind_any.get_socket_address(), bind_any.size()) < 0) {
 						throw dpp::connection_exception(err_bind_failure, "Can't bind() client UDP socket");
 					}
 
@@ -467,13 +464,7 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 					this->custom_writeable_ready = [this] { write_ready(); };
 					this->custom_readable_ready = [this] { read_ready(); };
 
-					int bound_port = 0;
-					sockaddr_in sin{};
-					socklen_t len = sizeof(sin);
-					if (getsockname(this->fd, reinterpret_cast<sockaddr *>(&sin), &len) > -1) {
-						bound_port = ntohs(sin.sin_port);
-					}
-
+					int bound_port = address_t().get_port(this->fd);
 					this->write(json({
 						{ "op", voice_opcode_connection_select_protocol },
 							{ "d", {

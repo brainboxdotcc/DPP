@@ -74,5 +74,4 @@ public:
 	}
 };
 
-} // namespace dpp::dave
-
+}

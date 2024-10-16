@@ -148,7 +148,8 @@
 		"nullopt",
 		"chrono",
 		"ciphersuite",
-		"rmap"
+		"rmap",
+		"WSAPOLLFD"
 	],
 	"flagWords": [
 		"hte"

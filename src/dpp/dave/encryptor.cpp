@@ -39,39 +39,39 @@ using namespace std::chrono_literals;
 
 namespace dpp::dave {
 
-void encryptor::set_key_ratchet(std::unique_ptr<key_ratchet_interface> keyRatchet)
+void encryptor::set_key_ratchet(std::unique_ptr<key_ratchet_interface> key_ratchet)
 {
-	std::lock_guard<std::mutex> lock(keyGenMutex_);
-	keyRatchet_ = std::move(keyRatchet);
-	cryptor_ = nullptr;
-	currentKeyGeneration_ = 0;
-	truncatedNonce_ = 0;
+	std::lock_guard<std::mutex> lock(key_gen_mutex);
+	ratchet = std::move(key_ratchet);
+	cryptor = nullptr;
+	current_key_generation = 0;
+	truncated_nonce = 0;
 }
 
-void encryptor::set_passthrough_mode(bool passthroughMode)
+void encryptor::set_passthrough_mode(bool passthrough_mode)
 {
-	passthroughMode_ = passthroughMode;
-	update_current_protocol_version(passthroughMode ? 0 : max_protocol_version());
+	passthrough_mode_enable = passthrough_mode;
+	update_current_protocol_version(passthrough_mode ? 0 : max_protocol_version());
 }
 
-encryptor::result_code encryptor::encrypt(media_type mediaType, uint32_t ssrc, array_view<const uint8_t> frame, array_view<uint8_t> encryptedFrame, size_t* bytesWritten) {
-	if (mediaType != media_audio && mediaType != media_video) {
-		creator.log(dpp::ll_warning, "encrypt failed, invalid media type: " + std::to_string(static_cast<int>(mediaType)));
+encryptor::result_code encryptor::encrypt(media_type this_media_type, uint32_t ssrc, array_view<const uint8_t> frame, array_view<uint8_t> encrypted_frame, size_t* bytes_written) {
+	if (this_media_type != media_audio && this_media_type != media_video) {
+		creator.log(dpp::ll_warning, "encrypt failed, invalid media type: " + std::to_string(static_cast<int>(this_media_type)));
 		return result_code::rc_encryption_failure;
 	}
 
-	if (passthroughMode_) {
+	if (passthrough_mode_enable) {
 		// Pass frame through without encrypting
-	std::memcpy(encryptedFrame.data(), frame.data(), frame.size());
-		*bytesWritten = frame.size();
-		stats_[mediaType].passthroughs++;
+		std::memcpy(encrypted_frame.data(), frame.data(), frame.size());
+		*bytes_written = frame.size();
+		stats[this_media_type].passthroughs++;
 		return result_code::rc_success;
 	}
 
 	{
-		std::lock_guard<std::mutex> lock(keyGenMutex_);
-		if (!keyRatchet_) {
-			stats_[mediaType].encrypt_failure++;
+		std::lock_guard<std::mutex> lock(key_gen_mutex);
+		if (!ratchet) {
+			stats[this_media_type].encrypt_failure++;
 			return result_code::rc_encryption_failure;
 		}
 	}
@@ -82,27 +82,27 @@ encryptor::result_code encryptor::encrypt(media_type mediaType, uint32_t ssrc, a
 	// write the codec identifier
 	auto codec = codec_for_ssrc(ssrc);
 
-	auto frameProcessor = get_or_create_frame_processor();
-	scope_exit cleanup([&] { return_frame_processor(std::move(frameProcessor)); });
+	auto frame_processor = get_or_create_frame_processor();
+	scope_exit cleanup([&] { return_frame_processor(std::move(frame_processor)); });
 
-	frameProcessor->process_frame(frame, codec);
+	frame_processor->process_frame(frame, codec);
 
-	const auto& unencryptedBytes = frameProcessor->get_unencrypted_bytes();
-	const auto& encryptedBytes = frameProcessor->get_encrypted_bytes();
-	auto& ciphertextBytes = frameProcessor->get_ciphertext_bytes();
+	const auto& unencrypted_bytes = frame_processor->get_unencrypted_bytes();
+	const auto& encrypted_bytes = frame_processor->get_encrypted_bytes();
+	auto& ciphertext_bytes = frame_processor->get_ciphertext_bytes();
 
-	const auto& unencryptedRanges = frameProcessor->get_unencrypted_ranges();
-	auto unencryptedRangesSize = unencrypted_ranges_size(unencryptedRanges);
+	const auto& unencrypted_ranges = frame_processor->get_unencrypted_ranges();
+	auto ranges_size = unencrypted_ranges_size(unencrypted_ranges);
 
-	auto additionalData = make_array_view(unencryptedBytes.data(), unencryptedBytes.size());
-	auto plaintextBuffer = make_array_view(encryptedBytes.data(), encryptedBytes.size());
-	auto ciphertextBuffer = make_array_view(ciphertextBytes.data(), ciphertextBytes.size());
+	auto additional_data = make_array_view(unencrypted_bytes.data(), unencrypted_bytes.size());
+	auto plaintext_buffer = make_array_view(encrypted_bytes.data(), encrypted_bytes.size());
+	auto ciphertext_buffer = make_array_view(ciphertext_bytes.data(), ciphertext_bytes.size());
 
-	auto frameSize = encryptedBytes.size() + unencryptedBytes.size();
-	auto tagBuffer = make_array_view(encryptedFrame.data() + frameSize, AES_GCM_127_TRUNCATED_TAG_BYTES);
+	auto frame_size = encrypted_bytes.size() + unencrypted_bytes.size();
+	auto tag_buffer = make_array_view(encrypted_frame.data() + frame_size, AES_GCM_127_TRUNCATED_TAG_BYTES);
 
-	auto nonceBuffer = std::array<uint8_t, AES_GCM_128_NONCE_BYTES>();
-	auto nonceBufferView = make_array_view<const uint8_t>(nonceBuffer.data(), nonceBuffer.size());
+	auto nonce_buffer = std::array<uint8_t, AES_GCM_128_NONCE_BYTES>();
+	auto nonce_buffer_view = make_array_view<const uint8_t>(nonce_buffer.data(), nonce_buffer.size());
 
 	constexpr auto MAX_CIPHERTEXT_VALIDATION_RETRIES = 10;
 
@@ -117,72 +117,70 @@ encryptor::result_code encryptor::encrypt(media_type mediaType, uint32_t ssrc, a
 	// which can remove start codes from the last 1 or 2 bytes of the nonce
 	// and the two bytes of the unencrypted header bytes
 	for (auto attempt = 1; attempt <= MAX_CIPHERTEXT_VALIDATION_RETRIES; ++attempt) {
-		auto [cryptor, truncatedNonce] = get_next_cryptor_and_nonce();
+		auto [curr_cryptor, truncatedNonce] = get_next_cryptor_and_nonce();
 
-		if (!cryptor) {
+		if (!curr_cryptor) {
 			result = result_code::rc_encryption_failure;
 			break;
 		}
 
 		// write the truncated nonce to our temporary full nonce array
 		// (since the encryption call expects a full size nonce)
-		std::memcpy(nonceBuffer.data() + AES_GCM_128_TRUNCATED_SYNC_NONCE_OFFSET,
-			&truncatedNonce,
-			AES_GCM_128_TRUNCATED_SYNC_NONCE_BYTES);
+		std::memcpy(nonce_buffer.data() + AES_GCM_128_TRUNCATED_SYNC_NONCE_OFFSET, &truncatedNonce, AES_GCM_128_TRUNCATED_SYNC_NONCE_BYTES);
 
 		// encrypt the plaintext, adding the unencrypted header to the tag
-		bool success = cryptor->encrypt(
-		ciphertextBuffer, plaintextBuffer, nonceBufferView, additionalData, tagBuffer);
+		bool success = curr_cryptor->encrypt(ciphertext_buffer, plaintext_buffer, nonce_buffer_view, additional_data, tag_buffer);
 
-		stats_[mediaType].encrypt_attempts++;
-		stats_[mediaType].encrypt_max_attempts =
-		  std::max(stats_[mediaType].encrypt_max_attempts, (uint64_t)attempt);
+		stats[this_media_type].encrypt_attempts++;
+		stats[this_media_type].encrypt_max_attempts =
+		  std::max(stats[this_media_type].encrypt_max_attempts, (uint64_t)attempt);
 
 		if (!success) {
 			result = result_code::rc_encryption_failure;
 			break;
 		}
 
-		auto reconstructedFrameSize = frameProcessor->reconstruct_frame(encryptedFrame);
+		auto reconstructed_frame_size = frame_processor->reconstruct_frame(encrypted_frame);
 
-		auto nonceSize = leb128_size(truncatedNonce);
+		auto size = leb128_size(truncatedNonce);
 
-		auto truncatedNonceBuffer = make_array_view(tagBuffer.end(), nonceSize);
-		auto unencryptedRangesBuffer =
-		make_array_view(truncatedNonceBuffer.end(), unencryptedRangesSize);
-		auto supplementalBytesBuffer =
-		make_array_view(unencryptedRangesBuffer.end(), sizeof(supplemental_bytes_size));
-		auto markerBytesBuffer = make_array_view(supplementalBytesBuffer.end(), sizeof(magic_marker));
+		auto truncated_nonce_buffer = make_array_view(tag_buffer.end(), size);
+		auto unencrypted_ranges_buffer = make_array_view(truncated_nonce_buffer.end(), ranges_size);
+		auto supplemental_bytes_buffer = make_array_view(unencrypted_ranges_buffer.end(), sizeof(supplemental_bytes_size));
+		auto marker_bytes_buffer = make_array_view(supplemental_bytes_buffer.end(), sizeof(magic_marker));
 
 		// write the nonce
-		auto res = write_leb128(truncatedNonce, truncatedNonceBuffer.begin());
-		if (res != nonceSize) {
+		auto res = write_leb128(truncatedNonce, truncated_nonce_buffer.begin());
+		if (res != size) {
 			result = result_code::rc_encryption_failure;
 			break;
 		}
 
 		// write the unencrypted ranges
-		res = serialize_unencrypted_ranges(
-			unencryptedRanges, unencryptedRangesBuffer.begin(), unencryptedRangesBuffer.size());
-		if (res != unencryptedRangesSize) {
+		res = serialize_unencrypted_ranges(unencrypted_ranges, unencrypted_ranges_buffer.begin(), unencrypted_ranges_buffer.size());
+		if (res != ranges_size) {
 			result = result_code::rc_encryption_failure;
 			break;
 		}
 
 		// write the supplemental bytes size
-		supplemental_bytes_size supplementalBytes =
-		SUPPLEMENTAL_BYTES + nonceSize + unencryptedRangesSize;
-	std::memcpy(supplementalBytesBuffer.data(), &supplementalBytes, sizeof(supplemental_bytes_size));
+		uint64_t supplemental_bytes_large = SUPPLEMENTAL_BYTES + size + ranges_size;
+
+		if (supplemental_bytes_large > std::numeric_limits<supplemental_bytes_size>::max()) {
+			result = rc_encryption_failure;
+			break;
+		}
+
+		supplemental_bytes_size supplemental_bytes = supplemental_bytes_large;
+		std::memcpy(supplemental_bytes_buffer.data(), &supplemental_bytes, sizeof(supplemental_bytes_size));
 
 		// write the marker bytes, ends the frame
-	std::memcpy(markerBytesBuffer.data(), &MARKER_BYTES, sizeof(magic_marker));
+		std::memcpy(marker_bytes_buffer.data(), &MARKER_BYTES, sizeof(magic_marker));
 
-		auto encryptedFrameBytes = reconstructedFrameSize + AES_GCM_127_TRUNCATED_TAG_BYTES +
-				   nonceSize + unencryptedRangesSize + sizeof(supplemental_bytes_size) + sizeof(magic_marker);
+		auto encrypted_frame_bytes = reconstructed_frame_size + AES_GCM_127_TRUNCATED_TAG_BYTES + size + ranges_size + sizeof(supplemental_bytes_size) + sizeof(magic_marker);
 
-		if (codec_utils::validate_encrypted_frame(
-		*frameProcessor, make_array_view(encryptedFrame.data(), encryptedFrameBytes))) {
-			*bytesWritten = encryptedFrameBytes;
+		if (codec_utils::validate_encrypted_frame(*frame_processor, make_array_view(encrypted_frame.data(), encrypted_frame_bytes))) {
+			*bytes_written = encrypted_frame_bytes;
 			break;
 		}
 		else if (attempt >= MAX_CIPHERTEXT_VALIDATION_RETRIES) {
@@ -192,47 +190,48 @@ encryptor::result_code encryptor::encrypt(media_type mediaType, uint32_t ssrc, a
 	}
 
 	auto now = std::chrono::steady_clock::now();
-	stats_[mediaType].encrypt_duration +=
-	  std::chrono::duration_cast<std::chrono::microseconds>(now - start).count();
+	stats[this_media_type].encrypt_duration += std::chrono::duration_cast<std::chrono::microseconds>(now - start).count();
 	if (result == result_code::rc_success) {
-		stats_[mediaType].encrypt_success++;
+		stats[this_media_type].encrypt_success++;
 	}
 	else {
-		stats_[mediaType].encrypt_failure++;
+		stats[this_media_type].encrypt_failure++;
 	}
 
 	return result;
 }
 
-size_t encryptor::get_max_ciphertext_byte_size(media_type mediaType, size_t frameSize)
+size_t encryptor::get_max_ciphertext_byte_size(media_type this_media_type, size_t frame_size)
 {
-	return frameSize + SUPPLEMENTAL_BYTES + TRANSFORM_PADDING_BYTES;
+	return frame_size + SUPPLEMENTAL_BYTES + TRANSFORM_PADDING_BYTES;
 }
 
-void encryptor::assign_ssrc_to_codec(uint32_t ssrc, codec codecType)
+void encryptor::assign_ssrc_to_codec(uint32_t ssrc, codec codec_type)
 {
-	auto existingCodecIt = std::find_if(
-	  ssrcCodecPairs_.begin(), ssrcCodecPairs_.end(), [ssrc](const SsrcCodecPair& pair) {
-		  return pair.first == ssrc;
-	  });
+	auto existing_codec_it = std::find_if(
+		ssrc_codec_pairs.begin(), ssrc_codec_pairs.end(), [ssrc](const ssrc_codec_pair& pair) {
+			return pair.first == ssrc;
+		}
+	);
 
-	if (existingCodecIt == ssrcCodecPairs_.end()) {
-		ssrcCodecPairs_.emplace_back(ssrc, codecType);
+	if (existing_codec_it == ssrc_codec_pairs.end()) {
+		ssrc_codec_pairs.emplace_back(ssrc, codec_type);
 	}
 	else {
-		existingCodecIt->second = codecType;
+		existing_codec_it->second = codec_type;
 	}
 }
 
 codec encryptor::codec_for_ssrc(uint32_t ssrc)
 {
-	auto existingCodecIt = std::find_if(
-	  ssrcCodecPairs_.begin(), ssrcCodecPairs_.end(), [ssrc](const SsrcCodecPair& pair) {
-		  return pair.first == ssrc;
-	  });
+	auto existing_codec_it = std::find_if(
+		ssrc_codec_pairs.begin(), ssrc_codec_pairs.end(), [ssrc](const ssrc_codec_pair& pair) {
+			return pair.first == ssrc;
+		}
+	);
 
-	if (existingCodecIt != ssrcCodecPairs_.end()) {
-		return existingCodecIt->second;
+	if (existing_codec_it != ssrc_codec_pairs.end()) {
+		return existing_codec_it->second;
 	}
 	else {
 		return codec::cd_opus;
@@ -241,51 +240,50 @@ codec encryptor::codec_for_ssrc(uint32_t ssrc)
 
 std::unique_ptr<outbound_frame_processor> encryptor::get_or_create_frame_processor()
 {
-	std::lock_guard<std::mutex> lock(frameProcessorsMutex_);
-	if (frameProcessors_.empty()) {
+	std::lock_guard<std::mutex> lock(frame_processors_mutex);
+	if (frame_processors.empty()) {
 		return std::make_unique<outbound_frame_processor>(creator);
 	}
-	auto frameProcessor = std::move(frameProcessors_.back());
-	frameProcessors_.pop_back();
-	return frameProcessor;
+	auto frame_processor = std::move(frame_processors.back());
+	frame_processors.pop_back();
+	return frame_processor;
 }
 
 void encryptor::return_frame_processor(std::unique_ptr<outbound_frame_processor> frameProcessor)
 {
-	std::lock_guard<std::mutex> lock(frameProcessorsMutex_);
-	frameProcessors_.push_back(std::move(frameProcessor));
+	std::lock_guard<std::mutex> lock(frame_processors_mutex);
+	frame_processors.push_back(std::move(frameProcessor));
 }
 
 encryptor::cryptor_and_nonce encryptor::get_next_cryptor_and_nonce()
 {
-	std::lock_guard<std::mutex> lock(keyGenMutex_);
-	if (!keyRatchet_) {
+	std::lock_guard<std::mutex> lock(key_gen_mutex);
+	if (!ratchet) {
 		return {nullptr, 0};
 	}
 
-	auto generation = compute_wrapped_generation(currentKeyGeneration_, ++truncatedNonce_ >> RATCHET_GENERATION_SHIFT_BITS);
+	auto generation = compute_wrapped_generation(current_key_generation, ++truncated_nonce >> RATCHET_GENERATION_SHIFT_BITS);
 
-	if (generation != currentKeyGeneration_ || !cryptor_) {
-		currentKeyGeneration_ = generation;
+	if (generation != current_key_generation || !cryptor) {
+		current_key_generation = generation;
 
-		auto encryptionKey = keyRatchet_->get_key(currentKeyGeneration_);
-		cryptor_ = create_cipher(creator, encryptionKey);
+		auto key = ratchet->get_key(current_key_generation);
+		cryptor = create_cipher(creator, key);
 	}
 
-	return {cryptor_, truncatedNonce_};
+	return {cryptor, truncated_nonce};
 }
 
 void encryptor::update_current_protocol_version(protocol_version version)
 {
-	if (version == currentProtocolVersion_) {
+	if (version == current_protocol_version) {
 		return;
 	}
 
-	currentProtocolVersion_ = version;
-	if (protocolVersionChangedCallback_) {
-		protocolVersionChangedCallback_();
+	current_protocol_version = version;
+	if (changed_callback) {
+		changed_callback();
 	}
 }
 
-} // namespace dpp::dave
-
+}

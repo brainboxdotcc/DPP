@@ -27,19 +27,17 @@
 
 namespace dpp::dave {
 
-mls_key_ratchet::mls_key_ratchet(dpp::cluster& cl, ::mlspp::CipherSuite suite, bytes baseSecret) noexcept
-  : hashRatchet_(suite, std::move(baseSecret)), creator(cl)
-{
+mls_key_ratchet::mls_key_ratchet(dpp::cluster& cl, ::mlspp::CipherSuite suite, bytes base_secret) noexcept : ratchet(suite, std::move(base_secret)), creator(cl) {
 }
 
 mls_key_ratchet::~mls_key_ratchet() noexcept = default;
 
 encryption_key mls_key_ratchet::get_key(key_generation generation) noexcept
 {
-	creator.log(dpp::ll_debug, "Retrieving key for generation " + std::to_string(generation) + " from HashRatchet");
+	creator.log(dpp::ll_debug, "Retrieving key for generation " + std::to_string(generation) + " from hash ratchet");
 	try {
-		auto keyAndNonce = hashRatchet_.get(generation);
-		return std::move(keyAndNonce.key.as_vec());
+		auto key_and_nonce = ratchet.get(generation);
+		return std::move(key_and_nonce.key.as_vec());
 	}
 	catch (const std::exception& e) {
 		creator.log(dpp::ll_warning, "Failed to retrieve key for generation " + std::to_string(generation) + ": " + std::string(e.what()));
@@ -49,8 +47,8 @@ encryption_key mls_key_ratchet::get_key(key_generation generation) noexcept
 
 void mls_key_ratchet::delete_key(key_generation generation) noexcept
 {
-	hashRatchet_.erase(generation);
+	ratchet.erase(generation);
 }
 
-} // namespace dpp::dave
+}
 

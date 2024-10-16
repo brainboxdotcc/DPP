@@ -77,9 +77,9 @@ struct encryption_stats {
 class encryptor {
 public:
 	/**
- * @brief Constructor
- * @param cl Creator
- */
+	 * @brief Constructor
+	 * @param cl Creator
+	 */
 	encryptor(dpp::cluster& cl) : creator(cl) { };
 
 	/**
@@ -98,22 +98,22 @@ public:
 
 	/**
 	 * @brief Set key ratchet for encryptor, this should be the bot's ratchet.
-	 * @param keyRatchet Bot's key ratchet
+	 * @param key_ratchet Bot's key ratchet
 	 */
-	void set_key_ratchet(std::unique_ptr<key_ratchet_interface> keyRatchet);
+	void set_key_ratchet(std::unique_ptr<key_ratchet_interface> key_ratchet);
 
 	/**
 	 * @brief Set encryption to passthrough mode
-	 * @param passthroughMode true to enable passthrough mode, false to disable
+	 * @param passthrough_mode true to enable passthrough mode, false to disable
 	 */
-	void set_passthrough_mode(bool passthroughMode);
+	void set_passthrough_mode(bool passthrough_mode);
 
 	/**
 	 * @brief True if key ratchet assigned
 	 * @return key ratchet is assigned
 	 */
 	bool has_key_ratchet() const {
-		return keyRatchet_ != nullptr;
+		return ratchet != nullptr;
 	}
 
 	/**
@@ -121,16 +121,16 @@ public:
 	 * @return is in passthrough mode
 	 */
 	bool is_passthrough_mode() const {
-		return passthroughMode_;
+		return passthrough_mode_enable;
 	}
 
 	/**
 	 * @brief Assign SSRC to codec
 	 * @note This is unused - all SSRC are assumed to be OPUS for bots at present.
 	 * @param ssrc RTP SSRC
-	 * @param codecType Codec type
+	 * @param codec_type Codec type
 	 */
-	void assign_ssrc_to_codec(uint32_t ssrc, codec codecType);
+	void assign_ssrc_to_codec(uint32_t ssrc, codec codec_type);
 
 	/**
 	 * @brief Get codec for RTP SSRC
@@ -142,34 +142,30 @@ public:
 
 	/**
 	 * @brief Encrypt plaintext opus frames
-	 * @param mediaType media type, should always be audio
+	 * @param this_media_type media type, should always be audio
 	 * @param ssrc RTP SSRC
 	 * @param frame Frame plaintext
-	 * @param encryptedFrame Encrypted frame
-	 * @param bytesWritten Number of bytes written to the encrypted buffer
+	 * @param encrypted_frame Encrypted frame
+	 * @param bytes_written Number of bytes written to the encrypted buffer
 	 * @return Status code for encryption
 	 */
-	encryptor::result_code encrypt(media_type mediaType,
-		uint32_t ssrc,
-		array_view<const uint8_t> frame,
-		array_view<uint8_t> encryptedFrame,
-		size_t* bytesWritten);
+	encryptor::result_code encrypt(media_type this_media_type, uint32_t ssrc, array_view<const uint8_t> frame, array_view<uint8_t> encrypted_frame, size_t* bytes_written);
 
 	/**
 	 * @brief Get maximum possible ciphertext size for a plaintext buffer
-	 * @param mediaType media type, should always be audio for bots
-	 * @param frameSize frame size of plaintext buffer
+	 * @param this_media_type media type, should always be audio for bots
+	 * @param frame_size frame size of plaintext buffer
 	 * @return size of ciphertext buffer to allocate
 	 */
-	size_t get_max_ciphertext_byte_size(media_type mediaType, size_t frameSize);
+	size_t get_max_ciphertext_byte_size(media_type this_media_type, size_t frame_size);
 
 	/**
 	 * @brief Get encryption stats
-	 * @param mediaType media type
+	 * @param this_media_type media type
 	 * @return encryption stats
 	 */
-	encryption_stats get_stats(media_type mediaType) const {
-		return stats_[mediaType];
+	encryption_stats get_stats(media_type this_media_type) const {
+		return stats[this_media_type];
 	}
 
 	/**
@@ -182,7 +178,7 @@ public:
 	 * @param callback Callback to set
 	 */
 	void set_protocol_version_changed_callback(protocol_version_changed_callback callback) {
-		protocolVersionChangedCallback_ = std::move(callback);
+		changed_callback = std::move(callback);
 	}
 
 	/**
@@ -190,7 +186,7 @@ public:
 	 * @return protocol version
 	 */
 	protocol_version get_protocol_version() const {
-		return currentProtocolVersion_;
+		return current_protocol_version;
 	}
 
 private:
@@ -223,26 +219,80 @@ private:
 	 */
 	void update_current_protocol_version(protocol_version version);
 
-	std::atomic_bool passthroughMode_{false};
+	/**
+	 * @brief True if passthrough is enabled
+	 */
+	std::atomic_bool passthrough_mode_enable{false};
 
-	std::mutex keyGenMutex_;
-	std::unique_ptr<key_ratchet_interface> keyRatchet_;
-	std::shared_ptr<cipher_interface> cryptor_;
-	key_generation currentKeyGeneration_{0};
-	truncated_sync_nonce truncatedNonce_{0};
+	/**
+	 * @brief Key generation mutex for thread safety
+	 */
+	std::mutex key_gen_mutex;
 
-	std::mutex frameProcessorsMutex_;
-	std::vector<std::unique_ptr<outbound_frame_processor>> frameProcessors_;
+	/**
+	 * @brief Current encryption (send) ratchet
+	 */
+	std::unique_ptr<key_ratchet_interface> ratchet;
 
-	using SsrcCodecPair = std::pair<uint32_t, codec>;
-	std::vector<SsrcCodecPair> ssrcCodecPairs_;
+	/**
+	 * @brief Current encryption cipher
+	 */
+	std::shared_ptr<cipher_interface> cryptor;
 
-	using TimePoint = std::chrono::time_point<std::chrono::steady_clock>;
-	TimePoint lastStatsTime_{TimePoint::min()};
-	std::array<encryption_stats, 2> stats_;
+	/**
+	 * @brief Current key generation number
+	 */
+	key_generation current_key_generation{0};
 
-	protocol_version_changed_callback protocolVersionChangedCallback_;
-	protocol_version currentProtocolVersion_{max_protocol_version()};
+	/**
+	 * @brief Current truncated sync nonce
+	 */
+	truncated_sync_nonce truncated_nonce{0};
+
+	/**
+	 * @brief Frame processor list mutex
+	 */
+	std::mutex frame_processors_mutex;
+
+	/**
+	 * @brief List of outbound frame processors
+	 */
+	std::vector<std::unique_ptr<outbound_frame_processor>> frame_processors;
+
+	/**
+	 * @brief A pair of 32 bit SSRC and codec in use for that SSRC
+	 */
+	using ssrc_codec_pair = std::pair<uint32_t, codec>;
+
+	/**
+	 * @brief List of codec pairs for SSRCs
+	 */
+	std::vector<ssrc_codec_pair> ssrc_codec_pairs;
+
+	/**
+	 * @brief A chrono time point
+	 */
+	using time_point = std::chrono::time_point<std::chrono::steady_clock>;
+
+	/**
+	 * @brief Last time stats were updated
+	 */
+	time_point last_stats_time{time_point::min()};
+
+	/**
+	 * @brief Stores audio/video encryption stats
+	 */
+	std::array<encryption_stats, 2> stats;
+
+	/**
+	 * @brief Callback for version change, if any
+	 */
+	protocol_version_changed_callback changed_callback;
+
+	/**
+	 * Current protocol version supported
+	 */
+	protocol_version current_protocol_version{max_protocol_version()};
 
 	/**
 	 * @brief DPP Cluster, used for logging
@@ -250,5 +300,4 @@ private:
 	dpp::cluster& creator;
 };
 
-} // namespace dpp::dave
-
+}

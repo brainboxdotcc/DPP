@@ -45,45 +45,50 @@ public:
 	 * @param data data pointer to array
 	 * @param size size of array
 	 */
-	array_view(T* data, size_t size)
-	  : data_(data)
-	  , size_(size)
-	{
+	array_view(T* data, size_t size) : array(data), array_size(size) {
 	}
 
 	/**
 	 * @brief Get size of view
 	 * @return size
 	 */
-	size_t size() const { return size_; }
+	size_t size() const {
+		return array_size;
+	}
 
 	/**
 	 * @brief Get data of view from first element
 	 * @return data
 	 */
-	T* data() const { return data_; }
+	T* data() const {
+		return array;
+	}
 
 	/**
 	 * @brief Get start of view, first element
 	 * @return first element
 	 */
-	T* begin() const { return data_; }
+	T* begin() const {
+		return array;
+	}
 
 	/**
 	 * @brief Get ending iterator of view, 1+last element
 	 * @return end of view
 	 */
-	T* end() const { return data_ + size_; }
+	T* end() const {
+		return array + array_size;
+	}
 
 private:
 	/**
 	 * @brief array data
 	 */
-	T* data_ = nullptr;
+	T* array = nullptr;
 	/**
 	 * @brief Array size
 	 */
-	size_t size_ = 0;
+	size_t array_size = 0;
 };
 
 /**
@@ -111,5 +116,4 @@ inline array_view<T> make_array_view(std::vector<T>& data)
 	return array_view<T>(data.data(), data.size());
 }
 
-} // namespace dpp::dave
-
+}

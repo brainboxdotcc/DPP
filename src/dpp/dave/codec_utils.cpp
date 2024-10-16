@@ -31,98 +31,97 @@
 
 namespace dpp::dave::codec_utils {
 
-unencrypted_frame_header_size BytesCoveringH264PPS(const uint8_t* payload, const uint64_t sizeRemaining)
-{
+unencrypted_frame_header_size bytes_covering_h264_pps(const uint8_t* payload, const uint64_t size_remaining) {
 	// the payload starts with three exponential golomb encoded values
 	// (first_mb_in_slice, sps_id, pps_id)
 	// the depacketizer needs the pps_id unencrypted
 	// and the payload has RBSP encoding that we need to work around
 
-	constexpr uint8_t kEmulationPreventionByte = 0x03;
+	constexpr uint8_t emulation_prevention_byte = 0x03;
 
-	uint64_t payloadBitIndex = 0;
-	auto zeroBitCount = 0;
-	auto parsedExpGolombValues = 0;
+	uint64_t payload_bit_index = 0;
+	auto zero_bit_count = 0;
+	auto parsed_exp_golomb_values = 0;
 
-	while (payloadBitIndex < sizeRemaining * 8 && parsedExpGolombValues < 3) {
-		auto bitIndex = payloadBitIndex % 8;
-		auto byteIndex = payloadBitIndex / 8;
-		auto payloadByte = payload[byteIndex];
+	while (payload_bit_index < size_remaining * 8 && parsed_exp_golomb_values < 3) {
+		auto bit_index = payload_bit_index % 8;
+		auto byte_index = payload_bit_index / 8;
+		auto payload_byte = payload[byte_index];
 
 		// if we're starting a new byte
 		// check if this is an emulation prevention byte
 		// which we skip over
-		if (bitIndex == 0) {
-			if (byteIndex >= 2 && payloadByte == kEmulationPreventionByte &&
-				payload[byteIndex - 1] == 0 && payload[byteIndex - 2] == 0) {
-				payloadBitIndex += 8;
+		if (bit_index == 0) {
+			if (byte_index >= 2 && payload_byte == emulation_prevention_byte && payload[byte_index - 1] == 0 && payload[byte_index - 2] == 0) {
+				payload_bit_index += 8;
 				continue;
 			}
 		}
 
-		if ((payloadByte & (1 << (7 - bitIndex))) == 0) {
+		if ((payload_byte & (1 << (7 - bit_index))) == 0) {
 			// still in the run of leading zero bits
-			++zeroBitCount;
-			++payloadBitIndex;
+			++zero_bit_count;
+			++payload_bit_index;
 
-			if (zeroBitCount >= 32) {
+			if (zero_bit_count >= 32) {
 				throw dpp::length_exception("Unexpectedly large exponential golomb encoded value");
 			}
-		}
-		else {
+		} else {
 			// we hit a one
 			// skip forward the number of bits dictated by the leading number of zeroes
-			parsedExpGolombValues += 1;
-			payloadBitIndex += 1 + zeroBitCount;
-			zeroBitCount = 0;
+			parsed_exp_golomb_values += 1;
+			payload_bit_index += 1 + zero_bit_count;
+			zero_bit_count = 0;
 		}
 	}
 
 	// return the number of bytes that covers the last exp golomb encoded value
-	return (payloadBitIndex / 8) + 1;
+	auto result = (payload_bit_index / 8) + 1;
+	if (result > std::numeric_limits<unencrypted_frame_header_size>::max()) {
+		// bytes covering H264 PPS result cannot fit into unencrypted frame header size
+		return 0;
+	}
+	return static_cast<unencrypted_frame_header_size>(result);
 }
 
-const uint8_t kH26XNaluLongStartCode[] = {0, 0, 0, 1};
-constexpr uint8_t kH26XNaluShortStartSequenceSize = 3;
+const uint8_t nalu_long_start_code[] = {0, 0, 0, 1};
+constexpr uint8_t nalu_short_start_sequence_size = 3;
 
-using IndexStartCodeSizePair = std::pair<size_t, size_t>;
+using index_start_code_size_pair = std::pair<size_t, size_t>;
 
-std::optional<IndexStartCodeSizePair> FindNextH26XNaluIndex(const uint8_t* buffer, const size_t bufferSize, const size_t searchStartIndex = 0)
+std::optional<index_start_code_size_pair> next_h26x_nalu_index(const uint8_t* buffer, const size_t buffer_size, const size_t search_start_index = 0)
 {
-	constexpr uint8_t kH26XStartCodeHighestPossibleValue = 1;
-	constexpr uint8_t kH26XStartCodeEndByteValue = 1;
-	constexpr uint8_t kH26XStartCodeLeadingBytesValue = 0;
+	constexpr uint8_t start_code_highest_possible_value = 1;
+	constexpr uint8_t start_code_end_byte_value = 1;
+	constexpr uint8_t start_code_leading_bytes_value = 0;
 
-	if (bufferSize < kH26XNaluShortStartSequenceSize) {
+	if (buffer_size < nalu_short_start_sequence_size) {
 		return std::nullopt;
 	}
 
 	// look for NAL unit 3 or 4 byte start code
-	for (size_t i = searchStartIndex; i < bufferSize - kH26XNaluShortStartSequenceSize;) {
-		if (buffer[i + 2] > kH26XStartCodeHighestPossibleValue) {
+	for (size_t i = search_start_index; i < buffer_size - nalu_short_start_sequence_size;) {
+		if (buffer[i + 2] > start_code_highest_possible_value) {
 			// third byte is not 0 or 1, can't be a start code
-			i += kH26XNaluShortStartSequenceSize;
-		}
-		else if (buffer[i + 2] == kH26XStartCodeEndByteValue) {
+			i += nalu_short_start_sequence_size;
+		} else if (buffer[i + 2] == start_code_end_byte_value) {
 			// third byte matches the start code end byte, might be a start code sequence
-			if (buffer[i + 1] == kH26XStartCodeLeadingBytesValue &&
-				buffer[i] == kH26XStartCodeLeadingBytesValue) {
+			if (buffer[i + 1] == start_code_leading_bytes_value && buffer[i] == start_code_leading_bytes_value) {
 				// confirmed start sequence {0, 0, 1}
-				auto nalUnitStartIndex = i + kH26XNaluShortStartSequenceSize;
+				auto nal_unit_start_index = i + nalu_short_start_sequence_size;
 
-				if (i >= 1 && buffer[i - 1] == kH26XStartCodeLeadingBytesValue) {
+				if (i >= 1 && buffer[i - 1] == start_code_leading_bytes_value) {
 					// 4 byte start code
-					return std::optional<IndexStartCodeSizePair>({nalUnitStartIndex, 4});
+					return std::optional<index_start_code_size_pair>({nal_unit_start_index, 4});
 				}
 				else {
 					// 3 byte start code
-					return std::optional<IndexStartCodeSizePair>({nalUnitStartIndex, 3});
+					return std::optional<index_start_code_size_pair>({nal_unit_start_index, 3});
 				}
 			}
 
-			i += kH26XNaluShortStartSequenceSize;
-		}
-		else {
+			i += nalu_short_start_sequence_size;
+		} else {
 			// third byte is 0, might be a four byte start code
 			++i;
 		}
@@ -139,8 +138,8 @@ bool process_frame_opus(outbound_frame_processor& processor, array_view<const ui
 
 bool process_frame_vp8(outbound_frame_processor& processor, array_view<const uint8_t> frame)
 {
-	constexpr uint8_t kVP8KeyFrameUnencryptedBytes = 10;
-	constexpr uint8_t kVP8DeltaFrameUnencryptedBytes = 1;
+	constexpr uint8_t key_frame_unencrypted_bytes = 10;
+	constexpr uint8_t delta_frame_unencrypted_bytes = 1;
 
 	// parse the VP8 payload header to determine if it's a key frame
 	// https://datatracker.ietf.org/doc/html/rfc7741#section-4.3
@@ -155,17 +154,15 @@ bool process_frame_vp8(outbound_frame_processor& processor, array_view<const uin
 	// if this is a delta frame the depacketizer only needs the first byte of the payload
 	// header (since that's where the key frame flag is)
 
-	size_t unencryptedHeaderBytes = 0;
+	size_t unencrypted_header_bytes = 0;
 	if ((frame.data()[0] & 0x01) == 0) {
-		unencryptedHeaderBytes = kVP8KeyFrameUnencryptedBytes;
-	}
-	else {
-		unencryptedHeaderBytes = kVP8DeltaFrameUnencryptedBytes;
+		unencrypted_header_bytes = key_frame_unencrypted_bytes;
+	} else {
+		unencrypted_header_bytes = delta_frame_unencrypted_bytes;
 	}
 
-	processor.add_unencrypted_bytes(frame.data(), unencryptedHeaderBytes);
-	processor.add_encrypted_bytes(frame.data() + unencryptedHeaderBytes,
-					  frame.size() - unencryptedHeaderBytes);
+	processor.add_unencrypted_bytes(frame.data(), unencrypted_header_bytes);
+	processor.add_encrypted_bytes(frame.data() + unencrypted_header_bytes, frame.size() - unencrypted_header_bytes);
 	return true;
 }
 
@@ -184,51 +181,46 @@ bool process_frame_h264(outbound_frame_processor& processor, array_view<const ui
 	// src/common_video/h264/h264_common.cc
 	// src/modules/rtp_rtcp/source/video_rtp_depacketizer_h264.cc
 
-	// constexpr uint8_t kH264SBit = 0x80;
-	constexpr uint8_t kH264NalHeaderTypeMask = 0x1F;
-	constexpr uint8_t kH264NalTypeSlice = 1;
-	constexpr uint8_t kH264NalTypeIdr = 5;
-	constexpr uint8_t kH264NalUnitHeaderSize = 1;
+	constexpr uint8_t nal_header_type_mask = 0x1F;
+	constexpr uint8_t nal_type_slice = 1;
+	constexpr uint8_t nal_type_idr = 5;
+	constexpr uint8_t nal_unit_header_size = 1;
 
 	// this frame can be packetized as a STAP-A or a FU-A
 	// so we need to look at the first NAL units to determine how many bytes
 	// the packetizer/depacketizer will need into the payload
-	if (frame.size() < kH26XNaluShortStartSequenceSize + kH264NalUnitHeaderSize) {
+	if (frame.size() < nalu_short_start_sequence_size + nal_unit_header_size) {
 		throw dpp::length_exception("H264 frame is too small to contain a NAL unit");
 	}
 
-	auto naluIndexPair = FindNextH26XNaluIndex(frame.data(), frame.size());
-	while (naluIndexPair && naluIndexPair->first < frame.size() - 1) {
-		auto [nalUnitStartIndex, startCodeSize] = *naluIndexPair;
+	auto nalu_index_pair = next_h26x_nalu_index(frame.data(), frame.size());
+	while (nalu_index_pair && nalu_index_pair->first < frame.size() - 1) {
+		auto [nal_unit_start_index, start_code_size] = *nalu_index_pair;
 
-		auto nalType = frame.data()[nalUnitStartIndex] & kH264NalHeaderTypeMask;
+		auto nal_type = frame.data()[nal_unit_start_index] & nal_header_type_mask;
 
 		// copy the start code and then the NAL unit
 
 		// Because WebRTC will convert them all start codes to 4-byte on the receiver side
 		// always write a long start code and then the NAL unit
-		processor.add_unencrypted_bytes(kH26XNaluLongStartCode, sizeof(kH26XNaluLongStartCode));
+		processor.add_unencrypted_bytes(nalu_long_start_code, sizeof(nalu_long_start_code));
 
-		auto nextNaluIndexPair = FindNextH26XNaluIndex(frame.data(), frame.size(), nalUnitStartIndex);
-		auto nextNaluStart = nextNaluIndexPair.has_value() ? nextNaluIndexPair->first - nextNaluIndexPair->second : frame.size();
+		auto next_nalu_index_pair = next_h26x_nalu_index(frame.data(), frame.size(), nal_unit_start_index);
+		auto next_nalu_start = next_nalu_index_pair.has_value() ? next_nalu_index_pair->first - next_nalu_index_pair->second : frame.size();
 
-		if (nalType == kH264NalTypeSlice || nalType == kH264NalTypeIdr) {
+		if (nal_type == nal_type_slice || nal_type == nal_type_idr) {
 			// once we've hit a slice or an IDR
 			// we just need to cover getting to the PPS ID
-			auto nalUnitPayloadStart = nalUnitStartIndex + kH264NalUnitHeaderSize;
-			auto nalUnitPPSBytes = BytesCoveringH264PPS(frame.data() + nalUnitPayloadStart, frame.size() - nalUnitPayloadStart);
+			auto nal_unit_payload_start = nal_unit_start_index + nal_unit_header_size;
+			auto nal_unit_pps_bytes = bytes_covering_h264_pps(frame.data() + nal_unit_payload_start, frame.size() - nal_unit_payload_start);
 
-		processor.add_unencrypted_bytes(frame.data() + nalUnitStartIndex, kH264NalUnitHeaderSize + nalUnitPPSBytes);
-		processor.add_encrypted_bytes(
-			frame.data() + nalUnitStartIndex + kH264NalUnitHeaderSize + nalUnitPPSBytes,
-			nextNaluStart - nalUnitStartIndex - kH264NalUnitHeaderSize - nalUnitPPSBytes);
-		}
-		else {
+		processor.add_unencrypted_bytes(frame.data() + nal_unit_start_index, nal_unit_header_size + nal_unit_pps_bytes);
+		processor.add_encrypted_bytes(frame.data() + nal_unit_start_index + nal_unit_header_size + nal_unit_pps_bytes, next_nalu_start - nal_unit_start_index - nal_unit_header_size - nal_unit_pps_bytes);
+		} else {
 			// copy the whole NAL unit
-		processor.add_unencrypted_bytes(frame.data() + nalUnitStartIndex, nextNaluStart - nalUnitStartIndex);
+			processor.add_unencrypted_bytes(frame.data() + nal_unit_start_index, next_nalu_start - nal_unit_start_index);
 		}
-
-		naluIndexPair = nextNaluIndexPair;
+		nalu_index_pair = next_nalu_index_pair;
 	}
 
 	return true;
@@ -241,43 +233,43 @@ bool process_frame_h265(outbound_frame_processor& processor, array_view<const ui
 	// src/common_video/h265/h265_common.cc
 	// src/modules/rtp_rtcp/source/video_rtp_depacketizer_h265.cc
 
-	constexpr uint8_t kH265NalHeaderTypeMask = 0x7E;
-	constexpr uint8_t kH265NalTypeVclCutoff = 32;
-	constexpr uint8_t kH265NalUnitHeaderSize = 2;
+	constexpr uint8_t nal_header_type_mask = 0x7E;
+	constexpr uint8_t nal_type_vcl_cutoff = 32;
+	constexpr uint8_t nal_unit_header_size = 2;
 
 	// this frame can be packetized as a STAP-A or a FU-A
 	// so we need to look at the first NAL units to determine how many bytes
 	// the packetizer/depacketizer will need into the payload
-	if (frame.size() < kH26XNaluShortStartSequenceSize + kH265NalUnitHeaderSize) {
+	if (frame.size() < nalu_short_start_sequence_size + nal_unit_header_size) {
 		throw dpp::length_exception("H265 frame is too small to contain a NAL unit");
 	}
 
 	// look for NAL unit 3 or 4 byte start code
-	auto naluIndexPair = FindNextH26XNaluIndex(frame.data(), frame.size());
-	while (naluIndexPair && naluIndexPair->first < frame.size() - 1) {
-		auto [nalUnitStartIndex, startCodeSize] = *naluIndexPair;
+	auto nalu_index = next_h26x_nalu_index(frame.data(), frame.size());
+	while (nalu_index && nalu_index->first < frame.size() - 1) {
+		auto [nal_unit_start_index, start_code_size] = *nalu_index;
 
-		uint8_t nalType = (frame.data()[nalUnitStartIndex] & kH265NalHeaderTypeMask) >> 1;
+		uint8_t nal_type = (frame.data()[nal_unit_start_index] & nal_header_type_mask) >> 1;
 
 		// copy the start code and then the NAL unit
 
 		// Because WebRTC will convert them all start codes to 4-byte on the receiver side
 		// always write a long start code and then the NAL unit
-		processor.add_unencrypted_bytes(kH26XNaluLongStartCode, sizeof(kH26XNaluLongStartCode));
+		processor.add_unencrypted_bytes(nalu_long_start_code, sizeof(nalu_long_start_code));
 
-		auto nextNaluIndexPair = FindNextH26XNaluIndex(frame.data(), frame.size(), nalUnitStartIndex);
-		auto nextNaluStart = nextNaluIndexPair.has_value() ? nextNaluIndexPair->first - nextNaluIndexPair->second : frame.size();
+		auto next_nalu_index_pair = next_h26x_nalu_index(frame.data(), frame.size(), nal_unit_start_index);
+		auto next_nalu_start = next_nalu_index_pair.has_value() ? next_nalu_index_pair->first - next_nalu_index_pair->second : frame.size();
 
-		if (nalType < kH265NalTypeVclCutoff) {
+		if (nal_type < nal_type_vcl_cutoff) {
 			// found a VCL NAL, encrypt the payload only
-			processor.add_unencrypted_bytes(frame.data() + nalUnitStartIndex, kH265NalUnitHeaderSize);
-			processor.add_encrypted_bytes(frame.data() + nalUnitStartIndex + kH265NalUnitHeaderSize, nextNaluStart - nalUnitStartIndex - kH265NalUnitHeaderSize);
+			processor.add_unencrypted_bytes(frame.data() + nal_unit_start_index, nal_unit_header_size);
+			processor.add_encrypted_bytes(frame.data() + nal_unit_start_index + nal_unit_header_size, next_nalu_start - nal_unit_start_index - nal_unit_header_size);
 		} else {
 			// copy the whole NAL unit
-			processor.add_unencrypted_bytes(frame.data() + nalUnitStartIndex, nextNaluStart - nalUnitStartIndex);
+			processor.add_unencrypted_bytes(frame.data() + nal_unit_start_index, next_nalu_start - nal_unit_start_index);
 		}
 
-		naluIndexPair = nextNaluIndexPair;
+		nalu_index = next_nalu_index_pair;
 	}
 
 	return true;
@@ -285,28 +277,28 @@ bool process_frame_h265(outbound_frame_processor& processor, array_view<const ui
 
 bool process_frame_av1(outbound_frame_processor& processor, array_view<const uint8_t> frame)
 {
-	constexpr uint8_t kAv1ObuHeaderHasExtensionMask = 0b0'0000'100;
-	constexpr uint8_t kAv1ObuHeaderHasSizeMask = 0b0'0000'010;
-	constexpr uint8_t kAv1ObuHeaderTypeMask = 0b0'1111'000;
-	constexpr uint8_t kObuTypeTemporalDelimiter = 2;
-	constexpr uint8_t kObuTypeTileList = 8;
-	constexpr uint8_t kObuTypePadding = 15;
-	constexpr uint8_t kObuExtensionSizeBytes = 1;
+	constexpr uint8_t obu_header_has_extension_mask = 0b0'0000'100;
+	constexpr uint8_t obu_header_has_size_mask = 0b0'0000'010;
+	constexpr uint8_t obu_header_type_mask = 0b0'1111'000;
+	constexpr uint8_t obu_type_temporal_delimiter = 2;
+	constexpr uint8_t obu_type_tile_list = 8;
+	constexpr uint8_t obu_type_padding = 15;
+	constexpr uint8_t obu_extension_size_bytes = 1;
 
 	size_t i = 0;
 	while (i < frame.size()) {
 		// Read the OBU header.
-		size_t obuHeaderIndex = i;
-		uint8_t obuHeader = frame.data()[obuHeaderIndex];
-		i += sizeof(obuHeader);
+		size_t obu_header_index = i;
+		uint8_t obu_header = frame.data()[obu_header_index];
+		i += sizeof(obu_header);
 
-		bool obuHasExtension = obuHeader & kAv1ObuHeaderHasExtensionMask;
-		bool obuHasSize = obuHeader & kAv1ObuHeaderHasSizeMask;
-		int obuType = (obuHeader & kAv1ObuHeaderTypeMask) >> 3;
+		bool obu_has_extension = obu_header & obu_header_has_extension_mask;
+		bool obu_has_size = obu_header & obu_header_has_size_mask;
+		int obu_type = (obu_header & obu_header_type_mask) >> 3;
 
-		if (obuHasExtension) {
+		if (obu_has_extension) {
 			// Skip extension byte
-			i += kObuExtensionSizeBytes;
+			i += obu_extension_size_bytes;
 		}
 
 		if (i >= frame.size()) {
@@ -314,12 +306,12 @@ bool process_frame_av1(outbound_frame_processor& processor, array_view<const uin
 			throw dpp::logic_exception("Malformed AV1 frame: header overflows frame");
 		}
 
-		size_t obuPayloadSize = 0;
-		if (obuHasSize) {
+		size_t obu_payload_size = 0;
+		if (obu_has_size) {
 			// Read payload size
 			const uint8_t* start = frame.data() + i;
 			const uint8_t* ptr = start;
-			obuPayloadSize = read_leb128(ptr, frame.end());
+			obu_payload_size = read_leb128(ptr, frame.end());
 			if (!ptr) {
 				// Malformed frame
 				throw dpp::logic_exception("Malformed AV1 frame: invalid LEB128 size");
@@ -328,51 +320,50 @@ bool process_frame_av1(outbound_frame_processor& processor, array_view<const uin
 		}
 		else {
 			// If the size is not present, the OBU extends to the end of the frame.
-			obuPayloadSize = frame.size() - i;
+			obu_payload_size = frame.size() - i;
 		}
 
-		const auto obuPayloadIndex = i;
+		const auto obu_payload_index = i;
 
-		if (i + obuPayloadSize > frame.size()) {
+		if (i + obu_payload_size > frame.size()) {
 			// Malformed frame
 			throw dpp::logic_exception("Malformed AV1 frame: payload overflows frame");
 		}
 
-		i += obuPayloadSize;
+		i += obu_payload_size;
 
 		// We only copy the OBUs that will not get dropped by the packetizer
-		if (obuType != kObuTypeTemporalDelimiter && obuType != kObuTypeTileList &&
-			obuType != kObuTypePadding) {
+		if (obu_type != obu_type_temporal_delimiter && obu_type != obu_type_tile_list && obu_type != obu_type_padding) {
 			// if this is the last OBU, we may need to flip the "has size" bit
 			// which allows us to append necessary protocol data to the frame
-			bool rewrittenWithoutSize = false;
+			bool rewritten_without_size = false;
 
-			if (i == frame.size() && obuHasSize) {
+			if (i == frame.size() && obu_has_size) {
 				// Flip the "has size" bit
-				obuHeader &= ~kAv1ObuHeaderHasSizeMask;
-				rewrittenWithoutSize = true;
+				obu_header &= ~obu_header_has_size_mask;
+				rewritten_without_size = true;
 			}
 
 			// write the OBU header unencrypted
-		processor.add_unencrypted_bytes(&obuHeader, sizeof(obuHeader));
-			if (obuHasExtension) {
+			processor.add_unencrypted_bytes(&obu_header, sizeof(obu_header));
+			if (obu_has_extension) {
 				// write the extension byte unencrypted
-				processor.add_unencrypted_bytes(frame.data() + obuHeaderIndex + sizeof(obuHeader), kObuExtensionSizeBytes);
+				processor.add_unencrypted_bytes(frame.data() + obu_header_index + sizeof(obu_header), obu_extension_size_bytes);
 			}
 
 			// write the OBU payload size unencrypted if it was present and we didn't rewrite
 			// without it
-			if (obuHasSize && !rewrittenWithoutSize) {
+			if (obu_has_size && !rewritten_without_size) {
 				// The AMD AV1 encoder may pad LEB128 encoded sizes with a zero byte which the
 				// webrtc packetizer removes. To prevent the packetizer from changing the frame,
 				// we sanitize the size by re-writing it ourselves
 				uint8_t leb128Buffer[LEB128_MAX_SIZE];
-				size_t additionalBytesToWrite = write_leb128(obuPayloadSize, leb128Buffer);
+				size_t additionalBytesToWrite = write_leb128(obu_payload_size, leb128Buffer);
 				processor.add_unencrypted_bytes(leb128Buffer, additionalBytesToWrite);
 			}
 
 			// add the OBU payload, encrypted
-			processor.add_encrypted_bytes(frame.data() + obuPayloadIndex, obuPayloadSize);
+			processor.add_encrypted_bytes(frame.data() + obu_payload_index, obu_payload_size);
 		}
 	}
 
@@ -386,42 +377,42 @@ bool validate_encrypted_frame(outbound_frame_processor& processor, array_view<ui
 		return true;
 	}
 
-	constexpr size_t Padding = kH26XNaluShortStartSequenceSize - 1;
+	constexpr size_t padding = nalu_short_start_sequence_size - 1;
 
-	const auto& unencryptedRanges = processor.get_unencrypted_ranges();
+	const auto& unencrypted_ranges = processor.get_unencrypted_ranges();
 
 	// H264 and H265 ciphertexts cannot contain a 3 or 4 byte start code {0, 0, 1}
 	// otherwise the packetizer gets confused
 	// and the frame we get on the decryption side will be shifted and fail to decrypt
-	size_t encryptedSectionStart = 0;
-	for (auto& range : unencryptedRanges) {
-		if (encryptedSectionStart == range.offset) {
-			encryptedSectionStart += range.size;
+	size_t encrypted_section_start = 0;
+	for (auto& range : unencrypted_ranges) {
+		if (encrypted_section_start == range.offset) {
+			encrypted_section_start += range.size;
 			continue;
 		}
 
-		auto start = encryptedSectionStart - std::min(encryptedSectionStart, size_t{Padding});
-		auto end = std::min(range.offset + Padding, frame.size());
-		if (FindNextH26XNaluIndex(frame.data() + start, end - start)) {
+		auto start = encrypted_section_start - std::min(encrypted_section_start, size_t{padding});
+		auto end = std::min(range.offset + padding, frame.size());
+		if (next_h26x_nalu_index(frame.data() + start, end - start)) {
 			return false;
 		}
 
-		encryptedSectionStart = range.offset + range.size;
+		encrypted_section_start = range.offset + range.size;
 	}
 
-	if (encryptedSectionStart == frame.size()) {
+	if (encrypted_section_start == frame.size()) {
 		return true;
 	}
 
-	auto start = encryptedSectionStart - std::min(encryptedSectionStart, size_t{Padding});
+	auto start = encrypted_section_start - std::min(encrypted_section_start, size_t{padding});
 	auto end = frame.size();
-	if (FindNextH26XNaluIndex(frame.data() + start, end - start)) {
+	if (next_h26x_nalu_index(frame.data() + start, end - start)) {
 		return false;
 	}
 
 	return true;
 }
 
-} // namespace dpp::dave::codec_utils
+}
 
 

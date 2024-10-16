@@ -77,16 +77,16 @@ public:
 	 * @brief Constructor
 	 * @param cl Creating cluster
 	 * @param clock chrono clock
-	 * @param keyRatchet key ratchet for cipher
+	 * @param key_ratchet key ratchet for cipher
 	 */
-	aead_cipher_manager(dpp::cluster& cl, const clock_interface& clock, std::unique_ptr<key_ratchet_interface> keyRatchet);
+	aead_cipher_manager(dpp::cluster& cl, const clock_interface& clock, std::unique_ptr<key_ratchet_interface> key_ratchet);
 
 	/**
 	 * @brief Update cipher expiry
 	 * @param expiry expiry time
 	 */
 	void update_expiry(time_point expiry) {
-		ratchetExpiry_ = expiry;
+		ratchet_expiry = expiry;
 	}
 
 	/**
@@ -94,7 +94,7 @@ public:
 	 * @return true if expired
 	 */
 	bool is_expired() const {
-		return clock_.now() > ratchetExpiry_;
+		return current_clock.now() > ratchet_expiry;
 	}
 
 	/**
@@ -149,17 +149,50 @@ private:
 	 */
 	void cleanup_expired_ciphers();
 
-	const clock_interface& clock_;
-	std::unique_ptr<key_ratchet_interface> keyRatchet_;
-	std::unordered_map<key_generation, expiring_cipher> cryptors_;
+	/**
+	 * @brief chrono clock
+	 */
+	const clock_interface& current_clock;
 
-	time_point ratchetCreation_;
-	time_point ratchetExpiry_;
-	key_generation oldestGeneration_{0};
-	key_generation newestGeneration_{0};
+	/**
+	 * @brief key ratchet for cryptor
+	 */
+	std::unique_ptr<key_ratchet_interface> current_key_ratchet;
 
-	std::optional<big_nonce> newestProcessedNonce_;
-	std::deque<big_nonce> missingNonces_;
+	/**
+	 * @brief Cryptor for each generation with expiry
+	 */
+	std::unordered_map<key_generation, expiring_cipher> cryptor_generations;
+
+	/**
+	 * @brief Time ratchet was created
+	 */
+	time_point ratchet_creation;
+
+	/**
+	 * @brief Time ratchet expired
+	 */
+	time_point ratchet_expiry;
+
+	/**
+	 * @brief Oldest generation for ratchet
+	 */
+	key_generation oldest_generation{0};
+
+	/**
+	 * @brief Newest generation for ratchet
+	 */
+	key_generation newest_generation{0};
+
+	/**
+	 * @brief Newest nonce
+	 */
+	std::optional<big_nonce> newest_processed_nonce;
+
+	/**
+	 * @brief List of missing nonces from sequence
+	 */
+	std::deque<big_nonce> missing_nonces;
 
 	/**
 	 * @brief DPP Cluster, used for logging

@@ -28,11 +28,10 @@
 
 namespace dpp::dave {
 
-std::unique_ptr<cipher_interface> create_cipher(dpp::cluster& cl, const encryption_key& encryptionKey)
+std::unique_ptr<cipher_interface> create_cipher(dpp::cluster& cl, const encryption_key& key)
 {
-	auto cipher = std::make_unique<openssl_aead_cipher>(cl, encryptionKey);
+	auto cipher = std::make_unique<openssl_aead_cipher>(cl, key);
 	return cipher->is_valid() ? std::move(cipher) : nullptr;
 }
 
-} // namespace dpp::dave
-
+}
