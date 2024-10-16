@@ -247,32 +247,99 @@ private:
 	 */
 	inline static const std::string USER_MEDIA_KEY_BASE_LABEL = "Discord Secure Frames v0";
 
+	/**
+	 * @brief DAVE protocol version for the session
+	 */
 	protocol_version session_protocol_version;
+
+	/**
+	 * @brief Session group ID (voice channel id)
+	 */
 	std::vector<uint8_t> session_group_id;
+
+	/**
+	 * @brief Signing key id
+	 */
 	std::string signing_key_id;
+
+	/**
+	 * @brief The bot's user snowflake ID
+	 */
 	std::string bot_user_id;
+
+	/**
+	 * @brief The bot's key pair context
+	 */
 	key_pair_context_type key_pair_context{nullptr};
 
+	/**
+	 * @brief Our leaf node in the ratchet tree
+	 */
 	std::unique_ptr<::mlspp::LeafNode> self_leaf_node;
+
+	/**
+	 * @brief The bots signature private key
+	 */
 	std::shared_ptr<::mlspp::SignaturePrivateKey> signature_private_key;
+
+	/**
+	 * @brief HPKE private key
+	 */
 	std::unique_ptr<::mlspp::HPKEPrivateKey> hpke_private_key;
 
+	/**
+	 * @brief Private key for join initialisation
+	 */
 	std::unique_ptr<::mlspp::HPKEPrivateKey> join_init_private_key;
+
+	/**
+	 * @brief Join key package
+	 */
 	std::unique_ptr<::mlspp::KeyPackage> join_key_package;
 
+	/**
+	 * @brief MLS External sender (the discord voice gateway server)
+	 */
 	std::unique_ptr<::mlspp::ExternalSender> mls_external_sender;
 
+	/**
+	 * @brief Pending MLS group state
+	 */
 	std::unique_ptr<::mlspp::State> pending_group_state;
+
+	/**
+	 * @brief Pending MLS group commit
+	 */
 	std::unique_ptr<::mlspp::MLSMessage> pending_group_commit;
 
+	/**
+	 * @brief Outbound cached group state
+	 */
 	std::unique_ptr<::mlspp::State> outbound_cached_group_state;
 
+	/**
+	 * @brief Current MLS state
+	 */
 	std::unique_ptr<::mlspp::State> current_state;
+
+	/**
+	 * @brief Participant roster, all users who are in the VC with dave enabled
+	 */
 	roster_map roster;
 
+	/**
+	 * @brief Current state containing proposals
+	 */
 	std::unique_ptr<::mlspp::State> state_with_proposals;
+
+	/**
+	 * @brief Queue of proposals to process
+	 */
 	std::list<queued_proposal> proposal_queue;
 
+	/**
+	 * @brief Function to call on failure, if any
+	 */
 	mls_failure_callback failure_callback{};
 
 	/**

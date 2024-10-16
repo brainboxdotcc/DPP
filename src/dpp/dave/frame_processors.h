@@ -183,13 +183,44 @@ private:
 	 */
 	void add_ciphertext_bytes(const uint8_t* data, size_t size);
 
+	/**
+	 * @brief True if frames are encrypted
+	 */
 	bool encrypted{false};
+
+	/**
+	 * @brief Original size
+	 */
 	size_t original_size{0};
+
+	/**
+	 * @brief AEAD tag
+	 */
 	array_view<const uint8_t> tag;
+
+	/**
+	 * @brief Truncated nonce
+	 */
 	truncated_sync_nonce truncated_nonce;
+
+	/**
+	 * @brief Unencrypted parts of the frames
+	 */
 	ranges unencrypted_ranges;
+
+	/**
+	 * @brief additional authenticated data
+	 */
 	std::vector<uint8_t> authenticated;
+
+	/**
+	 * @brief Ciphertext
+	 */
 	std::vector<uint8_t> ciphertext;
+
+	/**
+	 * @brief Plaintext
+	 */
 	std::vector<uint8_t> plaintext;
 
 	/**
@@ -283,11 +314,34 @@ public:
 	void add_encrypted_bytes(const uint8_t* bytes, size_t size);
 
 private:
+	/**
+	 * @brief Codec used to decrypt
+	 */
 	codec frame_codec{codec::cd_unknown};
+
+	/**
+	 * @brief Frame index
+	 */
 	size_t frame_index{0};
+
+	/**
+	 * @brief Unencrypted bytes
+	 */
 	std::vector<uint8_t> unencrypted_bytes;
+
+	/**
+	 * @brief Encrypted bytes
+	 */
 	std::vector<uint8_t> encrypted_bytes;
+
+	/**
+	 * @brief Ciphertext bytes
+	 */
 	std::vector<uint8_t> ciphertext_bytes;
+
+	/**
+	 * @brief Unencrypted ranges that need to be kept plaintext to allow for RTP routing
+	 */
 	ranges unencrypted_ranges;
 
 	/**

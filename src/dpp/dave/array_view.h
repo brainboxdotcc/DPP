@@ -116,5 +116,4 @@ inline array_view<T> make_array_view(std::vector<T>& data)
 	return array_view<T>(data.data(), data.size());
 }
 
-} // namespace dpp::dave
-
+}

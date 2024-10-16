@@ -82,4 +82,4 @@ namespace dpp::dave::mls {
  */
 ::mlspp::ExtensionList group_extensions_for_protocol_version(protocol_version version, const ::mlspp::ExternalSender& external_sender) noexcept;
 
-} // namespace dpp::dave::mls
+}
