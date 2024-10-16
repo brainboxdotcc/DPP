@@ -318,10 +318,10 @@ void ssl_client::connect()
 		/* Resolve hostname to IP */
 		int err = 0;
 		const dns_cache_entry* addr = resolve_hostname(hostname, port);
-		sfd = ::socket(addr->addr.ai_family, addr->addr.ai_socktype, addr->addr.ai_protocol);
+		sfd = addr->make_connecting_socket();
 		if (sfd == ERROR_STATUS) {
 			err = errno;
-		} else if (connect_with_timeout(sfd, (sockaddr*)&addr->ai_addr, (int)addr->addr.ai_addrlen, SOCKET_OP_TIMEOUT) != 0) {
+		} else if (connect_with_timeout(sfd, (sockaddr*)&addr->ai_addr, addr->size(), SOCKET_OP_TIMEOUT) != 0) {
 			close_socket(sfd);
 			sfd = ERROR_STATUS;
 		}

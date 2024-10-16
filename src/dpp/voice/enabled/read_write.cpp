@@ -43,26 +43,23 @@ dpp::socket discord_voice_client::want_read() {
 
 
 void discord_voice_client::send(const char* packet, size_t len, uint64_t duration) {
-	std::lock_guard<std::mutex> lock(this->stream_mutex);
 	voice_out_packet frame;
-	frame.packet = std::string(packet, len);
+	frame.packet.assign(packet, packet + len);
 	frame.duration = duration;
-	outbuf.emplace_back(frame);
+	{
+		std::lock_guard<std::mutex> lock(this->stream_mutex);
+		outbuf.emplace_back(frame);
+	}
 }
 
 int discord_voice_client::udp_send(const char* data, size_t length) {
-	sockaddr_in servaddr{};
-	memset(&servaddr, 0, sizeof(servaddr));
-	servaddr.sin_family = AF_INET;
-	servaddr.sin_port = htons(this->port);
-	servaddr.sin_addr.s_addr = inet_addr(this->ip.c_str());
 	return static_cast<int>(sendto(
 		this->fd,
 		data,
 		static_cast<int>(length),
 		0,
-		reinterpret_cast<const sockaddr*>(&servaddr),
-		static_cast<int>(sizeof(sockaddr_in))
+		destination.get_socket_address(),
+		destination.size()
 	));
 }
 

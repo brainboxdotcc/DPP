@@ -31,6 +31,8 @@
 #include <sys/types.h>
 #include <string>
 #include <unordered_map>
+#include <cstring>
+#include <dpp/socket.h>
 
 namespace dpp {
 
@@ -57,6 +59,23 @@ namespace dpp {
 		 * @brief Time at which this cache entry is invalidated
 		 */
 		time_t expire_timestamp;
+
+		/**
+		 * @brief Get address length
+		 * @return address length
+		 */
+		inline int size() const {
+			return static_cast<int>(addr.ai_addrlen);
+		}
+
+		/**
+		 * @brief Allocate a socket file descriptor for the given dns address
+		 * @return File descriptor ready for calling connect(), or INVALID_SOCKET
+		 * on failure.
+		 */
+		inline socket make_connecting_socket() const {
+			return ::socket(addr.ai_family, addr.ai_socktype, addr.ai_protocol);
+		}
 	};
 
 	/**

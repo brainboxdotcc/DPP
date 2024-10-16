@@ -585,6 +585,13 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	dave_version_t dave_version;
 
 	/**
+	 * @brief Destination address for where packets go
+	 * on the UDP socket
+	 */
+	address_t destination{};
+
+
+	/**
 	 * @brief Send data to UDP socket immediately.
 	 * 
 	 * @param data data to send
