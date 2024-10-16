@@ -18,14 +18,12 @@
 
 add_compile_definitions(HAVE_VOICE)
 
-file(GLOB THE_SOURCES "${DPP_ROOT_PATH}/src/dpp/events/*.cpp" "${modules_dir}/dpp/voice/enabled/*.cpp" "${DPP_ROOT_PATH}/dpp/dave/*.cpp" "${DPP_ROOT_PATH}/src/dpp/cluster/*.cpp" "${DPP_ROOT_PATH}/src/dpp/*.cpp" "${DPP_ROOT_PATH}/src/dpp/*.rc")
+file(GLOB THE_SOURCES "${DPP_ROOT_PATH}/src/dpp/events/*.cpp" "${DPP_ROOT_PATH}/src/dpp/voice/enabled/*.cpp" "${DPP_ROOT_PATH}/src/dpp/dave/*.cpp" "${DPP_ROOT_PATH}/src/dpp/cluster/*.cpp" "${DPP_ROOT_PATH}/src/dpp/*.cpp" "${DPP_ROOT_PATH}/src/dpp/*.rc")
 
 set(LIB_NAME "${PROJECT_NAME}")
 
-if(WIN32)
-	add_library("${LIB_NAME}" SHARED "${THE_SOURCES}")
-else()
-	add_library("${LIB_NAME}" STATIC "${THE_SOURCES}")
+add_library("${LIB_NAME}" SHARED "${THE_SOURCES}")
+if(NOT WIN32)
 	find_package(Threads REQUIRED)
 endif()
 
@@ -51,9 +49,10 @@ if(WIN32)
 	add_compile_definitions(WIN32_LEAN_AND_MEAN)
 	add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
 	add_compile_definitions(_CRT_NONSTDC_NO_DEPRECATE)
-	# Fake an ssl version number to satisfy MLSPP
-	set(OPENSSL_VERSION "1.1.1f")
 endif()
+
+# Fake an ssl version number to satisfy MLSPP
+set(OPENSSL_VERSION "1.1.1f")
 
 target_compile_options(
 	"${LIB_NAME}"
@@ -62,8 +61,8 @@ target_compile_options(
 	PRIVATE
 		"$<$<PLATFORM_ID:Windows>:$<$<CONFIG:Debug>:/sdl;/Od;/DEBUG;/MP;/DFD_SETSIZE=1024>>"
 		"$<$<PLATFORM_ID:Windows>:$<$<CONFIG:Release>:/O2;/Oi;/Oy;/GL;/Gy;/sdl;/MP;/DFD_SETSIZE=1024>>"
-		"$<$<PLATFORM_ID:Linux>:$<$<CONFIG:Debug>:-fPIC;-Wall;-Wempty-body;-Wno-psabi;-Wunknown-pragmas;-Wignored-qualifiers;-Wimplicit-fallthrough;-Wmissing-field-initializers;-Wsign-compare;-Wtype-limits;-Wuninitialized;-Wshift-negative-value;-pthread;-g;-Og;-fPIC>>"
-		"$<$<PLATFORM_ID:Linux>:$<$<CONFIG:Release>:-fPIC;-Wall;-Wempty-body;-Wno-psabi;-Wunknown-pragmas;-Wignored-qualifiers;-Wimplicit-fallthrough;-Wmissing-field-initializers;-Wsign-compare;-Wtype-limits;-Wuninitialized;-Wshift-negative-value;-pthread;-O3;-fPIC>>"
+		"$<$<PLATFORM_ID:Linux>:$<$<CONFIG:Debug>:-fPIC;-Wall;-Wempty-body;-Wno-deprecated-declarations;-Wno-psabi;-Wunknown-pragmas;-Wignored-qualifiers;-Wimplicit-fallthrough;-Wmissing-field-initializers;-Wsign-compare;-Wtype-limits;-Wuninitialized;-Wshift-negative-value;-pthread;-g;-Og;-fPIC>>"
+		"$<$<PLATFORM_ID:Linux>:$<$<CONFIG:Release>:-fPIC;-Wall;-Wempty-body;-Wno-deprecated-declarations;-Wno-psabi;-Wunknown-pragmas;-Wignored-qualifiers;-Wimplicit-fallthrough;-Wmissing-field-initializers;-Wsign-compare;-Wtype-limits;-Wuninitialized;-Wshift-negative-value;-pthread;-O3;-fPIC>>"
 		"${AVX_FLAG}"
 )
 
@@ -82,6 +81,7 @@ target_include_directories(
 	"$<INSTALL_INTERFACE:include>"
 )
 
+find_package(OpenSSL REQUIRED)
 add_subdirectory("${DPP_ROOT_PATH}/mlspp" "mlspp")
 include_directories("${DPP_ROOT_PATH}/mlspp/include")
 include_directories("${DPP_ROOT_PATH}/mlspp/lib/bytes/include")
@@ -99,8 +99,12 @@ target_link_options(
 )
 
 find_package(nlohmann_json CONFIG REQUIRED)
-find_package(OpenSSL REQUIRED)
-find_package(Opus CONFIG REQUIRED)
+if (DPP_TEST_VCPKG)
+	include("${CMAKE_CURRENT_SOURCE_DIR}/../cmake/FindOpus.cmake")
+	find_package(Opus REQUIRED)
+else()
+	find_package(Opus CONFIG REQUIRED)
+endif()
 find_package(ZLIB REQUIRED)
 
 target_link_libraries(
