@@ -70,6 +70,7 @@
 #include <dpp/sslclient.h>
 #include <dpp/exception.h>
 #include <dpp/utility.h>
+#include <dpp/stringops.h>
 #include <dpp/dns.h>
 
 /* Maximum allowed time in milliseconds for socket read/write timeouts and connect() */
@@ -319,9 +320,10 @@ void ssl_client::connect()
 		int err = 0;
 		const dns_cache_entry* addr = resolve_hostname(hostname, port);
 		sfd = addr->make_connecting_socket();
+		address_t destination = addr->get_connecting_address(from_string<uint16_t>(this->port, std::dec));
 		if (sfd == ERROR_STATUS) {
 			err = errno;
-		} else if (connect_with_timeout(sfd, (sockaddr*)&addr->ai_addr, addr->size(), SOCKET_OP_TIMEOUT) != 0) {
+		} else if (connect_with_timeout(sfd, destination.get_socket_address(), destination.size(), SOCKET_OP_TIMEOUT) != 0) {
 			close_socket(sfd);
 			sfd = ERROR_STATUS;
 		}
