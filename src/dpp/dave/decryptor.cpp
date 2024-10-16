@@ -44,7 +44,7 @@ void decryptor::transition_to_key_ratchet(std::unique_ptr<key_ratchet_interface>
 	update_cryptor_manager_expiry(transition_expiry);
 
 	if (key_ratchet) {
-		cryptor_managers.emplace_back(creator, clock_, std::move(key_ratchet));
+		cryptor_managers.emplace_back(creator, current_clock, std::move(key_ratchet));
 	}
 }
 
@@ -55,7 +55,7 @@ void decryptor::transition_to_passthrough_mode(bool passthrough_mode, duration t
 	}
 	else {
 		// Update the pass through mode expiry
-		auto max_expiry = clock_.now() + transition_expiry;
+		auto max_expiry = current_clock.now() + transition_expiry;
 		allow_pass_through_until = std::min(allow_pass_through_until, max_expiry);
 	}
 }
@@ -67,7 +67,7 @@ size_t decryptor::decrypt(media_type this_media_type, array_view<const uint8_t> 
 		return 0;
 	}
 
-	auto start = clock_.now();
+	auto start = current_clock.now();
 
 	auto local_frame = get_or_create_frame_processor();
 	scope_exit cleanup([&] { return_frame_processor(std::move(local_frame)); });
@@ -133,7 +133,7 @@ size_t decryptor::decrypt(media_type this_media_type, array_view<const uint8_t> 
 		);
 	}
 
-	auto end = clock_.now();
+	auto end = current_clock.now();
 	stats[this_media_type].decrypt_duration += std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
 
 	return bytes_written;
@@ -186,7 +186,7 @@ size_t decryptor::get_max_plaintext_byte_size(media_type this_media_type, size_t
 
 void decryptor::update_cryptor_manager_expiry(duration expiry)
 {
-	auto max_expiry_time = clock_.now() + expiry;
+	auto max_expiry_time = current_clock.now() + expiry;
 	for (auto& cryptorManager : cryptor_managers) {
 		cryptorManager.update_expiry(max_expiry_time);
 	}

@@ -177,7 +177,7 @@ private:
 	 */
 	void return_frame_processor(std::unique_ptr<inbound_frame_processor> frame_processor);
 
-	clock clock_;
+	clock current_clock;
 	std::deque<aead_cipher_manager> cryptor_managers;
 
 	std::mutex frame_processors_mutex;
