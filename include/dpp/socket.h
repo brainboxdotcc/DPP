@@ -68,7 +68,7 @@ namespace dpp
  *
  * Avoids type punning with C style casts from sockaddr_in to sockaddr pointers.
  */
-class address_t {
+class DPP_EXPORT address_t {
 	/**
 	 * @brief Internal sockaddr struct
 	 */
@@ -88,7 +88,7 @@ public:
 	 * @brief Get sockaddr
 	 * @return sockaddr pointer
 	 */
-	sockaddr *get_socket_address();
+	[[nodiscard]] sockaddr *get_socket_address();
 
 	/**
 	 * @brief Returns size of sockaddr_in
@@ -96,20 +96,20 @@ public:
 	 * @note It is important the size this returns is sizeof(sockaddr_in) not
 	 * sizeof(sockaddr), this is NOT a bug but requirement of C socket functions.
 	 */
-	size_t size();
+	[[nodiscard]] size_t size();
 
 	/**
 	 * @brief Get the port bound to a file descriptor
 	 * @param fd File descriptor
 	 * @return Port number, or 0 if no port bound
 	 */
-	uint16_t get_port(socket fd);
+	[[nodiscard]] uint16_t get_port(socket fd);
 };
 
 /**
  * @brief Allocates a dpp::socket, closing it on destruction
  */
-struct raii_socket {
+struct DPP_EXPORT raii_socket {
 	/**
 	 * @brief File descriptor
 	 */
