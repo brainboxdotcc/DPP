@@ -53,8 +53,7 @@ unencrypted_frame_header_size BytesCoveringH264PPS(const uint8_t* payload, const
 		// check if this is an emulation prevention byte
 		// which we skip over
 		if (bit_index == 0) {
-			if (byte_index >= 2 && payload_byte == emulation_prevention_byte &&
-			    payload[byte_index - 1] == 0 && payload[byte_index - 2] == 0) {
+			if (byte_index >= 2 && payload_byte == emulation_prevention_byte && payload[byte_index - 1] == 0 && payload[byte_index - 2] == 0) {
 				payload_bit_index += 8;
 				continue;
 			}
@@ -103,8 +102,7 @@ std::optional<index_start_code_size_pair> next_h26x_nalu_index(const uint8_t* bu
 			i += nalu_short_start_sequence_size;
 		} else if (buffer[i + 2] == start_code_end_byte_value) {
 			// third byte matches the start code end byte, might be a start code sequence
-			if (buffer[i + 1] == start_code_leading_bytes_value &&
-			    buffer[i] == start_code_leading_bytes_value) {
+			if (buffer[i + 1] == start_code_leading_bytes_value && buffer[i] == start_code_leading_bytes_value) {
 				// confirmed start sequence {0, 0, 1}
 				auto nal_unit_start_index = i + nalu_short_start_sequence_size;
 

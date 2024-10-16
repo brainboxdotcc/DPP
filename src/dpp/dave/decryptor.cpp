@@ -73,8 +73,7 @@ size_t decryptor::decrypt(media_type this_media_type, array_view<const uint8_t> 
 	scope_exit cleanup([&] { return_frame_processor(std::move(local_frame)); });
 
 	// Skip decrypting for silence frames
-	if (this_media_type == media_audio && encrypted_frame.size() == OPUS_SILENCE_PACKET.size() &&
-	    std::memcmp(encrypted_frame.data(), OPUS_SILENCE_PACKET.data(), OPUS_SILENCE_PACKET.size()) == 0) {
+	if (this_media_type == media_audio && encrypted_frame.size() == OPUS_SILENCE_PACKET.size() && std::memcmp(encrypted_frame.data(), OPUS_SILENCE_PACKET.data(), OPUS_SILENCE_PACKET.size()) == 0) {
 		creator.log(dpp::ll_trace, "decrypt skipping silence of size: " + std::to_string(encrypted_frame.size()));
 		if (encrypted_frame.data() != frame.data()) {
 			std::memcpy(frame.data(), encrypted_frame.data(), encrypted_frame.size());
@@ -125,11 +124,12 @@ size_t decryptor::decrypt(media_type this_media_type, array_view<const uint8_t> 
 	}
 	else {
 		stats[this_media_type].decrypt_failure++;
-		creator.log(dpp::ll_warning, "decrypt failed, no valid cryptor found, type: " + std::string(this_media_type ? "video" : "audio") +
-					     ", encrypted frame size: " + std::to_string(encrypted_frame.size()) +
-					     ", plaintext frame size: " + std::to_string(frame.size()) +
-					     ", number of cryptor managers: " + std::to_string(cryptor_managers.size()) +
-					     ", pass through enabled: " + std::string(can_use_pass_through ? "yes" : "no")
+		creator.log(dpp::ll_warning,
+			"decrypt failed, no valid cryptor found, type: " + std::string(this_media_type ? "video" : "audio") +
+			", encrypted frame size: " + std::to_string(encrypted_frame.size()) +
+			", plaintext frame size: " + std::to_string(frame.size()) +
+			", number of cryptor managers: " + std::to_string(cryptor_managers.size()) +
+			", pass through enabled: " + std::string(can_use_pass_through ? "yes" : "no")
 		);
 	}
 

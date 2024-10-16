@@ -60,8 +60,7 @@ bool aead_cipher_manager::can_process_nonce(key_generation generation, truncated
 	}
 
 	auto wrapped_big_nonce = compute_wrapped_big_nonce(generation, nonce);
-	return wrapped_big_nonce > *newest_processed_nonce ||
-	       std::find(missing_nonces.rbegin(), missing_nonces.rend(), wrapped_big_nonce) != missing_nonces.rend();
+	return wrapped_big_nonce > *newest_processed_nonce || std::find(missing_nonces.rbegin(), missing_nonces.rend(), wrapped_big_nonce) != missing_nonces.rend();
 }
 
 cipher_interface* aead_cipher_manager::get_cipher(key_generation generation)
