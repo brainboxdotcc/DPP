@@ -141,7 +141,7 @@ std::shared_ptr<::mlspp::SignaturePrivateKey> get_generic_persisted_key_pair(dpp
 		}
 
 #ifdef _WIN32
-		int wret = _write(fd, newstr.c_str(), newstr.size());
+		ssize_t written = _write(fd, newstr.c_str(), newstr.size());
 		_close(fd);
 #else
 		ssize_t written = write(fd, newstr.c_str(), newstr.size());
