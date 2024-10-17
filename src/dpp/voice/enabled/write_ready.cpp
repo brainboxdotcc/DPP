@@ -44,7 +44,7 @@ void discord_voice_client::write_ready() {
 			}
 
 			/* Fallthrough if paused */
-		} else if (outbuf.size()) {
+		} else if (!outbuf.empty()) {
 			type = send_audio_type;
 			if (outbuf[0].packet.size() == sizeof(uint16_t) && (*(reinterpret_cast<uint16_t*>(outbuf[0].packet.data()))) == AUDIO_TRACK_MARKER) {
 				outbuf.erase(outbuf.begin());
@@ -53,7 +53,7 @@ void discord_voice_client::write_ready() {
 					tracks--;
 				}
 			}
-			if (outbuf.size()) {
+			if (!outbuf.empty()) {
 				if (this->udp_send(outbuf[0].packet.data(), outbuf[0].packet.length()) == (int)outbuf[0].packet.length()) {
 					duration = outbuf[0].duration * timescale;
 					bufsize = outbuf[0].packet.length();
