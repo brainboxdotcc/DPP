@@ -111,10 +111,11 @@ endif()
 
 if(NOT BUILD_SHARED_LIBS)
 	if(UNIX)
-		message("-- Building static library.")
+		message("-- Building ${Green}static${ColourReset} library.")
 		
 		if(UNIX AND NOT APPLE)
 			set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
+			message("-- INFO: Changed lib suffix to .a")
 		endif()
 		
 		set(OPENSSL_USE_STATIC_LIBS ON)
@@ -122,6 +123,8 @@ if(NOT BUILD_SHARED_LIBS)
 	else()
 		message(WARNING "-- Building of static library not supported on non UNIX systems.")
 	endif()
+else()
+	message("-- Building ${Green}dynamic${ColourReset} library.")
 endif()
 
 if (BUILD_VOICE_SUPPORT)
@@ -276,13 +279,22 @@ foreach (fullmodname ${subdirlist})
 
 	if (HAVE_VOICE)
 		# Private statically linked dependencies
-		target_link_libraries(${modname} PRIVATE
-			mlspp
-			mls_vectors
-			bytes
-			tls_syntax
-			hpke
-		)
+		if(NOT BUILD_SHARED_LIBS AND NOT APPLE)
+			target_link_libraries(${modname} PRIVATE							      mlspp.a
+				mls_vectors.a
+				bytes.a
+				tls_syntax.a
+				hpke.a
+			)
+		else()
+			target_link_libraries(${modname} PRIVATE
+				mlspp
+				mls_vectors
+				bytes
+				tls_syntax
+				hpke
+			)
+		endif()
 	endif()
 
 	if (HAVE_VOICE)
