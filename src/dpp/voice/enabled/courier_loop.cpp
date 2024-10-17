@@ -76,7 +76,21 @@ void discord_voice_client::voice_courier_loop(discord_voice_client& client, cour
 					break;
 				}
 
-				shared_state.signal_iteration.wait(lk);
+                shared_state.signal_iteration.wait(lk, [&shared_state](){
+                    /* 
+                     * Actually check the state we're looking for instead of waking up
+                     * everytime read_ready was called.
+                     */
+                    for (auto &[user_id, parking_lot]: shared_state.parked_voice_payloads) {
+                        if (parking_lot.parked_payloads.empty()) {
+                            continue;
+                        }
+
+                        return true;
+                    }
+                    return false;
+                });
+
 				/*
 				 * More data came or about to terminate, or just a spurious wake.
 				 * We need to collect the payloads again to determine what to do next.

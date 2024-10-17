@@ -37,7 +37,14 @@ void discord_voice_client::write_ready() {
 	send_audio_type_t type = satype_recorded_audio;
 	{
 		std::lock_guard<std::mutex> lock(this->stream_mutex);
-		if (!this->paused && outbuf.size()) {
+		if (this->paused) {
+			if (!this->sent_stop_frames) {
+				this->send_stop_frames(true);
+				this->sent_stop_frames = true;
+			}
+
+			/* Fallthrough if paused */
+		} else if (outbuf.size()) {
 			type = send_audio_type;
 			if (outbuf[0].packet.size() == sizeof(uint16_t) && (*(reinterpret_cast<uint16_t*>(outbuf[0].packet.data()))) == AUDIO_TRACK_MARKER) {
 				outbuf.erase(outbuf.begin());
