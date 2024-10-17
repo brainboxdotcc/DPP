@@ -30,7 +30,7 @@ namespace dpp {
 
 dpp::socket discord_voice_client::want_write() {
 	std::lock_guard<std::mutex> lock(this->stream_mutex);
-	if (!this->paused && !outbuf.empty()) {
+	if (!this->sent_stop_frames && !outbuf.empty()) {
 		return fd;
 	}
 	return INVALID_SOCKET;
@@ -42,13 +42,16 @@ dpp::socket discord_voice_client::want_read() {
 }
 
 
-void discord_voice_client::send(const char* packet, size_t len, uint64_t duration) {
-	voice_out_packet frame;
-	frame.packet.assign(packet, packet + len);
-	frame.duration = duration;
-	{
+void discord_voice_client::send(const char* packet, size_t len, uint64_t duration, bool send_now) {
+	if (!send_now) [[likely]] {
+		voice_out_packet frame;
+		frame.packet.assign(packet, packet + len);
+		frame.duration = duration;
+
 		std::lock_guard<std::mutex> lock(this->stream_mutex);
 		outbuf.emplace_back(frame);
+	} else [[unlikely]] {
+		this->udp_send(packet, len);
 	}
 }
 

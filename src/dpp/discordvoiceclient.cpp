@@ -20,6 +20,7 @@
  *
  ************************************************************************************/
 
+#include <cstdint>
 #ifdef _WIN32
 	#include <WinSock2.h>
 	#include <WS2tcpip.h>
@@ -148,6 +149,9 @@ bool discord_voice_client::is_end_to_end_encrypted() const {
 
 discord_voice_client& discord_voice_client::pause_audio(bool pause) {
 	this->paused = pause;
+	if (!this->paused) {
+		this->sent_stop_frames = false;
+	}
 	return *this;
 }
 
@@ -176,6 +180,7 @@ discord_voice_client& discord_voice_client::stop_audio() {
 	outbuf.clear();
 	track_meta.clear();
 	tracks = 0;
+	this->send_stop_frames();
 	return *this;
 }
 
@@ -398,7 +403,6 @@ discord_voice_client& discord_voice_client::skip_to_next_marker() {
 }
 
 discord_voice_client& discord_voice_client::send_silence(const uint64_t duration) {
-	uint8_t silence_packet[3] = { 0xf8, 0xff, 0xfe };
 	send_audio_opus(silence_packet, 3, duration);
 	return *this;
 }
@@ -412,6 +416,7 @@ discord_voice_client& discord_voice_client::set_send_audio_type(send_audio_type_
 
 discord_voice_client& discord_voice_client::speak() {
 	if (!this->sending) {
+		std::cout << "Sending voice_opcode_client_speaking\n";
 		this->queue_message(json({
 		{"op", voice_opcode_client_speaking},
 		{"d", {
@@ -441,6 +446,17 @@ discord_voice_client& discord_voice_client::set_iteration_interval(uint16_t inte
 
 uint16_t discord_voice_client::get_iteration_interval() {
 	return this->iteration_interval;
+}
+
+discord_voice_client& discord_voice_client::send_stop_frames(bool send_now) {
+	uint8_t silence_frames[sizeof(silence_packet) / sizeof(*silence_packet) * 5];
+	for (size_t i = 0; i < sizeof(silence_frames) / sizeof(*silence_frames); i++) {
+		silence_frames[i] = silence_packet[i % 3];
+	}
+
+	this->send_audio_opus(silence_frames, sizeof(silence_frames) / sizeof(*silence_frames), 20, send_now);
+
+	return *this;
 }
 
 } // namespace dpp
