@@ -641,7 +641,6 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::thread_member_update_t, success);
 		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::thread_members_update_t, success);
 		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::voice_buffer_send_t, success);
-		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::voice_user_talking_t, success);
 		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::voice_ready_t, success);
 		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::voice_receive_t, success);
 		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::voice_client_speaking_t, success);
