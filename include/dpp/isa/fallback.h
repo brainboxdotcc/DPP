@@ -50,11 +50,11 @@ namespace dpp {
 				auto increment_new = increment * x;
 				auto current_gain_new = current_gain + increment_new;
 				auto current_sample_new = data_in[x] * current_gain_new;
-				if (current_sample_new >= std::numeric_limits<int16_t>::max()) {
-					current_sample_new = std::numeric_limits<int16_t>::max();
+				if (current_sample_new >= (std::numeric_limits<int16_t>::max)()) {
+					current_sample_new = (std::numeric_limits<int16_t>::max)();
 				}
-				else if (current_sample_new <= std::numeric_limits<int16_t>::min()) {
-					current_sample_new = std::numeric_limits<int16_t>::min();
+				else if (current_sample_new <= (std::numeric_limits<int16_t>::min)()) {
+					current_sample_new = (std::numeric_limits<int16_t>::min)();
 				}
 				data_out[x] = static_cast<int16_t>(current_sample_new);
 			}
