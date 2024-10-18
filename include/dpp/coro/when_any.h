@@ -190,7 +190,7 @@ class when_any {
 		/**
 		 * @brief Index of the awaitable that finished. Initialized to the maximum value of std::size_t.
 		 */
-		size_t index_finished = std::numeric_limits<std::size_t>::max();
+		size_t index_finished = (std::numeric_limits<std::size_t>::max)();
 
 		/**
 		 * @brief State of the when_any object.
