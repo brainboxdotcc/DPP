@@ -200,12 +200,12 @@ private:
 	/**
 	 * @brief Passthrough expiry time
 	 */
-	time_point allow_pass_through_until{time_point::min()};
+	time_point allow_pass_through_until{(time_point::min)()};
 
 	/**
 	 * @brief Last stats generation time
 	 */
-	time_point last_stats_time{time_point::min()};
+	time_point last_stats_time{(time_point::min)()};
 
 	/**
 	 * @brief Stats for audio and video decryption
