@@ -120,7 +120,7 @@ find_package_handle_standard_args(DPP DEFAULT_MSG DPP_LIBRARIES DPP_INCLUDE_DIR)
 
 ## 4. Build the bot.
 
-Now that we have our all our cmake stuff setup and we've got our code in place, we can initalise CMake. You'll want to go inside the `build/` directory and do `cmake ..`. 
+Now that we have our all our cmake stuff setup and we've got our code in place, we can initalise CMake. You'll want to go inside the `build/` directory and do `cmake ..`.
 
 Once that's completed, you'll want to head back to your up-most folder (where all the folders are for your bot) and run `cmake --build build/ -j4` (replace -j4 with however many threads you want to use). This will start compiling your bot and creating the executable.
 

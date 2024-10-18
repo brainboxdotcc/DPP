@@ -30,12 +30,12 @@ jobs:
           egress-policy: audit
 
       - name: Checkout D++
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+        uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4.2.0
         with:
           submodules: recursive
   
       - name: Install apt packages
-        run: sudo sed -i 's/azure\.//' /etc/apt/sources.list && sudo apt-get update && sudo apt-get install -y g++-12 libsodium-dev libopus-dev zlib1g-dev libmpg123-dev liboggz-dev cmake libfmt-dev libopusfile-dev
+        run: sudo sed -i 's/azure\.//' /etc/apt/sources.list && sudo apt-get update && sudo apt-get install -y g++-12 libopus-dev zlib1g-dev libmpg123-dev liboggz-dev cmake libfmt-dev libopusfile-dev
   
       - name: Generate CMake
         run: mkdir build && cd build && cmake -DDPP_NO_VCPKG=ON -DAVX_TYPE=T_fallback -DDPP_CORO=ON -DCMAKE_BUILD_TYPE=Debug ..

@@ -134,6 +134,38 @@ class DPP_EXPORT cluster {
 	timer_next_t next_timer;
 
 	/**
+	 * @brief Mutex to work with named_commands and synchronize read write access
+	 */
+	std::shared_mutex named_commands_mutex;
+
+	/**
+	 * @brief Typedef for slashcommand handler type
+	 */
+	using slashcommand_handler_t = std::function<void(const slashcommand_t &)>;
+
+#ifdef DPP_CORO
+	/**
+	 * @brief Typedef for coroutines based slashcommand handler type
+	 */
+	using co_slashcommand_handler_t = std::function<dpp::task<void>(const slashcommand_t&)>;
+
+	/**
+	 * @brief Typedef for variant of coroutines based slashcommand handler type and regular version of it
+	 */
+	using slashcommand_handler_variant = std::variant<slashcommand_handler_t,co_slashcommand_handler_t>;
+
+	/**
+	 * @brief Container to store relation between command name and it's handler
+	 */
+	std::map<std::string,slashcommand_handler_variant> named_commands;
+#else
+	/**
+	 * @brief Container to store relation between command name and it's handler
+	 */
+	std::map<std::string,slashcommand_handler_t> named_commands;
+#endif
+
+	/**
 	 * @brief Tick active timers
 	 */
 	void tick_timers();
@@ -437,6 +469,49 @@ public:
 	/* Functions for attaching to event handlers */
 
 	/**
+	 * @brief Register a slash command handler.
+	 *
+	 * @param name The name of the slash command to register
+	 * @param handler A handler function of type `slashcommand_handler_t`
+	 *
+	 * @return bool Returns `true` if the command was registered successfully, or `false` if
+	 * the command with the same name already exists
+	 */
+	bool register_command(const std::string& name, const slashcommand_handler_t handler);
+
+#ifdef DPP_CORO
+	/**
+	 * @brief Register a coroutine-based slash command handler.
+	 *
+	 * @param name The name of the slash command to register.
+	 * @param handler A coroutine handler function of type `co_slashcommand_handler_t`.
+	 *
+	 * @return bool Returns `true` if the command was registered successfully, or `false` if
+	 * the command with the same name already exists.
+	 */
+	template <typename F>
+	std::enable_if_t<std::is_same_v<std::invoke_result_t<F, const slashcommand_handler_t&>, dpp::task<void>>, bool>
+	register_command(const std::string& name, F&& handler){
+		std::unique_lock lk(named_commands_mutex);
+		auto [_, inserted] = named_commands.try_emplace(name, std::forward<F>(handler));
+		return inserted;
+	};
+#endif
+
+	/**
+	 * @brief Unregister a slash command.
+	 *
+	 * This function unregisters (removes) a previously registered slash command by name.
+	 * If the command is successfully removed, it returns `true`.
+	 *
+	 * @param name The name of the slash command to unregister.
+	 *
+	 * @return bool Returns `true` if the command was successfully unregistered, or `false`
+	 * if the command was not found.
+	 */
+	bool unregister_command(const std::string& name);
+
+	/**
 	 * @brief on voice state update event
 	 *
 	 * @see https://discord.com/developers/docs/topics/gateway-events#voice-state-update
@@ -445,7 +520,16 @@ public:
 	 */
 	event_router_t<voice_state_update_t> on_voice_state_update;
 
-	
+	/**
+	 * @brief on voice client platform event
+	 * After a client connects, or on joining a vc, you will receive the platform type of each client. This is either desktop
+	 * or mobile.
+	 *
+	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
+	 * The function signature for this event takes a single `const` reference of type voice_client_disconnect_t&, and returns void.
+	 */
+	event_router_t<voice_client_platform_t> on_voice_client_platform;
+
 	/**
 	 * @brief on voice client disconnect event
 	 *
@@ -1237,7 +1321,7 @@ public:
 	/**
 	 * @brief Called when packets are sent from the voice buffer.
 	 * The voice buffer contains packets that are already encoded with Opus and encrypted
-	 * with Sodium, and merged into packets by the repacketizer, which is done in the
+	 * with XChaCha20-Poly1305, and merged into packets by the repacketizer, which is done in the
 	 * dpp::discord_voice_client::send_audio method. You should use the buffer size properties
 	 * of dpp::voice_buffer_send_t to determine if you should fill the buffer with more
 	 * content.

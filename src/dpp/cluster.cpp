@@ -120,6 +120,40 @@ cluster::cluster(const std::string &_token, uint32_t _intents, uint32_t _shards,
 			i_message_content,
 			"You have attached an event to cluster::on_message_update() but have not specified the privileged intent dpp::i_message_content. Message content, embeds, attachments, and components on received guild messages will be empty.")
 	);
+
+	/* Add slashcommand callback for named commands. */
+#ifdef DPP_CORO
+	on_slashcommand([this](const slashcommand_t& event) -> task<void> {
+		slashcommand_handler_variant copy;
+		{
+			std::shared_lock lk(named_commands_mutex);
+			auto it = named_commands.find(event.command.get_command_name());
+			if (it == named_commands.end()) {
+				co_return;
+			}
+			copy = it->second;
+		}
+		if (std::holds_alternative<co_slashcommand_handler_t>(copy)) {
+			co_await std::get<co_slashcommand_handler_t>(copy)(event);
+		} else if (std::holds_alternative<slashcommand_handler_t>(copy)) {
+			std::get<slashcommand_handler_t>(copy)(event);
+		}
+		co_return;
+	});
+#else
+	on_slashcommand([this](const slashcommand_t& event) {
+		slashcommand_handler_t copy;
+		{
+			std::shared_lock lk(named_commands_mutex);
+			auto it = named_commands.find(event.command.get_command_name());
+			if (it == named_commands.end()) {
+				return;
+			}
+			copy = it->second;
+		}
+		copy(event);
+	});
+#endif
 }
 
 cluster::~cluster()
@@ -154,6 +188,11 @@ void cluster::log(dpp::loglevel severity, const std::string &msg) const {
 		dpp::log_t logmsg(nullptr, msg);
 		logmsg.severity = severity;
 		logmsg.message = msg;
+		size_t pos{0};
+		while ((pos = logmsg.message.find(token, pos)) != std::string::npos) {
+			logmsg.message.replace(pos, token.length(), "*****");
+			pos += 5;
+		}
 		on_log.call(logmsg);
 	}
 }
@@ -459,6 +498,17 @@ const shard_list& cluster::get_shards() {
 cluster& cluster::set_request_timeout(uint16_t timeout) {
 	request_timeout = timeout;
 	return *this;
+}
+
+bool cluster::register_command(const std::string &name, const slashcommand_handler_t handler) {
+	std::unique_lock lk(named_commands_mutex);
+	auto [_, inserted] = named_commands.try_emplace(name, handler);
+	return inserted;
+}
+
+bool cluster::unregister_command(const std::string &name) {
+	std::unique_lock lk(named_commands_mutex);
+	return named_commands.erase(name) == 1;
 }
 
 };

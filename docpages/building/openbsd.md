@@ -15,7 +15,7 @@ pkg_add cmake
 If you wish to use voice support, you'll need to do the following:
 
 ```bash
-pkg_add libsodium opus pkgconf
+pkg_add opus
 ```
 
 ## 3. Build Source Code

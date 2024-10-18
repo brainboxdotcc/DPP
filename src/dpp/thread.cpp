@@ -46,12 +46,14 @@ thread& thread::fill_from_json_impl(json* j) {
 	set_int8_not_null(j, "member_count", this->member_count);
 	set_bool_not_null(j, "newly_created", this->newly_created);
 
-	auto json_metadata = (*j)["thread_metadata"];
-	metadata.archived = bool_not_null(&json_metadata, "archived");
-	metadata.archive_timestamp = ts_not_null(&json_metadata, "archive_timestamp");
-	metadata.auto_archive_duration = int16_not_null(&json_metadata, "auto_archive_duration");
-	metadata.locked = bool_not_null(&json_metadata, "locked");
-	metadata.invitable = bool_not_null(&json_metadata, "invitable");
+	if (j->contains("thread_metadata")) {
+		auto json_metadata = (*j)["thread_metadata"];
+		metadata.archived = bool_not_null(&json_metadata, "archived");
+		metadata.archive_timestamp = ts_not_null(&json_metadata, "archive_timestamp");
+		metadata.auto_archive_duration = int16_not_null(&json_metadata, "auto_archive_duration");
+		metadata.locked = bool_not_null(&json_metadata, "locked");
+		metadata.invitable = bool_not_null(&json_metadata, "invitable");
+	}
 
 	/* Only certain events set this */
 	if (j->contains("member"))  {

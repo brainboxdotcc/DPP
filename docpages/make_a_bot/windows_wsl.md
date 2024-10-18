@@ -8,7 +8,7 @@ This tutorial teaches you how to create a lightweight environment for D++ develo
 2. Now open PowerShell as Administrator and type `wsl` to start up your subsystem. You may also type `ubuntu` into your search bar and open it that way.
 3. Head on over to your home directory using `cd ~`.
 4. Download the latest build for your distro using `wget [url here]`. In this guide we will use the latest build for 64 bit Ubuntu: `wget -O libdpp.deb https://dl.dpp.dev/latest`.
-5. Finally install all required dependencies and the library itself using `sudo apt-get install libopus0 libopus-dev libsodium-dev && sudo dpkg -i libdpp.deb && rm libdpp.deb`.
+5. Finally install all required dependencies and the library itself using `sudo apt-get install libopus0 libopus-dev && sudo dpkg -i libdpp.deb && rm libdpp.deb`.
 6. Congratulations, you've successfully installed all dependencies! Now comes the real fun: Setting up the environment! For this tutorial we'll use a as small as possible setup, so you might create a more advanced one for production bots.
 7. Create a new directory, inside your home directory, using `mkdir MyBot`. Then, you want to open that directory using `cd MyBot`.
 8. Now that you've a directory to work in, type `touch mybot.cxx` to create a file you can work in!

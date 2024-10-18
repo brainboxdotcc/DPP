@@ -88,6 +88,12 @@ public:
 	class discord_voice_client* voiceclient;
 
 	/**
+	 * @brief True to enable DAVE E2EE
+	 * @warning This is an EXPERIMENTAL feature!
+	 */
+	bool dave;
+
+	/**
 	 * @brief Construct a new voiceconn object
 	 */
 	voiceconn() = default;
@@ -97,8 +103,10 @@ public:
 	 * 
 	 * @param o owner
 	 * @param _channel_id voice channel id
+	 * @param enable_dave True to enable DAVE E2EE
+	 * @warn DAVE is an EXPERIMENTAL feature!
 	 */
-	voiceconn(class discord_client* o, snowflake _channel_id);
+	voiceconn(class discord_client* o, snowflake _channel_id, bool enable_dave);
 
 	/**
 	 * @brief Destroy the voiceconn object
@@ -473,9 +481,10 @@ public:
 	/**
 	 * @brief Handle JSON from the websocket.
 	 * @param buffer The entire buffer content from the websocket client
+	 * @param opcode The type of frame, e.g. text or binary
 	 * @returns True if a frame has been handled
 	 */
-	virtual bool handle_frame(const std::string &buffer);
+	virtual bool handle_frame(const std::string &buffer, ws_opcode opcode);
 
 	/**
 	 * @brief Handle a websocket error.
@@ -497,12 +506,13 @@ public:
 	 * @param channel_id Channel ID of the voice channel
 	 * @param self_mute True if the bot should mute itself
 	 * @param self_deaf True if the bot should deafen itself
+	 * @param enable_dave True to enable DAVE E2EE - EXPERIMENTAL
 	 * @return reference to self
 	 * @note This is NOT a synchronous blocking call! The bot isn't instantly ready to send or listen for audio,
 	 * as we have to wait for the connection to the voice server to be established!
 	 * e.g. wait for dpp::cluster::on_voice_ready event, and then send the audio within that event.
 	 */
-	discord_client& connect_voice(snowflake guild_id, snowflake channel_id, bool self_mute = false, bool self_deaf = false);
+	discord_client& connect_voice(snowflake guild_id, snowflake channel_id, bool self_mute = false, bool self_deaf = false, bool enable_dave = false);
 
 	/**
 	 * @brief Disconnect from the connected voice channel on a guild

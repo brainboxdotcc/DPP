@@ -220,7 +220,7 @@ void discord_client::run()
 	this->thread_id = runner->native_handle();
 }
 
-bool discord_client::handle_frame(const std::string &buffer)
+bool discord_client::handle_frame(const std::string &buffer, ws_opcode opcode)
 {
 	std::string& data = (std::string&)buffer;
 
@@ -340,7 +340,7 @@ bool discord_client::handle_frame(const std::string &buffer)
 							}
 						}
 					};
-					this->write(jsonobj_to_string(obj));
+					this->write(jsonobj_to_string(obj), protocol == ws_etf ? OP_BINARY : OP_TEXT);
 					resumes++;
 				} else {
 					/* Full connect */
@@ -369,7 +369,7 @@ bool discord_client::handle_frame(const std::string &buffer)
 							}
 						}
 					};
-					this->write(jsonobj_to_string(obj));
+					this->write(jsonobj_to_string(obj), protocol == ws_etf ? OP_BINARY : OP_TEXT);
 					this->connect_time = creator->last_identify = time(nullptr);
 					reconnects++;
 				}
@@ -459,6 +459,11 @@ void discord_client::log(dpp::loglevel severity, const std::string &msg) const
 		dpp::log_t logmsg(nullptr, msg);
 		logmsg.severity = severity;
 		logmsg.message = msg;
+		size_t pos{0};
+		while ((pos = logmsg.message.find(token, pos)) != std::string::npos) {
+			logmsg.message.replace(pos, token.length(), "*****");
+			pos += 5;
+		}
 		creator->on_log.call(logmsg);
 	}
 }
@@ -539,7 +544,7 @@ void discord_client::one_second_timer()
 					ping_start = utility::time_f();
 					last_ping_message.clear();
 				}
-				this->write(message);
+				this->write(message, protocol == ws_etf ? OP_BINARY : OP_TEXT);
 			}
 		}
 
@@ -608,7 +613,7 @@ uint64_t discord_client::get_channel_count() {
 	return total;
 }
 
-discord_client& discord_client::connect_voice(snowflake guild_id, snowflake channel_id, bool self_mute, bool self_deaf) {
+discord_client& discord_client::connect_voice(snowflake guild_id, snowflake channel_id, bool self_mute, bool self_deaf, bool enable_dave) {
 #ifdef HAVE_VOICE
 	std::unique_lock lock(voice_mutex);
 	if (connecting_voice_channels.find(guild_id) != connecting_voice_channels.end()) {
@@ -617,11 +622,11 @@ discord_client& discord_client::connect_voice(snowflake guild_id, snowflake chan
 			return *this;
 		}
 	}
-	connecting_voice_channels[guild_id] = std::make_unique<voiceconn>(this, channel_id);
+	connecting_voice_channels[guild_id] = std::make_unique<voiceconn>(this, channel_id, enable_dave);
 	/* Once sent, this expects two events (in any order) on the websocket:
 	* VOICE_SERVER_UPDATE and VOICE_STATUS_UPDATE
 	*/
-	log(ll_debug, "Sending op 4 to join VC, guild " + std::to_string(guild_id) + " channel " + std::to_string(channel_id));
+	log(ll_debug, "Sending op 4 to join VC, guild " + std::to_string(guild_id) + " channel " + std::to_string(channel_id) + (enable_dave ? " WITH DAVE" : ""));
 	queue_message(jsonobj_to_string(json({
 		{ "op", 4 },
 		{ "d", {
@@ -684,7 +689,7 @@ voiceconn* discord_client::get_voice(snowflake guild_id) {
 }
 
 
-voiceconn::voiceconn(discord_client* o, snowflake _channel_id) : creator(o), channel_id(_channel_id), voiceclient(nullptr) {
+voiceconn::voiceconn(discord_client* o, snowflake _channel_id, bool enable_dave) : creator(o), channel_id(_channel_id), voiceclient(nullptr), dave(enable_dave) {
 }
 
 bool voiceconn::is_ready() {
@@ -713,7 +718,7 @@ voiceconn& voiceconn::connect(snowflake guild_id) {
 		auto t = std::thread([guild_id, this]() {
 			try {
 				this->creator->log(ll_debug, "Connecting voice for guild " + std::to_string(guild_id) + " channel " + std::to_string(this->channel_id));
-				this->voiceclient = new discord_voice_client(creator->creator, this->channel_id, guild_id, this->token, this->session_id, this->websocket_hostname);
+				this->voiceclient = new discord_voice_client(creator->creator, this->channel_id, guild_id, this->token, this->session_id, this->websocket_hostname, this->dave);
 				/* Note: Spawns thread! */
 				this->voiceclient->run();
 			}

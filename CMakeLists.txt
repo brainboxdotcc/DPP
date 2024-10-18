@@ -24,7 +24,7 @@ option(RUN_LDCONFIG "Run ldconfig after installation" ON)
 option(DPP_INSTALL "Generate the install target" ON)
 option(DPP_BUILD_TEST "Build the test program" ON)
 option(DPP_NO_VCPKG "No VCPKG" OFF)
-option(DPP_CORO "Experimental support for C++20 coroutines" OFF)
+option(DPP_CORO "Support for C++20 coroutines" OFF)
 option(DPP_FORMATTERS "Support for C++20 formatters" OFF)
 option(DPP_USE_EXTERNAL_JSON "Use an external installation of nlohmann::json" OFF)
 option(DPP_USE_PCH "Use precompiled headers to speed up compilation" OFF)
@@ -103,6 +103,8 @@ else()
 	add_subdirectory(library)
 endif()
 
+find_package(Filesystem)
+
 if(DPP_USE_EXTERNAL_JSON)
 	# We do nothing here, we just assume it is on the include path.
 	# nlohmann::json's cmake stuff does all kinds of weird, and is more hassle than it's worth.
@@ -115,4 +117,8 @@ else()
 	# fussy, this is an older version because trying to use v3.11.2 gave a bunch of parse errors
 	# that made no sense, it seems they may have changed their parsing rules somehow.
 	message("-- Using bundled nlohmann::json")
+endif()
+
+if (NOT WIN32)
+	target_link_libraries(dpp PRIVATE std::filesystem)
 endif()

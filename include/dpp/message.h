@@ -2011,6 +2011,24 @@ namespace cache_policy {
 };
 
 /**
+ * @brief Message Reference type
+ */
+enum DPP_EXPORT message_ref_type : uint8_t {
+	/**
+	 * A reply or crosspost
+	 */
+	mrt_default = 0,
+	/**
+	 * A forwarded message
+	 */
+	mrt_forward = 1,
+};
+
+template <typename T> struct message_snapshot {
+	std::vector<T> messages;
+};
+
+	/**
  * @brief Represents messages sent and received on Discord
  */
 struct DPP_EXPORT message : public managed, json_interface<message> {
@@ -2141,6 +2159,10 @@ public:
 	 */
 	struct message_ref {
 		/**
+		 * @brief Message reference type, set to 1 to forward a message
+		 */
+		message_ref_type type{mrt_default};
+		/**
 		 * @brief ID of the originating message.
 		 */
 		snowflake message_id;
@@ -2163,9 +2185,14 @@ public:
 	} message_reference;
 
 	/**
+	 * @brief Message snapshots for a forwarded message
+	 */
+	message_snapshot<message> message_snapshots;
+
+	/**
 	 * @brief Reference to an interaction
 	 */
-	struct message_interaction_struct{
+	struct message_interaction_struct {
 		/**
 		 * @brief ID of the interaction.
 		 */
@@ -2342,9 +2369,10 @@ public:
 	 * @param _guild_id guild id to reply to (optional)
 	 * @param _channel_id channel id to reply to (optional)
 	 * @param fail_if_not_exists true if the message send should fail if these values are invalid (optional)
+	 * @param type Type of reference
 	 * @return message& reference to self
 	 */
-	message& set_reference(snowflake _message_id, snowflake _guild_id = 0, snowflake _channel_id = 0, bool fail_if_not_exists = false);
+	message& set_reference(snowflake _message_id, snowflake _guild_id = 0, snowflake _channel_id = 0, bool fail_if_not_exists = false, message_ref_type type = mrt_default);
 
 	/**
 	 * @brief Set the allowed mentions object for pings on the message

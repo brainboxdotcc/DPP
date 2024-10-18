@@ -2145,6 +2145,44 @@ struct DPP_EXPORT voice_client_disconnect_t : public event_dispatch_t {
 };
 
 /**
+ * @brief Discord voice platform types
+ */
+enum client_platform_t : uint8_t {
+	/**
+	 * @brief Web, Desktop
+	 */
+	client_platform_desktop = 0,
+	/**
+	 * @brief Mobile device
+	 */
+	client_platform_mobile = 1,
+};
+
+/**
+ * @brief voice client platform type notification event
+ */
+struct DPP_EXPORT voice_client_platform_t : public event_dispatch_t {
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
+	/**
+	 * @brief voice client where user is
+	 */
+	discord_voice_client* voice_client = nullptr;
+
+	/**
+	 * @brief user id of user who left vc
+	 */
+	snowflake user_id = {};
+
+	/**
+	 * @brief Client platform for the voice user
+	 * Either desktop, or mobile
+	 */
+	client_platform_t platform = client_platform_desktop;
+};
+
+/**
  * @brief Delete stage instance
  */
 struct DPP_EXPORT entitlement_create_t : public event_dispatch_t {

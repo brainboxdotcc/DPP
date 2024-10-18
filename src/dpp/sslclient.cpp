@@ -70,6 +70,7 @@
 #include <dpp/sslclient.h>
 #include <dpp/exception.h>
 #include <dpp/utility.h>
+#include <dpp/stringops.h>
 #include <dpp/dns.h>
 
 /* Maximum allowed time in milliseconds for socket read/write timeouts and connect() */
@@ -318,10 +319,11 @@ void ssl_client::connect()
 		/* Resolve hostname to IP */
 		int err = 0;
 		const dns_cache_entry* addr = resolve_hostname(hostname, port);
-		sfd = ::socket(addr->addr.ai_family, addr->addr.ai_socktype, addr->addr.ai_protocol);
+		sfd = addr->make_connecting_socket();
+		address_t destination = addr->get_connecting_address(from_string<uint16_t>(this->port, std::dec));
 		if (sfd == ERROR_STATUS) {
 			err = errno;
-		} else if (connect_with_timeout(sfd, (sockaddr*)&addr->ai_addr, (int)addr->addr.ai_addrlen, SOCKET_OP_TIMEOUT) != 0) {
+		} else if (connect_with_timeout(sfd, destination.get_socket_address(), destination.size(), SOCKET_OP_TIMEOUT) != 0) {
 			close_socket(sfd);
 			sfd = ERROR_STATUS;
 		}
@@ -379,7 +381,7 @@ void ssl_client::connect()
 	}
 }
 
-void ssl_client::write(const std::string_view data)
+void ssl_client::socket_write(const std::string_view data)
 {
 	/* If we are in nonblocking mode, append to the buffer,
 	 * otherwise just use SSL_write directly. The only time we
