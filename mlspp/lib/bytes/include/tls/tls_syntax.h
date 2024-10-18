@@ -14,7 +14,7 @@
 namespace mlspp::tls {
 
 // For indicating no min or max in vector definitions
-const size_t none = std::numeric_limits<size_t>::max();
+const size_t none = (std::numeric_limits<size_t>::max)();
 
 class WriteError : public std::invalid_argument
 {
@@ -37,7 +37,7 @@ public:
 class ostream
 {
 public:
-  static const size_t none = std::numeric_limits<size_t>::max();
+  static const size_t none = (std::numeric_limits<size_t>::max)();
 
   void write_raw(const std::vector<uint8_t>& bytes);
 
