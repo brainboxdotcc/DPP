@@ -71,14 +71,14 @@ discord_voice_client& discord_voice_client::send_audio_raw(uint16_t* audio_data,
 	return *this;
 }
 
-discord_voice_client& discord_voice_client::send_audio_opus(uint8_t* opus_packet, const size_t length) {
+discord_voice_client& discord_voice_client::send_audio_opus(const uint8_t* opus_packet, const size_t length) {
 	int samples = opus_packet_get_nb_samples(opus_packet, (opus_int32)length, opus_sample_rate_hz);
 	uint64_t duration = (samples / 48) / (timescale / 1000000);
-	send_audio_opus(opus_packet, length, duration);
+	send_audio_opus(opus_packet, length, duration, false);
 	return *this;
 }
 
-discord_voice_client& discord_voice_client::send_audio_opus(uint8_t* opus_packet, const size_t length, uint64_t duration) {
+discord_voice_client& discord_voice_client::send_audio_opus(const uint8_t* opus_packet, const size_t length, uint64_t duration, bool send_now) {
 	int frame_size = (int)(48 * duration * (timescale / 1000000));
 	opus_int32 encoded_audio_max_length = (opus_int32)length;
 	std::vector<uint8_t> encoded_audio(encoded_audio_max_length);
@@ -147,7 +147,7 @@ discord_voice_client& discord_voice_client::send_audio_opus(uint8_t* opus_packet
 	/* Append the 4 byte nonce to the resulting payload */
 	std::memcpy(payload.data() + payload.size() - sizeof(noncel), &noncel, sizeof(noncel));
 
-	this->send(reinterpret_cast<const char *>(payload.data()), payload.size(), duration);
+	this->send(reinterpret_cast<const char *>(payload.data()), payload.size(), duration, send_now);
 
 	timestamp += frame_size;
 

@@ -1335,17 +1335,6 @@ public:
 
 	
 	/**
-	 * @brief Called when a user is talking on a voice channel.
-	 *
-	 * @warning If the cache policy has disabled guild caching, the pointer to the guild in this event may be nullptr.
-	 *
-	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The function signature for this event takes a single `const` reference of type voice_user_talking_t&, and returns void.
-	 */
-	event_router_t<voice_user_talking_t> on_voice_user_talking;
-
-	
-	/**
 	 * @brief Called when a voice channel is connected and ready to send audio.
 	 * Note that this is not directly attached to the READY event of the websocket,
 	 * as there is further connection that needs to be done before audio is ready to send.
