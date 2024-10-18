@@ -48,6 +48,27 @@ STRING(REPLACE "AVX" "" AVX_TYPE ${AVX_TYPE})
 add_compile_definitions(AVX_TYPE=${AVX_TYPE})
 add_compile_options(${AVX_FLAG})
 
+if(NOT BUILD_SHARED_LIBS)
+	if(UNIX)
+		message("-- Building ${Green}static${ColourReset} library.")
+
+		if(UNIX AND NOT APPLE)
+			set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
+			message("-- INFO: Changed lib suffix to ${CMAKE_FIND_LIBRARY_SUFFIXES}")
+		endif()
+
+		set(OPENSSL_USE_STATIC_LIBS TRUE)
+		set(OPUS_USE_STATIC_LIBS TRUE)
+
+	else()
+		message(WARNING "-- Building of static library not supported on non UNIX systems.")
+	endif()
+else()
+	message("-- Building ${Green}dynamic${ColourReset} library.")
+endif()
+
+
+
 if(WIN32 AND NOT MINGW)
 	# Fake an ssl version number to satisfy MLSPP
 	set(OPENSSL_VERSION "1.1.1f")
@@ -109,21 +130,6 @@ if (UNIX)
  	endif()
 endif()
 
-if(NOT BUILD_SHARED_LIBS)
-	if(UNIX)
-		message("-- Building static library.")
-		
-		if(UNIX AND NOT APPLE)
-			set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
-		endif()
-		
-		set(OPENSSL_USE_STATIC_LIBS ON)
-		set(OPUS_USE_STATIC_LIBS TRUE)
-	else()
-		message(WARNING "-- Building of static library not supported on non UNIX systems.")
-	endif()
-endif()
-
 if (BUILD_VOICE_SUPPORT)
 	if (MINGW OR NOT WIN32)
 		include("${CMAKE_CURRENT_SOURCE_DIR}/../cmake/FindOpus.cmake")
@@ -151,6 +157,7 @@ set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 if(MINGW OR NOT WIN32)
 	find_package(ZLIB REQUIRED)
+	message("-- ZLIB: ${Green}${ZLIB_LIBRARIES}${ColourReset}")
 endif(MINGW OR NOT WIN32)
 
 if(APPLE)
@@ -162,6 +169,9 @@ if(APPLE)
 	find_package(OpenSSL REQUIRED)
 else()
 	if(MINGW OR NOT WIN32)
+		if(NOT BUILD_SHARED_LIBS)
+			set(OPENSSL_USE_STATIC_LIBS TRUE)
+		endif()
 		find_package(OpenSSL REQUIRED)
 	endif()
 endif()
@@ -275,23 +285,33 @@ foreach (fullmodname ${subdirlist})
 	endif()
 
 	if (HAVE_VOICE)
-		# Private statically linked dependencies
-		target_link_libraries(${modname} PRIVATE
-			mlspp
-			mls_vectors
-			bytes
-			tls_syntax
-			hpke
-		)
-	endif()
-
-	if (HAVE_VOICE)
 		target_link_libraries(${modname} PUBLIC ${OPUS_LIBRARIES})
 		include_directories(${OPUS_INCLUDE_DIRS})
 	endif()
 endforeach()
 
-
+if (HAVE_VOICE)
+	# Private statically linked dependencies
+	if(NOT BUILD_SHARED_LIBS AND NOT APPLE)
+		target_link_libraries(dpp PRIVATE
+				mlspp.a
+				mls_vectors.a
+				bytes.a
+				tls_syntax.a
+				hpke.a
+		)
+		message("-- INFO: Linking static dependencies")
+	else()
+		target_link_libraries(dpp PRIVATE
+				mlspp
+				mls_vectors
+				bytes
+				tls_syntax
+				hpke
+		)
+		message("-- INFO: Linking dynamic dependencies")
+	endif()
+endif()
 
 target_compile_features(dpp PUBLIC cxx_std_17)
 target_compile_features(dpp PRIVATE cxx_constexpr)
@@ -369,6 +389,22 @@ if(DPP_FORMATTERS)
 	target_compile_definitions(dpp PUBLIC DPP_FORMATTERS)
 endif()
 
+if (NOT BUILD_SHARED_LIBS)
+	add_library(dppstatic STATIC
+			$<TARGET_OBJECTS:dpp>
+			$<TARGET_OBJECTS:hpke>
+			$<TARGET_OBJECTS:tls_syntax>
+			$<TARGET_OBJECTS:mls_vectors>
+			$<TARGET_OBJECTS:mlspp>
+			$<TARGET_OBJECTS:bytes>
+	)
+	if (HAVE_VOICE)
+		target_link_libraries(dppstatic ${ZLIB_LIBRARIES} ${OPENSSL_LIBRARIES} ${OPUS_LIBRARIES} -static-libgcc -static-libstdc++)
+	else()
+		target_link_libraries(dppstatic ${ZLIB_LIBRARIES} ${OPENSSL_LIBRARIES})
+	endif()
+endif()
+
 if (DPP_BUILD_TEST)
 	enable_testing(${CMAKE_CURRENT_SOURCE_DIR}/..)
 	file(GLOB testnamelist "${CMAKE_CURRENT_SOURCE_DIR}/../src/*")
@@ -387,11 +423,11 @@ if (DPP_BUILD_TEST)
 			if (MSVC)
 				target_compile_options(${testname} PRIVATE /utf-8)
 			endif()
-			set (static_if_needed "")
-			if(NOT BUILD_SHARED_LIBS)
-				set (static_if_needed "-static")
+			if(BUILD_SHARED_LIBS)
+				target_link_libraries(${testname} PUBLIC ${modname})
+			else()
+				target_link_libraries(${testname} PUBLIC dppstatic)
 			endif()
-			target_link_libraries(${testname} PUBLIC ${modname} ${static_if_needed})
 		endif()
 	endforeach()
 	add_test(
