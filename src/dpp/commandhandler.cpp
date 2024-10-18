@@ -91,7 +91,7 @@ commandhandler& commandhandler::add_command(const std::string &command, const pa
 	if (slash_commands_enabled) {
 		if (this->app_id.empty()) {
 			if (owner->me.id.empty()) {
-				throw dpp::logic_exception("Command handler not ready (i don't know my application ID)");
+				throw dpp::logic_exception(err_command_handler_not_ready, "Command handler not ready (i don't know my application ID)");
 			} else {
 				this->app_id = owner->me.id;
 			}
@@ -168,7 +168,7 @@ bool commandhandler::string_has_prefix(std::string &str)
 {
 	for (auto& p : prefixes) {
 		size_t prefix_length = utility::utf8len(p);
-		if (utility::utf8substr(str, 0, prefix_length) == p) {
+		if (utility::utf8subview(str, 0, prefix_length) == p) {
 			str.erase(str.begin(), str.begin() + prefix_length);
 			return true;
 		}

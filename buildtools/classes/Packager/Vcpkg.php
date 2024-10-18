@@ -170,7 +170,6 @@ file(COPY "${CMAKE_CURRENT_LIST_DIR}/usage" DESTINATION "${CURRENT_PACKAGES_DIR}
   "license": "Apache-2.0",
   "supports": "((windows & !static & !uwp) | linux | osx)",
   "dependencies": [
-    "libsodium",
     "nlohmann-json",
     "openssl",
     "opus",
@@ -251,7 +250,7 @@ file(COPY "${CMAKE_CURRENT_LIST_DIR}/usage" DESTINATION "${CURRENT_PACKAGES_DIR}
         $this->sudo('./vcpkg format-manifest ./ports/dpp/vcpkg.json');
         /* Note: We commit this in /usr/local, but we never push it (we can't) */
         $this->git('add .', true);
-        $this->git('commit -m "[bot] VCPKG info update"', true);
+        $this->git('-c user.name="DPP VCPKG Bot" -c user.email=noreply@dpp.dev commit -m "[bot] VCPKG info update"', true);
         $this->sudo('/usr/local/share/vcpkg/vcpkg x-add-version dpp');
 
         echo GREEN . "Copy back port files from /usr/local/share...\n" . WHITE;
@@ -261,6 +260,8 @@ file(COPY "${CMAKE_CURRENT_LIST_DIR}/usage" DESTINATION "${CURRENT_PACKAGES_DIR}
         system('cp -v -R /usr/local/share/vcpkg/versions/d-/dpp.json ./vcpkg/versions/d-/dpp.json');
 
         echo GREEN . "Commit and push changes to master branch\n" . WHITE;
+        $this->git('config --global user.email "noreply@dpp.dev"');
+        $this->git('config --global user.name "DPP VCPKG Bot"');
         $this->git('add .');
         $this->git('commit -m "[bot] VCPKG info update [skip ci]"');
         $this->git('config pull.rebase false');

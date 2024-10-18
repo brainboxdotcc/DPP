@@ -51,8 +51,6 @@
 
 namespace dpp {
 
-using  json = nlohmann::json;
-
 /**
  * @brief Types of startup for cluster::start()
  */
@@ -136,6 +134,38 @@ class DPP_EXPORT cluster {
 	timer_next_t next_timer;
 
 	/**
+	 * @brief Mutex to work with named_commands and synchronize read write access
+	 */
+	std::shared_mutex named_commands_mutex;
+
+	/**
+	 * @brief Typedef for slashcommand handler type
+	 */
+	using slashcommand_handler_t = std::function<void(const slashcommand_t &)>;
+
+#ifdef DPP_CORO
+	/**
+	 * @brief Typedef for coroutines based slashcommand handler type
+	 */
+	using co_slashcommand_handler_t = std::function<dpp::task<void>(const slashcommand_t&)>;
+
+	/**
+	 * @brief Typedef for variant of coroutines based slashcommand handler type and regular version of it
+	 */
+	using slashcommand_handler_variant = std::variant<slashcommand_handler_t,co_slashcommand_handler_t>;
+
+	/**
+	 * @brief Container to store relation between command name and it's handler
+	 */
+	std::map<std::string,slashcommand_handler_variant> named_commands;
+#else
+	/**
+	 * @brief Container to store relation between command name and it's handler
+	 */
+	std::map<std::string,slashcommand_handler_t> named_commands;
+#endif
+
+	/**
 	 * @brief Tick active timers
 	 */
 	void tick_timers();
@@ -205,6 +235,11 @@ public:
 	std::condition_variable terminating;
 
 	/**
+	 * @brief The time (in seconds) that a request is allowed to take.
+	 */
+	uint16_t request_timeout = 20;
+
+	/**
 	 * @brief Constructor for creating a cluster. All but the token are optional.
 	 * @param token The bot token to use for all HTTP commands and websocket connections
 	 * @param intents A bitmask of dpd::intents values for all shards on this cluster. This is required to be sent for all bots with over 100 servers.
@@ -213,12 +248,12 @@ public:
 	 * @param cluster_id The ID of this cluster, should be between 0 and MAXCLUSTERS-1
 	 * @param maxclusters The total number of clusters that are active, which may be on separate processes or even separate machines.
 	 * @param compressed Whether or not to use compression for shards on this cluster. Saves a ton of bandwidth at the cost of some CPU
-	 * @param policy Set the user caching policy for the cluster, either lazy (only cache users/members when they message the bot) or aggressive (request whole member lists on seeing new guilds too)
+	 * @param policy Set the caching policy for the cluster, either lazy (only cache users/members when they message the bot) or aggressive (request whole member lists on seeing new guilds too)
 	 * @param request_threads The number of threads to allocate for making HTTP requests to Discord. This defaults to 12. You can increase this at runtime via the object returned from get_rest().
 	 * @param request_threads_raw The number of threads to allocate for making HTTP requests to sites outside of Discord. This defaults to 1. You can increase this at runtime via the object returned from get_raw_rest().
 	 * @throw dpp::exception Thrown on windows, if WinSock fails to initialise, or on any other system if a dpp::request_queue fails to construct
 	 */
-	cluster(const std::string& token, uint32_t intents = i_default_intents, uint32_t shards = 0, uint32_t cluster_id = 0, uint32_t maxclusters = 1, bool compressed = true, cache_policy_t policy = { cp_aggressive, cp_aggressive, cp_aggressive }, uint32_t request_threads = 12, uint32_t request_threads_raw = 1);
+	cluster(const std::string& token, uint32_t intents = i_default_intents, uint32_t shards = 0, uint32_t cluster_id = 0, uint32_t maxclusters = 1, bool compressed = true, cache_policy_t policy = cache_policy::cpol_default, uint32_t request_threads = 12, uint32_t request_threads_raw = 1);
 
 	/**
 	 * @brief dpp::cluster is non-copyable
@@ -233,12 +268,12 @@ public:
 	/**
 	 * @brief dpp::cluster is non-copyable
 	 */
-        cluster& operator=(const cluster&) = delete;
+	cluster& operator=(const cluster&) = delete;
 
 	/**
 	 * @brief dpp::cluster is non-moveable
 	 */
-        cluster& operator=(const cluster&&) = delete;
+	cluster& operator=(const cluster&&) = delete;
 
 	/**
 	 * @brief Destroy the cluster object
@@ -327,7 +362,7 @@ public:
 	 *
 	 * @return cluster& Reference to self for chaining.
 	 */
-	cluster& set_default_gateway(std::string& default_gateway);
+	cluster& set_default_gateway(const std::string& default_gateway);
 
 	/**
 	 * @brief Log a message to whatever log the user is using.
@@ -422,7 +457,59 @@ public:
 	 */
 	const shard_list& get_shards();
 
+	/**
+	 * @brief Sets the request timeout.
+	 *
+	 * @param timeout The length of time (in seconds) that requests are allowed to take. Default: 20.
+	 *
+	 * @return cluster& Reference to self for chaining.
+	 */
+	cluster& set_request_timeout(uint16_t timeout);
+
 	/* Functions for attaching to event handlers */
+
+	/**
+	 * @brief Register a slash command handler.
+	 *
+	 * @param name The name of the slash command to register
+	 * @param handler A handler function of type `slashcommand_handler_t`
+	 *
+	 * @return bool Returns `true` if the command was registered successfully, or `false` if
+	 * the command with the same name already exists
+	 */
+	bool register_command(const std::string& name, const slashcommand_handler_t handler);
+
+#ifdef DPP_CORO
+	/**
+	 * @brief Register a coroutine-based slash command handler.
+	 *
+	 * @param name The name of the slash command to register.
+	 * @param handler A coroutine handler function of type `co_slashcommand_handler_t`.
+	 *
+	 * @return bool Returns `true` if the command was registered successfully, or `false` if
+	 * the command with the same name already exists.
+	 */
+	template <typename F>
+	std::enable_if_t<std::is_same_v<std::invoke_result_t<F, const slashcommand_handler_t&>, dpp::task<void>>, bool>
+	register_command(const std::string& name, F&& handler){
+		std::unique_lock lk(named_commands_mutex);
+		auto [_, inserted] = named_commands.try_emplace(name, std::forward<F>(handler));
+		return inserted;
+	};
+#endif
+
+	/**
+	 * @brief Unregister a slash command.
+	 *
+	 * This function unregisters (removes) a previously registered slash command by name.
+	 * If the command is successfully removed, it returns `true`.
+	 *
+	 * @param name The name of the slash command to unregister.
+	 *
+	 * @return bool Returns `true` if the command was successfully unregistered, or `false`
+	 * if the command was not found.
+	 */
+	bool unregister_command(const std::string& name);
 
 	/**
 	 * @brief on voice state update event
@@ -433,7 +520,16 @@ public:
 	 */
 	event_router_t<voice_state_update_t> on_voice_state_update;
 
-	
+	/**
+	 * @brief on voice client platform event
+	 * After a client connects, or on joining a vc, you will receive the platform type of each client. This is either desktop
+	 * or mobile.
+	 *
+	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
+	 * The function signature for this event takes a single `const` reference of type voice_client_disconnect_t&, and returns void.
+	 */
+	event_router_t<voice_client_platform_t> on_voice_client_platform;
+
 	/**
 	 * @brief on voice client disconnect event
 	 *
@@ -695,6 +791,9 @@ public:
 	/**
 	 * @brief Called when a new guild is created.
 	 * D++ will request members for the guild for its cache using guild_members_chunk.
+	 * 
+	 * @warning If the cache policy has disabled guild caching, the pointer in this event will become invalid after the
+	 * event ends. You should make a copy of any data you wish to preserve beyond this.
 	 *
 	 * @see https://discord.com/developers/docs/topics/gateway-events#guild-create
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
@@ -706,6 +805,9 @@ public:
 	/**
 	 * @brief Called when a new channel is created on a guild.
 	 *
+	 * @warning If the cache policy has disabled channel caching, the pointer in this event will become invalid after the
+	 * event ends. You should make a copy of any data you wish to preserve beyond this.
+	 * 
 	 * @see https://discord.com/developers/docs/topics/gateway-events#channel-create
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
 	 * The function signature for this event takes a single `const` reference of type channel_create_t&, and returns void.
@@ -736,6 +838,8 @@ public:
 	/**
 	 * @brief Called when an existing role is updated on a guild.
 	 *
+	 * @warning If the cache policy has disabled guild caching, the pointer to the guild in this event may be nullptr.
+	 *
 	 * @see https://discord.com/developers/docs/topics/gateway-events#guild-role-update
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
 	 * The function signature for this event takes a single `const` reference of type guild_role_update_t&, and returns void.
@@ -745,6 +849,8 @@ public:
 	
 	/**
 	 * @brief Called when a role is deleted in a guild.
+	 *
+	 * @warning If the cache policy has disabled guild caching, the pointer to the guild in this event may be nullptr.
 	 *
 	 * @see https://discord.com/developers/docs/topics/gateway-events#guild-role-delete
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
@@ -780,6 +886,8 @@ public:
 	 * This will be sent either when we establish a new voice channel connection,
 	 * or as discord rearrange their infrastructure.
 	 *
+	 * @warning If the cache policy has disabled guild caching, the pointer to the guild in this event may be nullptr.
+	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
 	 * The function signature for this event takes a single `const` reference of type voice_server_update_t&, and returns void.
 	 */
@@ -789,6 +897,8 @@ public:
 	/**
 	 * @brief Called when new emojis are added to a guild.
 	 * The complete set of emojis is sent every time.
+	 *
+	 * @warning If the cache policy has disabled guild caching, the pointer to the guild in this event may be nullptr.
 	 *
 	 * @see https://discord.com/developers/docs/topics/gateway-events#guild-emojis-update
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
@@ -800,6 +910,8 @@ public:
 	/**
 	 * @brief Called when new stickers are added to a guild.
 	 * The complete set of stickers is sent every time.
+	 *
+	 * @warning If the cache policy has disabled guild caching, the pointer to the guild in this event may be nullptr.
 	 *
 	 * @see https://discord.com/developers/docs/topics/gateway-events#guild-stickers-update
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
@@ -871,6 +983,8 @@ public:
 	/**
 	 * @brief Called when a new member joins a guild.
 	 *
+	 * @warning If the cache policy has disabled guild caching, the pointer to the guild in this event may be nullptr.
+	 *
 	 * @see https://discord.com/developers/docs/topics/gateway-events#guild-member-add
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
 	 * The function signature for this event takes a single `const` reference of type guild_member_add_t&, and returns void.
@@ -891,6 +1005,10 @@ public:
 	/**
 	 * @brief Called when details of a guild are updated.
 	 *
+	 * @warning If the cache policy has disabled guild caching, the pointer in this event will become invalid after the
+	 * event ends. You should make a copy of any data you wish to preserve beyond this. If the guild cache is disabled,
+	 * only changed elements in the updated guild object will be set. all other values will be empty or defaults.
+	 * 
 	 * @see https://discord.com/developers/docs/topics/gateway-events#guild-update
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
 	 * The function signature for this event takes a single `const` reference of type guild_update_t&, and returns void.
@@ -904,6 +1022,8 @@ public:
 	 * An integration is a connection to a guild of a user's associated accounts,
 	 * e.g. youtube or twitch, for automatic assignment of roles etc.
 	 *
+	 * @warning If the cache policy has disabled guild caching, the pointer to the guild in this event may be nullptr.
+	 *
 	 * @see https://discord.com/developers/docs/topics/gateway-events#guild-integrations-update
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
 	 * The function signature for this event takes a single `const` reference of type guild_integrations_update_t&, and returns void.
@@ -914,6 +1034,8 @@ public:
 	/**
 	 * @brief Called when details of a guild member (e.g. their roles or nickname) are updated.
 	 *
+	 * @warning If the cache policy has disabled guild caching, the pointer to the guild in this event may be nullptr.
+	 *
 	 * @see https://discord.com/developers/docs/topics/gateway-events#guild-member-update
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
 	 * The function signature for this event takes a single `const` reference of type guild_member_update_t&, and returns void.
@@ -923,6 +1045,8 @@ public:
 	
 	/**
 	 * @brief Called when a new invite is created for a guild.
+	 *
+	 * @warning If the cache policy has disabled guild caching, the pointer to the guild in this event may be nullptr.
 	 *
 	 * @see https://discord.com/developers/docs/topics/gateway-events#invite-create
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
@@ -967,6 +1091,24 @@ public:
 	event_router_t<message_create_t> on_message_create;
 
 	/**
+	 * @brief Called when a vote is added to a message poll.
+	 *
+	 * @see https://discord.com/developers/docs/topics/gateway-events#message-poll-vote-add
+	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
+	 * The function signature for this event takes a single `const` reference of type message_poll_vote_add_t&, and returns void.
+	 */
+	event_router_t<message_poll_vote_add_t> on_message_poll_vote_add;
+
+	/**
+	 * @brief Called when a vote is removed from a message poll.
+	 *
+	 * @see https://discord.com/developers/docs/topics/gateway-events#message-poll-vote-remove
+	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
+	 * The function signature for this event takes a single `const` reference of type message_poll_vote_remove_t&, and returns void.
+	 */
+	event_router_t<message_poll_vote_remove_t> on_message_poll_vote_remove;
+
+	/**
 	 * @brief Called when a guild audit log entry is created.
 	 *
 	 * @see https://discord.com/developers/docs/topics/gateway-events#guild-audit-log-entry-create
@@ -978,6 +1120,8 @@ public:
 	/**
 	 * @brief Called when a ban is added to a guild.
 	 *
+	 * @warning If the cache policy has disabled guild caching, the pointer to the guild in this event may be nullptr.
+	 *
 	 * @see https://discord.com/developers/docs/topics/gateway-events#guild-ban-add
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
 	 * The function signature for this event takes a single `const` reference of type guild_ban_add_t&, and returns void.
@@ -987,6 +1131,8 @@ public:
 	
 	/**
 	 * @brief Called when a ban is removed from a guild.
+	 *
+	 * @warning If the cache policy has disabled guild caching, the pointer to the guild in this event may be nullptr.
 	 *
 	 * @see https://discord.com/developers/docs/topics/gateway-events#guild-ban-remove
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
@@ -999,6 +1145,8 @@ public:
 	 * @brief Called when a new integration is attached to a guild by a user.
 	 * An integration is a connection to a guild of a user's associated accounts,
 	 * e.g. youtube or twitch, for automatic assignment of roles etc.
+	 *
+	 * @warning If the cache policy has disabled guild caching, the pointer to the guild in this event may be nullptr.
 	 *
 	 * @see https://discord.com/developers/docs/topics/gateway-events#integration-create
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
@@ -1013,6 +1161,8 @@ public:
 	 * An integration is a connection to a guild of a user's associated accounts,
 	 * e.g. youtube or twitch, for automatic assignment of roles etc.
 	 *
+	 * @warning If the cache policy has disabled guild caching, the pointer to the guild in this event may be nullptr.
+	 *
 	 * @see https://discord.com/developers/docs/topics/gateway-events#integration-update
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
 	 * The function signature for this event takes a single `const` reference of type integration_update_t&, and returns void.
@@ -1025,6 +1175,8 @@ public:
 	 * An integration is a connection to a guild of a user's associated accounts,
 	 * e.g. youtube or twitch, for automatic assignment of roles etc.
 	 *
+	 * @warning If the cache policy has disabled guild caching, the pointer to the guild in this event may be nullptr.
+	 *
 	 * @see https://discord.com/developers/docs/topics/gateway-events#integration-delete
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
 	 * The function signature for this event takes a single `const` reference of type integration_delete_t&, and returns void.
@@ -1036,6 +1188,8 @@ public:
 	 * @brief Called when a thread is created.
 	 * Note that threads are not cached by D++, but a list of thread IDs is accessible in a guild object
 	 *
+	 * @warning If the cache policy has disabled guild caching, the pointer to the guild in this event may be nullptr.
+	 *
 	 * @see https://discord.com/developers/docs/topics/gateway-events#thread-create
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
 	 * The function signature for this event takes a single `const` reference of type thread_create_t&, and returns void.
@@ -1046,6 +1200,8 @@ public:
 	/**
 	 * @brief Called when a thread is updated
 	 *
+	 * @warning If the cache policy has disabled guild caching, the pointer to the guild in this event may be nullptr.
+	 *
 	 * @see https://discord.com/developers/docs/topics/gateway-events#thread-update
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
 	 * The function signature for this event takes a single `const` reference of type thread_update_t&, and returns void.
@@ -1055,6 +1211,8 @@ public:
 	
 	/**
 	 * @brief Called when a thread is deleted
+	 *
+	 * @warning If the cache policy has disabled guild caching, the pointer to the guild in this event may be nullptr.
 	 *
 	 * @see https://discord.com/developers/docs/topics/gateway-events#thread-delete
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
@@ -1067,6 +1225,8 @@ public:
 	 * @brief Called when thread list is synced (upon gaining access to a channel).
 	 * Note that threads are not cached by D++, but a list of thread IDs is accessible in a guild object
 	 *
+	 * @warning If the cache policy has disabled guild caching, the pointer to the guild in this event may be nullptr.
+	 *
 	 * @see https://discord.com/developers/docs/topics/gateway-events#thread-list-sync
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
 	 * The function signature for this event takes a single `const` reference of type thread_list_sync_t&, and returns void.
@@ -1076,6 +1236,8 @@ public:
 	
 	/**
 	 * @brief Called when current user's thread member object is updated
+	 *
+	 * @warning If the cache policy has disabled guild caching, the pointer to the guild in this event may be nullptr.
 	 *
 	 * @see https://discord.com/developers/docs/topics/gateway-events#thread-member-update
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
@@ -1087,6 +1249,8 @@ public:
 	/**
 	 * @brief Called when a thread's member list is updated (without GUILD_MEMBERS intent, is only called for current user)
 	 *
+	 * @warning If the cache policy has disabled guild caching, the pointer to the guild in this event may be nullptr.
+	 *
 	 * @see https://discord.com/developers/docs/topics/gateway-events#thread-members-update
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
 	 * The function signature for this event takes a single `const` reference of type thread_members_update_t&, and returns void.
@@ -1096,6 +1260,8 @@ public:
 	
 	/**
 	 * @brief Called when a new scheduled event is created
+	 *
+	 * @warning If the cache policy has disabled guild caching, the pointer to the guild in this event may be nullptr.
 	 *
 	 * @see https://discord.com/developers/docs/topics/gateway-events#guild-scheduled-event-create
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
@@ -1107,6 +1273,8 @@ public:
 	/**
 	 * @brief Called when a new scheduled event is updated
 	 *
+	 * @warning If the cache policy has disabled guild caching, the pointer to the guild in this event may be nullptr.
+	 *
 	 * @see https://discord.com/developers/docs/topics/gateway-events#guild-scheduled-event-update
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
 	 * The function signature for this event takes a single `const` reference of type guild_scheduled_event_update_t&, and returns void.
@@ -1116,6 +1284,8 @@ public:
 	
 	/**
 	 * @brief Called when a new scheduled event is deleted
+	 *
+	 * @warning If the cache policy has disabled guild caching, the pointer to the guild in this event may be nullptr.
 	 *
 	 * @see https://discord.com/developers/docs/topics/gateway-events#guild-scheduled-event-delete
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
@@ -1127,6 +1297,8 @@ public:
 	/**
 	 * @brief Called when a user is added to a scheduled event
 	 *
+	 * @warning If the cache policy has disabled guild caching, the pointer to the guild in this event may be nullptr.
+	 *
 	 * @see https://discord.com/developers/docs/topics/gateway-events#guild-scheduled-event-user-add
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
 	 * The function signature for this event takes a single `const` reference of type guild_scheduled_event_user_add_t&, and returns void.
@@ -1135,7 +1307,9 @@ public:
 
 	
 	/**
-	 * @brief Called when a user is removed to a scheduled event
+	 * @brief Called when a user is removed from a scheduled event
+	 *
+	 * @warning If the cache policy has disabled guild caching, the pointer to the guild in this event may be nullptr.
 	 *
 	 * @see https://discord.com/developers/docs/topics/gateway-events#guild-scheduled-event-user-remove
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
@@ -1147,10 +1321,12 @@ public:
 	/**
 	 * @brief Called when packets are sent from the voice buffer.
 	 * The voice buffer contains packets that are already encoded with Opus and encrypted
-	 * with Sodium, and merged into packets by the repacketizer, which is done in the
+	 * with XChaCha20-Poly1305, and merged into packets by the repacketizer, which is done in the
 	 * dpp::discord_voice_client::send_audio method. You should use the buffer size properties
 	 * of dpp::voice_buffer_send_t to determine if you should fill the buffer with more
 	 * content.
+	 *
+	 * @warning If the cache policy has disabled guild caching, the pointer to the guild in this event may be nullptr.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
 	 * The function signature for this event takes a single `const` reference of type voice_buffer_send_t&, and returns void.
@@ -1160,6 +1336,8 @@ public:
 	
 	/**
 	 * @brief Called when a user is talking on a voice channel.
+	 *
+	 * @warning If the cache policy has disabled guild caching, the pointer to the guild in this event may be nullptr.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
 	 * The function signature for this event takes a single `const` reference of type voice_user_talking_t&, and returns void.
@@ -1171,6 +1349,8 @@ public:
 	 * @brief Called when a voice channel is connected and ready to send audio.
 	 * Note that this is not directly attached to the READY event of the websocket,
 	 * as there is further connection that needs to be done before audio is ready to send.
+	 *
+	 * @warning If the cache policy has disabled guild caching, the pointer to the guild in this event may be nullptr.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
 	 * The function signature for this event takes a single `const` reference of type voice_ready_t&, and returns void.
@@ -1216,6 +1396,8 @@ public:
 	/**
 	 * @brief Called when a new stage instance is created on a stage channel.
 	 *
+	 * @warning If the cache policy has disabled guild caching, the pointer to the guild in this event may be nullptr.
+	 *
 	 * @see https://discord.com/developers/docs/topics/gateway-events#stage-instance-create
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
 	 * The function signature for this event takes a single `const` reference of type stage_instance_create_t&, and returns void.
@@ -1225,6 +1407,8 @@ public:
 	
 	/**
 	 * @brief Called when a stage instance is updated.
+	 *
+	 * @warning If the cache policy has disabled guild caching, the pointer to the guild in this event may be nullptr.
 	 *
 	 * @see https://discord.com/developers/docs/topics/gateway-events#stage-instance-update
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
@@ -1236,12 +1420,44 @@ public:
 	/**
 	 * @brief Called when an existing stage instance is deleted from a stage channel.
 	 *
+	 * @warning If the cache policy has disabled guild caching, the pointer to the guild in this event may be nullptr.
+	 *
 	 * @see https://discord.com/developers/docs/topics/gateway-events#stage-instance-delete
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
 	 * The function signature for this event takes a single `const` reference of type stage_instance_delete_t&, and returns void.
 	 */
 	event_router_t<stage_instance_delete_t> on_stage_instance_delete;
 
+	/**
+	 * @brief Called when a user subscribes to an SKU.
+	 *
+	 * @see https://discord.com/developers/docs/monetization/entitlements#new-entitlement
+	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
+	 * The function signature for this event takes a single `const` reference of type channel_delete_t&, and returns void.
+	 */
+	event_router_t<entitlement_create_t> on_entitlement_create;
+
+
+	/**
+	 * @brief Called when a user's subscription renews for the next billing period.
+	 * The `ends_at` field will have an updated value with the new expiration date.
+	 *
+	 * @see https://discord.com/developers/docs/monetization/entitlements#updated-entitlement
+	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
+	 * The function signature for this event takes a single `const` reference of type channel_update_t&, and returns void.
+	 */
+	event_router_t<entitlement_update_t> on_entitlement_update;
+
+	/**
+	 * @brief Called when a user's entitlement is deleted.
+	 * These events are infrequent and only occur if Discord issues a refund, or Discord removes an entitlement via "internal tooling".
+	 * Entitlements **are not deleted** when they expire.
+	 *
+	 * @see https://discord.com/developers/docs/monetization/entitlements#deleted-entitlement
+	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
+	 * The function signature for this event takes a single `const` reference of type channel_update_t&, and returns void.
+	 */
+	event_router_t<entitlement_delete_t> on_entitlement_delete;
 	
 	/**
 	 * @brief Post a REST request. Where possible use a helper method instead like message_create
@@ -1255,8 +1471,9 @@ public:
 	 * @param filename Filename to post for POST requests (for uploading files)
 	 * @param filecontent File content to post for POST requests (for uploading files)
 	 * @param filemimetype File content to post for POST requests (for uploading files)
+	 * @param protocol HTTP protocol to use (1.0 and 1.1 are supported)
 	 */
-	void post_rest(const std::string &endpoint, const std::string &major_parameters, const std::string &parameters, http_method method, const std::string &postdata, json_encode_t callback, const std::string &filename = "", const std::string &filecontent = "", const std::string &filemimetype = "");
+	void post_rest(const std::string &endpoint, const std::string &major_parameters, const std::string &parameters, http_method method, const std::string &postdata, json_encode_t callback, const std::string &filename = "", const std::string &filecontent = "", const std::string &filemimetype = "", const std::string& protocol = "1.1");
 
 	/**
 	 * @brief Post a multipart REST request. Where possible use a helper method instead like message_create
@@ -1267,11 +1484,9 @@ public:
 	 * @param method Method, e.g. GET, POST
 	 * @param postdata Post data (usually JSON encoded)
 	 * @param callback Function to call when the HTTP call completes. The callback parameter will contain amongst other things, the decoded json.
-	 * @param filename List of filenames to post for POST requests (for uploading files)
-	 * @param filecontent List of file content to post for POST requests (for uploading files)
-	 * @param filemimetypes List of mime types for each file to post for POST requests (for uploading files)
+	 * @param file_data List of files to post for POST requests (for uploading files)
 	 */
-	void post_rest_multipart(const std::string &endpoint, const std::string &major_parameters, const std::string &parameters, http_method method, const std::string &postdata, json_encode_t callback, const std::vector<std::string> &filename = {}, const std::vector<std::string>& filecontent = {}, const std::vector<std::string>& filemimetypes = {});
+	void post_rest_multipart(const std::string &endpoint, const std::string &major_parameters, const std::string &parameters, http_method method, const std::string &postdata, json_encode_t callback, const std::vector<message_file_data> &file_data = {});
 
 	/**
 	 * @brief Make a HTTP(S) request. For use when wanting asynchronous access to HTTP APIs outside of Discord.
@@ -1282,8 +1497,10 @@ public:
 	 * @param postdata POST data
 	 * @param mimetype MIME type of POST data
 	 * @param headers Headers to send with the request
+	 * @param protocol HTTP protocol to use (1.1 and 1.0 are supported)
+	 * @param request_timeout How many seconds before the connection is considered failed if not finished
 	 */
-	void request(const std::string &url, http_method method, http_completion_event callback, const std::string &postdata = "", const std::string &mimetype = "text/plain", const std::multimap<std::string, std::string> &headers = {});
+	void request(const std::string &url, http_method method, http_completion_event callback, const std::string &postdata = "", const std::string &mimetype = "text/plain", const std::multimap<std::string, std::string> &headers = {}, const std::string &protocol = "1.1", time_t request_timeout = 5);
 
 	/**
 	 * @brief Respond to a slash command
@@ -1327,7 +1544,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void interaction_followup_create(const std::string &token, const message &m, command_completion_event_t callback);
+	void interaction_followup_create(const std::string &token, const message &m, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Edit original followup message to a slash command
@@ -1432,7 +1649,6 @@ public:
 	 */
 	void guild_command_create(const slashcommand &s, snowflake guild_id, command_completion_event_t callback = utility::log_error());
 
-
 	/**
 	 * @brief Create/overwrite guild slash commands.
 	 * Any existing guild slash commands on this guild will be deleted and replaced with these.
@@ -1447,17 +1663,36 @@ public:
 	void guild_bulk_command_create(const std::vector<slashcommand> &commands, snowflake guild_id, command_completion_event_t callback = utility::log_error());
 
 	/**
+	 * @brief Delete all existing guild slash commands.
+	 * 
+	 * @see https://discord.com/developers/docs/interactions/application-commands#bulk-overwrite-global-application-commands
+	 * @param guild_id Guild ID to delete the slash commands in.
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::slashcommand_map object in confirmation_callback_t::value **which will be empty, meaning there are no commands**. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void guild_bulk_command_delete(snowflake guild_id, command_completion_event_t callback = utility::log_error());
+
+	/**
 	 * @brief Create/overwrite global slash commands.
 	 * Any existing global slash commands will be deleted and replaced with these.
 	 *
 	 * @see https://discord.com/developers/docs/interactions/application-commands#bulk-overwrite-global-application-commands
 	 * @param commands Vector of slash commands to create/update.
-	 * overwriting existing commands that are registered globally for this application. Updates will be available in all guilds after 1 hour.
+	 * overwriting existing commands that are registered globally for this application.
 	 * Commands that do not already exist will count toward daily application command create limits.
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::slashcommand_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void global_bulk_command_create(const std::vector<slashcommand> &commands, command_completion_event_t callback = utility::log_error());
+
+	/**
+	 * @brief Delete all existing global slash commands.
+	 * 
+	 * @see https://discord.com/developers/docs/interactions/application-commands#bulk-overwrite-global-application-commands
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::slashcommand_map object in confirmation_callback_t::value **which will be empty, meaning there are no commands**. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void global_bulk_command_delete(command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Edit a global slash command (a bot can have a maximum of 100 of these)
@@ -1652,6 +1887,15 @@ public:
 	void message_edit(const struct message &m, command_completion_event_t callback = utility::log_error());
 
 	/**
+	 * @brief Edit the flags of a message on a channel. The callback function is called when the message has been edited
+	 *
+	 * @param m Message to edit the flags of
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::message object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void message_edit_flags(const struct message &m, command_completion_event_t callback = utility::log_error());
+
+	/**
 	 * @brief Add a reaction to a message. The reaction string must be either an `emojiname:id` or a unicode character.
 	 *
 	 * @see https://discord.com/developers/docs/resources/channel#create-reaction
@@ -1820,6 +2064,54 @@ public:
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void message_delete_bulk(const std::vector<snowflake> &message_ids, snowflake channel_id, command_completion_event_t callback = utility::log_error());
+
+	/**
+	 * @brief Get a list of users that voted for this specific answer.
+	 *
+	 * @param m Message that contains the poll to retrieve the answers from
+	 * @param answer_id ID of the answer to retrieve votes from (see poll_answer::answer_id)
+	 * @param after Users after this ID should be retrieved if this is set to non-zero
+	 * @param limit This number of users maximum should be returned, up to 100
+	 * @param callback Function to call when the API call completes.
+	 * @see https://discord.com/developers/docs/resources/poll#get-answer-voters
+	 * On success the callback will contain a dpp::user_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void poll_get_answer_voters(const message& m, uint32_t answer_id, snowflake after, uint64_t limit, command_completion_event_t callback = utility::log_error());
+
+	/**
+	 * @brief Get a list of users that voted for this specific answer.
+	 *
+	 * @param message_id ID of the message with the poll to retrieve the answers from
+	 * @param channel_id ID of the channel with the poll to retrieve the answers from
+	 * @param answer_id ID of the answer to retrieve votes from (see poll_answer::answer_id)
+	 * @param after Users after this ID should be retrieved if this is set to non-zero
+	 * @param limit This number of users maximum should be returned, up to 100
+	 * @param callback Function to call when the API call completes.
+	 * @see https://discord.com/developers/docs/resources/poll#get-answer-voters
+	 * On success the callback will contain a dpp::user_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void poll_get_answer_voters(snowflake message_id, snowflake channel_id, uint32_t answer_id, snowflake after, uint64_t limit, command_completion_event_t callback = utility::log_error());
+
+	/**
+	 * @brief Immediately end a poll.
+	 *
+	 * @param m Message that contains the poll
+	 * @param callback Function to call when the API call completes.
+	 * @see https://discord.com/developers/docs/resources/poll#end-poll
+	 * On success the callback will contain a dpp::message object representing the message containing the poll in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void poll_end(const message &m, command_completion_event_t callback = utility::log_error());
+
+	/**
+	 * @brief Immediately end a poll.
+	 *
+	 * @param message_id ID of the message with the poll to end
+	 * @param channel_id ID of the channel with the poll to end
+	 * @param callback Function to call when the API call completes.
+	 * @see https://discord.com/developers/docs/resources/poll#end-poll
+	 * On success the callback will contain a dpp::message object representing the message containing the poll in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void poll_end(snowflake message_id, snowflake channel_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get a channel
@@ -2272,6 +2564,19 @@ public:
 	void guild_member_timeout(snowflake guild_id, snowflake user_id, time_t communication_disabled_until, command_completion_event_t callback = utility::log_error());
 
 	/**
+	 * @brief Remove the timeout of a guild member.
+	 * A shortcut for guild_member_timeout(guild_id, user_id, 0, callback)
+	 * Fires a `Guild Member Update` Gateway event.
+	 * @see https://discord.com/developers/docs/resources/guild#modify-guild-member
+	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+	 * @param guild_id Guild ID to remove the member timeout from
+	 * @param user_id User ID to remove the timeout for
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void guild_member_timeout_remove(snowflake guild_id, snowflake user_id, command_completion_event_t callback = utility::log_error());
+
+	/**
 	 * @brief Add guild ban
 	 *
 	 * Create a guild ban, and optionally delete previous messages sent by the banned user.
@@ -2367,7 +2672,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::dtemplate object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_template_create(snowflake guild_id, const std::string &name, const std::string &description, command_completion_event_t callback);
+	void guild_template_create(snowflake guild_id, const std::string &name, const std::string &description, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Syncs the template to the guild's current state.
@@ -2510,6 +2815,55 @@ public:
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void guild_emoji_delete(snowflake guild_id, snowflake emoji_id, command_completion_event_t callback = utility::log_error());
+
+	/**
+	 * @brief List all Application Emojis
+	 *
+	 * @see https://discord.com/developers/docs/resources/emoji#list-application-emojis
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::emoji_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void application_emojis_get(command_completion_event_t callback = utility::log_error());
+
+	/**
+	 * @brief Get an Application Emoji
+	 *
+	 * @see https://discord.com/developers/docs/resources/emoji#get-application-emoji
+	 * @param emoji_id The ID of the Emoji to get.
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::emoji object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void application_emoji_get(snowflake emoji_id, command_completion_event_t callback = utility::log_error());
+
+	/**
+	 * @brief Create an Application Emoji
+	 *
+	 * @see https://discord.com/developers/docs/resources/emoji#create-application-emoji
+	 * @param newemoji The emoji to create
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::emoji object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void application_emoji_create(const class emoji& newemoji, command_completion_event_t callback = utility::log_error());
+
+	/**
+	 * @brief Edit an Application Emoji
+	 *
+	 * @see https://discord.com/developers/docs/resources/emoji#modify-application-emoji
+	 * @param newemoji The emoji to edit
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::emoji object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void application_emoji_edit(const class emoji& newemoji, command_completion_event_t callback = utility::log_error());
+
+	/**
+	 * @brief Delete an Application Emoji
+	 *
+	 * @see https://discord.com/developers/docs/resources/emoji#delete-application-emoji
+	 * @param emoji_id The emoji's ID to delete.
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void application_emoji_delete(snowflake emoji_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get prune counts
@@ -2664,7 +3018,7 @@ public:
 	 * @brief Get the guild's onboarding configuration
 	 *
 	 * @see https://discord.com/developers/docs/resources/guild#get-guild-onboarding
-	 * @param o The onboarding object
+	 * @param guild_id The guild to pull the onboarding configuration from.
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::onboarding object in confirmation_callback_t::value filled to match the vanity url. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
@@ -3046,19 +3400,24 @@ public:
 	void current_user_get_guilds(command_completion_event_t callback);
 
 	/**
-	 * @brief Edit current (bot) user
+	 * @brief Edit current (bot) user.
 	 *
-	 * Modifies the current member in a guild. Returns the updated guild_member object on success.
-	 * Fires a `Guild Member Update` Gateway event.
+	 * Modify the requester's user account settings. Returns a dpp::user object on success.
+	 * Fires a User Update Gateway event.
+	 *
+	 * @note There appears to be no limit to the image size, however, if your image cannot be processed/uploaded in time, you will receive a malformed http request.
+	 *
 	 * @see https://discord.com/developers/docs/resources/user#modify-current-user
 	 * @param nickname Nickname to set
-	 * @param image_blob Avatar data to upload (NOTE: Very heavily rate limited!)
-	 * @param type Type of image for avatar. It can be one of `i_gif`, `i_jpg` or `i_png`.
+	 * @param avatar_blob Avatar data to upload
+	 * @param avatar_type Type of image for avatar. It can be one of `i_gif`, `i_jpg` or `i_png`.
+	 * @param banner_blob Banner data to upload
+	 * @param banner_type Type of image for Banner. It can be one of `i_gif`, `i_jpg` or `i_png`.
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::user object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
  	 * @throw dpp::length_exception Image data is larger than the maximum size of 256 kilobytes
 	 */
-	void current_user_edit(const std::string &nickname, const std::string& image_blob = "", const image_type type = i_png, command_completion_event_t callback = utility::log_error());
+	void current_user_edit(const std::string &nickname, const std::string& avatar_blob = "", const image_type avatar_type = i_png, const std::string& banner_blob = "", const image_type banner_type = i_png, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get current user DM channels
@@ -3241,6 +3600,15 @@ public:
 	 * On success the callback will contain a dpp::thread_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void threads_get_joined_private_archived(snowflake channel_id, snowflake before_id, uint16_t limit, command_completion_event_t callback);
+
+	/**
+	 * @brief Get the thread specified by thread_id. This uses the same call as dpp::cluster::channel_get but returns a thread object.
+	 * @see https://discord.com/developers/docs/resources/channel#get-channel
+	 * @param thread_id The id of the thread to obtain.
+	 * @param callback Function to call when the API call completes
+	 * On success the callback will contain a dpp::thread object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void thread_get(snowflake thread_id, command_completion_event_t callback);
 
 	/**
 	 * @brief Create a sticker in a guild
@@ -3524,6 +3892,78 @@ public:
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void automod_rule_delete(snowflake guild_id, snowflake rule_id, command_completion_event_t callback = utility::log_error());
+
+	/**
+	 * @brief Returns all entitlements for a given app, active and expired.
+	 *
+	 * @see https://discord.com/developers/docs/monetization/entitlements#list-entitlements
+	 * @param user_id User ID to look up entitlements for.
+	 * @param sku_ids List of SKU IDs to check entitlements for.
+	 * @param before_id Retrieve entitlements before this entitlement ID.
+	 * @param after_id Retrieve entitlements after this entitlement ID.
+	 * @param limit Number of entitlements to return, 1-100 (default 100).
+	 * @param guild_id Guild ID to look up entitlements for.
+	 * @param exclude_ended Whether ended entitlements should be excluded from the search.
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::emoji_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void entitlements_get(snowflake user_id = 0, const std::vector<snowflake>& sku_ids = {}, snowflake before_id = 0, snowflake after_id = 0, uint8_t limit = 100, snowflake guild_id = 0, bool exclude_ended = false, command_completion_event_t callback = utility::log_error());
+
+	/**
+	 * @brief Creates a test entitlement to a given SKU for a given guild or user.
+	 * Discord will act as though that user or guild has entitlement to your premium offering.
+	 *
+	 * @see https://discord.com/developers/docs/monetization/entitlements#create-test-entitlement
+	 * @param new_entitlement The entitlement to create.
+	 * Make sure your dpp::entitlement_type (inside your dpp::entitlement object) matches the type of the owner_id
+	 * (if type is guild, owner_id is a guild id), otherwise it won't work!
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::entitlement object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void entitlement_test_create(const class entitlement& new_entitlement, command_completion_event_t callback = utility::log_error());
+
+	/**
+	 * @brief Deletes a currently-active test entitlement.
+	 * Discord will act as though that user or guild no longer has entitlement to your premium offering.
+	 *
+	 * @see https://discord.com/developers/docs/monetization/entitlements#delete-test-entitlement
+	 * @param entitlement_id The test entitlement to delete.
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void entitlement_test_delete(snowflake entitlement_id, command_completion_event_t callback = utility::log_error());
+
+	/**
+	 * @brief For One-Time Purchase consumable SKUs, marks a given entitlement for the user as consumed.
+	 *
+	 * @see https://discord.com/developers/docs/monetization/entitlements#consume-an-entitlement
+	 * @param entitlement_id The entitlement to mark as consumed.
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void entitlement_consume(snowflake entitlement_id, command_completion_event_t callback = utility::log_error());
+
+	/**
+	 * @brief Returns all SKUs for a given application.
+	 * @note Because of how Discord's SKU and subscription systems work, you will see two SKUs for your premium offering.
+	 * For integration and testing entitlements, you should use the SKU with type: 5.
+	 *
+	 * @see https://discord.com/developers/docs/monetization/skus#list-skus
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void skus_get(command_completion_event_t callback = utility::log_error());
+
+	/**
+	 * @brief Set the status of a voice channel.
+	 *
+	 * @see https://github.com/discord/discord-api-docs/pull/6400 (please replace soon).
+	 * @param channel_id The channel to update.
+	 * @param status The new status for the channel.
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void channel_set_voice_status(snowflake channel_id, const std::string& status, command_completion_event_t callback = utility::log_error());
 
 #include <dpp/cluster_sync_calls.h>
 #ifdef DPP_CORO

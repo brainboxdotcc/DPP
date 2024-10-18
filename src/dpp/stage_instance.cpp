@@ -36,24 +36,23 @@ stage_instance::stage_instance() :
 {
 }
 
-stage_instance& stage_instance::fill_from_json(const json* j) {
+stage_instance& stage_instance::fill_from_json_impl(const json* j) {
 	set_snowflake_not_null(j, "id", this->id);
 	set_snowflake_not_null(j, "guild_id", this->guild_id);
 	set_snowflake_not_null(j, "channel_id", this->channel_id);
 	set_string_not_null(j, "topic", this->topic) ;
 	this->privacy_level = static_cast<dpp::stage_privacy_level>(int8_not_null(j, "privacy_level"));
 	set_bool_not_null(j, "discoverable_disabled", this->discoverable_disabled);
-
 	return *this;
 }
 
-std::string stage_instance::build_json(bool with_id) const {
+json stage_instance::to_json_impl(bool with_id) const {
 	json j;
 	j["topic"] = this->topic;
 	j["privacy_level"] = this->privacy_level;
 	j["channel_id"] = std::to_string(this->channel_id);
 
-	return j.dump();
+	return j;
 }
 
 } // namespace dpp

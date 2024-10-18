@@ -34,34 +34,49 @@ std::string emoji::get_mention(std::string_view name, snowflake id, bool is_anim
 	return utility::emoji_mention(name,id,is_animated);
 }
 
-emoji& emoji::fill_from_json(nlohmann::json* j) {
+emoji& emoji::fill_from_json_impl(nlohmann::json* j) {
 	id = snowflake_not_null(j, "id");
 	name = string_not_null(j, "name");
 	if (j->contains("user")) {
 		json & user = (*j)["user"];
 		user_id = snowflake_not_null(&user, "id");
 	}
-	if (bool_not_null(j, "require_colons"))
+
+	if(j->contains("roles")) {
+		for (const auto& role : (*j)["roles"]) {
+			this->roles.emplace_back(to_string(role));
+		}
+	}
+
+	if (bool_not_null(j, "require_colons")) {
 		flags |= e_require_colons;
-	if (bool_not_null(j, "managed"))
+	}
+	if (bool_not_null(j, "managed")) {
 		flags |= e_managed;
-	if (bool_not_null(j, "animated"))
+	}
+	if (bool_not_null(j, "animated")) {
 		flags |= e_animated;
-	if (bool_not_null(j, "available"))
+	}
+	if (bool_not_null(j, "available")) {
 		flags |= e_available;
+	}
 	return *this;
 }
 
-std::string emoji::build_json(bool with_id) const {
+json emoji::to_json_impl(bool with_id) const {
 	json j;
 	if (with_id) {
 		j["id"] = std::to_string(id);
 	}
 	j["name"] = name;
 	if (!image_data.empty()) {
-		j["image"] = image_data;
+		j["image"] = image_data.to_nullable_json();
 	}
-	return j.dump();
+	j["roles"] = json::array();
+	for (const auto& role : roles) {
+		j["roles"].push_back(role.str());
+	}
+	return j;
 }
 
 bool emoji::requires_colons() const {
@@ -82,16 +97,21 @@ bool emoji::is_available() const {
 
 emoji& emoji::load_image(std::string_view image_blob, const image_type type) {
 	if (image_blob.size() > MAX_EMOJI_SIZE) {
-		throw dpp::length_exception("Emoji file exceeds discord limit of 256 kilobytes");
+		throw dpp::length_exception(err_icon_size, "Emoji file exceeds discord limit of 256 kilobytes");
 	}
-
-	image_data = "data:" + utility::mime_type(type) + ";base64," + base64_encode(reinterpret_cast<unsigned char const*>(image_blob.data()), static_cast<unsigned int>(image_blob.length()));
-
+	image_data = utility::image_data{type, image_blob};
 	return *this;
 }
 
-std::string emoji::format() const
-{
+emoji& emoji::load_image(const std::byte *data, uint32_t size, const image_type type) {
+	if (size > MAX_EMOJI_SIZE) {
+		throw dpp::length_exception(err_icon_size, "Emoji file exceeds discord limit of 256 kilobytes");
+	}
+	image_data = utility::image_data{type, data, size};
+	return *this;
+}
+
+std::string emoji::format() const {
 	return id ? ((is_animated() ? "a:" : "") + name + ":" + std::to_string(id)) : name;
 }
 
@@ -102,11 +122,11 @@ std::string emoji::get_mention() const {
 std::string emoji::get_url(uint16_t size, const dpp::image_type format, bool prefer_animated) const {
 	if (this->id) {
 		return utility::cdn_endpoint_url({ i_jpg, i_png, i_webp, i_gif },
-										 "emojis/" + std::to_string(this->id),
-										 format, size, prefer_animated, is_animated());
-	} else {
-		return std::string();
+	 		"emojis/" + std::to_string(this->id),
+		 	format, size, prefer_animated, is_animated());
 	}
+
+	return "";
 }
 
 

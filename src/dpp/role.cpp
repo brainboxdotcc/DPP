@@ -38,30 +38,11 @@ std::map<uint8_t, dpp::role_flags> rolemap = {
 		{ 1 << 0,       dpp::r_in_prompt },
 };
 
-role::role() :
-	managed(),
-	guild_id(0),
-	colour(0),
-	position(0),
-	permissions(0),
-	flags(0),
-	integration_id(0),
-	bot_id(0),
-	subscription_listing_id(0),
-	image_data(nullptr)
-{
-}
-
-role::~role()
-{
-	delete image_data;
-}
-
 std::string role::get_mention(const snowflake& id){
 	return utility::role_mention(id);
 }
 
-role& role::fill_from_json(nlohmann::json* j)
+role& role::fill_from_json_impl(nlohmann::json* j)
 {
 	return fill_from_json(0, j);
 }
@@ -70,7 +51,8 @@ role& role::fill_from_json(snowflake _guild_id, nlohmann::json* j)
 {
 	this->guild_id = _guild_id;
 	this->name = string_not_null(j, "name");
-	this->icon = string_not_null(j, "icon");
+	if (auto it = j->find("icon"); it != j->end() && !it->is_null())
+		this->icon = utility::iconhash{it->get<std::string>()};
 	this->unicode_emoji = string_not_null(j, "unicode_emoji");
 	this->id = snowflake_not_null(j, "id");
 	this->colour = int32_not_null(j, "color");
@@ -110,7 +92,7 @@ role& role::fill_from_json(snowflake _guild_id, nlohmann::json* j)
 	return *this;
 }
 
-std::string role::build_json(bool with_id) const {
+json role::to_json_impl(bool with_id) const {
 	json j;
 
 	if (with_id) {
@@ -126,33 +108,27 @@ std::string role::build_json(bool with_id) const {
 	j["permissions"] = permissions;
 	j["hoist"] = is_hoisted();
 	j["mentionable"] = is_mentionable();
-	if (image_data) {
-		j["icon"] = *image_data;
+	if (icon.is_image_data()) {
+		j["icon"] = icon.as_image_data().to_nullable_json();
 	}
 	if (!unicode_emoji.empty()) {
 		j["unicode_emoji"] = unicode_emoji;
 	}
 
-	return j.dump();
+	return j;
 }
 
 std::string role::get_mention() const {
 	return utility::role_mention(id);
 }
 
-role& role::load_image(const std::string &image_blob, const image_type type) {
-	static const std::map<image_type, std::string> mimetypes = {
-		{ i_gif, "image/gif" },
-		{ i_jpg, "image/jpeg" },
-		{ i_png, "image/png" },
-		{ i_webp, "image/webp" },
-	};
+role& role::load_image(std::string_view image_blob, const image_type type) {
+	icon = utility::image_data{type, image_blob};
+	return *this;
+}
 
-	/* If there's already image data defined, free the old data, to prevent a memory leak */
-	delete image_data;
-
-	image_data = new std::string("data:" + mimetypes.find(type)->second + ";base64," + base64_encode((unsigned char const*)image_blob.data(), (unsigned int)image_blob.length()));
-
+role& role::load_image(const std::byte* data, uint32_t size, const image_type type) {
+	icon = utility::image_data{type, data, size};
 	return *this;
 }
 
@@ -413,8 +389,9 @@ members_container role::get_members() const {
 		}
 		for (auto & m : g->members) {
 			/* Iterate all members and use std::find on their role list to see who has this role */
-			auto i = std::find(m.second.roles.begin(), m.second.roles.end(), this->id);
-			if (i != m.second.roles.end()) {
+			const auto& r = m.second.get_roles();
+			auto i = std::find(r.begin(), r.end(), this->id);
+			if (i != r.end()) {
 				gm[m.second.user_id] = m.second;
 			}
 		}
@@ -423,19 +400,22 @@ members_container role::get_members() const {
 }
 
 std::string role::get_icon_url(uint16_t size, const image_type format) const {
-	if (!this->icon.to_string().empty() && this->id) {
-		return utility::cdn_endpoint_url({ i_jpg, i_png, i_webp },
-										 "role-icons/" + std::to_string(this->id) + "/" + this->icon.to_string(),
-										 format, size);
-	} else {
-		return std::string();
+	if (this->icon.is_iconhash() && this->id) {
+		std::string as_str = this->icon.as_iconhash().to_string();
+
+		if (!as_str.empty()) {
+			return utility::cdn_endpoint_url({ i_jpg, i_png, i_webp },
+				"role-icons/" + std::to_string(this->id) + "/" + as_str,
+				format, size);
+		}
 	}
+	return std::string{};
 }
 
 application_role_connection_metadata::application_role_connection_metadata() : key(""), name(""), description("") {
 }
 
-application_role_connection_metadata &application_role_connection_metadata::fill_from_json(nlohmann::json *j) {
+application_role_connection_metadata &application_role_connection_metadata::fill_from_json_impl(nlohmann::json *j) {
 	type = (application_role_connection_metadata_type)int8_not_null(j, "type");
 	key = string_not_null(j, "key");
 	name = string_not_null(j, "name");
@@ -453,7 +433,7 @@ application_role_connection_metadata &application_role_connection_metadata::fill
 	return *this;
 }
 
-std::string application_role_connection_metadata::build_json(bool with_id) const {
+json application_role_connection_metadata::to_json_impl(bool with_id) const {
 	json j;
 	j["type"] = type;
 	j["key"] = key;
@@ -471,21 +451,21 @@ std::string application_role_connection_metadata::build_json(bool with_id) const
 			j["description_localizations"][loc.first] = loc.second;
 		}
 	}
-	return j.dump();
+	return j;
 }
 
 
 application_role_connection::application_role_connection() : platform_name(""), platform_username("") {
 }
 
-application_role_connection &application_role_connection::fill_from_json(nlohmann::json *j) {
+application_role_connection &application_role_connection::fill_from_json_impl(nlohmann::json *j) {
 	platform_name = string_not_null(j, "platform_name");
 	platform_username = string_not_null(j, "platform_username");
 	metadata = application_role_connection_metadata().fill_from_json(&((*j)["metadata"]));
 	return *this;
 }
 
-std::string application_role_connection::build_json(bool with_id) const {
+json application_role_connection::to_json_impl(bool with_id) const {
 	json j;
 	if (!platform_name.empty()) {
 		j["platform_name"] = platform_name;
@@ -494,9 +474,14 @@ std::string application_role_connection::build_json(bool with_id) const {
 		j["platform_username"] = platform_username;
 	}
 	if (std::holds_alternative<application_role_connection_metadata>(metadata)) {
-		j["metadata"] = json::parse(std::get<application_role_connection_metadata>(metadata).build_json());
+		try {
+			j["metadata"] = json::parse(std::get<application_role_connection_metadata>(metadata).build_json());
+		}
+		catch (const std::exception &e) {
+			/* Protection against malformed json in metadata */
+		}
 	}
-	return j.dump();
+	return j;
 }
 
 

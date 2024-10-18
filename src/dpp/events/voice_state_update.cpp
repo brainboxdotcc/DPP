@@ -29,11 +29,7 @@
 
 
 
-namespace dpp { namespace events {
-	
-using json = nlohmann::json;
-using namespace dpp;
-
+namespace dpp::events {
 /**
  * @brief Handle event
  * 
@@ -70,8 +66,7 @@ void voice_state_update::handle(discord_client* client, json &j, const std::stri
 		}
 	}
 
-	if (vsu.state.user_id == client->creator->me.id)
-	{
+	if (vsu.state.user_id == client->creator->me.id) {
 		if (vsu.state.channel_id.empty()) {
 			/* Instruction to disconnect from vc */
 			client->disconnect_voice_internal(vsu.state.guild_id, false);
@@ -93,4 +88,4 @@ void voice_state_update::handle(discord_client* client, json &j, const std::stri
 	}
 }
 
-}};
+};

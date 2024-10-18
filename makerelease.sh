@@ -12,15 +12,15 @@ mkdir assets
 # rpm
 mv "./libdpp - RPM Package amd64/libdpp-$NEWVER-Linux.rpm" "./assets/libdpp-$NEWVER-linux-x64.rpm"
 mv "./libdpp - RPM Package Linux x86/libdpp-$NEWVER-Linux.rpm" "./assets/libdpp-$NEWVER-linux-i386.rpm"
-mv "./libdpp - RPM Package ARM64/libdpp-$NEWVER-Linux.rpm" "./assets/libdpp-$NEWVER-linux-rpi-arm64.rpm"
-mv "./libdpp - RPM Package ARMv7 HF/libdpp-$NEWVER-Linux.rpm" "./assets/libdpp-$NEWVER-linux-rpi-arm7hf.rpm"
+mv "./libdpp - RPM Package arm64/libdpp-$NEWVER-Linux.rpm" "./assets/libdpp-$NEWVER-linux-rpi-arm64.rpm"
+mv "./libdpp - RPM Package arm7hf/libdpp-$NEWVER-Linux.rpm" "./assets/libdpp-$NEWVER-linux-rpi-arm7hf.rpm"
 mv "./libdpp - RPM Package ARMv6/libdpp-$NEWVER-Linux.rpm" "./assets/libdpp-$NEWVER-linux-rpi-arm6.rpm"
 
 # deb
 mv "./libdpp - Debian Package amd64/libdpp-$NEWVER-Linux.deb" "./assets/libdpp-$NEWVER-linux-x64.deb"
 mv "./libdpp - Debian Package Linux x86/libdpp-$NEWVER-Linux.deb" "./assets/libdpp-$NEWVER-linux-i386.deb"
-mv "./libdpp - Debian Package ARM64/libdpp-$NEWVER-Linux.deb" "./assets/libdpp-$NEWVER-linux-rpi-arm64.deb"
-mv "./libdpp - Debian Package ARMv7 HF/libdpp-$NEWVER-Linux.deb" "./assets/libdpp-$NEWVER-linux-rpi-arm7hf.deb"
+mv "./libdpp - Debian Package arm64/libdpp-$NEWVER-Linux.deb" "./assets/libdpp-$NEWVER-linux-rpi-arm64.deb"
+mv "./libdpp - Debian Package arm7hf/libdpp-$NEWVER-Linux.deb" "./assets/libdpp-$NEWVER-linux-rpi-arm7hf.deb"
 mv "./libdpp - Debian Package ARMv6/libdpp-$NEWVER-Linux.deb" "./assets/libdpp-$NEWVER-linux-rpi-arm6.deb"
 
 # win vs2019

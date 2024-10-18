@@ -5,12 +5,17 @@ on:
     branches:
       - 'master'
 
+permissions:
+  contents: read
+
 jobs:
   run:
+    permissions:
+      pull-requests: write # Needs to be able to close a PR.
     runs-on: ubuntu-latest
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@8ca2b8b2ece13480cda6dacd3511b49857a23c09 # v2.5.1
+        uses: step-security/harden-runner@17d0e2bd7d51742c71671bd19fa12bdc9d40a3d6 # v2.8.1
         with:
           egress-policy: audit
 

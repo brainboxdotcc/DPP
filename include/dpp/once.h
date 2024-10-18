@@ -24,23 +24,23 @@
 
 namespace dpp {
 
-	/**
-	 * @brief Run some code within an if() statement only once.
-	 * 
-	 * Use this template like this:
-	 * 
-	 * ```
-	 * if (dpp::run_once<struct any_unique_name_you_like_here>()) {
-	 *     // Your code here
-	 * }
-	 * ```
-	 * 
-	 * @tparam T any unique 'tag' identifier name
-	 * @return auto a true/false return to say if we should execute or not
-	 */
-	template <typename T> auto run_once() {
-		static auto called = false;
-		return !std::exchange(called, true);
-	};
+/**
+ * @brief Run some code within an if() statement only once.
+ *
+ * Use this template like this:
+ *
+ * ```
+ * if (dpp::run_once<struct any_unique_name_you_like_here>()) {
+ *     // Your code here
+ * }
+ * ```
+ *
+ * @tparam T any unique 'tag' identifier name
+ * @return auto a true/false return to say if we should execute or not
+ */
+template <typename T> auto run_once() {
+	static auto called = false;
+	return !std::exchange(called, true);
+};
 
 } // namespace dpp

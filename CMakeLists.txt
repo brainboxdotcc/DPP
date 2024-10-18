@@ -24,14 +24,19 @@ option(RUN_LDCONFIG "Run ldconfig after installation" ON)
 option(DPP_INSTALL "Generate the install target" ON)
 option(DPP_BUILD_TEST "Build the test program" ON)
 option(DPP_NO_VCPKG "No VCPKG" OFF)
-option(DPP_CORO "Experimental support for C++20 coroutines" OFF)
+option(DPP_CORO "Support for C++20 coroutines" OFF)
+option(DPP_FORMATTERS "Support for C++20 formatters" OFF)
 option(DPP_USE_EXTERNAL_JSON "Use an external installation of nlohmann::json" OFF)
 option(DPP_USE_PCH "Use precompiled headers to speed up compilation" OFF)
 option(AVX_TYPE "Force AVX type for speeding up audio mixing" OFF)
+option(DPP_TEST_VCPKG "Force VCPKG build without VCPKG installed (for development use only!)" OFF)
 
 include(CheckCXXSymbolExists)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 add_compile_definitions(DPP_BUILD)
+add_compile_definitions(NOMINMAX)
+
+include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/colour.cmake")
 
 set(DPP_ROOT_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 
@@ -49,10 +54,14 @@ string(CONCAT DPP_VERSION "${DPP_VERSION_MAJOR}.${DPP_VERSION_MINOR}.${DPP_VERSI
 
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${DPP_ROOT_PATH}/cmake/")
 
-if (DPP_NO_VCPKG)
-	message("-- INFO: Explicitly disabling VCPKG as running inside the CI action.")
+if (DPP_TEST_VCPKG)
+	message("-- ${Red}DEVELOPER WARNING${ColourReset}: Running in ${Red}VCPKG test mode${ColourReset}: EMULATING A VCPKG BUILD WITHOUT VCPKG")
 else()
-	message("-- INFO: Using VCPKG if detected")
+	if (DPP_NO_VCPKG)
+		message("-- INFO: Explicitly disabling VCPKG as running inside the CI action.")
+	else()
+		message("-- INFO: Using VCPKG if detected")
+	endif()
 endif()
 
 if (WIN32 AND NOT MINGW AND BUILD_SHARED_LIBS)
@@ -60,27 +69,71 @@ if (WIN32 AND NOT MINGW AND BUILD_SHARED_LIBS)
 	configure_file("${DPP_ROOT_PATH}/src/dpp/dpp.rc.in" "${DPP_ROOT_PATH}/src/dpp/dpp.rc" NEWLINE_STYLE WIN32)
 endif()
 
-if (NOT DPP_NO_VCPKG AND EXISTS "${_VCPKG_ROOT_DIR}")
+if (DPP_TEST_VCPKG)
 	set(PROJECT_NAME "dpp")
 	project(
-		"${PROJECT_NAME}"
-		VERSION "${DPP_VERSION}"
-		LANGUAGES CXX
-		HOMEPAGE_URL "https://dpp.dev/"
-		DESCRIPTION "An incredibly lightweight C++ Discord library."
+			"${PROJECT_NAME}"
+			VERSION "${DPP_VERSION}"
+			LANGUAGES CXX
+			HOMEPAGE_URL "https://dpp.dev/"
+			DESCRIPTION "An incredibly lightweight C++ Discord library."
 	)
+
+	if (MSVC AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+		set(DPP_CLANG_CL true)
+	endif()
+
+	# Required before we add any subdirectories.
+	if (DPP_BUILD_TEST)
+		enable_testing(${CMAKE_CURRENT_SOURCE_DIR})
+	endif()
+
 	add_subdirectory(library-vcpkg)
 else()
-	set(PROJECT_NAME "libdpp")
-	project(
-		"${PROJECT_NAME}"
-		VERSION "${DPP_VERSION}"
-		LANGUAGES CXX
-		HOMEPAGE_URL "https://dpp.dev/"
-		DESCRIPTION "An incredibly lightweight C++ Discord library."
-	)
-	add_subdirectory(library)
+	if (NOT DPP_NO_VCPKG AND EXISTS "${_VCPKG_ROOT_DIR}")
+		set(PROJECT_NAME "dpp")
+		project(
+			"${PROJECT_NAME}"
+			VERSION "${DPP_VERSION}"
+			LANGUAGES CXX
+			HOMEPAGE_URL "https://dpp.dev/"
+			DESCRIPTION "An incredibly lightweight C++ Discord library."
+		)
+
+		if (MSVC AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+			set(DPP_CLANG_CL true)
+		endif()
+
+		# Required before we add any subdirectories.
+		if (DPP_BUILD_TEST)
+			enable_testing(${CMAKE_CURRENT_SOURCE_DIR})
+		endif()
+
+		add_subdirectory(library-vcpkg)
+	else()
+		set(PROJECT_NAME "libdpp")
+		project(
+			"${PROJECT_NAME}"
+			VERSION "${DPP_VERSION}"
+			LANGUAGES CXX
+			HOMEPAGE_URL "https://dpp.dev/"
+			DESCRIPTION "An incredibly lightweight C++ Discord library."
+		)
+
+		if (MSVC AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+			set(DPP_CLANG_CL true)
+		endif()
+
+		# Required before we add any subdirectories.
+		if (DPP_BUILD_TEST)
+			enable_testing(${CMAKE_CURRENT_SOURCE_DIR})
+		endif()
+
+		add_subdirectory(library)
+	endif()
 endif()
+
+find_package(Filesystem)
 
 if(DPP_USE_EXTERNAL_JSON)
 	# We do nothing here, we just assume it is on the include path.
@@ -94,4 +147,8 @@ else()
 	# fussy, this is an older version because trying to use v3.11.2 gave a bunch of parse errors
 	# that made no sense, it seems they may have changed their parsing rules somehow.
 	message("-- Using bundled nlohmann::json")
+endif()
+
+if (NOT WIN32)
+	target_link_libraries(dpp PRIVATE std::filesystem)
 endif()

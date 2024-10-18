@@ -11,25 +11,31 @@ on:
       - '**Doxyfile'
       - '**docpages/example_code/**'
   workflow_dispatch:
+
+permissions:
+  contents: read
     
 jobs:
   test_docs_examples:
     name: Test build examples
     runs-on: ubuntu-22.04
-
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
+  
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@8ca2b8b2ece13480cda6dacd3511b49857a23c09 # v2.5.1
+        uses: step-security/harden-runner@17d0e2bd7d51742c71671bd19fa12bdc9d40a3d6 # v2.8.1
         with:
           egress-policy: audit
 
       - name: Checkout D++
-        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+        uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4.2.0
         with:
           submodules: recursive
   
       - name: Install apt packages
-        run: sudo sed -i 's/azure\.//' /etc/apt/sources.list && sudo apt-get update && sudo apt-get install -y g++-12 libsodium-dev libopus-dev zlib1g-dev libmpg123-dev liboggz-dev cmake libfmt-dev
+        run: sudo sed -i 's/azure\.//' /etc/apt/sources.list && sudo apt-get update && sudo apt-get install -y g++-12 libopus-dev zlib1g-dev libmpg123-dev liboggz-dev cmake libfmt-dev libopusfile-dev
   
       - name: Generate CMake
         run: mkdir build && cd build && cmake -DDPP_NO_VCPKG=ON -DAVX_TYPE=T_fallback -DDPP_CORO=ON -DCMAKE_BUILD_TYPE=Debug ..

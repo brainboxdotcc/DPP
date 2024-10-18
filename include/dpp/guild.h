@@ -35,125 +35,302 @@ namespace dpp {
 
 class channel;
 
+/* Note from Archie: I'd like to move this soon (dpp::guild::region) and allow users to use a region enum.
+ * This would make it easier for people to be able to alter a channel region without having to get the text right.
+ */
+
 /**
  * @brief Represents voice regions for guilds and channels.
  * @deprecated Deprecated in favour of per-channel regions.
- * Please use channel::rtc_region instead.
+ * Please use dpp::channel::rtc_region instead.
  */
 enum region : uint8_t {
-	r_brazil,		//!< Brazil
-	r_central_europe,	//!< Central Europe
-	r_hong_kong,		//!< Hong Kong
-	r_india,		//!< India
-	r_japan,		//!< Japan
-	r_russia,		//!< Russia
-	r_singapore,		//!< Singapore
-	r_south_africa,		//!< South Africa
-	r_sydney,		//!< Sydney
-	r_us_central,		//!< US Central
-	r_us_east,		//!< US East Coast
-	r_us_south,		//!< US South
-	r_us_west,		//!< US West Coast
-	r_western_europe	//!< Western Europe
+	/**
+	 * @brief Brazil
+	 */
+	r_brazil,
+
+	/**
+	 * @brief Central Europe
+	 */
+	r_central_europe,
+
+	/**
+	 * @brief Hong Kong
+	 */
+	r_hong_kong,
+
+	/**
+	 * @brief India
+	 */
+	r_india,
+
+	/**
+	 * @brief Japan
+	 */
+	r_japan,
+
+	/**
+	 * @brief Russia
+	 */
+	r_russia,
+
+	/**
+	 * @brief Singapore
+	 */
+	r_singapore,
+
+	/**
+	 * @brief South Africa
+	 */
+	r_south_africa,
+
+	/**
+	 * @brief Sydney
+	 */
+	r_sydney,
+
+	/**
+	 * @brief US Central
+	 */
+	r_us_central,
+
+	/**
+	 * @brief US East Coast
+	 */
+	r_us_east,
+
+	/**
+	 * @brief US South
+	 */
+	r_us_south,
+
+	/**
+	 * @brief US West Coast
+	 */
+	r_us_west,
+
+	/**
+	 * @brief Western Europe
+	 */
+	r_western_europe
 };
 
 /**
  * @brief The various flags that represent the status of a dpp::guild object
  */
 enum guild_flags : uint32_t {
-	/** Large guild */
-	g_large =				0b00000000000000000000000000000001,
-	/** Unavailable guild (inaccessible due to an outage) */
-	g_unavailable = 			0b00000000000000000000000000000010,
-	/** Guild has widget enabled */
-	g_widget_enabled =			0b00000000000000000000000000000100,
-	/** Guild can  have an invite splash image */
-	g_invite_splash =			0b00000000000000000000000000001000,
-	/** Guild can have VIP regions */
-	g_vip_regions =				0b00000000000000000000000000010000,
-	/** Guild can have a vanity url */
-	g_vanity_url =				0b00000000000000000000000000100000,
-	/** Guild is verified */
-	g_verified =				0b00000000000000000000000001000000,
-	/** Guild is partnered */
-	g_partnered =				0b00000000000000000000000010000000,
-	/** Community features enabled */
-	g_community =				0b00000000000000000000000100000000,
-	/** Guild has enabled role subscriptions */
-	g_role_subscription_enabled = 	0b00000000000000000000001000000000,
-	/** Guild has access to create announcement channels */
-	g_news =				0b00000000000000000000010000000000,
-	/** Guild is discoverable in discovery */
-	g_discoverable =			0b00000000000000000000100000000000,
-	/** Guild is featureable */
-	g_featureable =				0b00000000000000000001000000000000,
-	/** Guild can have an animated icon (doesn't mean it actually has one though) */
-	g_animated_icon =			0b00000000000000000010000000000000,
-	/** Guild can have a banner image */
-	g_banner =				0b00000000000000000100000000000000,
-	/** Guild has a welcome screen */
-	g_welcome_screen_enabled =		0b00000000000000001000000000000000,
-	/** Guild has a member verification gate */
-	g_member_verification_gate =		0b00000000000000010000000000000000,
-	/** Guild has a preview */
-	g_preview_enabled =			0b00000000000000100000000000000000,
-	/** Guild join notifications are off */
-	g_no_join_notifications =		0b00000000000001000000000000000000,
-	/** Guild boost notifications are off */
-	g_no_boost_notifications =		0b00000000000010000000000000000000,
-	/** Guild has an actual animated icon (set by the icon hash starting with 'a_') */
-	g_has_animated_icon =			0b00000000000100000000000000000000,
-	/** Guild has an actual animated banner (set by the icon hash starting with 'a_') */
-	g_has_animated_banner =			0b00000000001000000000000000000000,
-	/** Guild setup tips are off */
-	g_no_setup_tips =			0b00000000010000000000000000000000,
-	/** "Wave to say hi" sticker prompt buttons are off */
-	g_no_sticker_greeting =			0b00000000100000000000000000000000,
-	/** guild has enabled monetization */
-	g_monetization_enabled =		0b00000001000000000000000000000000,
-	/** guild has increased custom sticker slots */
-	g_more_stickers =			0b00000010000000000000000000000000,
-	/** Guild has enabled the role subscription promo page */
-	g_creator_store_page_enabled =	0b00000100000000000000000000000000,
-	/** guild is able to set role icons */
-	g_role_icons =				0b00001000000000000000000000000000,
-	/** guild has access to the seven day archive time for threads
+	/**
+	 * @brief Large guild
+	 */
+	g_large = 0b00000000000000000000000000000001,
+
+	/**
+	 * @brief Unavailable guild (inaccessible due to an outage)
+	 */
+	g_unavailable = 0b00000000000000000000000000000010,
+
+	/**
+	 * @brief Guild has widget enabled
+	 */
+	g_widget_enabled = 0b00000000000000000000000000000100,
+
+	/**
+	 * @brief Guild can have an invite splash image
+	 */
+	g_invite_splash = 0b00000000000000000000000000001000,
+
+	/**
+	 * @brief Guild can have VIP regions
+	 */
+	g_vip_regions =	0b00000000000000000000000000010000,
+
+	/**
+	 * @brief Guild can have a vanity url
+	 */
+	g_vanity_url = 0b00000000000000000000000000100000,
+
+	/**
+	 * @brief Guild is verified
+	 */
+	g_verified = 0b00000000000000000000000001000000,
+
+	/**
+	 * @brief Guild is partnered
+	 */
+	g_partnered = 0b00000000000000000000000010000000,
+
+	/**
+	 * @brief Community features enabled
+	 */
+	g_community = 0b00000000000000000000000100000000,
+
+	/**
+	 * @brief Guild has enabled role subscriptions
+	 */
+	g_role_subscription_enabled = 0b00000000000000000000001000000000,
+
+	/**
+	 * @brief Guild has access to create announcement channels
+	 */
+	g_news = 0b00000000000000000000010000000000,
+
+	/**
+	 * @brief Guild is discoverable in discovery
+	 */
+	g_discoverable = 0b00000000000000000000100000000000,
+
+	/**
+	 * @brief Guild is featureable
+	 */
+	g_featureable = 0b00000000000000000001000000000000,
+
+	/**
+	 * @brief Guild can have an animated icon (doesn't mean it actually has one though)
+	 */
+	g_animated_icon = 0b00000000000000000010000000000000,
+
+	/**
+	 * @brief Guild can have a banner image
+	 */
+	g_banner = 0b00000000000000000100000000000000,
+
+	/**
+	 * @brief Guild has a welcome screen
+	 */
+	g_welcome_screen_enabled = 0b00000000000000001000000000000000,
+
+	/**
+	 * @brief Guild has a member verification gate
+	 */
+	g_member_verification_gate = 0b00000000000000010000000000000000,
+
+	/**
+	 * @brief Guild has a preview
+	 */
+	g_preview_enabled = 0b00000000000000100000000000000000,
+
+	/**
+	 * @brief Guild join notifications are off
+	 */
+	g_no_join_notifications = 0b00000000000001000000000000000000,
+
+	/**
+	 * @brief Guild boost notifications are off
+	 */
+	g_no_boost_notifications = 0b00000000000010000000000000000000,
+
+	/**
+	 * @brief Guild has an actual animated icon (set by the icon hash starting with 'a_')
+	 */
+	g_has_animated_icon = 0b00000000000100000000000000000000,
+
+	/**
+	 * @brief Guild has an actual animated banner (set by the icon hash starting with 'a_')
+	 */
+	g_has_animated_banner =	0b00000000001000000000000000000000,
+
+	/**
+	 * @brief Guild setup tips are off
+	 */
+	g_no_setup_tips = 0b00000000010000000000000000000000,
+
+	/**
+	 * @brief "Wave to say hi" sticker prompt buttons are off
+	 */
+	g_no_sticker_greeting =	0b00000000100000000000000000000000,
+
+	/**
+	 * @brief Guild has enabled monetization
+	 */
+	g_monetization_enabled = 0b00000001000000000000000000000000,
+
+	/**
+	 * @brief Guild has increased custom sticker slots
+	 */
+	g_more_stickers = 0b00000010000000000000000000000000,
+
+	/**
+	 * @brief Guild has enabled the role subscription promo page
+	 */
+	g_creator_store_page_enabled = 0b00000100000000000000000000000000,
+
+	/**
+	 * @brief Guild is able to set role icons
+	 */
+	g_role_icons = 0b00001000000000000000000000000000,
+
+	/**
+	 * @brief Guild has access to the seven day archive time for threads
 	 * @deprecated Removed by Discord
 	 */
-	g_seven_day_thread_archive =		0b00010000000000000000000000000000,
-	/** guild has access to the three day archive time for threads
+	g_seven_day_thread_archive = 0b00010000000000000000000000000000,
+
+	/**
+	 * @brief Guild has access to the three day archive time for threads
 	 * @deprecated Removed by Discord
 	 */
-	g_three_day_thread_archive =		0b00100000000000000000000000000000,
-	/** guild has enabled ticketed events */
-	g_ticketed_events =			0b01000000000000000000000000000000,
-	/** guild can have channel banners
+	g_three_day_thread_archive = 0b00100000000000000000000000000000,
+
+	/**
+	 * @brief Guild has enabled ticketed events
+	 */
+	g_ticketed_events = 0b01000000000000000000000000000000,
+
+	/**
+	 * @brief Guild can have channel banners
 	 * @deprecated Removed by Discord
 	 */
-	g_channel_banners =			0b10000000000000000000000000000000,
+	g_channel_banners = 0b10000000000000000000000000000000,
 };
 
 /**
  * @brief Additional boolean flag values for guild, as guild_flags is full
  */
 enum guild_flags_extra : uint16_t {
-	/** Guild has premium progress bar enabled */
-	g_premium_progress_bar_enabled =	0b0000000000000001,
-	/** Guild can have an animated banner (doesn't mean it actually has one though) */
-	g_animated_banner =			0b0000000000000010,
-	/** Guild has auto moderation */
-	g_auto_moderation =			0b0000000000000100,
-	/** Guild has paused invites, preventing new users from joining */
-	g_invites_disabled =		0b0000000000001000,
-	/** Guild has been set as support server of an app in the App Directory */
-	g_developer_support_server =	0b0000000000010000,
-	/** Guild role subscription purchase and renewal notifications are off */
+	/**
+	 * @brief Guild has premium progress bar enabled
+	 */
+	g_premium_progress_bar_enabled = 0b0000000000000001,
+
+	/**
+	 * @brief Guild can have an animated banner (doesn't mean it actually has one though)
+	 */
+	g_animated_banner = 0b0000000000000010,
+
+	/**
+	 * @brief Guild has auto moderation
+	 */
+	g_auto_moderation = 0b0000000000000100,
+
+	/**
+	 * @brief Guild has paused invites, preventing new users from joining
+	 */
+	g_invites_disabled = 0b0000000000001000,
+
+	/**
+	 * @brief Guild has been set as support server of an app in the App Directory
+	 */
+	g_developer_support_server = 0b0000000000010000,
+
+	/**
+	 * @brief Guild role subscription purchase and renewal notifications are off
+	 */
 	g_no_role_subscription_notifications = 0b0000000000100000,
-	/** Guild role subscription sticker reply buttons are off */
+
+	/**
+	 * @brief Guild role subscription sticker reply buttons are off
+	 */
 	g_no_role_subscription_notification_replies = 0b0000000001000000,
-	/** Guild has role subscriptions that can be purchased */
+
+	/**
+	 * @brief Guild has role subscriptions that can be purchased
+	 */
 	g_role_subscriptions_available_for_purchase = 0b0000000010000000,
-	/** Guild has disabled alerts for join raids in the configured safety alerts channel */
+
+	/**
+	 * @brief Guild has disabled alerts for join raids in the configured safety alerts channel
+	 */
 	g_raid_alerts_disabled = 0b0000000100000000,
 };
 
@@ -162,69 +339,146 @@ enum guild_flags_extra : uint16_t {
  * @note Use the setter functions in dpp::guild_member and do not toggle the bits yourself.
  */
 enum guild_member_flags : uint16_t {
-	/** Member deafened in voice channels */
-	gm_deaf =		0b0000000000000001,
-	/** Member muted in voice channels */
-	gm_mute =		0b0000000000000010,
-	/** Member pending verification by membership screening */
-	gm_pending =		0b0000000000000100,
-	/** Member has animated guild-specific avatar */
-	gm_animated_avatar = 	0b0000000000001000,
-	/** gm_deaf or gm_mute has been toggled */
-	gm_voice_action = 		0b0000000000010000,
-	/** Member has left and rejoined the guild */
+	/**
+	 * @brief Member deafened in voice channel
+	 */
+	gm_deaf = 0b0000000000000001,
+
+	/**
+	 * @brief Member muted in voice channels
+	 */
+	gm_mute = 0b0000000000000010,
+
+	/**
+	 * @brief Member pending verification by membership screening
+	 */
+	gm_pending = 0b0000000000000100,
+
+	/**
+	 * @brief Member has animated guild-specific avatar
+	 */
+	gm_animated_avatar = 0b0000000000001000,
+
+	/**
+	 * @brief gm_deaf or gm_mute has been toggled
+	 */
+	gm_voice_action = 0b0000000000010000,
+
+	/**
+	 * @brief Member has left and rejoined the guild
+	 */
 	gm_did_rejoin = 0b0000000000100000,
-	/** Member has completed onboarding */
+
+	/**
+	 * @brief Member has completed onboarding
+	 */
 	gm_completed_onboarding = 0b0000000001000000,
-	/** Member is exempt from guild verification requirements */
+
+	/**
+	 * @brief Member is exempt from guild verification requirements
+	 */
 	gm_bypasses_verification = 0b0000000010000000,
-	/** Member has started onboarding */
+
+	/**
+	 * @brief Member has started onboarding
+	 */
 	gm_started_onboarding = 0b0000000100000000,
+
+	/**
+	 * @brief Should change roles on next call to edit guild_member?
+	 * @warning This is set by dpp::guild_member::add_role, dpp::guild_member::remove_role, and dpp::guild_member::set_roles.
+	 * You should only ever use this value if you know what you're doing, otherwise stick to the three functions listed.
+	 */
+	gm_roles_action = 0b0000001000000000,
+
+	/**
+	 * @brief Should nicknames on next call to edit guild_member?
+	 * @warning This is set by dpp::guild_member::set_nickname.
+	 * You should only ever use this value if you know what you're doing, otherwise stick to the function listed.
+	 */
+	gm_nickname_action = 0b0000010000000000,
 };
 
 /**
  * @brief Represents dpp::user membership upon a dpp::guild.
  * This contains the user's nickname, guild roles, and any other guild-specific flags.
  */
-class DPP_EXPORT guild_member {
-public:
-	/** Nickname, or empty string if they don't have a nickname on this guild */
+class DPP_EXPORT guild_member : public json_interface<guild_member> {
+protected:
+	friend struct json_interface<guild_member>;
+
+	/**
+	 * @brief Build json for the member object
+	 *
+	 * @param with_id Add ID to output
+	 * @return json JSON object
+	 */
+	json to_json_impl(bool with_id = false) const;
+
+protected:
+	/**
+	 * @brief Nickname.
+	 *
+	 * @note Empty string if they don't have a nickname on this guild
+	 */
 	std::string nickname;
-	/** List of roles this user has on this guild */
+
+	/**
+	 * @brief List of roles this user has on this guild
+	 */
 	std::vector<snowflake> roles;
-	/** Guild id */
-	snowflake guild_id;
-	/** User id */
-	snowflake user_id;
-	/** User avatar (per-server avatar is a nitro only feature) */
-	utility::iconhash avatar;
-	/** timestamp of when the time out will be removed; until then, they cannot interact with the guild */
-	time_t communication_disabled_until;
-	/** Date and time the user joined the guild */
-	time_t joined_at;
-	/** Boosting since */
-	time_t premium_since;
-	/** A set of flags built from the bitmask defined by dpp::guild_member_flags */
+
+	/**
+	 * @brief A set of flags built from the bitmask defined by dpp::guild_member_flags
+	 */
 	uint16_t flags;
+
+	friend void from_json(const nlohmann::json& j, guild_member& gm);
+
+public:
+	/**
+	 * @brief Guild id
+	 */
+	snowflake guild_id;
+
+	/**
+	 * @brief User id
+	 */
+	snowflake user_id;
+
+	/**
+	 * @brief User avatar.
+	 *
+	 * @note Per-server avatar is a nitro only feature.
+	 */
+	utility::iconhash avatar;
+
+	/**
+	 * @brief Timestamp of when the time out will be removed; until then, they cannot interact with the guild
+	 */
+	time_t communication_disabled_until;
+
+	/**
+	 * @brief Date and time the user joined the guild.
+	 */
+	time_t joined_at;
+
+	/**
+	 * @brief The Date and time the user started boosting.
+	 */
+	time_t premium_since;
 
 	/** Default constructor */
 	guild_member();
 
-	/** Fill this object from a json object.
+	/**
+	 * @brief Fill this object from a json object.
 	 * @param j The json object to get data from
 	 * @param g_id The guild id to associate the member with
 	 * @param u_id The user id to associate the member with
 	 * @return Reference to self for call chaining
 	 */
 	guild_member& fill_from_json(nlohmann::json* j, snowflake g_id, snowflake u_id);
-
-	/**
-	 * @brief Build json string for the member object
-	 * 
-	 * @param with_id Add ID to output
-	 * @return std::string json string
-	 */
-	std::string build_json(bool with_id = false) const;
 
 	/**
 	 * @brief Returns true if the user is in time-out (communication disabled)
@@ -265,6 +519,14 @@ public:
 	 * @return false user has not rejoined
 	 */
 	bool has_rejoined() const;
+
+	/**
+	 * @brief Is this user also the guild member?
+	 * @return true if the user is the guild owner.
+	 * @return false if the user is not the guild owner or the guild is not in the cache.
+	 * @note If the guild cache is disabled, this function will always return false.
+	 */
+	bool is_guild_owner() const;
 
 	/**
 	 * @brief Returns true if the user has completed onboarding
@@ -323,6 +585,20 @@ public:
 	guild_member& set_nickname(const std::string& nick);
 
 	/**
+	 * @brief Get the nickname 
+	 * 
+	 * @return std::string nickname
+	 */
+	std::string get_nickname() const;
+
+	/**
+	 * @brief Get the roles
+	 * 
+	 * @return std::vector<dpp::snowflake> roles
+	 */
+	const std::vector<dpp::snowflake>& get_roles() const;
+
+	/**
 	 * @brief Find the dpp::user object for this member. This is an alias for dpp::find_user
 	 * @return dpp::user* Pointer to the user object. If not in cache, it returns nullptr
 	 */
@@ -378,19 +654,86 @@ public:
 	 * @return std::string mention
 	 */
 	std::string get_mention() const;
+
+	/**
+	 * @brief Add a role to this member
+	 * @note This call sets the role change bit, which causes the new role
+	 * list to be sent if this is passed to dpp::cluster::guild_edit_member
+	 * or dpp::cluster::guild_add_member
+	 * 
+	 * @param role_id Role ID to add
+	 * @return guild_member& Reference to self
+	 */
+	guild_member& add_role(dpp::snowflake role_id);
+
+	/**
+	 * @brief Remove a role from this member
+	 * @note This call sets the role change bit, which causes the new role
+	 * list to be sent if this is passed to dpp::cluster::guild_edit_member
+	 * or dpp::cluster::guild_add_member
+	 * 
+	 * @param role_id Role ID to remove
+	 * @return guild_member& Reference to self
+	 */
+	guild_member& remove_role(dpp::snowflake role_id);
+
+	/**
+	 * @brief Set a new role list for this member
+	 * @note This call sets the role change bit, which causes the new role
+	 * list to be sent if this is passed to dpp::cluster::guild_edit_member
+	 * or dpp::cluster::guild_add_member
+	 * 
+	 * @param role_ids Roles to set
+	 * @return guild_member& Reference to self
+	 */
+	guild_member& set_roles(const std::vector<dpp::snowflake> &role_ids);
+
 };
 
 /**
  * @brief Defines a channel on a server's welcome screen
  */
-struct DPP_EXPORT welcome_channel: public json_interface<welcome_channel> {
-	/// The description shown for the channel
+struct DPP_EXPORT welcome_channel : public json_interface<welcome_channel> {
+protected:
+	friend struct json_interface<welcome_channel>;
+
+	/**
+	 * @brief Read class values from json object
+	 *
+	 * @param j A json object to read from
+	 * @return A reference to self
+	 */
+	welcome_channel& fill_from_json_impl(nlohmann::json* j);
+
+	/**
+	 * @brief Build the json for this object
+	 *
+	 * @param with_id include the id in the JSON
+	 * @return json JSON data
+	 */
+	json to_json_impl(bool with_id = false) const;
+
+public:
+	/**
+	 * @brief The description shown for the channel.
+	 */
 	std::string description;
-	/// The emoji name if custom, the unicode character if standard, or null if no emoji is set
+
+	/**
+	 * @brief The emoji name.
+	 *
+	 * @note name if custom, the unicode character if standard, or null if no emoji is set.
+	 */
 	std::string emoji_name;
-	/// The channel's id
+
+	/**
+	 * @brief The channel's id.
+	 */
 	snowflake channel_id;
-	/// The emoji id, if the emoji is custom
+
+	/**
+	 * @brief The emoji id, if the emoji is custom.
+	 */
 	snowflake emoji_id;
 
 	/**
@@ -402,22 +745,6 @@ struct DPP_EXPORT welcome_channel: public json_interface<welcome_channel> {
 	 * @brief Destroy the welcome channel object
 	 */
 	virtual ~welcome_channel() = default;
-
-	/**
-	 * @brief Read class values from json object
-	 *
-	 * @param j A json object to read from
-	 * @return A reference to self
-	 */
-	welcome_channel& fill_from_json(nlohmann::json* j);
-
-	/**
-	 * @brief Build the json for this object
-	 *
-	 * @param with_id include the id in the JSON
-	 * @return std::string json data
-	 */
-	std::string build_json(bool with_id = false) const;
 
 	/**
 	 * @brief Set the channel ID of this welcome channel object
@@ -440,10 +767,35 @@ struct DPP_EXPORT welcome_channel: public json_interface<welcome_channel> {
 /**
  * @brief Defines a server's welcome screen
  */
-struct DPP_EXPORT welcome_screen: public json_interface<welcome_screen> {
-	/// The server description shown in the welcome screen
+struct DPP_EXPORT welcome_screen : public json_interface<welcome_screen> {
+protected:
+	friend struct json_interface<welcome_screen>;
+
+	/**
+	 * @brief Read class values from json object
+	 *
+	 * @param j A json object to read from
+	 * @return A reference to self
+	 */
+	welcome_screen& fill_from_json_impl(nlohmann::json* j);
+
+	/**
+	 * @brief Build the json for this object
+	 *
+	 * @param with_id include the id in the JSON
+	 * @return std::string json data
+	 */
+	json to_json_impl(bool with_id = false) const;
+
+public:
+	/**
+	 * @brief The server description shown in the welcome screen
+	 */
 	std::string description;
-	/// The channels shown in the welcome screen (max 5)
+
+	/**
+	 * @brief The channels shown in the welcome screen (max 5)
+	 */
 	std::vector<welcome_channel> welcome_channels;
 
 	/**
@@ -455,22 +807,6 @@ struct DPP_EXPORT welcome_screen: public json_interface<welcome_screen> {
 	 * @brief Destroy the welcome screen object
 	 */
 	virtual ~welcome_screen() = default;
-
-	/**
-	 * @brief Read class values from json object
-	 *
-	 * @param j A json object to read from
-	 * @return A reference to self
-	 */
-	welcome_screen& fill_from_json(nlohmann::json* j);
-
-	/**
-	 * @brief Build the json for this object
-	 *
-	 * @param with_id include the id in the JSON
-	 * @return std::string json data
-	 */
-	std::string build_json(bool with_id = false) const;
 
 	/**
 	 * @brief Set the server description for this welcome screen object shown in the welcome screen
@@ -487,14 +823,25 @@ struct DPP_EXPORT welcome_screen: public json_interface<welcome_screen> {
  * @note This is set by Discord, and cannot be set by any bot or user on the guild.
  */
 enum guild_nsfw_level_t : uint8_t {
-	/// Default setting, not configured
-	nsfw_default		=	0,
-	/// Explicit content may be in this guild
-	nsfw_explicit		=	1,
-	/// Safe for work content only
-	nsfw_safe		=	2,
-	/// Age restricted, 18+
-	nsfw_age_restricted	=	3
+	/**
+	 * @brief Default setting, not configured
+	 */
+	nsfw_default = 0,
+
+	/**
+	 * @brief Explicit content may be in this guild
+	 */
+	nsfw_explicit =	1,
+
+	/**
+	 * @brief Safe for work content only
+	 */
+	nsfw_safe = 2,
+
+	/**
+	 * @brief Age restricted, 18+
+	 */
+	nsfw_age_restricted = 3
 };
 
 /**
@@ -503,22 +850,35 @@ enum guild_nsfw_level_t : uint8_t {
  * partnered, official etc.
  */
 enum guild_explicit_content_t : uint8_t {
-	/// media content will not be scanned
-	expl_disabled =			0,
-	/// media content sent by members without roles will be scanned
-	expl_members_without_roles =	1,
-	/// media content sent by all members will be scanned
-	expl_all_members =		2
+	/**
+	 * @brief Media content will not be scanned.
+	 */
+	expl_disabled =	0,
+
+	/**
+	 * @brief Media content sent by members without roles will be scanned.
+	 */
+	expl_members_without_roles = 1,
+
+	/**
+	 * @brief Media content sent by all members will be scanned.
+	 */
+	expl_all_members = 2
 };
 
 /**
- * @brief MFA level for server. If set to elevated all moderators need MFA to perform specific
- * actions such as kick or ban.
+ * @brief MFA level for server.
+ * If set to elevated all moderators need MFA to perform specific actions such as kick or ban.
  */
 enum mfa_level_t : uint8_t {
-	/// MFA not elevated
+	/**
+	 * @brief MFA not elevated
+	 */
 	mfa_none = 0,
-	/// MFA elevated
+
+	/**
+	 * @brief MFA elevated.
+	 */
 	mfa_elevated = 1
 };
 
@@ -526,73 +886,142 @@ enum mfa_level_t : uint8_t {
  * @brief Guild verification level
  */
 enum verification_level_t : uint8_t {
-	/// unrestricted
-	ver_none =	0,
-	/// must have verified email on account
-	ver_low	= 	1,
-	/// must be registered on Discord for longer than 5 minutes
-	ver_medium =	2,
-	/// must be a member of the server for longer than 10 minutes
-	ver_high =	3,
-	/// must have a verified phone number
+	/**
+	 * @brief Unrestricted.
+	 */
+	ver_none = 0,
+
+	/**
+	 * @brief Must have verified email on account.
+	 */
+	ver_low	= 1,
+
+	/**
+	 * @brief Must be registered on Discord for longer than 5 minutes.
+	 */
+	ver_medium = 2,
+
+	/**
+	 * @brief Must be a member of the server for longer than 10 minutes.
+	 */
+	ver_high = 3,
+
+	/**
+	 * @brief Must have a verified phone number.
+	 */
 	ver_very_high =	4,
 };
 
 /**
  * @brief Default message notification level
  */
-enum default_message_notification_t: uint8_t {
-	/// members will receive notifications for all messages by default
+enum default_message_notification_t : uint8_t {
+	/**
+	 * @brief Members will receive notifications for all messages by default.
+	 */
 	dmn_all = 0,
-	///	members will receive notifications only for messages that \@mention them by default
+
+	/**
+	 * @brief Members will receive notifications only for messages that \@mention them by default.
+	 */
 	dmn_only_mentions = 1,
 };
 
 /**
- * @brief Premium tier
+ * @brief The guild's premium tier.
  */
-enum guild_premium_tier_t: uint8_t {
-	/// guild has not unlocked any Server Boost perks
+enum guild_premium_tier_t : uint8_t {
+	/**
+	 * @brief Guild has not unlocked any Server Boost perks.
+	 */
 	tier_none = 0,
-	/// guild has unlocked Server Boost level 1 perks
+
+	/**
+	 * @brief Guild has unlocked Server Boost level 1 perks.
+	 */
 	tier_1 = 1,
-	/// guild has unlocked Server Boost level 2 perks
+
+	/**
+	 * @brief Guild has unlocked Server Boost level 2 perks.
+	 */
 	tier_2 = 2,
-	/// guild has unlocked Server Boost level 3 perks
+
+	/**
+	 * @brief Guild has unlocked Server Boost level 3 perks.
+	 */
 	tier_3 = 3,
 };
 
 /**
  * @brief Voice AFK timeout values for guild::afk_timeout
  */
-enum guild_afk_timeout_t: uint8_t {
-	/// AFK timeout disabled
+enum guild_afk_timeout_t : uint8_t {
+	/**
+	 * @brief AFK timeout disabled
+	 */
 	afk_off,
-	/// AFK timeout of 1 Minute
+
+	/**
+	 * @brief AFK timeout of 1 Minute
+	 */
 	afk_60,
-	/// AFK timeout of 5 Minutes
+
+	/**
+	 * @brief AFK timeout of 5 Minutes
+	 */
 	afk_300,
-	/// AFK timeout of 15 Minutes
+
+	/**
+	 * @brief AFK timeout of 15 Minutes
+	 */
 	afk_900,
-	/// AFK timeout of 30 Minutes
+
+	/**
+	 * @brief AFK timeout of 30 Minutes
+	 */
 	afk_1800,
-	/// AFK timeout of 1 Hour
+
+	/**
+	 * @brief AFK timeout of 1 Hour
+	 */
 	afk_3600,
 };
 
-/** @brief Guild members container
+/**
+ * @brief Guild members container
  */
 typedef std::unordered_map<snowflake, guild_member> members_container;
 
 /**
  * @brief Represents a guild on Discord (AKA a server)
  */
-class DPP_EXPORT guild : public managed, public json_interface<guild>  {
+class DPP_EXPORT guild : public managed, public json_interface<guild> {
+protected:
+	friend struct json_interface<guild>;
+
+	/** Read class values from json object
+	 * @param j A json object to read from
+	 * @return A reference to self
+	 */
+	guild& fill_from_json_impl(nlohmann::json* j);
+
+	/** Build a JSON from this object.
+	 * @param with_id True if an ID is to be included in the JSON
+	 * @return JSON
+	 */
+	json to_json_impl(bool with_id = false) const;
+
 public:
-	/** Guild name */
+	using json_interface<guild>::fill_from_json;
+
+	/**
+	 * @brief Guild name
+	 */
 	std::string name;
 
-	/** Server description */
+	/**
+	 * @brief Server description
+	 */
 	std::string description;
 
 	/**
@@ -603,74 +1032,114 @@ public:
 	 */
 	std::string vanity_url_code;
 
-	/** Roles defined on this server */
+	/**
+	 * @brief Roles defined on this server
+	 */
 	std::vector<snowflake> roles;
 
-	/** List of channels on this server */
+	/**
+	 * @brief List of channels on this server
+	 */
 	std::vector<snowflake> channels;
 
-	/** List of threads on this server */
+	/**
+	 * @brief List of threads on this server
+	 */
 	std::vector<snowflake> threads;
 
-	/** List of emojis
-	*/
+	/**
+	 * @brief List of emojis
+	 */
 	std::vector<snowflake> emojis;
 
-	/** List of members in voice channels in the guild.
+	/**
+	 * @brief List of members in voice channels in the guild.
 	 */
 	std::map<snowflake, voicestate> voice_members;
 
-	/** List of guild members. Note that when you first receive the
-	 * guild create event, this may be empty or near empty.
-	 * This depends upon your dpp::intents and the size of your bot.
+	/**
+	 * @brief List of guild members.
+	 *
+	 * @note When you first receive the guild create event,
+	 * this may be empty or near empty. This depends upon your
+	 * dpp::intents and the size of your bot.
 	 * It will be filled by guild member chunk requests.
 	 */
 	members_container members;
 
-	/** Welcome screen
+	/**
+	 * @brief Welcome screen
 	 */
 	dpp::welcome_screen welcome_screen;
 
-	/** Guild icon hash */
-	utility::iconhash icon;
+	/**
+	 * @brief Guild icon
+	 */
+	utility::icon icon;
 
-	/** Guild splash hash */
-	utility::iconhash splash;
+	/**
+	 * @brief Guild splash
+	 */
+	utility::icon splash;
 
-	/** Guild discovery splash hash */
-	utility::iconhash discovery_splash;
+	/**
+	 * @brief Guild discovery splash
+	 */
+	utility::icon discovery_splash;
 
-	/** Server banner hash */
-	utility::iconhash banner;
+	/**
+	 * @brief Server banner
+	 */
+	utility::icon banner;
 
-	/** Snowflake id of guild owner */
+	/**
+	 * @brief Snowflake id of guild owner
+	 */
 	snowflake owner_id;
 
-	/** Snowflake ID of AFK voice channel or 0 */
+	/**
+	 * @brief Snowflake ID of AFK voice channel or 0
+	 */
 	snowflake afk_channel_id;
 
-	/** ID of creating application, if any, or 0 */
+	/**
+	 * @brief ID of creating application, if any, or 0
+	 */
 	snowflake application_id;
 
-	/** ID of system channel where discord update messages are sent */
+	/**
+	 * @brief ID of system channel where discord update messages are sent
+	 */
 	snowflake system_channel_id;
 
-	/** ID of rules channel for communities */
+	/**
+	 * @brief ID of rules channel for communities
+	 */
 	snowflake rules_channel_id;
 
-	/** Public updates channel id or 0 */
+	/**
+	 * @brief Public updates channel id or 0
+	 */
 	snowflake public_updates_channel_id;
 
-	/** Snowflake ID of widget channel, or 0 */
+	/**
+	 * @brief Snowflake ID of widget channel, or 0
+	 */
 	snowflake widget_channel_id;
 
-	/** The id of the channel where admins and moderators of Community guilds receive safety alerts from Discord */
+	/**
+	 * @brief The id of the channel where admins and moderators of Community guilds receive safety alerts from Discord
+	 */
 	snowflake safety_alerts_channel_id;
 
-	/** Approximate member count. May be sent as zero */
+	/**
+	 * @brief Approximate member count. May be sent as zero
+	 */
 	uint32_t member_count;
 
-	/** Flags bitmask as defined by values within dpp::guild_flags */
+	/**
+	 * @brief Flags bitmask as defined by values within dpp::guild_flags
+	 */
 	uint32_t flags;
 
 	/**
@@ -689,31 +1158,49 @@ public:
 	 */
 	uint16_t flags_extra;
 
-	/** Shard ID of the guild */
+	/**
+	 * @brief Shard ID of the guild
+	 */
 	uint16_t shard_id;
 
-	/** Number of boosters */
+	/**
+	 * @brief Number of boosters
+	 */
 	uint16_t premium_subscription_count;
 
-	/** Voice AFK timeout before moving users to AFK channel */
+	/**
+	 * @brief Voice AFK timeout before moving users to AFK channel
+	 */
 	guild_afk_timeout_t afk_timeout;
 
-	/** Maximum users in a video channel, or 0 */
+	/**
+	 * @brief Maximum users in a video channel, or 0
+	 */
 	uint8_t max_video_channel_users;
 
-	/** Setting for how notifications are to be delivered to users */
+	/**
+	 * @brief Setting for how notifications are to be delivered to users
+	 */
 	default_message_notification_t default_message_notifications;
 
-	/** Boost level */
+	/**
+	 * @brief Boost level
+	 */
 	guild_premium_tier_t premium_tier;
 
-	/** Verification level of server */
+	/**
+	 * @brief Verification level of server
+	 */
 	verification_level_t verification_level;
 
-	/** Whether or not explicit content filtering is enable and what setting it is */
+	/**
+	 * @brief Whether or not explicit content filtering is enable and what setting it is
+	 */
 	guild_explicit_content_t explicit_content_filter;
 
-	/** If multi factor authentication is required for moderators or not */
+	/**
+	 * @brief If multi factor authentication is required for moderators or not
+	 */
 	mfa_level_t mfa_level;
 
 	/**
@@ -730,23 +1217,11 @@ public:
 	virtual ~guild() = default;
 
 	/** Read class values from json object
-	 * @param j A json object to read from
-	 * @return A reference to self
-	 */
-	 guild& fill_from_json(nlohmann::json* j);
-
-	/** Read class values from json object
 	 * @param shard originating shard
 	 * @param j A json object to read from
 	 * @return A reference to self
 	 */
 	guild& fill_from_json(class discord_client* shard, nlohmann::json* j);
-
-	/** Build a JSON string from this object.
-	 * @param with_id True if an ID is to be included in the JSON
-	 * @return JSON string
-	 */
-	std::string build_json(bool with_id = false) const;
 
 	/**
 	 * @brief Compute the base permissions for a member on this guild,
@@ -813,12 +1288,14 @@ public:
 	 * @param user_id User id to join
 	 * @param self_mute True if the bot should mute itself
 	 * @param self_deaf True if the bot should deafen itself
+	 * @param dave True to enable DAVE E2EE
+	 * @warning DAVE is EXPERIMENTAL and subject to change.
 	 * @return True if the user specified is in a vc, false if they aren't
 	 * @note This is NOT a synchronous blocking call! The bot isn't instantly ready to send or listen for audio,
 	 * as we have to wait for the connection to the voice server to be established!
 	 * e.g. wait for dpp::cluster::on_voice_ready event, and then send the audio within that event.
 	 */
-	bool connect_member_voice(snowflake user_id, bool self_mute = false, bool self_deaf = false);
+	bool connect_member_voice(snowflake user_id, bool self_mute = false, bool self_deaf = false, bool dave = false);
 
 	/**
 	 * @brief Get the banner url of the guild if it have one, otherwise returns an empty string
@@ -874,6 +1351,108 @@ public:
 	 * @throw dpp::length_exception if guild name is too short
 	 */
 	guild& set_name(const std::string& n);
+
+	/**
+	 * @brief Remove the guild banner.
+	 * @return guild& Reference to self for chaining
+	 */
+	guild& remove_banner();
+
+	/**
+	 * @brief Set the guild banner image. Server needs banner feature.
+	 * Must be 16:9, and depending on nitro level, must be png or jpeg.
+	 * Animated gif needs the animated banner server feature.
+	 * @param format Image format.
+	 * @param data Image data in bytes
+	 * @return guild& Reference to self for chaining
+	 */
+	guild& set_banner(image_type format, std::string_view data);
+
+	/**
+	 * @brief Set the guild banner image. Server needs banner feature.
+	 * Must be 16:9, and depending on nitro level, must be png or jpeg.
+	 * Animated gif needs the animated banner server feature.
+	 * @param format Image format.
+	 * @param data Image data in bytes
+	 * @param size Size of the data in bytes
+	 * @return guild& Reference to self for chaining
+	 */
+	guild& set_banner(image_type format, const std::byte* data, uint32_t size);
+
+	/**
+	 * @brief Remove the guild discovery splash.
+	 * @return guild& Reference to self for chaining
+	 */
+	guild& remove_discovery_splash();
+
+	/**
+	 * @brief Set the guild discovery splash image. Server needs discoverable feature.
+	 * Must be 16:9 and png or jpeg.
+	 * @param format Image format.
+	 * @param data Image data in bytes
+	 * @return guild& Reference to self for chaining
+	 */
+	guild& set_discovery_splash(image_type format, std::string_view data);
+
+	/**
+	 * @brief Set the guild discovery splash image. Server needs discoverable feature.
+	 * Must be 16:9 and png or jpeg.
+	 * @param format Image format.
+	 * @param data Image data in bytes
+	 * @param size Size of the data in bytes
+	 * @return guild& Reference to self for chaining
+	 */
+	guild& set_discovery_splash(image_type format, const std::byte* data, uint32_t size);
+
+	/**
+	 * @brief Remove the guild invite splash.
+	 * @return guild& Reference to self for chaining
+	 */
+	guild& remove_splash();
+
+	/**
+	 * @brief Set the guild invite splash image. Server needs invite splash feature.
+	 * Must be 16:9 and png or jpeg.
+	 * @param format Image format.
+	 * @param data Image data in bytes
+	 * @return guild& Reference to self for chaining
+	 */
+	guild& set_splash(image_type format, std::string_view data);
+
+	/**
+	 * @brief Set the guild invite splash image. Server needs invite splash feature.
+	 * Must be 16:9 and png or jpeg.
+	 * @param format Image format.
+	 * @param data Image data in bytes
+	 * @param size Size of the data in bytes
+	 * @return guild& Reference to self for chaining
+	 */
+	guild& set_splash(image_type format, const std::byte* data, uint32_t size);
+
+	/**
+	 * @brief Remove the guild icon.
+	 * @return guild& Reference to self for chaining
+	 */
+	guild& remove_icon();
+
+	/**
+	 * @brief Set the guild icon image.
+	 * Must be 1024x1024 and png or jpeg. Gif allowed only if the server has animated icon.
+	 * @param format Image format.
+	 * @param data Image data in bytes
+	 * @return guild& Reference to self for chaining
+	 */
+	guild& set_icon(image_type format, std::string_view data);
+
+	/**
+	 * @brief Set the 1024x1024 guild icon image.
+	 * Must be png or jpeg. Gif allowed only if the server has animated icon.
+	 * @param format Image format.
+	 * @param data Image data in bytes
+	 * @param size Size of the data in bytes
+	 * @return guild& Reference to self for chaining
+	 */
+	guild& set_icon(image_type format, const std::byte* data, uint32_t size);
 
 	/**
 	 * @brief Is a large server (>250 users)
@@ -1090,13 +1669,34 @@ public:
 	bool has_invites_disabled() const;
 };
 
-/** A container of guilds */
+/**
+ * @brief A container of guilds
+ */
 typedef std::unordered_map<snowflake, guild> guild_map;
 
 /**
  * @brief Represents a guild widget, simple web widget of member list
  */
-class DPP_EXPORT guild_widget {
+class DPP_EXPORT guild_widget : public json_interface<guild_widget> {
+protected:
+	friend struct json_interface<guild_widget>;
+
+	/**
+	 * @brief Build a guild widget from json
+	 *
+	 * @param j json to build from
+	 * @return guild_widget& reference to self
+	 */
+	guild_widget& fill_from_json_impl(nlohmann::json* j);
+
+	/**
+	 * @brief Build json for a guild widget
+	 *
+	 * @param with_id Add ID to output
+	 * @return std::string guild widget stringified json
+	 */
+	json to_json_impl(bool with_id = false) const;
+
 public:
 	/**
 	 * @brief Channel widget points to
@@ -1112,58 +1712,107 @@ public:
 	 * @brief Construct a new guild widget object
 	 */
 	guild_widget();
-
-	/**
-	 * @brief Build a guild widget from json
-	 *
-	 * @param j json to build from
-	 * @return guild_widget& reference to self
-	 */
-	guild_widget& fill_from_json(nlohmann::json* j);
-
-	/**
-	 * @brief Build json for a guild widget
-	 *
-	 * @param with_id Add ID to output
-	 * @return std::string guild widget stringified json
-	 */
-	std::string build_json(bool with_id = false) const;
 };
 
 /**
  * @brief The onboarding mode for the dpp::onboarding object. Defines the criteria used to satisfy Onboarding constraints that are required for enabling.
  */
-enum onboarding_mode: uint8_t {
-	gom_default = 	0, //!< Counts only Default Channels towards constraints
-	gom_advanced = 	1, //!< Counts Default Channels and Questions towards constraints
+enum onboarding_mode : uint8_t {
+	/**
+	 * @brief Counts only Default Channels towards constraints.
+	 */
+	gom_default = 0,
+
+	/**
+	 * @brief Counts Default Channels and Questions towards constraints.
+	 */
+	gom_advanced = 1,
 };
 
 /**
  * @brief The various types of dpp::onboarding_prompt
  */
-enum onboarding_prompt_type: uint8_t {
-	opt_multiple_choice = 0, //!< Multiple choice
-	opt_dropdown = 1, //!< Dropdown
+enum onboarding_prompt_type : uint8_t {
+	/**
+	 * @brief Multiple choice.
+	 */
+	opt_multiple_choice = 0,
+
+	/**
+	 * @brief Dropdown.
+	 */
+	opt_dropdown = 1,
 };
 
 /**
  * @brief Various flags for dpp::onboarding_prompt
  */
-enum onboarding_prompt_flags: uint8_t {
-	opf_single_select = 1 << 0, //!< Indicates whether users are limited to selecting one option for the prompt
-	opf_required =		1 << 1, //!< Indicates whether the prompt is required before a user completes the onboarding flow
-	opf_in_onboarding = 1 << 2, //!< Indicates whether the prompt is present in the onboarding flow. If set, the prompt will only appear in the Channels & Roles tab
+enum onboarding_prompt_flags : uint8_t {
+	/**
+	 * @brief Indicates whether users are limited to selecting one option for the prompt.
+	 */
+	opf_single_select = 1 << 0,
+
+	/**
+	 * @brief Indicates whether the prompt is required before a user completes the onboarding flow.
+	 */
+	opf_required = 1 << 1,
+
+	/**
+	 * @brief Indicates whether the prompt is present in the onboarding flow.
+	 * If set, the prompt will only appear in the Channels & Roles tab
+	 */
+	opf_in_onboarding = 1 << 2,
 };
 
 /**
  * @brief Represents an onboarding prompt option
  */
-struct DPP_EXPORT onboarding_prompt_option: public managed, public json_interface<onboarding_prompt_option> {
-	std::vector<snowflake> channel_ids; //!< IDs for channels a member is added to when the option is selected
-	std::vector<snowflake> role_ids; //!< IDs for roles assigned to a member when the option is selected
-	dpp::emoji emoji; //!< Emoji of the option
-	std::string title; //!< Title of the option
-	std::string description; //!< Description of the option
+struct DPP_EXPORT onboarding_prompt_option : public managed, public json_interface<onboarding_prompt_option> {
+protected:
+	friend struct json_interface<onboarding_prompt_option>;
+
+	/**
+	 * @brief Read class values from json object
+	 *
+	 * @param j A json object to read from
+	 * @return A reference to self
+	 */
+	onboarding_prompt_option& fill_from_json_impl(nlohmann::json* j);
+
+	/**
+	 * @brief Build the json for this object
+	 *
+	 * @param with_id include the id in the JSON
+	 * @return json data
+	 */
+	json to_json_impl(bool with_id = false) const;
+
+public:
+	/**
+	 * @brief IDs for channels a member is added to when the option is selected.
+	 */
+	std::vector<snowflake> channel_ids;
+
+	/**
+	 * @brief IDs for roles assigned to a member when the option is selected
+	 */
+	std::vector<snowflake> role_ids;
+
+	/**
+	 * @brief Emoji of the option
+	 */
+	dpp::emoji emoji;
+
+	/**
+	 * @brief Title of the option
+	 */
+	std::string title;
+
+	/**
+	 * @brief Description of the option
+	 */
+	std::string description;
 
 	/**
 	 * @brief Construct a new onboarding prompt option object
@@ -1174,22 +1823,6 @@ struct DPP_EXPORT onboarding_prompt_option: public managed, public json_interfac
 	 * @brief Destroy the onboarding prompt option object
 	 */
 	virtual ~onboarding_prompt_option() = default;
-
-	/**
-	 * @brief Read class values from json object
-	 *
-	 * @param j A json object to read from
-	 * @return A reference to self
-	 */
-	onboarding_prompt_option& fill_from_json(nlohmann::json* j);
-
-	/**
-	 * @brief Build the json for this object
-	 *
-	 * @param with_id include the id in the JSON
-	 * @return std::string json data
-	 */
-	std::string build_json(bool with_id = false) const;
 
 	/**
 	 * @brief Set the emoji of this onboarding prompt option object
@@ -1219,11 +1852,46 @@ struct DPP_EXPORT onboarding_prompt_option: public managed, public json_interfac
 /**
  * @brief Represents an onboarding prompt
  */
-struct DPP_EXPORT onboarding_prompt: public managed, public json_interface<onboarding_prompt> {
-	onboarding_prompt_type type; //!< Type of prompt (defaults to dpp::opt_multiple_choice)
-	std::vector<onboarding_prompt_option> options; //!< Options available within the prompt
-	std::string title; //!< Title of the prompt
-	uint8_t flags; //!< A set of flags built from the bitmask defined by dpp::onboarding_prompt_flags
+struct DPP_EXPORT onboarding_prompt : public managed, public json_interface<onboarding_prompt> {
+protected:
+	friend struct json_interface<onboarding_prompt>;
+
+	/**
+	 * @brief Read class values from json object
+	 *
+	 * @param j A json object to read from
+	 * @return A reference to self
+	 */
+	onboarding_prompt& fill_from_json_impl(nlohmann::json* j);
+
+	/**
+	 * @brief Build the json for this object
+	 *
+	 * @param with_id include the id in the JSON
+	 * @return json data
+	 */
+	json to_json_impl(bool with_id = false) const;
+
+public:
+	/**
+	 * @brief Type of prompt (defaults to dpp::opt_multiple_choice).
+	 */
+	onboarding_prompt_type type;
+
+	/**
+	 * @brief Options available within the prompt
+	 */
+	std::vector<onboarding_prompt_option> options;
+
+	/**
+	 * @brief Title of the prompt.
+	 */
+	std::string title;
+
+	/**
+	 * @brief A set of flags built from the bitmask defined by dpp::onboarding_prompt_flags
+	 */
+	uint8_t flags;
 
 	/**
 	 * @brief Construct a new onboarding prompt object
@@ -1234,22 +1902,6 @@ struct DPP_EXPORT onboarding_prompt: public managed, public json_interface<onboa
 	 * @brief Destroy the onboarding prompt object
 	 */
 	virtual ~onboarding_prompt() = default;
-
-	/**
-	 * @brief Read class values from json object
-	 *
-	 * @param j A json object to read from
-	 * @return A reference to self
-	 */
-	onboarding_prompt& fill_from_json(nlohmann::json* j);
-
-	/**
-	 * @brief Build the json for this object
-	 *
-	 * @param with_id include the id in the JSON
-	 * @return std::string json data
-	 */
-	std::string build_json(bool with_id = false) const;
 
 	/**
 	 * @brief Set the type of this onboarding prompt object
@@ -1289,12 +1941,51 @@ struct DPP_EXPORT onboarding_prompt: public managed, public json_interface<onboa
 /**
  * @brief Represents a guild's onboarding flow
  */
-struct DPP_EXPORT onboarding: public json_interface<onboarding> {
-	snowflake guild_id; //!< ID of the guild this onboarding is part of
-	std::vector<onboarding_prompt> prompts; //!< Prompts shown during onboarding and in customize community
-	std::vector<snowflake> default_channel_ids; //!< Channel IDs that members get opted into automatically
-	onboarding_mode mode; //!< Current mode of onboarding (defaults to dpp::gom_default)
-	bool enabled; //!< Whether onboarding is enabled in the guild
+struct DPP_EXPORT onboarding : public json_interface<onboarding> {
+protected:
+	friend struct json_interface<onboarding>;
+
+	/**
+	 * @brief Read class values from json object
+	 *
+	 * @param j A json object to read from
+	 * @return A reference to self
+	 */
+	onboarding& fill_from_json_impl(nlohmann::json* j);
+
+	/**
+	 * @brief Build the json for this object
+	 *
+	 * @param with_id include the id in the JSON
+	 * @return json data
+	 */
+	json to_json_impl(bool with_id = false) const;
+
+public:
+	/**
+	 * @brief ID of the guild this onboarding is part of.
+	 */
+	snowflake guild_id;
+
+	/**
+	 * @brief Prompts shown during onboarding and in customize community.
+	 */
+	std::vector<onboarding_prompt> prompts;
+
+	/**
+	 * @brief Channel IDs that members get opted into automatically
+	 */
+	std::vector<snowflake> default_channel_ids;
+
+	/**
+	 * @brief Current mode of onboarding (defaults to dpp::gom_default)
+	 */
+	onboarding_mode mode;
+
+	/**
+	 * @brief Whether onboarding is enabled in the guild
+	 */
+	bool enabled;
 
 	/**
 	 * @brief Construct a new onboarding object
@@ -1307,25 +1998,9 @@ struct DPP_EXPORT onboarding: public json_interface<onboarding> {
 	virtual ~onboarding() = default;
 
 	/**
-	 * @brief Read class values from json object
-	 *
-	 * @param j A json object to read from
-	 * @return A reference to self
-	 */
-	onboarding& fill_from_json(nlohmann::json* j);
-
-	/**
-	 * @brief Build the json for this object
-	 *
-	 * @param with_id include the id in the JSON
-	 * @return std::string json data
-	 */
-	std::string build_json(bool with_id = false) const;
-
-	/**
 	 * @brief Set guild_id of this onboarding object
 	 *
-	 * @param guild_id Guild ID to set
+	 * @param id Guild ID to set
 	 * @return Reference to self, so these method calls may be chained
 	 */
 	onboarding& set_guild_id(const snowflake id);
@@ -1357,7 +2032,9 @@ struct DPP_EXPORT onboarding: public json_interface<onboarding> {
  */
 void from_json(const nlohmann::json& j, guild_member& gm);
 
-/** A container of guild members */
+/**
+ * @brief A container of guild members
+ */
 typedef std::unordered_map<snowflake, guild_member> guild_member_map;
 
 /**

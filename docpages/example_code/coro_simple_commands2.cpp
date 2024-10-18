@@ -1,11 +1,11 @@
 #include <dpp/dpp.h>
 
 int main() {
-	dpp::cluster bot("token");
+	dpp::cluster bot{"token"};
 
 	bot.on_log(dpp::utility::cout_logger());
 
-	bot.on_slashcommand([](dpp::slashcommand_t event) -> dpp::job {
+	bot.on_slashcommand([](const dpp::slashcommand_t& event) -> dpp::task<void> {
 		if (event.command.get_command_name() == "avatar") {
 			// Make a nested coroutine to fetch the guild member requested, that returns it as an optional
 			constexpr auto resolve_member = [](const dpp::slashcommand_t &event) -> dpp::task<std::optional<dpp::guild_member>> {
@@ -20,8 +20,9 @@ int main() {
 
 				// If we have the guild member in the command's resolved data, return it
 				const auto &member_map = event.command.resolved.members;
-				if (auto member = member_map.find(user_id); member != member_map.end())
+				if (auto member = member_map.find(user_id); member != member_map.end()) {
 					co_return member->second;
+				}
 				// Try looking in guild cache
 				dpp::guild *guild = dpp::find_guild(event.command.guild_id);
 				if (guild) {
@@ -69,7 +70,7 @@ int main() {
 	});
 
 
-	bot.on_ready([&bot](const dpp::ready_t & event) {
+	bot.on_ready([&bot](const dpp::ready_t& event) {
 		if (dpp::run_once<struct register_bot_commands>()) {
 			dpp::slashcommand command("avatar", "Get your or another user's avatar image", bot.me.id);
 			command.add_option(dpp::command_option(dpp::co_user, "user", "User to fetch the avatar from"));
@@ -79,4 +80,6 @@ int main() {
 	});
 
 	bot.start(dpp::st_wait);
+
+	return 0;
 }

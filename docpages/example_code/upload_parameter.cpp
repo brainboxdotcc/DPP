@@ -1,17 +1,14 @@
 #include <dpp/dpp.h>
 
-int main()
-{
+int main() {
 	dpp::cluster bot("token");
 
 	bot.on_log(dpp::utility::cout_logger());
 
 	/* The event is fired when someone issues your commands */
 	bot.on_slashcommand([&bot](const dpp::slashcommand_t& event) {
-
 		/* Check which command they ran */
 		if (event.command.get_command_name() == "show") {
-
 			/* Get the file id from the parameter attachment. */
 			dpp::snowflake file_id = std::get<dpp::snowflake>(event.get_parameter("file"));
 
@@ -25,7 +22,6 @@ int main()
 
 	bot.on_ready([&bot](const dpp::ready_t & event) {
 		if (dpp::run_once<struct register_bot_commands>()) {
-
 			/* Create a new command. */
 			dpp::slashcommand newcommand("show", "Show an uploaded file", bot.me.id);
 

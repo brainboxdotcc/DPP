@@ -31,8 +31,8 @@ using json = nlohmann::json;
 scheduled_event::scheduled_event() :
 	managed(0),
 	guild_id(0),
-	channel_id(0),	
-	creator_id(0),	
+	channel_id(0),
+	creator_id(0),
 	scheduled_start_time(0),
 	scheduled_end_time(0),
 	privacy_level(ep_guild_only),
@@ -77,15 +77,15 @@ scheduled_event& scheduled_event::set_creator_id(snowflake c) {
 
 scheduled_event& scheduled_event::set_status(event_status s) {
 	if (this->status == es_completed || this->status == es_cancelled) {
-		throw dpp::logic_exception("Can't update status of a completed or cancelled event");
+		throw dpp::logic_exception(err_cancelled_event, "Can't update status of a completed or cancelled event");
 	} else {
 		if (this->status == es_scheduled) {
 			if (s != es_active && s != es_cancelled) {
-				throw dpp::logic_exception("Invalid status transition, scheduled can only transition to active or cancelled");
+				throw dpp::logic_exception(err_event_status, "Invalid status transition, scheduled can only transition to active or cancelled");
 			}
 		} else if (this->status == es_active) {
 			if (s != es_completed) {
-				throw dpp::logic_exception("Invalid status transition, active can only transition to completed");
+				throw dpp::logic_exception(err_event_status, "Invalid status transition, active can only transition to completed");
 			}
 		}
 	}
@@ -95,7 +95,7 @@ scheduled_event& scheduled_event::set_status(event_status s) {
 
 scheduled_event& scheduled_event::set_start_time(time_t t) {
 	if (t < time(nullptr)) {
-		throw dpp::length_exception("Start time cannot be before current date and time");
+		throw dpp::length_exception(err_event_start_time, "Start time cannot be before current date and time");
 	}
 	this->scheduled_start_time = t;
 	return *this;
@@ -103,13 +103,23 @@ scheduled_event& scheduled_event::set_start_time(time_t t) {
 
 scheduled_event& scheduled_event::set_end_time(time_t t) {
 	if (t < time(nullptr)) {
-		throw dpp::length_exception("End time cannot be before current date and time");
+		throw dpp::length_exception(err_event_end_time, "End time cannot be before current date and time");
 	}
 	this->scheduled_end_time = t;
 	return *this;
 }
 
-scheduled_event& scheduled_event::fill_from_json(const json* j) {
+scheduled_event& scheduled_event::load_image(std::string_view image_blob, const image_type type) {
+	image = utility::image_data{type, image_blob};
+	return *this;
+}
+
+scheduled_event& scheduled_event::load_image(const std::byte* data, uint32_t size, const image_type type) {
+	image = utility::image_data{type, data, size};
+	return *this;
+}
+
+scheduled_event& scheduled_event::fill_from_json_impl(const json* j) {
 	set_snowflake_not_null(j, "id", this->id);
 	set_snowflake_not_null(j, "guild_id", this->guild_id);
 	set_snowflake_not_null(j, "channel_id", this->channel_id);
@@ -117,7 +127,8 @@ scheduled_event& scheduled_event::fill_from_json(const json* j) {
 	set_snowflake_not_null(j, "creator_id", this->creator_id);
 	set_string_not_null(j, "name", this->name);
 	set_string_not_null(j, "description", this->description);
-	set_string_not_null(j, "image", this->image);
+	if (auto it = j->find("image"); it != j->end() && !it->is_null())
+		this->image = utility::iconhash{it->get<std::string>()};
 	set_ts_not_null(j, "scheduled_start_time", this->scheduled_start_time);
 	set_ts_not_null(j, "scheduled_end_time", this->scheduled_end_time);
 	this->privacy_level = static_cast<dpp::event_privacy_level>(int8_not_null(j, "privacy_level"));
@@ -135,7 +146,7 @@ scheduled_event& scheduled_event::fill_from_json(const json* j) {
 	return *this;
 }
 
-std::string scheduled_event::build_json(bool with_id) const {
+json scheduled_event::to_json_impl(bool with_id) const {
 	json j;
 	if (this->id && with_id) {
 		j["id"] = std::to_string(id);
@@ -144,8 +155,8 @@ std::string scheduled_event::build_json(bool with_id) const {
 	if (!this->description.empty()) {
 		j["description"] = this->description;
 	}
-	if (!this->image.empty()) {
-		j["image"] = this->image;
+	if (image.is_image_data()) {
+		j["image"] = image.as_image_data().to_nullable_json();
 	}
 	j["privacy_level"] = this->privacy_level;
 	j["status"] = this->status;
@@ -179,7 +190,7 @@ std::string scheduled_event::build_json(bool with_id) const {
 		j["entity_metadata"]["location"] = json::value_t::null;
 	}
 
-	return j.dump();
+	return j;
 }
 
 } // namespace dpp

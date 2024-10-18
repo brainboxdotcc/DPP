@@ -6,8 +6,7 @@ int main() {
 	bot.on_log(dpp::utility::cout_logger());
 
 	/* The event is fired when someone issues your commands */
-	/* Make note of passing the event by value, this is important (explained below) */
-	bot.on_slashcommand([](dpp::slashcommand_t event) -> dpp::job {
+	bot.on_slashcommand([](const dpp::slashcommand_t& event) -> dpp::task<void> {
 		if (event.command.get_command_name() == "file") {
 			/* Request the image from the URL specified and co_await the response */
 			dpp::http_request_completion_t result = co_await event.from->creator->co_request("https://dpp.dev/DPP-Logo.png", dpp::m_get);
@@ -31,5 +30,6 @@ int main() {
 	});
 
 	bot.start(dpp::st_wait);
+	
 	return 0;
 }

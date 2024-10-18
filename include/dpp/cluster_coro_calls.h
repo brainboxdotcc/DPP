@@ -33,12 +33,22 @@
  * @see dpp::cluster::global_bulk_command_create
  * @see https://discord.com/developers/docs/interactions/application-commands#bulk-overwrite-global-application-commands
  * @param commands Vector of slash commands to create/update.
- * overwriting existing commands that are registered globally for this application. Updates will be available in all guilds after 1 hour.
+ * overwriting existing commands that are registered globally for this application.
  * Commands that do not already exist will count toward daily application command create limits.
  * @return slashcommand_map returned object on completion
  * \memberof dpp::cluster
  */
 [[nodiscard]] async<confirmation_callback_t> co_global_bulk_command_create(const std::vector<slashcommand> &commands);
+
+/**
+ * @brief Delete all existing global slash commands.
+ * 
+ * @see dpp::cluster::global_bulk_command_delete
+ * @see https://discord.com/developers/docs/interactions/application-commands#bulk-overwrite-global-application-commands
+ * @return slashcommand_map returned object on completion
+ * \memberof dpp::cluster
+ */
+[[nodiscard]] async<confirmation_callback_t> co_global_bulk_command_delete();
 
 /**
  * @brief Create a global slash command (a bot can have a maximum of 100 of these).
@@ -107,6 +117,17 @@
  * \memberof dpp::cluster
  */
 [[nodiscard]] async<confirmation_callback_t> co_guild_bulk_command_create(const std::vector<slashcommand> &commands, snowflake guild_id);
+
+/**
+ * @brief Delete all existing guild slash commands.
+ * 
+ * @see dpp::cluster::guild_bulk_command_delete
+ * @see https://discord.com/developers/docs/interactions/application-commands#bulk-overwrite-global-application-commands
+ * @param guild_id Guild ID to delete the slash commands in.
+ * @return slashcommand_map returned object on completion
+ * \memberof dpp::cluster
+ */
+[[nodiscard]] async<confirmation_callback_t> co_guild_bulk_command_delete(snowflake guild_id);
 
 /**
  * @brief Get all slash command permissions of a guild
@@ -556,6 +577,18 @@
 [[nodiscard]] async<confirmation_callback_t> co_channels_get(snowflake guild_id);
 
 /**
+ * @brief Set the status of a voice channel.
+ *
+ * @see dpp::cluster::channel_set_voice_status
+ * @see https://github.com/discord/discord-api-docs/pull/6400 (please replace soon).
+ * @param channel_id The channel to update.
+ * @param status The new status for the channel.
+ * @return confirmation returned object on completion
+ * \memberof dpp::cluster
+ */
+[[nodiscard]] async<confirmation_callback_t> co_channel_set_voice_status(snowflake channel_id, const std::string& status);
+
+/**
  * @brief Create a dm channel
  * @see dpp::cluster::create_dm_channel
  * @see https://discord.com/developers/docs/resources/user#create-dm
@@ -674,6 +707,114 @@
  * \memberof dpp::cluster
  */
 [[nodiscard]] async<confirmation_callback_t> co_guild_emojis_get(snowflake guild_id);
+
+/**
+ * @brief List all Application Emojis
+ *
+ * @see dpp::cluster::application_emojis_get
+ * @see https://discord.com/developers/docs/resources/emoji#list-application-emojis
+ * @return emoji_map returned object on completion
+ * \memberof dpp::cluster
+ */
+[[nodiscard]] async<confirmation_callback_t> co_application_emojis_get();
+
+/**
+ * @brief Get an Application Emoji
+ *
+ * @see dpp::cluster::application_emoji_get
+ * @see https://discord.com/developers/docs/resources/emoji#get-application-emoji
+ * @param emoji_id The ID of the Emoji to get.
+ * @return emoji returned object on completion
+ * \memberof dpp::cluster
+ */
+[[nodiscard]] async<confirmation_callback_t> co_application_emoji_get(snowflake emoji_id);
+
+/**
+ * @brief Create an Application Emoji
+ *
+ * @see dpp::cluster::application_emoji_create
+ * @see https://discord.com/developers/docs/resources/emoji#create-application-emoji
+ * @param newemoji The emoji to create
+ * @return emoji returned object on completion
+ * \memberof dpp::cluster
+ */
+[[nodiscard]] async<confirmation_callback_t> co_application_emoji_create(const class emoji& newemoji);
+
+/**
+ * @brief Edit an Application Emoji
+ *
+ * @see dpp::cluster::application_emoji_edit
+ * @see https://discord.com/developers/docs/resources/emoji#modify-application-emoji
+ * @param newemoji The emoji to edit
+ * @return emoji returned object on completion
+ * \memberof dpp::cluster
+ */
+[[nodiscard]] async<confirmation_callback_t> co_application_emoji_edit(const class emoji& newemoji);
+
+/**
+ * @brief Delete an Application Emoji
+ *
+ * @see dpp::cluster::application_emoji_delete
+ * @see https://discord.com/developers/docs/resources/emoji#delete-application-emoji
+ * @param emoji_id The emoji's ID to delete.
+ * @return confirmation returned object on completion
+ * \memberof dpp::cluster
+ */
+[[nodiscard]] async<confirmation_callback_t> co_application_emoji_delete(snowflake emoji_id);
+
+/**
+ * @brief Returns all entitlements for a given app, active and expired.
+ *
+ * @see dpp::cluster::entitlements_get
+ * @see https://discord.com/developers/docs/monetization/entitlements#list-entitlements
+ * @param user_id User ID to look up entitlements for.
+ * @param sku_ids List of SKU IDs to check entitlements for.
+ * @param before_id Retrieve entitlements before this entitlement ID.
+ * @param after_id Retrieve entitlements after this entitlement ID.
+ * @param limit Number of entitlements to return, 1-100 (default 100).
+ * @param guild_id Guild ID to look up entitlements for.
+ * @param exclude_ended Whether ended entitlements should be excluded from the search.
+ * @return entitlement_map returned object on completion
+ * \memberof dpp::cluster
+ */
+[[nodiscard]] async<confirmation_callback_t> co_entitlements_get(snowflake user_id = 0, const std::vector<snowflake>& sku_ids = {}, snowflake before_id = 0, snowflake after_id = 0, uint8_t limit = 100, snowflake guild_id = 0, bool exclude_ended = false);
+
+/**
+ * @brief Creates a test entitlement to a given SKU for a given guild or user.
+ * Discord will act as though that user or guild has entitlement to your premium offering.
+ *
+ * @see dpp::cluster::entitlement_test_create
+ * @see https://discord.com/developers/docs/monetization/entitlements#create-test-entitlement
+ * @param new_entitlement The entitlement to create.
+ * Make sure your dpp::entitlement_type (inside your dpp::entitlement object) matches the type of the owner_id
+ * (if type is guild, owner_id is a guild id), otherwise it won't work!
+ * @return entitlement returned object on completion
+ * \memberof dpp::cluster
+ */
+[[nodiscard]] async<confirmation_callback_t> co_entitlement_test_create(const class entitlement& new_entitlement);
+
+/**
+ * @brief Deletes a currently-active test entitlement.
+ * Discord will act as though that user or guild no longer has entitlement to your premium offering.
+ *
+ * @see dpp::cluster::entitlement_test_delete
+ * @see https://discord.com/developers/docs/monetization/entitlements#delete-test-entitlement
+ * @param entitlement_id The test entitlement to delete.
+ * @return confirmation returned object on completion
+ * \memberof dpp::cluster
+ */
+[[nodiscard]] async<confirmation_callback_t> co_entitlement_test_delete(snowflake entitlement_id);
+
+/**
+ * @brief For One-Time Purchase consumable SKUs, marks a given entitlement for the user as consumed.
+ *
+ * @see dpp::cluster::entitlement_consume
+ * @see https://discord.com/developers/docs/monetization/entitlements#consume-an-entitlement
+ * @param entitlement_id The entitlement to mark as consumed.
+ * @return confirmation returned object on completion
+ * \memberof dpp::cluster
+ */
+[[nodiscard]] async<confirmation_callback_t> co_entitlement_consume(snowflake entitlement_id);
 
 /**
  * @brief Get the gateway information for the bot using the token
@@ -987,7 +1128,7 @@
  *
  * @see dpp::cluster::guild_get_onboarding
  * @see https://discord.com/developers/docs/resources/guild#get-guild-onboarding
- * @param o The onboarding object
+ * @param guild_id The guild to pull the onboarding configuration from.
  * @return onboarding returned object on completion
  * \memberof dpp::cluster
  */
@@ -1159,6 +1300,20 @@
  * \memberof dpp::cluster
  */
 [[nodiscard]] async<confirmation_callback_t> co_guild_member_timeout(snowflake guild_id, snowflake user_id, time_t communication_disabled_until);
+
+/**
+ * @brief Remove the timeout of a guild member.
+ * A shortcut for guild_member_timeout(guild_id, user_id, 0, callback)
+ * Fires a `Guild Member Update` Gateway event.
+ * @see dpp::cluster::guild_member_timeout_remove
+ * @see https://discord.com/developers/docs/resources/guild#modify-guild-member
+ * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+ * @param guild_id Guild ID to remove the member timeout from
+ * @param user_id User ID to remove the timeout for
+ * @return confirmation returned object on completion
+ * \memberof dpp::cluster
+ */
+[[nodiscard]] async<confirmation_callback_t> co_guild_member_timeout_remove(snowflake guild_id, snowflake user_id);
 
 /**
  * @brief Remove role from guild member
@@ -1439,6 +1594,15 @@
 [[nodiscard]] async<confirmation_callback_t> co_message_edit(const struct message &m);
 
 /**
+ * @brief Edit the flags of a message on a channel. The callback function is called when the message has been edited
+ *
+ * @param m Message to edit the flags of
+ * @return message returned object on completion
+ * \memberof dpp::cluster
+ */
+[[nodiscard]] async<confirmation_callback_t> co_message_edit_flags(const struct message &m);
+
+/**
  * @brief Get a message
  *
  * @see dpp::cluster::message_get
@@ -1521,6 +1685,58 @@
  * \memberof dpp::cluster
  */
 [[nodiscard]] async<confirmation_callback_t> co_message_unpin(snowflake channel_id, snowflake message_id);
+
+/**
+ * @brief Get a list of users that voted for this specific answer.
+ *
+ * @param m Message that contains the poll to retrieve the answers from
+ * @param answer_id ID of the answer to retrieve votes from (see poll_answer::answer_id)
+ * @param after Users after this ID should be retrieved if this is set to non-zero
+ * @param limit This number of users maximum should be returned, up to 100
+ * @return user_map returned object on completion
+ * @see dpp::cluster::poll_get_answer_voters
+ * @see https://discord.com/developers/docs/resources/poll#get-answer-voters
+ * \memberof dpp::cluster
+ */
+[[nodiscard]] async<confirmation_callback_t> co_poll_get_answer_voters(const message& m, uint32_t answer_id, snowflake after, uint64_t limit);
+
+/**
+ * @brief Get a list of users that voted for this specific answer.
+ *
+ * @param message_id ID of the message with the poll to retrieve the answers from
+ * @param channel_id ID of the channel with the poll to retrieve the answers from
+ * @param answer_id ID of the answer to retrieve votes from (see poll_answer::answer_id)
+ * @param after Users after this ID should be retrieved if this is set to non-zero
+ * @param limit This number of users maximum should be returned, up to 100
+ * @return user_map returned object on completion
+ * @see dpp::cluster::poll_get_answer_voters
+ * @see https://discord.com/developers/docs/resources/poll#get-answer-voters
+ * \memberof dpp::cluster
+ */
+[[nodiscard]] async<confirmation_callback_t> co_poll_get_answer_voters(snowflake message_id, snowflake channel_id, uint32_t answer_id, snowflake after, uint64_t limit);
+
+/**
+ * @brief Immediately end a poll.
+ *
+ * @param m Message that contains the poll
+ * @return message returned object on completion
+ * @see dpp::cluster::poll_end
+ * @see https://discord.com/developers/docs/resources/poll#end-poll
+ * \memberof dpp::cluster
+ */
+[[nodiscard]] async<confirmation_callback_t> co_poll_end(const message &m);
+
+/**
+ * @brief Immediately end a poll.
+ *
+ * @param message_id ID of the message with the poll to end
+ * @param channel_id ID of the channel with the poll to end
+ * @return message returned object on completion
+ * @see dpp::cluster::poll_end
+ * @see https://discord.com/developers/docs/resources/poll#end-poll
+ * \memberof dpp::cluster
+ */
+[[nodiscard]] async<confirmation_callback_t> co_poll_end(snowflake message_id, snowflake channel_id);
 
 /**
  * @brief Get a channel's pins
@@ -1705,6 +1921,18 @@
  * \memberof dpp::cluster
  */
 [[nodiscard]] async<confirmation_callback_t> co_guild_event_get(snowflake guild_id, snowflake event_id);
+
+/**
+ * @brief Returns all SKUs for a given application.
+ * @note Because of how Discord's SKU and subscription systems work, you will see two SKUs for your premium offering.
+ * For integration and testing entitlements, you should use the SKU with type: 5.
+ *
+ * @see dpp::cluster::skus_get
+ * @see https://discord.com/developers/docs/monetization/skus#list-skus
+ * @return sku_map returned object on completion
+ * \memberof dpp::cluster
+ */
+[[nodiscard]] async<confirmation_callback_t> co_skus_get();
 
 
 [[nodiscard]] async<confirmation_callback_t> co_stage_instance_create(const stage_instance& si);
@@ -2062,20 +2290,35 @@
 [[nodiscard]] async<confirmation_callback_t> co_thread_member_remove(snowflake thread_id, snowflake user_id);
 
 /**
- * @brief Edit current (bot) user
+ * @brief Get the thread specified by thread_id. This uses the same call as dpp::cluster::channel_get but returns a thread object.
+ * @see dpp::cluster::thread_get
+ * @see https://discord.com/developers/docs/resources/channel#get-channel
+ * @param thread_id The id of the thread to obtain.
+ * @return thread returned object on completion
+ * \memberof dpp::cluster
+ */
+[[nodiscard]] async<confirmation_callback_t> co_thread_get(snowflake thread_id);
+
+/**
+ * @brief Edit current (bot) user.
  *
- * Modifies the current member in a guild. Returns the updated guild_member object on success.
- * Fires a `Guild Member Update` Gateway event.
+ * Modify the requester's user account settings. Returns a dpp::user object on success.
+ * Fires a User Update Gateway event.
+ *
+ * @note There appears to be no limit to the image size, however, if your image cannot be processed/uploaded in time, you will receive a malformed http request.
+ *
  * @see dpp::cluster::current_user_edit
  * @see https://discord.com/developers/docs/resources/user#modify-current-user
  * @param nickname Nickname to set
- * @param image_blob Avatar data to upload (NOTE: Very heavily rate limited!)
- * @param type Type of image for avatar. It can be one of `i_gif`, `i_jpg` or `i_png`.
+ * @param avatar_blob Avatar data to upload
+ * @param avatar_type Type of image for avatar. It can be one of `i_gif`, `i_jpg` or `i_png`.
+ * @param banner_blob Banner data to upload
+ * @param banner_type Type of image for Banner. It can be one of `i_gif`, `i_jpg` or `i_png`.
  * @return user returned object on completion
  	 * @throw dpp::length_exception Image data is larger than the maximum size of 256 kilobytes
  * \memberof dpp::cluster
  */
-[[nodiscard]] async<confirmation_callback_t> co_current_user_edit(const std::string &nickname, const std::string& image_blob = "", const image_type type = i_png);
+[[nodiscard]] async<confirmation_callback_t> co_current_user_edit(const std::string &nickname, const std::string& avatar_blob = "", const image_type avatar_type = i_png, const std::string& banner_blob = "", const image_type banner_type = i_png);
 
 /**
  * @brief Get current (bot) application
@@ -2232,16 +2475,8 @@
  */
 [[nodiscard]] async<confirmation_callback_t> co_guild_get_voice_regions(snowflake guild_id);
 
-/**
- * @brief Create a webhook
- * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
- * @see dpp::cluster::create_webhook
- * @see https://discord.com/developers/docs/resources/webhook#create-webhook
- * @param w Webhook to create
- * @return webhook returned object on completion
- * \memberof dpp::cluster
- */
-[[nodiscard]] async<confirmation_callback_t> co_create_webhook(const class webhook &w);
+
+[[nodiscard]] async<confirmation_callback_t> co_create_webhook(const class webhook &wh);
 
 /**
  * @brief Delete a webhook
@@ -2390,5 +2625,5 @@
 
 
 /* End of auto-generated definitions */
-[[nodiscard]] async<http_request_completion_t> co_request(const std::string &url, http_method method, const std::string &postdata = "", const std::string &mimetype = "text/plain", const std::multimap<std::string, std::string> &headers = {});
+[[nodiscard]] async<http_request_completion_t> co_request(const std::string &url, http_method method, const std::string &postdata = "", const std::string &mimetype = "text/plain", const std::multimap<std::string, std::string> &headers = {}, const std::string &protocol = "1.1", time_t request_timeout = 5);
 

@@ -26,11 +26,7 @@
 
 
 
-namespace dpp { namespace events {
-	
-using json = nlohmann::json;
-using namespace dpp;
-
+namespace dpp::events {
 /**
  * @brief Handle event
  * 
@@ -51,4 +47,4 @@ void typing_start::handle(discord_client* client, json &j, const std::string &ra
 	}
 }
 
-}};
+};

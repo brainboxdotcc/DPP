@@ -24,7 +24,7 @@
 namespace dpp {
 
 void cluster::guild_current_member_edit(snowflake guild_id, const std::string &nickname, command_completion_event_t callback) {
-	std::string o = (nickname.empty() ? json({{"nick", json::value_t::null }}) : json({{"nick", nickname }})).dump();
+	std::string o = (nickname.empty() ? json({{"nick", json::value_t::null }}) : json({{"nick", nickname }})).dump(-1, ' ', false, json::error_handler_t::replace);
 	rest_request<confirmation>(this, API_PATH "/guilds", std::to_string(guild_id), "members/@me", m_patch, o, callback);
 }
 
@@ -52,7 +52,7 @@ void cluster::guild_ban_add(snowflake guild_id, snowflake user_id, uint32_t dele
 			}
 		}
 	}
-	rest_request<confirmation>(this, API_PATH "/guilds", std::to_string(guild_id), "bans/" + std::to_string(user_id), m_put, j.dump(), callback);
+	rest_request<confirmation>(this, API_PATH "/guilds", std::to_string(guild_id), "bans/" + std::to_string(user_id), m_put, j.dump(-1, ' ', false, json::error_handler_t::replace), callback);
 }
 
 
@@ -140,7 +140,7 @@ void cluster::guild_begin_prune(snowflake guild_id, const struct prune& pruneinf
 
 
 void cluster::guild_set_nickname(snowflake guild_id, const std::string &nickname, command_completion_event_t callback) {
-	std::string o = (nickname.empty() ? json({{"nick", json::value_t::null }}) : json({{"nick", nickname }})).dump();
+	std::string o = (nickname.empty() ? json({{"nick", json::value_t::null }}) : json({{"nick", nickname }})).dump(-1, ' ', false, json::error_handler_t::replace);
 	rest_request<confirmation>(this, API_PATH "/guilds", std::to_string(guild_id), "members/@me/nick", m_patch, o, callback);
 }
 
@@ -163,9 +163,9 @@ void cluster::guild_get_welcome_screen(snowflake guild_id, command_completion_ev
 }
 
 void cluster::guild_edit_welcome_screen(snowflake guild_id, const struct welcome_screen& welcome_screen, bool enabled, command_completion_event_t callback) {
-	json j = json::parse(welcome_screen.build_json());
+	json j = welcome_screen.to_json();
 	j["enabled"] = enabled;
-	rest_request<dpp::welcome_screen>(this, API_PATH "/guilds", std::to_string(guild_id), "welcome-screen", m_patch, j.dump(), callback);
+	rest_request<dpp::welcome_screen>(this, API_PATH "/guilds", std::to_string(guild_id), "welcome-screen", m_patch, j.dump(-1, ' ', false, json::error_handler_t::replace), callback);
 }
 
 

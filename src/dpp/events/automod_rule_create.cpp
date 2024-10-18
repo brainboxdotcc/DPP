@@ -26,10 +26,8 @@
 
 
 
-namespace dpp { namespace events {
+namespace dpp::events {
 
-using json = nlohmann::json;
-using namespace dpp;
 
 /**
  * @brief Handle event
@@ -47,4 +45,4 @@ void automod_rule_create::handle(discord_client* client, json &j, const std::str
 	}
 }
 
-}};
+};

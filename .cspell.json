@@ -99,6 +99,7 @@
 		"stringified",
 		"disdppgloss",
 		"awaiter",
+		"awaiters",
 		"resumer",
 		"checkered",
 		"ramen",
@@ -133,7 +134,22 @@
 		"cvtps",
 		"neww",
 		"STDCORO",
-		"NOMINMAX"
+		"NOMINMAX",
+		"sku",
+		"skus",
+		"Codecademy",
+		"tparam",
+		"khanda",
+		"oclock",
+		"moai",
+		"xbps",
+		"chacha20",
+		"chacha",
+		"nullopt",
+		"chrono",
+		"ciphersuite",
+		"rmap",
+		"WSAPOLLFD"
 	],
 	"flagWords": [
 		"hte"

@@ -4,21 +4,21 @@ int main()
 {
 	dpp::cluster bot("token");
 
-    bot.on_log(dpp::utility::cout_logger());
+	bot.on_log(dpp::utility::cout_logger());
 
 	bot.on_ready([&bot](const dpp::ready_t & event) {
-	    if (dpp::run_once<struct register_bot_commands>()) {
+		if (dpp::run_once<struct register_bot_commands>()) {
 
-		    /* Create a new global command once on ready event */
-		    bot.global_command_create(dpp::slashcommand("blep", "Send a random adorable animal photo", bot.me.id)
-		    	.add_option(
-		    		/* If you set the auto complete setting on a command option, it will trigger the on_autocomplete
-		    		 * event whenever discord needs to fill information for the choices. You cannot set any choices
-		    		 * here if you set the auto complete value to true.
-		    		 */
-		    		dpp::command_option(dpp::co_string, "animal", "The type of animal").set_auto_complete(true)
-		    	)
-		    );
+			/* Create a new global command once on ready event */
+			bot.global_command_create(dpp::slashcommand("blep", "Send a random adorable animal photo", bot.me.id)
+				.add_option(
+				/* If you set the auto complete setting on a command option, it will trigger the on_autocomplete
+				* event whenever discord needs to fill information for the choices. You cannot set any choices
+				* here if you set the auto complete value to true.
+				*/
+				dpp::command_option(dpp::co_string, "animal", "The type of animal").set_auto_complete(true)
+				)
+			);
 		}
 	});
 
@@ -50,10 +50,10 @@ int main()
 				 */
 				std::string uservalue = std::get<std::string>(opt.value);
 				bot.interaction_response_create(event.command.id, event.command.token, dpp::interaction_response(dpp::ir_autocomplete_reply)
-					.add_autocomplete_choice(dpp::command_option_choice("squids", "lots of squids"))
-					.add_autocomplete_choice(dpp::command_option_choice("cats", "a few cats"))
-					.add_autocomplete_choice(dpp::command_option_choice("dogs", "bucket of dogs"))
-					.add_autocomplete_choice(dpp::command_option_choice("elephants", "bottle of elephants"))
+					.add_autocomplete_choice(dpp::command_option_choice("squids", std::string("lots of squids")))
+					.add_autocomplete_choice(dpp::command_option_choice("cats", std::string("a few cats")))
+					.add_autocomplete_choice(dpp::command_option_choice("dogs", std::string("bucket of dogs")))
+					.add_autocomplete_choice(dpp::command_option_choice("elephants", std::string("bottle of elephants")))
 				);
 				bot.log(dpp::ll_debug, "Autocomplete " + opt.name + " with value '" + uservalue + "' in field " + event.name);
 				break;

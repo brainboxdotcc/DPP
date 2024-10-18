@@ -5,13 +5,18 @@ int main() {
 
 	bot.on_log(dpp::utility::cout_logger());
 
-	bot.on_slashcommand([](dpp::slashcommand_t event) -> dpp::job {
+	bot.on_slashcommand([](const dpp::slashcommand_t& event) -> dpp::task<void> {
 		if (event.command.get_command_name() == "test") {
 			// Make a message and add a button with its custom ID set to the command interaction's ID so we can identify it
 			dpp::message m{"Test"};
 			std::string id{event.command.id.str()};
 			m.add_component(
-				dpp::component{}.add_component(dpp::component{}.set_type(dpp::cot_button).set_label("Click me!").set_id(id))
+				dpp::component{}.add_component(
+					dpp::component{}
+						.set_type(dpp::cot_button)
+						.set_label("Click me!")
+						.set_id(id)
+				)
 			);
 			co_await event.co_reply(m);
 
@@ -27,7 +32,7 @@ int main() {
 		}
 	});
 
-	bot.on_ready([&bot](const dpp::ready_t & event) {
+	bot.on_ready([&bot](const dpp::ready_t& event) {
 		if (dpp::run_once<struct register_bot_commands>()) {
 			dpp::slashcommand command{"test", "Test awaiting for an event", bot.me.id};
 
@@ -36,4 +41,6 @@ int main() {
 	});
 
 	bot.start(dpp::st_wait);
+
+	return 0;
 }

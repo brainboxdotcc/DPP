@@ -27,33 +27,37 @@ namespace dpp {
 
 using json = nlohmann::json;
 
-voiceregion::voiceregion() : flags(0) 
+voiceregion::voiceregion() : flags(0)
 {
 }
 
-voiceregion& voiceregion::fill_from_json(nlohmann::json* j) {
-	id = string_not_null(j, "id");
-	name = string_not_null(j, "id");
-	if (bool_not_null(j, "optimal"))
+voiceregion& voiceregion::fill_from_json_impl(nlohmann::json* j) {
+	set_string_not_null(j, "id", id);
+	set_string_not_null(j, "name", name);
+
+	if (bool_not_null(j, "optimal")) {
 		flags |= v_optimal;
-	if (bool_not_null(j, "deprecated"))
+	}
+
+	if (bool_not_null(j, "deprecated")) {
 		flags |= v_deprecated;
-	if (bool_not_null(j, "custom"))
+	}
+
+	if (bool_not_null(j, "custom")) {
 		flags |= v_custom;
-	if (bool_not_null(j, "vip"))
-		flags |= v_vip;
+	}
+
 	return *this;
 }
 
-std::string voiceregion::build_json(bool with_id) const {
-	return json({
+json voiceregion::to_json_impl(bool with_id) const {
+	return json{
 		{ "id", id },
 		{ "name", name },
 		{ "optimal", is_optimal() },
 		{ "deprecated", is_deprecated() },
-		{ "custom", is_custom() },
-		{ "vip", is_vip() }
-	}).dump();
+		{ "custom", is_custom() }
+	};
 }
 
 bool voiceregion::is_optimal() const {
@@ -67,11 +71,6 @@ bool voiceregion::is_deprecated() const {
 bool voiceregion::is_custom() const {
 	return flags & v_custom;
 }
-
-bool voiceregion::is_vip() const {
-	return flags & v_vip;
-}
-
 
 } // namespace dpp
 

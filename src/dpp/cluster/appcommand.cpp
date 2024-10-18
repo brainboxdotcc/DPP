@@ -26,9 +26,13 @@ namespace dpp {
 void cluster::global_bulk_command_create(const std::vector<slashcommand> &commands, command_completion_event_t callback) {
 	json j = json::array();
 	for (auto & s : commands) {
-		j.push_back(json::parse(s.build_json(false)));
+		j.push_back(s.to_json(false));
 	}
-	rest_request_list<slashcommand>(this, API_PATH "/applications", std::to_string(commands.size() > 0 && commands[0].application_id ? commands[0].application_id : me.id), "commands", m_put, j.dump(), callback);
+	rest_request_list<slashcommand>(this, API_PATH "/applications", std::to_string(commands.size() > 0 && commands[0].application_id ? commands[0].application_id : me.id), "commands", m_put, j.dump(-1, ' ', false, json::error_handler_t::replace), callback);
+}
+
+void cluster::global_bulk_command_delete(command_completion_event_t callback) {
+	rest_request_list<slashcommand>(this, API_PATH "/applications", std::to_string(me.id), "commands", m_put, "{}", callback);
 }
 
 void cluster::global_command_create(const slashcommand &s, command_completion_event_t callback) {
@@ -54,9 +58,13 @@ void cluster::global_commands_get(command_completion_event_t callback) {
 void cluster::guild_bulk_command_create(const std::vector<slashcommand> &commands, snowflake guild_id, command_completion_event_t callback) {
 	json j = json::array();
 	for (auto & s : commands) {
-		j.push_back(json::parse(s.build_json(false)));
+		j.push_back(s.to_json(false));
 	}
-	rest_request_list<slashcommand>(this, API_PATH "/applications", std::to_string(commands.size() > 0 && commands[0].application_id ? commands[0].application_id : me.id), "guilds/" + std::to_string(guild_id) + "/commands", m_put, j.dump(), callback);
+	rest_request_list<slashcommand>(this, API_PATH "/applications", std::to_string(commands.size() > 0 && commands[0].application_id ? commands[0].application_id : me.id), "guilds/" + std::to_string(guild_id) + "/commands", m_put, j.dump(-1, ' ', false, json::error_handler_t::replace), callback);
+}
+
+void cluster::guild_bulk_command_delete(snowflake guild_id, command_completion_event_t callback) {
+	rest_request_list<slashcommand>(this, API_PATH "/applications", std::to_string(me.id), "guilds/" + std::to_string(guild_id) + "/commands", m_put, "{}", callback);
 }
 
 void cluster::guild_commands_get_permissions(snowflake guild_id, command_completion_event_t callback) {
@@ -77,7 +85,7 @@ void cluster::guild_bulk_command_edit_permissions(const std::vector<slashcommand
 		}
 		j.push_back(jcommand);
 	}
-	rest_request_list<guild_command_permissions>(this, API_PATH "/applications", std::to_string(me.id), "guilds/" + std::to_string(guild_id) + "/commands/permissions", m_put, j.dump(), callback);
+	rest_request_list<guild_command_permissions>(this, API_PATH "/applications", std::to_string(me.id), "guilds/" + std::to_string(guild_id) + "/commands/permissions", m_put, j.dump(-1, ' ', false, json::error_handler_t::replace), callback);
 }
 
 void cluster::guild_command_create(const slashcommand &s, snowflake guild_id, command_completion_event_t callback) {
@@ -108,7 +116,7 @@ void cluster::guild_command_edit_permissions(const slashcommand &s, snowflake gu
 			j["permissions"].push_back(jperm);
 		}
 	}
-	rest_request<confirmation>(this, API_PATH "/applications", std::to_string(s.application_id ? s.application_id : me.id), "guilds/" + std::to_string(guild_id) + "/commands/" + std::to_string(s.id) + "/permissions", m_put, j.dump(), callback);
+	rest_request<confirmation>(this, API_PATH "/applications", std::to_string(s.application_id ? s.application_id : me.id), "guilds/" + std::to_string(guild_id) + "/commands/" + std::to_string(s.id) + "/permissions", m_put, j.dump(-1, ' ', false, json::error_handler_t::replace), callback);
 }
 
 void cluster::guild_command_get(snowflake id, snowflake guild_id, command_completion_event_t callback) {
@@ -132,7 +140,7 @@ void cluster::interaction_response_create(snowflake interaction_id, const std::s
 		if (callback) {
 			callback(confirmation_callback_t(this, confirmation(), http));
 		}
-	}, r.msg.filename, r.msg.filecontent, r.msg.filemimetype);
+	}, r.msg.file_data);
 }
 
 void cluster::interaction_response_edit(const std::string &token, const message &m, command_completion_event_t callback) {
@@ -140,7 +148,7 @@ void cluster::interaction_response_edit(const std::string &token, const message 
 		if (callback) {
 			callback(confirmation_callback_t(this, confirmation(), http));
 		}
-	}, m.filename, m.filecontent, m.filemimetype);
+	}, m.file_data);
 }
 
 void cluster::interaction_response_get_original(const std::string &token, command_completion_event_t callback) {
@@ -152,7 +160,7 @@ void cluster::interaction_followup_create(const std::string &token, const messag
 		if (callback) {
 			callback(confirmation_callback_t(this, confirmation(), http));
 		}
-	}, m.filename, m.filecontent, m.filemimetype);
+	}, m.file_data);
 }
 
 void cluster::interaction_followup_edit_original(const std::string &token, const message &m, command_completion_event_t callback) {
@@ -160,7 +168,7 @@ void cluster::interaction_followup_edit_original(const std::string &token, const
 		if (callback) {
 			callback(confirmation_callback_t(this, confirmation(), http));
 		}
-	}, m.filename, m.filecontent, m.filemimetype);
+	}, m.file_data);
 }
 
 void cluster::interaction_followup_delete(const std::string &token, command_completion_event_t callback) {
@@ -172,7 +180,7 @@ void cluster::interaction_followup_edit(const std::string &token, const message 
 		if (callback) {
 			callback(confirmation_callback_t(this, confirmation(), http));
 		}
-	}, m.filename, m.filecontent, m.filemimetype);
+	}, m.file_data);
 }
 
 void cluster::interaction_followup_get(const std::string &token, snowflake message_id, command_completion_event_t callback) {

@@ -84,10 +84,11 @@ struct job_awaitable {
 			} catch (const test_exception<42> &) {
 				/* intended exception to catch. we should have 2, one for the job_data test, one for the top-level job test */
 				int exceptions = ++exceptions_caught;
-				if (exceptions == 2)
+				if (exceptions == 2) {
 					set_status(CORO_JOB_OFFLINE, ts_success);
-				else if (exceptions > 2)
+				} else if (exceptions > 2) {
 					set_status(CORO_JOB_OFFLINE, ts_failed, "resume() threw more than expected");
+				}
 			} catch (const std::exception &) {
 				/* anything else should not be caught */
 				set_status(CORO_JOB_OFFLINE, ts_failed, "resume() threw an exception it shouldn't have");
@@ -102,21 +103,25 @@ struct job_awaitable {
 };
 
 dpp::job job_offline_test() {
-	if (int ret = co_await job_awaitable{42}; ret != 42)
+	if (int ret = co_await job_awaitable{42}; ret != 42) {
 		set_status(CORO_JOB_OFFLINE, ts_failed, "failed simple awaitable");
+	}
 	std::array<dpp::job, 10> jobs;
 	for (int i = 0; i < 10; ++i) {
 		jobs[i] = [](int i) -> dpp::job {
 			static std::atomic<bool> passed = false;
-			if (int ret = co_await job_awaitable{i}; ret != i)
+			if (int ret = co_await job_awaitable{i}; ret != i) {
 				set_status(CORO_JOB_OFFLINE, ts_failed, "failed in-loop awaitable");
+			}
 			job_data[i] = i;
 			for (int j = 0; j < 10; ++j) {
-				if (job_data[j] != j)
+				if (job_data[j] != j) {
 					co_return;
+				}
 			}
-			if (passed.exchange(true) == true) // another thread came here and already passed this check, skip the exception
+			if (passed.exchange(true) == true) { // another thread came here and already passed this check, skip the exception
 				co_return;
+			}
 			throw test_exception<42>(); // should be caught by simple_awaitable (since this is after resume)
 		}(i);
 	}
@@ -139,21 +144,29 @@ dpp::task<void> task_offline_test() {
 	using clock = time::system_clock;
 	static auto &test = CORO_TASK_OFFLINE;
 
-	if (int ret = co_await simple_awaitable{test, 42}; ret != 42)
+	if (int ret = co_await simple_awaitable{test, 42}; ret != 42) {
 		set_status(test, ts_failed, "failed simple awaitable");
+	}
+
+	if (int ret = co_await []() -> dpp::task<int> { co_return 42; }(); ret != 42) {
+		set_status(test, ts_failed, "failed simple task");
+	}
+	
 	std::array<dpp::task<int>, 10> tasks;
 	auto start = clock::now();
 	for (int i = 0; i < 10; ++i) {
 		tasks[i] = [](int i) -> dpp::task<int> {
-			if (int ret = co_await simple_awaitable{test, i}; ret != i)
+			if (int ret = co_await simple_awaitable{test, i}; ret != i) {
 				set_status(test, ts_failed, "failed in-loop awaitable");
+			}
 			job_data[i] = i;
 			co_return i;
 		}(i);
 	}
 	for (int i = 0; i < 10; ++i) {
-		if (co_await tasks[i] != i)
+		if (co_await tasks[i] != i) {
 			set_status(test, ts_failed, "failed to co_await expected value");
+		}
 	}
 	auto diff = clock::now() - start;
 	if (diff > time::seconds(10)) { // task is async so 10 parallel tasks should all take 5 seconds + some overhead
@@ -165,8 +178,9 @@ dpp::task<void> task_offline_test() {
 	dpp::task task2;
 	try {
 		task1 = []() -> dpp::task<void> { // throws after co_await
-			if (int ret = co_await simple_awaitable{test, 69}; ret != 69)
+			if (int ret = co_await simple_awaitable{test, 69}; ret != 69) {
 				set_status(test, ts_failed, "nested failed simple awaitable");
+			}
 			dpp::task task2 = []() -> dpp::task<void> {
 				co_await std_coroutine::suspend_never{}; // needed to make sure the task is initialized properly
 				throw test_exception<1>{};
@@ -189,8 +203,9 @@ dpp::task<void> task_offline_test() {
 	} catch (const test_exception<1> &) {
 		success = true;
 	}
-	if (!success)
+	if (!success) {
 		set_status(CORO_TASK_OFFLINE, ts_failed, "task failed to throw expected test_exception<1>");
+	}
 	success = false;
 	// test throw without suspending
 	try {
@@ -199,8 +214,9 @@ dpp::task<void> task_offline_test() {
 	catch (const test_exception<2> &) {
 		success = true;
 	}
-	if (!success)
+	if (!success) {
 		set_status(CORO_TASK_OFFLINE, ts_failed, "task failed to throw expected test_exception<2>");
+	}
 	// test cancel (throws dpp::task_cancelled_exception)
 	auto task3 = []() -> dpp::task<void> {
 		auto make_task = []() -> dpp::task<void> {
@@ -215,8 +231,9 @@ dpp::task<void> task_offline_test() {
 		auto start_time = clock::now();
 		int exceptions = 0;
 		std::generate(tasks.begin(), tasks.end(), make_task);
-		for (auto &task : tasks)
+		for (auto &task : tasks) {
 			task.cancel();
+		}
 		for (auto &task : tasks) {
 			try {
 				co_await task;
@@ -225,9 +242,9 @@ dpp::task<void> task_offline_test() {
 				++exceptions;
 			}
 		}
-		if (exceptions < 3 || !(clock::now() - start_time < std::chrono::seconds(10)))
+		if (exceptions < 3 || !(clock::now() - start_time < std::chrono::seconds(10))) {
 			set_status(CORO_TASK_OFFLINE, ts_failed, "failed to cancel 3 nested tasks in time");
-		// }
+		}
 
 		// test cancel and propagate {
 		std::generate(tasks.begin(), tasks.end(), make_task);
@@ -257,19 +274,24 @@ dpp::coroutine<void> coroutine_offline_test() {
 	int num = 0;
 
 	auto factory = [&data](int &i) -> dpp::coroutine<int> {
-		if (int ret = co_await simple_awaitable{test, 42}; ret != 42)
+		if (int ret = co_await simple_awaitable{test, 42}; ret != 42) {
 			set_status(test, ts_failed, "failed simple awaitable");
+		}
 		data[i] = i;
 		co_return i++;
 	};
-	if (int ret = co_await factory(num); ret != 0)
+	if (int ret = co_await factory(num); ret != 0) {
 		set_status(test, ts_failed, "coroutine 1 to set expected values");
-	if (int ret = co_await factory(num); ret != 1)
+	}
+	if (int ret = co_await factory(num); ret != 1) {
 		set_status(test, ts_failed, "coroutine 2 to set expected values");
-	if (int ret = co_await factory(num); ret != 2)
+	}
+	if (int ret = co_await factory(num); ret != 2) {
 		set_status(test, ts_failed, "coroutine 3 to set expected values");
-	if (data != std::to_array<int>({0, 1, 2}))
+	}
+	if (data != std::to_array<int>({0, 1, 2})) {
 		set_status(test, ts_failed, "unexpected test data");
+	}
 
 	// verify that exceptions work as expected (dpp::coroutine throws uncaught exceptions to co_await-er)
 	co_await []() -> dpp::coroutine<void> {
@@ -303,10 +325,11 @@ dpp::coroutine<void> coroutine_offline_test() {
 		} catch (const test_exception<2> &) {
 			success2 = true;
 		}
-		if (success1 && success2)
+		if (success1 && success2) {
 			throw test_exception<0>{};
-		else
+		} else {
 			set_status(test, ts_failed, "failed to throw at co_await");
+		}
 	}(); // test_exception<0> escapes
 }
 
@@ -319,8 +342,9 @@ dpp::job async_test() {
 
 		std::generate(arr.begin(), arr.end(), [] { return dpp::async<int>{&sync_awaitable_fun}; });
 		for (auto &async : arr) {
-			if (int ret = co_await async; ret != 42)
+			if (int ret = co_await async; ret != 42) {
 				set_status(test, ts_failed, "failed to sync resume with expected value");
+			}
 		}
 		bool success = false;
 		try {
@@ -328,13 +352,15 @@ dpp::job async_test() {
 		} catch (const test_exception<0> &) {
 			success = true;
 		}
-		if (!success)
+		if (!success) {
 			set_status(test, ts_failed, "failed to propagate exception");
+		}
 		auto now = clock::now();
 		std::generate(arr.begin(), arr.end(), [] { return dpp::async<int>{&async_awaitable_wait5}; });
 		for (auto &async : arr) {
-			if (int ret = co_await async; ret != 69)
+			if (int ret = co_await async; ret != 69) {
 				set_status(test, ts_failed, "failed to async resume with expected value");
+			}
 		}
 		auto diff = clock::now() - now;
 		if (diff > time::seconds(10)) {
@@ -344,7 +370,110 @@ dpp::job async_test() {
 		set_status(test, ts_success);
 	} catch (const std::exception &e) {
 		/* no exception should be caught here */
-		set_status(test, ts_failed, "unknown exception thrown");
+		set_status(test, ts_failed, std::string{"unknown exception thrown: "} + e.what());
+	}
+}
+
+dpp::job coro_awaitable_test() {
+	try {
+		{
+			dpp::promise<int> test;
+
+			test.set_value(42);
+			if (int res = co_await test.get_awaitable(); res != 42) {
+				set_status(CORO_AWAITABLE_OFFLINE, ts_failed, "could not retrieve value set before co_await");
+			}
+		}
+		{
+			dpp::promise<int> test;
+
+			test.set_value(420);
+			if (int res = test.get_awaitable().sync_wait(); res != 420) {
+				set_status(CORO_AWAITABLE_OFFLINE, ts_failed, "could not retrieve value set before sync_wait");
+			}
+		}
+		{
+			dpp::promise<int>   test;
+			dpp::awaitable<int> awaitable;
+
+			awaitable = test.get_awaitable();
+			test.set_value(420);
+			if (std::optional<int> res = awaitable.sync_wait_for(std::chrono::seconds(5)); !res || *res != 420) {
+				set_status(CORO_AWAITABLE_OFFLINE, ts_failed, "could not retrieve value set before sync_wait_for");
+			}
+		}
+		{
+			dpp::promise<void> test;
+			dpp::awaitable     awaitable{test.get_awaitable()};
+
+			if (bool res = awaitable.sync_wait_for(std::chrono::seconds(5)); res) {
+				set_status(CORO_AWAITABLE_OFFLINE, ts_failed, "could not retrieve time out with sync_wait_for");
+			}
+		}
+		{
+			dpp::promise<int> test;
+			dpp::awaitable     awaitable{test.get_awaitable()};
+			std::thread        th{[&test]() mutable {
+				std::this_thread::sleep_for(std::chrono::seconds(2));
+				test.set_value(69);
+			}};
+			th.detach();
+			if (std::optional<int> res = awaitable.sync_wait_for(std::chrono::seconds(5)); !res || *res != 69) {
+				set_status(CORO_AWAITABLE_OFFLINE, ts_failed, "could not retrieve value set after sync_wait_for");
+			}
+		}
+		{
+			dpp::promise<int> test;
+			dpp::awaitable     awaitable{test.get_awaitable()};
+			std::thread        th{[p = std::move(test)]() mutable {
+				std::this_thread::sleep_for(std::chrono::seconds(2));
+				p.set_value(69420);
+			}};
+			th.detach();
+			if (int res = co_await awaitable; res != 69420) {
+				set_status(CORO_AWAITABLE_OFFLINE, ts_failed, "could not retrieve value set after co_await");
+			}
+		}
+		{
+			dpp::promise<void> test;
+			dpp::awaitable     awaitable{test.get_awaitable()};
+			std::thread        th{[p = std::move(test)]() mutable {
+				std::this_thread::sleep_for(std::chrono::seconds(2));
+				p.set_exception(std::make_exception_ptr(dpp::voice_exception("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")));
+			}};
+			th.detach();
+			bool success = false;
+			try {
+				co_await awaitable;
+			} catch (const dpp::voice_exception &) {
+				success = true;
+			}
+			if (!success) {
+				set_status(CORO_AWAITABLE_OFFLINE, ts_failed, "retrieval of an exception with co_await failed");
+			}
+		}
+		{
+			dpp::promise<void> test;
+			dpp::awaitable     awaitable{test.get_awaitable()};
+			std::thread        th{[&test]() mutable {
+				std::this_thread::sleep_for(std::chrono::seconds(2));
+				test.set_exception(std::make_exception_ptr(dpp::voice_exception("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")));
+			}};
+			th.detach();
+			bool success = false;
+			try {
+				awaitable.sync_wait();
+			} catch (const dpp::voice_exception &) {
+				success = true;
+			}
+			if (!success) {
+				set_status(CORO_AWAITABLE_OFFLINE, ts_failed, "retrieval of an exception with co_await failed");
+			}
+		}
+		set_status(CORO_AWAITABLE_OFFLINE, ts_success);
+	} catch (const std::exception &e) {
+		// no exception should reach this point
+		set_status(CORO_AWAITABLE_OFFLINE, ts_failed, std::string{"unknown exception thrown: "} + e.what());
 	}
 }
 
@@ -357,6 +486,9 @@ void coro_offline_tests()
 	std::fill(job_data.begin(), job_data.end(), -1);
 	job_offline_test();
 
+	start_test(CORO_AWAITABLE_OFFLINE);
+	coro_awaitable_test();
+
 	start_test(CORO_TASK_OFFLINE);
 	std::fill(task_data.begin(), task_data.end(), -1);
 	[]() -> dpp::job {
@@ -367,7 +499,7 @@ void coro_offline_tests()
 		} catch (const test_exception<0> &) { // exception thrown at the end of the task test
 			set_status(CORO_TASK_OFFLINE, ts_success);
 		} catch (const std::exception &e) { // anything else should not escape
-			set_status(CORO_TASK_OFFLINE, ts_failed, "unknown exception thrown");
+			set_status(CORO_TASK_OFFLINE, ts_failed, std::string{"unknown exception thrown: "} + e.what());
 		}
 	}();
 
@@ -380,7 +512,7 @@ void coro_offline_tests()
 		} catch (const test_exception<0> &) {
 			set_status(CORO_COROUTINE_OFFLINE, ts_success);
 		} catch (const std::exception &e) { // anything else should not escape
-			set_status(CORO_COROUTINE_OFFLINE, ts_failed, "unknown exception thrown");
+			set_status(CORO_COROUTINE_OFFLINE, ts_failed, std::string{"unknown exception thrown: "} + e.what());
 		}
 	}();
 
@@ -389,7 +521,7 @@ void coro_offline_tests()
 }
 
 void event_handler_test(dpp::cluster *bot) {
-	bot->on_message_create([](dpp::message_create_t event) -> dpp::job {
+	bot->on_message_create([](dpp::message_create_t event) -> dpp::task<void> {
 		if (event.msg.content == "coro test") {
 			dpp::cluster *bot = event.from->creator;
 
@@ -428,15 +560,18 @@ void event_handler_test(dpp::cluster *bot) {
 						std::string content = "coro " + std::to_string(i);
 						dpp::confirmation_callback_t result = co_await bot->co_message_create(dpp::message{channel, content});
 
-						if (result.is_error())
+						if (result.is_error()) {
 							co_return {};
+						}
 						dpp::message msg = std::get<dpp::message>(std::move(result).value);
-						if (msg.content != content)
+						if (msg.content != content) {
 							co_return {};
+						}
 						user_member pair = co_await get_member_task;
-						if (!pair.first.has_value())
+						if (!pair.first.has_value()) {
 							co_return {};
-						const std::string& member_nick = pair.second.has_value() ? pair.second->nickname : "";
+						}
+						const std::string& member_nick = pair.second.has_value() ? pair.second->get_nickname() : "";
 						const std::string& user_nick = pair.first->username;
 						result = co_await bot->co_message_edit(msg.set_content("coro " + (member_nick.empty() ? user_nick : member_nick) + " " + std::to_string(i)));
 						co_return result.is_error() ? dpp::snowflake{} : std::get<dpp::message>(result.value).id;
@@ -451,9 +586,9 @@ void event_handler_test(dpp::cluster *bot) {
 						if (msg_ids[i] == dpp::snowflake{}) {
 							set_status(CORO_MUMBO_JUMBO, ts_failed, "failed to post message");
 							reacts[i] = dpp::async{[](auto &&cc) { cc(dpp::confirmation_callback_t{}); }};
-						}
-						else
+						} else {
 							reacts[i] = bot->co_message_add_reaction(msg_ids[i], event.msg.channel_id, "✅");
+						}
 					} catch (const std::exception &e) {
 						set_status(CORO_MUMBO_JUMBO, ts_failed, "message task threw " + std::string{e.what()});
 						reacts[i] = dpp::async{[](auto &&cc) { cc(dpp::confirmation_callback_t{}); }};

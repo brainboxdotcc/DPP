@@ -29,32 +29,31 @@
 #include <dpp/cluster.h>
 #include <dpp/httpsclient.h>
 #include <dpp/stringops.h>
-#include <dpp/version.h>
 
 namespace dpp {
 
-static std::string http_version = "DiscordBot (https://github.com/brainboxdotcc/DPP, " + std::to_string(DPP_VERSION_MAJOR) + "." + std::to_string(DPP_VERSION_MINOR) + "." + std::to_string(DPP_VERSION_PATCH) + ")";
-static const char* DISCORD_HOST = "https://discord.com";
-
-http_request::http_request(const std::string &_endpoint, const std::string &_parameters, http_completion_event completion, const std::string &_postdata, http_method _method, const std::string &audit_reason, const std::string &filename, const std::string &filecontent, const std::string &filemimetype)
- : complete_handler(completion), completed(false), non_discord(false), endpoint(_endpoint), parameters(_parameters), postdata(_postdata),  method(_method), reason(audit_reason), mimetype("application/json"), waiting(false)
+http_request::http_request(const std::string &_endpoint, const std::string &_parameters, http_completion_event completion, const std::string &_postdata, http_method _method, const std::string &audit_reason, const std::string &filename, const std::string &filecontent, const std::string &filemimetype, const std::string &http_protocol)
+ : complete_handler(completion), completed(false), non_discord(false), endpoint(_endpoint), parameters(_parameters), postdata(_postdata),  method(_method), reason(audit_reason), mimetype("application/json"), waiting(false), protocol(http_protocol), request_timeout(5)
 {
-		if (!filename.empty())
-			file_name.push_back(filename);
-		if (!filecontent.empty())
-			file_content.push_back(filecontent);
-	if (!filemimetype.empty())
+	if (!filename.empty()) {
+		file_name.push_back(filename);
+	}
+	if (!filecontent.empty()) {
+		file_content.push_back(filecontent);
+	}
+	if (!filemimetype.empty()) {
 		file_mimetypes.push_back(filemimetype);
+	}
 }
 
-http_request::http_request(const std::string &_endpoint, const std::string &_parameters, http_completion_event completion, const std::string &_postdata, http_method method, const std::string &audit_reason, const std::vector<std::string> &filename, const std::vector<std::string> &filecontent, const std::vector<std::string> &filemimetypes)
- : complete_handler(completion), completed(false), non_discord(false), endpoint(_endpoint), parameters(_parameters), postdata(_postdata),  method(method), reason(audit_reason), file_name(filename), file_content(filecontent), file_mimetypes(filemimetypes), mimetype("application/json"), waiting(false)
+http_request::http_request(const std::string &_endpoint, const std::string &_parameters, http_completion_event completion, const std::string &_postdata, http_method method, const std::string &audit_reason, const std::vector<std::string> &filename, const std::vector<std::string> &filecontent, const std::vector<std::string> &filemimetypes, const std::string &http_protocol)
+ : complete_handler(completion), completed(false), non_discord(false), endpoint(_endpoint), parameters(_parameters), postdata(_postdata),  method(method), reason(audit_reason), file_name(filename), file_content(filecontent), file_mimetypes(filemimetypes), mimetype("application/json"), waiting(false), protocol(http_protocol), request_timeout(5)
 {
 }
 
 
-http_request::http_request(const std::string &_url, http_completion_event completion, http_method _method, const std::string &_postdata, const std::string &_mimetype, const std::multimap<std::string, std::string> &_headers)
- : complete_handler(completion), completed(false), non_discord(true), endpoint(_url), postdata(_postdata), method(_method), mimetype(_mimetype), req_headers(_headers), waiting(false)
+http_request::http_request(const std::string &_url, http_completion_event completion, http_method _method, const std::string &_postdata, const std::string &_mimetype, const std::multimap<std::string, std::string> &_headers, const std::string &http_protocol, time_t _request_timeout)
+ : complete_handler(completion), completed(false), non_discord(true), endpoint(_url), postdata(_postdata), method(_method), mimetype(_mimetype), req_headers(_headers), waiting(false), protocol(http_protocol), request_timeout(_request_timeout)
 {
 }
 
@@ -62,8 +61,9 @@ http_request::~http_request() = default;
 
 void http_request::complete(const http_request_completion_t &c) {
 	/* Call completion handler only if the request has been completed */
-	if (is_completed() && complete_handler)
+	if (is_completed() && complete_handler) {
 		complete_handler(c);
+	}
 }
 
 /* Fill a http_request_completion_t from a HTTP result */
@@ -176,9 +176,12 @@ http_request_completion_t http_request::run(cluster* owner) {
 	}
 	http_connect_info hci = https_client::get_host_info(_host);
 	try {
-		https_client cli(hci.hostname, hci.port, _url, request_verb[method], multipart.body, headers, !hci.is_ssl);
+		https_client cli(hci.hostname, hci.port, _url, request_verb[method], multipart.body, headers, !hci.is_ssl, owner->request_timeout, protocol);
 		rv.latency = dpp::utility::time_f() - start;
-		if (cli.get_status() < 100) {
+		if (cli.timed_out) {
+			rv.error = h_connection;			
+			owner->log(ll_error, "HTTP(S) error on " + hci.scheme + " connection to " + hci.hostname + ":" + std::to_string(hci.port) + ": Timed out while waiting for the response");
+		} else if (cli.get_status() < 100) {
 			rv.error = h_connection;
 			owner->log(ll_error, "HTTP(S) error on " + hci.scheme + " connection to " + hci.hostname + ":" + std::to_string(hci.port) + ": Malformed HTTP response");
 		} else {
@@ -198,7 +201,7 @@ http_request_completion_t http_request::run(cluster* owner) {
 request_queue::request_queue(class cluster* owner, uint32_t request_threads) : creator(owner), terminating(false), globally_ratelimited(false), globally_limited_for(0), in_thread_pool_size(request_threads)
 {
 	for (uint32_t in_alloc = 0; in_alloc < in_thread_pool_size; ++in_alloc) {
-		requests_in.push_back(new in_thread(owner, this, in_alloc));
+		requests_in.push_back(std::make_unique<in_thread>(owner, this, in_alloc));
 	}
 	out_thread = new std::thread(&request_queue::out_loop, this);
 }
@@ -206,7 +209,7 @@ request_queue::request_queue(class cluster* owner, uint32_t request_threads) : c
 request_queue& request_queue::add_request_threads(uint32_t request_threads)
 {
 	for (uint32_t in_alloc_ex = 0; in_alloc_ex < request_threads; ++in_alloc_ex) {
-		requests_in.push_back(new in_thread(creator, this, in_alloc_ex + in_thread_pool_size));
+		requests_in.push_back(std::make_unique<in_thread>(creator, this, in_alloc_ex + in_thread_pool_size));
 	}
 	in_thread_pool_size += request_threads;
 	return *this;
@@ -224,115 +227,159 @@ in_thread::in_thread(class cluster* owner, class request_queue* req_q, uint32_t 
 
 in_thread::~in_thread()
 {
-	terminating = true;
-	in_ready.notify_one();
+	terminate();
 	in_thr->join();
 	delete in_thr;
 }
 
+void in_thread::terminate()
+{
+	terminating.store(true, std::memory_order_relaxed);
+	in_ready.notify_one();
+}
+
 request_queue::~request_queue()
 {
-	terminating = true;
+	terminating.store(true, std::memory_order_relaxed);
 	out_ready.notify_one();
+	for (auto& in_thr : requests_in) {
+		in_thr->terminate(); // signal all of them here, otherwise they will all join 1 by 1 and it will take forever
+	}
 	out_thread->join();
 	delete out_thread;
-	for (auto& ri : requests_in) {
-		delete ri;
-	}
+}
+
+namespace
+{
+
+/**
+ * @brief Comparator for sorting a request container
+ */
+struct compare_request {
+	/**
+	 * @brief Less_than comparator for sorting
+	 * @param lhs Left-hand side
+	 * @param rhs Right-hand side
+	 * @return Whether lhs comes before rhs in strict ordering
+	 */
+	bool operator()(const std::unique_ptr<http_request>& lhs, const std::unique_ptr<http_request>& rhs) const noexcept {
+		return std::less{}(lhs->endpoint, rhs->endpoint);
+	};
+
+	/**
+	 * @brief Less_than comparator for sorting
+	 * @param lhs Left-hand side
+	 * @param rhs Right-hand side
+	 * @return Whether lhs comes before rhs in strict ordering
+	 */
+	bool operator()(const std::unique_ptr<http_request>& lhs, std::string_view rhs) const noexcept {
+		return std::less{}(lhs->endpoint, rhs);
+	};
+
+	/**
+	 * @brief Less_than comparator for sorting
+	 * @param lhs Left-hand side
+	 * @param rhs Right-hand side
+	 * @return Whether lhs comes before rhs in strict ordering
+	 */
+	bool operator()(std::string_view lhs, const std::unique_ptr<http_request>& rhs) const noexcept {
+		return std::less{}(lhs, rhs->endpoint);
+	};
+};
+
 }
 
 void in_thread::in_loop(uint32_t index)
 {
 	utility::set_thread_name(std::string("http_req/") + std::to_string(index));
-	while (!terminating) {
+	while (!terminating.load(std::memory_order_relaxed)) {
 		std::mutex mtx;
-		std::unique_lock<std::mutex> lock{ mtx };			
+		std::unique_lock<std::mutex> lock{ mtx };
 		in_ready.wait_for(lock, std::chrono::seconds(1));
 		/* New request to be sent! */
 
 		if (!requests->globally_ratelimited) {
 
-			std::map<std::string, std::vector<http_request*>> requests_in_copy;
+			std::vector<http_request*> requests_view;
 			{
-				/* Make a safe copy within a mutex */
+				/* Gather all the requests first within a mutex */
 				std::shared_lock lock(in_mutex);
 				if (requests_in.empty()) {
 					/* Nothing to copy, wait again */
 					continue;
 				}
-				requests_in_copy = requests_in;
+				requests_view.reserve(requests_in.size());
+				std::transform(requests_in.begin(), requests_in.end(), std::back_inserter(requests_view), [](const std::unique_ptr<http_request> &r) {
+					return r.get();
+				});
 			}
 
-			for (auto & bucket : requests_in_copy) {
-				for (auto req : bucket.second) {
+			for (auto& request_view : requests_view) {
+				const std::string &key = request_view->endpoint;
+				http_request_completion_t rv;
+				auto                      currbucket = buckets.find(key);
 
-					http_request_completion_t rv;
-					auto currbucket = buckets.find(bucket.first);
-
-					if (currbucket != buckets.end()) {
-						/* There's a bucket for this request. Check its status. If the bucket says to wait,
-						* skip all requests in this bucket till its ok.
-						*/
-						if (currbucket->second.remaining < 1) {
-							uint64_t wait = (currbucket->second.retry_after ? currbucket->second.retry_after : currbucket->second.reset_after);
-							if ((uint64_t)time(nullptr) > currbucket->second.timestamp + wait) {
-								/* Time has passed, we can process this bucket again. send its request. */
-								rv = req->run(creator);
-							} else {
-								if (!req->waiting) {
-									req->waiting = true;
-								}
-								/* Time not up yet, wait more */
-								break;
-							}
+				if (currbucket != buckets.end()) {
+					/* There's a bucket for this request. Check its status. If the bucket says to wait,
+					* skip all requests in this bucket till its ok.
+					*/
+					if (currbucket->second.remaining < 1) {
+						uint64_t wait = (currbucket->second.retry_after ? currbucket->second.retry_after : currbucket->second.reset_after);
+						if ((uint64_t)time(nullptr) > currbucket->second.timestamp + wait) {
+							/* Time has passed, we can process this bucket again. send its request. */
+							rv = request_view->run(creator);
 						} else {
-							/* There's limit remaining, we can just run the request */
-							rv = req->run(creator);
+							if (!request_view->waiting) {
+								request_view->waiting = true;
+							}
+							/* Time not up yet, wait more */
+							break;
 						}
 					} else {
-						/* No bucket for this endpoint yet. Just send it, and make one from its reply */
-						rv = req->run(creator);
+						/* There's limit remaining, we can just run the request */
+						rv = request_view->run(creator);
 					}
-
-					bucket_t newbucket;
-					newbucket.limit = rv.ratelimit_limit;
-					newbucket.remaining = rv.ratelimit_remaining;
-					newbucket.reset_after = rv.ratelimit_reset_after;
-					newbucket.retry_after = rv.ratelimit_retry_after;
-					newbucket.timestamp = time(nullptr);
-					requests->globally_ratelimited = rv.ratelimit_global;
-					if (requests->globally_ratelimited) {
-						requests->globally_limited_for = (newbucket.retry_after ? newbucket.retry_after : newbucket.reset_after);
-					}
-					buckets[req->endpoint] = newbucket;
-
-					/* Make a new entry in the completion list and notify */
-					http_request_completion_t* hrc = new http_request_completion_t();
-					*hrc = rv;
-					{
-						std::unique_lock lock(requests->out_mutex);
-						requests->responses_out.push(std::make_pair(hrc, req));
-					}
-					requests->out_ready.notify_one();
+				} else {
+					/* No bucket for this endpoint yet. Just send it, and make one from its reply */
+					rv = request_view->run(creator);
 				}
-			}
 
-			{
-				std::unique_lock lock(in_mutex);
-				bool again = false;
-				do {
-					again = false;
-					for (auto & bucket : requests_in) {
-						for (auto req = bucket.second.begin(); req != bucket.second.end(); ++req) {
-							if ((*req)->is_completed()) {
-								requests_in[bucket.first].erase(req);
-								again = true;
-								goto out;	/* Only clean way out of a nested loop */
-							}
+				bucket_t newbucket;
+				newbucket.limit = rv.ratelimit_limit;
+				newbucket.remaining = rv.ratelimit_remaining;
+				newbucket.reset_after = rv.ratelimit_reset_after;
+				newbucket.retry_after = rv.ratelimit_retry_after;
+				newbucket.timestamp = time(nullptr);
+				requests->globally_ratelimited = rv.ratelimit_global;
+				if (requests->globally_ratelimited) {
+					requests->globally_limited_for = (newbucket.retry_after ? newbucket.retry_after : newbucket.reset_after);
+				}
+				buckets[request_view->endpoint] = newbucket;
+
+				/* Remove the request from the incoming requests to transfer it to completed requests */
+				std::unique_ptr<http_request> request;
+				{
+					/* Find the owned pointer in requests_in */
+					std::scoped_lock lock1{in_mutex};
+
+					auto [begin, end] = std::equal_range(requests_in.begin(), requests_in.end(), key, compare_request{});
+					for (auto it = begin; it != end; ++it) {
+						if (it->get() == request_view) {
+							/* Grab and remove */
+							request = std::move(*it);
+							requests_in.erase(it);
+							break;
 						}
 					}
-					out:;
-				} while (again);
+				}
+				/* Make a new entry in the completion list and notify */
+				auto hrc = std::make_unique<http_request_completion_t>();
+				*hrc = rv;
+				{
+					std::scoped_lock lock1(requests->out_mutex);
+					requests->responses_out.push({std::move(request), std::move(hrc)});
+				}
+				requests->out_ready.notify_one();
 			}
 
 		} else {
@@ -346,47 +393,59 @@ void in_thread::in_loop(uint32_t index)
 	}
 }
 
+bool request_queue::queued_deleting_request::operator<(const queued_deleting_request& other) const noexcept {
+	return time_to_delete < other.time_to_delete;
+}
+
+bool request_queue::queued_deleting_request::operator<(time_t time) const noexcept {
+	return time_to_delete < time;
+}
+
+
 void request_queue::out_loop()
 {
 	utility::set_thread_name("req_callback");
-	while (!terminating) {
+	while (!terminating.load(std::memory_order_relaxed)) {
 
 		std::mutex mtx;
-		std::unique_lock<std::mutex> lock{ mtx };			
+		std::unique_lock lock{ mtx };
 		out_ready.wait_for(lock, std::chrono::seconds(1));
 		time_t now = time(nullptr);
 
 		/* A request has been completed! */
-		std::pair<http_request_completion_t*, http_request*> queue_head = {};
+		completed_request queue_head = {};
 		{
-			std::unique_lock lock(out_mutex);
+			std::scoped_lock lock1(out_mutex);
 			if (responses_out.size()) {
-				queue_head = responses_out.front();
+				queue_head = std::move(responses_out.front());
 				responses_out.pop();
 			}
 		}
 
-		if (queue_head.first && queue_head.second) {
-			queue_head.second->complete(*queue_head.first);
+		if (queue_head.request && queue_head.response) {
+			queue_head.request->complete(*queue_head.response);
 			/* Queue deletions for 60 seconds from now */
-			responses_to_delete.insert(std::make_pair(now + 60, queue_head));
+			auto when = now + 60;
+			auto where = std::lower_bound(responses_to_delete.begin(), responses_to_delete.end(), when);
+			responses_to_delete.insert(where, {when, std::move(queue_head)});
 		}
 
 		/* Check for deletable items every second regardless of select status */
-		while (responses_to_delete.size() && now >= responses_to_delete.begin()->first) {
-			delete responses_to_delete.begin()->second.first;
-			delete responses_to_delete.begin()->second.second;
-			responses_to_delete.erase(responses_to_delete.begin());
+		auto end = std::lower_bound(responses_to_delete.begin(), responses_to_delete.end(), now);
+		if (end != responses_to_delete.begin()) {
+			responses_to_delete.erase(responses_to_delete.begin(), end);
 		}
 	}
 }
 
 /* Post a http_request into the queue */
-void in_thread::post_request(http_request* req)
+void in_thread::post_request(std::unique_ptr<http_request> req)
 {
 	{
-		std::unique_lock lock(in_mutex);
-		requests_in[req->endpoint].push_back(req);
+		std::scoped_lock lock(in_mutex);
+
+		auto where = std::lower_bound(requests_in.begin(), requests_in.end(), req->endpoint, compare_request{});
+		requests_in.emplace(where, std::move(req));
 	}
 	in_ready.notify_one();
 }
@@ -403,15 +462,16 @@ void in_thread::post_request(http_request* req)
 inline uint32_t hash(const char *s)
 {
 	uint32_t hashval;
-	for (hashval = 17; *s != 0; s++)
+	for (hashval = 17; *s != 0; s++) {
 		hashval = *s + 31 * hashval;
+	}
 	return hashval;
 }
 
 /* Post a http_request into a request queue */
-request_queue& request_queue::post_request(http_request* req)
+request_queue& request_queue::post_request(std::unique_ptr<http_request> req)
 {
-	requests_in[hash(req->endpoint.c_str()) % in_thread_pool_size]->post_request(req);
+	requests_in[hash(req->endpoint.c_str()) % in_thread_pool_size]->post_request(std::move(req));
 	return *this;
 }
 

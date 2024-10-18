@@ -27,9 +27,12 @@ _Pragma("warning( disable : 5105 )"); // 4251 warns when we export classes or st
 #include <dpp/dpp.h>
 #include <dpp/json_fwd.h>
 #include <iomanip>
+#include <type_traits>
 
 #ifdef _WIN32
 #define SHARED_OBJECT "dpp.dll"
+#elif __APPLE__
+#define SHARED_OBJECT "libdpp.dylib"
 #else
 #define SHARED_OBJECT "libdpp.so"
 #endif
@@ -79,6 +82,11 @@ struct test_t {
 #define DPP_TEST(name, desc, flags) inline test_t name = {#name, desc, flags}
 
 /* Current list of unit tests */
+DPP_TEST(SNOWFLAKE, "dpp::snowflake class", tf_offline);
+DPP_TEST(BIGNUM, "dpp::bignumber decimal to raw buffer", tf_offline);
+DPP_TEST(BIGNUM2, "dpp::bignumber raw buffer to hex", tf_offline);
+DPP_TEST(BIGNUM3, "dpp::bignumber to_binary()", tf_offline);
+DPP_TEST(JSON_INTERFACE, "dpp::json_interface class", tf_offline);
 DPP_TEST(CLUSTER, "Instantiate DPP cluster", tf_offline);
 DPP_TEST(BOTSTART, "cluster::start method", tf_online);
 DPP_TEST(CONNECTION, "Connection to client websocket", tf_online);
@@ -130,7 +138,6 @@ DPP_TEST(OPTCHOICE_STRING, "command_option_choice::fill_from_json: string", tf_o
 DPP_TEST(HOSTINFO, "https_client::get_host_info()", tf_offline);
 DPP_TEST(HTTPS, "https_client HTTPS request", tf_online);
 DPP_TEST(HTTP, "https_client HTTP request", tf_offline);
-DPP_TEST(MULTIHEADER, "multiheader cookie test", tf_offline);
 DPP_TEST(RUNONCE, "run_once<T>", tf_offline);
 DPP_TEST(WEBHOOK, "webhook construct from URL", tf_offline);
 DPP_TEST(MD_ESC_1, "Markdown escaping (ignore code block contents)", tf_offline);
@@ -144,8 +151,11 @@ DPP_TEST(CHANNELTYPES, "channel type flags", tf_online);
 DPP_TEST(FORUM_CREATION, "create a forum channel", tf_online);
 DPP_TEST(FORUM_CHANNEL_GET, "retrieve the created forum channel", tf_online);
 DPP_TEST(FORUM_CHANNEL_DELETE, "delete the created forum channel", tf_online);
+DPP_TEST(ERRORS, "Human readable error translation", tf_offline);
+DPP_TEST(INVALIDUTF8, "Invalid UTF-8 handling", tf_online);
 
-DPP_TEST(GUILD_BAN_CREATE, "cluster::guild_ban_add ban three deleted discord accounts", tf_online);
+DPP_TEST(GUILD_EDIT, "cluster::guild_edit", tf_online);
+DPP_TEST(GUILD_BAN_CREATE, "cluster::guild_ban_add ban three well-known discord accounts", tf_online);
 DPP_TEST(GUILD_BAN_GET, "cluster::guild_get_ban getting one of the banned accounts", tf_online);
 DPP_TEST(GUILD_BANS_GET, "cluster::guild_get_bans get bans using the after-parameter", tf_online);
 DPP_TEST(GUILD_BAN_DELETE, "cluster::guild_ban_delete unban the banned discord accounts", tf_online);
@@ -163,6 +173,7 @@ DPP_TEST(VOICE_CHANNEL_EDIT, "editing the created voice channel", tf_online);
 DPP_TEST(VOICE_CHANNEL_DELETE, "deleting the created voice channel", tf_online);
 
 DPP_TEST(PERMISSION_CLASS, "permission", tf_offline);
+DPP_TEST(EVENT_CLASS, "event class", tf_offline);
 DPP_TEST(USER_GET, "cluster::user_get", tf_online);
 DPP_TEST(USER_GET_FLAGS, "cluster::user_get flag parsing", tf_online);
 DPP_TEST(MEMBER_GET, "cluster::guild_get_member", tf_online);
@@ -219,10 +230,15 @@ DPP_TEST(INVITE_DELETE, "cluster::invite_delete", tf_online);
 
 /* Extended set -- Less important, skipped on the master branch due to rate limits and GitHub actions limitations*/
 /* To execute, run unittests with "full" command line argument */
+DPP_TEST(MULTIHEADER, "multiheader cookie test", tf_offline | tf_extended); // Fails in the EU as cookies are not sent without acceptance
+
 DPP_TEST(VOICECONN, "Connect to voice channel", tf_online | tf_extended);
 DPP_TEST(VOICESEND, "Send audio to voice channel", tf_online | tf_extended); // udp unreliable on gitbub
 DPP_TEST(MESSAGEPIN, "Pinning a channel message", tf_online | tf_extended);
 DPP_TEST(MESSAGEUNPIN, "Unpinning a channel message", tf_online | tf_extended);
+
+DPP_TEST(POLL_CREATE, "Creating a poll", tf_online);
+DPP_TEST(POLL_END, "Ending a poll", tf_online);
 
 DPP_TEST(THREAD_MEMBER_ADD, "cluster::thread_member_add", tf_online | tf_extended);
 DPP_TEST(THREAD_MEMBER_GET, "cluster::thread_member_get", tf_online | tf_extended);
@@ -240,12 +256,15 @@ DPP_TEST(THREAD_MESSAGE_REACT_ADD_EVENT, "cluster::on_reaction_add in thread", t
 DPP_TEST(THREAD_MESSAGE_REACT_REMOVE_EVENT, "cluster::on_reaction_remove in thread", tf_online | tf_extended);
 
 DPP_TEST(CORO_JOB_OFFLINE, "coro: offline job", tf_offline | tf_coro);
+DPP_TEST(CORO_AWAITABLE_OFFLINE, "coro: offline promise & awaitable", tf_offline | tf_coro);
 DPP_TEST(CORO_COROUTINE_OFFLINE, "coro: offline coroutine", tf_offline | tf_coro);
 DPP_TEST(CORO_TASK_OFFLINE, "coro: offline task", tf_offline | tf_coro);
 DPP_TEST(CORO_ASYNC_OFFLINE, "coro: offline async", tf_offline | tf_coro);
 DPP_TEST(CORO_EVENT_HANDLER, "coro: online event handler", tf_online | tf_coro);
 DPP_TEST(CORO_API_CALLS, "coro: online api calls", tf_online | tf_coro);
 DPP_TEST(CORO_MUMBO_JUMBO, "coro: online mumbo jumbo in event handler", tf_online | tf_coro | tf_extended);
+
+DPP_TEST(SNOWFLAKE_STD_FORMAT, "snowflake: std::format support", tf_offline);
 
 void coro_offline_tests();
 void coro_online_tests(dpp::cluster *bot);
@@ -465,11 +484,11 @@ int test_summary();
 std::vector<uint8_t> load_test_audio();
 
 /**
- * @brief Load test image for the attachment tests
+ * @brief Load bytes from file
  * 
- * @return std::vector<uint8_t> data and size for test image
+ * @return std::vector<std::byte> File data
  */
-std::vector<uint8_t> load_test_image();
+std::vector<std::byte> load_data(const std::string& file);
 
 /**
  * @brief Get the token from the environment variable DPP_UNIT_TEST_TOKEN
@@ -546,3 +565,20 @@ inline constexpr user_project_id_t get_user_snowflake;
 inline constexpr auto is_owner = [](auto &&user) noexcept {
 	return get_user_snowflake(user) == TEST_USER_ID;
 };
+
+#define DPP_RUNTIME_CHECK(test, check, var) if (!check) { var = false; set_status(test, ts_failed, "check failed: " #check); }
+#define DPP_COMPILETIME_CHECK(test, check, var) static_assert(check, #test ": " #check)
+
+#ifndef DPP_STATIC_TEST
+#define DPP_CHECK(test, check, var) DPP_RUNTIME_CHECK(test, check, var)
+#else
+#define DPP_CHECK(test, check, var) DPP_COMPILETIME_CHECK(test, check, var)
+#endif
+
+#define DPP_CHECK_CONSTRUCT_ASSIGN(test, type, var) do { \
+  DPP_CHECK(test, std::is_default_constructible_v<type>, var); \
+  DPP_CHECK(test, std::is_copy_constructible_v<type>, var); \
+  DPP_CHECK(test, std::is_move_constructible_v<type>, var); \
+  DPP_CHECK(test, std::is_copy_assignable_v<type>, var); \
+	DPP_CHECK(test, std::is_move_assignable_v<type>, var); \
+  } while(0)

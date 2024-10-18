@@ -31,27 +31,34 @@ voicestate::voicestate() : shard(nullptr), guild_id(0), channel_id(0), user_id(0
 {
 }
 
-voicestate& voicestate::fill_from_json(nlohmann::json* j) {
-	guild_id = snowflake_not_null(j, "guild_id");
-	channel_id = snowflake_not_null(j, "channel_id");
-	user_id = snowflake_not_null(j, "user_id");
-	session_id = string_not_null(j, "session_id");
-	request_to_speak = ts_not_null(j, "request_to_speak_timestamp");
-	flags = 0;
-	if (bool_not_null(j, "deaf"))
+voicestate& voicestate::fill_from_json_impl(nlohmann::json* j) {
+	set_snowflake_not_null(j, "guild_id", guild_id);
+	set_snowflake_not_null(j, "channel_id", channel_id);
+	set_snowflake_not_null(j, "user_id", user_id);
+	set_string_not_null(j, "session_id", session_id);
+	set_ts_not_null(j, "request_to_speak_timestamp", request_to_speak);
+
+	if (bool_not_null(j, "deaf")) {
 		flags |= vs_deaf;
-	if (bool_not_null(j, "mute"))
+	}
+	if (bool_not_null(j, "mute")) {
 		flags |= vs_mute;
-	if (bool_not_null(j, "self_mute"))
+	}
+	if (bool_not_null(j, "self_mute")) {
 		flags |= vs_self_mute;
-	if (bool_not_null(j, "self_deaf"))
+	}
+	if (bool_not_null(j, "self_deaf")) {
 		flags |= vs_self_deaf;
-	if (bool_not_null(j, "self_stream"))
+	}
+	if (bool_not_null(j, "self_stream")) {
 		flags |= vs_self_stream;
-	if (bool_not_null(j, "self_video"))
+	}
+	if (bool_not_null(j, "self_video")) {
 		flags |= vs_self_video;
-	if (bool_not_null(j, "suppress"))
+	}
+	if (bool_not_null(j, "suppress")) {
 		flags |= vs_suppress;
+	}
 	return *this;
 }
 
@@ -83,9 +90,5 @@ bool voicestate::is_suppressed() const {
 	return flags & vs_suppress;
 }
 
-std::string voicestate::build_json(bool with_id) const {
-	/* Voicestates are never sent from a bot */
-	return json({}).dump();
-}
-
 } // namespace dpp
+

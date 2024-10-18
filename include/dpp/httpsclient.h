@@ -27,9 +27,17 @@
 #include <vector>
 #include <variant>
 #include <dpp/sslclient.h>
+#include <dpp/version.h>
+#include <dpp/stringops.h>
 
 namespace dpp {
 
+static inline const std::string http_version = "DiscordBot (https://github.com/brainboxdotcc/DPP, "
+                                                + to_hex(DPP_VERSION_MAJOR, false) + "."
+                                                + to_hex(DPP_VERSION_MINOR, false) + "."
+                                                + to_hex(DPP_VERSION_PATCH, false) + ")";
+
+static inline constexpr const char* DISCORD_HOST = "https://discord.com";
 
 /**
  * @brief HTTP connection status
@@ -88,6 +96,7 @@ struct multipart_content {
 	 * @brief Multipart body
 	 */
 	std::string body;
+
 	/**
 	 * @brief MIME type
 	 */
@@ -103,14 +112,17 @@ struct http_connect_info {
 	 * @brief True if the connection should be SSL
 	 */
 	bool is_ssl;
+
 	/**
 	 * @brief The request scheme, e.g. 'https' or 'http'
 	 */
 	std::string scheme;
+
 	/**
 	 * @brief The request hostname part, e.g. 'discord.com'
 	 */
 	std::string hostname;
+
 	/**
 	 * @brief The port number, either determined from the scheme,
 	 * or from the part of the hostname after a colon ":" character
@@ -122,8 +134,7 @@ struct http_connect_info {
  * @brief Implements a HTTPS socket client based on the SSL client.
  * @note plaintext HTTP without SSL is also supported via a "downgrade" setting
  */
-class DPP_EXPORT https_client : public ssl_client
-{
+class DPP_EXPORT https_client : public ssl_client {
 	/**
 	 * @brief Current connection state
 	 */
@@ -168,6 +179,11 @@ class DPP_EXPORT https_client : public ssl_client
 	uint16_t status;
 
 	/**
+	 * @brief The HTTP protocol to use
+	 */
+	std::string http_protocol;
+
+	/**
 	 * @brief Time at which the request should be abandoned
 	 */
 	time_t timeout;
@@ -202,7 +218,6 @@ class DPP_EXPORT https_client : public ssl_client
 	bool do_buffer(std::string& buffer);
 
 protected:
-
 	/**
 	 * @brief Start the connection
 	 */
@@ -215,7 +230,11 @@ protected:
 	http_state get_state();
 
 public:
-
+	/**
+	 * @brief If true the response timed out while waiting
+	 */
+	bool timed_out;	
+	
 	/**
 	 * @brief Connect to a specific HTTP(S) server and complete a request.
 	 * 
@@ -235,8 +254,9 @@ public:
 	 * @param extra_headers Additional request headers, e.g. user-agent, authorization, etc
 	 * @param plaintext_connection Set to true to make the connection plaintext (turns off SSL)
 	 * @param request_timeout How many seconds before the connection is considered failed if not finished
+	 * @param protocol Request HTTP protocol (default: 1.1)
 	 */
-        https_client(const std::string &hostname, uint16_t port = 443, const std::string &urlpath = "/", const std::string &verb = "GET", const std::string &req_body = "", const http_headers& extra_headers = {}, bool plaintext_connection = false, uint16_t request_timeout = 5);
+        https_client(const std::string &hostname, uint16_t port = 443, const std::string &urlpath = "/", const std::string &verb = "GET", const std::string &req_body = "", const http_headers& extra_headers = {}, bool plaintext_connection = false, uint16_t request_timeout = 5, const std::string &protocol = "1.1");
 
 	/**
 	 * @brief Destroy the https client object

@@ -1,8 +1,8 @@
 \page spdlog Integrating with spdlog
 
-If you want to make your bot use spdlog, like aegis does, you can attach it to the on_log event. You can do this as follows:
+If you want to make your bot use spdlog, like aegis does, you can attach it to the `on_log` event. You can do this as follows:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~cpp
 #include <spdlog/spdlog.h>
 #include <spdlog/async.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
@@ -11,8 +11,7 @@ If you want to make your bot use spdlog, like aegis does, you can attach it to t
 #include <dpp/dpp.h>
 #include <fmt/format.h>
 
-int main(int argc, char const *argv[])
-{
+int main(int argc, char const *argv[]) {
 	dpp::cluster bot("token");
 
 	const std::string log_name = "mybot.log";

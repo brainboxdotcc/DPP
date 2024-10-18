@@ -37,37 +37,75 @@ namespace dpp {
  * @brief Flags for dpp::emoji
  */
 enum emoji_flags : uint8_t {
-	/// Emoji requires colons
+	/**
+	 * @brief Emoji requires colons.
+	 */
 	e_require_colons = 0b00000001,
-	/// Managed (introduced by application)
-	e_managed =        0b00000010,
-	/// Animated
-	e_animated =       0b00000100,
-	/// Available (false if the guild doesn't meet boosting criteria, etc)
-	e_available =      0b00001000,
+
+	/**
+	 * @brief Managed (introduced by application)
+	 */
+	e_managed = 0b00000010,
+
+	/**
+	 * @brief Animated emoji.
+	 */
+	e_animated = 0b00000100,
+
+	/**
+	 * @brief Available (false if the guild doesn't meet boosting criteria, etc)
+	 */
+	e_available = 0b00001000,
 };
 
 /**
  * @brief Represents an emoji for a dpp::guild
  */
-class DPP_EXPORT emoji : public managed, public json_interface<emoji>  {
+class DPP_EXPORT emoji : public managed, public json_interface<emoji> {
+protected:
+	friend struct json_interface<emoji>;
+
+	/**
+	 * @brief Read class values from json object
+	 *
+	 * @param j A json object to read from
+	 * @return A reference to self
+	 */
+	emoji& fill_from_json_impl(nlohmann::json* j);
+
+	/**
+	 * @brief Build the json for this object
+	 *
+	 * @param with_id include the id in the JSON
+	 * @return std::string json data
+	 */
+	json to_json_impl(bool with_id = false) const;
+
 public:
 	/**
-	 * @brief Emoji name
+	 * @brief Emoji name.
 	 */
 	std::string name{};
+
 	/**
-	 * @brief User id who uploaded the emoji
+	 * @brief Roles allowed to use this emoji.
 	 */
-	snowflake user_id{0};
+	std::vector<snowflake> roles;
+
 	/**
-	 * @brief Flags for the emoji from dpp::emoji_flags
+	 * @brief The id of the user that created this emoji.
+	 */
+	snowflake user_id;
+
+	/**
+	 * @brief Image data for the emoji, if uploading.
+	 */
+	utility::image_data image_data;
+
+	/**
+	 * @brief Flags for the emoji from dpp::emoji_flags.
 	 */
 	uint8_t flags{0};
-	/**
-	 * @brief Image data for the emoji if uploading
-	 */
-	std::string image_data{};
 
 	/**
 	 * @brief Construct a new emoji object
@@ -126,22 +164,6 @@ public:
 	static std::string get_mention(std::string_view name, snowflake id, bool is_animated = false);
 
 	/**
-	 * @brief Read class values from json object
-	 *
-	 * @param j A json object to read from
-	 * @return A reference to self
-	 */
-	emoji& fill_from_json(nlohmann::json* j);
-
-	/**
-	 * @brief Build the json for this object
-	 *
-	 * @param with_id include the id in the JSON
-	 * @return std::string json data
-	 */
-	std::string build_json(bool with_id = false) const override;
-
-	/**
 	 * @brief Emoji requires colons
 	 *
 	 * @return true Requires colons
@@ -174,7 +196,7 @@ public:
 	bool is_available() const;
 
 	/**
-	 * @brief Load an image into the object as base64
+	 * @brief Load an image into the object
 	 *
 	 * @param image_blob Image binary data
 	 * @param type Type of image. It can be one of `i_gif`, `i_jpg` or `i_png`.
@@ -182,6 +204,17 @@ public:
 	 * @throw dpp::length_exception Image content exceeds discord maximum of 256 kilobytes
 	 */
 	emoji& load_image(std::string_view image_blob, const image_type type);
+
+	/**
+	 * @brief Load an image into the object
+	 *
+	 * @param data Image binary data
+	 * @param size Size of the image.
+	 * @param type Type of image. It can be one of `i_gif`, `i_jpg` or `i_png`.
+	 * @return emoji& Reference to self
+	 * @throw dpp::length_exception Image content exceeds discord maximum of 256 kilobytes
+	 */
+	emoji& load_image(const std::byte* data, uint32_t size, const image_type type);
 
 	/**
 	 * @brief Format to name if unicode, name:id if has id or a:name:id if animated

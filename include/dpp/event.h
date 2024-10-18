@@ -25,24 +25,21 @@
 #include <dpp/json_fwd.h>
 
 #define event_decl(x,wstype) /** @brief Internal event handler for wstype websocket events. Called for each websocket message of this type. @internal */ \
-	class x : public event { public: virtual void handle(dpp::discord_client* client, nlohmann::json &j, const std::string &raw); };
-
-namespace dpp { 
-
-class discord_client;
+	class x : public event { public: virtual void handle(class dpp::discord_client* client, nlohmann::json &j, const std::string &raw); };
 
 /**
  * @brief The events namespace holds the internal event handlers for each websocket event.
  * These are handled internally and also dispatched to the user code if the event is hooked.
  */
-namespace events {
+namespace dpp::events { 
 
 /**
  * @brief An event object represents an event handled internally, passed from the websocket e.g. MESSAGE_CREATE.
  */
 class DPP_EXPORT event {
 public:
-	/** Pure virtual method for event handler code
+	/**
+	 * @brief Pure virtual method for event handler code
 	 * @param client The creating shard
 	 * @param j The json data of the event
 	 * @param raw The raw event json
@@ -103,6 +100,8 @@ event_decl(message_create,MESSAGE_CREATE);
 event_decl(message_update,MESSAGE_UPDATE);
 event_decl(message_delete,MESSAGE_DELETE);
 event_decl(message_delete_bulk,MESSAGE_DELETE_BULK);
+event_decl(message_poll_vote_add,MESSAGE_POLL_VOTE_ADD);
+event_decl(message_poll_vote_remove,MESSAGE_POLL_VOTE_REMOVE);
 
 /* Presence/typing */
 event_decl(presence_update,PRESENCE_UPDATE);
@@ -152,5 +151,9 @@ event_decl(automod_rule_execute, AUTO_MODERATION_ACTION_EXECUTION);
 /* Audit log */
 event_decl(guild_audit_log_entry_create, GUILD_AUDIT_LOG_ENTRY_CREATE);
 
-} // namespace events
-} // namespace dpp
+/* Entitlements */
+event_decl(entitlement_create, ENTITLEMENT_CREATE);
+event_decl(entitlement_update, ENTITLEMENT_UPDATE);
+event_decl(entitlement_delete, ENTITLEMENT_DELETE);
+
+} // namespace dpp::events

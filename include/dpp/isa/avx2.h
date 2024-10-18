@@ -24,6 +24,8 @@
 
 #include <immintrin.h>
 #include <numeric>
+#include <cstdint>
+#include <limits>
 
 namespace dpp {
 
@@ -76,7 +78,10 @@ namespace dpp {
 		}
 
 	protected:
-		alignas(32) float values[byte_blocks_per_register]{};///< Array for storing the values to be loaded/stored.
+		/**
+		 * @brief Array for storing the values to be loaded/stored.
+		 */
+		alignas(32) float values[byte_blocks_per_register]{};
 
 		/**
 		 * @brief Stores values from a 256-bit AVX2 vector to a storage location.

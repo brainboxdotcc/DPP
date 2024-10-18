@@ -33,9 +33,14 @@ namespace dpp {
  * @brief Represents the privacy of a stage instance
  */
 enum stage_privacy_level : uint8_t {
-	/// The Stage instance is visible publicly, such as on Stage Discovery.
+	/**
+	 * @brief The Stage instance is visible publicly, such as on Stage Discovery.
+	 */
 	sp_public = 1,
-	/// The Stage instance is visible to only guild members.
+
+	/**
+	 * @brief The Stage instance is visible to only guild members.
+	 */
 	sp_guild_only = 2
 };
 
@@ -43,16 +48,49 @@ enum stage_privacy_level : uint8_t {
  * @brief A stage instance.
  * Stage instances are like a conference facility, with moderators/speakers and listeners.
  */
-struct DPP_EXPORT stage_instance : public managed, public json_interface<stage_instance>  {
-	/// The guild id of the associated Stage channel
+struct DPP_EXPORT stage_instance : public managed, public json_interface<stage_instance> {
+protected:
+	friend struct json_interface<stage_instance>;
+
+	/**
+	 * @brief Serialise a stage_instance object rom json
+	 *
+	 * @return stage_instance& a reference to self
+	 */
+	 stage_instance& fill_from_json_impl(const nlohmann::json* j);
+
+	/**
+	 * @brief Build json for this object
+	 *
+	 * @param with_id include ID
+	 * @return json Json of this object
+	 */
+	virtual json to_json_impl(bool with_id = false) const;
+
+public:
+	/**
+	 * @brief The guild ID of the associated Stage channel.
+	 */
 	snowflake guild_id;
-	/// The id of the associated Stage channel
+
+	/**
+	 * @brief The ID of the associated Stage channel.
+	 */
 	snowflake channel_id;
-	/// The topic of the Stage instance (1-120 characters)
+
+	/**
+	 * @brief The topic of the Stage instance (1-120 characters).
+	 */
 	std::string topic;
-	/// The privacy level of the Stage instance
+
+	/**
+	 * @brief The privacy level of the Stage instance.
+	 */
 	stage_privacy_level privacy_level;
-	/// Whether or not Stage Discovery is disabled
+
+	/**
+	 * @brief Whether or not Stage Discovery is disabled.
+	 */
 	bool discoverable_disabled;
 
 	/**
@@ -64,24 +102,11 @@ struct DPP_EXPORT stage_instance : public managed, public json_interface<stage_i
 	 * @brief Destroy the stage_instance object
 	 */
 	~stage_instance() = default;
-
-	/**
-	 * @brief Serialise a stage_instance object rom json
-	 *
-	 * @return stage_instance& a reference to self
-	 */
-	 stage_instance& fill_from_json(const nlohmann::json* j);
-
-	/**
-	 * @brief Build json for this object
-	 *
-	 * @param with_id include ID
-	 * @return std::string Dumped json of this object
-	 */
-	virtual std::string build_json(bool with_id = false) const;
 };
 
-/** A group of stage instances */
+/**
+ * @brief A group of stage instances
+ */
 typedef std::unordered_map<snowflake, stage_instance> stage_instance_map;
 
 } // namespace dpp

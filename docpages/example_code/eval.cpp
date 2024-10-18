@@ -25,8 +25,7 @@ int test_function() {
  * Note for OSX you'll probably have to change all references
  * from .so to .dylib.
  */
-int main()
-{
+int main() {
 	dpp::cluster bot("token", dpp::i_default_intents | dpp::i_message_content);
 
         bot.on_log(dpp::utility::cout_logger());
@@ -60,7 +59,7 @@ int main()
 				#include <unordered_map>\n\
 				#include <stdint.h>\n\
 				#include <dpp/dpp.h>\n\
-				#include <nlohmann/json.hpp>\n\
+				#include <dpp/nlohmann/json.hpp>\n\
 				#include <fmt/format.h>\n\
 				#include \"eval.h\"\n\
 				extern \"C\" void so_exec(dpp::cluster& bot, dpp::message_create_t event) {\n\
@@ -171,5 +170,6 @@ int main()
 	});
 
 	bot.start(dpp::st_wait);
+	
 	return 0;
 }

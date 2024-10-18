@@ -41,10 +41,12 @@ void set_status(test_t &test, test_status_t newstatus, std::string_view message)
 	static std::mutex m;
 	std::scoped_lock lock{m};
 
-	if (is_skipped(test) || newstatus == test.status)
+	if (is_skipped(test) || newstatus == test.status) {
 		return;
-	if (test.status != ts_failed) // disallow changing the state of a failed test, but we still log
+	}
+	if (test.status != ts_failed) { // disallow changing the state of a failed test, but we still log
 		test.status = newstatus;
+	}
 	switch (newstatus) {
 		case ts_started:
 			std::cout << "[" << std::fixed << std::setprecision(3) << get_time() << "]: " << "[\u001b[33mTESTING\u001b[0m] " << test.description << (message.empty() ? "" : " - " + std::string{message} ) << "\n";
@@ -145,10 +147,10 @@ std::vector<uint8_t> load_test_audio() {
 	return testaudio;
 }
 
-std::vector<uint8_t> load_test_image() {
-	std::vector<uint8_t> testimage;
+std::vector<std::byte> load_data(const std::string& file) {
+	std::vector<std::byte> testimage;
 	std::string dir = get_testdata_dir();
-	std::ifstream input (dir + "DPP-Logo.png", std::ios::in|std::ios::binary|std::ios::ate);
+	std::ifstream input (dir + file, std::ios::in|std::ios::binary|std::ios::ate);
 	if (input.is_open()) {
 		size_t testimage_size = input.tellg();
 		testimage.resize(testimage_size);
@@ -157,7 +159,7 @@ std::vector<uint8_t> load_test_image() {
 		input.close();
 	}
 	else {
-		std::cout << "ERROR: Can't load " + dir + "DPP-Logo.png\n";
+		std::cout << "ERROR: Can't load " + dir + file + "\n";
 		exit(1);
 	}
 	return testimage;
@@ -198,7 +200,8 @@ void wait_for_tests() {
 		ticks++;
 	}
 	for (auto t : tests) {
-		if (t->status == ts_started)
+		if (t->status == ts_started) {
 			std::cout << "[" << std::fixed << std::setprecision(3)  << get_time() << "]: " << "[\u001b[31mTIMEOUT\u001b[0m] " << t->description << "\n";
+		}
 	}
 }

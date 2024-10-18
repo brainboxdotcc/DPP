@@ -144,6 +144,7 @@ template<> inline void rest_request_list<invite>(dpp::cluster* c, const char* ba
 		}
 	});
 }
+
 /**
  * @brief Templated REST request helper to save on typing (for returned lists, specialised for voiceregions)
  *  
@@ -172,6 +173,7 @@ template<> inline void rest_request_list<voiceregion>(dpp::cluster* c, const cha
 		}
 	});
 }
+
 /**
  * @brief Templated REST request helper to save on typing (for returned lists, specialised for bans)
  *
@@ -201,6 +203,7 @@ template<> inline void rest_request_list<ban>(dpp::cluster* c, const char* basep
 		}
 	});
 }
+
 /**
  * @brief Templated REST request helper to save on typing (for returned lists, specialised for sticker packs)
  *
@@ -224,6 +227,36 @@ template<> inline void rest_request_list<sticker_pack>(dpp::cluster* c, const ch
 				for (auto &curr_item: j["sticker_packs"]) {
 					list[snowflake_not_null(&curr_item, key.c_str())] = sticker_pack().fill_from_json(&curr_item);
 				}
+			}
+		}
+		if (callback) {
+			callback(confirmation_callback_t(c, list, http));
+		}
+	});
+}
+
+/**
+ * @brief Templated REST request helper to save on typing (for returned lists)
+ *  
+ * @tparam T singular type to return in lambda callback
+ * @tparam T map type to return in lambda callback
+ * @param c calling cluster
+ * @param basepath base path for API call
+ * @param major major API function
+ * @param minor minor API function
+ * @param method HTTP method
+ * @param postdata Post data or empty string
+ * @param key Key name of elements in the json list
+ * @param root Root element to look for
+ * @param callback Callback lambda
+ */
+template<class T> inline void rest_request_list(dpp::cluster* c, const char* basepath, const std::string &major, const std::string &minor, http_method method, const std::string& postdata, command_completion_event_t callback, const std::string& key, const std::string& root) {
+	c->post_rest(basepath, major, minor, method, postdata, [c, root, key, callback](json &j, const http_request_completion_t& http) {
+		std::unordered_map<snowflake, T> list;
+		confirmation_callback_t e(c, confirmation(), http);
+		if (!e.is_error()) {
+			for (auto & curr_item : j[root]) {
+				list[snowflake_not_null(&curr_item, key.c_str())] = T().fill_from_json(&curr_item);
 			}
 		}
 		if (callback) {

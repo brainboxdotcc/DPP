@@ -65,7 +65,7 @@ public:
 	/**
 	 * @brief Construct a new cache object.
 	 * 
-	 * Caches must contain classes derived from dpp::managed.
+	 * @note Caches must contain classes derived from dpp::managed.
 	 */
 	cache() {
 		cache_map = new std::unordered_map<snowflake, T*>;
@@ -250,12 +250,13 @@ public:
 	 */
 	size_t bytes() {
 		std::shared_lock l(cache_mutex);
-		return sizeof(this) + (cache_map->bucket_count() * sizeof(size_t));
+		return sizeof(*this) + (cache_map->bucket_count() * sizeof(size_t));
 	}
 
 };
 
-/** Run garbage collection across all caches removing deleted items
+/**
+ * Run garbage collection across all caches removing deleted items
  * that have been deleted over 60 seconds ago.
  */
 void DPP_EXPORT garbage_collection();

@@ -2,8 +2,7 @@
 #include <iomanip>
 #include <sstream>
 
-int main(int argc, char const *argv[])
-{
+int main() {
 	/* Example to record a user in a VC
 	* 
 	* Recording is output as './me.pcm' and you can play it via the soundboard example
@@ -19,14 +18,12 @@ int main(int argc, char const *argv[])
 	FILE *fd;
 	fd = fopen("./me.pcm", "wb");
 
-    bot.on_log(dpp::utility::cout_logger());
+	bot.on_log(dpp::utility::cout_logger());
 
 	/* The event is fired when someone issues your commands */
 	bot.on_slashcommand([&bot, &fd](const dpp::slashcommand_t& event) {
-
 		/* Check which command they ran */
 		if (event.command.get_command_name() == "record") {
-
 			/* Get the guild */
 			dpp::guild* g = dpp::find_guild(event.command.guild_id);
 
@@ -39,7 +36,6 @@ int main(int argc, char const *argv[])
 			/* Tell the user we joined their channel. */
 			event.reply("Joined your channel, now recording!");
 		} else if (event.command.get_command_name() == "stop") {
-
 			event.from->disconnect_voice(event.command.guild_id);
 			fclose(fd);
 
@@ -55,13 +51,11 @@ int main(int argc, char const *argv[])
 
 	bot.on_ready([&bot](const dpp::ready_t & event) {
 		if (dpp::run_once<struct register_bot_commands>()) {
-
 			/* Create a new command. */
 			dpp::slashcommand recordcommand("record", "Joins your voice channel and records you.", bot.me.id);
-
 			dpp::slashcommand stopcommand("stop", "Stops recording you.", bot.me.id);
 
-			bot.global_bulk_command_create({recordcommand, stopcommand});
+			bot.global_bulk_command_create({ recordcommand, stopcommand });
 		}
 	});
 

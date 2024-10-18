@@ -27,11 +27,7 @@
 
 
 
-namespace dpp { namespace events {
-	
-using json = nlohmann::json;
-using namespace dpp;
-
+namespace dpp::events {
 /**
  * @brief Handle event
  * 
@@ -53,4 +49,4 @@ void channel_pins_update::handle(discord_client* client, json &j, const std::str
 
 }
 
-}};
+};

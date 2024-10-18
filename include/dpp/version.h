@@ -21,10 +21,10 @@
  ************************************************************************************/
 #pragma once
 
-#if !defined(DPP_VERSION_LONG)
-#define DPP_VERSION_LONG 0x00100026
-#define DPP_VERSION_SHORT 100026
-#define DPP_VERSION_TEXT "D++ 10.0.26 (30-Aug-2023)"
+#ifndef DPP_VERSION_LONG
+#define DPP_VERSION_LONG 0x00100033
+#define DPP_VERSION_SHORT 100033
+#define DPP_VERSION_TEXT "D++ 10.0.33 (13-Oct-2024)"
 
 #define DPP_VERSION_MAJOR ((DPP_VERSION_LONG & 0x00ff0000) >> 16)
 #define DPP_VERSION_MINOR ((DPP_VERSION_LONG & 0x0000ff00) >> 8)

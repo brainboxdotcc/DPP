@@ -48,8 +48,8 @@ You can find further releases in other architectures and formats or the source c
 ### Linux
 The library runs ideally on **Linux**.
 
-### Mac OS X and FreeBSD
-The library is well-functional and stable on **Mac OS X** and **FreeBSD** too.
+### Mac OS X, FreeBSD, and OpenBSD
+The library is well-functional and stable on **Mac OS X**, **FreeBSD**, and **OpenBSD** too!
 
 ### Raspberry Pi
 For running your bot on a **Raspberry Pi**, we offer a prebuilt .deb package for ARM64, ARM6, and ARM7 so that you do not have to wait for it to compile.
@@ -63,10 +63,10 @@ The library should work fine on other operating systems as well, and if you run 
 ## Getting started
 * [GitHub Repository](https://github.com/brainboxdotcc/DPP)
 * [Discord Server](https://discord.gg/dpp)
-* \ref frequently-asked-questions "Frequently Asked Questions"
-* \ref installing "Installing D++"
-* \ref example-programs "Example Programs"
-* \ref glossary-of-common-discord-terms "Commonly used terms"
+* \ref frequently-asked-questions
+* \ref installing
+* \ref example-programs
+* \ref glossary-of-common-discord-terms
 
 ## Architecture
 * \ref clusters-shards-guilds

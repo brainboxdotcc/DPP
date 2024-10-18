@@ -57,7 +57,22 @@ table.doxtable td, table.doxtable th {
 
 dl.note {
 	background-color: #fcfcc0;
+	border-left-color: #f1b602;
 	color: #8d7400;
+}
+
+dl.note dt {
+	color: #f1b602;
+}
+
+dl.warning, dl.attention {
+	background: #2e1917;
+	border-left-color: #ad2617;
+	color: #f5b1aa;
+}
+
+dl.warning dt, dl.attention dt {
+	color: #ad2617;
 }
 
 #nav-tree .arrow {

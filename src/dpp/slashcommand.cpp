@@ -60,7 +60,7 @@ slashcommand& slashcommand::set_default_permissions(uint64_t defaults) {
 	return *this;
 }
 
-slashcommand& slashcommand::fill_from_json(nlohmann::json* j) {
+slashcommand& slashcommand::fill_from_json_impl(nlohmann::json* j) {
 	id = snowflake_not_null(j, "id");
 	name = string_not_null(j, "name");
 	description = string_not_null(j, "description");
@@ -243,7 +243,7 @@ void to_json(json& j, const slashcommand& p) {
 		}
 	}
 
-	if(p.permissions.size())  {
+	if (p.permissions.size())  {
 		j["permissions"] = json();
 
 		for(const auto& perm : p.permissions) {
@@ -257,14 +257,14 @@ void to_json(json& j, const slashcommand& p) {
 	j["application_id"] = std::to_string(p.application_id);
 }
 
-std::string slashcommand::build_json(bool with_id) const {
+json slashcommand::to_json_impl(bool with_id) const {
 	json j = *this;
 
 	if (with_id) {
 		j["id"] = std::to_string(id);
 	}
 
-	return j.dump();
+	return j;
 }
 
 slashcommand& slashcommand::set_type(slashcommand_contextmenu_type t) {
@@ -308,7 +308,7 @@ command_option_choice::command_option_choice(const std::string &n, command_value
 {
 }
 
-command_option_choice &command_option_choice::fill_from_json(nlohmann::json *j) {
+command_option_choice &command_option_choice::fill_from_json_impl(nlohmann::json *j) {
 	name = string_not_null(j, "name");
 	if ((*j)["value"].is_boolean()) { // is bool
 		value.emplace<bool>((*j)["value"].get<bool>());
@@ -331,14 +331,17 @@ command_option_choice &command_option_choice::fill_from_json(nlohmann::json *j) 
 }
 
 command_option::command_option(command_option_type t, const std::string &n, const std::string &d, bool r) :
-	type(t), name(n), description(d), required(r), autocomplete(false)
+	type(t), name(n), description(d), required(r), focused(false), autocomplete(false)
 {
+	if (std::any_of(n.begin(), n.end(), [](unsigned char c){ return std::isupper(c); })) {
+		throw dpp::logic_exception(err_command_has_caps, "Command options can not contain capital letters in the name of the option.");
+	}
 }
 
 command_option& command_option::add_choice(const command_option_choice &o)
 {
 	if (this->autocomplete) {
-		throw dpp::logic_exception("Can't set autocomplete=true if choices exist in the command_option");
+		throw dpp::logic_exception(err_choice_autocomplete, "Can't set autocomplete=true if choices exist in the command_option");
 	}
 	choices.emplace_back(o);
 	return *this;
@@ -359,13 +362,13 @@ command_option& command_option::add_channel_type(const channel_type ch)
 command_option& command_option::set_auto_complete(bool autocomp)
 {
 	if (autocomp && !choices.empty()) {
-		throw dpp::logic_exception("Can't set autocomplete=true if choices exist in the command_option");
+		throw dpp::logic_exception(err_choice_autocomplete, "Can't set autocomplete=true if choices exist in the command_option");
 	}
 	this->autocomplete = autocomp;
 	return *this;
 }
 
-command_option &command_option::fill_from_json(nlohmann::json *j) {
+command_option &command_option::fill_from_json_impl(nlohmann::json *j) {
 	/*
 	* Command options contains command options. Therefor the object is filled with recursion.
 	*/
@@ -435,14 +438,14 @@ slashcommand& slashcommand::add_option(const command_option &o)
 	return *this;
 }
 
-interaction::interaction() : application_id(0), type(0), guild_id(0), channel_id(0), message_id(0), version(0), cache_policy({cp_aggressive, cp_aggressive, cp_aggressive}) {
+interaction::interaction() : application_id(0), type(0), guild_id(0), channel_id(0), message_id(0), version(0), cache_policy(cache_policy::cpol_default) {
 }
 
 command_interaction interaction::get_command_interaction() const {
 	if (std::holds_alternative<command_interaction>(data)) {
 		return std::get<command_interaction>(data);
 	} else {
-		throw dpp::logic_exception("Interaction is not for a command");
+		throw dpp::logic_exception(err_interaction, "Interaction is not for a command");
 	}
 }
 
@@ -450,7 +453,7 @@ component_interaction interaction::get_component_interaction() const {
 	if (std::holds_alternative<component_interaction>(data)) {
 		return std::get<component_interaction>(data);
 	} else {
-		throw dpp::logic_exception("Interaction is not for a component");
+		throw dpp::logic_exception(err_interaction, "Interaction is not for a component");
 	}
 }
 
@@ -458,7 +461,7 @@ autocomplete_interaction interaction::get_autocomplete_interaction() const {
 	if (std::holds_alternative<autocomplete_interaction>(data)) {
 		return std::get<autocomplete_interaction>(data);
 	} else {
-		throw dpp::logic_exception("Interaction is not for an autocomplete");
+		throw dpp::logic_exception(err_interaction, "Interaction is not for an autocomplete");
 	}
 }
 
@@ -471,12 +474,12 @@ std::string interaction::get_command_name() const {
 	}
 }
 
-interaction& interaction::fill_from_json(nlohmann::json* j) {
+interaction& interaction::fill_from_json_impl(nlohmann::json* j) {
 	j->get_to(*this);
 	return *this;
 }
 
-std::string interaction::build_json(bool with_id) const {
+json interaction::to_json_impl(bool with_id) const {
 	/* There is no facility to build the json of an interaction as bots don't send them, only the API sends them as an event payload */
 	return "";
 }
@@ -518,7 +521,9 @@ void from_json(const nlohmann::json& j, command_data_option& cdo) {
 	if (j.contains("value") && !j.at("value").is_null()) {
 		switch (cdo.type) {
 			case co_boolean:
-				cdo.value = j.at("value").get<bool>();
+				if(j.at("value").is_boolean()) {
+					cdo.value = j.at("value").get<bool>();
+				}
 				break;
 			case co_channel:
 			case co_role:
@@ -528,13 +533,19 @@ void from_json(const nlohmann::json& j, command_data_option& cdo) {
 				cdo.value = dpp::snowflake(snowflake_not_null(&j, "value"));
 				break;
 			case co_integer:
-				cdo.value = j.at("value").get<int64_t>();
+				if(j.at("value").is_number_integer()) {
+					cdo.value = j.at("value").get<int64_t>();
+				}
 				break;
 			case co_string:
-				cdo.value = j.at("value").get<std::string>();
+				if(j.at("value").is_string()) {
+					cdo.value = j.at("value").get<std::string>();
+				}
 				break;
 			case co_number:
-				cdo.value = j.at("value").get<double>();
+				if(j.at("value").is_number_float()) {
+					cdo.value = j.at("value").get<double>();
+				}
 				break;
 			case co_sub_command:
 			case co_sub_command_group:
@@ -590,12 +601,12 @@ void from_json(const nlohmann::json& j, interaction& i) {
 
 	if (j.contains("channel") && !j.at("channel").is_null()) {
 		const json& c = j["channel"];
-		i.channel = channel().fill_from_json((json*)&c);
+		i.channel = channel().fill_from_json(const_cast<json*>(&c));
 	}
 
 	if (j.contains("message") && !j.at("message").is_null()) {
 		const json& m = j["message"];
-		i.msg = message().fill_from_json((json*)&m, i.cache_policy);
+		i.msg = message().fill_from_json(const_cast<json*>(&m), i.cache_policy);
 		set_snowflake_not_null(&m, "id", i.message_id);
 	}
 
@@ -716,6 +727,12 @@ void from_json(const nlohmann::json& j, interaction& i) {
 			i.data = ai;
 		}
 	}
+
+	if(j.contains("entitlements")) {
+		for (auto& entitle : j["entitlements"]) {
+			i.entitlements.emplace_back(entitlement().fill_from_json(const_cast<json*>(&entitle)));
+		}
+	}
 }
 
 interaction_response& interaction_response::add_autocomplete_choice(const command_option_choice& achoice) {
@@ -734,7 +751,7 @@ interaction_response::interaction_response(interaction_response_type t) : intera
 	type = t;
 }
 
-interaction_response& interaction_response::fill_from_json(nlohmann::json* j) {
+interaction_response& interaction_response::fill_from_json_impl(nlohmann::json* j) {
 	type = (interaction_response_type)int8_not_null(j, "type");
 	if (j->contains("data")) {
 		msg.fill_from_json(&((*j)["data"]));
@@ -742,7 +759,7 @@ interaction_response& interaction_response::fill_from_json(nlohmann::json* j) {
 	return *this;
 }
 
-interaction_modal_response& interaction_modal_response::fill_from_json(nlohmann::json* j) {
+interaction_modal_response& interaction_modal_response::fill_from_json_impl(nlohmann::json* j) {
 	type = (interaction_response_type)int8_not_null(j, "type");
 	json& d = (*j)["data"];
 	custom_id = string_not_null(&d, "custom_id");
@@ -759,11 +776,11 @@ interaction_modal_response& interaction_modal_response::fill_from_json(nlohmann:
 	return *this;
 }
 
-std::string interaction_response::build_json(bool with_id) const {
+json interaction_response::to_json_impl(bool with_id) const {
 	json j;
 	j["type"] = this->type;
 	if (this->autocomplete_choices.empty()) {
-		json msg_json = json::parse(msg.build_json(false, true));
+		json msg_json = msg.to_json(false, true);
 		auto cid = msg_json.find("channel_id");
 		if (cid != msg_json.end()) {
 			msg_json.erase(cid);
@@ -777,7 +794,7 @@ std::string interaction_response::build_json(bool with_id) const {
 			j["data"]["choices"].push_back(opt);
 		}
 	}
-	return j.dump();
+	return j;
 }
 
 /* NOTE: Forward declaration for internal function actually defined in message.cpp */
@@ -796,7 +813,7 @@ interaction_modal_response::interaction_modal_response(const std::string& _custo
 	components.push_back(_components);
 }
 
-std::string interaction_modal_response::build_json(bool with_id) const {
+json interaction_modal_response::to_json_impl(bool with_id) const {
 	json j;
 	j["type"] = this->type;
 	j["data"] = json::object();
@@ -813,7 +830,7 @@ std::string interaction_modal_response::build_json(bool with_id) const {
 		}
 		j["data"]["components"].push_back(n);
 	}
-	return j.dump();
+	return j;
 }
 
 interaction_modal_response& interaction_modal_response::add_component(const component& c) {
@@ -826,7 +843,7 @@ interaction_modal_response& interaction_modal_response::add_row() {
 		current_row++;
 		components.push_back({});
 	} else {
-		throw dpp::logic_exception("A modal dialog can only have a maximum of five component rows");
+		throw dpp::logic_exception(err_too_many_component_rows, "A modal dialog can only have a maximum of five component rows");
 	}
 	return *this;
 }
@@ -845,7 +862,7 @@ command_permission::command_permission(snowflake id, const command_permission_ty
 	id(id), type(t), permission(permission) {
 }
 
-command_permission& command_permission::fill_from_json(nlohmann::json* j) {
+command_permission& command_permission::fill_from_json_impl(nlohmann::json* j) {
 	id = snowflake_not_null(j, "id");
 	type = (command_permission_type)int8_not_null(j, "type");
 	permission = bool_not_null(j, "permission");
@@ -856,7 +873,7 @@ guild_command_permissions::guild_command_permissions() : id(0), application_id(0
 {
 }
 
-guild_command_permissions &guild_command_permissions::fill_from_json(nlohmann::json *j) {
+guild_command_permissions &guild_command_permissions::fill_from_json_impl(nlohmann::json *j) {
 	id = snowflake_not_null(j, "id");
 	application_id = snowflake_not_null(j, "application_id");
 	guild_id = snowflake_not_null(j, "guild_id");
@@ -904,7 +921,7 @@ const dpp::message& interaction::get_context_message() const {
 const dpp::channel& interaction::get_channel() const {
 	auto c = find_channel(channel_id);
 	if (c == nullptr) {
-		throw dpp::logic_exception("No channel for this command interaction");
+		throw dpp::logic_exception(err_unknown_channel, "No channel for this command interaction");
 	}
 	return *c;
 }
@@ -912,7 +929,7 @@ const dpp::channel& interaction::get_channel() const {
 const dpp::guild& interaction::get_guild() const {
 	auto g = find_guild(guild_id);
 	if (g == nullptr) {
-		throw dpp::logic_exception("No guild for this command interaction");
+		throw dpp::logic_exception(err_unknown_guild, "No guild for this command interaction");
 	}
 	return *g;
 }

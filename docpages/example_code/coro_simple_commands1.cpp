@@ -1,11 +1,11 @@
 #include <dpp/dpp.h>
 
 int main() {
-	dpp::cluster bot("token");
+	dpp::cluster bot{"token"};
 
 	bot.on_log(dpp::utility::cout_logger());
 
-	bot.on_slashcommand([](dpp::slashcommand_t event) -> dpp::job {
+	bot.on_slashcommand([](const dpp::slashcommand_t& event) -> dpp::task<void> {
 		if (event.command.get_command_name() == "addemoji") {
 			dpp::cluster *cluster = event.from->creator;
 			// Retrieve parameter values
@@ -48,7 +48,7 @@ int main() {
 		}
 	});
 
-	bot.on_ready([&bot](const dpp::ready_t & event) {
+	bot.on_ready([&bot](const dpp::ready_t& event) {
 		if (dpp::run_once<struct register_bot_commands>()) {
 			dpp::slashcommand command("addemoji", "Add an emoji", bot.me.id);
 			// Add file and name as required parameters
@@ -60,4 +60,6 @@ int main() {
 	});
 
 	bot.start(dpp::st_wait);
+
+	return 0;
 }

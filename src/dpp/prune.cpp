@@ -28,14 +28,14 @@ namespace dpp {
 
 using json = nlohmann::json;
 
-prune& prune::fill_from_json(nlohmann::json* j) {
+prune& prune::fill_from_json_impl(nlohmann::json* j) {
 	days = int32_not_null(j, "days");
 	compute_prune_count = bool_not_null(j, "compute_prune_count");
 	set_snowflake_array_not_null(j, "include_roles", include_roles);
 	return *this;
 }
 
-std::string prune::build_json(bool with_prune_count) const {
+json prune::to_json_impl(bool with_prune_count) const {
 	json j;
 	for (auto & r : include_roles) {
 		j["include_roles"].push_back(std::to_string(r));
@@ -44,7 +44,11 @@ std::string prune::build_json(bool with_prune_count) const {
 		j["compute_prune_count"] = compute_prune_count;
 	}
 	j["days"] = days;
-	return j.dump();
+	return j;
+}
+
+json prune::to_json(bool with_id) const {
+	return to_json_impl(with_id);
 }
 
 } // namespace dpp

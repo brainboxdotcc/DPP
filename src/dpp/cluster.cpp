@@ -35,16 +35,6 @@
 
 namespace dpp {
 
-#ifdef _WIN32
-	#ifdef _DEBUG
-		extern "C" void you_are_using_a_debug_build_of_dpp_on_a_release_project() {
-		}
-	#else
-		extern "C" void you_are_using_a_release_build_of_dpp_on_a_debug_project() {
-		}
-	#endif
-#endif
-
 /**
  * @brief An audit reason for each thread. These are per-thread to make the cluster
  * methods like cluster::get_audit_reason and cluster::set_audit_reason thread safe across
@@ -69,6 +59,38 @@ template<typename T> std::function<void(const T&)> make_intent_warning(cluster* 
 		}
 	};
 }
+
+template <build_type BuildType>
+bool validate_configuration() {
+#ifdef _DEBUG
+	[[maybe_unused]] constexpr build_type expected = build_type::debug;
+#else
+	[[maybe_unused]] constexpr build_type expected = build_type::release;
+#endif
+#ifdef _WIN32
+	if constexpr (BuildType != build_type::universal && BuildType != expected) {
+		MessageBox(
+			nullptr,
+			"Mismatched Debug/Release configurations between project and dpp.dll.\n"
+			"Please ensure both your program and the D++ DLL file are both using the same configuration.\n"
+			"The program will now terminate.",
+			"D++ Debug/Release mismatch",
+			MB_OK | MB_ICONERROR
+		);
+		/* Use std::runtime_rror here because dpp exceptions use std::string and that would crash when catching, because of ABI */
+		throw std::runtime_error("Mismatched Debug/Release configurations between project and dpp.dll");
+	}
+	return true;
+#else
+	return true;
+#endif
+}
+
+template bool DPP_EXPORT validate_configuration<build_type::debug>();
+
+template bool DPP_EXPORT validate_configuration<build_type::release>();
+
+template bool DPP_EXPORT validate_configuration<build_type::universal>();
 
 cluster::cluster(const std::string &_token, uint32_t _intents, uint32_t _shards, uint32_t _cluster_id, uint32_t _maxclusters, bool comp, cache_policy_t policy, uint32_t request_threads, uint32_t request_threads_raw)
 	: default_gateway("gateway.discord.gg"), rest(nullptr), raw_rest(nullptr), compressed(comp), start_time(0), token(_token), last_identify(time(nullptr) - 5), intents(_intents),
@@ -98,6 +120,40 @@ cluster::cluster(const std::string &_token, uint32_t _intents, uint32_t _shards,
 			i_message_content,
 			"You have attached an event to cluster::on_message_update() but have not specified the privileged intent dpp::i_message_content. Message content, embeds, attachments, and components on received guild messages will be empty.")
 	);
+
+	/* Add slashcommand callback for named commands. */
+#ifdef DPP_CORO
+	on_slashcommand([this](const slashcommand_t& event) -> task<void> {
+		slashcommand_handler_variant copy;
+		{
+			std::shared_lock lk(named_commands_mutex);
+			auto it = named_commands.find(event.command.get_command_name());
+			if (it == named_commands.end()) {
+				co_return;
+			}
+			copy = it->second;
+		}
+		if (std::holds_alternative<co_slashcommand_handler_t>(copy)) {
+			co_await std::get<co_slashcommand_handler_t>(copy)(event);
+		} else if (std::holds_alternative<slashcommand_handler_t>(copy)) {
+			std::get<slashcommand_handler_t>(copy)(event);
+		}
+		co_return;
+	});
+#else
+	on_slashcommand([this](const slashcommand_t& event) {
+		slashcommand_handler_t copy;
+		{
+			std::shared_lock lk(named_commands_mutex);
+			auto it = named_commands.find(event.command.get_command_name());
+			if (it == named_commands.end()) {
+				return;
+			}
+			copy = it->second;
+		}
+		copy(event);
+	});
+#endif
 }
 
 cluster::~cluster()
@@ -120,7 +176,7 @@ request_queue* cluster::get_raw_rest() {
 
 cluster& cluster::set_websocket_protocol(websocket_protocol_t mode) {
 	if (start_time > 0) {
-		throw dpp::logic_exception("Cannot change websocket protocol on a started cluster!");
+		throw dpp::logic_exception(err_websocket_proto_already_set, "Cannot change websocket protocol on a started cluster!");
 	}
 	ws_mode = mode;
 	return *this;
@@ -132,6 +188,11 @@ void cluster::log(dpp::loglevel severity, const std::string &msg) const {
 		dpp::log_t logmsg(nullptr, msg);
 		logmsg.severity = severity;
 		logmsg.message = msg;
+		size_t pos{0};
+		while ((pos = logmsg.message.find(token, pos)) != std::string::npos) {
+			logmsg.message.replace(pos, token.length(), "*****");
+			pos += 5;
+		}
 		on_log.call(logmsg);
 	}
 }
@@ -149,13 +210,34 @@ void cluster::start(bool return_after) {
 		this->terminating.wait(thread_lock);
 	};
 
+	if (on_guild_member_add && !(intents & dpp::i_guild_members)) {
+		log(ll_warning, "You have attached an event to cluster::on_guild_member_add() but have not specified the privileged intent dpp::i_guild_members. This event will not fire.");
+	}
+
+	if (on_guild_member_remove && !(intents & dpp::i_guild_members)) {
+		log(ll_warning, "You have attached an event to cluster::on_guild_member_remove() but have not specified the privileged intent dpp::i_guild_members. This event will not fire.");
+	}
+
+	if (on_guild_member_update && !(intents & dpp::i_guild_members)) {
+		log(ll_warning, "You have attached an event to cluster::on_guild_member_update() but have not specified the privileged intent dpp::i_guild_members. This event will not fire.");
+	}
+
+	if (on_presence_update && !(intents & dpp::i_guild_presences)) {
+		log(ll_warning, "You have attached an event to cluster::on_presence_update() but have not specified the privileged intent dpp::i_guild_presences. This event will not fire.");
+	}
+
 	/* Start up all shards */
 	gateway g;
 	try {
+#ifdef DPP_CORO
+		confirmation_callback_t cc = co_get_gateway_bot().sync_wait();
+		g = std::get<gateway>(cc.value);
+#else
 		g = dpp::sync<gateway>(this, &cluster::get_gateway_bot);
+#endif
 		log(ll_debug, "Cluster: " + std::to_string(g.session_start_remaining) + " of " + std::to_string(g.session_start_total) + " session starts remaining");
 		if (g.session_start_remaining < g.shards) {
-			throw dpp::connection_exception("Discord indicates you cannot start enough sessions to boot this cluster! Cluster startup aborted. Try again later.");
+			throw dpp::connection_exception(err_no_sessions_left, "Discord indicates you cannot start enough sessions to boot this cluster! Cluster startup aborted. Try again later.");
 		}
 		if (g.session_start_max_concurrency > 1) {
 			log(ll_debug, "Cluster: Large bot sharding; Using session concurrency: " + std::to_string(g.session_start_max_concurrency));
@@ -164,7 +246,7 @@ void cluster::start(bool return_after) {
 			if (g.shards) {
 				log(ll_info, "Auto Shard: Bot requires " + std::to_string(g.shards) + std::string(" shard") + ((g.shards > 1) ? "s" : ""));
 			} else {
-				throw dpp::connection_exception("Auto Shard: Cannot determine number of shards. Cluster startup aborted. Check your connection.");
+				throw dpp::connection_exception(err_auto_shard, "Auto Shard: Cannot determine number of shards. Cluster startup aborted. Check your connection.");
 			}
 			numshards = g.shards;
 		}
@@ -172,7 +254,7 @@ void cluster::start(bool return_after) {
 	catch (const dpp::rest_exception& e) {
 		if (std::string(e.what()) == "401: Unauthorized") {
 			/* Throw special form of exception for invalid token */
-			throw dpp::invalid_token_exception("Invalid bot token (401: Unauthorized when getting gateway shard count)");
+			throw dpp::invalid_token_exception(err_unauthorized, "Invalid bot token (401: Unauthorized when getting gateway shard count)");
 		} else {
 			/* Rethrow */
 			throw e;
@@ -232,8 +314,9 @@ void cluster::start(bool return_after) {
 
 	log(ll_debug, "Shards started.");
 	
-	if (!return_after)
+	if (!return_after) {
 		block_calling_thread();
+	}
 }
 
 void cluster::shutdown() {
@@ -294,13 +377,12 @@ json error_response(const std::string& message, http_request_completion_t& rv)
 		}},
 		{"message", message}
 	});
-	rv.body = j.dump();
+	rv.body = j.dump(-1, ' ', false, json::error_handler_t::replace);
 	return j;
 }
 
-void cluster::post_rest(const std::string &endpoint, const std::string &major_parameters, const std::string &parameters, http_method method, const std::string &postdata, json_encode_t callback, const std::string &filename, const std::string &filecontent, const std::string &filemimetype) {
-	/* NOTE: This is not a memory leak! The request_queue will free the http_request once it reaches the end of its lifecycle */
-	rest->post_request(new http_request(endpoint + (!major_parameters.empty() ? "/" : "") + major_parameters, parameters, [endpoint, callback](http_request_completion_t rv) {
+void cluster::post_rest(const std::string &endpoint, const std::string &major_parameters, const std::string &parameters, http_method method, const std::string &postdata, json_encode_t callback, const std::string &filename, const std::string &filecontent, const std::string &filemimetype, const std::string &protocol) {
+	rest->post_request(std::make_unique<http_request>(endpoint + (!major_parameters.empty() ? "/" : "") + major_parameters, parameters, [endpoint, callback](http_request_completion_t rv) {
 		json j;
 		if (rv.error == h_success && !rv.body.empty()) {
 			try {
@@ -313,12 +395,21 @@ void cluster::post_rest(const std::string &endpoint, const std::string &major_pa
 		if (callback) {
 			callback(j, rv);
 		}
-	}, postdata, method, get_audit_reason(), filename, filecontent, filemimetype));
+	}, postdata, method, get_audit_reason(), filename, filecontent, filemimetype, protocol));
 }
 
-void cluster::post_rest_multipart(const std::string &endpoint, const std::string &major_parameters, const std::string &parameters, http_method method, const std::string &postdata, json_encode_t callback, const std::vector<std::string> &filename, const std::vector<std::string> &filecontent, const std::vector<std::string> &filemimetypes) {
-	/* NOTE: This is not a memory leak! The request_queue will free the http_request once it reaches the end of its lifecycle */
-	rest->post_request(new http_request(endpoint + (!major_parameters.empty() ? "/" : "") + major_parameters, parameters, [endpoint, callback](http_request_completion_t rv) {
+void cluster::post_rest_multipart(const std::string &endpoint, const std::string &major_parameters, const std::string &parameters, http_method method, const std::string &postdata, json_encode_t callback, const std::vector<message_file_data> &file_data) {
+	std::vector<std::string> file_names{};
+	std::vector<std::string> file_contents{};
+	std::vector<std::string> file_mimetypes{};
+
+	for(const message_file_data& data : file_data) {
+		file_names.push_back(data.name);
+		file_contents.push_back(data.content);
+		file_mimetypes.push_back(data.mimetype);
+	}
+
+	rest->post_request(std::make_unique<http_request>(endpoint + (!major_parameters.empty() ? "/" : "") + major_parameters, parameters, [endpoint, callback](http_request_completion_t rv) {
 		json j;
 		if (rv.error == h_success && !rv.body.empty()) {
 			try {
@@ -331,19 +422,18 @@ void cluster::post_rest_multipart(const std::string &endpoint, const std::string
 		if (callback) {
 			callback(j, rv);
 		}
-	}, postdata, method, get_audit_reason(), filename, filecontent, filemimetypes));
+	}, postdata, method, get_audit_reason(), file_names, file_contents, file_mimetypes));
 }
 
 
-void cluster::request(const std::string &url, http_method method, http_completion_event callback, const std::string &postdata, const std::string &mimetype, const std::multimap<std::string, std::string> &headers) {
-	/* NOTE: This is not a memory leak! The request_queue will free the http_request once it reaches the end of its lifecycle */
-	raw_rest->post_request(new http_request(url, callback, method, postdata, mimetype, headers));
+void cluster::request(const std::string &url, http_method method, http_completion_event callback, const std::string &postdata, const std::string &mimetype, const std::multimap<std::string, std::string> &headers, const std::string &protocol, time_t request_timeout) {
+	raw_rest->post_request(std::make_unique<http_request>(url, callback, method, postdata, mimetype, headers, protocol, request_timeout));
 }
 
 gateway::gateway() : shards(0), session_start_total(0), session_start_remaining(0), session_start_reset_after(0), session_start_max_concurrency(0) {
 }
 
-gateway& gateway::fill_from_json(nlohmann::json* j) {
+gateway& gateway::fill_from_json_impl(nlohmann::json* j) {
 	url = string_not_null(j, "url");
 	shards = int32_not_null(j, "shards");
 	session_start_total = int32_not_null(&((*j)["session_start_limit"]), "total");
@@ -358,7 +448,12 @@ gateway::gateway(nlohmann::json* j) {
 }
 
 void cluster::set_presence(const dpp::presence &p) {
-	json pres = json::parse(p.build_json());
+	if(p.activities.empty()) {
+		log(ll_warning, "An empty presence was passed to set_presence.");
+		return;
+	}
+
+	json pres = p.to_json();
 	for (auto& s : shards) {
 		if (s.second->is_connected()) {
 			s.second->queue_message(s.second->jsonobj_to_string(pres));
@@ -376,7 +471,7 @@ cluster& cluster::clear_audit_reason() {
 	return *this;
 }
 
-cluster& cluster::set_default_gateway(std::string &default_gateway_new) {
+cluster& cluster::set_default_gateway(const std::string &default_gateway_new) {
 	default_gateway = default_gateway_new;
 	return *this;
 }
@@ -398,6 +493,22 @@ discord_client* cluster::get_shard(uint32_t id) {
 
 const shard_list& cluster::get_shards() {
 	return shards;
+}
+
+cluster& cluster::set_request_timeout(uint16_t timeout) {
+	request_timeout = timeout;
+	return *this;
+}
+
+bool cluster::register_command(const std::string &name, const slashcommand_handler_t handler) {
+	std::unique_lock lk(named_commands_mutex);
+	auto [_, inserted] = named_commands.try_emplace(name, handler);
+	return inserted;
+}
+
+bool cluster::unregister_command(const std::string &name) {
+	std::unique_lock lk(named_commands_mutex);
+	return named_commands.erase(name) == 1;
 }
 
 };

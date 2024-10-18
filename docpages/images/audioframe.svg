@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="1920"
+   height="1080"
+   viewBox="0 0 1920 1080"
+   version="1.1"
+   id="svg5"
+   inkscape:version="1.2.2 (b0a8486541, 2022-12-01)"
+   sodipodi:docname="audioframe.svg"
+   inkscape:export-filename="audioframe.png"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="px"
+     showgrid="false"
+     inkscape:zoom="0.50428933"
+     inkscape:cx="1456.5051"
+     inkscape:cy="477.90026"
+     inkscape:window-width="1366"
+     inkscape:window-height="712"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs2">
+    <rect
+       x="324.38163"
+       y="290.03534"
+       width="9.540636"
+       height="112.57951"
+       id="rect2092" />
+  </defs>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <rect
+       style="fill:none;stroke:#000000;stroke-opacity:1"
+       id="rect221"
+       width="1759.2933"
+       height="568.62189"
+       x="73.03286"
+       y="196.6519" />
+    <rect
+       style="fill:none;stroke:#000000;stroke-opacity:1"
+       id="rect1380"
+       width="1549.3994"
+       height="450.31802"
+       x="185.61235"
+       y="257.71198" />
+    <rect
+       style="fill:none;stroke:#000000;stroke-opacity:1"
+       id="rect1382"
+       width="452.2261"
+       height="333.92227"
+       x="277.20248"
+       y="303.50705" />
+    <rect
+       style="fill:none;stroke:#000000;stroke-opacity:1"
+       id="rect1384"
+       width="912.08478"
+       height="330.10602"
+       x="767.59119"
+       y="309.23141" />
+    <text
+       xml:space="preserve"
+       style="font-size:48px;white-space:pre;inline-size:0;fill:none;stroke:#000000;stroke-opacity:1"
+       x="833.85156"
+       y="49.611305"
+       id="text1442"><tspan
+         id="tspan1440"
+         x="833.85156"
+         y="49.611305" /></text>
+    <text
+       xml:space="preserve"
+       style="font-size:48px;fill:#000000;fill-opacity:1;stroke:#c8c8c8;stroke-opacity:1"
+       x="86.212151"
+       y="242.44696"
+       id="text1446"><tspan
+         sodipodi:role="line"
+         id="tspan1444"
+         x="86.212151"
+         y="242.44696">UDP PACKET</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:48px;fill:#000000;fill-opacity:1;stroke:#c8c8c8;stroke-opacity:1"
+       x="195.84946"
+       y="296.58807"
+       id="text2034"><tspan
+         sodipodi:role="line"
+         id="tspan2032"
+         x="195.84946"
+         y="296.58807">RTP FRAME</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:48px;white-space:pre;inline-size:288.649;display:inline;fill:#000000;fill-opacity:1;stroke:#c8c8c8;stroke-opacity:1"
+       x="326.28976"
+       y="290.03534"
+       id="text2038"
+       transform="translate(25.329684,190.92753)"><tspan
+         x="326.28976"
+         y="290.03534"
+         id="tspan234">RTP HEADER</tspan></text>
+    <text
+       xml:space="preserve"
+       id="text2090"
+       style="font-size:48px;white-space:pre;shape-inside:url(#rect2092);display:inline;fill:#000000;fill-opacity:1;stroke:#c8c8c8;stroke-opacity:1" />
+    <text
+       xml:space="preserve"
+       style="font-size:48px;fill:#000000;fill-opacity:1;stroke:#c8c8c8;stroke-opacity:1"
+       x="1216.4484"
+       y="444.70847"
+       id="text2206"><tspan
+         sodipodi:role="line"
+         id="tspan2204"
+         x="1216.4484"
+         y="444.70847"
+         style="text-align:center;text-anchor:middle">OPUS AUDIO</tspan><tspan
+         sodipodi:role="line"
+         x="1216.4484"
+         y="504.70847"
+         id="tspan2208"
+         style="text-align:center;text-anchor:middle">(44khz 16 bit signed stereo)</tspan></text>
+    <rect
+       style="opacity:0.3;fill:#ff0000;fill-opacity:1;stroke:#ffffff;stroke-width:0.998199;stroke-opacity:1"
+       id="rect2418"
+       width="990.55231"
+       height="448.41168"
+       x="744.46021"
+       y="258.90567" />
+    <rect
+       style="opacity:0.3;fill:#00ff00;fill-opacity:1;stroke:#ffffff;stroke-opacity:1"
+       id="rect2952"
+       width="911.91266"
+       height="329.75964"
+       x="766.95514"
+       y="308.90634" />
+    <rect
+       style="opacity:0.3;fill:#00ff00;fill-opacity:1;stroke:#ffffff;stroke-opacity:1"
+       id="rect2954"
+       width="201.88301"
+       height="61.339355"
+       x="534.02515"
+       y="791.12787" />
+    <rect
+       style="opacity:0.3;fill:#ff0000;fill-opacity:1;stroke:#ffffff;stroke-opacity:1"
+       id="rect2956"
+       width="200.93933"
+       height="61.339375"
+       x="534.02515"
+       y="871.5036" />
+    <text
+       xml:space="preserve"
+       style="font-size:48px;text-align:start;text-anchor:start;opacity:1;fill:#000000;fill-opacity:1;stroke:#ffffff;stroke-opacity:1"
+       x="748.91284"
+       y="835.92316"
+       id="text3012"><tspan
+         sodipodi:role="line"
+         id="tspan3010"
+         x="748.91284"
+         y="835.92316">DAVE OPUS AUDIO (AES 128 GCM AEAD)</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:48px;text-align:start;text-anchor:start;opacity:1;fill:#000000;fill-opacity:1;stroke:#ffffff;stroke-opacity:1"
+       x="743.3595"
+       y="912.60059"
+       id="text3864"><tspan
+         sodipodi:role="line"
+         id="tspan3862"
+         x="743.3595"
+         y="912.60059">RTP CONTENT (CHACHA20 POLY1305 AEAD)</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:48px;text-align:start;text-anchor:start;opacity:1;fill:#000000;fill-opacity:1;stroke:#ffffff;stroke-opacity:1"
+       x="1470.0812"
+       y="754.35535"
+       id="text3868"><tspan
+         sodipodi:role="line"
+         id="tspan3866"
+         x="1470.0812"
+         y="754.35535">8...65535 BYTES</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:48px;text-align:start;text-anchor:start;opacity:1;fill:#000000;fill-opacity:1;stroke:#ffffff;stroke-opacity:1"
+       x="978.41394"
+       y="692.66699"
+       id="text3872"><tspan
+         sodipodi:role="line"
+         id="tspan3870"
+         x="978.41394"
+         y="692.66699">1..380 FRAMES PER UDP PACKET </tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:48px;text-align:start;text-anchor:start;opacity:1;fill:#000000;fill-opacity:1;stroke:#ffffff;stroke-opacity:1"
+       x="515.60699"
+       y="627.72919"
+       id="text3876"><tspan
+         sodipodi:role="line"
+         id="tspan3874"
+         x="515.60699"
+         y="627.72919">76 BYTES</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:57.7429px;text-align:start;text-anchor:start;white-space:pre;inline-size:1097.17;display:inline;opacity:1;fill:#000000;fill-opacity:1;stroke:#ffffff;stroke-opacity:1"
+       x="134.84323"
+       y="57.506672"
+       id="text3880"
+       transform="matrix(2.0023506,0,0,1.7815993,-205.43242,13.123197)"><tspan
+         x="134.84323"
+         y="57.506672"
+         id="tspan236">DISCORD AUDIO FRAME LAYOUT</tspan></text>
+  </g>
+</svg>

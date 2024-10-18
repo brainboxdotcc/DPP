@@ -26,10 +26,8 @@
 #include <dpp/json.h>
 
 
-namespace dpp { namespace events {
+namespace dpp::events {
 
-using json = nlohmann::json;
-using namespace dpp;
 
 void thread_member_update::handle(discord_client* client, json& j, const std::string& raw) {
 	if (!client->creator->on_thread_member_update.empty()) {
@@ -39,4 +37,4 @@ void thread_member_update::handle(discord_client* client, json& j, const std::st
 		client->creator->on_thread_member_update.call(tm);
 	}
 }
-}};
+};

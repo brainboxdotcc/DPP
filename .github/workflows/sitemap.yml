@@ -3,8 +3,13 @@ on:
   schedule:
     - cron: '0 6 * * 6'
 
+permissions:
+  contents: read
+
 jobs:
   updater:
+    permissions:
+      contents: write # Needs to be able to write to the repo.
     name: Generate Sitemap
     if: github.repository == 'brainboxdotcc/DPP'
     runs-on: ubuntu-20.04
@@ -14,7 +19,7 @@ jobs:
 
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@8ca2b8b2ece13480cda6dacd3511b49857a23c09 # v2.5.1
+        uses: step-security/harden-runner@17d0e2bd7d51742c71671bd19fa12bdc9d40a3d6 # v2.8.1
         with:
           egress-policy: audit
 

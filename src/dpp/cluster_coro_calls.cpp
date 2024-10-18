@@ -39,6 +39,10 @@ async<confirmation_callback_t> cluster::co_global_bulk_command_create(const std:
 	return async{ this, static_cast<void (cluster::*)(const std::vector<slashcommand> &, command_completion_event_t)>(&cluster::global_bulk_command_create), commands };
 }
 
+async<confirmation_callback_t> cluster::co_global_bulk_command_delete() {
+	return async{ this, static_cast<void (cluster::*)(command_completion_event_t)>(&cluster::global_bulk_command_delete) };
+}
+
 async<confirmation_callback_t> cluster::co_global_command_create(const slashcommand &s) {
 	return async{ this, static_cast<void (cluster::*)(const slashcommand &, command_completion_event_t)>(&cluster::global_command_create), s };
 }
@@ -61,6 +65,10 @@ async<confirmation_callback_t> cluster::co_global_commands_get() {
 
 async<confirmation_callback_t> cluster::co_guild_bulk_command_create(const std::vector<slashcommand> &commands, snowflake guild_id) {
 	return async{ this, static_cast<void (cluster::*)(const std::vector<slashcommand> &, snowflake, command_completion_event_t)>(&cluster::guild_bulk_command_create), commands, guild_id };
+}
+
+async<confirmation_callback_t> cluster::co_guild_bulk_command_delete(snowflake guild_id) {
+	return async{ this, static_cast<void (cluster::*)(snowflake, command_completion_event_t)>(&cluster::guild_bulk_command_delete), guild_id };
 }
 
 async<confirmation_callback_t> cluster::co_guild_commands_get_permissions(snowflake guild_id) {
@@ -211,6 +219,10 @@ async<confirmation_callback_t> cluster::co_channels_get(snowflake guild_id) {
 	return async{ this, static_cast<void (cluster::*)(snowflake, command_completion_event_t)>(&cluster::channels_get), guild_id };
 }
 
+async<confirmation_callback_t> cluster::co_channel_set_voice_status(snowflake channel_id, const std::string& status) {
+	return async{ this, static_cast<void (cluster::*)(snowflake, const std::string&, command_completion_event_t)>(&cluster::channel_set_voice_status), channel_id, status };
+}
+
 async<confirmation_callback_t> cluster::co_create_dm_channel(snowflake user_id) {
 	return async{ this, static_cast<void (cluster::*)(snowflake, command_completion_event_t)>(&cluster::create_dm_channel), user_id };
 }
@@ -249,6 +261,42 @@ async<confirmation_callback_t> cluster::co_guild_emoji_get(snowflake guild_id, s
 
 async<confirmation_callback_t> cluster::co_guild_emojis_get(snowflake guild_id) {
 	return async{ this, static_cast<void (cluster::*)(snowflake, command_completion_event_t)>(&cluster::guild_emojis_get), guild_id };
+}
+
+async<confirmation_callback_t> cluster::co_application_emojis_get() {
+	return async{ this, static_cast<void (cluster::*)(command_completion_event_t)>(&cluster::application_emojis_get) };
+}
+
+async<confirmation_callback_t> cluster::co_application_emoji_get(snowflake emoji_id) {
+	return async{ this, static_cast<void (cluster::*)(snowflake, command_completion_event_t)>(&cluster::application_emoji_get), emoji_id };
+}
+
+async<confirmation_callback_t> cluster::co_application_emoji_create(const class emoji& newemoji) {
+	return async{ this, static_cast<void (cluster::*)(const class emoji&, command_completion_event_t)>(&cluster::application_emoji_create), newemoji };
+}
+
+async<confirmation_callback_t> cluster::co_application_emoji_edit(const class emoji& newemoji) {
+	return async{ this, static_cast<void (cluster::*)(const class emoji&, command_completion_event_t)>(&cluster::application_emoji_edit), newemoji };
+}
+
+async<confirmation_callback_t> cluster::co_application_emoji_delete(snowflake emoji_id) {
+	return async{ this, static_cast<void (cluster::*)(snowflake, command_completion_event_t)>(&cluster::application_emoji_delete), emoji_id };
+}
+
+async<confirmation_callback_t> cluster::co_entitlements_get(snowflake user_id, const std::vector<snowflake>& sku_ids, snowflake before_id, snowflake after_id, uint8_t limit, snowflake guild_id, bool exclude_ended) {
+	return async{ this, static_cast<void (cluster::*)(snowflake, const std::vector<snowflake>&, snowflake, snowflake, uint8_t, snowflake, bool, command_completion_event_t)>(&cluster::entitlements_get), user_id, sku_ids, before_id, after_id, limit, guild_id, exclude_ended };
+}
+
+async<confirmation_callback_t> cluster::co_entitlement_test_create(const class entitlement& new_entitlement) {
+	return async{ this, static_cast<void (cluster::*)(const class entitlement&, command_completion_event_t)>(&cluster::entitlement_test_create), new_entitlement };
+}
+
+async<confirmation_callback_t> cluster::co_entitlement_test_delete(const class snowflake entitlement_id) {
+	return async{ this, static_cast<void (cluster::*)(const class snowflake, command_completion_event_t)>(&cluster::entitlement_test_delete), entitlement_id };
+}
+
+async<confirmation_callback_t> cluster::co_entitlement_consume(const class snowflake entitlement_id) {
+	return async{ this, static_cast<void (cluster::*)(const class snowflake, command_completion_event_t)>(&cluster::entitlement_consume), entitlement_id };
 }
 
 async<confirmation_callback_t> cluster::co_get_gateway_bot() {
@@ -387,6 +435,10 @@ async<confirmation_callback_t> cluster::co_guild_member_timeout(snowflake guild_
 	return async{ this, static_cast<void (cluster::*)(snowflake, snowflake, time_t, command_completion_event_t)>(&cluster::guild_member_timeout), guild_id, user_id, communication_disabled_until };
 }
 
+async<confirmation_callback_t> cluster::co_guild_member_timeout_remove(snowflake guild_id, snowflake user_id) {
+	return async{ this, static_cast<void (cluster::*)(snowflake, snowflake, command_completion_event_t)>(&cluster::guild_member_timeout_remove), guild_id, user_id };
+}
+
 async<confirmation_callback_t> cluster::co_guild_member_delete_role(snowflake guild_id, snowflake user_id, snowflake role_id) {
 	return async{ this, static_cast<void (cluster::*)(snowflake, snowflake, snowflake, command_completion_event_t)>(&cluster::guild_member_delete_role), guild_id, user_id, role_id };
 }
@@ -475,6 +527,10 @@ async<confirmation_callback_t> cluster::co_message_edit(const message &m) {
 	return async{ this, static_cast<void (cluster::*)(const message &, command_completion_event_t)>(&cluster::message_edit), m };
 }
 
+async<confirmation_callback_t> cluster::co_message_edit_flags(const message &m) {
+	return async{ this, static_cast<void (cluster::*)(const message &, command_completion_event_t)>(&cluster::message_edit_flags), m };
+}
+
 async<confirmation_callback_t> cluster::co_message_get(snowflake message_id, snowflake channel_id) {
 	return async{ this, static_cast<void (cluster::*)(snowflake, snowflake, command_completion_event_t)>(&cluster::message_get), message_id, channel_id };
 }
@@ -497,6 +553,22 @@ async<confirmation_callback_t> cluster::co_messages_get(snowflake channel_id, sn
 
 async<confirmation_callback_t> cluster::co_message_unpin(snowflake channel_id, snowflake message_id) {
 	return async{ this, static_cast<void (cluster::*)(snowflake, snowflake, command_completion_event_t)>(&cluster::message_unpin), channel_id, message_id };
+}
+
+async<confirmation_callback_t> cluster::co_poll_get_answer_voters(const message& m, uint32_t answer_id, snowflake after, uint64_t limit) {
+	return async{ this, static_cast<void (cluster::*)(const message&, uint32_t, snowflake, uint64_t, command_completion_event_t)>(&cluster::poll_get_answer_voters), m, answer_id, after, limit };
+}
+
+async<confirmation_callback_t> cluster::co_poll_get_answer_voters(snowflake message_id, snowflake channel_id, uint32_t answer_id, snowflake after, uint64_t limit) {
+	return async{ this, static_cast<void (cluster::*)(snowflake, snowflake, uint32_t, snowflake, uint64_t, command_completion_event_t)>(&cluster::poll_get_answer_voters), message_id, channel_id, answer_id, after, limit };
+}
+
+async<confirmation_callback_t> cluster::co_poll_end(const message &m) {
+	return async{ this, static_cast<void (cluster::*)(const message &, command_completion_event_t)>(&cluster::poll_end), m };
+}
+
+async<confirmation_callback_t> cluster::co_poll_end(snowflake message_id, snowflake channel_id) {
+	return async{ this, static_cast<void (cluster::*)(snowflake, snowflake, command_completion_event_t)>(&cluster::poll_end), message_id, channel_id };
 }
 
 async<confirmation_callback_t> cluster::co_channel_pins_get(snowflake channel_id) {
@@ -557,6 +629,10 @@ async<confirmation_callback_t> cluster::co_guild_event_edit(const scheduled_even
 
 async<confirmation_callback_t> cluster::co_guild_event_get(snowflake guild_id, snowflake event_id) {
 	return async{ this, static_cast<void (cluster::*)(snowflake, snowflake, command_completion_event_t)>(&cluster::guild_event_get), guild_id, event_id };
+}
+
+async<confirmation_callback_t> cluster::co_skus_get() {
+	return async{ this, static_cast<void (cluster::*)(command_completion_event_t)>(&cluster::skus_get) };
 }
 
 async<confirmation_callback_t> cluster::co_stage_instance_create(const stage_instance& si) {
@@ -687,8 +763,12 @@ async<confirmation_callback_t> cluster::co_thread_member_remove(snowflake thread
 	return async{ this, static_cast<void (cluster::*)(snowflake, snowflake, command_completion_event_t)>(&cluster::thread_member_remove), thread_id, user_id };
 }
 
-async<confirmation_callback_t> cluster::co_current_user_edit(const std::string &nickname, const std::string& image_blob, const image_type type) {
-	return async{ this, static_cast<void (cluster::*)(const std::string &, const std::string&, const image_type, command_completion_event_t)>(&cluster::current_user_edit), nickname, image_blob, type };
+async<confirmation_callback_t> cluster::co_thread_get(snowflake thread_id) {
+	return async{ this, static_cast<void (cluster::*)(snowflake, command_completion_event_t)>(&cluster::thread_get), thread_id };
+}
+
+async<confirmation_callback_t> cluster::co_current_user_edit(const std::string &nickname, const std::string& avatar_blob, const image_type avatar_type, const std::string& banner_blob, const image_type banner_type) {
+	return async{ this, static_cast<void (cluster::*)(const std::string &, const std::string&, const image_type, const std::string&, const image_type, command_completion_event_t)>(&cluster::current_user_edit), nickname, avatar_blob, avatar_type, banner_blob, banner_type };
 }
 
 async<confirmation_callback_t> cluster::co_current_application_get() {
@@ -735,8 +815,8 @@ async<confirmation_callback_t> cluster::co_guild_get_voice_regions(snowflake gui
 	return async{ this, static_cast<void (cluster::*)(snowflake, command_completion_event_t)>(&cluster::guild_get_voice_regions), guild_id };
 }
 
-async<confirmation_callback_t> cluster::co_create_webhook(const class webhook &w) {
-	return async{ this, static_cast<void (cluster::*)(const class webhook &, command_completion_event_t)>(&cluster::create_webhook), w };
+async<confirmation_callback_t> cluster::co_create_webhook(const class webhook &wh) {
+	return async{ this, static_cast<void (cluster::*)(const class webhook &, command_completion_event_t)>(&cluster::create_webhook), wh };
 }
 
 async<confirmation_callback_t> cluster::co_delete_webhook(snowflake webhook_id) {
@@ -791,8 +871,8 @@ async<confirmation_callback_t> cluster::co_get_webhook_with_token(snowflake webh
 };
 
 /* End of auto-generated definitions */
-dpp::async<dpp::http_request_completion_t> dpp::cluster::co_request(const std::string &url, http_method method, const std::string &postdata, const std::string &mimetype, const std::multimap<std::string, std::string> &headers) {
-	return async<http_request_completion_t>{ [&, this] <typename C> (C &&cc) { return this->request(url, method, std::forward<C>(cc), postdata, mimetype, headers); }};
+dpp::async<dpp::http_request_completion_t> dpp::cluster::co_request(const std::string &url, http_method method, const std::string &postdata, const std::string &mimetype, const std::multimap<std::string, std::string> &headers, const std::string &protocol, time_t request_timeout) {
+	return async<http_request_completion_t>{ [&, this] <typename C> (C &&cc) { return this->request(url, method, std::forward<C>(cc), postdata, mimetype, headers, protocol, request_timeout); }};
 }
 
 #endif

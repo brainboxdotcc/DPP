@@ -32,7 +32,7 @@
 
 namespace dpp {
 
-https_client::https_client(const std::string &hostname, uint16_t port,  const std::string &urlpath, const std::string &verb, const std::string &req_body, const http_headers& extra_headers, bool plaintext_connection, uint16_t request_timeout)
+https_client::https_client(const std::string &hostname, uint16_t port,  const std::string &urlpath, const std::string &verb, const std::string &req_body, const http_headers& extra_headers, bool plaintext_connection, uint16_t request_timeout, const std::string &protocol)
 	: ssl_client(hostname, std::to_string(port), plaintext_connection, false),
 	state(HTTPS_HEADERS),
 	request_type(verb),
@@ -41,7 +41,9 @@ https_client::https_client(const std::string &hostname, uint16_t port,  const st
 	content_length(0),
 	request_headers(extra_headers),
 	status(0),
-	timeout(request_timeout)
+	http_protocol(protocol),
+	timeout(request_timeout),
+	timed_out(false)
 {
 	nonblocking = false;
 	timeout = time(nullptr) + request_timeout;
@@ -56,8 +58,8 @@ void https_client::connect()
 		map_headers += k + ": " + v + "\r\n";
 	}
 	if (this->sfd != SOCKET_ERROR) {
-		this->write(
-			this->request_type + " " + this->path + " HTTP/1.1\r\n"
+		this->socket_write(
+			this->request_type + " " + this->path + " HTTP/" + http_protocol + "\r\n"
 			"Host: " + this->hostname + "\r\n"
 			"pragma: no-cache\r\n"
 			"Connection: keep-alive\r\n"
@@ -102,7 +104,7 @@ multipart_content https_client::build_multipart(const std::string &json, const s
 			/* Multiple files */
 			for (size_t i = 0; i < filenames.size(); ++i) {
 				content += part_start + "name=\"files[" + std::to_string(i) + "]\"; filename=\"" + filenames[i] + "\"";
-				content += "\r\nContent-Type: " + (mimetypes.size() < i || mimetypes[i].empty() ? default_mime_type : mimetypes[i]) + two_cr;
+				content += "\r\nContent-Type: " + (mimetypes.size() <= i || mimetypes[i].empty() ? default_mime_type : mimetypes[i]) + two_cr;
 				content += contents[i];
 				content += "\r\n";
 			}
@@ -174,7 +176,7 @@ bool https_client::handle_buffer(std::string &buffer)
 						h.erase(h.begin());
 						/* HTTP/1.1 200 OK */
 						std::vector<std::string> req_status = utility::tokenize(status_line, " ");
-						if (req_status.size() >= 3 && (req_status[0] == "HTTP/1.1" || req_status[0] == "HTTP/1.0") && atoi(req_status[1].c_str())) {
+						if (req_status.size() >= 2 && (req_status[0] == "HTTP/1.1" || req_status[0] == "HTTP/1.0") && atoi(req_status[1].c_str())) {
 							for(auto &hd : h) {
 								std::string::size_type sep = hd.find(": ");
 								if (sep != std::string::npos) {
@@ -282,7 +284,7 @@ bool https_client::handle_buffer(std::string &buffer)
 			case HTTPS_CONTENT:
 				body += buffer;
 				buffer.clear();
-				if (body.length() >= content_length) {
+				if (content_length == ULLONG_MAX || body.length() >= content_length) {
 					state = HTTPS_DONE;
 					this->close();
 					return false;
@@ -312,6 +314,10 @@ http_state https_client::get_state() {
 
 void https_client::one_second_timer() {
 	if ((this->sfd == SOCKET_ERROR || time(nullptr) >= timeout) && this->state != HTTPS_DONE) {
+		/* if and only if response is timed out */
+		if (this->sfd != SOCKET_ERROR) {
+			timed_out = true;
+		}
 		keepalive = false;
 		this->close();
 	}
