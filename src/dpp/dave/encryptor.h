@@ -277,7 +277,7 @@ private:
 	/**
 	 * @brief Last time stats were updated
 	 */
-	time_point last_stats_time{time_point::min()};
+	time_point last_stats_time{(time_point::min)()};
 
 	/**
 	 * @brief Stores audio/video encryption stats
