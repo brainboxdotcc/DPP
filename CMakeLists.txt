@@ -34,6 +34,7 @@ option(DPP_TEST_VCPKG "Force VCPKG build without VCPKG installed (for developmen
 include(CheckCXXSymbolExists)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 add_compile_definitions(DPP_BUILD)
+add_compile_definitions(NOMINMAX)
 
 include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/colour.cmake")
 
