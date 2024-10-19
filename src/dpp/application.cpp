@@ -94,6 +94,7 @@ application& application::fill_from_json_impl(nlohmann::json* j) {
 	set_iconhash_not_null(j, "cover_image", cover_image);
 	set_int32_not_null(j, "flags", flags);
 	set_int64_not_null(j, "approximate_guild_count", approximate_guild_count);
+	set_int64_not_null(j, "approximate_user_install_count", approximate_user_install_count);
 
 	if (j->contains("redirect_uris")) {
 		for (const auto& uri : (*j)["redirect_uris"]) {
