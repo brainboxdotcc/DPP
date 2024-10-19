@@ -783,8 +783,16 @@ async<confirmation_callback_t> cluster::co_current_user_set_voice_state(snowflak
 	return async{ this, static_cast<void (cluster::*)(snowflake, snowflake, bool, time_t, command_completion_event_t)>(&cluster::current_user_set_voice_state), guild_id, channel_id, suppress, request_to_speak_timestamp };
 }
 
+async<confirmation_callback_t> cluster::co_current_user_get_voice_state(snowflake guild_id) {
+	return async{ this, static_cast<void (cluster::*)(snowflake, command_completion_event_t)>(&cluster::current_user_get_voice_state), guild_id };
+}
+
 async<confirmation_callback_t> cluster::co_user_set_voice_state(snowflake user_id, snowflake guild_id, snowflake channel_id, bool suppress) {
 	return async{ this, static_cast<void (cluster::*)(snowflake, snowflake, snowflake, bool, command_completion_event_t)>(&cluster::user_set_voice_state), user_id, guild_id, channel_id, suppress };
+}
+
+async<confirmation_callback_t> cluster::co_user_get_voice_state(snowflake guild_id, snowflake user_id) {
+	return async{ this, static_cast<void (cluster::*)(snowflake, snowflake, command_completion_event_t)>(&cluster::user_get_voice_state), guild_id, user_id };
 }
 
 async<confirmation_callback_t> cluster::co_current_user_connections_get() {

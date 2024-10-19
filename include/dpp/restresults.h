@@ -156,6 +156,7 @@ typedef std::variant<
 		ban_map,
 		voiceregion,
 		voiceregion_map,
+		voicestate,
 		integration,
 		integration_map,
 		webhook,
