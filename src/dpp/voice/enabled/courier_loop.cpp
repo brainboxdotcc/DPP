@@ -33,31 +33,11 @@
 
 namespace dpp {
 
-struct iter_bench {
-	std::chrono::time_point<std::chrono::steady_clock> start;
-	std::string n;
-
-	iter_bench(std::string _n) : n(std::move(_n)) {
-		start = std::chrono::steady_clock::now();
-		std::cout << n << "START: " << std::chrono::duration_cast<std::chrono::milliseconds>(start.time_since_epoch()).count() << "\n";
-	}
-
-	~iter_bench() {
-		auto end = std::chrono::steady_clock::now();
-		std::cout << n << "END: " << std::chrono::duration_cast<std::chrono::milliseconds>(end.time_since_epoch()).count() << "\n";
-		std::cout << n << "BENCH: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "\n";
-	}
-};
-
 void discord_voice_client::voice_courier_loop(discord_voice_client& client, courier_shared_state_t& shared_state) {
 	utility::set_thread_name(std::string("vcourier/") + std::to_string(client.server_id));
-	size_t iter = 0;
+
 	while (true) {
-		std::cout << "voice_courier_loop ITER: " << ++iter << "\n";
-
 		std::this_thread::sleep_for(std::chrono::milliseconds{client.iteration_interval});
-
-		iter_bench b("voice_courier_loop ITER_");
 
 		struct flush_data_t {
 			snowflake user_id;
@@ -73,9 +53,6 @@ void discord_voice_client::voice_courier_loop(discord_voice_client& client, cour
 		 * release the lock as soon as possible.
 		 */
 		{
-			std::cout << "shared_state.mtx LOCK\n";
-			iter_bench c("voice_courier_loop FLUSH_DATA_");
-
 			std::unique_lock lk(shared_state.mtx);
 
 			/* mitigates vector resizing while holding the mutex */
@@ -84,13 +61,17 @@ void discord_voice_client::voice_courier_loop(discord_voice_client& client, cour
 			bool has_payload_to_deliver = false;
 			for (auto &[user_id, parking_lot]: shared_state.parked_voice_payloads) {
 				has_payload_to_deliver = has_payload_to_deliver || !parking_lot.parked_payloads.empty();
-				flush_data.push_back(flush_data_t{user_id,
+
+				flush_data.push_back(flush_data_t{
+					user_id,
 					parking_lot.range.min_seq,
 					std::move(parking_lot.parked_payloads),
 					/* Quickly check if we already have a decoder and only take the pending ctls if so. */
 					parking_lot.decoder ? std::move(parking_lot.pending_decoder_ctls)
 					: decltype(parking_lot.pending_decoder_ctls){},
-					parking_lot.decoder});
+					parking_lot.decoder
+				});
+
 				parking_lot.range.min_seq = parking_lot.range.max_seq + 1;
 				parking_lot.range.min_timestamp = parking_lot.range.max_timestamp + 1;
 			}
@@ -98,12 +79,10 @@ void discord_voice_client::voice_courier_loop(discord_voice_client& client, cour
 			if (!has_payload_to_deliver) {
 				if (shared_state.terminating) {
 					/* We have delivered all data to handlers. Terminate now. */
-					std::cout << "shared_state.mtx RELEASE\n";
 					break;
 				}
 
 				shared_state.signal_iteration.wait(lk, [&shared_state](){
-					std::cout << "shared_state.mtx LOCKED\n";
 					if (shared_state.terminating) {
 						return true;
 					}
@@ -116,14 +95,10 @@ void discord_voice_client::voice_courier_loop(discord_voice_client& client, cour
 						if (parking_lot.parked_payloads.empty()) {
 							continue;
 						}
-
-						std::cout << "shared_state.mtx RELEASE\n";
 						return true;
 					}
-					std::cout << "shared_state.mtx RELEASE\n";
 					return false;
 				});
-				std::cout << "shared_state.mtx RELEASE\n";
 
 				/*
 				 * More data came or about to terminate, or just a spurious wake.
@@ -131,7 +106,6 @@ void discord_voice_client::voice_courier_loop(discord_voice_client& client, cour
 				 */
 				continue;
 			}
-			std::cout << "shared_state.mtx RELEASE\n";
 		}
 
 		if (client.creator->on_voice_receive.empty() && client.creator->on_voice_receive_combined.empty()) {
@@ -144,7 +118,7 @@ void discord_voice_client::voice_courier_loop(discord_voice_client& client, cour
 
 		/* This 32 bit PCM audio buffer is an upmixed version of the streams
 		 * combined for all users. This is a wider width audio buffer so that
-		  * there is no clipping when there are many loud audio sources at once.
+		 * there is no clipping when there are many loud audio sources at once.
 		 */
 		opus_int32 pcm_mix[23040] = {0};
 		size_t park_count = 0;
@@ -153,7 +127,6 @@ void discord_voice_client::voice_courier_loop(discord_voice_client& client, cour
 
 		opus_int16 flush_data_pcm[23040];
 		for (auto &d: flush_data) {
-			iter_bench c("voice_courier_loop FLUSH_LOOP_");
 			if (!d.decoder) {
 				continue;
 			}
@@ -162,34 +135,38 @@ void discord_voice_client::voice_courier_loop(discord_voice_client& client, cour
 			}
 
 			for (rtp_seq_t seq = d.min_seq; !d.parked_payloads.empty(); ++seq) {
-				iter_bench e("voice_courier_loop SEQ_LOOP_");
-				std::cout << "TOP_SEQ: " << d.parked_payloads.top().seq << "\nCURRENT_SEQ: "<< seq << "\n";
-
 				if (d.parked_payloads.top().seq != seq) {
 					/*
 					 * Lost a packet with sequence number "seq",
 					 * But Opus decoder might be able to guess something.
 					 */
-					if (int samples = opus_decode(d.decoder.get(), nullptr, 0, flush_data_pcm, 5760, 0);
-						samples >= 0) {
+					if (int lost_packet_samples = opus_decode(d.decoder.get(), nullptr, 0, flush_data_pcm, 5760, 0);
+						lost_packet_samples >= 0) {
 						/*
 						 * Since this sample comes from a lost packet,
 						 * we can only pretend there is an event, without any raw payload byte.
 						 */
-						voice_receive_t vr(nullptr, "", &client, d.user_id, reinterpret_cast<uint8_t *>(flush_data_pcm),
-						 samples * opus_channel_count * sizeof(opus_int16));
+						voice_receive_t vr(nullptr, "", &client, d.user_id,
+						 reinterpret_cast<uint8_t *>(flush_data_pcm),
+						 lost_packet_samples * opus_channel_count * sizeof(opus_int16));
 
-						park_count = audio_mix(client, *client.mixer, pcm_mix, flush_data_pcm, park_count, samples, max_samples);
+						park_count = audio_mix(client, *client.mixer, pcm_mix, flush_data_pcm, park_count, lost_packet_samples, max_samples);
 						client.creator->on_voice_receive.call(vr);
 					}
 				} else {
 					voice_receive_t &vr = *d.parked_payloads.top().vr;
 
-					/* We do decryption here to avoid blocking ssl_client from receiving more audio data */
+					/* 
+					 * We do decryption here to avoid blocking ssl_client and saving cpu time by doing it when needed only.
+					 *
+					 * NOTE: You do not want to send audio while also listening for on_voice_receive/on_voice_receive_combined.
+					 * It will cause gaps in your recording, I have no idea why exactly.
+					 */
+
 					constexpr size_t header_size = 12;
 
 					uint8_t *buffer = vr.audio_data.data();
-					int packet_size = vr.audio_data.size();
+					size_t packet_size = vr.audio_data.size();
 
 					constexpr size_t nonce_size = sizeof(uint32_t);
 					/* Nonce is 4 byte at the end of payload with zero padding */
@@ -251,18 +228,21 @@ void discord_voice_client::voice_courier_loop(discord_voice_client& client, cour
 					/**
 					 * If DAVE is enabled, use the user's ratchet to decrypt the OPUS audio data
 					 */
-					std::vector<uint8_t> frame;
+					std::vector<uint8_t> decrypted_dave_frame;
 					if (vr.voice_client->is_end_to_end_encrypted()) {
 						auto decryptor = vr.voice_client->mls_state->decryptors.find(vr.user_id);
+
 						if (decryptor != vr.voice_client->mls_state->decryptors.end()) {
-							frame.resize(decryptor->second->get_max_plaintext_byte_size(dave::media_type::media_audio, opus_packet_len));
+							decrypted_dave_frame.resize(decryptor->second->get_max_plaintext_byte_size(dave::media_type::media_audio, opus_packet_len));
+
 							size_t enc_len = decryptor->second->decrypt(
 								dave::media_type::media_audio,
 								dave::make_array_view<const uint8_t>(opus_packet, opus_packet_len),
-								dave::make_array_view(frame)
+								dave::make_array_view(decrypted_dave_frame)
 							);
+
 							if (enc_len > 0) {
-								opus_packet = frame.data();
+								opus_packet = decrypted_dave_frame.data();
 								opus_packet_len = enc_len;
 							}
 						}
@@ -271,13 +251,15 @@ void discord_voice_client::voice_courier_loop(discord_voice_client& client, cour
 					if (opus_packet_len > 0x7FFFFFFF) {
 						throw dpp::length_exception(err_massive_audio, "audio_data > 2GB! This should never happen!");
 					}
-					if (samples = opus_decode(d.decoder.get(), opus_packet,
-							   static_cast<opus_int32>(opus_packet_len & 0x7FFFFFFF), flush_data_pcm, 5760, 0);
-						samples >= 0) {
-						vr.reassign(&client, d.user_id, reinterpret_cast<uint8_t *>(flush_data_pcm),
-									samples * opus_channel_count * sizeof(opus_int16));
+
+					samples = opus_decode(d.decoder.get(), opus_packet, static_cast<opus_int32>(opus_packet_len & 0x7FFFFFFF), flush_data_pcm, 5760, 0);
+
+					if (samples >= 0) {
+						vr.reassign(&client, d.user_id, reinterpret_cast<uint8_t *>(flush_data_pcm), samples * opus_channel_count * sizeof(opus_int16));
+
 						client.end_gain = 1.0f / client.moving_average;
 						park_count = audio_mix(client, *client.mixer, pcm_mix, flush_data_pcm, park_count, samples, max_samples);
+
 						client.creator->on_voice_receive.call(vr);
 					}
 
@@ -287,12 +269,12 @@ void discord_voice_client::voice_courier_loop(discord_voice_client& client, cour
 		}
 		/* If combined receive is bound, dispatch it */
 		if (park_count) {
-
 			/* Downsample the 32 bit samples back to 16 bit */
 			opus_int16 pcm_downsample[23040] = {0};
 			opus_int16 *pcm_downsample_ptr = pcm_downsample;
 			opus_int32 *pcm_mix_ptr = pcm_mix;
 			client.increment = (client.end_gain - client.current_gain) / static_cast<float>(samples);
+
 			for (int64_t x = 0; x < (samples * opus_channel_count) / client.mixer->byte_blocks_per_register; ++x) {
 				client.mixer->collect_single_register(pcm_mix_ptr, pcm_downsample_ptr, client.current_gain, client.increment);
 				client.current_gain += client.increment * static_cast<float>(client.mixer->byte_blocks_per_register);

@@ -66,9 +66,6 @@ void discord_voice_client::read_ready()
 		return;
 	}
 
-	auto start = std::chrono::steady_clock::now();
-	std::cout << "read_ready START: " << std::chrono::duration_cast<std::chrono::milliseconds>(start.time_since_epoch()) .count() << "\n";
-
 	voice_payload vp{0, // seq, populate later
 		0, // timestamp, populate later
 		std::make_unique<voice_receive_t>(nullptr, std::string(reinterpret_cast<char*>(buffer), packet_size))};
@@ -93,8 +90,6 @@ void discord_voice_client::read_ready()
 	vp.vr->audio_data.assign(buffer, buffer + packet_size);
 
 	{
-		std::cout << "voice_courier_shared_state.mtx LOCK\n";
-
 		std::lock_guard lk(voice_courier_shared_state.mtx);
 		auto& [range, payload_queue, pending_decoder_ctls, decoder] = voice_courier_shared_state.parked_voice_payloads[vp.vr->user_id];
 
@@ -120,26 +115,14 @@ void discord_voice_client::read_ready()
 
 		if (vp.seq < range.min_seq && vp.timestamp < range.min_timestamp) {
 			/* This packet arrived too late. We can only discard it. */
-
-			std::cout << "voice_courier_shared_state.mtx RELEASE\n";
-
 			return;
 		}
 		range.max_seq = vp.seq;
 		range.max_timestamp = vp.timestamp;
 		payload_queue.push(std::move(vp));
-
-		std::cout << "voice_courier_shared_state.mtx RELEASE\n";
 	}
 
-	std::cout << "read_ready NOTIFY_ONE\n";
-
 	voice_courier_shared_state.signal_iteration.notify_one();
-
-	auto end = std::chrono::steady_clock::now();
-	std::cout << "read_ready END: " << std::chrono::duration_cast<std::chrono::milliseconds>(start.time_since_epoch()).count() << "\n";
-
-	std::cout << "read_ready TIME: " << std::chrono::duration_cast<std::chrono::milliseconds>((end - start)).count() << "\n";
 
 	if (!voice_courier.joinable()) {
 		/* Courier thread is not running, start it */
