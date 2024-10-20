@@ -20,6 +20,7 @@
  *
  ************************************************************************************/
 
+#include <cstdint>
 #include <iostream>
 #include <algorithm>
 #include <cmath>
@@ -138,6 +139,9 @@ bool discord_voice_client::is_end_to_end_encrypted() const {
 
 discord_voice_client& discord_voice_client::pause_audio(bool pause) {
 	this->paused = pause;
+	if (!this->paused) {
+		this->sent_stop_frames = false;
+	}
 	return *this;
 }
 
@@ -162,10 +166,13 @@ dpp::utility::uptime discord_voice_client::get_remaining() {
 }
 
 discord_voice_client& discord_voice_client::stop_audio() {
-	std::lock_guard<std::mutex> lock(this->stream_mutex);
-	outbuf.clear();
-	track_meta.clear();
-	tracks = 0;
+	{
+		std::lock_guard<std::mutex> lock(this->stream_mutex);
+		outbuf.clear();
+		track_meta.clear();
+		tracks = 0;
+	}
+	this->send_stop_frames();
 	return *this;
 }
 
@@ -388,7 +395,6 @@ discord_voice_client& discord_voice_client::skip_to_next_marker() {
 }
 
 discord_voice_client& discord_voice_client::send_silence(const uint64_t duration) {
-	uint8_t silence_packet[3] = { 0xf8, 0xff, 0xfe };
 	send_audio_opus(silence_packet, 3, duration);
 	return *this;
 }
@@ -434,3 +440,15 @@ uint16_t discord_voice_client::get_iteration_interval() {
 }
 
 }
+discord_voice_client& discord_voice_client::send_stop_frames(bool send_now) {
+	uint8_t silence_frames[sizeof(silence_packet) / sizeof(*silence_packet) * 5];
+	for (size_t i = 0; i < sizeof(silence_frames) / sizeof(*silence_frames); i++) {
+		silence_frames[i] = silence_packet[i % 3];
+	}
+
+	this->send_audio_opus(silence_frames, sizeof(silence_frames) / sizeof(*silence_frames), 20, send_now);
+
+	return *this;
+}
+
+} // namespace dpp

@@ -411,6 +411,11 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 								});
 						}
 						this->reinit_dave_mls_group();
+
+						/* Ready now if there's no DAVE user waiting in the vc */
+						if (dave_mls_user_list.empty()) {
+							ready_now = true;
+						}
 					}
 				} else {
 					/* Non-DAVE ready immediately */

@@ -63,11 +63,11 @@ namespace dpp {
 		return *this;
 	}
 
-	discord_voice_client& discord_voice_client::send_audio_opus(uint8_t* opus_packet, const size_t length) {
+	discord_voice_client& discord_voice_client::send_audio_opus(const uint8_t* opus_packet, const size_t length, uint64_t duration, bool send_now) {
 		return *this;
 	}
 
-	discord_voice_client& discord_voice_client::send_audio_opus(uint8_t* opus_packet, const size_t length, uint64_t duration) {
+	discord_voice_client& discord_voice_client::send_audio_opus(const uint8_t* opus_packet, const size_t length) {
 		return *this;
 	}
 
@@ -80,7 +80,7 @@ namespace dpp {
 	}
 
 
-	void discord_voice_client::send(const char* packet, size_t len, uint64_t duration) {
+	void discord_voice_client::send(const char* packet, size_t len, uint64_t duration, bool send_now) {
 	}
 
 	int discord_voice_client::udp_send(const char* data, size_t length) {
