@@ -439,7 +439,6 @@ uint16_t discord_voice_client::get_iteration_interval() {
 	return this->iteration_interval;
 }
 
-}
 discord_voice_client& discord_voice_client::send_stop_frames(bool send_now) {
 	uint8_t silence_frames[sizeof(silence_packet) / sizeof(*silence_packet) * 5];
 	for (size_t i = 0; i < sizeof(silence_frames) / sizeof(*silence_frames); i++) {
@@ -451,4 +450,4 @@ discord_voice_client& discord_voice_client::send_stop_frames(bool send_now) {
 	return *this;
 }
 
-} // namespace dpp
+}
