@@ -40,5 +40,5 @@ ban& ban::fill_from_json_impl(nlohmann::json* j) {
 	return *this;
 }
 
-} // namespace dpp
+}
 

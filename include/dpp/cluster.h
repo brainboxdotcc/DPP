@@ -1335,17 +1335,6 @@ public:
 
 	
 	/**
-	 * @brief Called when a user is talking on a voice channel.
-	 *
-	 * @warning If the cache policy has disabled guild caching, the pointer to the guild in this event may be nullptr.
-	 *
-	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The function signature for this event takes a single `const` reference of type voice_user_talking_t&, and returns void.
-	 */
-	event_router_t<voice_user_talking_t> on_voice_user_talking;
-
-	
-	/**
 	 * @brief Called when a voice channel is connected and ready to send audio.
 	 * Note that this is not directly attached to the READY event of the websocket,
 	 * as there is further connection that needs to be done before audio is ready to send.
@@ -3662,7 +3651,7 @@ public:
 
 	/**
 	 * @brief Get all guild stickers
-	 * @see https://discord.com/developers/docs/resources/sticker#get-guild-stickers
+	 * @see https://discord.com/developers/docs/resources/sticker#list-guild-stickers
 	 * @param guild_id Guild ID of the guild where the sticker is
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::sticker_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
@@ -3671,7 +3660,7 @@ public:
 
 	/**
 	 * @brief Get a list of available sticker packs
-	 * @see https://discord.com/developers/docs/resources/sticker#list-nitro-sticker-packs
+	 * @see https://discord.com/developers/docs/resources/sticker#list-sticker-packs
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::sticker_pack_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
@@ -3822,6 +3811,16 @@ public:
 	void current_user_set_voice_state(snowflake guild_id, snowflake channel_id, bool suppress = false, time_t request_to_speak_timestamp = 0, command_completion_event_t callback = utility::log_error());
 
 	/**
+	 * @brief Get the bot's voice state in a guild without a Gateway connection
+	 *
+	 * @see https://discord.com/developers/docs/resources/voice#get-current-user-voice-state
+	 * @param guild_id Guild to get the voice state for
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::voicestate object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void current_user_get_voice_state(snowflake guild_id, command_completion_event_t callback);
+
+	/**
 	 * @brief Set a user's voice state on a stage channel
 	 *
 	 * **Caveats**
@@ -3843,6 +3842,17 @@ public:
 	 * On success the callback will contain a dpp::scheduled_event object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void user_set_voice_state(snowflake user_id, snowflake guild_id, snowflake channel_id, bool suppress = false, command_completion_event_t callback = utility::log_error());
+
+	/**
+	 * @brief Get a user's voice state in a guild without a Gateway connection
+	 *
+	 * @see https://discord.com/developers/docs/resources/voice#get-user-voice-state
+	 * @param guild_id Guild to get the voice state for
+	 * @param user_id The user to get the voice state of
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::voicestate object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void user_get_voice_state(snowflake guild_id, snowflake user_id, command_completion_event_t callback);
 
 	/**
 	 * @brief Get all auto moderation rules for a guild
@@ -3972,4 +3982,4 @@ public:
 
 };
 
-} // namespace dpp
+}

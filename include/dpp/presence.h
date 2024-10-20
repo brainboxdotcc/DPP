@@ -595,4 +595,4 @@ public:
  */
 typedef std::unordered_map<snowflake, presence> presence_map;
 
-} // namespace dpp
+}

@@ -994,5 +994,5 @@ typedef std::unordered_map<snowflake, role> role_map;
  */
 typedef std::vector<application_role_connection_metadata> application_role_connection_metadata_list;
 
-} // namespace dpp
+}
 

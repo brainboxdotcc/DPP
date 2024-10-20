@@ -23,8 +23,6 @@
 #include <dpp/discordevents.h>
 #include <dpp/json.h>
 
-
-
 namespace dpp {
 
 using json = nlohmann::json;
@@ -117,4 +115,4 @@ invite &invite::set_unique(const bool is_unique) {
 	return *this;
 }
 
-} // namespace dpp
+}

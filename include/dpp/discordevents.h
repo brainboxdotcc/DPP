@@ -229,4 +229,4 @@ std::string DPP_EXPORT base64_encode(unsigned char const* buf, unsigned int buff
  */
 std::string DPP_EXPORT ts_to_string(time_t ts);
 
-} // namespace dpp
+}

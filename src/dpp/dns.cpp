@@ -21,7 +21,6 @@
  ************************************************************************************/
 
 #include <dpp/dns.h>
-#include <cerrno>
 #include <exception>
 #include <cstring>
 #include <mutex>

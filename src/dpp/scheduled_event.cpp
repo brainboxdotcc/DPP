@@ -19,7 +19,6 @@
  *
  ************************************************************************************/
 #include <dpp/scheduled_event.h>
-#include <dpp/exception.h>
 #include <dpp/discordevents.h>
 #include <dpp/stringops.h>
 #include <dpp/json.h>
@@ -193,4 +192,4 @@ json scheduled_event::to_json_impl(bool with_id) const {
 	return j;
 }
 
-} // namespace dpp
+}

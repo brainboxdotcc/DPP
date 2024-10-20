@@ -81,4 +81,4 @@ void cluster::entitlement_consume(const class snowflake entitlement_id, command_
 	rest_request<confirmation>(this, API_PATH "/applications", me.id.str(), "entitlements/" + entitlement_id.str() + "/consume", m_post, "", callback);
 }
 
-} // namespace dpp
+}

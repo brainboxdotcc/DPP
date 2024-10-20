@@ -25,8 +25,6 @@
 #include <dpp/json.h>
 #include <dpp/cache.h>
 
-
-
 namespace dpp {
 
 using json = nlohmann::json;
@@ -150,4 +148,4 @@ connection& connection::fill_from_json_impl(nlohmann::json* j) {
 	return *this;
 }
 
-} // namespace dpp
+}

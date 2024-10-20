@@ -533,4 +533,4 @@ public:
 	voiceconn* get_voice(snowflake guild_id);
 };
 
-} // namespace dpp
+}

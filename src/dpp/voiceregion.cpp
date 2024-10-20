@@ -72,5 +72,4 @@ bool voiceregion::is_custom() const {
 	return flags & v_custom;
 }
 
-} // namespace dpp
-
+}

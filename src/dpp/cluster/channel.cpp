@@ -101,4 +101,4 @@ void cluster::channel_set_voice_status(snowflake channel_id, const std::string& 
 	rest_request<confirmation>(this, API_PATH "/channels", std::to_string(channel_id), "voice-status", m_put, j.dump(-1, ' ', false, json::error_handler_t::replace), callback);
 }
 
-} // namespace dpp
+}

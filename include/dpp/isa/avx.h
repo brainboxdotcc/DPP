@@ -107,6 +107,6 @@ namespace dpp {
 		}
 	};
 
-} // namespace dpp
+}
 
 #endif

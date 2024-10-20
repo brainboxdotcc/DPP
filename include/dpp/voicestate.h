@@ -176,4 +176,4 @@ public:
 /** A container of voicestates */
 typedef std::unordered_map<std::string, voicestate> voicestate_map;
 
-} // namespace dpp
+}

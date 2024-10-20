@@ -81,4 +81,4 @@ void cluster::application_emoji_delete(snowflake emoji_id, command_completion_ev
 	rest_request<confirmation>(this, API_PATH "/applications", me.id.str(), "emojis/" + emoji_id.str(), m_delete, "", callback);
 }
 
-} // namespace dpp
+}

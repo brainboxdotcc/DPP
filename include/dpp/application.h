@@ -326,6 +326,11 @@ public:
 	uint64_t approximate_guild_count;
 
 	/**
+	 * @brief Optional: Approximate count of users that have installed the app
+	 */
+	uint64_t approximate_user_install_count;
+
+	/**
 	 * @brief Optional: Array of redirect URIs for the app.
 	 */
 	std::vector<std::string> redirect_uris;
@@ -467,4 +472,4 @@ public:
  */
 typedef std::unordered_map<snowflake, application> application_map;
 
-} // namespace dpp
+}

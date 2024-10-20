@@ -78,4 +78,4 @@ template<typename T, class F, class... Ts> T sync(class cluster* c, F func, Ts&&
 	return _f.get();
 }
 
-} // namespace dpp
+}

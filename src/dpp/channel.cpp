@@ -22,7 +22,6 @@
 #include <dpp/channel.h>
 #include <dpp/cache.h>
 #include <dpp/guild.h>
-#include <dpp/user.h>
 #include <dpp/role.h>
 #include <dpp/discordevents.h>
 #include <dpp/stringops.h>
@@ -580,4 +579,4 @@ forum_layout_type channel::get_default_forum_layout() const {
 }
 
 
-} // namespace dpp
+}
