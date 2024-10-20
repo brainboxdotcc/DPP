@@ -1548,4 +1548,4 @@ sticker& sticker::set_file_content(std::string_view fc) {
 }
 
 
-} // namespace dpp
+}

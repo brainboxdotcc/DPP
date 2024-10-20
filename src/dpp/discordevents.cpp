@@ -22,7 +22,7 @@
 /* OpenBSD errors when xopen_source is defined.
  * We want to make sure that OpenBSD does not define it.
  */
-#if !defined(__OpenBSD__)
+#ifndef __OpenBSD__
 	#ifndef _XOPEN_SOURCE
 		#define _XOPEN_SOURCE
 	#endif
@@ -35,11 +35,7 @@
 #include <stdlib.h>
 #include <dpp/discordevents.h>
 #include <dpp/discordclient.h>
-#include <dpp/event.h>
-#include <dpp/cache.h>
-#include <dpp/stringops.h>
 #include <dpp/json.h>
-#include <time.h>
 #include <iomanip>
 #include <sstream>
 
@@ -439,4 +435,4 @@ void discord_client::handle_event(const std::string &event, json &j, const std::
 	}
 }
 
-} // namespace dpp
+}

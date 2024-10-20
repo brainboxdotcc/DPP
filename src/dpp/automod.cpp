@@ -186,5 +186,5 @@ json automod_rule::to_json_impl(bool with_id) const {
 	return j;
 }
 
-} // namespace dpp
+}
 

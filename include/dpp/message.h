@@ -2651,4 +2651,4 @@ typedef std::unordered_map<snowflake, sticker> sticker_map;
  */
 typedef std::unordered_map<snowflake, sticker_pack> sticker_pack_map;
 
-} // namespace dpp
+}

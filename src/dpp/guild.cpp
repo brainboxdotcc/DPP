@@ -20,9 +20,6 @@
  ************************************************************************************/
 #include <dpp/cache.h>
 #include <dpp/discordclient.h>
-#include <dpp/voicestate.h>
-#include <dpp/exception.h>
-#include <dpp/guild.h>
 #include <dpp/discordevents.h>
 #include <dpp/stringops.h>
 #include <dpp/json.h>
@@ -1196,4 +1193,4 @@ onboarding &onboarding::set_enabled(const bool is_enabled) {
 }
 
 
-} // namespace dpp
+}

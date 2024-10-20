@@ -581,4 +581,4 @@ void from_json(const nlohmann::json& j, user_identified& u);
  */
 typedef std::unordered_map<snowflake, user> user_map;
 
-} // namespace dpp
+}

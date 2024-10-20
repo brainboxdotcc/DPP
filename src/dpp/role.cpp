@@ -23,11 +23,7 @@
 #include <dpp/role.h>
 #include <dpp/cache.h>
 #include <dpp/discordevents.h>
-#include <dpp/permissions.h>
-#include <dpp/stringops.h>
 #include <dpp/json.h>
-
-
 
 namespace dpp {
 
@@ -485,4 +481,4 @@ json application_role_connection::to_json_impl(bool with_id) const {
 }
 
 
-} // namespace dpp
+}

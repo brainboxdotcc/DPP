@@ -249,4 +249,4 @@ public:
  */
 typedef std::unordered_map<snowflake, emoji> emoji_map;
 
-} // namespace dpp
+}

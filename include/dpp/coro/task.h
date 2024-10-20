@@ -433,7 +433,7 @@ std_coroutine::coroutine_handle<> final_awaiter<R>::await_suspend(handle_t<R> ha
 DPP_CHECK_ABI_COMPAT(task<void>, task_dummy)
 DPP_CHECK_ABI_COMPAT(task<uint64_t>, task_dummy)
 
-} // namespace dpp
+}
 
 /**
  * @brief Specialization of std::coroutine_traits, helps the standard library figure out a promise_t type from a coroutine function.

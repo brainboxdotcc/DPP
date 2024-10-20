@@ -57,4 +57,4 @@ json dtemplate::to_json_impl(bool with_id) const {
 	};
 }
 
-} // namespace dpp
+}

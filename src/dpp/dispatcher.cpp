@@ -286,4 +286,4 @@ void voice_receive_t::reassign(discord_voice_client* vc, snowflake _user_id, con
 	audio_size = audio_data.size();
 }
 
-} // namespace dpp
+}

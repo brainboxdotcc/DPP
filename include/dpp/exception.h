@@ -602,5 +602,5 @@ public:
 #  endif /* DPP_CORO */
 #endif
 
-} // namespace dpp
+}
 

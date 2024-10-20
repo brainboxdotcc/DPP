@@ -2198,5 +2198,5 @@ struct DPP_EXPORT entitlement_delete_t : public event_dispatch_t {
 	entitlement deleted = {};
 };
 
-} // namespace dpp
+}
 

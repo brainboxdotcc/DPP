@@ -86,4 +86,4 @@ bool sku::is_user_subscription() const {
 	return flags & sku_flags::sku_user_subscription;
 }
 
-} // namespace dpp
+}

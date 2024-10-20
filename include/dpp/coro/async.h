@@ -184,6 +184,6 @@ public:
 
 DPP_CHECK_ABI_COMPAT(async<>, async_dummy);
 
-} // namespace dpp
+}
 
 #endif /* DPP_CORO */

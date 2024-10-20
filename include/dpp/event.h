@@ -156,4 +156,4 @@ event_decl(entitlement_create, ENTITLEMENT_CREATE);
 event_decl(entitlement_update, ENTITLEMENT_UPDATE);
 event_decl(entitlement_delete, ENTITLEMENT_DELETE);
 
-} // namespace dpp::events
+}

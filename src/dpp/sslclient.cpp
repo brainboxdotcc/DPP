@@ -37,20 +37,13 @@
 #else
 	/* Anyting other than Windows (e.g. sane OSes) */
 	#include <poll.h>
-	#include <netinet/in.h>
-	#include <resolv.h>
-	#include <netdb.h>
 	#include <sys/socket.h>
-	#include <netinet/tcp.h>
 	#include <unistd.h>
 #endif
-#include <signal.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <csignal>
 #include <sys/types.h>
 #include <fcntl.h>
-#include <signal.h>
-#include <string.h>
+#include <cstring>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 /* Windows specific OpenSSL symbol weirdness */
@@ -676,4 +669,4 @@ ssl_client::~ssl_client()
 	cleanup();
 }
 
-} // namespace dpp
+}

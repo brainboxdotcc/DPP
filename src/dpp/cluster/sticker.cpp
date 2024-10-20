@@ -55,4 +55,4 @@ void cluster::sticker_packs_get(command_completion_event_t callback) {
 	rest_request_list<sticker_pack>(this, API_PATH "/sticker-packs", "", "", m_get, "", callback);
 }
 
-} // namespace dpp
+}
