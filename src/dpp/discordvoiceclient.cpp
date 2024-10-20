@@ -20,16 +20,6 @@
  *
  ************************************************************************************/
 
-#ifdef _WIN32
-	#include <WinSock2.h>
-	#include <WS2tcpip.h>
-	#include <io.h>
-#else
-	#include <arpa/inet.h>
-	#include <netinet/in.h>
-	#include <sys/socket.h>
-#endif
-#include <string_view>
 #include <iostream>
 #include <algorithm>
 #include <cmath>
@@ -443,4 +433,4 @@ uint16_t discord_voice_client::get_iteration_interval() {
 	return this->iteration_interval;
 }
 
-} // namespace dpp
+}

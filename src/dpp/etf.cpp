@@ -33,8 +33,6 @@
  ************************************************************************************/
 #include <dpp/etf.h>
 #include <dpp/sysdep.h>
-#include <dpp/discordevents.h>
-#include <dpp/exception.h>
 #include <dpp/json.h>
 #include <zlib.h>
 #include <iostream>
@@ -729,5 +727,5 @@ etf_buffer::etf_buffer(size_t initial) {
 
 etf_buffer::~etf_buffer() = default;
 
-} // namespace dpp
+}
 

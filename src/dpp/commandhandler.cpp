@@ -20,7 +20,6 @@
  ************************************************************************************/
 #include <dpp/commandhandler.h>
 #include <dpp/cluster.h>
-#include <dpp/exception.h>
 #include <dpp/stringops.h>
 #include <sstream>
 #include <utility>
@@ -437,4 +436,4 @@ void commandhandler::thonk(command_source source, command_completion_event_t cal
 	thinking(source, callback);
 }
 
-} // namespace dpp
+}

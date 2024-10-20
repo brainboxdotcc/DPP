@@ -21,10 +21,7 @@
  ************************************************************************************/
 #include <dpp/application.h>
 #include <dpp/discordevents.h>
-#include <dpp/snowflake.h>
-#include <dpp/managed.h>
 #include <dpp/json.h>
-#include <iostream>
 
 namespace dpp {
 
@@ -168,5 +165,4 @@ std::string application::get_icon_url(uint16_t size, const image_type format) co
 	return "";
 }
 
-} // namespace dpp
-
+}

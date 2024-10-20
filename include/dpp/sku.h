@@ -173,4 +173,4 @@ public:
  */
 typedef std::unordered_map<snowflake, sku> sku_map;
 
-} // namespace dpp
+}

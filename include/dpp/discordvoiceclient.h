@@ -1240,5 +1240,5 @@ public:
 	void process_mls_group_rosters(const std::map<uint64_t, std::vector<uint8_t>>& rmap);
 };
 
-} // namespace dpp
+}
 

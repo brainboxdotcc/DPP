@@ -20,7 +20,6 @@
  *
  ************************************************************************************/
 #include <string>
-#include <iostream>
 #include <fstream>
 #include <dpp/exception.h>
 #include <dpp/discordclient.h>
@@ -30,18 +29,6 @@
 #include <dpp/json.h>
 #include <dpp/etf.h>
 #include <zlib.h>
-#ifdef _WIN32
-	#include <WinSock2.h>
-	#include <WS2tcpip.h>
-	#include <io.h>
-#else
-	#include <unistd.h>
-	#include <netinet/in.h>
-	#include <resolv.h>
-	#include <netdb.h>
-	#include <sys/socket.h>
-	#include <netinet/tcp.h>
-#endif
 
 #define PATH_UNCOMPRESSED_JSON	"/?v=" DISCORD_API_VERSION "&encoding=json"
 #define PATH_COMPRESSED_JSON	"/?v=" DISCORD_API_VERSION "&encoding=json&compress=zlib-stream"
@@ -732,4 +719,4 @@ voiceconn& voiceconn::connect(snowflake guild_id) {
 }
 
 
-} // namespace dpp
+}

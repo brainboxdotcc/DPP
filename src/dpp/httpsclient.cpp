@@ -27,8 +27,6 @@
 #include <climits>
 #include <dpp/httpsclient.h>
 #include <dpp/utility.h>
-#include <dpp/exception.h>
-#include <dpp/stringops.h>
 
 namespace dpp {
 
@@ -358,4 +356,4 @@ http_connect_info https_client::get_host_info(std::string url) {
 	return hci;
 }
 
-} // namespace dpp
+}

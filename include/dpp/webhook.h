@@ -196,4 +196,4 @@ public:
  */
 typedef std::unordered_map<snowflake, webhook> webhook_map;
 
-} // namespace dpp
+}

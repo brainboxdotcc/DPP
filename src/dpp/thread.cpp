@@ -22,7 +22,6 @@
 #include <dpp/thread.h>
 #include <dpp/discordevents.h>
 
-
 namespace dpp {
 
 thread_member& thread_member::fill_from_json_impl(nlohmann::json* j) {

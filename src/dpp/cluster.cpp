@@ -21,17 +21,9 @@
 #include <map>
 #include <dpp/exception.h>
 #include <dpp/cluster.h>
-#include <dpp/discordclient.h>
-#include <dpp/discordevents.h>
-#include <dpp/message.h>
-#include <dpp/cache.h>
-#include <dpp/once.h>
-#include <dpp/sync.h>
 #include <chrono>
 #include <iostream>
 #include <dpp/json.h>
-#include <utility>
-#include <algorithm>
 
 namespace dpp {
 

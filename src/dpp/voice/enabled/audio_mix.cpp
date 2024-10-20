@@ -21,14 +21,12 @@
  ************************************************************************************/
 
 #include <string_view>
-#include <iostream>
 #include <fstream>
 #include <algorithm>
 #include <cmath>
 #include <dpp/exception.h>
 #include <dpp/isa_detection.h>
 #include <dpp/discordvoiceclient.h>
-#include <dpp/json.h>
 #include <opus/opus.h>
 
 namespace dpp {

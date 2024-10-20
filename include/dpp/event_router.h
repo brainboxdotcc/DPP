@@ -742,4 +742,4 @@ const T &awaitable<T>::await_resume() {
 }
 #endif
 
-} // namespace dpp
+}

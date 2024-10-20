@@ -21,7 +21,6 @@
  ************************************************************************************/
 #include <dpp/utility.h>
 #include <dpp/stringops.h>
-#include <dpp/exception.h>
 #include <dpp/version.h>
 #include <ctime>
 #include <iomanip>
@@ -34,9 +33,6 @@
 #include <streambuf>
 #include <array>
 #include <dpp/cluster.h>
-#include <dpp/dispatcher.h>
-#include <dpp/message.h>
-#include <dpp/discordevents.h>
 
 #ifdef _WIN32
 	#include <stdio.h>
@@ -936,4 +932,4 @@ void set_thread_name(const std::string& name) {
 	#endif
 }
 
-} // namespace dpp::utility
+}

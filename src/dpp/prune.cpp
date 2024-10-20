@@ -51,4 +51,4 @@ json prune::to_json(bool with_id) const {
 	return to_json_impl(with_id);
 }
 
-} // namespace dpp
+}
