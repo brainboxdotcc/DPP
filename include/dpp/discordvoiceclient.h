@@ -1035,6 +1035,8 @@ public:
 	 *
 	 * @param send_now send this packet right away without buffering.
 	 * Do NOT set send_now to true outside write_ready.
+	 * Also make sure you're not locking stream_mutex if you
+	 * don't set send_now to true.
 	 * 
 	 * @return discord_voice_client& Reference to self
 	 * @throw dpp::voice_exception if voice support is not compiled into D++
