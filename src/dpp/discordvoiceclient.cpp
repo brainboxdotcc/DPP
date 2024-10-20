@@ -416,7 +416,6 @@ discord_voice_client& discord_voice_client::set_send_audio_type(send_audio_type_
 
 discord_voice_client& discord_voice_client::speak() {
 	if (!this->sending) {
-		std::cout << "Sending voice_opcode_client_speaking\n";
 		this->queue_message(json({
 		{"op", voice_opcode_client_speaking},
 		{"d", {

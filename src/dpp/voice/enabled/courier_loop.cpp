@@ -147,8 +147,8 @@ void discord_voice_client::voice_courier_loop(discord_voice_client& client, cour
 						 * we can only pretend there is an event, without any raw payload byte.
 						 */
 						voice_receive_t vr(nullptr, "", &client, d.user_id,
-						 reinterpret_cast<uint8_t *>(flush_data_pcm),
-						 lost_packet_samples * opus_channel_count * sizeof(opus_int16));
+						                   reinterpret_cast<uint8_t *>(flush_data_pcm),
+						                   lost_packet_samples * opus_channel_count * sizeof(opus_int16));
 
 						park_count = audio_mix(client, *client.mixer, pcm_mix, flush_data_pcm, park_count, lost_packet_samples, max_samples);
 						client.creator->on_voice_receive.call(vr);
@@ -283,7 +283,7 @@ void discord_voice_client::voice_courier_loop(discord_voice_client& client, cour
 			}
 
 			voice_receive_t vr(nullptr, "", &client, 0, reinterpret_cast<uint8_t *>(pcm_downsample),
-					  max_samples * opus_channel_count * sizeof(opus_int16));
+			                   max_samples * opus_channel_count * sizeof(opus_int16));
 
 			client.creator->on_voice_receive_combined.call(vr);
 		}

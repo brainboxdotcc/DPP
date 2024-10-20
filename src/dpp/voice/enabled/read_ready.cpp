@@ -67,8 +67,8 @@ void discord_voice_client::read_ready()
 	}
 
 	voice_payload vp{0, // seq, populate later
-		0, // timestamp, populate later
-		std::make_unique<voice_receive_t>(nullptr, std::string(reinterpret_cast<char*>(buffer), packet_size))};
+	                 0, // timestamp, populate later
+	                 std::make_unique<voice_receive_t>(nullptr, std::string(reinterpret_cast<char*>(buffer), packet_size))};
 
 	vp.vr->voice_client = this;
 
@@ -103,7 +103,7 @@ void discord_voice_client::read_ready()
 
 			int opus_error = 0;
 			decoder.reset(opus_decoder_create(opus_sample_rate_hz, opus_channel_count, &opus_error),
-				 &opus_decoder_destroy);
+			              &opus_decoder_destroy);
 			if (opus_error) {
 				/**
 				 * NOTE: The -10 here makes the opus_error match up with values of exception_error_code,
@@ -127,8 +127,8 @@ void discord_voice_client::read_ready()
 	if (!voice_courier.joinable()) {
 		/* Courier thread is not running, start it */
 		voice_courier = std::thread(&voice_courier_loop,
-							  std::ref(*this),
-							  std::ref(voice_courier_shared_state));
+		                            std::ref(*this),
+		                            std::ref(voice_courier_shared_state));
 	}
 }
 
