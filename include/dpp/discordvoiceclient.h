@@ -440,7 +440,7 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	bool paused;
 
 	/**
-	 * @brief Whether has sent 5 frame of silence before stopping on pause/stop.
+	 * @brief Whether has sent 5 frame of silence before stopping on pause.
 	 *
 	 * This is to avoid unintended Opus interpolation with subsequent transmissions.
 	 */
