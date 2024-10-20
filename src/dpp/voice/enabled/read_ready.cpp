@@ -20,6 +20,7 @@
  *
  ************************************************************************************/
 
+#include <chrono>
 #include <string_view>
 #include <dpp/exception.h>
 #include <dpp/isa_detection.h>
@@ -65,9 +66,12 @@ void discord_voice_client::read_ready()
 		return;
 	}
 
+	auto start = std::chrono::steady_clock::now();
+	std::cout << "read_ready START: " << std::chrono::duration_cast<std::chrono::milliseconds>(start.time_since_epoch()) .count() << "\n";
+
 	voice_payload vp{0, // seq, populate later
-			 0, // timestamp, populate later
-			 std::make_unique<voice_receive_t>(nullptr, std::string(reinterpret_cast<char*>(buffer), packet_size))};
+		0, // timestamp, populate later
+		std::make_unique<voice_receive_t>(nullptr, std::string(reinterpret_cast<char*>(buffer), packet_size))};
 
 	vp.vr->voice_client = this;
 
@@ -86,90 +90,11 @@ void discord_voice_client::read_ready()
 	std::memcpy(&vp.timestamp, &buffer[4], sizeof(rtp_timestamp_t));
 	vp.timestamp = ntohl(vp.timestamp);
 
-	constexpr size_t nonce_size = sizeof(uint32_t);
-	/* Nonce is 4 byte at the end of payload with zero padding */
-	uint8_t nonce[24] = { 0 };
-	std::memcpy(nonce, buffer + packet_size - nonce_size, nonce_size);
-
-	/* Get the number of CSRC in header */
-	const size_t csrc_count = buffer[0] & 0b0000'1111;
-	/* Skip to the encrypted voice data */
-	const ptrdiff_t offset_to_data = header_size + sizeof(uint32_t) * csrc_count;
-	size_t total_header_len = offset_to_data;
-
-	uint8_t* ciphertext = buffer + offset_to_data;
-	size_t ciphertext_len = packet_size - offset_to_data - nonce_size;
-
-	size_t ext_len = 0;
-	if ([[maybe_unused]] const bool uses_extension = (buffer[0] >> 4) & 0b0001) {
-		/**
-		 * Get the RTP Extensions size, we only get the size here because
-		 * the extension itself is encrypted along with the opus packet
-		 */
-		{
-			uint16_t ext_len_in_words;
-			memcpy(&ext_len_in_words, &ciphertext[2], sizeof(uint16_t));
-			ext_len_in_words = ntohs(ext_len_in_words);
-			ext_len = sizeof(uint32_t) * ext_len_in_words;
-		}
-		constexpr size_t ext_header_len = sizeof(uint16_t) * 2;
-		ciphertext += ext_header_len;
-		ciphertext_len -= ext_header_len;
-		total_header_len += ext_header_len;
-	}
-
-	uint8_t decrypted[65535] = { 0 };
-	unsigned long long opus_packet_len  = 0;
-	if (ssl_crypto_aead_xchacha20poly1305_ietf_decrypt(
-		decrypted, &opus_packet_len,
-		nullptr,
-		ciphertext, ciphertext_len,
-		buffer,
-		/**
-		 * Additional Data:
-		 * The whole header (including csrc list) +
-		 * 4 byte extension header (magic 0xBEDE + 16-bit denoting extension length)
-		 */
-		total_header_len,
-		nonce, secret_key.data()) != 0) {
-		/* Invalid Discord RTP payload. */
-		return;
-	}
-
-	uint8_t *opus_packet = decrypted;
-	if (ext_len > 0) {
-		/* Skip previously encrypted RTP Header Extension */
-		opus_packet += ext_len;
-		opus_packet_len -= ext_len;
-	}
-
-	/**
-	 * If DAVE is enabled, use the user's ratchet to decrypt the OPUS audio data
-	 */
-	std::vector<uint8_t> frame;
-	if (is_end_to_end_encrypted()) {
-		auto decryptor = mls_state->decryptors.find(vp.vr->user_id);
-		if (decryptor != mls_state->decryptors.end()) {
-			frame.resize(decryptor->second->get_max_plaintext_byte_size(dave::media_type::media_audio, opus_packet_len));
-			size_t enc_len = decryptor->second->decrypt(
-				dave::media_type::media_audio,
-				dave::make_array_view<const uint8_t>(opus_packet, opus_packet_len),
-				dave::make_array_view(frame)
-			);
-			if (enc_len > 0) {
-				opus_packet = frame.data();
-				opus_packet_len = enc_len;
-			}
-		}
-	}
-
-	/*
-	 * We're left with the decrypted, opus-encoded data.
-	 * Park the payload and decode on the voice courier thread.
-	 */
-	vp.vr->audio_data.assign(opus_packet, opus_packet + opus_packet_len);
+	vp.vr->audio_data.assign(buffer, buffer + packet_size);
 
 	{
+		std::cout << "voice_courier_shared_state.mtx LOCK\n";
+
 		std::lock_guard lk(voice_courier_shared_state.mtx);
 		auto& [range, payload_queue, pending_decoder_ctls, decoder] = voice_courier_shared_state.parked_voice_payloads[vp.vr->user_id];
 
@@ -183,7 +108,7 @@ void discord_voice_client::read_ready()
 
 			int opus_error = 0;
 			decoder.reset(opus_decoder_create(opus_sample_rate_hz, opus_channel_count, &opus_error),
-				      &opus_decoder_destroy);
+				 &opus_decoder_destroy);
 			if (opus_error) {
 				/**
 				 * NOTE: The -10 here makes the opus_error match up with values of exception_error_code,
@@ -195,20 +120,32 @@ void discord_voice_client::read_ready()
 
 		if (vp.seq < range.min_seq && vp.timestamp < range.min_timestamp) {
 			/* This packet arrived too late. We can only discard it. */
+
+			std::cout << "voice_courier_shared_state.mtx RELEASE\n";
+
 			return;
 		}
 		range.max_seq = vp.seq;
 		range.max_timestamp = vp.timestamp;
 		payload_queue.push(std::move(vp));
+
+		std::cout << "voice_courier_shared_state.mtx RELEASE\n";
 	}
 
+	std::cout << "read_ready NOTIFY_ONE\n";
+
 	voice_courier_shared_state.signal_iteration.notify_one();
+
+	auto end = std::chrono::steady_clock::now();
+	std::cout << "read_ready END: " << std::chrono::duration_cast<std::chrono::milliseconds>(start.time_since_epoch()).count() << "\n";
+
+	std::cout << "read_ready TIME: " << std::chrono::duration_cast<std::chrono::milliseconds>((end - start)).count() << "\n";
 
 	if (!voice_courier.joinable()) {
 		/* Courier thread is not running, start it */
 		voice_courier = std::thread(&voice_courier_loop,
-					    std::ref(*this),
-					    std::ref(voice_courier_shared_state));
+							  std::ref(*this),
+							  std::ref(voice_courier_shared_state));
 	}
 }
 
