@@ -31,6 +31,20 @@
 namespace dpp {
 
 /**
+ * @brief Where an app can be installed, also called its supported installation contexts.
+ */
+enum application_integration_types {
+	/**
+	* @brief Installable to servers
+	*/
+	ait_guild_install = 0,
+	/**
+	* @brief Installable to users
+	*/
+	ait_user_install = 1,
+};
+
+/**
  * @brief Integration types
  */
 enum integration_type {

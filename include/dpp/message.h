@@ -2011,6 +2011,43 @@ namespace cache_policy {
 };
 
 /**
+ * @brief Metadata about the interaction, including the source of the interaction and relevant server and user IDs.
+ */
+struct DPP_EXPORT interaction_metadata_type {
+
+	/**
+	 * @brief ID of the interaction
+	 */
+	snowflake id;
+
+	/**
+	 * @brief User who triggered the interaction
+	 */
+	uint8_t type;
+
+	/**
+	 * @brief User who triggered the interaction
+	 */
+	user usr;
+
+	/**
+	 * @brief ID of the original response message, present only on follow-up messages
+	 */
+	snowflake original_response_message_id;
+
+	/**
+	 * @brief ID of the message that contained interactive component, present only on messages created from component interactions
+	 */
+	snowflake interacted_message_id;
+
+	// FIXME: Add this field sometime 
+	/**
+	 * @brief Metadata for the interaction that was used to open the modal, present only on modal submit interactions
+	 */
+	// interaction_metadata_type triggering_interaction_metadata;
+};
+
+/**
  * @brief Message Reference type
  */
 enum DPP_EXPORT message_ref_type : uint8_t {
@@ -2213,6 +2250,11 @@ public:
 		 */
 		user usr;
 	} interaction;
+
+	/**
+	 * @brief Sent if the message is sent as a result of an interaction
+	 */
+	interaction_metadata_type interaction_metadata;
 
 	/**
 	 * @brief Allowed mentions details

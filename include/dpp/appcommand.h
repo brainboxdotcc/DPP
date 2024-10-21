@@ -19,6 +19,7 @@
  *
  ************************************************************************************/
 #pragma once
+#include <dpp/integration.h>
 #include <dpp/export.h>
 #include <dpp/snowflake.h>
 #include <dpp/managed.h>
@@ -773,6 +774,26 @@ enum interaction_type {
 	it_modal_submit = 5,
 };
 
+/*
+* @brief Context type where the interaction can be used or triggered from, e.g. guild, user etc
+*/
+enum interaction_context_type {
+	/**
+	 * @brief Interaction can be used within servers
+	 */
+	itc_guild = 0,
+
+	/**
+	 * @brief Interaction can be used within DMs with the app's bot user
+	 */
+	itc_bot_dm = 1,
+
+	/**
+	 * @brief Interaction can be used within Group DMs and DMs other than the app's bot user
+	 */
+	itc_private_channel = 2,
+};
+
 /**
  * @brief Right-click context menu types
  */
@@ -952,6 +973,16 @@ protected:
 	virtual json to_json_impl(bool with_id = false) const;
 
 public:
+	/**
+	 * @brief Context where the interaction was triggered from
+	 */
+	std::map<application_integration_types, snowflake> authorizing_integration_owners;
+
+	/**
+	 * @brief Context where the interaction was triggered from
+	 */
+	std::optional<interaction_context_type> context;
+
 	/**
 	 * @brief ID of the application this interaction is for.
 	 */
@@ -1194,6 +1225,30 @@ public:
 	 * is not for a command.
 	 */
 	std::string get_command_name() const;
+
+	/**
+	 * @brief Get the user who installed the application for a given type.
+	 * @param type Type of installation for the command, e.g. dpp::ait_guild_install or
+	 * dpp::ait_user_install.
+	 * @return The snowflake of the user. In the event this type is not allowed for the
+	 * given command, this will return a default-initialised snowflake with value 0.
+	 */
+	dpp::snowflake get_authorizing_integration_owner(application_integration_types type) const;
+
+	/**
+	 * @brief Returns true if this interaction occurred as a user-app interaction, e.g.
+	 * within a DM or group DM, added to the user not a guild.
+	 * @return true if a user-app interaction
+	 */
+	bool is_user_app_interaction() const;
+
+	/**
+	 * @brief Returns true if this interaction occurred as a guild-invited interaction, e.g.
+	 * within a guild's channel, or a DM of a user in that guild.
+	 * @return true if a guild interaction
+	 */
+	bool is_guild_interaction() const;
+
 };
 
 /**
@@ -1421,9 +1476,20 @@ public:
 	permission default_member_permissions;
 
 	/**
+	 * @brief Installation contexts where the command is available, only for globally-scoped commands. Defaults to your app's configured contexts
+	 */
+	std::vector<application_integration_types> integration_types;
+
+	/**
+	 * @brief Interaction context(s) where the command can be used, only for globally-scoped commands. By default, all interaction context types included for new commands.
+	 */
+	std::vector<interaction_context_type> contexts;
+
+	/**
 	 * @brief True if this command should be allowed in a DM
 	 * D++ defaults this to false. Cannot be set to true in a guild
 	 * command, only a global command.
+	 * @deprecated Use dpp::slashcommand_t::set_interaction_contexts instead
 	 */
 	bool dm_permission;
 
@@ -1542,6 +1608,14 @@ public:
 	 * @return slashcommand& reference to self for chaining of calls
 	 */
 	slashcommand& set_application_id(snowflake i);
+
+	/**
+	 * @brief Set the interaction contexts for the command
+	 *
+	 * @param contexts the contexts to set
+	 * @return slashcommand& reference to self for chaining of calls
+	 */
+	slashcommand& set_interaction_contexts(std::vector<interaction_context_type> contexts);
 
 	/**
 	 * @brief Adds a permission to the command
