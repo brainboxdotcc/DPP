@@ -10,7 +10,7 @@ updates:
   - package-ecosystem: "docker"
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: "monthly"
     target-branch: "dev"
 
   - package-ecosystem: github-actions
