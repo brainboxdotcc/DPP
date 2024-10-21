@@ -1489,6 +1489,7 @@ public:
 	 * @brief True if this command should be allowed in a DM
 	 * D++ defaults this to false. Cannot be set to true in a guild
 	 * command, only a global command.
+	 * @deprecated Use dpp::slashcommand_t::set_interaction_contexts instead
 	 */
 	bool dm_permission;
 

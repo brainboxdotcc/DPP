@@ -213,9 +213,9 @@ public:
 };
 
 /**
- *  * @brief Configuration object for an app installation
- *   */
-struct integration_configuration {
+ * @brief Configuration object for an app installation
+ */
+struct DPP_EXPORT integration_configuration {
 		std::optional<application_install_params> oauth2_install_params;
 };
 
