@@ -4,6 +4,7 @@ Interactions are a unified way provided by Discord to handle \ref slashcommands 
 
 * \subpage slashcommands-menu
 * \subpage user-only-messages
+* \subpage user-applications
 * \subpage resolved-objects
 * \subpage components-menu
 * \subpage modal-dialog-interactions
