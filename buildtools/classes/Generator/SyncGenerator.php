@@ -88,7 +88,7 @@ EOT;
      */
     public function generateHeaderDef(string $returnType, string $currentFunction, string $parameters, string $noDefaults, string $parameterTypes, string $parameterNames): string
     {
-        return "$returnType {$currentFunction}_sync($parameters);\n\n";
+        return "DPP_DEPRECATED(\"Please use coroutines instead of sync functions: https://dpp.dev/coro-introduction.html\") $returnType {$currentFunction}_sync($parameters);\n\n";
     }
 
     /**
@@ -107,6 +107,7 @@ EOT;
         return [
             " * \memberof dpp::cluster",
             " * @throw dpp::rest_exception upon failure to execute REST function",
+            " * @deprecated This function is deprecated, please use coroutines instead.",
             " * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.",
             " * Avoid direct use of this function inside an event handler.",
         ];

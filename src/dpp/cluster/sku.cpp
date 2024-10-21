@@ -27,4 +27,4 @@ void cluster::skus_get(command_completion_event_t callback) {
 	rest_request_list<sku>(this, API_PATH "/applications", me.id.str(), "entitlements", m_get, "", callback);
 }
 
-} // namespace dpp
+}

@@ -109,4 +109,4 @@ public:
  */
 typedef std::unordered_map<snowflake, stage_instance> stage_instance_map;
 
-} // namespace dpp
+}

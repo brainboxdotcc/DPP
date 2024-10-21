@@ -43,4 +43,4 @@ template <typename T> auto run_once() {
 	return !std::exchange(called, true);
 };
 
-} // namespace dpp
+}

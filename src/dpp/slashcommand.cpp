@@ -20,7 +20,6 @@
  ************************************************************************************/
 #include <dpp/appcommand.h>
 #include <dpp/discordevents.h>
-#include <dpp/exception.h>
 #include <dpp/json.h>
 #include <dpp/stringops.h>
 #include <dpp/cache.h>
@@ -972,4 +971,4 @@ std::string command_interaction::get_mention() const {
 std::string slashcommand::get_mention() const {
 	return dpp::utility::slashcommand_mention(id, name);
 }
-} // namespace dpp
+}

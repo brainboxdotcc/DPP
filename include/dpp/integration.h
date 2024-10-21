@@ -349,5 +349,5 @@ typedef std::unordered_map<snowflake, integration> integration_map;
  */
 typedef std::unordered_map<snowflake, connection> connection_map;
 
-} // namespace dpp
+}
 

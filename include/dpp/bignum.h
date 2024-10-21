@@ -98,4 +98,4 @@ public:
 	[[nodiscard]] std::vector<uint64_t> get_binary() const;
 };
 
-} // namespace dpp
+}

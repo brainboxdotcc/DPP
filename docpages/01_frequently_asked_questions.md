@@ -68,7 +68,7 @@ All functions within D++ are multi-threaded. You should still avoid doing long o
 
 ## Does this library support voice?
 
-Yes! This library supports voice and will automatically enable voice if your system has the libopus and libsodium libraries. When running `cmake` the script will identify if these libraries are found. See the example programs for information on how to send audio.
+Yes! This library supports voice and will automatically enable voice if your system has the libopus library. When running `cmake` the script will identify if this library is found. See the example programs for information on how to send audio.
 
 ## Does this library support sharding?
 
@@ -93,10 +93,6 @@ No, the library only requires C++17. We have some optional features such as \ref
 ## When I start my bot I get an error: "error while loading shared libraries: libdpp.so: cannot open shared object file: No such file or directory"
 
 To fix this issue, run `ldconfig`: `sudo ldconfig` as root. Log out if your SSH session and log back in, and the bot should be able to find the library.
-
-## When compiling with voice support, I get an error: "No rule to make target 'sodium_LIBRARY_DEBUG-NOTFOUND', needed by 'libdpp.so'. Stop."
-
-The libsodium package requires pkg-config, but does not check for it when installed. Install it as root, e.g. `sudo apt install pkg-config`. Rerun cmake, and rebuild the library.
 
 ## When I try to instantiate a dpp::cluster in windows, I get "D++ Debug/Release mismatch"
 

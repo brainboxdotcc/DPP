@@ -478,4 +478,4 @@ public:
 	virtual ~auditlog() = default;
 };
 
-} // namespace dpp
+}

@@ -134,6 +134,38 @@ class DPP_EXPORT cluster {
 	timer_next_t next_timer;
 
 	/**
+	 * @brief Mutex to work with named_commands and synchronize read write access
+	 */
+	std::shared_mutex named_commands_mutex;
+
+	/**
+	 * @brief Typedef for slashcommand handler type
+	 */
+	using slashcommand_handler_t = std::function<void(const slashcommand_t &)>;
+
+#ifdef DPP_CORO
+	/**
+	 * @brief Typedef for coroutines based slashcommand handler type
+	 */
+	using co_slashcommand_handler_t = std::function<dpp::task<void>(const slashcommand_t&)>;
+
+	/**
+	 * @brief Typedef for variant of coroutines based slashcommand handler type and regular version of it
+	 */
+	using slashcommand_handler_variant = std::variant<slashcommand_handler_t,co_slashcommand_handler_t>;
+
+	/**
+	 * @brief Container to store relation between command name and it's handler
+	 */
+	std::map<std::string,slashcommand_handler_variant> named_commands;
+#else
+	/**
+	 * @brief Container to store relation between command name and it's handler
+	 */
+	std::map<std::string,slashcommand_handler_t> named_commands;
+#endif
+
+	/**
 	 * @brief Tick active timers
 	 */
 	void tick_timers();
@@ -437,6 +469,49 @@ public:
 	/* Functions for attaching to event handlers */
 
 	/**
+	 * @brief Register a slash command handler.
+	 *
+	 * @param name The name of the slash command to register
+	 * @param handler A handler function of type `slashcommand_handler_t`
+	 *
+	 * @return bool Returns `true` if the command was registered successfully, or `false` if
+	 * the command with the same name already exists
+	 */
+	bool register_command(const std::string& name, const slashcommand_handler_t handler);
+
+#ifdef DPP_CORO
+	/**
+	 * @brief Register a coroutine-based slash command handler.
+	 *
+	 * @param name The name of the slash command to register.
+	 * @param handler A coroutine handler function of type `co_slashcommand_handler_t`.
+	 *
+	 * @return bool Returns `true` if the command was registered successfully, or `false` if
+	 * the command with the same name already exists.
+	 */
+	template <typename F>
+	std::enable_if_t<std::is_same_v<std::invoke_result_t<F, const slashcommand_handler_t&>, dpp::task<void>>, bool>
+	register_command(const std::string& name, F&& handler){
+		std::unique_lock lk(named_commands_mutex);
+		auto [_, inserted] = named_commands.try_emplace(name, std::forward<F>(handler));
+		return inserted;
+	};
+#endif
+
+	/**
+	 * @brief Unregister a slash command.
+	 *
+	 * This function unregisters (removes) a previously registered slash command by name.
+	 * If the command is successfully removed, it returns `true`.
+	 *
+	 * @param name The name of the slash command to unregister.
+	 *
+	 * @return bool Returns `true` if the command was successfully unregistered, or `false`
+	 * if the command was not found.
+	 */
+	bool unregister_command(const std::string& name);
+
+	/**
 	 * @brief on voice state update event
 	 *
 	 * @see https://discord.com/developers/docs/topics/gateway-events#voice-state-update
@@ -445,7 +520,16 @@ public:
 	 */
 	event_router_t<voice_state_update_t> on_voice_state_update;
 
-	
+	/**
+	 * @brief on voice client platform event
+	 * After a client connects, or on joining a vc, you will receive the platform type of each client. This is either desktop
+	 * or mobile.
+	 *
+	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
+	 * The function signature for this event takes a single `const` reference of type voice_client_disconnect_t&, and returns void.
+	 */
+	event_router_t<voice_client_platform_t> on_voice_client_platform;
+
 	/**
 	 * @brief on voice client disconnect event
 	 *
@@ -1237,7 +1321,7 @@ public:
 	/**
 	 * @brief Called when packets are sent from the voice buffer.
 	 * The voice buffer contains packets that are already encoded with Opus and encrypted
-	 * with Sodium, and merged into packets by the repacketizer, which is done in the
+	 * with XChaCha20-Poly1305, and merged into packets by the repacketizer, which is done in the
 	 * dpp::discord_voice_client::send_audio method. You should use the buffer size properties
 	 * of dpp::voice_buffer_send_t to determine if you should fill the buffer with more
 	 * content.
@@ -1248,17 +1332,6 @@ public:
 	 * The function signature for this event takes a single `const` reference of type voice_buffer_send_t&, and returns void.
 	 */
 	event_router_t<voice_buffer_send_t> on_voice_buffer_send;
-
-	
-	/**
-	 * @brief Called when a user is talking on a voice channel.
-	 *
-	 * @warning If the cache policy has disabled guild caching, the pointer to the guild in this event may be nullptr.
-	 *
-	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The function signature for this event takes a single `const` reference of type voice_user_talking_t&, and returns void.
-	 */
-	event_router_t<voice_user_talking_t> on_voice_user_talking;
 
 	
 	/**
@@ -3578,7 +3651,7 @@ public:
 
 	/**
 	 * @brief Get all guild stickers
-	 * @see https://discord.com/developers/docs/resources/sticker#get-guild-stickers
+	 * @see https://discord.com/developers/docs/resources/sticker#list-guild-stickers
 	 * @param guild_id Guild ID of the guild where the sticker is
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::sticker_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
@@ -3587,7 +3660,7 @@ public:
 
 	/**
 	 * @brief Get a list of available sticker packs
-	 * @see https://discord.com/developers/docs/resources/sticker#list-nitro-sticker-packs
+	 * @see https://discord.com/developers/docs/resources/sticker#list-sticker-packs
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::sticker_pack_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
@@ -3738,6 +3811,16 @@ public:
 	void current_user_set_voice_state(snowflake guild_id, snowflake channel_id, bool suppress = false, time_t request_to_speak_timestamp = 0, command_completion_event_t callback = utility::log_error());
 
 	/**
+	 * @brief Get the bot's voice state in a guild without a Gateway connection
+	 *
+	 * @see https://discord.com/developers/docs/resources/voice#get-current-user-voice-state
+	 * @param guild_id Guild to get the voice state for
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::voicestate object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void current_user_get_voice_state(snowflake guild_id, command_completion_event_t callback);
+
+	/**
 	 * @brief Set a user's voice state on a stage channel
 	 *
 	 * **Caveats**
@@ -3759,6 +3842,17 @@ public:
 	 * On success the callback will contain a dpp::scheduled_event object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void user_set_voice_state(snowflake user_id, snowflake guild_id, snowflake channel_id, bool suppress = false, command_completion_event_t callback = utility::log_error());
+
+	/**
+	 * @brief Get a user's voice state in a guild without a Gateway connection
+	 *
+	 * @see https://discord.com/developers/docs/resources/voice#get-user-voice-state
+	 * @param guild_id Guild to get the voice state for
+	 * @param user_id The user to get the voice state of
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::voicestate object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void user_get_voice_state(snowflake guild_id, snowflake user_id, command_completion_event_t callback);
 
 	/**
 	 * @brief Get all auto moderation rules for a guild
@@ -3888,4 +3982,4 @@ public:
 
 };
 
-} // namespace dpp
+}

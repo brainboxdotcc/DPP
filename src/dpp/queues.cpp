@@ -28,7 +28,6 @@
 #include <dpp/queues.h>
 #include <dpp/cluster.h>
 #include <dpp/httpsclient.h>
-#include <dpp/stringops.h>
 
 namespace dpp {
 
@@ -480,4 +479,4 @@ bool request_queue::is_globally_ratelimited() const
 	return this->globally_ratelimited;
 }
 
-} // namespace dpp
+}

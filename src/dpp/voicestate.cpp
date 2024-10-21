@@ -90,4 +90,4 @@ bool voicestate::is_suppressed() const {
 	return flags & vs_suppress;
 }
 
-} // namespace dpp
+}

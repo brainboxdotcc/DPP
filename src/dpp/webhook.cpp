@@ -22,7 +22,6 @@
 #include <dpp/webhook.h>
 #include <dpp/discordevents.h>
 #include <dpp/json.h>
-#include <dpp/exception.h>
 
 namespace dpp {
 
@@ -101,5 +100,4 @@ webhook& webhook::load_image(const std::string &image_blob, const image_type typ
 	return *this;
 }
 
-} // namespace dpp
-
+}

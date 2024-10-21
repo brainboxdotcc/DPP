@@ -878,5 +878,5 @@ void to_json(nlohmann::json& j, const permission_overwrite& po);
  */
 typedef std::unordered_map<snowflake, channel> channel_map;
 
-} // namespace dpp
+}
 

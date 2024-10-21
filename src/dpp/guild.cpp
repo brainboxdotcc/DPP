@@ -20,9 +20,6 @@
  ************************************************************************************/
 #include <dpp/cache.h>
 #include <dpp/discordclient.h>
-#include <dpp/voicestate.h>
-#include <dpp/exception.h>
-#include <dpp/guild.h>
 #include <dpp/discordevents.h>
 #include <dpp/stringops.h>
 #include <dpp/json.h>
@@ -217,7 +214,7 @@ void from_json(const nlohmann::json& j, guild_member& gm) {
 std::string guild_member::get_avatar_url(uint16_t size, const image_type format, bool prefer_animated) const {
 	if (this->guild_id && this->user_id && !this->avatar.to_string().empty()) {
 		return utility::cdn_endpoint_url_hash({ i_jpg, i_png, i_webp, i_gif },
-			"guilds/" + std::to_string(this->guild_id) + "/" + std::to_string(this->user_id), this->avatar.to_string(),
+			"guilds/" + std::to_string(this->guild_id) + "/users/" + std::to_string(this->user_id) + "/avatars", this->avatar.to_string(),
 			format, size, prefer_animated, has_animated_guild_avatar());
 	} else {
 		return std::string();
@@ -948,7 +945,7 @@ permission guild::permission_overwrites(const guild_member &member, const channe
 	return permissions;
 }
 
-bool guild::connect_member_voice(snowflake user_id, bool self_mute, bool self_deaf) {
+bool guild::connect_member_voice(snowflake user_id, bool self_mute, bool self_deaf, bool dave) {
 	for (auto & c : channels) {
 		channel* ch = dpp::find_channel(c);
 		if (!ch || (!ch->is_voice_channel() && !ch->is_stage_channel())) {
@@ -958,7 +955,7 @@ bool guild::connect_member_voice(snowflake user_id, bool self_mute, bool self_de
 		auto vsi = vcmembers.find(user_id);
 		if (vsi != vcmembers.end()) {
 			if (vsi->second.shard) {
-				vsi->second.shard->connect_voice(this->id, vsi->second.channel_id, self_mute, self_deaf);
+				vsi->second.shard->connect_voice(this->id, vsi->second.channel_id, self_mute, self_deaf, dave);
 				return true;
 			}
 		}
@@ -1196,4 +1193,4 @@ onboarding &onboarding::set_enabled(const bool is_enabled) {
 }
 
 
-} // namespace dpp
+}

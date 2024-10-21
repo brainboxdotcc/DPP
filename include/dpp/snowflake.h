@@ -269,7 +269,7 @@ public:
 	}
 };
 
-} // namespace dpp
+}
 
 template<>
 struct std::hash<dpp::snowflake>

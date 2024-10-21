@@ -152,4 +152,4 @@ enum intents {
         i_unverified_default_intents    = dpp::i_default_intents | dpp::i_message_content
 };
 
-} // namespace dpp
+}

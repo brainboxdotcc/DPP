@@ -22,7 +22,6 @@
 #include <dpp/emoji.h>
 #include <dpp/discordevents.h>
 #include <dpp/json.h>
-#include <dpp/exception.h>
 
 namespace dpp {
 
@@ -130,5 +129,5 @@ std::string emoji::get_url(uint16_t size, const dpp::image_type format, bool pre
 }
 
 
-} // namespace dpp
+}
 

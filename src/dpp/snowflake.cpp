@@ -44,4 +44,4 @@ snowflake::operator json() const {
 	return std::to_string(value);
 }
 
-} // namespace dpp
+}

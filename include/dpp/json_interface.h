@@ -70,4 +70,4 @@ struct json_interface {
 	}
 };
 
-} // namespace dpp
+}

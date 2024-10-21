@@ -156,6 +156,7 @@ typedef std::variant<
 		ban_map,
 		voiceregion,
 		voiceregion_map,
+		voicestate,
 		integration,
 		integration_map,
 		webhook,
@@ -334,4 +335,4 @@ typedef std::function<void(const confirmation_callback_t&)> command_completion_e
  * @brief Automatically JSON encoded HTTP result
  */
 typedef std::function<void(json&, const http_request_completion_t&)> json_encode_t;
-} // namespace dpp
+}

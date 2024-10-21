@@ -35,7 +35,7 @@ int main() {
 			/* Command description */
 			"A test ping command",
 
-			/* Guild id (omit for a guild command) */
+			/* Guild id (omit for a global command) */
 			819556414099554344
 		);
 

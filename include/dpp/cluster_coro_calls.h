@@ -2009,7 +2009,7 @@
 /**
  * @brief Get all guild stickers
  * @see dpp::cluster::guild_stickers_get
- * @see https://discord.com/developers/docs/resources/sticker#get-guild-stickers
+ * @see https://discord.com/developers/docs/resources/sticker#list-guild-stickers
  * @param guild_id Guild ID of the guild where the sticker is
  * @return sticker_map returned object on completion
  * \memberof dpp::cluster
@@ -2029,7 +2029,7 @@
 /**
  * @brief Get a list of available sticker packs
  * @see dpp::cluster::sticker_packs_get
- * @see https://discord.com/developers/docs/resources/sticker#list-nitro-sticker-packs
+ * @see https://discord.com/developers/docs/resources/sticker#list-sticker-packs
  * @return sticker_pack_map returned object on completion
  * \memberof dpp::cluster
  */
@@ -2368,6 +2368,17 @@
 [[nodiscard]] async<confirmation_callback_t> co_current_user_set_voice_state(snowflake guild_id, snowflake channel_id, bool suppress = false, time_t request_to_speak_timestamp = 0);
 
 /**
+ * @brief Get the bot's voice state in a guild without a Gateway connection
+ *
+ * @see dpp::cluster::current_user_get_voice_state
+ * @see https://discord.com/developers/docs/resources/voice#get-current-user-voice-state
+ * @param guild_id Guild to get the voice state for
+ * @return voicestate returned object on completion
+ * \memberof dpp::cluster
+ */
+[[nodiscard]] async<confirmation_callback_t> co_current_user_get_voice_state(snowflake guild_id);
+
+/**
  * @brief Set a user's voice state on a stage channel
  *
  * **Caveats**
@@ -2390,6 +2401,18 @@
  * \memberof dpp::cluster
  */
 [[nodiscard]] async<confirmation_callback_t> co_user_set_voice_state(snowflake user_id, snowflake guild_id, snowflake channel_id, bool suppress = false);
+
+/**
+ * @brief Get a user's voice state in a guild without a Gateway connection
+ *
+ * @see dpp::cluster::user_get_voice_state
+ * @see https://discord.com/developers/docs/resources/voice#get-user-voice-state
+ * @param guild_id Guild to get the voice state for
+ * @param user_id The user to get the voice state of
+ * @return voicestate returned object on completion
+ * \memberof dpp::cluster
+ */
+[[nodiscard]] async<confirmation_callback_t> co_user_get_voice_state(snowflake guild_id, snowflake user_id);
 
 /**
  * @brief Get current user's connections (linked accounts, e.g. steam, xbox).
