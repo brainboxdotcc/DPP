@@ -2229,7 +2229,7 @@ public:
 	/**
 	 * @brief Reference to an interaction
 	 */
-	DPP_DEPRECATED("Use interaction_metadata instead.") struct message_interaction_struct{
+	struct message_interaction_struct {
 		/**
 		 * @brief ID of the interaction.
 		 */

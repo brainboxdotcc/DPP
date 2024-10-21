@@ -21,7 +21,6 @@
  ************************************************************************************/
 #include <dpp/application.h>
 #include <dpp/discordevents.h>
-#include <dpp/integration.h>
 #include <dpp/json.h>
 
 namespace dpp {

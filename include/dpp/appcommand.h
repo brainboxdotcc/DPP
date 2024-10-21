@@ -1225,6 +1225,30 @@ public:
 	 * is not for a command.
 	 */
 	std::string get_command_name() const;
+
+	/**
+	 * @brief Get the user who installed the application for a given type.
+	 * @param type Type of installation for the command, e.g. dpp::ait_guild_install or
+	 * dpp::ait_user_install.
+	 * @return The snowflake of the user. In the event this type is not allowed for the
+	 * given command, this will return a default-initialised snowflake with value 0.
+	 */
+	dpp::snowflake get_authorizing_integration_owner(application_integration_types type) const;
+
+	/**
+	 * @brief Returns true if this interaction occurred as a user-app interaction, e.g.
+	 * within a DM or group DM, added to the user not a guild.
+	 * @return true if a user-app interaction
+	 */
+	bool is_user_app_interaction() const;
+
+	/**
+	 * @brief Returns true if this interaction occurred as a guild-invited interaction, e.g.
+	 * within a guild's channel, or a DM of a user in that guild.
+	 * @return true if a guild interaction
+	 */
+	bool is_guild_interaction() const;
+
 };
 
 /**
@@ -1466,7 +1490,7 @@ public:
 	 * D++ defaults this to false. Cannot be set to true in a guild
 	 * command, only a global command.
 	 */
-	[[deprecated("Use contexts instead.")]] bool dm_permission;
+	bool dm_permission;
 
 	/**
 	 * @brief Indicates whether the command is [age-restricted](https://discord.com/developers/docs/interactions/application-commands#agerestricted-commands).

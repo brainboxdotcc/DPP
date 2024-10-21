@@ -755,7 +755,11 @@ void from_json(const nlohmann::json& j, interaction& i) {
 	}
 
 	if (auto it = j.find("authorizing_integration_owners"); it != j.end()) {
-		it->get_to(i.authorizing_integration_owners);
+		for (auto owner = it->begin(); owner != it->end(); ++owner) {
+			auto type = static_cast<application_integration_types>(from_string<int>(owner.key()));
+			std::string owner_flake = owner.value();
+			i.authorizing_integration_owners[type] = dpp::snowflake(owner_flake);
+		}
 	}
 
 	if(j.contains("entitlements")) {
@@ -764,6 +768,24 @@ void from_json(const nlohmann::json& j, interaction& i) {
 		}
 	}
 }
+
+dpp::snowflake interaction::get_authorizing_integration_owner(application_integration_types type) const {
+	dpp::snowflake rv;
+	auto i = this->authorizing_integration_owners.find(type);
+	if (i != this->authorizing_integration_owners.end()) {
+		rv = i->second;
+	}
+	return rv;
+}
+
+bool interaction::is_user_app_interaction() const {
+	return this->authorizing_integration_owners.find(ait_user_install) != this->authorizing_integration_owners.end();
+}
+
+bool interaction::is_guild_interaction() const {
+	return this->authorizing_integration_owners.find(ait_guild_install) != this->authorizing_integration_owners.end();
+}
+
 
 interaction_response& interaction_response::add_autocomplete_choice(const command_option_choice& achoice) {
 	if (autocomplete_choices.size() < AUTOCOMPLETE_MAX_CHOICES) {
