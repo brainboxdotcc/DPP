@@ -47,13 +47,10 @@ int main() {
 		}
 	});
 
-	bot.on_slashcommand([](const auto& e) {
+	bot.register_command("userapp", [](const dpp::slashcommand_t& e) {
 		/**
 		 * Simple test output that shows the context of the command
 		 */
-		if (e.command.get_command_name() != "userapp") {
-			return;
-		}
 		e.reply("This is the `/userapp` command." + std::string(
 			e.command.is_user_app_interaction() ?
 			" Executing as a user interaction owned by user: <@" + e.command.get_authorizing_integration_owner(dpp::ait_user_install).str() + ">" :
