@@ -21,6 +21,7 @@
  ************************************************************************************/
 
 #pragma once
+#include <dpp/integration.h>
 #include <dpp/export.h>
 #include <dpp/snowflake.h>
 #include <dpp/managed.h>
@@ -30,6 +31,8 @@
 #include <dpp/permissions.h>
 #include <dpp/json_fwd.h>
 #include <dpp/json_interface.h>
+#include <map>
+#include <optional>
 
 namespace dpp {
 
@@ -210,6 +213,13 @@ public:
 };
 
 /**
+ *  * @brief Configuration object for an app installation
+ *   */
+struct integration_configuration {
+		std::optional<application_install_params> oauth2_install_params;
+};
+
+/**
  * @brief The application class represents details of a bot application
  */
 class DPP_EXPORT application : public managed, public json_interface<application> {
@@ -356,6 +366,11 @@ public:
 	 * @brief Settings for the application's default in-app authorization link, if enabled.
 	 */
 	application_install_params install_params;
+
+	/**
+	 * @brief Default scopes and permissions for each supported installation context
+	 */
+	std::map<application_integration_types, integration_configuration> integration_types_config;
 
 	/**
 	 * @brief The application's default custom authorization link, if enabled.
