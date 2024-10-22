@@ -395,28 +395,18 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 
 				if (dave_version != dave_version_none) {
 					/* DAVE ready later */
-					if (j["d"]["dave_protocol_version"] != static_cast<uint32_t>(dave_version)) {
+
+					bool dave_incapable = j["d"]["dave_protocol_version"] != static_cast<uint32_t>(dave_version);
+					if (dave_incapable) {
 						log(ll_error, "We requested DAVE E2EE but didn't receive it from the server, downgrading...");
 						dave_version = dave_version_none;
-						ready_now = true;
-					} else {
-						if (mls_state == nullptr) {
-							mls_state = std::make_unique<dave_state>();
-						}
-						if (mls_state->dave_session == nullptr) {
-							mls_state->dave_session = std::make_unique<dave::mls::session>(
-								*creator,
-								nullptr, "", [this](std::string const &s1, std::string const &s2) {
-									log(ll_debug, "DAVE: " + s1 + ", " + s2);
-								});
-						}
-						this->reinit_dave_mls_group();
-
-						/* Ready now if there's no DAVE user waiting in the vc */
-						if (dave_mls_user_list.empty()) {
-							ready_now = true;
-						}
 					}
+
+					/* We told gateway that we got DAVE, stay true to ourselves! */
+					this->reinit_dave_mls_group();
+
+					/* Ready now when no upgrade or no DAVE user waiting in the vc */
+					ready_now = dave_incapable || dave_mls_user_list.empty();
 				} else {
 					/* Non-DAVE ready immediately */
 					ready_now = true;
@@ -501,27 +491,32 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
  */
 
 void discord_voice_client::ready_for_transition(const std::string &data) {
-	log(ll_debug, "Ready to execute transition " + std::to_string(this->mls_state->transition_id));
+	if (mls_state == nullptr) {
+		/* Impossible! */
+		return;
+	}
+
+	log(ll_debug, "Ready to execute transition " + std::to_string(mls_state->transition_id));
 	json obj = {
 		{ "op", voice_client_dave_transition_ready },
 		{
 			"d",
 			{
-				{ "transition_id", this->mls_state->transition_id },
+				{ "transition_id", mls_state->transition_id },
 			}
 		}
 	};
 	this->write(obj.dump(-1, ' ', false, json::error_handler_t::replace), OP_TEXT);
-	this->mls_state->pending_transition.id = this->mls_state->transition_id;
+	mls_state->pending_transition.id = mls_state->transition_id;
 
 	/* When the included transition ID is 0, the transition is for (re)initialization, and it can be executed immediately. */
-	if (this->mls_state->transition_id == 0) {
+	if (mls_state->transition_id == 0) {
 		/* Mark state ready and update ratchets the first time */
 		update_ratchets();
 	}
 
-	if (!this->mls_state->done_ready) {
-		this->mls_state->done_ready = true;
+	if (!mls_state->done_ready) {
+		mls_state->done_ready = true;
 
 		if (!creator->on_voice_ready.empty()) {
 			voice_ready_t rdy(nullptr, data);
@@ -537,47 +532,68 @@ void discord_voice_client::recover_from_invalid_commit_welcome() {
 		{"op", voice_client_dave_mls_invalid_commit_welcome},
 		{
 			"d", {
-				"transition_id", this->mls_state->transition_id
+				"transition_id", mls_state->transition_id
 			}
 		}
 	};
 	this->write(obj.dump(-1, ' ', false, json::error_handler_t::replace), OP_TEXT);
-	this->reinit_dave_mls_group();
+	reinit_dave_mls_group();
 }
 
 bool discord_voice_client::execute_pending_upgrade_downgrade() {
+	if (mls_state == nullptr) {
+		/* Who called?? */
+		return false;
+	}
+
 	bool did_upgrade_downgrade = false;
 
-	if (this->mls_state->transition_id != this->mls_state->pending_transition.id) {
-		log(ll_debug, "execute_pending_upgrade_downgrade unexpected transition_id, we never received voice_client_dave_prepare_transition event with this id: " + std::to_string(this->mls_state->transition_id));
-	} else if (dave_version != this->mls_state->pending_transition.protocol_version) {
-		dave_version = this->mls_state->pending_transition.protocol_version == 1 ? dave_version_1 : dave_version_none;
+	if (mls_state->transition_id != mls_state->pending_transition.id) {
+		log(ll_debug, "execute_pending_upgrade_downgrade unexpected transition_id, we never received voice_client_dave_prepare_transition event with this id: " + std::to_string(mls_state->transition_id));
+	} else if (dave_version != mls_state->pending_transition.protocol_version) {
+		dave_version = mls_state->pending_transition.protocol_version == 1 ? dave_version_1 : dave_version_none;
 
-		if (this->mls_state->pending_transition.protocol_version != 0 && dave_version == dave_version_none) {
-			log(ll_debug, "execute_pending_upgrade_downgrade unexpected protocol version: " + std::to_string(this->mls_state->pending_transition.protocol_version)+ " in transition " + std::to_string(this->mls_state->transition_id));
+		if (mls_state->pending_transition.protocol_version != 0 && dave_version == dave_version_none) {
+			log(ll_debug, "execute_pending_upgrade_downgrade unexpected protocol version: " + std::to_string(mls_state->pending_transition.protocol_version)+ " in transition " + std::to_string(mls_state->transition_id));
 		} else {
 			log(ll_debug, "execute_pending_upgrade_downgrade upgrade/downgrade successful");
 			did_upgrade_downgrade = true;
 		}
 	}
 
-	this->mls_state->pending_transition.is_pending = false;
+	mls_state->pending_transition.is_pending = false;
 	return did_upgrade_downgrade;
 }
 
 void discord_voice_client::reinit_dave_mls_group() {
-	mls_state->dave_session->init(dave::max_protocol_version(), channel_id, creator->me.id.str(), mls_state->mls_key);
+	/* This method is the beginning of a dave session, do the basics */
+	if (dave_version != dave_version_none) {
+		if (mls_state == nullptr) {
+			mls_state = std::make_unique<dave_state>();
+		}
 
-	auto key_response = mls_state->dave_session->get_marshalled_key_package();
-	key_response.insert(key_response.begin(), voice_client_dave_mls_key_package);
-	this->write(std::string_view(reinterpret_cast<const char*>(key_response.data()), key_response.size()), OP_BINARY);
+		if (mls_state->dave_session == nullptr) {
+			mls_state->dave_session = std::make_unique<dave::mls::session>(
+				*creator,
+				nullptr, "", [this](std::string const &s1, std::string const &s2) {
+					log(ll_debug, "DAVE: " + s1 + ", " + s2);
+				});
+		}
 
-	mls_state->encryptor = std::make_unique<dave::encryptor>(*creator);
-	mls_state->decryptors.clear();
+		mls_state->dave_session->init(dave::max_protocol_version(), channel_id, creator->me.id.str(), mls_state->mls_key);
 
-	mls_state->cached_roster_map.clear();
+		auto key_response = mls_state->dave_session->get_marshalled_key_package();
+		key_response.insert(key_response.begin(), voice_client_dave_mls_key_package);
+		this->write(std::string_view(reinterpret_cast<const char*>(key_response.data()), key_response.size()), OP_BINARY);
 
-	mls_state->privacy_code.clear();
+		mls_state->encryptor = std::make_unique<dave::encryptor>(*creator);
+	}
+
+	if (mls_state) {
+		mls_state->decryptors.clear();
+		mls_state->cached_roster_map.clear();
+		mls_state->privacy_code.clear();
+	}
 
 	/* Remove any user in pending remove from MLS member list */
 	for (const auto &user : dave_mls_pending_remove_list) {
@@ -587,6 +603,11 @@ void discord_voice_client::reinit_dave_mls_group() {
 }
 
 void discord_voice_client::process_mls_group_rosters(const dave::roster_map &rmap) {
+	if (mls_state == nullptr) {
+		/* What??? */
+		return;
+	}
+
 	log(ll_debug, "process_mls_group_rosters of size: " + std::to_string(rmap.size()));
 
 	for (const auto &[k, v] : rmap) {
