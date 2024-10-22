@@ -33,6 +33,8 @@
 #include <vector>
 #include <map>
 #include <set>
+#include <dpp/export.h>
+#include <dpp/snowflake.h>
 #include "persisted_key_pair.h"
 #include "key_ratchet.h"
 #include "version.h"
@@ -73,7 +75,7 @@ public:
 	 * @param auth_session_id auth session id (set to empty string to use a transient key pair)
 	 * @param callback callback for failure
 	 */
-	session(dpp::cluster& cluster, key_pair_context_type context, const std::string& auth_session_id, mls_failure_callback callback) noexcept;
+	session(dpp::cluster& cluster, key_pair_context_type context, dpp::snowflake auth_session_id, mls_failure_callback callback) noexcept;
 
 	/**
 	 * @brief Destructor
@@ -90,7 +92,7 @@ public:
 	 * @param self_user_id bot's user id
 	 * @param transient_key transient private key
 	 */
-	void init(protocol_version version, uint64_t group_id, std::string const& self_user_id, std::shared_ptr<::mlspp::SignaturePrivateKey>& transient_key) noexcept;
+	void init(protocol_version version, dpp::snowflake group_id, dpp::snowflake self_user_id, std::shared_ptr<::mlspp::SignaturePrivateKey>& transient_key) noexcept;
 
 	/**
 	 * @brief Reset the session to defaults
@@ -157,7 +159,7 @@ public:
 	 * @param user_id User id to get ratchet for
 	 * @return The user's key ratchet for use in an encryptor or decryptor
 	 */
-	[[nodiscard]] std::unique_ptr<key_ratchet_interface> get_key_ratchet(std::string const& user_id) const noexcept;
+	[[nodiscard]] std::unique_ptr<key_ratchet_interface> get_key_ratchet(dpp::snowflake user_id) const noexcept;
 
 	/**
 	 * @brief callback for completion of pairwise fingerprint
@@ -172,7 +174,7 @@ public:
 	 * @param user_id User ID to get fingerprint for
 	 * @param callback Callback for completion
 	 */
-	void get_pairwise_fingerprint(uint16_t version, std::string const& user_id, pairwise_fingerprint_callback callback) const noexcept;
+	void get_pairwise_fingerprint(uint16_t version, dpp::snowflake user_id, pairwise_fingerprint_callback callback) const noexcept;
 
 private:
 	/**
@@ -180,7 +182,7 @@ private:
 	 * @param self_user_id Bot user id
 	 * @param transient_key Transient key
 	 */
-	void init_leaf_node(std::string const& self_user_id, std::shared_ptr<::mlspp::SignaturePrivateKey>& transient_key) noexcept;
+	void init_leaf_node(dpp::snowflake self_user_id, std::shared_ptr<::mlspp::SignaturePrivateKey>& transient_key) noexcept;
 
 	/**
 	 * @brief Reset join key
@@ -260,12 +262,12 @@ private:
 	/**
 	 * @brief Signing key id
 	 */
-	std::string signing_key_id;
+	dpp::snowflake signing_key_id;
 
 	/**
 	 * @brief The bot's user snowflake ID
 	 */
-	std::string bot_user_id;
+	dpp::snowflake bot_user_id;
 
 	/**
 	 * @brief The bot's key pair context

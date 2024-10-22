@@ -575,12 +575,12 @@ void discord_voice_client::reinit_dave_mls_group() {
 		if (mls_state->dave_session == nullptr) {
 			mls_state->dave_session = std::make_unique<dave::mls::session>(
 				*creator,
-				nullptr, "", [this](std::string const &s1, std::string const &s2) {
+				nullptr, snowflake(), [this](std::string const &s1, std::string const &s2) {
 					log(ll_debug, "DAVE: " + s1 + ", " + s2);
 				});
 		}
 
-		mls_state->dave_session->init(dave::max_protocol_version(), channel_id, creator->me.id.str(), mls_state->mls_key);
+		mls_state->dave_session->init(dave::max_protocol_version(), channel_id, creator->me.id, mls_state->mls_key);
 
 		auto key_response = mls_state->dave_session->get_marshalled_key_package();
 		key_response.insert(key_response.begin(), voice_client_dave_mls_key_package);

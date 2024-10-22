@@ -29,6 +29,8 @@
 #include <iostream>
 #include <mls/crypto.h>
 #include <mls/messages.h>
+#include <dpp/export.h>
+#include <dpp/snowflake.h>
 #include <mls/state.h>
 #include <dpp/cluster.h>
 #include "mls_key_ratchet.h"
@@ -50,7 +52,7 @@ struct queued_proposal {
 	::mlspp::bytes_ns::bytes ref;
 };
 
-session::session(dpp::cluster& cluster, key_pair_context_type context, const std::string& auth_session_id, mls_failure_callback callback) noexcept
+session::session(dpp::cluster& cluster, key_pair_context_type context, dpp::snowflake auth_session_id, mls_failure_callback callback) noexcept
   : signing_key_id(auth_session_id), key_pair_context(context), failure_callback(std::move(callback)), creator(cluster)
 {
 	creator.log(dpp::ll_debug, "Creating a new MLS session");
@@ -58,12 +60,12 @@ session::session(dpp::cluster& cluster, key_pair_context_type context, const std
 
 session::~session() noexcept = default;
 
-void session::init(protocol_version version, uint64_t group_id, std::string const& self_user_id, std::shared_ptr<::mlspp::SignaturePrivateKey>& transient_key) noexcept {
+void session::init(protocol_version version, dpp::snowflake group_id, dpp::snowflake self_user_id, std::shared_ptr<::mlspp::SignaturePrivateKey>& transient_key) noexcept {
 	reset();
 
 	bot_user_id = self_user_id;
 
-	creator.log(dpp::ll_debug, "Initializing MLS session with protocol version " + std::to_string(version) + " and group ID " + std::to_string(group_id));
+	creator.log(dpp::ll_debug, "Initializing MLS session with protocol version " + std::to_string(version) + " and group ID " + group_id.str());
 	session_protocol_version = version;
 	session_group_id = std::move(big_endian_bytes_from(group_id).as_vec());
 
@@ -183,9 +185,7 @@ try {
 		for (const auto& proposal_message : messages) {
 			auto validated_content = state_with_proposals->unwrap(proposal_message);
 
-			if (!validate_proposal_message(validated_content.authenticated_content(),
-						       *state_with_proposals,
-						       recognised_user_ids)) {
+			if (!validate_proposal_message(validated_content.authenticated_content(), *state_with_proposals, recognised_user_ids)) {
 				return std::nullopt;
 			}
 
@@ -502,13 +502,13 @@ bool session::verify_welcome_state(::mlspp::State const& state, std::set<std::st
 	return true;
 }
 
-void session::init_leaf_node(std::string const& self_user_id, std::shared_ptr<::mlspp::SignaturePrivateKey>& transient_key) noexcept
+void session::init_leaf_node(dpp::snowflake self_user_id, std::shared_ptr<::mlspp::SignaturePrivateKey>& transient_key) noexcept
 try {
 	auto ciphersuite = ciphersuite_for_protocol_version(session_protocol_version);
 
 	if (!transient_key) {
 		if (!signing_key_id.empty()) {
-			transient_key = get_persisted_key_pair(creator, key_pair_context, signing_key_id, session_protocol_version);
+			transient_key = get_persisted_key_pair(creator, key_pair_context, signing_key_id.str(), session_protocol_version);
 			if (!transient_key) {
 				creator.log(dpp::ll_warning, "Did not receive MLS signature private key from get_persisted_key_pair; aborting");
 				return;
@@ -522,7 +522,7 @@ try {
 
 	signature_private_key = transient_key;
 
-	auto self_credential = create_user_credential(self_user_id, session_protocol_version);
+	auto self_credential = create_user_credential(self_user_id.str(), session_protocol_version);
 	hpke_private_key = std::make_unique<::mlspp::HPKEPrivateKey>(::mlspp::HPKEPrivateKey::generate(ciphersuite));
 	self_leaf_node = std::make_unique<::mlspp::LeafNode>(
 		ciphersuite, hpke_private_key->public_key, signature_private_key->public_key, std::move(self_credential),
@@ -608,7 +608,7 @@ catch (const std::exception& e) {
 	return {};
 }
 
-std::unique_ptr<key_ratchet_interface> session::get_key_ratchet(std::string const& user_id) const noexcept
+std::unique_ptr<key_ratchet_interface> session::get_key_ratchet(dpp::snowflake user_id) const noexcept
 {
 	if (!current_state) {
 		creator.log(dpp::ll_warning, "Cannot get key ratchet without an established MLS group");
@@ -617,7 +617,7 @@ std::unique_ptr<key_ratchet_interface> session::get_key_ratchet(std::string cons
 
 	// change the string user ID to a little endian 64 bit user ID
 	// TODO: Make this use dpp::snowflake
-	auto u64_user_id = strtoull(user_id.c_str(), nullptr, 10);
+	uint64_t u64_user_id = user_id;
 	auto user_id_bytes = ::mlspp::bytes_ns::bytes(sizeof(u64_user_id));
 	memcpy(user_id_bytes.data(), &u64_user_id, sizeof(u64_user_id));
 
@@ -629,14 +629,14 @@ std::unique_ptr<key_ratchet_interface> session::get_key_ratchet(std::string cons
 	return std::make_unique<mls_key_ratchet>(creator, current_state->cipher_suite(), std::move(secret));
 }
 
-void session::get_pairwise_fingerprint(uint16_t version, std::string const& user_id, pairwise_fingerprint_callback callback) const noexcept
+void session::get_pairwise_fingerprint(uint16_t version, dpp::snowflake user_id, pairwise_fingerprint_callback callback) const noexcept
 try {
 	if (!current_state || !signature_private_key) {
 		throw std::invalid_argument("No established MLS group");
 	}
 
-	uint64_t remote_user_id = strtoull(user_id.c_str(), nullptr, 10);
-	uint64_t self_user_id = strtoull(bot_user_id.c_str(), nullptr, 10);
+	uint64_t remote_user_id = user_id;
+	uint64_t self_user_id = bot_user_id;
 
 	auto it = roster.find(remote_user_id);
 	if (it == roster.end()) {
@@ -687,16 +687,7 @@ try {
 
 		std::vector<uint8_t> out(hash_len);
 
-		int ret = EVP_PBE_scrypt((const char*)data.data(),
-								 data.size(),
-								 salt,
-								 sizeof(salt),
-								 N,
-								 r,
-								 p,
-								 max_mem,
-								 out.data(),
-								 out.size());
+		int ret = EVP_PBE_scrypt((const char*)data.data(), data.size(), salt, sizeof(salt), N, r, p, max_mem, out.data(), out.size());
 
 		if (ret == 1) {
 			callback(out);
