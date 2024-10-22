@@ -131,7 +131,7 @@ public:
 	 * @param recognised_user_ids list of recognised user IDs
 	 * @return optional vector to send in reply as commit welcome
 	 */
-	std::optional<std::vector<uint8_t>> process_proposals(std::vector<uint8_t> proposals, std::set<std::string> const& recognised_user_ids) noexcept;
+	std::optional<std::vector<uint8_t>> process_proposals(std::vector<uint8_t> proposals, std::set<dpp::snowflake> const& recognised_user_ids) noexcept;
 
 	/**
 	 * @brief Process commit message from discord websocket
@@ -146,7 +146,7 @@ public:
 	 * @param recognised_user_ids Recognised user ID list
 	 * @return roster list of people in the vc
 	 */
-	std::optional<roster_map> process_welcome(std::vector<uint8_t> welcome, std::set<std::string> const& recognised_user_ids) noexcept;
+	std::optional<roster_map> process_welcome(std::vector<uint8_t> welcome, std::set<dpp::snowflake> const& recognised_user_ids) noexcept;
 
 	/**
 	 * @brief Get the bot user's key package for sending to websocket
@@ -206,7 +206,7 @@ private:
 	 * @param recognised_user_ids list of recognised user IDs
 	 * @return
 	 */
-	[[nodiscard]] bool is_recognized_user_id(const ::mlspp::Credential& cred, std::set<std::string> const& recognised_user_ids) const;
+	[[nodiscard]] bool is_recognized_user_id(const ::mlspp::Credential& cred, std::set<dpp::snowflake> const& recognised_user_ids) const;
 
 	/**
 	 * @brief Validate proposals message
@@ -215,7 +215,7 @@ private:
 	 * @param recognised_user_ids recognised list of user IDs
 	 * @return true if validated
 	 */
-	[[nodiscard]] bool validate_proposal_message(::mlspp::AuthenticatedContent const& message, ::mlspp::State const& target_state, std::set<std::string> const& recognised_user_ids) const;
+	[[nodiscard]] bool validate_proposal_message(::mlspp::AuthenticatedContent const& message, ::mlspp::State const& target_state, std::set<dpp::snowflake> const& recognised_user_ids) const;
 
 	/**
 	 * @brief Verify that welcome state is valid
@@ -223,7 +223,7 @@ private:
 	 * @param recognised_user_ids list of recognised user IDs
 	 * @return
 	 */
-	[[nodiscard]] bool verify_welcome_state(::mlspp::State const& state, std::set<std::string> const& recognised_user_ids) const;
+	[[nodiscard]] bool verify_welcome_state(::mlspp::State const& state, std::set<dpp::snowflake> const& recognised_user_ids) const;
 
 	/**
 	 * @brief Check if can process a commit now

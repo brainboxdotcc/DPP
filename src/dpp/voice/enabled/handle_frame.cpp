@@ -50,16 +50,15 @@ void discord_voice_client::update_ratchets(bool force) {
 	 */
 	log(ll_debug, "Updating MLS ratchets for " + std::to_string(dave_mls_user_list.size() + 1) + " user(s)");
 	for (const auto& user : dave_mls_user_list) {
-		dpp::snowflake u{user};
-		if (u == creator->me.id) {
+		if (user == creator->me.id) {
 			continue;
 		}
 		decryptor_list::iterator decryptor;
 		/* New user join/old user leave - insert new ratchets if they don't exist */
-		decryptor = mls_state->decryptors.find(u);
+		decryptor = mls_state->decryptors.find(user.str());
 		if (decryptor == mls_state->decryptors.end()) {
-			log(ll_debug, "Inserting decryptor key ratchet for NEW user: " + user + ", protocol version: " + std::to_string(mls_state->dave_session->get_protocol_version()));
-			auto [iter, inserted] = mls_state->decryptors.emplace(u, std::make_unique<dpp::dave::decryptor>(*creator));
+			log(ll_debug, "Inserting decryptor key ratchet for NEW user: " + user.str() + ", protocol version: " + std::to_string(mls_state->dave_session->get_protocol_version()));
+			auto [iter, inserted] = mls_state->decryptors.emplace(user.str(), std::make_unique<dpp::dave::decryptor>(*creator));
 			decryptor = iter;
 		}
 		decryptor->second->transition_to_key_ratchet(mls_state->dave_session->get_key_ratchet(user), RATCHET_EXPIRY);
@@ -72,7 +71,7 @@ void discord_voice_client::update_ratchets(bool force) {
 	if (mls_state->encryptor) {
 		/* Updating key rachet should always be done on execute transition. Generally after group member add/remove. */
 		log(ll_debug, "Setting key ratchet for sending audio...");
-		mls_state->encryptor->set_key_ratchet(mls_state->dave_session->get_key_ratchet(creator->me.id.str()));
+		mls_state->encryptor->set_key_ratchet(mls_state->dave_session->get_key_ratchet(creator->me.id));
 	}
 
 	/**
@@ -146,7 +145,7 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 				log(ll_debug, "voice_client_dave_mls_welcome with transition id " + std::to_string(this->mls_state->transition_id));
 
 				/* We should always recognize our own selves, but do we? */
-				dave_mls_user_list.insert(this->creator->me.id.str());
+				dave_mls_user_list.insert(this->creator->me.id);
 
 				auto r = mls_state->dave_session->process_welcome(dave_header.get_data(), dave_mls_user_list);
 
@@ -222,7 +221,7 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 
 				/* Remove this user from pending remove list if exist */
 				for (const auto &user : joining_dave_users) {
-					dave_mls_pending_remove_list.erase(user);
+					dave_mls_pending_remove_list.erase(dpp::snowflake(user));
 				}
 
 				log(ll_debug, "New of clients in voice channel: " + std::to_string(joining_dave_users.size()) + " total is " + std::to_string(dave_mls_user_list.size()));
@@ -298,7 +297,7 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 					}
 
 					/* Mark this user for remove on immediate upgrade */
-					dave_mls_pending_remove_list.insert(u_id.str());
+					dave_mls_pending_remove_list.insert(u_id);
 
 					if (!creator->on_voice_client_disconnect.empty()) {
 						voice_client_disconnect_t vcd(nullptr, data);
@@ -630,12 +629,11 @@ void discord_voice_client::process_mls_group_rosters(const dave::roster_map &rma
 		}
 
 		dpp::snowflake u_id(k);
-		auto u_id_str = u_id.str();
 
-		log(ll_debug, "Removed user from MLS Group: " + u_id_str);
+		log(ll_debug, "Removed user from MLS Group: " + u_id.str());
 
-		dave_mls_user_list.erase(u_id_str);
-		dave_mls_pending_remove_list.erase(u_id_str);
+		dave_mls_user_list.erase(u_id);
+		dave_mls_pending_remove_list.erase(u_id);
 
 		/* Remove this user's key ratchet */
 		mls_state->decryptors.erase(u_id);

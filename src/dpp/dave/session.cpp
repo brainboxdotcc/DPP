@@ -125,7 +125,7 @@ catch (const std::exception& e) {
 	return;
 }
 
-std::optional<std::vector<uint8_t>> session::process_proposals(std::vector<uint8_t> proposals, std::set<std::string> const& recognised_user_ids) noexcept
+std::optional<std::vector<uint8_t>> session::process_proposals(std::vector<uint8_t> proposals, std::set<dpp::snowflake> const& recognised_user_ids) noexcept
 try {
 	if (!pending_group_state && !current_state) {
 		creator.log(dpp::ll_debug, "Cannot process proposals without any pending or established MLS group state");
@@ -238,9 +238,9 @@ catch (const std::exception& e) {
 	return std::nullopt;
 }
 
-bool session::is_recognized_user_id(const ::mlspp::Credential& cred, std::set<std::string> const& recognised_user_ids) const
+bool session::is_recognized_user_id(const ::mlspp::Credential& cred, std::set<dpp::snowflake> const& recognised_user_ids) const
 {
-	std::string uid = user_credential_to_string(cred, session_protocol_version);
+	dpp::snowflake uid(user_credential_to_string(cred, session_protocol_version));
 	if (uid.empty()) {
 		creator.log(dpp::ll_warning, "Attempted to verify credential of unexpected type");
 		return false;
@@ -254,7 +254,7 @@ bool session::is_recognized_user_id(const ::mlspp::Credential& cred, std::set<st
 	return true;
 }
 
-bool session::validate_proposal_message(::mlspp::AuthenticatedContent const& message, ::mlspp::State const& target_state, std::set<std::string> const& recognised_user_ids) const {
+bool session::validate_proposal_message(::mlspp::AuthenticatedContent const& message, ::mlspp::State const& target_state, std::set<dpp::snowflake> const& recognised_user_ids) const {
 	if (message.wire_format != ::mlspp::WireFormat::mls_public_message) {
 		creator.log(dpp::ll_warning, "MLS proposal message must be PublicMessage");
 		TRACK_MLS_ERROR("Invalid proposal wire format");
@@ -357,7 +357,7 @@ catch (const std::exception& e) {
 	return failed_t{};
 }
 
-std::optional<roster_map> session::process_welcome(std::vector<uint8_t> welcome, std::set<std::string> const& recognised_user_ids) noexcept
+std::optional<roster_map> session::process_welcome(std::vector<uint8_t> welcome, std::set<dpp::snowflake> const& recognised_user_ids) noexcept
 try {
 	if (!has_cryptographic_state_for_welcome()) {
 		creator.log(dpp::ll_warning, "Missing local crypto state necessary to process MLS welcome");
@@ -461,7 +461,7 @@ bool session::has_cryptographic_state_for_welcome() const noexcept
 	return join_key_package && join_init_private_key && signature_private_key && hpke_private_key;
 }
 
-bool session::verify_welcome_state(::mlspp::State const& state, std::set<std::string> const& recognised_user_ids) const
+bool session::verify_welcome_state(::mlspp::State const& state, std::set<dpp::snowflake> const& recognised_user_ids) const
 {
 	if (!mls_external_sender) {
 		creator.log(dpp::ll_warning, "Cannot verify MLS welcome without an external sender");
