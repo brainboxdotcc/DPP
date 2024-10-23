@@ -17,7 +17,7 @@ class DPPConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
 
-    def build_requirements(self):
+    def requirements(self):
         self.requires("nlohmann_json/3.11.2")
         self.requires("openssl/3.1.2")
         self.requires("zlib/1.3")
