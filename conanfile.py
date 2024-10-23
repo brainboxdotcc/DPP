@@ -35,11 +35,15 @@ class DPPConan(ConanFile):
     def layout(self):
         cmake_layout(self)
 
+    def export(self):
+        git = Git(self, self.recipe_folder)
+        scm_url, scm_commit = git.get_url_and_commit()
+        update_conandata(self, {"sources": {"commit": scm_commit, "url": scm_url}})
+
     def source(self):
         zip_name = f"DPP.zip"
         download(self, f"https://github.com/brainboxdotcc/DPP/archive/refs/tags/v{self.version}.zip", zip_name)
         unzip(self, zip_name, '.', False, None, True)
-        # shutil.move(f"DPP-{self.version}", f"DPP-{self.version}/../")
         os.unlink(zip_name)
 
     def generate(self):
