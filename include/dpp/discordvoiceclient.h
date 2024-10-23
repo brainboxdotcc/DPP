@@ -487,13 +487,13 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	 * @brief The list of users that have E2EE potentially enabled for
 	 * DAVE protocol.
 	 */
-	std::set<std::string> dave_mls_user_list;
+	std::set<dpp::snowflake> dave_mls_user_list;
 
 	/**
 	 * @brief The list of users that have left the voice channel but
 	 * not yet removed from MLS group.
 	 */
-	std::set<std::string> dave_mls_pending_remove_list;
+	std::set<dpp::snowflake> dave_mls_pending_remove_list;
 
 	/**
 	 * @brief File descriptor for UDP connection
