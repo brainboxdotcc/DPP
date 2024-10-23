@@ -1,8 +1,9 @@
 import os
+import shutil
 from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
 from conan.tools.scm import Git
-from conan.tools.files import update_conandata
+from conan.tools.files import update_conandata, download, unzip
 
 class DPPConan(ConanFile):
     name = "dpp"
@@ -15,7 +16,7 @@ class DPPConan(ConanFile):
     topics = ("discord")
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    default_options = {"shared": True, "fPIC": True}
 
     def requirements(self):
         self.requires("nlohmann_json/3.11.2")
@@ -34,16 +35,12 @@ class DPPConan(ConanFile):
     def layout(self):
         cmake_layout(self)
 
-    def export(self):
-        git = Git(self, os.path.dirname(self.recipe_folder))
-        scm_url, scm_commit = git.get_url_and_commit()
-        update_conandata(self, {"sources": {"commit": scm_commit, "url": scm_url}})
-
     def source(self):
-        git = Git(self)
-        sources = self.conan_data["sources"]
-        git.clone(url=sources["url"], target=".")
-        git.checkout(commit=sources["commit"])
+        zip_name = f"DPP.zip"
+        download(self, f"https://github.com/brainboxdotcc/DPP/archive/refs/tags/v{self.version}.zip", zip_name)
+        unzip(self, zip_name, '.', False, None, True)
+        # shutil.move(f"DPP-{self.version}", f"DPP-{self.version}/../")
+        os.unlink(zip_name)
 
     def generate(self):
         deps = CMakeDeps(self)
