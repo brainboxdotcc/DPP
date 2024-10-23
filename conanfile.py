@@ -1,5 +1,4 @@
 import os
-import shutil
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
@@ -68,7 +67,7 @@ class DPPConan(ConanFile):
         update_conandata(self, {"sources": {"commit": scm_commit, "url": scm_url}})
 
     def source(self):
-        zip_name = f"DPP.zip"
+        zip_name = "DPP.zip"
         download(self, f"https://github.com/brainboxdotcc/DPP/archive/refs/tags/v{self.version}.zip", zip_name)
         unzip(self, zip_name, '.', False, None, True)
         os.unlink(zip_name)
