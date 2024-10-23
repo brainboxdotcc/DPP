@@ -280,7 +280,7 @@ foreach (fullmodname ${subdirlist})
 		)
 	endif()
 
-	if (WIN32 AND NOT MINGW)
+	if (WIN32 AND NOT MINGW AND NOT CONAN_EXPORTED)
 
 		if (NOT WINDOWS_32_BIT)
 			target_link_libraries(${modname} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/../win32/lib/libssl.lib"
@@ -295,7 +295,11 @@ foreach (fullmodname ${subdirlist})
 		endif()
 
 	else()
-		target_link_libraries(${modname} PUBLIC ${OPENSSL_SSL_LIBRARY} ${OPENSSL_CRYPTO_LIBRARY} ${ZLIB_LIBRARIES})
+		if (CONAN_EXPORTED)
+			target_link_libraries(${modname} PUBLIC nlohmann_json::nlohmann_json openssl::openssl ZLIB::ZLIB Opus::opus)
+		else()
+			target_link_libraries(${modname} PUBLIC ${OPENSSL_SSL_LIBRARY} ${OPENSSL_CRYPTO_LIBRARY} ${ZLIB_LIBRARIES})
+		endif()
 		if (MINGW)
 			target_link_libraries(${modname} PUBLIC wsock32 ws2_32 crypt32)
 		endif ()
