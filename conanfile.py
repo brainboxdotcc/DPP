@@ -1,9 +1,8 @@
 import os
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
-from conan.tools.scm import Git, Version
+from conan.tools.scm import Git
 from conan.tools.files import update_conandata, download, unzip
 
 required_conan_version = ">=2.0"
@@ -11,9 +10,7 @@ required_conan_version = ">=2.0"
 class DPPConan(ConanFile):
     name = "dpp"
     version = "10.0.33"
-    default_user = "brainboxdotcc"
-    default_channel = "testing"
-    license = "https://github.com/brainboxdotcc/DPP/blob/master/LICENSE"
+    license = "Apache-2.0"
     url = "https://github.com/brainboxdotcc/DPP"
     description = "D++ is a lightweight and efficient library for Discord"
     topics = ("discord")
@@ -25,24 +22,9 @@ class DPPConan(ConanFile):
     def _min_cppstd(self):
         return 17
 
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "gcc": "8",
-            "clang": "11",
-            "apple-clang": "14",
-            "Visual Studio": "17",
-            "msvc": "193",
-        }
-
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
 
     def requirements(self):
         self.requires("nlohmann_json/3.11.2")
@@ -63,8 +45,7 @@ class DPPConan(ConanFile):
 
     def export(self):
         git = Git(self, self.recipe_folder)
-        scm_url, scm_commit = git.get_url_and_commit()
-        update_conandata(self, {"sources": {"commit": scm_commit, "url": scm_url}})
+        git.coordinates_to_conandata()
 
     def source(self):
         zip_name = "DPP.zip"
