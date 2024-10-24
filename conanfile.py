@@ -9,7 +9,7 @@ required_conan_version = ">=2.0"
 
 class DPPConan(ConanFile):
     name = "dpp"
-    version = "10.0.33"
+    version = "10.0.34"
     license = "Apache-2.0"
     url = "https://github.com/brainboxdotcc/DPP"
     description = "D++ is a lightweight and efficient library for Discord"
