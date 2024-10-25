@@ -48,6 +48,10 @@ class DPPConan(ConanFile):
         git.coordinates_to_conandata()
 
     def source(self):
+        # This environment variable should only be set by D++ library developers to ensure that conan builds succeed
+        # without having to wait for release. It will check out the development branch where conanfile.py is being 
+        # developed and tested. If you are NOT sure what this does, DO NOT SET IT. You won't get the D++ release
+        # you expect!
         if 'DPP_CONAN_TESTING' in os.environ:
             git = Git(self)
             git.clone(url="https://github.com/brainboxdotcc/DPP.git", target=".")
