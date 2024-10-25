@@ -296,7 +296,7 @@ foreach (fullmodname ${subdirlist})
 
 	else()
 		if (CONAN_EXPORTED)
-			target_link_libraries(${modname} PUBLIC nlohmann_json::nlohmann_json openssl::openssl ZLIB::ZLIB Opus::opus)
+			target_link_libraries(${modname} PUBLIC openssl::openssl ZLIB::ZLIB Opus::opus)
 		else()
 			target_link_libraries(${modname} PUBLIC ${OPENSSL_SSL_LIBRARY} ${OPENSSL_CRYPTO_LIBRARY} ${ZLIB_LIBRARIES})
 		endif()
