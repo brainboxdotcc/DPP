@@ -49,6 +49,7 @@ class DPPConan(ConanFile):
 
     def source(self):
         if 'DPP_CONAN_TESTING' in os.environ:
+            git = Git(self)
             git.clone(url="https://github.com/brainboxdotcc/DPP.git", target=".")
             git.checkout(commit="conan-the-librarian")
             zip_name = "DPP.zip"
