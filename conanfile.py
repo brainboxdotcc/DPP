@@ -48,10 +48,14 @@ class DPPConan(ConanFile):
         git.coordinates_to_conandata()
 
     def source(self):
-        zip_name = "DPP.zip"
-        download(self, f"https://github.com/brainboxdotcc/DPP/archive/refs/tags/v{self.version}.zip", zip_name)
-        unzip(self, zip_name, '.', False, None, True)
-        os.unlink(zip_name)
+        if 'DPP_CONAN_TESTING' in os.environ:
+            git.clone(url="https://github.com/brainboxdotcc/DPP.git", target=".")
+            git.checkout(commit="conan-the-librarian")
+            zip_name = "DPP.zip"
+        else:
+            download(self, f"https://github.com/brainboxdotcc/DPP/archive/refs/tags/v{self.version}.zip", zip_name)
+            unzip(self, zip_name, '.', False, None, True)
+            os.unlink(zip_name)
 
     def generate(self):
         deps = CMakeDeps(self)
