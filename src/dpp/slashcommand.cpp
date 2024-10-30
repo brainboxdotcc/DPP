@@ -74,14 +74,19 @@ slashcommand& slashcommand::fill_from_json_impl(nlohmann::json* j) {
 
 	type = (slashcommand_contextmenu_type)int8_not_null(j, "type");
 	set_object_array_not_null<command_option>(j, "options", options); // command_option fills recursive
-	
-	if (auto it = j->find("integration_types"); it != j->end()) {
-		it->get_to(this->integration_types);
+
+	if(j->contains("integration_types")) {
+		if (auto it = j->find("integration_types"); it != j->end() && !it->is_null()) {
+			it->get_to(this->integration_types);
+		}
 	}
 
-	if (auto it = j->find("contexts"); it != j->end()) {
-		it->get_to(this->contexts);
+	if(j->contains("contexts")) {
+		if (auto it = j->find("contexts"); it != j->end() && !it->is_null()) {
+			it->get_to(this->contexts);
+		}
 	}
+
 	return *this;
 }
 
