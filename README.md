@@ -9,7 +9,8 @@
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/brainboxdotcc/DPP/badge)](https://securityscorecards.dev/viewer/?uri=github.com/brainboxdotcc/DPP)
 [![AUR version](https://img.shields.io/aur/version/dpp)](https://aur.archlinux.org/packages/dpp)
 [![XBPS version](https://repology.org/badge/version-for-repo/void_x86_64/dpp-discord.svg?header=xbps)](https://github.com/void-linux/void-packages/blob/master/srcpkgs/dpp/template)
-![vcpkg version](https://img.shields.io/vcpkg/v/dpp)
+[![vcpkg version](https://img.shields.io/vcpkg/v/dpp)](https://vcpkg.io/en/package/dpp)
+[![Conan version](https://img.shields.io/conan/v/dpp)](https://conan.io/center/recipes/dpp?version=)
 [![Homebrew version](https://img.shields.io/homebrew/v/libdpp)](https://formulae.brew.sh/formula/libdpp#default)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md)
 
