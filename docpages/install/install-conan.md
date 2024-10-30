@@ -7,7 +7,7 @@ To install D++ into a project using conan 2.0 and cmake:
 
 ```conanfile
 [requires]
-dpp/10.0.29
+dpp/10.0.34
 
 [generators]
 CMakeDeps
@@ -43,10 +43,11 @@ set(CMAKE_BUILD_TYPE Release)
 - Now run the following commands
 
 ```
-mkdir build && cd build
-conan install .. --build=missing -of=. -s build_type=Release
-cmake ..
-make
+mkdir build
+conan install . --output-folder=build --build=missing -s build_type=Release
+cd build
+cmake .. -DCMAKE_TOOLCHAIN_FILE="conan_toolchain.cmake"
+cmake --build build --config Release
 ```
 
 - NOTE: build_type= needs to match whatever was set in your CMake or you will get linker issues.
