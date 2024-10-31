@@ -24,6 +24,7 @@
 #include <dpp/misc-enum.h>
 #include <string>
 #include <functional>
+#include <ctime>
 #include <dpp/socket.h>
 #include <cstdint>
 
