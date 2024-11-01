@@ -27,7 +27,7 @@ jobs:
           egress-policy: audit
 
       - name: Checkout D++
-        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Check docs spelling
         run: npx -y cspell lint --language-id=cpp --no-progress --no-summary --show-context --show-suggestions --relative --color docpages/*.md include/dpp/*.h
