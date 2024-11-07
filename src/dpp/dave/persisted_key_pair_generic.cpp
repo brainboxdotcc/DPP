@@ -30,9 +30,10 @@
 #include <functional>
 #include <iostream>
 #ifdef _WIN32
-#include <io.h>
+	#include <io.h>
 #else
-#include <unistd.h>
+	#include <unistd.h>
+	#include <sys/stat.h>
 #endif
 #include <fcntl.h>
 #include <bytes/bytes.h>
