@@ -30,7 +30,7 @@ void cluster::guild_add_member(const guild_member& gm, const std::string &access
 
 
 void cluster::guild_edit_member(const guild_member& gm, command_completion_event_t callback) {
-	this->post_rest(API_PATH "/guilds", std::to_string(gm.guild_id), "members/" + std::to_string(gm.user_id), m_patch, gm.build_json(), [this, &gm, callback](json &j, const http_request_completion_t& http) {
+	this->post_rest(API_PATH "/guilds", std::to_string(gm.guild_id), "members/" + std::to_string(gm.user_id), m_patch, gm.build_json(), [this, gm, callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t(this, guild_member().fill_from_json(&j, gm.guild_id, gm.user_id), http));
 		}
