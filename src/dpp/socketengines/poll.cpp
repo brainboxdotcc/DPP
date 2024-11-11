@@ -101,11 +101,11 @@ struct socket_engine_poll : public socket_engine_base {
 		}
 	}
 
-	bool register_socket(dpp::socket fd, const socket_events& e) final {
-		bool r = socket_engine_base::register_socket(fd, e);
+	bool register_socket(const socket_events& e) final {
+		bool r = socket_engine_base::register_socket(e);
 		if (r) {
 			pollfd fd_info{};
-			fd_info.fd = fd;
+			fd_info.fd = e.fd;
 			fd_info.events = 0;
 			if ((e.flags & WANT_READ) != 0) {
 				fd_info.events |= POLLIN;
@@ -121,12 +121,12 @@ struct socket_engine_poll : public socket_engine_base {
 		return r;
 	}
 
-	bool update_socket(dpp::socket fd, const socket_events& e) final {
-		bool r = socket_engine_base::update_socket(fd, e);
+	bool update_socket(const socket_events& e) final {
+		bool r = socket_engine_base::update_socket(e);
 		if (r) {
 			/* We know this will succeed */
 			for (pollfd& fd_info : poll_set) {
-				if (fd_info.fd != fd) {
+				if (fd_info.fd != e.fd) {
 					continue;
 				}
 				fd_info.events = 0;

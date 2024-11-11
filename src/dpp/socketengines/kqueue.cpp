@@ -118,15 +118,15 @@ struct socket_engine_kqueue : public socket_engine_base {
 		}
 	}
 
-	bool register_socket(dpp::socket fd, const socket_events& e) final {
-		bool r = socket_engine_base::register_socket(fd, e);
+	bool register_socket(const socket_events& e) final {
+		bool r = socket_engine_base::register_socket(e);
 		if (r) {
 			struct kevent* ke = get_change_kevent();
-			socket_events* se = fds.find(fd)->second.get();
+			socket_events* se = fds.find(e.fd)->second.get();
 			if ((se->flags & WANT_READ) != 0) {
-				EV_SET(ke, fd, EVFILT_READ, EV_ADD, 0, 0, static_cast<CAST_TYPE>(se));
+				EV_SET(ke, e.fd, EVFILT_READ, EV_ADD, 0, 0, static_cast<CAST_TYPE>(se));
 			}
-			set_event_write_flags(fd, se, 0, e.flags);
+			set_event_write_flags(e.fd, se, 0, e.flags);
 			if (fds.size() * 2 > ke_list.size()) {
 				ke_list.resize(fds.size() * 2);
 			}
@@ -134,15 +134,15 @@ struct socket_engine_kqueue : public socket_engine_base {
 		return r;
 	}
 
-	bool update_socket(dpp::socket fd, const socket_events& e) final {
-		bool r = socket_engine_base::update_socket(fd, e);
+	bool update_socket(const socket_events& e) final {
+		bool r = socket_engine_base::update_socket(e);
 		if (r) {
 			struct kevent* ke = get_change_kevent();
-			socket_events* se = fds.find(fd)->second.get();
+			socket_events* se = fds.find(e.fd)->second.get();
 			if ((se->flags & WANT_READ) != 0) {
-				EV_SET(ke, fd, EVFILT_READ, EV_ADD, 0, 0, static_cast<CAST_TYPE>(se));
+				EV_SET(ke, e.fd, EVFILT_READ, EV_ADD, 0, 0, static_cast<CAST_TYPE>(se));
 			}
-			set_event_write_flags(fd, se, 0, e.flags);
+			set_event_write_flags(e.fd, se, 0, e.flags);
 			if (fds.size() * 2 > ke_list.size()) {
 				ke_list.resize(fds.size() * 2);
 			}
