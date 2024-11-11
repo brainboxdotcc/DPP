@@ -24,6 +24,8 @@
 
 #include <immintrin.h>
 #include <numeric>
+#include <cstdint>
+#include <limits>
 
 namespace dpp {
 
@@ -111,6 +113,6 @@ namespace dpp {
 		}
 	};
 
-} // namespace dpp
+}
 
 #endif

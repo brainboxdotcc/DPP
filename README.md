@@ -9,7 +9,8 @@
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/brainboxdotcc/DPP/badge)](https://securityscorecards.dev/viewer/?uri=github.com/brainboxdotcc/DPP)
 [![AUR version](https://img.shields.io/aur/version/dpp)](https://aur.archlinux.org/packages/dpp)
 [![XBPS version](https://repology.org/badge/version-for-repo/void_x86_64/dpp-discord.svg?header=xbps)](https://github.com/void-linux/void-packages/blob/master/srcpkgs/dpp/template)
-![vcpkg version](https://img.shields.io/vcpkg/v/dpp)
+[![vcpkg version](https://img.shields.io/vcpkg/v/dpp)](https://vcpkg.io/en/package/dpp)
+[![Conan version](https://img.shields.io/conan/v/dpp)](https://conan.io/center/recipes/dpp?version=)
 [![Homebrew version](https://img.shields.io/homebrew/v/libdpp)](https://formulae.brew.sh/formula/libdpp#default)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md)
 
@@ -27,7 +28,7 @@ D++ is a lightweight and efficient library for **Discord** written in **modern C
 * Sharding and clustering (Many shards, one process: specify the number of shards, or let the library decide)
 * Highly optimised ETF (Erlang Term Format) support for very fast websocket throughput
 * [Slash Commands/Interactions support](https://dpp.dev/slashcommands.html)
-* [Voice support](https://dpp.dev/soundboard.html) (sending **and** receiving audio)
+* [Voice support](https://dpp.dev/soundboard.html) (sending **and** receiving audio) with [DAVE](https://daveprotocol.com) End-To-End Encryption
 * The entire Discord API is available for use in the library
 * Stable [Windows support](https://dpp.dev/buildwindows.html)
 * Ready-made compiled packages for Windows, Raspberry Pi (ARM64/ARM7/ARMv6), Debian x86/x64, and RPM based distributions
@@ -76,6 +77,8 @@ int main() {
 You can find more examples in our [example page](https://dpp.dev/example-programs.html).
 
 ## 💻 Supported Systems
+
+We support the following OS families, as long as they are still officially supported by their provider. **We will provide no support for operating systems past end-of-life**.
 
 ### Linux
 
@@ -150,15 +153,16 @@ Other compilers may work (either newer versions of those listed above, or differ
 
 ### External Dependencies (You must install these)
 
-* [OpenSSL](https://openssl.org/) (whichever `-dev` package comes with your OS)
-* [zlib](https://zlib.net) (whichever `-dev` package comes with your OS)
+* [OpenSSL](https://openssl.org/) (For HTTPS, will use whichever `-dev` package comes with your OS)
+* [zlib](https://zlib.net) (For websocket compression, will use whichever `-dev` package comes with your OS)
 
 #### Optional Dependencies
 
-For voice support you require both of:
-* [libopus](https://www.opus-codec.org)
-* [libsodium](https://libsodium.org/)
+For **voice support** you require:
+* [libopus](https://www.opus-codec.org) (For audio encoding/decoding)
+* Note that our **windows zips** come packaged with copies of this library - you do not need to install it yourself!
 
 ### Included Dependencies (Packaged with the library)
 
-* [JSON for Modern C++](https://json.nlohmann.me/)
+* [JSON for Modern C++](https://json.nlohmann.me/) (You can bring your own nlohmann::json into D++ by setting a CMAKE flag)
+* [MLS++](https://github.com/cisco/mlspp) (This is statically compiled into the library if voice support is enabled)

@@ -24,8 +24,8 @@
 #include <dpp/stringops.h>
 
 namespace dpp {
-using json = nlohmann::
-json;
+
+using json = nlohmann::json;
 
 /* A mapping of discord's flag values to our bitmap (they're different bit positions to fit other stuff in) */
 std::map<uint32_t, dpp::user_flags> usermap = {
@@ -46,12 +46,7 @@ std::map<uint32_t, dpp::user_flags> usermap = {
 	{ 1 << 22, 	dpp::u_active_developer},
 };
 
-user::user() :
-	managed(),
-	flags(0),
-	discriminator(0),
-	refcount(1)
-{
+user::user() : managed(), flags(0), discriminator(0), refcount(1) {
 }
 
 std::string user::get_mention(const snowflake& id) {
@@ -98,8 +93,8 @@ std::string user::get_avatar_url(uint16_t size, const image_type format, bool pr
 		return get_default_avatar_url();
 	} else if (this->id) {
 		return utility::cdn_endpoint_url_hash({ i_jpg, i_png, i_webp, i_gif },
-											  "avatars/" + std::to_string(this->id), this->avatar.to_string(),
-											  format, size, prefer_animated, has_animated_icon());
+			"avatars/" + std::to_string(this->id), this->avatar.to_string(),
+			format, size, prefer_animated, has_animated_icon());
 	} else {
 		return std::string();
 	}
@@ -108,12 +103,12 @@ std::string user::get_avatar_url(uint16_t size, const image_type format, bool pr
 std::string user::get_default_avatar_url() const {
 	if (this->discriminator) {
 		return utility::cdn_endpoint_url({ i_png },
-										 "embed/avatars/" + std::to_string(this->discriminator % 5),
-										 i_png, 0);
+			"embed/avatars/" + std::to_string(this->discriminator % 5),
+			i_png, 0);
 	} else if (this->id){
 		return utility::cdn_endpoint_url({ i_png },
-										 "embed/avatars/" + std::to_string((this->id >> 22) % 6),
-										 i_png, 0);
+			"embed/avatars/" + std::to_string((this->id >> 22) % 6),
+			i_png, 0);
 	} else {
 		return std::string();
 	}
@@ -122,8 +117,8 @@ std::string user::get_default_avatar_url() const {
 std::string user::get_avatar_decoration_url(uint16_t size) const {
 	if (this->id) {
 		return utility::cdn_endpoint_url_hash({ i_png },
-											  "avatar-decorations/" + std::to_string(this->id), this->avatar_decoration.to_string(),
-											  i_png, size);
+			"avatar-decorations/" + std::to_string(this->id), this->avatar_decoration.to_string(),
+			i_png, size);
 	} else {
 		return std::string();
 	}
@@ -253,8 +248,8 @@ bool user_identified::has_animated_banner() const {
 std::string user_identified::get_banner_url(uint16_t size, const image_type format, bool prefer_animated) const {
 	if (!this->banner.to_string().empty() && this->id) {
 		return utility::cdn_endpoint_url_hash({ i_jpg, i_png, i_webp, i_gif },
-											  "banners/" + std::to_string(this->id), this->banner.to_string(),
-											  format, size, prefer_animated, has_animated_banner());
+			"banners/" + std::to_string(this->id), this->banner.to_string(),
+			format, size, prefer_animated, has_animated_banner());
 	} else {
 		return std::string();
 	}
@@ -309,4 +304,4 @@ void from_json(const nlohmann::json& j, user& u) {
 	}
 }
 
-} // namespace dpp
+}

@@ -1,3 +1,20 @@
+#
+# D++ (DPP), The Lightweight C++ Discord Library
+#
+# Copyright 2021 Craig Edwards <support@brainbox.cc>
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 # Check for various C functions
 check_cxx_symbol_exists(prctl "sys/prctl.h" HAVE_PRCTL)
 check_cxx_symbol_exists(pthread_setname_np "pthread.h" HAVE_PTHREAD_SETNAME_NP)
@@ -31,32 +48,59 @@ STRING(REPLACE "AVX" "" AVX_TYPE ${AVX_TYPE})
 add_compile_definitions(AVX_TYPE=${AVX_TYPE})
 add_compile_options(${AVX_FLAG})
 
+if(NOT BUILD_SHARED_LIBS)
+	if(UNIX)
+		message("-- Building ${Green}static${ColourReset} library.")
+
+		if(UNIX AND NOT APPLE)
+			set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
+			message("-- INFO: Changed lib suffix to ${CMAKE_FIND_LIBRARY_SUFFIXES}")
+		endif()
+
+		set(OPENSSL_USE_STATIC_LIBS TRUE)
+		set(OPUS_USE_STATIC_LIBS TRUE)
+
+	else()
+		message(WARNING "-- Building of static library not supported on non UNIX systems.")
+	endif()
+else()
+	message("-- Building ${Green}dynamic${ColourReset} library.")
+endif()
+
+if (CONAN_EXPORTED)
+	message("-- INFO: ${Green}Conan detected${ColourReset}... finding packages...")
+	find_package(OpenSSL REQUIRED COMPONENTS SSL Crypto)
+	find_package(ZLIB REQUIRED)
+	find_package(Opus)
+	find_package(Threads REQUIRED)
+	find_package(Git QUIET)
+endif()
+
 if(WIN32 AND NOT MINGW)
+	# Fake an ssl version number to satisfy MLSPP
+	set(OPENSSL_VERSION "1.1.1f")
 	if (NOT WINDOWS_32_BIT)
 		message("-- Building for windows with precompiled packaged dependencies")
 		#set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
-		set(ZLIB_LIBRARIES "${CMAKE_CURRENT_SOURCE_DIR}/../win32/lib")
-		set(ZLIB_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../win32/include")
-		set(OPENSSL_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../win32/include")
-		set(OPENSSL_LIBRARIES "${CMAKE_CURRENT_SOURCE_DIR}/../win32/lib")
-		#ADD_DEFINITIONS(/bigobj)
+		if (NOT CONAN_EXPORTED)
+			set(ZLIB_LIBRARIES "${CMAKE_CURRENT_SOURCE_DIR}/../win32/lib")
+			set(ZLIB_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../win32/include")
+			set(OPENSSL_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../win32/include")
+			set(OPENSSL_LIBRARIES "${CMAKE_CURRENT_SOURCE_DIR}/../win32/lib")
 
-		link_libraries("${CMAKE_CURRENT_SOURCE_DIR}/../win32/lib/libssl.lib")
-		link_libraries("${CMAKE_CURRENT_SOURCE_DIR}/../win32/lib/libcrypto.lib")
-		link_libraries("${CMAKE_CURRENT_SOURCE_DIR}/../win32/lib/zlib.lib")
-		link_libraries("${CMAKE_CURRENT_SOURCE_DIR}/../win32/lib/libsodium.lib")
-		link_libraries("${CMAKE_CURRENT_SOURCE_DIR}/../win32/lib/opus.lib")
+			link_libraries("${CMAKE_CURRENT_SOURCE_DIR}/../win32/lib/libssl.lib")
+			link_libraries("${CMAKE_CURRENT_SOURCE_DIR}/../win32/lib/libcrypto.lib")
+			link_libraries("${CMAKE_CURRENT_SOURCE_DIR}/../win32/lib/zlib.lib")
+			link_libraries("${CMAKE_CURRENT_SOURCE_DIR}/../win32/lib/opus.lib")
 
-		set(OPUS_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/../win32/include")
-		set(OPUS_LIBRARIES "${CMAKE_CURRENT_SOURCE_DIR}/../win32/lib/opus.lib")
-		set(sodium_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../win32/include")
-		set(sodium_LIBRARY_DEBUG "${CMAKE_CURRENT_SOURCE_DIR}/../win32/lib/libsodium.lib")
-		set(sodium_LIBRARY_RELEASE "${CMAKE_CURRENT_SOURCE_DIR}/../win32/lib/libsodium.lib")
-		set(HAVE_OPUS_OPUS_H "${CMAKE_CURRENT_SOURCE_DIR}/../win32/include/opus/opus.h")
+			set(OPUS_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/../win32/include")
+			set(OPUS_LIBRARIES "${CMAKE_CURRENT_SOURCE_DIR}/../win32/lib/opus.lib")
+			set(HAVE_OPUS_OPUS_H "${CMAKE_CURRENT_SOURCE_DIR}/../win32/include/opus/opus.h")
+
+			include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../win32/include")
+		endif()
+
 		set(OPUS_FOUND 1)
-		SET(sodium_VERSION_STRING "win32 bundled")
-
-		include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../win32/include")
 
 		add_compile_options("/bigobj")
 		add_compile_definitions(OPENSSL_SYS_WIN32)
@@ -95,48 +139,21 @@ if (UNIX)
  	endif()
 endif()
 
-if(NOT BUILD_SHARED_LIBS)
-	if(UNIX)
-		message("-- Building static library.")
-		
-		if(UNIX AND NOT APPLE)
-			set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
-		endif()
-		
-		set(OPENSSL_USE_STATIC_LIBS ON)
-		set(sodium_USE_STATIC_LIBS ON)
-		set(OPUS_USE_STATIC_LIBS TRUE)
-	else()
-		message(WARNING "-- Building of static library not supported on non UNIX systems.")
-	endif()
-endif()
-
 if (BUILD_VOICE_SUPPORT)
 	if (MINGW OR NOT WIN32)
-		find_package(PkgConfig QUIET)
-		if(PKG_CONFIG_FOUND)
-			include("${CMAKE_CURRENT_SOURCE_DIR}/../cmake/FindSodium.cmake")
-		else()
-			message("-- Could not detect ${Green}libsodium${ColourReset} due to missing ${Green}pkgconfig${ColourReset}. VOICE support will be ${Red}disabled${ColourReset}")
-		endif()
-      		include("${CMAKE_CURRENT_SOURCE_DIR}/../cmake/FindOpus.cmake")
+		include("${CMAKE_CURRENT_SOURCE_DIR}/../cmake/FindOpus.cmake")
 	endif()
 
-	if(DEFINED OPUS_FOUND)
+	if(HAVE_OPUS_OPUS_H)
 		message("-- Found Opus ${Green}${OPUS_LIBRARIES}${ColourReset}")
-		if((WIN32 OR PKG_CONFIG_FOUND) AND DEFINED sodium_VERSION_STRING AND DEFINED sodium_LIBRARY_RELEASE)
-			add_compile_definitions(HAVE_VOICE)
-		
-			message("-- Sodium ${Green}${sodium_VERSION_STRING}${ColourReset}")
-		
-			set(HAVE_VOICE 1)
-		endif()
+		add_compile_definitions(HAVE_VOICE)
+		set(HAVE_VOICE 1)
 	endif()
 
 	if(HAVE_VOICE)
-		message("-- Detected ${Green}libsodium${ColourReset} and ${Green}libopus${ColourReset}. VOICE support will be ${Green}enabled${ColourReset}")
+		message("-- Detected ${Green}libopus${ColourReset}. VOICE support will be ${Green}enabled${ColourReset}")
 	else(HAVE_VOICE)
-		message("-- Could not detect ${Green}libsodium${ColourReset} and/or ${Green}libopus${ColourReset}. VOICE support will be ${Red}disabled${ColourReset}")
+		message("-- Could not detect ${Green}libopus${ColourReset}. VOICE support will be ${Red}disabled${ColourReset}")
 	endif(HAVE_VOICE)
 else()
 	message("-- Voice support disabled by cmake option")
@@ -146,27 +163,39 @@ string(ASCII 27 Esc)
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 
-find_package(Threads REQUIRED)
+if (NOT CONAN_EXPORTED)
+	find_package(Threads REQUIRED)
+endif()
 if(MINGW OR NOT WIN32)
-	find_package(ZLIB REQUIRED)
+	if (NOT CONAN_EXPORTED)
+		find_package(ZLIB REQUIRED)
+	endif()
+	message("-- ZLIB: ${Green}${ZLIB_LIBRARIES}${ColourReset}")
 endif(MINGW OR NOT WIN32)
 
-if(APPLE)
-	if(CMAKE_APPLE_SILICON_PROCESSOR EQUAL arm64)
-		set(OPENSSL_ROOT_DIR "/opt/homebrew/opt/openssl")
-	else()
-		set(OPENSSL_ROOT_DIR "/usr/local/opt/openssl")
-	endif()
-	find_package(OpenSSL REQUIRED)
-else()
-	if(MINGW OR NOT WIN32)
+if (NOT CONAN_EXPORTED)
+	if(APPLE)
+		if(CMAKE_APPLE_SILICON_PROCESSOR EQUAL arm64)
+			set(OPENSSL_ROOT_DIR "/opt/homebrew/opt/openssl")
+		else()
+			set(OPENSSL_ROOT_DIR "/usr/local/opt/openssl")
+		endif()
 		find_package(OpenSSL REQUIRED)
+	else()
+		if(MINGW OR NOT WIN32)
+			if(NOT BUILD_SHARED_LIBS)
+				set(OPENSSL_USE_STATIC_LIBS TRUE)
+			endif()
+			find_package(OpenSSL REQUIRED)
+		endif()
 	endif()
 endif()
 
 include_directories(${OPENSSL_INCLUDE_DIR} ${ZLIB_INCLUDE_DIRS})
 
-find_package(Git QUIET)
+if (NOT CONAN_EXPORTED)
+	find_package(Git QUIET)
+endif()
 
 if(NOT GIT_FOUND AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../.git")
 	message(FATAL_ERROR "You are using a git version of D++ but do not have git installed. Install git (not 'gh') and try again.")
@@ -197,7 +226,7 @@ if(MSVC)
 	endif()
 	string(REGEX REPLACE "/W[1|2|3|4]" "/W3" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 else()
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-unused-private-field -Wno-psabi -Wempty-body -Wignored-qualifiers -Wimplicit-fallthrough -Wmissing-field-initializers -Wsign-compare -Wtype-limits -Wuninitialized -Wshift-negative-value -pthread")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -Wall -Wno-unused-private-field -Wno-psabi -Wempty-body -Wignored-qualifiers -Wimplicit-fallthrough -Wmissing-field-initializers -Wsign-compare -Wtype-limits -Wuninitialized -Wshift-negative-value -pthread")
 	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Og")
 
 	if (NOT MINGW)
@@ -209,11 +238,22 @@ set(modules_dir "../src")
 
 file(GLOB subdirlist ${modules_dir}/dpp)
 
+if (HAVE_VOICE)
+	add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/../mlspp" "mlspp")
+	include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../mlspp/include")
+	include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../mlspp/lib/bytes/include")
+	include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../mlspp/lib/hpke/include")
+endif()
+
 foreach (fullmodname ${subdirlist})
     get_filename_component(modname ${fullmodname} NAME)
     set (modsrc "")
-	
-	file(GLOB modsrc "${modules_dir}/dpp/*.cpp" "${modules_dir}/dpp/events/*.cpp" "${modules_dir}/dpp/cluster/*.cpp" "${modules_dir}/dpp/*.rc")
+
+	if (HAVE_VOICE)
+		file(GLOB modsrc "${modules_dir}/dpp/*.cpp" "${modules_dir}/dpp/voice/enabled/*.cpp" "${modules_dir}/dpp/dave/*.cpp" "${modules_dir}/dpp/events/*.cpp" "${modules_dir}/dpp/cluster/*.cpp" "${modules_dir}/dpp/*.rc")
+	else()
+		file(GLOB modsrc "${modules_dir}/dpp/*.cpp" "${modules_dir}/dpp/voice/stub/*.cpp" "${modules_dir}/dpp/events/*.cpp" "${modules_dir}/dpp/cluster/*.cpp" "${modules_dir}/dpp/*.rc")
+	endif()
 
 	if(BUILD_SHARED_LIBS)
 		add_library(${modname} SHARED ${modsrc})
@@ -240,32 +280,34 @@ foreach (fullmodname ${subdirlist})
 		)
 	endif()
 
-	if (WIN32 AND NOT MINGW)
+	if (WIN32 AND NOT MINGW AND NOT CONAN_EXPORTED)
+
 		if (NOT WINDOWS_32_BIT)
 			target_link_libraries(${modname} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/../win32/lib/libssl.lib"
 				"${CMAKE_CURRENT_SOURCE_DIR}/../win32/lib/libcrypto.lib"
-				"${CMAKE_CURRENT_SOURCE_DIR}/../win32/lib/libsodium.lib"
 				"${CMAKE_CURRENT_SOURCE_DIR}/../win32/lib/opus.lib"
 				"${CMAKE_CURRENT_SOURCE_DIR}/../win32/lib/zlib.lib")
 		else()
 			target_link_libraries(${modname} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/../win32/32/lib/libssl.lib"
 				"${CMAKE_CURRENT_SOURCE_DIR}/../win32/32/lib/libcrypto.lib"
-				"${CMAKE_CURRENT_SOURCE_DIR}/../win32/32/lib/libsodium.lib"
 				"${CMAKE_CURRENT_SOURCE_DIR}/../win32/32/lib/opus.lib"
 				"${CMAKE_CURRENT_SOURCE_DIR}/../win32/32/lib/zlib.lib")
 		endif()
 
 	else()
-		target_link_libraries(${modname} PUBLIC ${OPENSSL_SSL_LIBRARY} ${OPENSSL_CRYPTO_LIBRARY} ${ZLIB_LIBRARIES})
+		if (CONAN_EXPORTED)
+			target_link_libraries(${modname} PUBLIC openssl::openssl ZLIB::ZLIB Opus::opus)
+		else()
+			target_link_libraries(${modname} PUBLIC ${OPENSSL_SSL_LIBRARY} ${OPENSSL_CRYPTO_LIBRARY} ${ZLIB_LIBRARIES})
+		endif()
 		if (MINGW)
 			target_link_libraries(${modname} PUBLIC wsock32 ws2_32 crypt32)
 		endif ()
 	endif()
 
 	if (HAVE_VOICE)
-		target_link_libraries(${modname} PUBLIC ${sodium_LIBRARY_RELEASE} ${OPUS_LIBRARIES})
-		
-		include_directories(${OPUS_INCLUDE_DIRS} ${sodium_INCLUDE_DIR})
+		target_link_libraries(${modname} PUBLIC ${OPUS_LIBRARIES})
+		include_directories(${OPUS_INCLUDE_DIRS})
 	endif()
 endforeach()
 
@@ -274,14 +316,36 @@ include("${CMAKE_CURRENT_SOURCE_DIR}/../cmake/kqueue.cmake")
 check_epoll(HAS_EPOLL)
 check_kqueue(HAS_KQUEUE)
 if (HAS_EPOLL)
-	message("-- Building with ${Green}epoll socket engine${ColourReset} -- good!")
+	message("-- Building with ${Green}epoll socket engine${ColourReset} -- ${Green}good!${ColourReset}")
 	target_sources("dpp" PRIVATE "${modules_dir}/dpp/socketengines/epoll.cpp")
 elseif (HAS_KQUEUE)
-	message("-- Building with ${Green}kqueue socket engine${ColourReset} -- good!")
+	message("-- Building with ${Green}kqueue socket engine${ColourReset} -- ${Green}good!${ColourReset}")
 	target_sources("dpp" PRIVATE "${modules_dir}/dpp/socketengines/kqueue.cpp")
 else()
-	message("-- Building with ${Green}poll socket engine${ColourReset} -- meh!")
+	message("-- Building with ${Green}poll socket engine${ColourReset} -- ${Red}meh!${ColourReset}")
 	target_sources("dpp" PRIVATE "${modules_dir}/dpp/socketengines/poll.cpp")
+endif()
+if (HAVE_VOICE)
+	# Private statically linked dependencies
+	if(NOT BUILD_SHARED_LIBS AND NOT APPLE)
+		target_link_libraries(dpp PRIVATE
+				mlspp.a
+				mls_vectors.a
+				bytes.a
+				tls_syntax.a
+				hpke.a
+		)
+		message("-- INFO: Linking static dependencies")
+	else()
+		target_link_libraries(dpp PRIVATE
+				mlspp
+				mls_vectors
+				bytes
+				tls_syntax
+				hpke
+		)
+		message("-- INFO: Linking dynamic dependencies")
+	endif()
 endif()
 
 target_compile_features(dpp PUBLIC cxx_std_17)
@@ -304,7 +368,7 @@ if(HAVE_PTHREAD_SETNAME_NP)
 endif()
 
 if(DPP_CORO)
-	message("-- ${Yellow}Enabled experimental coroutine feature${ColourReset}")
+	message("-- ${Yellow}Enabled coroutine feature${ColourReset}")
 	set(CMAKE_CXX_STANDARD 20)
 	target_compile_features(dpp PUBLIC cxx_std_20)
 	if(WIN32 AND NOT MINGW AND NOT DPP_CLANG_CL)
@@ -360,6 +424,22 @@ if(DPP_FORMATTERS)
 	target_compile_definitions(dpp PUBLIC DPP_FORMATTERS)
 endif()
 
+if (NOT BUILD_SHARED_LIBS)
+	add_library(dppstatic STATIC
+			$<TARGET_OBJECTS:dpp>
+			$<TARGET_OBJECTS:hpke>
+			$<TARGET_OBJECTS:tls_syntax>
+			$<TARGET_OBJECTS:mls_vectors>
+			$<TARGET_OBJECTS:mlspp>
+			$<TARGET_OBJECTS:bytes>
+	)
+	if (HAVE_VOICE)
+		target_link_libraries(dppstatic ${ZLIB_LIBRARIES} ${OPENSSL_LIBRARIES} ${OPUS_LIBRARIES} -static-libgcc -static-libstdc++)
+	else()
+		target_link_libraries(dppstatic ${ZLIB_LIBRARIES} ${OPENSSL_LIBRARIES})
+	endif()
+endif()
+
 if (DPP_BUILD_TEST)
 	enable_testing(${CMAKE_CURRENT_SOURCE_DIR}/..)
 	file(GLOB testnamelist "${CMAKE_CURRENT_SOURCE_DIR}/../src/*")
@@ -378,11 +458,11 @@ if (DPP_BUILD_TEST)
 			if (MSVC)
 				target_compile_options(${testname} PRIVATE /utf-8)
 			endif()
-			set (static_if_needed "")
-			if(NOT BUILD_SHARED_LIBS)
-				set (static_if_needed "-static")
+			if(BUILD_SHARED_LIBS)
+				target_link_libraries(${testname} PUBLIC ${modname})
+			else()
+				target_link_libraries(${testname} PUBLIC dppstatic)
 			endif()
-			target_link_libraries(${testname} PUBLIC ${modname} ${static_if_needed})
 		endif()
 	endforeach()
 	add_test(
@@ -390,20 +470,20 @@ if (DPP_BUILD_TEST)
 		COMMAND unittest
 	)
 endif()
-	
-if(WIN32 AND NOT MINGW)
-	if (NOT WINDOWS_32_BIT)
-		configure_file("${CMAKE_CURRENT_SOURCE_DIR}/../win32/bin/zlib1.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
-		configure_file("${CMAKE_CURRENT_SOURCE_DIR}/../win32/bin/libcrypto-1_1-x64.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
-		configure_file("${CMAKE_CURRENT_SOURCE_DIR}/../win32/bin/libssl-1_1-x64.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
-		configure_file("${CMAKE_CURRENT_SOURCE_DIR}/../win32/bin/libsodium.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
-		configure_file("${CMAKE_CURRENT_SOURCE_DIR}/../win32/bin/opus.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
-	else()
-		configure_file("${CMAKE_CURRENT_SOURCE_DIR}/../win32/32/bin/zlib1.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
-		configure_file("${CMAKE_CURRENT_SOURCE_DIR}/../win32/32/bin/libcrypto-1_1.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
-		configure_file("${CMAKE_CURRENT_SOURCE_DIR}/../win32/32/bin/libssl-1_1.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
-		configure_file("${CMAKE_CURRENT_SOURCE_DIR}/../win32/32/bin/libsodium.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
-		configure_file("${CMAKE_CURRENT_SOURCE_DIR}/../win32/32/bin/opus.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
+
+if (NOT CONAN_EXPORTED)
+	if(WIN32 AND NOT MINGW)
+		if (NOT WINDOWS_32_BIT)
+			configure_file("${CMAKE_CURRENT_SOURCE_DIR}/../win32/bin/zlib1.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
+			configure_file("${CMAKE_CURRENT_SOURCE_DIR}/../win32/bin/libcrypto-1_1-x64.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
+			configure_file("${CMAKE_CURRENT_SOURCE_DIR}/../win32/bin/libssl-1_1-x64.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
+			configure_file("${CMAKE_CURRENT_SOURCE_DIR}/../win32/bin/opus.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
+		else()
+			configure_file("${CMAKE_CURRENT_SOURCE_DIR}/../win32/32/bin/zlib1.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
+			configure_file("${CMAKE_CURRENT_SOURCE_DIR}/../win32/32/bin/libcrypto-1_1.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
+			configure_file("${CMAKE_CURRENT_SOURCE_DIR}/../win32/32/bin/libssl-1_1.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
+			configure_file("${CMAKE_CURRENT_SOURCE_DIR}/../win32/32/bin/opus.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
+		endif()
 	endif()
 endif()
 

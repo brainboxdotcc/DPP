@@ -55,4 +55,4 @@ json stage_instance::to_json_impl(bool with_id) const {
 	return j;
 }
 
-} // namespace dpp
+}

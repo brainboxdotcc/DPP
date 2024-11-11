@@ -191,4 +191,4 @@ void cluster::thread_get(snowflake thread_id, command_completion_event_t callbac
 	rest_request<thread>(this, API_PATH "/channels", std::to_string(thread_id), "", m_get, "", callback);
 }
 
-} // namespace dpp
+}

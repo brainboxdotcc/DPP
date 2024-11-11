@@ -24,6 +24,7 @@
 #include <dpp/misc-enum.h>
 #include <string>
 #include <functional>
+#include <ctime>
 #include <dpp/socket.h>
 #include <cstdint>
 
@@ -242,7 +243,7 @@ public:
 	 * @param data Data to be written to the buffer.
 	 * @note The data may not be written immediately and may be written at a later time to the socket.
 	 */
-	virtual void write(const std::string_view data);
+	void socket_write(const std::string_view data);
 
 	/**
 	 * @brief Close socket connection
@@ -257,4 +258,4 @@ public:
 	virtual void log(dpp::loglevel severity, const std::string &msg) const;
 };
 
-} // namespace dpp
+}

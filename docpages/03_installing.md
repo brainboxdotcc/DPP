@@ -11,4 +11,5 @@ There are many ways to install D++, either from a package manager, or from sourc
 * \subpage install-windows-vs-zip
 * \subpage install-xmake
 * \subpage install-brew
+* \subpage install-conan
 * \subpage install-from-source

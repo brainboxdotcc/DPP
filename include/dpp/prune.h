@@ -77,4 +77,4 @@ public:
 	json to_json(bool with_id = false) const; // Intentional shadow of json_interface, mostly present for documentation
 };
 
-} // namespace dpp
+}

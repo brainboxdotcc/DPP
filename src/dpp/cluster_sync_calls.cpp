@@ -781,8 +781,16 @@ confirmation cluster::current_user_set_voice_state_sync(snowflake guild_id, snow
 	return dpp::sync<confirmation>(this, static_cast<void (cluster::*)(snowflake, snowflake, bool, time_t, command_completion_event_t)>(&cluster::current_user_set_voice_state), guild_id, channel_id, suppress, request_to_speak_timestamp);
 }
 
+voicestate cluster::current_user_get_voice_state_sync(snowflake guild_id) {
+	return dpp::sync<voicestate>(this, static_cast<void (cluster::*)(snowflake, command_completion_event_t)>(&cluster::current_user_get_voice_state), guild_id);
+}
+
 confirmation cluster::user_set_voice_state_sync(snowflake user_id, snowflake guild_id, snowflake channel_id, bool suppress) {
 	return dpp::sync<confirmation>(this, static_cast<void (cluster::*)(snowflake, snowflake, snowflake, bool, command_completion_event_t)>(&cluster::user_set_voice_state), user_id, guild_id, channel_id, suppress);
+}
+
+voicestate cluster::user_get_voice_state_sync(snowflake guild_id, snowflake user_id) {
+	return dpp::sync<voicestate>(this, static_cast<void (cluster::*)(snowflake, snowflake, command_completion_event_t)>(&cluster::user_get_voice_state), guild_id, user_id);
 }
 
 connection_map cluster::current_user_connections_get_sync() {

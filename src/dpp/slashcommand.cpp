@@ -20,11 +20,11 @@
  ************************************************************************************/
 #include <dpp/appcommand.h>
 #include <dpp/discordevents.h>
-#include <dpp/exception.h>
 #include <dpp/json.h>
 #include <dpp/stringops.h>
 #include <dpp/cache.h>
-#include <iostream>
+#include <algorithm>
+#include <iterator>
 
 namespace dpp {
 
@@ -74,6 +74,19 @@ slashcommand& slashcommand::fill_from_json_impl(nlohmann::json* j) {
 
 	type = (slashcommand_contextmenu_type)int8_not_null(j, "type");
 	set_object_array_not_null<command_option>(j, "options", options); // command_option fills recursive
+
+	if(j->contains("integration_types")) {
+		if (auto it = j->find("integration_types"); it != j->end() && !it->is_null()) {
+			it->get_to(this->integration_types);
+		}
+	}
+
+	if(j->contains("contexts")) {
+		if (auto it = j->find("contexts"); it != j->end() && !it->is_null()) {
+			it->get_to(this->contexts);
+		}
+	}
+
 	return *this;
 }
 
@@ -252,6 +265,15 @@ void to_json(json& j, const slashcommand& p) {
 		}
 	}
 
+	if (p.integration_types.size()) {
+		j["integration_types"] = p.integration_types;
+	}
+
+	// TODO: Maybe a std::optional is better to differentiate
+	if (p.contexts.size()) {
+		j["contexts"] = p.contexts;
+	}
+
 	// DEPRECATED
 	// j["default_permission"] = p.default_permission;
 	j["application_id"] = std::to_string(p.application_id);
@@ -291,6 +313,11 @@ slashcommand& slashcommand::set_description(const std::string &d) {
 
 slashcommand& slashcommand::set_application_id(snowflake i) {
 	application_id = i;
+	return *this;
+}
+
+slashcommand& slashcommand::set_interaction_contexts(std::vector<interaction_context_type> contexts) {
+	this->contexts = std::move(contexts);
 	return *this;
 }
 
@@ -728,12 +755,42 @@ void from_json(const nlohmann::json& j, interaction& i) {
 		}
 	}
 
+	if (auto it = j.find("context"); it != j.end()) {
+		i.context = static_cast<interaction_context_type>(*it);
+	}
+
+	if (auto it = j.find("authorizing_integration_owners"); it != j.end()) {
+		for (auto owner = it->begin(); owner != it->end(); ++owner) {
+			auto type = static_cast<application_integration_types>(from_string<int>(owner.key()));
+			std::string owner_flake = owner.value();
+			i.authorizing_integration_owners[type] = dpp::snowflake(owner_flake);
+		}
+	}
+
 	if(j.contains("entitlements")) {
 		for (auto& entitle : j["entitlements"]) {
 			i.entitlements.emplace_back(entitlement().fill_from_json(const_cast<json*>(&entitle)));
 		}
 	}
 }
+
+dpp::snowflake interaction::get_authorizing_integration_owner(application_integration_types type) const {
+	dpp::snowflake rv;
+	auto i = this->authorizing_integration_owners.find(type);
+	if (i != this->authorizing_integration_owners.end()) {
+		rv = i->second;
+	}
+	return rv;
+}
+
+bool interaction::is_user_app_interaction() const {
+	return this->authorizing_integration_owners.find(ait_user_install) != this->authorizing_integration_owners.end();
+}
+
+bool interaction::is_guild_interaction() const {
+	return this->authorizing_integration_owners.find(ait_guild_install) != this->authorizing_integration_owners.end();
+}
+
 
 interaction_response& interaction_response::add_autocomplete_choice(const command_option_choice& achoice) {
 	if (autocomplete_choices.size() < AUTOCOMPLETE_MAX_CHOICES) {
@@ -941,4 +998,4 @@ std::string command_interaction::get_mention() const {
 std::string slashcommand::get_mention() const {
 	return dpp::utility::slashcommand_mention(id, name);
 }
-} // namespace dpp
+}

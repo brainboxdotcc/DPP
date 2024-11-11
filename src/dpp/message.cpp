@@ -649,14 +649,20 @@ std::optional<uint32_t> poll::get_vote_count(uint32_t answer_id) const noexcept 
 	return 0;
 }
 
-
+void from_json(const json& j, interaction_metadata_type& i) {
+	i.id = snowflake_not_null(&j, "id");
+	i.interacted_message_id = snowflake_not_null(&j, "interacted_message_id");
+	i.original_response_message_id = snowflake_not_null(&j, "original_response_message_id");
+	i.type = j["type"];
+	i.usr = j["usr"];
+}
 
 embed::~embed() = default;
 
 embed::embed() : timestamp(0) {
 }
 
-message::message() : managed(0), channel_id(0), guild_id(0), sent(0), edited(0), webhook_id(0),
+message::message() : managed(0), channel_id(0), guild_id(0), sent(0), edited(0), webhook_id(0), interaction_metadata{},
 	owner(nullptr), type(mt_default), flags(0), pinned(false), tts(false), mention_everyone(false)
 {
 	message_reference.channel_id = 0;
@@ -1330,6 +1336,11 @@ message& message::fill_from_json(json* d, cache_policy_t cp) {
 			this->author = *authoruser;
 		}
 	}
+
+	if (auto it = d->find("interaction_medata"); it != d->end()) {
+		it->get_to(this->interaction_metadata);
+	}
+
 	if (d->find("interaction") != d->end()) {
 		json& inter = (*d)["interaction"];
 		interaction.id = snowflake_not_null(&inter, "id");
@@ -1548,4 +1559,4 @@ sticker& sticker::set_file_content(std::string_view fc) {
 }
 
 
-} // namespace dpp
+}

@@ -81,12 +81,20 @@ void cluster::current_user_set_voice_state(snowflake guild_id, snowflake channel
 	rest_request<confirmation>(this, API_PATH "/guilds", std::to_string(guild_id), "/voice-states/@me", m_patch, j.dump(-1, ' ', false, json::error_handler_t::replace), callback);
 }
 
+void cluster::current_user_get_voice_state(snowflake guild_id, command_completion_event_t callback) {
+	rest_request<voicestate>(this, API_PATH "/guilds", std::to_string(guild_id), "/voice-states/@me", m_get, "", callback);
+}
+
 void cluster::user_set_voice_state(snowflake user_id, snowflake guild_id, snowflake channel_id, bool suppress, command_completion_event_t callback) {
 	json j({
 		{"channel_id", channel_id},
 		{"suppress", suppress}
 	});
 	rest_request<confirmation>(this, API_PATH "/guilds", std::to_string(guild_id), "/voice-states/" + std::to_string(user_id), m_patch, j.dump(-1, ' ', false, json::error_handler_t::replace), callback);
+}
+
+void cluster::user_get_voice_state(snowflake guild_id, snowflake user_id, command_completion_event_t callback) {
+	rest_request<voicestate>(this, API_PATH "/guilds", std::to_string(guild_id), "/voice-states/" + std::to_string(user_id), m_get, "", callback);
 }
 
 void cluster::current_user_connections_get(command_completion_event_t callback) {
@@ -121,4 +129,4 @@ void cluster::user_get_cached(snowflake user_id, command_completion_event_t call
 	rest_request<user_identified>(this, API_PATH "/users", std::to_string(user_id), "", m_get, "", callback);
 }
 
-} // namespace dpp
+}

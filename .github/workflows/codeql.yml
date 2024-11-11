@@ -41,16 +41,16 @@ jobs:
 
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@17d0e2bd7d51742c71671bd19fa12bdc9d40a3d6 # v2.8.1
+        uses: step-security/harden-runner@91182cccc01eb5e619899d80e4e971d6181294a7 # v2.10.1
         with:
           egress-policy: audit
 
       - name: Checkout repository
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       # Initializes the CodeQL tools for scanning.
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@b611370bb5703a7efb587f9d136a52ea24c5c38c # v3.25.11
+        uses: github/codeql-action/init@662472033e021d55d94146f66f6058822b0b39fd # v3.27.0
         with:
           languages: ${{ matrix.language }}
           # If you wish to specify custom queries, you can do so here or in a config file.
@@ -58,12 +58,12 @@ jobs:
           # Prefix the list here with "+" to use these queries and those in the config file.
 
       - name: Setup mold
-        uses: rui314/setup-mold@0bf4f07ef9048ec62a45f9dbf2f098afa49695f0
+        uses: rui314/setup-mold@b015f7e3f2938ad3a5ed6e5111a8c6c7c1d6db6e
 
       - name: Build
         run: cmake -B build -DDPP_NO_VCPKG=ON -DAVX_TYPE=AVX0 -DCMAKE_BUILD_TYPE=Release && cmake --build build -j4
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@b611370bb5703a7efb587f9d136a52ea24c5c38c # v3.25.11
+        uses: github/codeql-action/analyze@662472033e021d55d94146f66f6058822b0b39fd # v3.27.0
         with:
           category: "/language:${{matrix.language}}"

@@ -83,4 +83,4 @@ bool entitlement::is_consumed() const {
 	return flags & entitlement_flags::ent_consumed;
 }
 
-} // namespace dpp
+}

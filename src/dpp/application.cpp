@@ -21,14 +21,26 @@
  ************************************************************************************/
 #include <dpp/application.h>
 #include <dpp/discordevents.h>
-#include <dpp/snowflake.h>
-#include <dpp/managed.h>
 #include <dpp/json.h>
-#include <iostream>
 
 namespace dpp {
 
 using json = nlohmann::json;
+
+void from_json(const json &j, application_integration_types& out) {
+	out = static_cast<dpp::application_integration_types>(j.get<int>());
+}
+
+void from_json(const json &j, application_install_params& out) {
+	out.permissions = j.at("permissions").get<uint64_t>();
+	j.at("scopes").get_to(out.scopes);
+}
+
+void from_json(const json &j, integration_configuration& out) {
+	if (auto it = j.find("oauth2_install_params"); it != j.end()) {
+		it->get_to(out.oauth2_install_params.value());
+	}
+}
 
 application::application() : managed(0), bot_public(false), bot_require_code_grant(false), guild_id(0), primary_sku_id(0), flags(0)
 {
@@ -94,6 +106,7 @@ application& application::fill_from_json_impl(nlohmann::json* j) {
 	set_iconhash_not_null(j, "cover_image", cover_image);
 	set_int32_not_null(j, "flags", flags);
 	set_int64_not_null(j, "approximate_guild_count", approximate_guild_count);
+	set_int64_not_null(j, "approximate_user_install_count", approximate_user_install_count);
 
 	if (j->contains("redirect_uris")) {
 		for (const auto& uri : (*j)["redirect_uris"]) {
@@ -116,6 +129,10 @@ application& application::fill_from_json_impl(nlohmann::json* j) {
 		for (const auto& scope : p["scopes"]) {
 			this->install_params.scopes.push_back(to_string(scope));
 		}
+	}
+
+	if (auto it = j->find("integration_types_config"); it != j->end()) {
+		it->get_to(this->integration_types_config);
 	}
 
 	set_string_not_null(j, "custom_install_url", custom_install_url);
@@ -167,5 +184,4 @@ std::string application::get_icon_url(uint16_t size, const image_type format) co
 	return "";
 }
 
-} // namespace dpp
-
+}

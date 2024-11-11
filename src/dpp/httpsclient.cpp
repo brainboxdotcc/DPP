@@ -27,8 +27,6 @@
 #include <climits>
 #include <dpp/httpsclient.h>
 #include <dpp/utility.h>
-#include <dpp/exception.h>
-#include <dpp/stringops.h>
 
 namespace dpp {
 
@@ -58,7 +56,7 @@ void https_client::connect()
 		map_headers += k + ": " + v + "\r\n";
 	}
 	if (this->sfd != SOCKET_ERROR) {
-		this->write(
+		this->socket_write(
 			this->request_type + " " + this->path + " HTTP/" + http_protocol + "\r\n"
 			"Host: " + this->hostname + "\r\n"
 			"pragma: no-cache\r\n"
@@ -358,4 +356,4 @@ http_connect_info https_client::get_host_info(std::string url) {
 	return hci;
 }
 
-} // namespace dpp
+}

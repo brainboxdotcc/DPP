@@ -65,16 +65,16 @@ jobs:
           - { arch: 'arm64', concurrency: 4, os: [self-hosted, linux, ARM64], package: g++-12, cpp: g++, version: 12, cmake-flags: '', cpack: 'yes', ctest: 'no', mold: 'yes' }
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@17d0e2bd7d51742c71671bd19fa12bdc9d40a3d6 # v2.8.1
+        uses: step-security/harden-runner@91182cccc01eb5e619899d80e4e971d6181294a7 # v2.10.1
         with:
           egress-policy: audit
 
       - name: Checkout D++
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Setup mold
         if: ${{ matrix.cfg.mold == 'yes' }}
-        uses: rui314/setup-mold@0bf4f07ef9048ec62a45f9dbf2f098afa49695f0 # v1
+        uses: rui314/setup-mold@b015f7e3f2938ad3a5ed6e5111a8c6c7c1d6db6e # v1
 
       - name: Add LLVM apt repository
         if: ${{ matrix.cfg.llvm-apt }}
@@ -84,7 +84,7 @@ jobs:
           sudo apt-add-repository -y "deb http://apt.llvm.org/$osname/ llvm-toolchain-$osname-${{ matrix.cfg.version }} main"
 
       - name: Install apt packages
-        run: sudo sed -i 's/azure\.//' /etc/apt/sources.list && sudo apt update && sudo apt-get install -y ${{ matrix.cfg.package }} pkg-config libsodium-dev libopus-dev zlib1g-dev rpm
+        run: sudo sed -i 's/azure\.//' /etc/apt/sources.list && sudo apt update && sudo apt-get install -y ${{ matrix.cfg.package }} pkg-config libopus-dev zlib1g-dev rpm
 
       - name: Generate CMake
         run: cmake -B build -DDPP_NO_VCPKG=ON -DAVX_TYPE=AVX0 -DCMAKE_BUILD_TYPE=Release ${{matrix.cfg.cmake-flags}}
@@ -111,14 +111,14 @@ jobs:
 
       - name: Upload Binary (DEB)
         if: ${{ matrix.cfg.cpack == 'yes' }}
-        uses: actions/upload-artifact@0b2256b8c012f0828dc542b3febcab082c67f72b # v4.3.4
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
         with:
           name: "libdpp - Debian Package ${{matrix.cfg.arch}}"
           path: '${{github.workspace}}/build/*.deb'
 
       - name: Upload Binary (RPM)
         if: ${{ matrix.cfg.cpack == 'yes' }}
-        uses: actions/upload-artifact@0b2256b8c012f0828dc542b3febcab082c67f72b # v4.3.4
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
         with:
           name: "libdpp - RPM Package ${{matrix.cfg.arch}}"
           path: '${{github.workspace}}/build/*.rpm'
@@ -137,12 +137,12 @@ jobs:
           - { arch: 'arm64', concurrency: 3, os: macos-latest, cpp: clang++, version: 14, cmake-flags: '', xcode-version: '14.3.1' }
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@17d0e2bd7d51742c71671bd19fa12bdc9d40a3d6 # v2.8.1
+        uses: step-security/harden-runner@91182cccc01eb5e619899d80e4e971d6181294a7 # v2.10.1
         with:
           egress-policy: audit
 
       - name: Checkout D++
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Update Xcode
         uses: maxim-lobanov/setup-xcode@60606e260d2fc5762a71e64e74b2174e8ea3c8bd # v1.6.0
@@ -150,7 +150,7 @@ jobs:
           xcode-version: ${{ matrix.cfg.xcode-version }}
 
       - name: Install homebrew packages
-        run: brew install cmake make libsodium opus openssl pkg-config
+        run: brew install cmake make opus openssl pkg-config
 
       - name: Generate CMake
         run: cmake -B build -DDPP_NO_VCPKG=ON -DCMAKE_BUILD_TYPE=Release -DDPP_CORO=ON -DAVX_TYPE=AVX0
@@ -191,12 +191,12 @@ jobs:
     runs-on: ${{matrix.cfg.os}}
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@17d0e2bd7d51742c71671bd19fa12bdc9d40a3d6 # v2.8.1
+        uses: step-security/harden-runner@91182cccc01eb5e619899d80e4e971d6181294a7 # v2.10.1
         with:
           egress-policy: audit
 
       - name: Checkout D++
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           path: main
 
@@ -234,7 +234,7 @@ jobs:
 
       - name: Upload Binary
         if: ${{ matrix.cfg.upload }}
-        uses: actions/upload-artifact@0b2256b8c012f0828dc542b3febcab082c67f72b # v4.3.4
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
         with:
           name: "libdpp - Windows ${{matrix.cfg.name}}-${{matrix.cfg.config}}-vs${{matrix.cfg.vs}}"
           path: '${{github.workspace}}/main/build/*.zip'
@@ -256,12 +256,12 @@ jobs:
     runs-on: ${{matrix.cfg.os}}
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@17d0e2bd7d51742c71671bd19fa12bdc9d40a3d6 # v2.8.1
+        uses: step-security/harden-runner@91182cccc01eb5e619899d80e4e971d6181294a7 # v2.10.1
         with:
           egress-policy: audit
 
       - name: Checkout D++
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Install Packages
         run: sudo sed -i 's/azure\.//' /etc/apt/sources.list && sudo apt update && sudo apt-get install -y cmake rpm
@@ -276,13 +276,13 @@ jobs:
         run: cd build && sudo cpack --verbose || cat /home/runner/work/DPP/DPP/build/_CPack_Packages/Linux/DEB/PreinstallOutput.log
 
       - name: Upload Binaries (DEB)
-        uses: actions/upload-artifact@0b2256b8c012f0828dc542b3febcab082c67f72b # v4.3.4
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
         with:
           name: "libdpp - Debian Package ${{matrix.cfg.name}}"
           path: "${{github.workspace}}/build/*.deb"
 
       - name: Upload Binaries (RPM)
-        uses: actions/upload-artifact@0b2256b8c012f0828dc542b3febcab082c67f72b # v4.3.4
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
         with:
           name: "libdpp - RPM Package ${{matrix.cfg.name}}"
           path: "${{github.workspace}}/build/*.rpm"

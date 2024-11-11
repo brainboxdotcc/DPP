@@ -18,7 +18,8 @@ endif()
 
 if(OPUS_LIBRARIES)
 	if(OPUS_USE_STATIC_LIBS)
-		find_library(LIBM NAMES "libm.a" "libm.tbd")
+		# on linux with glibc you CANT statically link libm without statically linking all of glibc. DONT DO IT.
+		#find_library(LIBM NAMES "libm.a" "libm.tbd")
 	else()
 		find_library(LIBM NAMES m)
 	endif()
