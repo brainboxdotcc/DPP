@@ -46,7 +46,7 @@ int main() {
 	dpp::socket_events events(
 		sfd,
 		dpp::WANT_READ | dpp::WANT_WRITE | dpp::WANT_ERROR,
-		[](dpp::socket fd, const struct dpp::socket_events& e) {
+		[&se](dpp::socket fd, const struct dpp::socket_events& e) {
 			int r = 0;
 			do {
 				char buf[128]{0};
@@ -54,12 +54,17 @@ int main() {
 				if (r > 0) {
 					buf[127] = 0;
 					std::cout << buf;
+					std::cout.flush();
 				}
 			} while (r > 0);
+			if (r == 0 || (errno && errno != EAGAIN && errno != EWOULDBLOCK && errno != EINTR)) {
+				dpp::close_socket(fd);
+				se->delete_socket(fd);
+			}
 		},
 		[](dpp::socket fd, const struct dpp::socket_events& e) {
 			std::cout << "WANT_WRITE event on socket " << fd << "\n";
-			::write(e.fd, "GET / HTTP/1.0\r\n\r\n", strlen("GET / HTTP/1.0\r\n\r\n"));
+			::write(e.fd, "GET / HTTP/1.0\r\nConnection: close\r\n\r\n", strlen("GET / HTTP/1.0\r\nConnection: close\r\n\r\n"));
 		},
 		[](dpp::socket fd, const struct dpp::socket_events&, int error_code) {
 		  std::cout << "WANT_ERROR event on socket " << fd << " with code " << error_code << "\n";

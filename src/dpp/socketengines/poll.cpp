@@ -145,6 +145,8 @@ struct socket_engine_poll : public socket_engine_base {
 		return r;
 	}
 
+protected:
+
 	bool remove_socket(dpp::socket fd) final {
 		bool r = socket_engine_base::remove_socket(fd);
 		if (r) {

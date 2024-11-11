@@ -123,6 +123,7 @@ struct socket_engine_epoll : public socket_engine_base {
 				});
 			}
 		}
+		prune();
 	}
 
 	bool register_socket(const socket_events& e) final {
@@ -173,6 +174,8 @@ struct socket_engine_epoll : public socket_engine_base {
 		}
 		return r;
 	}
+
+protected:
 
 	bool remove_socket(dpp::socket fd) final {
 		bool r = socket_engine_base::remove_socket(fd);

@@ -24,6 +24,7 @@
 #include <csignal>
 #include <memory>
 #include <sslclient.h>
+#include <iostream>
 
 namespace dpp {
 
@@ -44,15 +45,6 @@ bool socket_engine_base::update_socket(const socket_events &e) {
 	return false;
 }
 
-bool socket_engine_base::remove_socket(dpp::socket fd) {
-	auto iter = fds.find(fd);
-	if (iter != fds.end()) {
-		fds.erase(iter);
-		return true;
-	}
-	return false;
-}
-
 socket_engine_base::socket_engine_base() {
 #ifndef WIN32
 	set_signal_handler(SIGALRM);
@@ -68,6 +60,34 @@ socket_engine_base::socket_engine_base() {
 	}
 #endif
 	pool = std::make_unique<thread_pool>();
+}
+
+void socket_engine_base::prune() {
+	if (to_delete_count > 0) {
+		for (auto it = fds.cbegin(); it != fds.cend();) {
+			if ((it->second->flags & WANT_DELETION) != 0L) {
+				remove_socket(it->second->fd);
+				it = fds.erase(it);
+			} else {
+				++it;
+			}
+		}
+		to_delete_count = 0;
+	}
+}
+
+bool socket_engine_base::delete_socket(dpp::socket fd) {
+	auto iter = fds.find(fd);
+	if (iter == fds.end() || ((iter->second->flags & WANT_DELETION) != 0L)) {
+		return false;
+	}
+	iter->second->flags |= WANT_DELETION;
+	to_delete_count++;
+	return true;
+}
+
+bool socket_engine_base::remove_socket(dpp::socket fd) {
+	return false;
 }
 
 }
