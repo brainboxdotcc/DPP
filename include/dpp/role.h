@@ -324,19 +324,8 @@ public:
 	 * @param lhs first role to compare
 	 * @param rhs second role to compare
 	 * @return true if lhs is less than rhs
-	 *
-	 * @throws std::invalid_argument when roles of two different guilds are passed
 	 */
 	friend inline bool operator< (const role& lhs, const role& rhs) {
-        if (lhs.guild_id != rhs.guild_id) {
-	        throw std::invalid_argument("cannot compare roles from two different guilds");
-        }
-
-		// the @everyone role is always the lowest role in hierarchy
-		if (lhs.id == lhs.guild_id) {
-			return rhs.id != lhs.guild_id;
-		}
-
 		if (lhs.position == rhs.position) {
 			// the higher the IDs are, the lower the position
 			return lhs.id > rhs.id;
@@ -351,8 +340,6 @@ public:
 	 * @param lhs first role to compare
 	 * @param rhs second role to compare
 	 * @return true if lhs is greater than rhs
-	 *
-	 * @throws std::invalid_argument when roles of two different guilds are passed
 	 */
 	friend inline bool operator> (const role& lhs, const role& rhs) {
 		return !(lhs < rhs);
@@ -365,7 +352,7 @@ public:
 	 * @return true if is equal to other
 	 */
 	inline bool operator== (const role& other) const {
-		return this->position == other.position;
+		return this->id == other.id;
 	}
 
 	/**
@@ -375,7 +362,7 @@ public:
 	 * @return true if is not equal to other
 	 */
 	inline bool operator!= (const role& other) const {
-		return this->position != other.position;
+		return this->id != other.id;
 	}
 
 	/**

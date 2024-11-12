@@ -345,22 +345,13 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 	{
 		set_test(ROLE_COMPARE, false);
 		dpp::role role_1, role_2;
+		role_1.id = 99;
 		role_1.position = 1;
 		role_1.guild_id = 123;
+		role_1.id = 98;
 		role_2.position = 2;
 		role_2.guild_id = 123;
 		set_test(ROLE_COMPARE, role_1 < role_2 && !(role_1 > role_2) && role_1 != role_2);
-	}
-	{
-		set_test(ROLE_COMPARE_CONSIDERING_EVERYONE_ROLE, false);
-		dpp::role role_1, role_2;
-		role_1.id = 123;
-		role_1.position = 2;
-		role_1.guild_id = 123;
-		role_2.id = 124;
-		role_2.position = 2;
-		role_2.guild_id = 123;
-		set_test(ROLE_COMPARE_CONSIDERING_EVERYONE_ROLE, role_1 < role_2 && !(role_1 > role_2));
 	}
 	{
 		set_test(ROLE_COMPARE_CONSIDERING_ID, false);

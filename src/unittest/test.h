@@ -206,7 +206,6 @@ DPP_TEST(UTILITY_CDN_ENDPOINT_URL_HASH, "utility::cdn_endpoint_url_hash", tf_off
 DPP_TEST(STICKER_GET_URL, "sticker::get_url aka utility::cdn_endpoint_url_sticker", tf_offline);
 DPP_TEST(EMOJI_GET_URL, "emoji::get_url", tf_offline);
 DPP_TEST(ROLE_COMPARE, "role::operator<", tf_offline);
-DPP_TEST(ROLE_COMPARE_CONSIDERING_EVERYONE_ROLE, "role::operator<", tf_offline);
 DPP_TEST(ROLE_COMPARE_CONSIDERING_ID, "role::operator<", tf_offline);
 DPP_TEST(ROLE_CREATE, "cluster::role_create", tf_online);
 DPP_TEST(ROLE_EDIT, "cluster::role_edit", tf_online);
