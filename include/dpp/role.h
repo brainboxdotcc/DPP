@@ -120,6 +120,10 @@ public:
 
 	/**
 	 * @brief Role position.
+	 *
+	 * @warning multiple roles can have the same position number.
+	 * As a result, comparing roles by position alone can lead to subtle bugs when checking for role hierarchy.
+	 * The recommended and correct way to compare for roles in the hierarchy is using the comparison operators on the role objects themselves.
 	 */
 	uint8_t position{0};
 
@@ -320,8 +324,24 @@ public:
 	 * @param lhs first role to compare
 	 * @param rhs second role to compare
 	 * @return true if lhs is less than rhs
+	 *
+	 * @throws std::invalid_argument when roles of two different guilds are passed
 	 */
 	friend inline bool operator< (const role& lhs, const role& rhs) {
+        if (lhs.guild_id != rhs.guild_id) {
+	        throw std::invalid_argument("cannot compare roles from two different guilds");
+        }
+
+		// the @everyone role is always the lowest role in hierarchy
+		if (lhs.id == lhs.guild_id) {
+			return rhs.id != lhs.guild_id;
+		}
+
+		if (lhs.position == rhs.position) {
+			// the higher the IDs are, the lower the position
+			return lhs.id > rhs.id;
+		}
+
 		return lhs.position < rhs.position;
 	}
 
@@ -331,9 +351,11 @@ public:
 	 * @param lhs first role to compare
 	 * @param rhs second role to compare
 	 * @return true if lhs is greater than rhs
+	 *
+	 * @throws std::invalid_argument when roles of two different guilds are passed
 	 */
 	friend inline bool operator> (const role& lhs, const role& rhs) {
-		return lhs.position > rhs.position;
+		return !(lhs < rhs);
 	}
 
 	/**
