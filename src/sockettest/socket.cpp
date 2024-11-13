@@ -29,7 +29,7 @@
 
 int main() {
 	dpp::cluster cl("no-token");
-	auto se = dpp::create_socket_engine(cl);
+	auto se = dpp::create_socket_engine(&cl);
 
 	const dpp::dns_cache_entry* addr = dpp::resolve_hostname("neuron.brainbox.cc", "80");
 	std::cout << "Connect to IP: " << addr->resolved_addr << "\n";
