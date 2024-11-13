@@ -88,6 +88,7 @@ cluster::cluster(const std::string &_token, uint32_t _intents, uint32_t _shards,
 	: default_gateway("gateway.discord.gg"), rest(nullptr), raw_rest(nullptr), compressed(comp), start_time(0), token(_token), last_identify(time(nullptr) - 5), intents(_intents),
 	numshards(_shards), cluster_id(_cluster_id), maxclusters(_maxclusters), rest_ping(0.0), cache_policy(policy), ws_mode(ws_json)
 {
+	socketengine = create_socket_engine(this);
 	/* Instantiate REST request queues */
 	try {
 		rest = new request_queue(this, request_threads);
@@ -222,10 +223,10 @@ void cluster::start(bool return_after) {
 	gateway g;
 	try {
 #ifdef DPP_CORO
-		confirmation_callback_t cc = co_get_gateway_bot().sync_wait();
-		g = std::get<gateway>(cc.value);
+		//confirmation_callback_t cc = co_get_gateway_bot().sync_wait();
+		//g = std::get<gateway>(cc.value);
 #else
-		g = dpp::sync<gateway>(this, &cluster::get_gateway_bot);
+		//g = dpp::sync<gateway>(this, &cluster::get_gateway_bot);
 #endif
 		log(ll_debug, "Cluster: " + std::to_string(g.session_start_remaining) + " of " + std::to_string(g.session_start_total) + " session starts remaining");
 		if (g.session_start_remaining < g.shards) {
@@ -273,10 +274,10 @@ void cluster::start(bool return_after) {
 			 * so it will pause after every shard. For any with non-zero concurrency it'll pause 5 seconds
 			 * after every batch.
 			 */
-			if (((s + 1) % g.session_start_max_concurrency) == 0) {
+			/*if (((s + 1) % g.session_start_max_concurrency) == 0) {
 				size_t wait_time = 5;
 				if (g.session_start_max_concurrency > 1) {
-					/* If large bot sharding, be sure to give the batch of shards time to settle */
+					// If large bot sharding, be sure to give the batch of shards time to settle
 					bool all_connected = true;
 					do {
 						all_connected = true;
@@ -290,21 +291,26 @@ void cluster::start(bool return_after) {
 					} while (all_connected);
 				}
 				std::this_thread::sleep_for(std::chrono::seconds(wait_time));
-			}
+			}*/
 		}
 	}
 
 	/* Get all active DM channels and map them to user id -> dm id */
-	this->current_user_get_dms([this](const dpp::confirmation_callback_t& completion) {
+	/*this->current_user_get_dms([this](const dpp::confirmation_callback_t& completion) {
 		dpp::channel_map dmchannels = std::get<channel_map>(completion.value);
 		for (auto & c : dmchannels) {
 			for (auto & u : c.second.recipients) {
 				this->set_dm_channel(u, c.second.id);
 			}
 		}
-	});
+	});*/
 
 	log(ll_debug, "Shards started.");
+
+	// TODO: Temporary for testing
+	do {
+		socketengine->process_events();
+	} while (true);
 	
 	if (!return_after) {
 		block_calling_thread();

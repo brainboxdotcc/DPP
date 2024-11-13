@@ -60,7 +60,7 @@ struct socket_engine_epoll : public socket_engine_base {
 	socket_engine_epoll& operator=(const socket_engine_epoll&) = delete;
 	socket_engine_epoll& operator=(socket_engine_epoll&&) = delete;
 
-	socket_engine_epoll() : epoll_handle(epoll_create(socket_engine_epoll::epoll_hint)) {
+	socket_engine_epoll(cluster* creator) : socket_engine_base(creator), epoll_handle(epoll_create(socket_engine_epoll::epoll_hint)) {
 		events.resize(socket_engine_epoll::epoll_hint);
 		if (epoll_handle == -1) {
 			throw dpp::connection_exception("Failed to initialise epoll()");
@@ -87,40 +87,42 @@ struct socket_engine_epoll : public socket_engine_base {
 			}
 
 			if ((ev.events & EPOLLHUP) != 0U) {
-				eh->flags = modify_event(epoll_handle, eh, eh->flags & ~WANT_ERROR);
-				pool->enqueue([this, eh, fd]() {
+				//eh->flags = modify_event(epoll_handle, eh, eh->flags & ~WANT_ERROR);
+				//pool->enqueue([this, eh, fd]() {
 					eh->on_error(fd, *eh, 0);
-					eh->flags = modify_event(epoll_handle, eh, eh->flags | WANT_ERROR);
-				});
+				//	eh->flags = modify_event(epoll_handle, eh, eh->flags | WANT_ERROR);
+				//});
 				continue;
 			}
 
 			if ((ev.events & EPOLLERR) != 0U) {
 				/* Get error number */
-				eh->flags = modify_event(epoll_handle, eh, eh->flags & ~WANT_ERROR);
-				pool->enqueue([this, eh, fd]() {
+				//eh->flags = modify_event(epoll_handle, eh, eh->flags & ~WANT_ERROR);
+				//pool->enqueue([this, eh, fd]() {
 					socklen_t codesize = sizeof(int);
 					int errcode{};
 					if (getsockopt(fd, SOL_SOCKET, SO_ERROR, &errcode, &codesize) < 0) {
 						errcode = errno;
 					}
 					eh->on_error(fd, *eh, errcode);
-					eh->flags = modify_event(epoll_handle, eh, eh->flags | WANT_ERROR);
-				});
+				//	eh->flags = modify_event(epoll_handle, eh, eh->flags | WANT_ERROR);
+				//});
 				continue;
 			}
 
 			if ((ev.events & EPOLLOUT) != 0U) {
 				eh->flags = modify_event(epoll_handle, eh, eh->flags & ~WANT_WRITE);
-				pool->enqueue([eh, fd]() {eh->on_write(fd, *eh); });
+				//pool->enqueue([eh, fd]() {
+					eh->on_write(fd, *eh);
+				//});
 			}
 
 			if ((ev.events & EPOLLIN) != 0U) {
-				eh->flags = modify_event(epoll_handle, eh, eh->flags & ~WANT_READ);
-				pool->enqueue([this, eh, fd]() {
+				//eh->flags = modify_event(epoll_handle, eh, eh->flags & ~WANT_READ);
+				//pool->enqueue([this, eh, fd]() {
 					eh->on_read(fd, *eh);
-					eh->flags = modify_event(epoll_handle, eh, eh->flags | WANT_READ);
-				});
+				//	eh->flags = modify_event(epoll_handle, eh, eh->flags | WANT_READ);
+				//});
 			}
 		}
 		prune();
@@ -128,6 +130,7 @@ struct socket_engine_epoll : public socket_engine_base {
 
 	bool register_socket(const socket_events& e) final {
 		bool r = socket_engine_base::register_socket(e);
+		std::cout << "return register: " << r << "\n";
 		if (r) {
 			struct epoll_event ev{};
 			ev.events = EPOLLET;
@@ -142,6 +145,7 @@ struct socket_engine_epoll : public socket_engine_base {
 			}
 			ev.data.ptr = fds.find(e.fd)->second.get();
 			int i = epoll_ctl(epoll_handle, EPOLL_CTL_ADD, e.fd, &ev);
+			std::cout << "epoll_ctl for fd " << e.fd << ": " << i << "\n";
 			if (i < 0) {
 				throw dpp::connection_exception("Failed to register socket to epoll_ctl()");
 			}
@@ -191,8 +195,8 @@ protected:
 	}
 };
 
-std::unique_ptr<socket_engine_base> create_socket_engine() {
-	return std::make_unique<socket_engine_epoll>();
+std::unique_ptr<socket_engine_base> create_socket_engine(cluster* creator) {
+	return std::make_unique<socket_engine_epoll>(creator);
 }
 
 };

@@ -48,6 +48,7 @@
 #include <dpp/restresults.h>
 #include <dpp/event_router.h>
 #include <dpp/coro/async.h>
+#include <dpp/socketengine.h>
 
 namespace dpp {
 
@@ -166,11 +167,6 @@ class DPP_EXPORT cluster {
 #endif
 
 	/**
-	 * @brief Tick active timers
-	 */
-	void tick_timers();
-
-	/**
 	 * @brief Reschedule a timer for its next tick
 	 * 
 	 * @param t Timer to reschedule
@@ -238,6 +234,11 @@ public:
 	 * @brief The time (in seconds) that a request is allowed to take.
 	 */
 	uint16_t request_timeout = 20;
+
+	/**
+	 * @brief Socket engine instance
+	 */
+	std::unique_ptr<socket_engine_base> socketengine;
 
 	/**
 	 * @brief Constructor for creating a cluster. All but the token are optional.
@@ -309,6 +310,11 @@ public:
 	 * @throw dpp::logic_exception If called after the cluster is started (this is not supported)
 	 */
 	cluster& set_websocket_protocol(websocket_protocol_t mode);
+
+	/**
+	 * @brief Tick active timers
+	 */
+	void tick_timers();
 
 	/**
 	 * @brief Set the audit log reason for the next REST call to be made.

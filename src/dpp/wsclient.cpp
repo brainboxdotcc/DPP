@@ -26,6 +26,7 @@
 #include <dpp/utility.h>
 #include <dpp/httpsclient.h>
 #include <dpp/discordevents.h>
+#include <dpp/cluster.h>
 
 namespace dpp {
 
@@ -37,8 +38,8 @@ constexpr size_t WS_MAX_PAYLOAD_LENGTH_SMALL = 125;
 constexpr size_t WS_MAX_PAYLOAD_LENGTH_LARGE = 65535;
 constexpr size_t MAXHEADERSIZE = sizeof(uint64_t) + 2;
 
-websocket_client::websocket_client(const std::string& hostname, const std::string& port, const std::string& urlpath, ws_opcode opcode)
-	: ssl_client(hostname, port),
+websocket_client::websocket_client(cluster* creator, const std::string& hostname, const std::string& port, const std::string& urlpath, ws_opcode opcode)
+	: ssl_client(creator, hostname, port),
 	state(HTTP_HEADERS),
 	path(urlpath),
 	data_opcode(opcode)

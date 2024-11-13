@@ -256,7 +256,7 @@ public:
 	 * @param request_timeout How many seconds before the connection is considered failed if not finished
 	 * @param protocol Request HTTP protocol (default: 1.1)
 	 */
-        https_client(const std::string &hostname, uint16_t port = 443, const std::string &urlpath = "/", const std::string &verb = "GET", const std::string &req_body = "", const http_headers& extra_headers = {}, bool plaintext_connection = false, uint16_t request_timeout = 5, const std::string &protocol = "1.1");
+        https_client(cluster* creator, const std::string &hostname, uint16_t port = 443, const std::string &urlpath = "/", const std::string &verb = "GET", const std::string &req_body = "", const http_headers& extra_headers = {}, bool plaintext_connection = false, uint16_t request_timeout = 5, const std::string &protocol = "1.1");
 
 	/**
 	 * @brief Destroy the https client object

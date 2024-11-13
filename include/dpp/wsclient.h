@@ -183,7 +183,7 @@ public:
 	 * @note Voice websockets only support OP_TEXT, and other websockets must be
 	 * OP_BINARY if you are going to send ETF.
 	 */
-	websocket_client(const std::string& hostname, const std::string& port = "443", const std::string& urlpath = "", ws_opcode opcode = OP_BINARY);
+	websocket_client(cluster* creator, const std::string& hostname, const std::string& port = "443", const std::string& urlpath = "", ws_opcode opcode = OP_BINARY);
 
 	/**
 	 * @brief Destroy the websocket client object

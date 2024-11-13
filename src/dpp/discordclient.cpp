@@ -64,7 +64,7 @@ public:
 thread_local static std::string last_ping_message;
 
 discord_client::discord_client(dpp::cluster* _cluster, uint32_t _shard_id, uint32_t _max_shards, const std::string &_token, uint32_t _intents, bool comp, websocket_protocol_t ws_proto)
-       : websocket_client(_cluster->default_gateway, "443", comp ? (ws_proto == ws_json ? PATH_COMPRESSED_JSON : PATH_COMPRESSED_ETF) : (ws_proto == ws_json ? PATH_UNCOMPRESSED_JSON : PATH_UNCOMPRESSED_ETF)),
+       : websocket_client(_cluster, _cluster->default_gateway, "443", comp ? (ws_proto == ws_json ? PATH_COMPRESSED_JSON : PATH_COMPRESSED_ETF) : (ws_proto == ws_json ? PATH_UNCOMPRESSED_JSON : PATH_UNCOMPRESSED_ETF)),
         terminating(false),
         runner(nullptr),
 	compressed(comp),
@@ -167,7 +167,15 @@ void discord_client::thread_run()
 		bool error = false;
 		ready = false;
 		message_queue.clear();
+
+		std::cout << "before read_loop\n";
 		ssl_client::read_loop();
+		std::cout << "after read_loop\n";
+		while (!terminating) {
+			sleep(1);
+		}
+		std::cout << "after read_loop while\n";
+
 		if (!terminating) {
 			ssl_client::close();
 			end_zlib();
@@ -485,23 +493,6 @@ void discord_client::one_second_timer()
 	}
 
 	websocket_client::one_second_timer();
-
-	/* Every minute, rehash all containers from first shard.
-	 * We can't just get shard with the id 0 because this won't
-	 * work on a clustered environment
-	 */
-	auto shards = creator->get_shards();
-	auto first_iter = shards.begin();
-	if (first_iter != shards.end()) {
-		dpp::discord_client* first_shard = first_iter->second;
-		if (first_shard == this) {
-			creator->tick_timers();
-
-			if ((time(nullptr) % 60) == 0) {
-				dpp::garbage_collection();
-			}
-		}
-	}
 
 	/* This all only triggers if we are connected (have completed websocket, and received READY or RESUMED) */
 	if (this->is_connected()) {

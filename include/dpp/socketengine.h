@@ -162,9 +162,15 @@ struct socket_engine_base {
 	size_t to_delete_count{0};
 
 	/**
-	 * @brief Default constructor
+	 * @brief Owning cluster
 	 */
-	socket_engine_base();
+	class cluster* owner{nullptr};
+
+	/**
+	 * @brief Default constructor
+	 * @param creator Owning cluster
+	 */
+	socket_engine_base(class cluster* creator);
 
 	/**
 	 * @brief Non-copyable
@@ -234,8 +240,9 @@ protected:
 
 /**
  * @brief This is implemented by whatever derived form socket_engine takes
+ * @param creator Creating cluster
  */
-std::unique_ptr<socket_engine_base> create_socket_engine();
+std::unique_ptr<socket_engine_base> create_socket_engine(class cluster* creator);
 
 #ifndef _WIN32
 	void set_signal_handler(int signal);

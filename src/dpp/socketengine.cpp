@@ -25,6 +25,8 @@
 #include <memory>
 #include <sslclient.h>
 #include <iostream>
+#include <dpp/cache.h>
+#include <dpp/cluster.h>
 
 namespace dpp {
 
@@ -45,13 +47,13 @@ bool socket_engine_base::update_socket(const socket_events &e) {
 	return false;
 }
 
-socket_engine_base::socket_engine_base() {
+socket_engine_base::socket_engine_base(cluster* creator) : owner(creator) {
 #ifndef WIN32
 	set_signal_handler(SIGALRM);
-	set_signal_handler(SIGHUP);
-	set_signal_handler(SIGPIPE);
-	set_signal_handler(SIGCHLD);
 	set_signal_handler(SIGXFSZ);
+	set_signal_handler(SIGCHLD);
+	signal(SIGHUP, SIG_IGN);
+	signal(SIGPIPE, SIG_IGN);
 #else
 	// Set up winsock.
 	WSADATA wsadata;
@@ -59,8 +61,10 @@ socket_engine_base::socket_engine_base() {
 		throw dpp::connection_exception(err_connect_failure, "WSAStartup failure");
 	}
 #endif
-	pool = std::make_unique<thread_pool>();
+	//pool = std::make_unique<thread_pool>();
 }
+
+time_t last_time = time(nullptr);
 
 void socket_engine_base::prune() {
 	if (to_delete_count > 0) {
@@ -73,6 +77,17 @@ void socket_engine_base::prune() {
 			}
 		}
 		to_delete_count = 0;
+	}
+	if (time(nullptr) != last_time) {
+		/* Every minute, rehash all cache containers.
+		 * We do this from the socket engine now, not from
+		 * shard 0, so no need to run shards to have timers!
+		 */
+		owner->tick_timers();
+
+		if ((time(nullptr) % 60) == 0) {
+			dpp::garbage_collection();
+		}
 	}
 }
 

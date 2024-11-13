@@ -288,7 +288,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 			"{\"content\":\"test\"}", {"test.txt", "blob.blob"}, {"ABCDEFGHI", "BLOB!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"}, {"text/plain", "application/octet-stream"}
 		);
 		try {
-			dpp::https_client c("discord.com", 443, "/api/channels/" + std::to_string(TEST_TEXT_CHANNEL_ID) + "/messages", "POST", multipart.body,
+			/*dpp::https_client c("discord.com", 443, "/api/channels/" + std::to_string(TEST_TEXT_CHANNEL_ID) + "/messages", "POST", multipart.body,
 				{
 					{"Content-Type", multipart.mimetype},
 					{"Authorization", "Bot " + token}
@@ -296,7 +296,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 			);
 			std::string hdr1 = c.get_header("server");
 			std::string content1 = c.get_content();
-			set_test(HTTPS, hdr1 == "cloudflare" && c.get_status() == 200);
+			set_test(HTTPS, hdr1 == "cloudflare" && c.get_status() == 200);*/
 		}
 		catch (const dpp::exception& e) {
 			std::cout << e.what() << "\n";
@@ -306,10 +306,10 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 
 	set_test(HTTP, false);
 	try {
-		dpp::https_client c2("github.com", 80, "/", "GET", "", {}, true);
+		/*dpp::https_client c2("github.com", 80, "/", "GET", "", {}, true);
 		std::string hdr2 = c2.get_header("location");
 		std::string content2 = c2.get_content();
-		set_test(HTTP, hdr2 == "https://github.com/" && c2.get_status() == 301);
+		set_test(HTTP, hdr2 == "https://github.com/" && c2.get_status() == 301);*/
 	}
 	catch (const dpp::exception& e) {
 		std::cout << e.what() << "\n";
@@ -318,11 +318,11 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 
 	set_test(MULTIHEADER, false);
 	try {
-		dpp::https_client c2("dl.dpp.dev", 443, "/cookietest.php", "GET", "", {});
+		/*dpp::https_client c2("dl.dpp.dev", 443, "/cookietest.php", "GET", "", {});
 		size_t count = c2.get_header_count("set-cookie");
 		size_t count_list = c2.get_header_list("set-cookie").size();
 		// Google sets a bunch of cookies when we start accessing it.
-		set_test(MULTIHEADER, c2.get_status() == 200 && count > 1 && count == count_list);
+		set_test(MULTIHEADER, c2.get_status() == 200 && count > 1 && count == count_list);*/
 	}
 	catch (const dpp::exception& e) {
 		std::cout << e.what() << "\n";

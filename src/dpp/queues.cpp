@@ -175,14 +175,14 @@ http_request_completion_t http_request::run(cluster* owner) {
 	}
 	http_connect_info hci = https_client::get_host_info(_host);
 	try {
-		https_client cli(hci.hostname, hci.port, _url, request_verb[method], multipart.body, headers, !hci.is_ssl, owner->request_timeout, protocol);
+		https_client cli(owner, hci.hostname, hci.port, _url, request_verb[method], multipart.body, headers, !hci.is_ssl, owner->request_timeout, protocol);
 		rv.latency = dpp::utility::time_f() - start;
 		if (cli.timed_out) {
 			rv.error = h_connection;			
-			owner->log(ll_error, "HTTP(S) error on " + hci.scheme + " connection to " + hci.hostname + ":" + std::to_string(hci.port) + ": Timed out while waiting for the response");
+			owner->log(ll_error, "HTTP(S) error on " + hci.scheme + " connection to " + hci.hostname + ":" + std::to_string(hci.port) + endpoint + ": Timed out while waiting for the response");
 		} else if (cli.get_status() < 100) {
 			rv.error = h_connection;
-			owner->log(ll_error, "HTTP(S) error on " + hci.scheme + " connection to " + hci.hostname + ":" + std::to_string(hci.port) + ": Malformed HTTP response");
+			owner->log(ll_error, "HTTP(S) error on " + hci.scheme + " connection to " + hci.hostname + ":" + std::to_string(hci.port) + endpoint + ": Malformed HTTP response");
 		} else {
 			populate_result(_url, owner, rv, cli);
 		}

@@ -159,10 +159,12 @@ protected:
 		}
 		return false;
 	}
+
+	socket_engine_poll(cluster* creator) : socket_engine_base(creator) { };
 };
 
-std::unique_ptr<socket_engine_base> create_socket_engine() {
-	return std::make_unique<socket_engine_poll>();
+std::unique_ptr<socket_engine_base> create_socket_engine(cluster* creator) {
+	return std::make_unique<socket_engine_poll>(creator);
 }
 
 };

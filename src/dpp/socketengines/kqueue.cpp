@@ -27,6 +27,7 @@
 #include <sys/event.h>
 #include <sys/sysctl.h>
 #include <unistd.h>
+#include <dpp/cluster.h>
 
 #if defined __NetBSD__ && __NetBSD_Version__ <= 999001400
 	#define CAST_TYPE intptr_t
@@ -48,7 +49,7 @@ struct socket_engine_kqueue : public socket_engine_base {
 	socket_engine_kqueue& operator=(const socket_engine_kqueue&) = default;
 	socket_engine_kqueue& operator=(socket_engine_kqueue&&) = default;
 
-	socket_engine_kqueue() : kqueue_handle(kqueue()) {
+	socket_engine_kqueue(cluster* creator) : socket_engine_base(creator), kqueue_handle(kqueue()) {
 		change_list.resize(8);
 		ke_list.resize(16);
 		if (kqueue_handle == -1) {
@@ -166,8 +167,8 @@ protected:
 	}
 };
 
-std::unique_ptr<socket_engine_base> create_socket_engine() {
-	return std::make_unique<socket_engine_kqueue>();
+std::unique_ptr<socket_engine_base> create_socket_engine(cluster* creator) {
+	return std::make_unique<socket_engine_kqueue>(creator);
 }
 
 };
