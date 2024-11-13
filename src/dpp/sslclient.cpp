@@ -503,8 +503,6 @@ void ssl_client::on_error(socket fd, const struct socket_events&, int error_code
 	throw dpp::connection_exception(err_socket_error, strerror(errno));
 }
 
-using namespace std::placeholders;
-
 void ssl_client::read_loop()
 {
 	dpp::socket_events events(
