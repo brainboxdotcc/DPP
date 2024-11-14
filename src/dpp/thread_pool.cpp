@@ -41,11 +41,11 @@ thread_pool::thread_pool(size_t num_threads) {
 						return;
 					}
 
-					task = std::move(tasks.front());
+					task = std::move(tasks.top());
 					tasks.pop();
 				}
 
-				task();
+				task.function();
 			}
 		});
 	}

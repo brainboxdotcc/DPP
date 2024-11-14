@@ -31,7 +31,16 @@
 /**
  * A task within a thread pool. A simple lambda that accepts no parameters and returns void.
  */
-using thread_pool_task = std::function<void()>;
+struct thread_pool_task {
+	int priority;
+	std::function<void()> function;
+};
+
+struct thread_pool_task_comparator {
+    bool operator()(const thread_pool_task &a, const thread_pool_task &b) {
+        return a.priority < b.priority;
+    };
+};
 
 /**
  * @brief A thread pool contains 1 or more worker threads which accept thread_pool_task lambadas
@@ -39,7 +48,7 @@ using thread_pool_task = std::function<void()>;
  */
 struct thread_pool {
 	std::vector<std::thread> threads;
-	std::queue<thread_pool_task> tasks;
+	std::priority_queue<thread_pool_task, std::vector<thread_pool_task>, thread_pool_task_comparator> tasks;
 	std::mutex queue_mutex;
 	std::condition_variable cv;
 	bool stop{false};
