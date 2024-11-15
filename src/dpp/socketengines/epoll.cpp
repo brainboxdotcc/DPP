@@ -130,7 +130,6 @@ struct socket_engine_epoll : public socket_engine_base {
 
 	bool register_socket(const socket_events& e) final {
 		bool r = socket_engine_base::register_socket(e);
-		std::cout << "return register: " << r << "\n";
 		if (r) {
 			struct epoll_event ev{};
 			ev.events = EPOLLET;
@@ -145,7 +144,6 @@ struct socket_engine_epoll : public socket_engine_base {
 			}
 			ev.data.ptr = fds.find(e.fd)->second.get();
 			int i = epoll_ctl(epoll_handle, EPOLL_CTL_ADD, e.fd, &ev);
-			std::cout << "epoll_ctl for fd " << e.fd << ": " << i << "\n";
 			if (i < 0) {
 				throw dpp::connection_exception("Failed to register socket to epoll_ctl()");
 			}

@@ -39,15 +39,11 @@ timer cluster::start_timer(timer_callback_t on_tick, uint64_t frequency, timer_c
 	timer_list[newtimer->handle] = newtimer;
 	next_timer.emplace(newtimer->next_tick, newtimer);
 
-	std::cout << "start_timer " << newtimer->handle << "\n";
-
 	return newtimer->handle;
 }
 
 bool cluster::stop_timer(timer t) {
 	std::lock_guard<std::mutex> l(timer_guard);
-
-	std::cout << "stop_timer " << t << "\n";
 
 	auto i = timer_list.find(t);
 	if (i != timer_list.end()) {
@@ -57,10 +53,11 @@ bool cluster::stop_timer(timer t) {
 			tptr->on_stop(t);
 		}
 		timer_list.erase(i);
-		auto j = next_timer.find(tptr->next_tick);
-		while (j != next_timer.end()) {
-			next_timer.erase(j);
-			j = next_timer.find(tptr->next_tick);
+		for (auto this_timer = next_timer.begin(); this_timer != next_timer.end(); ++this_timer) {
+			if (this_timer->second == tptr) {
+				next_timer.erase(this_timer);
+				break;
+			}
 		}
 		delete tptr;
 		return true;

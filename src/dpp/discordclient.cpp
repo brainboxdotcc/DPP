@@ -161,58 +161,18 @@ void discord_client::set_resume_hostname()
 
 void discord_client::thread_run()
 {
-	utility::set_thread_name(std::string("shard/") + std::to_string(shard_id));
-	setup_zlib();
-	do {
-		bool error = false;
-		ready = false;
-		message_queue.clear();
-
-		std::cout << "before read_loop\n";
-		ssl_client::read_loop();
-		std::cout << "after read_loop\n";
-		while (!terminating) {
-			sleep(1);
-		}
-		std::cout << "after read_loop while\n";
-
-		if (!terminating) {
-			ssl_client::close();
-			end_zlib();
-			setup_zlib();
-			do {
-				this->log(ll_debug, "Attempting reconnection of shard " + std::to_string(this->shard_id) + " to wss://" + resume_gateway_url);
-				error = false;
-				try {
-					set_resume_hostname();
-					ssl_client::connect();
-					websocket_client::connect();
-				}
-				catch (const std::exception &e) {
-					log(dpp::ll_error, std::string("Error establishing connection, retry in 5 seconds: ") + e.what());
-					ssl_client::close();
-					std::this_thread::sleep_for(std::chrono::seconds(5));
-					error = true;
-				}
-			} while (error);
-		}
-	} while(!terminating);
-	if (this->sfd != INVALID_SOCKET) {
-		/* Send a graceful termination */
-		this->log(ll_debug, "Graceful shutdown of shard " + std::to_string(this->shard_id) + " succeeded.");
-		this->nonblocking = false;
-		this->send_close_packet();
-		ssl_client::close();
-	} else {
-		this->log(ll_debug, "Graceful shutdown of shard " + std::to_string(this->shard_id) + " not possible, socket already closed.");
-	}
-	end_zlib();
 }
 
 void discord_client::run()
 {
-	this->runner = new std::thread(&discord_client::thread_run, this);
-	this->thread_id = runner->native_handle();
+	// TODO: This only runs once. Replace the reconnect mechanics.
+	// To make this work, we will need to intercept errors.
+	setup_zlib();
+	ready = false;
+	message_queue.clear();
+	ssl_client::read_loop();
+	//ssl_client::close();
+	//end_zlib();
 }
 
 bool discord_client::handle_frame(const std::string &buffer, ws_opcode opcode)
@@ -298,6 +258,8 @@ bool discord_client::handle_frame(const std::string &buffer, ws_opcode opcode)
 			}
 		break;
 	}
+
+	//log(dpp::ll_trace, "R: " + j.dump());
 
 	auto seq = j.find("s");
 	if (seq != j.end() && !seq->is_null()) {
@@ -493,6 +455,7 @@ void discord_client::one_second_timer()
 	}
 
 	websocket_client::one_second_timer();
+	std::cout << "Shard tick\n";
 
 	/* This all only triggers if we are connected (have completed websocket, and received READY or RESUMED) */
 	if (this->is_connected()) {
@@ -532,6 +495,7 @@ void discord_client::one_second_timer()
 		if (this->heartbeat_interval && this->last_seq) {
 			/* Check if we're due to emit a heartbeat */
 			if (time(nullptr) > last_heartbeat + ((heartbeat_interval / 1000.0) * 0.75)) {
+				std::cout << "Send ping\n";
 				last_ping_message = jsonobj_to_string(json({{"op", 1}, {"d", last_seq}}));
 				queue_message(last_ping_message, true);
 				last_heartbeat = time(nullptr);

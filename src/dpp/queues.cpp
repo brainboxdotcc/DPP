@@ -278,7 +278,7 @@ void http_request::stash_self(std::unique_ptr<http_request> self) {
 
 request_queue::request_queue(class cluster* owner, uint32_t request_threads) : creator(owner), terminating(false), globally_ratelimited(false), globally_limited_for(0), in_thread_pool_size(request_threads)
 {
-	for (uint32_t in_alloc = 0; in_alloc < in_thread_pool_size; ++in_alloc) {
+	for (up_t32_t in_alloc = 0; in_alloc < in_thread_pool_size; ++in_alloc) {
 		requests_in.push_back(std::make_unique<in_thread>(owner, this, in_alloc));
 	}
 	out_thread = new std::thread(&request_queue::out_loop, this);

@@ -89,6 +89,7 @@ cluster::cluster(const std::string &_token, uint32_t _intents, uint32_t _shards,
 	numshards(_shards), cluster_id(_cluster_id), maxclusters(_maxclusters), rest_ping(0.0), cache_policy(policy), ws_mode(ws_json)
 {
 	socketengine = create_socket_engine(this);
+	pool = std::make_unique<thread_pool>(request_threads);
 	/* Instantiate REST request queues */
 	try {
 		rest = new request_queue(this, request_threads);

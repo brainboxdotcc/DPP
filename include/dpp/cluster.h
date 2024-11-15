@@ -241,6 +241,11 @@ public:
 	std::unique_ptr<socket_engine_base> socketengine;
 
 	/**
+	 * @brief Thread pool
+	 */
+	std::unique_ptr<thread_pool> pool{nullptr};
+
+	/**
 	 * @brief Constructor for creating a cluster. All but the token are optional.
 	 * @param token The bot token to use for all HTTP commands and websocket connections
 	 * @param intents A bitmask of dpd::intents values for all shards on this cluster. This is required to be sent for all bots with over 100 servers.
