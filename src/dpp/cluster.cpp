@@ -220,22 +220,21 @@ void cluster::start(bool return_after) {
 	}
 
 	/* Start up all shards */
-	gateway g;
-	try {
-#ifdef DPP_CORO
-		//confirmation_callback_t cc = co_get_gateway_bot().sync_wait();
-		//g = std::get<gateway>(cc.value);
-#else
-		//g = dpp::sync<gateway>(this, &cluster::get_gateway_bot);
-#endif
+	get_gateway_bot([this](const auto& response) {
+		if (response.is_error()) {
+			// TODO: Check for 401 unauthorized
+			// throw dpp::invalid_token_exception(err_unauthorized, "Invalid bot token (401: Unauthorized when getting gateway shard count)");
+			return;
+		}
+		auto g = std::get<gateway>(response.value);
 		log(ll_debug, "Cluster: " + std::to_string(g.session_start_remaining) + " of " + std::to_string(g.session_start_total) + " session starts remaining");
-		if (g.session_start_remaining < g.shards) {
+		if (g.session_start_remaining < g.shards || g.shards == 0) {
 			throw dpp::connection_exception(err_no_sessions_left, "Discord indicates you cannot start enough sessions to boot this cluster! Cluster startup aborted. Try again later.");
-		}
-		if (g.session_start_max_concurrency > 1) {
+		} else if (g. session_start_max_concurrency == 0) {
+			throw dpp::connection_exception(err_auto_shard, "Cluster: Could not determine concurrency, startup aborted!");
+		} else if (g.session_start_max_concurrency > 1) {
 			log(ll_debug, "Cluster: Large bot sharding; Using session concurrency: " + std::to_string(g.session_start_max_concurrency));
-		}
-		if (numshards == 0) {
+		} else if (numshards == 0) {
 			if (g.shards) {
 				log(ll_info, "Auto Shard: Bot requires " + std::to_string(g.shards) + std::string(" shard") + ((g.shards > 1) ? "s" : ""));
 			} else {
@@ -243,75 +242,64 @@ void cluster::start(bool return_after) {
 			}
 			numshards = g.shards;
 		}
-	}
-	catch (const dpp::rest_exception& e) {
-		if (std::string(e.what()) == "401: Unauthorized") {
-			/* Throw special form of exception for invalid token */
-			throw dpp::invalid_token_exception(err_unauthorized, "Invalid bot token (401: Unauthorized when getting gateway shard count)");
-		} else {
-			/* Rethrow */
-			throw e;
-		}
-	}
-
-	start_time = time(nullptr);
-
-	log(ll_debug, "Starting with " + std::to_string(numshards) + " shards...");
-
-	for (uint32_t s = 0; s < numshards; ++s) {
-		/* Filter out shards that aren't part of the current cluster, if the bot is clustered */
-		if (s % maxclusters == cluster_id) {
-			/* Each discord_client spawns its own thread in its run() */
-			try {
-				this->shards[s] = new discord_client(this, s, numshards, token, intents, compressed, ws_mode);
-				this->shards[s]->run();
-			}
-			catch (const std::exception &e) {
-				log(dpp::ll_critical, "Could not start shard " + std::to_string(s) + ": " + std::string(e.what()));
-			}
-			/* Stagger the shard startups, pausing every 'session_start_max_concurrency' shards for 5 seconds.
-			 * This means that for bots that don't have large bot sharding, any number % 1 is always 0,
-			 * so it will pause after every shard. For any with non-zero concurrency it'll pause 5 seconds
-			 * after every batch.
-			 */
-			/*if (((s + 1) % g.session_start_max_concurrency) == 0) {
-				size_t wait_time = 5;
-				if (g.session_start_max_concurrency > 1) {
-					// If large bot sharding, be sure to give the batch of shards time to settle
-					bool all_connected = true;
-					do {
-						all_connected = true;
-						for (auto& shard : this->shards) {
-							if (!shard.second->ready) {
-								all_connected = false;
-								std::this_thread::sleep_for(std::chrono::milliseconds(100));
-								break;
-							}
-						}
-					} while (all_connected);
+		start_time = time(nullptr);
+		log(ll_debug, "Starting with " + std::to_string(numshards) + " shards...");
+		
+		for (uint32_t s = 0; s < numshards; ++s) {
+			/* Filter out shards that aren't part of the current cluster, if the bot is clustered */
+			if (s % maxclusters == cluster_id) {
+				/* Each discord_client is inserted into the socket engine when we call run() */
+				try {
+					this->shards[s] = new discord_client(this, s, numshards, token, intents, compressed, ws_mode);
+					this->shards[s]->run();
 				}
-				std::this_thread::sleep_for(std::chrono::seconds(wait_time));
-			}*/
-		}
-	}
-
-	/* Get all active DM channels and map them to user id -> dm id */
-	/*this->current_user_get_dms([this](const dpp::confirmation_callback_t& completion) {
-		dpp::channel_map dmchannels = std::get<channel_map>(completion.value);
-		for (auto & c : dmchannels) {
-			for (auto & u : c.second.recipients) {
-				this->set_dm_channel(u, c.second.id);
+				catch (const std::exception &e) {
+					log(dpp::ll_critical, "Could not start shard " + std::to_string(s) + ": " + std::string(e.what()));
+				}
+				/* Stagger the shard startups, pausing every 'session_start_max_concurrency' shards for 5 seconds.
+				 * This means that for bots that don't have large bot sharding, any number % 1 is always 0,
+				 * so it will pause after every shard. For any with non-zero concurrency it'll pause 5 seconds
+				 * after every batch.
+				 */
+				if (((s + 1) % g.session_start_max_concurrency) == 0) {
+					size_t wait_time = 5;
+					if (g.session_start_max_concurrency > 1) {
+						/* If large bot sharding, be sure to give the batch of shards time to settle */
+						bool all_connected = true;
+						do {
+							all_connected = true;
+							for (auto& shard : this->shards) {
+								if (!shard.second->ready) {
+									all_connected = false;
+									std::this_thread::sleep_for(std::chrono::milliseconds(100));
+									break;
+								}
+							}
+						} while (all_connected);
+					}
+					std::this_thread::sleep_for(std::chrono::seconds(wait_time));
+				}
 			}
 		}
-	});*/
 
-	log(ll_debug, "Shards started.");
+		/* Get all active DM channels and map them to user id -> dm id */
+		current_user_get_dms([this](const dpp::confirmation_callback_t& completion) {
+			dpp::channel_map dmchannels = std::get<channel_map>(completion.value);
+			for (auto & c : dmchannels) {
+				for (auto & u : c.second.recipients) {
+					set_dm_channel(u, c.second.id);
+				}
+			}
+		});
 
-	// TODO: Temporary for testing
+		log(ll_debug, "Shards started.");
+	});
+
 	do {
+		// TODO: Thread this
 		socketengine->process_events();
 	} while (true);
-	
+
 	if (!return_after) {
 		block_calling_thread();
 	}

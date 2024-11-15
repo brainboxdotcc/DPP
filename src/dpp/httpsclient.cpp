@@ -30,7 +30,7 @@
 
 namespace dpp {
 
-https_client::https_client(cluster* creator, const std::string &hostname, uint16_t port,  const std::string &urlpath, const std::string &verb, const std::string &req_body, const http_headers& extra_headers, bool plaintext_connection, uint16_t request_timeout, const std::string &protocol)
+https_client::https_client(cluster* creator, const std::string &hostname, uint16_t port,  const std::string &urlpath, const std::string &verb, const std::string &req_body, const http_headers& extra_headers, bool plaintext_connection, uint16_t request_timeout, const std::string &protocol, https_client_completion_event done)
 	: ssl_client(creator, hostname, std::to_string(port), plaintext_connection, false),
 	state(HTTPS_HEADERS),
 	request_type(verb),
@@ -41,7 +41,8 @@ https_client::https_client(cluster* creator, const std::string &hostname, uint16
 	status(0),
 	http_protocol(protocol),
 	timeout(request_timeout),
-	timed_out(false)
+	timed_out(false),
+	completed(done)
 {
 	nonblocking = false;
 	timeout = time(nullptr) + request_timeout;
@@ -249,6 +250,10 @@ bool https_client::handle_buffer(std::string &buffer)
 				if (buffer.length() >= 2 && buffer.substr(0, 2) == "\r\n") {
 					if (state == HTTPS_CHUNK_LAST) {
 						state = HTTPS_DONE;
+						if (completed) {
+							completed(this);
+							completed = {};
+						}
 						this->close();
 						return false;
 					} else {
@@ -284,11 +289,19 @@ bool https_client::handle_buffer(std::string &buffer)
 				buffer.clear();
 				if (content_length == ULLONG_MAX || body.length() >= content_length) {
 					state = HTTPS_DONE;
+					if (completed) {
+						completed(this);
+						completed = {};
+					}
 					this->close();
 					return false;
 				}
 			break;
 			case HTTPS_DONE:
+				if (completed) {
+					completed(this);
+					completed = {};
+				}
 				this->close();
 				return false;
 			break;
@@ -325,6 +338,16 @@ void https_client::close() {
 	if (state != HTTPS_DONE) {
 		state = HTTPS_DONE;
 		ssl_client::close();
+		if (completed) {
+			completed(this);
+			completed = {};
+		}
+	}
+}
+
+https_client::~https_client() {
+	if (sfd != INVALID_SOCKET) {
+		https_client::close();
 	}
 }
 

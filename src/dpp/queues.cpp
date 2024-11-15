@@ -31,6 +31,46 @@
 
 namespace dpp {
 
+namespace
+{
+
+/**
+ * @brief Comparator for sorting a request container
+ */
+struct compare_request {
+	/**
+	 * @brief Less_than comparator for sorting
+	 * @param lhs Left-hand side
+	 * @param rhs Right-hand side
+	 * @return Whether lhs comes before rhs in strict ordering
+	 */
+	bool operator()(const std::unique_ptr<http_request>& lhs, const std::unique_ptr<http_request>& rhs) const noexcept {
+		return std::less{}(lhs->endpoint, rhs->endpoint);
+	};
+
+	/**
+	 * @brief Less_than comparator for sorting
+	 * @param lhs Left-hand side
+	 * @param rhs Right-hand side
+	 * @return Whether lhs comes before rhs in strict ordering
+	 */
+	bool operator()(const std::unique_ptr<http_request>& lhs, std::string_view rhs) const noexcept {
+		return std::less{}(lhs->endpoint, rhs);
+	};
+
+	/**
+	 * @brief Less_than comparator for sorting
+	 * @param lhs Left-hand side
+	 * @param rhs Right-hand side
+	 * @return Whether lhs comes before rhs in strict ordering
+	 */
+	bool operator()(std::string_view lhs, const std::unique_ptr<http_request>& rhs) const noexcept {
+		return std::less{}(lhs, rhs->endpoint);
+	};
+};
+
+}
+
 http_request::http_request(const std::string &_endpoint, const std::string &_parameters, http_completion_event completion, const std::string &_postdata, http_method _method, const std::string &audit_reason, const std::string &filename, const std::string &filecontent, const std::string &filemimetype, const std::string &http_protocol)
  : complete_handler(completion), completed(false), non_discord(false), endpoint(_endpoint), parameters(_parameters), postdata(_postdata),  method(_method), reason(audit_reason), mimetype("application/json"), waiting(false), protocol(http_protocol), request_timeout(5)
 {
@@ -104,7 +144,7 @@ bool http_request::is_completed()
 }
 
 /* Execute a HTTP request */
-http_request_completion_t http_request::run(cluster* owner) {
+http_request_completion_t http_request::run(in_thread* processor, cluster* owner) {
 
 	http_request_completion_t rv;
 	double start = dpp::utility::time_f();
@@ -175,26 +215,65 @@ http_request_completion_t http_request::run(cluster* owner) {
 	}
 	http_connect_info hci = https_client::get_host_info(_host);
 	try {
-		https_client cli(owner, hci.hostname, hci.port, _url, request_verb[method], multipart.body, headers, !hci.is_ssl, owner->request_timeout, protocol);
-		rv.latency = dpp::utility::time_f() - start;
-		if (cli.timed_out) {
-			rv.error = h_connection;			
-			owner->log(ll_error, "HTTP(S) error on " + hci.scheme + " connection to " + hci.hostname + ":" + std::to_string(hci.port) + endpoint + ": Timed out while waiting for the response");
-		} else if (cli.get_status() < 100) {
-			rv.error = h_connection;
-			owner->log(ll_error, "HTTP(S) error on " + hci.scheme + " connection to " + hci.hostname + ":" + std::to_string(hci.port) + endpoint + ": Malformed HTTP response");
-		} else {
-			populate_result(_url, owner, rv, cli);
-		}
+		cli = std::make_unique<https_client>(
+			owner,
+			hci.hostname,
+			hci.port,
+			_url,
+			request_verb[method],
+			multipart.body,
+			headers,
+			!hci.is_ssl,
+			owner->request_timeout,
+			protocol,
+			[processor, rv, hci, this, owner, start, _url](https_client* client) {
+				http_request_completion_t result{rv};
+				result.latency = dpp::utility::time_f() - start;
+				if (client->timed_out) {
+					result.error = h_connection;
+					owner->log(ll_error, "HTTP(S) error on " + hci.scheme + " connection to " + hci.hostname + ":" + std::to_string(hci.port) + endpoint + ": Timed out while waiting for the response");
+				} else if (cli->get_status() < 100) {
+					result.error = h_connection;
+					owner->log(ll_error, "HTTP(S) error on " + hci.scheme + " connection to " + hci.hostname + ":" + std::to_string(hci.port) + endpoint + ": Malformed HTTP response");
+				} else {
+					populate_result(_url, owner, result, *client);
+				}
+				/* Set completion flag */
+				completed = true;
+
+				bucket_t newbucket;
+				newbucket.limit = result.ratelimit_limit;
+				newbucket.remaining = result.ratelimit_remaining;
+				newbucket.reset_after = result.ratelimit_reset_after;
+				newbucket.retry_after = result.ratelimit_retry_after;
+				newbucket.timestamp = time(nullptr);
+				processor->requests->globally_ratelimited = rv.ratelimit_global;
+				if (processor->requests->globally_ratelimited) {
+					processor->requests->globally_limited_for = (newbucket.retry_after ? newbucket.retry_after : newbucket.reset_after);
+				}
+				processor->buckets[this->endpoint] = newbucket;
+
+				/* Transfer it to completed requests */
+				/* Make a new entry in the completion list and notify */
+				auto hrc = std::make_unique<http_request_completion_t>();
+				*hrc = result;
+				{
+					std::scoped_lock lock1(processor->requests->out_mutex);
+					processor->requests->responses_out.push({std::move(me), std::move(hrc)});
+				}
+				processor->requests->out_ready.notify_one();
+			}
+		);
 	}
 	catch (const std::exception& e) {
 		owner->log(ll_error, "HTTP(S) error on " + hci.scheme + " connection to " + hci.hostname + ":" + std::to_string(hci.port) + ": " + std::string(e.what()));
 		rv.error = h_connection;
 	}
-
-	/* Set completion flag */
-	completed = true;
 	return rv;
+}
+
+void http_request::stash_self(std::unique_ptr<http_request> self) {
+	me = std::move(self);
 }
 
 request_queue::request_queue(class cluster* owner, uint32_t request_threads) : creator(owner), terminating(false), globally_ratelimited(false), globally_limited_for(0), in_thread_pool_size(request_threads)
@@ -248,46 +327,6 @@ request_queue::~request_queue()
 	delete out_thread;
 }
 
-namespace
-{
-
-/**
- * @brief Comparator for sorting a request container
- */
-struct compare_request {
-	/**
-	 * @brief Less_than comparator for sorting
-	 * @param lhs Left-hand side
-	 * @param rhs Right-hand side
-	 * @return Whether lhs comes before rhs in strict ordering
-	 */
-	bool operator()(const std::unique_ptr<http_request>& lhs, const std::unique_ptr<http_request>& rhs) const noexcept {
-		return std::less{}(lhs->endpoint, rhs->endpoint);
-	};
-
-	/**
-	 * @brief Less_than comparator for sorting
-	 * @param lhs Left-hand side
-	 * @param rhs Right-hand side
-	 * @return Whether lhs comes before rhs in strict ordering
-	 */
-	bool operator()(const std::unique_ptr<http_request>& lhs, std::string_view rhs) const noexcept {
-		return std::less{}(lhs->endpoint, rhs);
-	};
-
-	/**
-	 * @brief Less_than comparator for sorting
-	 * @param lhs Left-hand side
-	 * @param rhs Right-hand side
-	 * @return Whether lhs comes before rhs in strict ordering
-	 */
-	bool operator()(std::string_view lhs, const std::unique_ptr<http_request>& rhs) const noexcept {
-		return std::less{}(lhs, rhs->endpoint);
-	};
-};
-
-}
-
 void in_thread::in_loop(uint32_t index)
 {
 	utility::set_thread_name(std::string("http_req/") + std::to_string(index));
@@ -316,7 +355,7 @@ void in_thread::in_loop(uint32_t index)
 			for (auto& request_view : requests_view) {
 				const std::string &key = request_view->endpoint;
 				http_request_completion_t rv;
-				auto                      currbucket = buckets.find(key);
+				auto currbucket = buckets.find(key);
 
 				if (currbucket != buckets.end()) {
 					/* There's a bucket for this request. Check its status. If the bucket says to wait,
@@ -326,7 +365,7 @@ void in_thread::in_loop(uint32_t index)
 						uint64_t wait = (currbucket->second.retry_after ? currbucket->second.retry_after : currbucket->second.reset_after);
 						if ((uint64_t)time(nullptr) > currbucket->second.timestamp + wait) {
 							/* Time has passed, we can process this bucket again. send its request. */
-							rv = request_view->run(creator);
+							request_view->run(this, creator);
 						} else {
 							if (!request_view->waiting) {
 								request_view->waiting = true;
@@ -336,49 +375,31 @@ void in_thread::in_loop(uint32_t index)
 						}
 					} else {
 						/* There's limit remaining, we can just run the request */
-						rv = request_view->run(creator);
+						request_view->run(this, creator);
 					}
 				} else {
 					/* No bucket for this endpoint yet. Just send it, and make one from its reply */
-					rv = request_view->run(creator);
+					request_view->run(this, creator);
 				}
 
-				bucket_t newbucket;
-				newbucket.limit = rv.ratelimit_limit;
-				newbucket.remaining = rv.ratelimit_remaining;
-				newbucket.reset_after = rv.ratelimit_reset_after;
-				newbucket.retry_after = rv.ratelimit_retry_after;
-				newbucket.timestamp = time(nullptr);
-				requests->globally_ratelimited = rv.ratelimit_global;
-				if (requests->globally_ratelimited) {
-					requests->globally_limited_for = (newbucket.retry_after ? newbucket.retry_after : newbucket.reset_after);
-				}
-				buckets[request_view->endpoint] = newbucket;
-
-				/* Remove the request from the incoming requests to transfer it to completed requests */
-				std::unique_ptr<http_request> request;
+				/* Remove from inbound requests */
+				std::unique_ptr<http_request> rq;
 				{
 					/* Find the owned pointer in requests_in */
 					std::scoped_lock lock1{in_mutex};
 
+					const std::string &key = request_view->endpoint;
 					auto [begin, end] = std::equal_range(requests_in.begin(), requests_in.end(), key, compare_request{});
 					for (auto it = begin; it != end; ++it) {
 						if (it->get() == request_view) {
 							/* Grab and remove */
-							request = std::move(*it);
+							// NOTE: Where to move this to?!
+							request_view->stash_self(std::move(*it));
 							requests_in.erase(it);
 							break;
 						}
 					}
 				}
-				/* Make a new entry in the completion list and notify */
-				auto hrc = std::make_unique<http_request_completion_t>();
-				*hrc = rv;
-				{
-					std::scoped_lock lock1(requests->out_mutex);
-					requests->responses_out.push({std::move(request), std::move(hrc)});
-				}
-				requests->out_ready.notify_one();
 			}
 
 		} else {
@@ -423,8 +444,8 @@ void request_queue::out_loop()
 
 		if (queue_head.request && queue_head.response) {
 			queue_head.request->complete(*queue_head.response);
-			/* Queue deletions for 60 seconds from now */
-			auto when = now + 60;
+			/* Queue deletions for 5 seconds from now */
+			auto when = now + 5;
 			auto where = std::lower_bound(responses_to_delete.begin(), responses_to_delete.end(), when);
 			responses_to_delete.insert(where, {when, std::move(queue_head)});
 		}

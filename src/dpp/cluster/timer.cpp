@@ -39,11 +39,15 @@ timer cluster::start_timer(timer_callback_t on_tick, uint64_t frequency, timer_c
 	timer_list[newtimer->handle] = newtimer;
 	next_timer.emplace(newtimer->next_tick, newtimer);
 
+	std::cout << "start_timer " << newtimer->handle << "\n";
+
 	return newtimer->handle;
 }
 
 bool cluster::stop_timer(timer t) {
 	std::lock_guard<std::mutex> l(timer_guard);
+
+	std::cout << "stop_timer " << t << "\n";
 
 	auto i = timer_list.find(t);
 	if (i != timer_list.end()) {
@@ -54,8 +58,9 @@ bool cluster::stop_timer(timer t) {
 		}
 		timer_list.erase(i);
 		auto j = next_timer.find(tptr->next_tick);
-		if (j != next_timer.end()) {
+		while (j != next_timer.end()) {
 			next_timer.erase(j);
+			j = next_timer.find(tptr->next_tick);
 		}
 		delete tptr;
 		return true;
@@ -84,12 +89,12 @@ void cluster::tick_timers() {
 	{
 		time_t now = time(nullptr);
 		std::lock_guard<std::mutex> l(timer_guard);
-		for (auto i = next_timer.begin(); i != next_timer.end(); ++i) {
-			if (now >= i->second->next_tick) {
-				scheduled.push_back(i->second);
+		for (auto & i : next_timer) {
+			if (now >= i.second->next_tick) {
+				scheduled.push_back(i.second);
 			} else {
 				/* The first time we encounter an entry which is not due,
-				 * we can bail out, because std::map is ordered storage so
+				 * we can bail out, because std::map is ordered storage, so
 				 * we know at this point no more will match either.
 				 */
 				break;

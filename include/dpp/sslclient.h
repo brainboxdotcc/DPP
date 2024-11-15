@@ -27,6 +27,7 @@
 #include <ctime>
 #include <dpp/socket.h>
 #include <cstdint>
+#include <dpp/timer.h>
 
 namespace dpp {
 
@@ -88,6 +89,27 @@ private:
 	 * @brief Clean up resources
 	 */
 	void cleanup();
+
+	/**
+	 * @brief Start offset into internal ring buffer for client to server IO
+	 */
+	size_t client_to_server_length = 0;
+
+	/**
+	 * @brief Start offset into internal ring buffer for server to client IO
+	 */
+	size_t client_to_server_offset = 0;
+
+	/**
+	 * @brief Internal ring buffer for client to server IO
+	 */
+	char client_to_server_buffer[DPP_BUFSIZE];
+
+	/**
+	 * @brief Internal ring buffer for server to client IO
+	 */
+	char server_to_client_buffer[DPP_BUFSIZE];
+
 protected:
 	/**
 	 * @brief Input buffer received from socket
@@ -155,6 +177,11 @@ protected:
 	 */
 	bool connected{false};
 
+	/**
+	 * @brief Timer handle for one second timer
+	 */
+	timer timer_handle;
+
 
 	/**
 	 * @brief Called every second
@@ -166,6 +193,7 @@ protected:
 	 * @throw dpp::exception Failed to initialise connection
 	 */
 	virtual void connect();
+
 public:
 	/**
 	 * @brief Get the bytes out objectGet total bytes sent
@@ -217,11 +245,10 @@ public:
 	 */
 	bool keepalive;
 
+	/**
+	 * @brief Owning cluster
+	 */
 	class cluster* owner;
-
-	size_t client_to_server_length = 0, client_to_server_offset = 0;
-	char client_to_server_buffer[DPP_BUFSIZE], server_to_client_buffer[DPP_BUFSIZE];
-
 
 	/**
 	 * @brief Connect to a specified host and port. Throws std::runtime_error on fatal error.

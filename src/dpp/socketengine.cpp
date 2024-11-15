@@ -88,6 +88,8 @@ void socket_engine_base::prune() {
 		if ((time(nullptr) % 60) == 0) {
 			dpp::garbage_collection();
 		}
+
+		last_time = time(nullptr);
 	}
 }
 

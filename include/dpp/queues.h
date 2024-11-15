@@ -31,6 +31,7 @@
 #include <functional>
 #include <condition_variable>
 #include <atomic>
+#include <dpp/httpsclient.h>
 
 namespace dpp {
 
@@ -231,6 +232,12 @@ class DPP_EXPORT http_request {
 	 * @brief True for requests that are not going to discord (rate limits code skipped).
 	 */
 	bool non_discord;
+
+	/**
+	 * @brief HTTPS client
+	 */
+	std::unique_ptr<https_client> cli;
+
 public:
 	/**
 	 * @brief Endpoint name
@@ -302,6 +309,11 @@ public:
 	DPP_DEPRECATED("Please now use dpp::cluster::request_timeout") time_t request_timeout;
 
 	/**
+	 * @brief Unique ptr to self
+	 */
+	std::unique_ptr<http_request> me{nullptr};
+
+	/**
 	 * @brief Constructor. When constructing one of these objects it should be passed to request_queue::post_request().
 	 * @param _endpoint The API endpoint, e.g. /api/guilds
 	 * @param _parameters Major and minor parameters for the endpoint e.g. a user id or guild id
@@ -350,6 +362,12 @@ public:
 	~http_request();
 
 	/**
+	 * @brief stash unique ptr to self for moving into outbound queue when done
+	 * @param self unique self
+	 */
+	void stash_self(std::unique_ptr<http_request> self);
+
+	/**
 	 * @brief Call the completion callback, if the request is complete.
 	 * @param c callback to call
 	 */
@@ -359,7 +377,7 @@ public:
 	 * @brief Execute the HTTP request and mark the request complete.
 	 * @param owner creating cluster
 	 */
-	http_request_completion_t run(class cluster* owner);
+	http_request_completion_t run(class in_thread* processor, class cluster* owner);
 
 	/** @brief Returns true if the request is complete */
 	bool is_completed();
@@ -406,7 +424,7 @@ struct DPP_EXPORT bucket_t {
  * waiting for internal containers to be usable.
  */
 class DPP_EXPORT in_thread {
-private:
+public:
 	/**
 	 * @brief True if ending.
 	 */
@@ -452,7 +470,7 @@ private:
 	 * @param index Thread index
 	 */
 	void in_loop(uint32_t index);
-public:
+
 	/**
 	 * @brief Construct a new in thread object
 	 * 
@@ -500,7 +518,7 @@ public:
  * used to support user REST calls via dpp::cluster::request().
  */
 class DPP_EXPORT request_queue {
-protected:
+public:
 	/**
 	 * @brief Required so in_thread can access these member variables
 	 */
@@ -512,11 +530,6 @@ protected:
 	class cluster* creator;
 
 	/**
-	 * @brief Outbound queue mutex thread safety
-	 */
-	std::shared_mutex out_mutex;
-
-	/**
 	 * @brief Outbound queue thread
 	 * Note that although there are many 'in queues', which handle the HTTP requests,
 	 * there is only ever one 'out queue' which dispatches the results to the caller.
@@ -524,12 +537,6 @@ protected:
 	 * and thread safety boilerplate is required.
 	 */
 	std::thread* out_thread;
-
-	/**
-	 * @brief Outbound queue condition.
-	 * Signalled when there are requests completed to call callbacks for.
-	 */
-	std::condition_variable out_ready;
 
 	/**
 	 * @brief A completed request. Contains both the request and the response
@@ -545,11 +552,6 @@ protected:
 		 */
 		std::unique_ptr<http_request_completion_t> response;
 	};
-
-	/**
-	 * @brief Completed requests queue
-	 */
-	std::queue<completed_request> responses_out;
 
 	/**
 	 * @brief A vector of inbound request threads forming a pool.
@@ -622,7 +624,6 @@ protected:
 	 * @brief Outbound queue thread loop
 	 */
 	void out_loop();
-public:
 
 	/**
 	 * @brief constructor
@@ -669,6 +670,20 @@ public:
 	 * @return true if globally rate limited
 	 */
 	bool is_globally_ratelimited() const;
+
+	/**
+		 * @brief Completed requests queue
+		 */
+	std::queue<completed_request> responses_out;
+	/**
+		 * @brief Outbound queue condition.
+		 * Signalled when there are requests completed to call callbacks for.
+		 */
+	std::condition_variable out_ready;
+	/**
+		 * @brief Outbound queue mutex thread safety
+		 */
+	std::shared_mutex out_mutex;
 };
 
 }
