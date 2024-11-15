@@ -99,7 +99,9 @@ void discord_voice_client::write_ready() {
 			snd.buffer_size = bufsize;
 			snd.packets_left = outbuf.size();
 			snd.voice_client = this;
-			creator->on_voice_buffer_send.call(snd);
+			creator->queue_work(-1, [this, snd]() {
+				creator->on_voice_buffer_send.call(snd);
+			});
 		}
 	}
 	if (track_marker_found) {
@@ -113,7 +115,10 @@ void discord_voice_client::write_ready() {
 					track_meta.erase(track_meta.begin());
 				}
 			}
-			creator->on_voice_track_marker.call(vtm);
+			creator->queue_work(-1, [this, vtm]() {
+				creator->on_voice_track_marker.call(vtm);
+			});
+
 		}
 	}
 }

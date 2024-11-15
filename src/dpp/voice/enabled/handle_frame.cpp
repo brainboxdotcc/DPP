@@ -208,7 +208,9 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 				vcp.voice_client = this;
 				vcp.user_id = snowflake_not_null(&j["d"], "user_id");
 				vcp.platform = static_cast<client_platform_t>(int8_not_null(&j["d"], "platform"));
-				creator->on_voice_client_platform.call(vcp);
+				creator->queue_work(0, [this, vcp]() {
+					creator->on_voice_client_platform.call(vcp);
+				});
 			}
 			break;
 			case voice_opcode_multiple_clients_connect: {
@@ -303,7 +305,9 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 						voice_client_disconnect_t vcd(nullptr, data);
 						vcd.voice_client = this;
 						vcd.user_id = u_id;
-						creator->on_voice_client_disconnect.call(vcd);
+						creator->queue_work(0, [this, vcd]() {
+							creator->on_voice_client_disconnect.call(vcd);
+						});
 					}
 				}
 			}
@@ -322,7 +326,9 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 						vcs.voice_client = this;
 						vcs.user_id = u_id;
 						vcs.ssrc = u_ssrc;
-						creator->on_voice_client_speaking.call(vcs);
+						creator->queue_work(0, [this, vcs]() {
+							creator->on_voice_client_speaking.call(vcs);
+						});
 					}
 				}
 			}
@@ -419,7 +425,9 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 						voice_ready_t rdy(nullptr, data);
 						rdy.voice_client = this;
 						rdy.voice_channel_id = this->channel_id;
-						creator->on_voice_ready.call(rdy);
+						creator->queue_work(0, [this, rdy]() {
+							creator->on_voice_ready.call(rdy);
+						});
 					}
 				}
 			}
@@ -521,7 +529,9 @@ void discord_voice_client::ready_for_transition(const std::string &data) {
 			voice_ready_t rdy(nullptr, data);
 			rdy.voice_client = this;
 			rdy.voice_channel_id = this->channel_id;
-			creator->on_voice_ready.call(rdy);
+			creator->queue_work(0, [this, rdy]() {
+				creator->on_voice_ready.call(rdy);
+			});
 		}
 	}
 }

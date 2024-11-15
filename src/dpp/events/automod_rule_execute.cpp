@@ -49,7 +49,9 @@ void automod_rule_execute::handle(discord_client* client, json &j, const std::st
 		are.content = string_not_null(&d, "content");
 		are.matched_keyword = string_not_null(&d, "matched_keyword");
 		are.matched_content = string_not_null(&d, "matched_content");
-		client->creator->on_automod_rule_execute.call(are);
+		client->creator->queue_work(0, [client, are]() {
+			client->creator->on_automod_rule_execute.call(are);
+		});
 	}
 }
 

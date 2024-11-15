@@ -41,7 +41,9 @@ void automod_rule_create::handle(discord_client* client, json &j, const std::str
 		json& d = j["d"];
 		automod_rule_create_t arc(client, raw);
 		arc.created = automod_rule().fill_from_json(&d);
-		client->creator->on_automod_rule_create.call(arc);
+		client->creator->queue_work(0, [client, arc]() {
+			client->creator->on_automod_rule_create.call(arc);
+		});
 	}
 }
 

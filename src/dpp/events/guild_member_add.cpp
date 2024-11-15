@@ -47,7 +47,9 @@ void guild_member_add::handle(discord_client* client, json &j, const std::string
 		gmr.added = gm;
 		if (!client->creator->on_guild_member_add.empty()) {
 			gmr.adding_guild = g;
-			client->creator->on_guild_member_add.call(gmr);
+			client->creator->queue_work(1, [client, gmr]() {
+				client->creator->on_guild_member_add.call(gmr);
+			});
 		}
 	} else {
 		dpp::user* u = dpp::find_user(snowflake_not_null(&(d["user"]), "id"));
@@ -69,7 +71,9 @@ void guild_member_add::handle(discord_client* client, json &j, const std::string
 		}
 		if (!client->creator->on_guild_member_add.empty()) {
 			gmr.adding_guild = g;
-			client->creator->on_guild_member_add.call(gmr);
+			client->creator->queue_work(1, [client, gmr]() {
+				client->creator->on_guild_member_add.call(gmr);
+			});
 		}
 	}
 }

@@ -51,7 +51,9 @@ void guild_member_update::handle(discord_client* client, json &j, const std::str
 			m.fill_from_json(&user, guild_id, u.id);
 			gmu.updated = m;
 		}
-		client->creator->on_guild_member_update.call(gmu);
+		client->creator->queue_work(1, [client, gmu]() {
+			client->creator->on_guild_member_update.call(gmu);
+		});
 	} else {
 		dpp::user* u = dpp::find_user(from_string<uint64_t>(d["user"]["id"].get<std::string>()));
 		if (u) {
