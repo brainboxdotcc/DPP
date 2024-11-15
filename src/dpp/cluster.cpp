@@ -176,6 +176,10 @@ cluster& cluster::set_websocket_protocol(websocket_protocol_t mode) {
 	return *this;
 }
 
+void cluster::queue_work(int priority, work_unit task) {
+	pool->enqueue({priority, task});
+}
+
 void cluster::log(dpp::loglevel severity, const std::string &msg) const {
 	if (!on_log.empty()) {
 		/* Pass to user if they've hooked the event */

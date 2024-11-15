@@ -455,7 +455,6 @@ void discord_client::one_second_timer()
 	}
 
 	websocket_client::one_second_timer();
-	std::cout << "Shard tick\n";
 
 	/* This all only triggers if we are connected (have completed websocket, and received READY or RESUMED) */
 	if (this->is_connected()) {
@@ -495,7 +494,6 @@ void discord_client::one_second_timer()
 		if (this->heartbeat_interval && this->last_seq) {
 			/* Check if we're due to emit a heartbeat */
 			if (time(nullptr) > last_heartbeat + ((heartbeat_interval / 1000.0) * 0.75)) {
-				std::cout << "Send ping\n";
 				last_ping_message = jsonobj_to_string(json({{"op", 1}, {"d", last_seq}}));
 				queue_message(last_ping_message, true);
 				last_heartbeat = time(nullptr);

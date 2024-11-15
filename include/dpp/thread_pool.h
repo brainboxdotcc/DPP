@@ -28,12 +28,14 @@
 #include <mutex>
 #include <functional>
 
+using work_unit = std::function<void()>;
+
 /**
  * A task within a thread pool. A simple lambda that accepts no parameters and returns void.
  */
 struct thread_pool_task {
 	int priority;
-	std::function<void()> function;
+	work_unit function;
 };
 
 struct thread_pool_task_comparator {

@@ -530,15 +530,6 @@ public:
 	class cluster* creator;
 
 	/**
-	 * @brief Outbound queue thread
-	 * Note that although there are many 'in queues', which handle the HTTP requests,
-	 * there is only ever one 'out queue' which dispatches the results to the caller.
-	 * This is to simplify thread management in bots that use the library, as less mutexing
-	 * and thread safety boilerplate is required.
-	 */
-	std::thread* out_thread;
-
-	/**
 	 * @brief A completed request. Contains both the request and the response
 	 */
 	struct completed_request {
@@ -565,40 +556,6 @@ public:
 	std::vector<std::unique_ptr<in_thread>> requests_in;
 
 	/**
-	 * @brief A request queued for deletion in the queue.
-	 */
-	struct queued_deleting_request {
-		/**
-		 * @brief Time to delete the request
-		 */
-		time_t time_to_delete;
-
-		/**
-		 * @brief The request to delete
-		 */
-		completed_request request;
-
-		/**
-		 * @brief Comparator for sorting purposes
-		 * @param other Other queued request to compare the deletion time with
-		 * @return bool Whether this request comes before another in strict ordering
-		 */
-		bool operator<(const queued_deleting_request& other) const noexcept;
-
-		/**
-		 * @brief Comparator for sorting purposes
-		 * @param time Time to compare with
-		 * @return bool Whether this request's deletion time is lower than the time given, for strict ordering
-		 */
-		bool operator<(time_t time) const noexcept;
-	};
-
-	/**
-	 * @brief Completed requests to delete. Sorted by deletion time
-	 */
-	std::vector<queued_deleting_request> responses_to_delete;
-
-	/**
 	 * @brief Set to true if the threads should terminate
 	 */
 	std::atomic<bool> terminating;
@@ -619,11 +576,6 @@ public:
 	 * @brief Number of request threads in the thread pool
 	 */
 	uint32_t in_thread_pool_size;
-
-	/**
-	 * @brief Outbound queue thread loop
-	 */
-	void out_loop();
 
 	/**
 	 * @brief constructor
@@ -670,20 +622,6 @@ public:
 	 * @return true if globally rate limited
 	 */
 	bool is_globally_ratelimited() const;
-
-	/**
-		 * @brief Completed requests queue
-		 */
-	std::queue<completed_request> responses_out;
-	/**
-		 * @brief Outbound queue condition.
-		 * Signalled when there are requests completed to call callbacks for.
-		 */
-	std::condition_variable out_ready;
-	/**
-		 * @brief Outbound queue mutex thread safety
-		 */
-	std::shared_mutex out_mutex;
 };
 
 }

@@ -235,6 +235,9 @@ http_request_completion_t http_request::run(in_thread* processor, cluster* owner
 				} else if (cli->get_status() < 100) {
 					result.error = h_connection;
 					owner->log(ll_error, "HTTP(S) error on " + hci.scheme + " connection to " + hci.hostname + ":" + std::to_string(hci.port) + endpoint + ": Malformed HTTP response");
+				} else if (cli->get_status() >= 400) {
+					owner->log(ll_error, "HTTP(S) error " + std::to_string(cli->get_status()) + " on " + hci.scheme + " connection to " + hci.hostname + ":" + std::to_string(hci.port) + ": " + cli->get_content());
+					result.error = h_connection;
 				} else {
 					populate_result(_url, owner, result, *client);
 				}
@@ -254,14 +257,9 @@ http_request_completion_t http_request::run(in_thread* processor, cluster* owner
 				processor->buckets[this->endpoint] = newbucket;
 
 				/* Transfer it to completed requests */
-				/* Make a new entry in the completion list and notify */
-				auto hrc = std::make_unique<http_request_completion_t>();
-				*hrc = result;
-				{
-					std::scoped_lock lock1(processor->requests->out_mutex);
-					processor->requests->responses_out.push({std::move(me), std::move(hrc)});
-				}
-				processor->requests->out_ready.notify_one();
+				owner->queue_work(0, [this, result]() {
+					complete(result);
+				});
 			}
 		);
 	}
@@ -278,10 +276,9 @@ void http_request::stash_self(std::unique_ptr<http_request> self) {
 
 request_queue::request_queue(class cluster* owner, uint32_t request_threads) : creator(owner), terminating(false), globally_ratelimited(false), globally_limited_for(0), in_thread_pool_size(request_threads)
 {
-	for (up_t32_t in_alloc = 0; in_alloc < in_thread_pool_size; ++in_alloc) {
+	for (uint32_t in_alloc = 0; in_alloc < in_thread_pool_size; ++in_alloc) {
 		requests_in.push_back(std::make_unique<in_thread>(owner, this, in_alloc));
 	}
-	out_thread = new std::thread(&request_queue::out_loop, this);
 }
 
 request_queue& request_queue::add_request_threads(uint32_t request_threads)
@@ -319,12 +316,9 @@ void in_thread::terminate()
 request_queue::~request_queue()
 {
 	terminating.store(true, std::memory_order_relaxed);
-	out_ready.notify_one();
 	for (auto& in_thr : requests_in) {
 		in_thr->terminate(); // signal all of them here, otherwise they will all join 1 by 1 and it will take forever
 	}
-	out_thread->join();
-	delete out_thread;
 }
 
 void in_thread::in_loop(uint32_t index)
@@ -409,51 +403,6 @@ void in_thread::in_loop(uint32_t index)
 			}
 			requests->globally_ratelimited = false;
 			in_ready.notify_one();
-		}
-	}
-}
-
-bool request_queue::queued_deleting_request::operator<(const queued_deleting_request& other) const noexcept {
-	return time_to_delete < other.time_to_delete;
-}
-
-bool request_queue::queued_deleting_request::operator<(time_t time) const noexcept {
-	return time_to_delete < time;
-}
-
-
-void request_queue::out_loop()
-{
-	utility::set_thread_name("req_callback");
-	while (!terminating.load(std::memory_order_relaxed)) {
-
-		std::mutex mtx;
-		std::unique_lock lock{ mtx };
-		out_ready.wait_for(lock, std::chrono::seconds(1));
-		time_t now = time(nullptr);
-
-		/* A request has been completed! */
-		completed_request queue_head = {};
-		{
-			std::scoped_lock lock1(out_mutex);
-			if (responses_out.size()) {
-				queue_head = std::move(responses_out.front());
-				responses_out.pop();
-			}
-		}
-
-		if (queue_head.request && queue_head.response) {
-			queue_head.request->complete(*queue_head.response);
-			/* Queue deletions for 5 seconds from now */
-			auto when = now + 5;
-			auto where = std::lower_bound(responses_to_delete.begin(), responses_to_delete.end(), when);
-			responses_to_delete.insert(where, {when, std::move(queue_head)});
-		}
-
-		/* Check for deletable items every second regardless of select status */
-		auto end = std::lower_bound(responses_to_delete.begin(), responses_to_delete.end(), now);
-		if (end != responses_to_delete.begin()) {
-			responses_to_delete.erase(responses_to_delete.begin(), end);
 		}
 	}
 }
