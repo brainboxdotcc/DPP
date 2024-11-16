@@ -1153,9 +1153,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 				if (files_tested == std::array{true, true, true} && pin_tested && thread_tested) {
 					set_test(MESSAGEDELETE, false);
 					bot.message_delete(message_id, channel_id, [](const dpp::confirmation_callback_t &callback) {
-						if (!callback.is_error()) {
-							set_test(MESSAGEDELETE, true);
-						}
+						set_test(MESSAGEDELETE, !callback.is_error());
 					});
 				}
 			}

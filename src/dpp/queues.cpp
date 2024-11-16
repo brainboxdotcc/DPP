@@ -235,9 +235,8 @@ http_request_completion_t http_request::run(in_thread* processor, cluster* owner
 				} else if (cli->get_status() < 100) {
 					result.error = h_connection;
 					owner->log(ll_error, "HTTP(S) error on " + hci.scheme + " connection to " + request_verb[method] + " "  + hci.hostname + ":" + std::to_string(hci.port) + endpoint + ": Malformed HTTP response");
-				} else {
-					populate_result(_url, owner, result, *client);
 				}
+				populate_result(_url, owner, result, *client);
 				/* Set completion flag */
 				completed = true;
 
