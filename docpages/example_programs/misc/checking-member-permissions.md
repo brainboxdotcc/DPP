@@ -17,7 +17,7 @@ if (c && c->get_user_permissions(member).can(dpp::p_send_messages)) {
 
 ### Role Hierarchy
 
-The recommended and correct way to compare for roles in the hierarchy is using the comparison operators (`<`, `>`) on the \ref dpp::role::operator<(dpp::role, dpp::role) "dpp::role" objects themselves. Keep in mind that multiple roles can have the same position number. As a result, comparing roles by position alone can lead to subtle bugs when checking for role hierarchy.
+The recommended and correct way to compare for roles in the hierarchy is using the comparison operators (`<`, `>`) on the dpp::role objects themselves. Keep in mind that multiple roles can have the same position number. As a result, comparing roles by position alone can lead to subtle bugs when checking for role hierarchy.
 
 For example let's say you have a ban command, and want to make sure that any issuer of the command can only ban members of lower position than their own highest role:
 
