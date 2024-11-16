@@ -43,7 +43,9 @@ void guild_scheduled_event_user_remove::handle(discord_client* client, json &j, 
 		eur.guild_id = snowflake_not_null(&d, "guild_id");
 		eur.user_id = snowflake_not_null(&d, "user_id");
 		eur.event_id = snowflake_not_null(&d, "guild_scheduled_event_id");
-		client->creator->on_guild_scheduled_event_user_remove.call(eur);
+		client->creator->queue_work(1, [client, eur]() {
+			client->creator->on_guild_scheduled_event_user_remove.call(eur);
+		});
 	}
 }
 

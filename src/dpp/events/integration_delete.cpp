@@ -41,7 +41,9 @@ void integration_delete::handle(discord_client* client, json &j, const std::stri
 		json& d = j["d"];
 		dpp::integration_delete_t id(client, raw);
 		id.deleted_integration = dpp::integration().fill_from_json(&d);
-		client->creator->on_integration_delete.call(id);
+		client->creator->queue_work(1, [client, id]() {
+			client->creator->on_integration_delete.call(id);
+		});
 	}
 }
 

@@ -42,7 +42,9 @@ void thread_create::handle(discord_client* client, json& j, const std::string& r
 		dpp::thread_create_t tc(client, raw);
 		tc.created = t;
 		tc.creating_guild = g;
-		client->creator->on_thread_create.call(tc);
+		client->creator->queue_work(1, [client, tc]() {
+			client->creator->on_thread_create.call(tc);
+		});
 	}
 }
 };

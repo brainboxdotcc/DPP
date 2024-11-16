@@ -49,7 +49,9 @@ void user_update::handle(discord_client* client, json &j, const std::string &raw
 			if (!client->creator->on_user_update.empty()) {
 				dpp::user_update_t uu(client, raw);
 				uu.updated = *u;
-				client->creator->on_user_update.call(uu);
+				client->creator->queue_work(1, [client, uu]() {
+					client->creator->on_user_update.call(uu);
+				});
 			}
 		} else {
 			if (!client->creator->on_user_update.empty()) {
@@ -57,7 +59,9 @@ void user_update::handle(discord_client* client, json &j, const std::string &raw
 				u.fill_from_json(&d);
 				dpp::user_update_t uu(client, raw);
 				uu.updated = u;
-				client->creator->on_user_update.call(uu);
+				client->creator->queue_work(1, [client, uu]() {
+					client->creator->on_user_update.call(uu);
+				});
 			}
 		}
 	}

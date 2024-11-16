@@ -40,7 +40,9 @@ void presence_update::handle(discord_client* client, json &j, const std::string 
 		json& d = j["d"];
 		dpp::presence_update_t pu(client, raw);
 		pu.rich_presence = dpp::presence().fill_from_json(&d);
-		client->creator->on_presence_update.call(pu);
+		client->creator->queue_work(1, [client, pu]() {
+			client->creator->on_presence_update.call(pu);
+		});
 	}
 }
 

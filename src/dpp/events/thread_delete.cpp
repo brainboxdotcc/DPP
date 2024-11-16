@@ -42,7 +42,9 @@ void thread_delete::handle(discord_client* client, json& j, const std::string& r
 		dpp::thread_delete_t td(client, raw);
 		td.deleted = t;
 		td.deleting_guild = g;
-		client->creator->on_thread_delete.call(td);
+		client->creator->queue_work(1, [client, td]() {
+			client->creator->on_thread_delete.call(td);
+		});
 	}
 }
 };

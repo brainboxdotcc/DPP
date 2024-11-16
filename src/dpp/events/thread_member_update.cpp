@@ -34,7 +34,9 @@ void thread_member_update::handle(discord_client* client, json& j, const std::st
 		json& d = j["d"];
 		dpp::thread_member_update_t tm(client, raw);
 		tm.updated = thread_member().fill_from_json(&d);
-		client->creator->on_thread_member_update.call(tm);
+		client->creator->queue_work(1, [client, tm]() {
+			client->creator->on_thread_member_update.call(tm);
+		});
 	}
 }
 };

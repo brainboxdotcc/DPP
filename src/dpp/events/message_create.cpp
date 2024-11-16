@@ -43,7 +43,9 @@ void message_create::handle(discord_client* client, json &j, const std::string &
 		dpp::message_create_t msg(client, raw);
 		msg.msg.fill_from_json(&d, client->creator->cache_policy);
 		msg.msg.owner = client->creator;
-		client->creator->on_message_create.call(msg);
+		client->creator->queue_work(1, [client, msg]() {
+			client->creator->on_message_create.call(msg);
+		});
 	}
 }
 

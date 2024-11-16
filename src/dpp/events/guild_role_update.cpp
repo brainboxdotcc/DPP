@@ -47,7 +47,9 @@ void guild_role_update::handle(discord_client* client, json &j, const std::strin
 			dpp::guild_role_update_t gru(client, raw);
 			gru.updating_guild = g;
 			gru.updated = &r;
-			client->creator->on_guild_role_update.call(gru);
+			client->creator->queue_work(1, [client, gru]() {
+				client->creator->on_guild_role_update.call(gru);
+			});
 		}
 	} else {
 		json& role = d["role"];
@@ -58,7 +60,9 @@ void guild_role_update::handle(discord_client* client, json &j, const std::strin
 				dpp::guild_role_update_t gru(client, raw);
 				gru.updating_guild = g;
 				gru.updated = r;
-				client->creator->on_guild_role_update.call(gru);
+				client->creator->queue_work(1, [client, gru]() {
+					client->creator->on_guild_role_update.call(gru);
+				});
 			}
 		}
 	}

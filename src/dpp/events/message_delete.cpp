@@ -43,7 +43,9 @@ void message_delete::handle(discord_client* client, json &j, const std::string &
 		msg.id = snowflake_not_null(&d, "id");
 		msg.guild_id = snowflake_not_null(&d, "guild_id");
 		msg.channel_id = snowflake_not_null(&d, "channel_id");
-		client->creator->on_message_delete.call(msg);
+		client->creator->queue_work(1, [client, msg]() {
+			client->creator->on_message_delete.call(msg);
+		});
 	}
 
 }

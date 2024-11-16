@@ -39,7 +39,9 @@ void stage_instance_delete::handle(discord_client* client, json &j, const std::s
 		json& d = j["d"];
 		dpp::stage_instance_delete_t sid(client, raw);
 		sid.deleted.fill_from_json(&d);
-		client->creator->on_stage_instance_delete.call(sid);
+		client->creator->queue_work(1, [client, sid]() {
+			client->creator->on_stage_instance_delete.call(sid);
+		});
 	}
 }
 
