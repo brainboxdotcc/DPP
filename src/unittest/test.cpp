@@ -282,53 +282,6 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 
 	set_test(HOSTINFO, hci_test);
 
-	set_test(HTTPS, false);
-	if (!offline) {
-		dpp::multipart_content multipart = dpp::https_client::build_multipart(
-			"{\"content\":\"test\"}", {"test.txt", "blob.blob"}, {"ABCDEFGHI", "BLOB!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"}, {"text/plain", "application/octet-stream"}
-		);
-		try {
-			/*dpp::https_client c("discord.com", 443, "/api/channels/" + std::to_string(TEST_TEXT_CHANNEL_ID) + "/messages", "POST", multipart.body,
-				{
-					{"Content-Type", multipart.mimetype},
-					{"Authorization", "Bot " + token}
-				}
-			);
-			std::string hdr1 = c.get_header("server");
-			std::string content1 = c.get_content();
-			set_test(HTTPS, hdr1 == "cloudflare" && c.get_status() == 200);*/
-		}
-		catch (const dpp::exception& e) {
-			std::cout << e.what() << "\n";
-			set_test(HTTPS, false);
-		}
-	}
-
-	set_test(HTTP, false);
-	try {
-		/*dpp::https_client c2("github.com", 80, "/", "GET", "", {}, true);
-		std::string hdr2 = c2.get_header("location");
-		std::string content2 = c2.get_content();
-		set_test(HTTP, hdr2 == "https://github.com/" && c2.get_status() == 301);*/
-	}
-	catch (const dpp::exception& e) {
-		std::cout << e.what() << "\n";
-		set_test(HTTP, false);
-	}
-
-	set_test(MULTIHEADER, false);
-	try {
-		/*dpp::https_client c2("dl.dpp.dev", 443, "/cookietest.php", "GET", "", {});
-		size_t count = c2.get_header_count("set-cookie");
-		size_t count_list = c2.get_header_list("set-cookie").size();
-		// Google sets a bunch of cookies when we start accessing it.
-		set_test(MULTIHEADER, c2.get_status() == 200 && count > 1 && count == count_list);*/
-	}
-	catch (const dpp::exception& e) {
-		std::cout << e.what() << "\n";
-		set_test(MULTIHEADER, false);
-	}
-
 	std::vector<uint8_t> testaudio = load_test_audio();
 
 	set_test(READFILE, false);
@@ -2288,16 +2241,21 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 				createdRole.name = "Test-Role-Edited";
 				createdRole.colour = dpp::colors::light_sea_green;
 				try {
-					dpp::role edited = dpp::sync<dpp::role>(&bot, &dpp::cluster::role_edit, createdRole);
-					if (createdRole.id == edited.id && edited.name == "Test-Role-Edited") {
-						set_test(ROLE_EDIT, true);
-					}
+					bot.role_delete(TEST_GUILD_ID, createdRole.id, [createdRole](const auto& e) {
+						if (e.is_error()) {
+							set_test(ROLE_EDIT, false);
+							return;
+						}
+						dpp::role edited = std::get<dpp::role>(e.value);
+						set_test(ROLE_EDIT, (createdRole.id == edited.id && edited.name == "Test-Role-Edited"));
+					});
 				} catch (dpp::rest_exception &exception) {
 					set_test(ROLE_EDIT, false);
 				}
 				try {
-					dpp::sync<dpp::confirmation>(&bot, &dpp::cluster::role_delete, TEST_GUILD_ID, createdRole.id);
-					set_test(ROLE_DELETE, true);
+					bot.role_delete(TEST_GUILD_ID, createdRole.id, [](const auto& e) {
+						set_test(ROLE_DELETE, !e.is_error());
+					});
 				} catch (dpp::rest_exception &exception) {
 					bot.log(dpp::ll_warning, "Exception: " + std::string(exception.what()));
 					set_test(ROLE_DELETE, false);
@@ -2316,6 +2274,59 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 			set_test(BOTSTART, false);
 		}
 
+		set_test(HTTPS, false);
+		if (!offline) {
+			dpp::multipart_content multipart = dpp::https_client::build_multipart(
+				"{\"content\":\"test\"}", {"test.txt", "blob.blob"}, {"ABCDEFGHI", "BLOB!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"}, {"text/plain", "application/octet-stream"}
+			);
+			try {
+				dpp::https_client c(&bot, "discord.com", 443, "/api/channels/" + std::to_string(TEST_TEXT_CHANNEL_ID) + "/messages", "POST", multipart.body,
+						    {
+							    {"Content-Type", multipart.mimetype},
+							    {"Authorization", "Bot " + token}
+						    }, false, 5, "1.1", [](dpp::https_client* c) {
+						std::string hdr1 = c->get_header("server");
+						std::string content1 = c->get_content();
+						set_test(HTTPS, hdr1 == "cloudflare" && c->get_status() == 200);
+					}
+				);
+				sleep(6);
+			}
+			catch (const dpp::exception& e) {
+				std::cout << e.what() << "\n";
+				set_test(HTTPS, false);
+			}
+		}
+
+		set_test(HTTP, false);
+		try {
+			dpp::https_client c2(&bot, "github.com", 80, "/", "GET", "", {}, true, 5, "1.1", [](dpp::https_client* c2) {
+				std::string hdr2 = c2->get_header("location");
+				std::string content2 = c2->get_content();
+				set_test(HTTP, hdr2 == "https://github.com/" && c2->get_status() == 301);
+			});
+			sleep(6);
+		}
+		catch (const dpp::exception& e) {
+			std::cout << e.what() << "\n";
+			set_test(HTTP, false);
+		}
+
+		set_test(MULTIHEADER, false);
+		try {
+			dpp::https_client c2(&bot, "dl.dpp.dev", 443, "/cookietest.php", "GET", "", {}, true, 5, "1.1", [](dpp::https_client* c2) {
+				size_t count = c2->get_header_count("set-cookie");
+				size_t count_list = c2->get_header_list("set-cookie").size();
+				// Google sets a bunch of cookies when we start accessing it.
+				set_test(MULTIHEADER, c2->get_status() == 200 && count > 1 && count == count_list);
+			});
+			sleep(6);
+		}
+		catch (const dpp::exception& e) {
+			std::cout << e.what() << "\n";
+			set_test(MULTIHEADER, false);
+		}
+
 		set_test(TIMERSTART, false);
 		uint32_t ticks = 0;
 		dpp::timer th = bot.start_timer([&](dpp::timer timer_handle) {
@@ -2330,8 +2341,14 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 
 		set_test(USER_GET_CACHED_PRESENT, false);
 		try {
-			dpp::user_identified u = dpp::sync<dpp::user_identified>(&bot, &dpp::cluster::user_get_cached, TEST_USER_ID);
-			set_test(USER_GET_CACHED_PRESENT, (u.id == TEST_USER_ID));
+			bot.user_get_cached(TEST_USER_ID, [](const auto &e) {
+				if (e.is_error()) {
+					set_test(USER_GET_CACHED_PRESENT, false);
+					return;
+				}
+				dpp::user_identified u = std::get<dpp::user_identified>(e.value);
+				set_test(USER_GET_CACHED_PRESENT, (u.id == TEST_USER_ID));
+			});
 		}
 		catch (const std::exception&) {
 			set_test(USER_GET_CACHED_PRESENT, false);
@@ -2345,8 +2362,14 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 			 * If this becomes not true any more, we'll pick another well known
 			 * user ID.
 			 */
-			dpp::user_identified u = dpp::sync<dpp::user_identified>(&bot, &dpp::cluster::user_get_cached, 90339695967350784);
-			set_test(USER_GET_CACHED_ABSENT, (u.id == dpp::snowflake(90339695967350784)));
+			bot.user_get_cached(90339695967350784, [](const auto &e) {
+				if (e.is_error()) {
+					set_test(USER_GET_CACHED_ABSENT, false);
+					return;
+				}
+				dpp::user_identified u = std::get<dpp::user_identified>(e.value);
+				set_test(USER_GET_CACHED_ABSENT, (u.id == 90339695967350784));
+			});
 		}
 		catch (const std::exception&) {
 			set_test(USER_GET_CACHED_ABSENT, false);

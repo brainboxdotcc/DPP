@@ -226,18 +226,15 @@ http_request_completion_t http_request::run(in_thread* processor, cluster* owner
 			!hci.is_ssl,
 			owner->request_timeout,
 			protocol,
-			[processor, rv, hci, this, owner, start, _url](https_client* client) {
+			[processor, rv, hci, this, owner, start, _url, &request_verb](https_client* client) {
 				http_request_completion_t result{rv};
 				result.latency = dpp::utility::time_f() - start;
 				if (client->timed_out) {
 					result.error = h_connection;
-					owner->log(ll_error, "HTTP(S) error on " + hci.scheme + " connection to " + hci.hostname + ":" + std::to_string(hci.port) + endpoint + ": Timed out while waiting for the response");
+					owner->log(ll_error, "HTTP(S) error on " + hci.scheme + " connection to " + request_verb[method] + " "  + hci.hostname + ":" + std::to_string(hci.port) + endpoint + ": Timed out while waiting for the response");
 				} else if (cli->get_status() < 100) {
 					result.error = h_connection;
-					owner->log(ll_error, "HTTP(S) error on " + hci.scheme + " connection to " + hci.hostname + ":" + std::to_string(hci.port) + endpoint + ": Malformed HTTP response");
-				} else if (cli->get_status() >= 400) {
-					owner->log(ll_error, "HTTP(S) error " + std::to_string(cli->get_status()) + " on " + hci.scheme + " connection to " + hci.hostname + ":" + std::to_string(hci.port) + ": " + cli->get_content());
-					result.error = h_connection;
+					owner->log(ll_error, "HTTP(S) error on " + hci.scheme + " connection to " + request_verb[method] + " "  + hci.hostname + ":" + std::to_string(hci.port) + endpoint + ": Malformed HTTP response");
 				} else {
 					populate_result(_url, owner, result, *client);
 				}

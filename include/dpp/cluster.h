@@ -249,7 +249,7 @@ public:
 	/**
 	 * @brief The time (in seconds) that a request is allowed to take.
 	 */
-	uint16_t request_timeout = 20;
+	uint16_t request_timeout = 60;
 
 	/**
 	 * @brief Socket engine instance

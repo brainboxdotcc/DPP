@@ -40,12 +40,11 @@ https_client::https_client(cluster* creator, const std::string &hostname, uint16
 	request_headers(extra_headers),
 	status(0),
 	http_protocol(protocol),
-	timeout(request_timeout),
+	timeout(time(nullptr) + request_timeout),
 	timed_out(false),
 	completed(done)
 {
 	nonblocking = false;
-	timeout = time(nullptr) + request_timeout;
 	https_client::connect();
 }
 

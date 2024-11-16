@@ -203,9 +203,9 @@ dpp::utility::uptime cluster::uptime()
 void cluster::start(bool return_after) {
 
 	auto event_loop = [this]() -> void {
-		do {
+		while (!this->terminating && socketengine.get()) {
 			socketengine->process_events();
-		} while (!this->terminating);
+		}
 	};
 
 	if (on_guild_member_add && !(intents & dpp::i_guild_members)) {
@@ -311,7 +311,8 @@ void cluster::start(bool return_after) {
 }
 
 void cluster::shutdown() {
-	/* Signal condition variable to terminate */
+	/* Signal termination */
+	terminating = true;
 	terminating.notify_all();
 	/* Free memory for active timers */
 	for (auto & t : timer_list) {
@@ -323,6 +324,9 @@ void cluster::shutdown() {
 	for (const auto& sh : shards) {
 		log(ll_info, "Terminating shard id " + std::to_string(sh.second->shard_id));
 		delete sh.second;
+	}
+	if (engine_thread) {
+		engine_thread->join();
 	}
 	shards.clear();
 }
