@@ -202,10 +202,10 @@ dpp::utility::uptime cluster::uptime()
 
 void cluster::start(bool return_after) {
 
-	auto block_calling_thread = [this]() {
-		std::mutex thread_mutex;
-		std::unique_lock thread_lock(thread_mutex);
-		this->terminating.wait(thread_lock);
+	auto event_loop = [this]() -> void {
+		do {
+			socketengine->process_events();
+		} while (!this->terminating);
 	};
 
 	if (on_guild_member_add && !(intents & dpp::i_guild_members)) {
@@ -300,13 +300,13 @@ void cluster::start(bool return_after) {
 		log(ll_debug, "Shards started.");
 	});
 
-	do {
-		// TODO: Thread this
-		socketengine->process_events();
-	} while (true);
-
-	if (!return_after) {
-		block_calling_thread();
+	if (return_after) {
+		engine_thread = std::make_unique<std::jthread>(std::jthread([event_loop]() {
+			dpp::utility::set_thread_name("event_loop");
+			event_loop();
+		}));
+	} else {
+		event_loop();
 	}
 }
 

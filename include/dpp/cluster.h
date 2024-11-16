@@ -178,6 +178,11 @@ class DPP_EXPORT cluster {
 	 */
 	std::unique_ptr<thread_pool> pool{nullptr};
 
+	/**
+	 * @brief Used to spawn the socket engine into its own thread if
+	 * the cluster is started with dpp::st_return. It is unused otherwise.
+	 */
+	std::unique_ptr<std::jthread> engine_thread{nullptr};
 
 public:
 	/**
@@ -233,9 +238,13 @@ public:
 	websocket_protocol_t ws_mode;
 
 	/**
-	 * @brief Condition variable notified when the cluster is terminating.
+	 * @brief Atomic bool to set to true when the cluster is terminating.
+	 *
+	 * D++ itself does not set this value, it is for library users to set if they want
+	 * the cluster to terminate outside of a flow where they may have simple access to
+	 * destruct the cluster object.
 	 */
-	std::condition_variable terminating;
+	std::atomic_bool terminating{false};
 
 	/**
 	 * @brief The time (in seconds) that a request is allowed to take.

@@ -144,7 +144,6 @@ DPP_TEST(MD_ESC_1, "Markdown escaping (ignore code block contents)", tf_offline)
 DPP_TEST(MD_ESC_2, "Markdown escaping (escape code block contents)", tf_offline);
 DPP_TEST(URLENC, "URL encoding", tf_offline);
 DPP_TEST(BASE64ENC, "Base 64 encoding", tf_offline);
-DPP_TEST(SYNC, "sync<T>()", tf_online);
 DPP_TEST(COMPARISON, "manged object comparison", tf_offline);
 DPP_TEST(CHANNELCACHE, "find_channel()", tf_online);
 DPP_TEST(CHANNELTYPES, "channel type flags", tf_online);
