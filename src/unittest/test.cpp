@@ -2248,14 +2248,17 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 						return;
 					}
 					dpp::role createdRole = std::get<dpp::role>(cc.value);
+					createdRole.guild_id = TEST_GUILD_ID;
 					if (createdRole.name == r.name &&
 						createdRole.has_move_members() &&
 						createdRole.flags & dpp::r_mentionable &&
 						createdRole.colour == r.colour) {
+						createdRole.name = "Test-Role-Edited";
 						set_test(ROLE_CREATE, true);
 						bot.role_edit(createdRole, [&bot, createdRole](const auto& e) {
 							if (e.is_error()) {
-							set_test(ROLE_EDIT, false);
+								set_test(ROLE_EDIT, false);
+								set_test(ROLE_DELETE, false);
 								return;
 							}
 							dpp::role edited = std::get<dpp::role>(e.value);
@@ -2264,6 +2267,10 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 								set_test(ROLE_DELETE, !e.is_error());
 							});
 						});
+					} else {
+						set_test(ROLE_CREATE, false);
+						set_test(ROLE_EDIT, false);
+						set_test(ROLE_DELETE, false);
 					}
 				});
 			}
@@ -2272,7 +2279,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		set_test(BOTSTART, false);
 		try {
 			if (!offline) {
-				bot.start(true);
+				bot.start(dpp::st_return);
 				set_test(BOTSTART, true);
 			}
 		}
@@ -2323,7 +2330,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 			dpp::https_client c2(&bot, "dl.dpp.dev", 443, "/cookietest.php", "GET", "", {}, true, 5, "1.1", [](dpp::https_client* c2) {
 				size_t count = c2->get_header_count("set-cookie");
 				size_t count_list = c2->get_header_list("set-cookie").size();
-				// Google sets a bunch of cookies when we start accessing it.
+				// This test script sets a bunch of cookies when we request it.
 				set_test(MULTIHEADER, c2->get_status() == 200 && count > 1 && count == count_list);
 			});
 			std::this_thread::sleep_for(std::chrono::seconds(6));
