@@ -2223,41 +2223,32 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 				r.permissions.add(dpp::p_move_members);
 				r.set_flags(dpp::r_mentionable);
 				r.colour = dpp::colors::moon_yellow;
-				dpp::role createdRole;
-				try {
-					createdRole = dpp::sync<dpp::role>(&bot, &dpp::cluster::role_create, r);
+				bot.role_create(r, [&bot, r](const auto cc) {
+					if (cc.is_error()) {
+						set_test(ROLE_CREATE, false);
+						set_test(ROLE_EDIT, false);
+						set_test(ROLE_DELETE, false);
+						return;
+					}
+					dpp::role createdRole = std::get<dpp::role>(cc.value);
 					if (createdRole.name == r.name &&
 						createdRole.has_move_members() &&
 						createdRole.flags & dpp::r_mentionable &&
 						createdRole.colour == r.colour) {
 						set_test(ROLE_CREATE, true);
-					}
-				} catch (dpp::rest_exception &exception) {
-					set_test(ROLE_CREATE, false);
-				}
-				createdRole.guild_id = TEST_GUILD_ID;
-				createdRole.name = "Test-Role-Edited";
-				createdRole.colour = dpp::colors::light_sea_green;
-				try {
-					bot.role_delete(TEST_GUILD_ID, createdRole.id, [createdRole](const auto& e) {
-						if (e.is_error()) {
+						bot.role_edit(createdRole, [&bot, createdRole](const auto& e) {
+							if (e.is_error()) {
 							set_test(ROLE_EDIT, false);
-							return;
-						}
-						dpp::role edited = std::get<dpp::role>(e.value);
-						set_test(ROLE_EDIT, (createdRole.id == edited.id && edited.name == "Test-Role-Edited"));
-					});
-				} catch (dpp::rest_exception &exception) {
-					set_test(ROLE_EDIT, false);
-				}
-				try {
-					bot.role_delete(TEST_GUILD_ID, createdRole.id, [](const auto& e) {
-						set_test(ROLE_DELETE, !e.is_error());
-					});
-				} catch (dpp::rest_exception &exception) {
-					bot.log(dpp::ll_warning, "Exception: " + std::string(exception.what()));
-					set_test(ROLE_DELETE, false);
-				}
+								return;
+							}
+							dpp::role edited = std::get<dpp::role>(e.value);
+							set_test(ROLE_EDIT, (createdRole.id == edited.id && edited.name == "Test-Role-Edited"));
+							bot.role_delete(TEST_GUILD_ID, createdRole.id, [](const auto& e) {
+								set_test(ROLE_DELETE, !e.is_error());
+							});
+						});
+					}
+				});
 			}
 		};
 
