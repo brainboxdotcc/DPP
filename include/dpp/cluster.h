@@ -25,6 +25,7 @@
 #include <string>
 #include <map>
 #include <variant>
+#include <thread>
 #include <dpp/snowflake.h>
 #include <dpp/dispatcher.h>
 #include <dpp/misc-enum.h>
@@ -182,7 +183,7 @@ class DPP_EXPORT cluster {
 	 * @brief Used to spawn the socket engine into its own thread if
 	 * the cluster is started with dpp::st_return. It is unused otherwise.
 	 */
-	std::unique_ptr<std::jthread> engine_thread{nullptr};
+	std::unique_ptr<std::thread> engine_thread{nullptr};
 
 public:
 	/**

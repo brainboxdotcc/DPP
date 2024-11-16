@@ -301,10 +301,10 @@ void cluster::start(bool return_after) {
 	});
 
 	if (return_after) {
-		engine_thread = std::make_unique<std::jthread>(std::jthread([event_loop]() {
+		engine_thread = std::make_unique<std::thread>([event_loop]() {
 			dpp::utility::set_thread_name("event_loop");
 			event_loop();
-		}));
+		});
 	} else {
 		event_loop();
 	}
