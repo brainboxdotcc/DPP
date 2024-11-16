@@ -2290,7 +2290,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 						set_test(HTTPS, hdr1 == "cloudflare" && c->get_status() == 200);
 					}
 				);
-				sleep(6);
+				std::this_thread::sleep_for(std::chrono::seconds(6));
 			}
 			catch (const dpp::exception& e) {
 				std::cout << e.what() << "\n";
@@ -2305,7 +2305,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 				std::string content2 = c2->get_content();
 				set_test(HTTP, hdr2 == "https://github.com/" && c2->get_status() == 301);
 			});
-			sleep(6);
+			std::this_thread::sleep_for(std::chrono::seconds(6));
 		}
 		catch (const dpp::exception& e) {
 			std::cout << e.what() << "\n";
@@ -2320,7 +2320,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 				// Google sets a bunch of cookies when we start accessing it.
 				set_test(MULTIHEADER, c2->get_status() == 200 && count > 1 && count == count_list);
 			});
-			sleep(6);
+			std::this_thread::sleep_for(std::chrono::seconds(6));
 		}
 		catch (const dpp::exception& e) {
 			std::cout << e.what() << "\n";
