@@ -15,6 +15,34 @@ if (c && c->get_user_permissions(member).can(dpp::p_send_messages)) {
 }
 ```
 
+### Role Hierarchy
+
+The recommended and correct way to compare for roles in the hierarchy is using the comparison operators (`<`, `>`) on the \ref dpp::role::operator<(dpp::role, dpp::role) "dpp::role" objects themselves.
+Keep in mind that multiple roles can have the same position number.
+As a result, comparing roles by position alone can lead to subtle bugs when checking for role hierarchy.
+
+For example let's say you have a ban command, and want to make sure that any issuer of the command can only ban members lower position than their own highest role.
+
+```cpp
+bot.on_interaction_create([](const dpp::interaction_create_t& event) {
+    dpp::snowflake target_id = std::get<dpp::snowflake>(event.get_parameter("user"));
+    dpp::guild_member target = event.command.get_resolved_member(target_id);
+
+    for (dpp::snowflake issuer_role_id : event.command.member.get_roles()) {
+        auto issuer_role = dpp::find_role(issuer_role_id);
+        if (issuer_role == nullptr) continue;
+        for (dpp::snowflake target_role_id : target.get_roles()) {
+            auto target_role = dpp::find_role(target_role_id);
+            if (target_role == nullptr) continue;
+            if (target_role > issuer_role) {
+                event.reply("You can't ban someone whose role is higher than yours!");
+                return;
+            }
+        }
+    }
+});
+```
+
 ## Permissions in Interaction Events
 
 ### Default Command Permissions

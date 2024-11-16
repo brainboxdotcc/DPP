@@ -295,11 +295,28 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 	set_test(TIMESTAMPTOSTRING, false);
 	set_test(TIMESTAMPTOSTRING, dpp::ts_to_string(1642611864) == "2022-01-19T17:04:24Z");
 
-	set_test(ROLE_COMPARE, false);
-	dpp::role role_1, role_2;
-	role_1.position = 1;
-	role_2.position = 2;
-	set_test(ROLE_COMPARE, role_1 < role_2 && role_1 != role_2);
+	{
+		set_test(ROLE_COMPARE, false);
+		dpp::role role_1, role_2;
+		role_1.id = 99;
+		role_1.position = 1;
+		role_1.guild_id = 123;
+		role_1.id = 98;
+		role_2.position = 2;
+		role_2.guild_id = 123;
+		set_test(ROLE_COMPARE, role_1 < role_2 && !(role_1 > role_2) && role_1 != role_2);
+	}
+	{
+		set_test(ROLE_COMPARE_CONSIDERING_ID, false);
+		dpp::role role_1, role_2;
+		role_1.id = 99;
+		role_1.position = 2;
+		role_1.guild_id = 123;
+		role_2.id = 98;
+		role_2.position = 2;
+		role_2.guild_id = 123;
+		set_test(ROLE_COMPARE_CONSIDERING_ID, role_1 < role_2 && !(role_1 > role_2));
+	}
 
 	set_test(WEBHOOK, false);
 	try {
