@@ -313,7 +313,6 @@ void cluster::start(bool return_after) {
 void cluster::shutdown() {
 	/* Signal termination */
 	terminating = true;
-	terminating.notify_all();
 	/* Free memory for active timers */
 	for (auto & t : timer_list) {
 		delete t.second;
