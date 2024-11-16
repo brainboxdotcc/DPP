@@ -8,7 +8,7 @@ header("Pragma: no-cache");
 header("Status: 200 OK");
 
 // Split up url and set defaults
-list($version, $arch, $type) = explode('/', preg_replace('/https:\/\/dl\.dpp\.dev\//', '', $_SERVER['REDIRECT_SCRIPT_URI']), 3);
+list($_, $version, $arch, $type) = explode('/', preg_replace('/https:\/\/dl\.dpp\.dev\//', '', $_SERVER['REDIRECT_URL'] ?? ''), 4);
 $version = !empty($version) ? $version : 'latest';
 $arch = !empty($arch) ? $arch : 'linux-x64';
 $type = !empty($type) ? $type : 'deb';
