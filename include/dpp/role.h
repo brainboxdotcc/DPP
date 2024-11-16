@@ -120,6 +120,10 @@ public:
 
 	/**
 	 * @brief Role position.
+	 *
+	 * @warning multiple roles can have the same position number.
+	 * As a result, comparing roles by position alone can lead to subtle bugs when checking for role hierarchy.
+	 * The recommended and correct way to compare for roles in the hierarchy is using the comparison operators on the role objects themselves.
 	 */
 	uint8_t position{0};
 
@@ -322,6 +326,11 @@ public:
 	 * @return true if lhs is less than rhs
 	 */
 	friend inline bool operator< (const role& lhs, const role& rhs) {
+		if (lhs.position == rhs.position) {
+			// the higher the IDs are, the lower the position
+			return lhs.id > rhs.id;
+		}
+
 		return lhs.position < rhs.position;
 	}
 
@@ -333,7 +342,7 @@ public:
 	 * @return true if lhs is greater than rhs
 	 */
 	friend inline bool operator> (const role& lhs, const role& rhs) {
-		return lhs.position > rhs.position;
+		return !(lhs < rhs);
 	}
 
 	/**
@@ -343,7 +352,7 @@ public:
 	 * @return true if is equal to other
 	 */
 	inline bool operator== (const role& other) const {
-		return this->position == other.position;
+		return this->id == other.id;
 	}
 
 	/**
@@ -353,7 +362,7 @@ public:
 	 * @return true if is not equal to other
 	 */
 	inline bool operator!= (const role& other) const {
-		return this->position != other.position;
+		return this->id != other.id;
 	}
 
 	/**
