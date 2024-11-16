@@ -31,6 +31,14 @@
 
 namespace dpp {
 
+constexpr std::array request_verb {
+	"GET",
+	"POST",
+	"PUT",
+	"PATCH",
+	"DELETE"
+};
+
 namespace
 {
 
@@ -196,14 +204,6 @@ http_request_completion_t http_request::run(in_thread* processor, cluster* owner
 		}
 	}
 
-	constexpr std::array request_verb {
-		"GET",
-		"POST",
-		"PUT",
-		"PATCH",
-		"DELETE"
-	};
-
 	multipart_content multipart;
 	if (non_discord) {
 		multipart = { postdata, mimetype };
@@ -226,7 +226,7 @@ http_request_completion_t http_request::run(in_thread* processor, cluster* owner
 			!hci.is_ssl,
 			owner->request_timeout,
 			protocol,
-			[processor, rv, hci, this, owner, start, _url, &request_verb](https_client* client) {
+			[processor, rv, hci, this, owner, start, _url](https_client* client) {
 				http_request_completion_t result{rv};
 				result.latency = dpp::utility::time_f() - start;
 				if (client->timed_out) {
