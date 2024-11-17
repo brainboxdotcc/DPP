@@ -626,10 +626,9 @@ public:
 
 	/**
 	 * @brief Add permission overwrites for a user or role.
-	 * If the channel already has permission overwrites for the specified target, the existing ones will be adjusted by the passed permissions.
-	 * Any permission flags that are not passed to the `allowed_permissions` or `denied_permissions` will remain unchanged.
+	 * If the channel already has permission overwrites for the passed target, the existing ones will be adjusted by the passed permissions
 	 *
-	 * @param target ID of the role or member for which you want to adjust overwrites
+	 * @param target ID of the role or the member you want to adjust overwrites for
 	 * @param type type of overwrite
 	 * @param allowed_permissions bitmask of dpp::permissions you want to allow for this user/role in this channel. Note: You can use the dpp::permission class
 	 * @param denied_permissions bitmask of dpp::permissions you want to deny for this user/role in this channel. Note: You can use the dpp::permission class

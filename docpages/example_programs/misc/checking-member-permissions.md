@@ -66,7 +66,7 @@ For more customization for server owners, they can override these permissions by
 
 ### Checking Permissions on Your Own
 
-If you don't want server admins to be able to override the command restrictions, then this section is for you.
+When using default permissions you don't necessarily need to check the issuing user for any permissions in the interaction event as Discord handles all that for you. However, if you don't want server admins to be able to override the command restrictions, you can make those permission checks on your own.
 
 To check if a member has certain permissions during interaction events, the easiest way is to use the dpp::interaction::get_resolved_permission function. The resolved list contains associated structures for the command and does not rely on the cache or require any extra API calls. Additionally, the permissions in the resolved set are pre-calculated by Discord and taking into account channel overwrites, roles and admin privileges. So, there's no need to loop through roles or stuff like that.
 
