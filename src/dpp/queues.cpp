@@ -23,7 +23,6 @@
 #ifdef _WIN32
 /* Central point for forcing inclusion of winsock library for all socket code */
 #include <io.h>
-#pragma comment(lib,"ws2_32")
 #endif
 #include <dpp/queues.h>
 #include <dpp/cluster.h>
@@ -231,10 +230,10 @@ http_request_completion_t http_request::run(in_thread* processor, cluster* owner
 				result.latency = dpp::utility::time_f() - start;
 				if (client->timed_out) {
 					result.error = h_connection;
-					owner->log(ll_error, "HTTP(S) error on " + hci.scheme + " connection to " + request_verb[method] + " "  + hci.hostname + ":" + std::to_string(hci.port) + endpoint + ": Timed out while waiting for the response");
+					owner->log(ll_error, "HTTP(S) error on " + hci.scheme + " connection to " + request_verb[method] + " "  + hci.hostname + ":" + std::to_string(hci.port) + _url + ": Timed out while waiting for the response");
 				} else if (cli->get_status() < 100) {
 					result.error = h_connection;
-					owner->log(ll_error, "HTTP(S) error on " + hci.scheme + " connection to " + request_verb[method] + " "  + hci.hostname + ":" + std::to_string(hci.port) + endpoint + ": Malformed HTTP response");
+					owner->log(ll_error, "HTTP(S) error on " + hci.scheme + " connection to " + request_verb[method] + " "  + hci.hostname + ":" + std::to_string(hci.port) + _url + ": Malformed HTTP response");
 				}
 				populate_result(_url, owner, result, *client);
 				/* Set completion flag */
