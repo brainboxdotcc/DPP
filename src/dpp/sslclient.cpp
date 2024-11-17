@@ -26,17 +26,8 @@
 	#include <WinSock2.h>
 	#include <WS2tcpip.h>
 	#include <io.h>
-	/* Windows doesn't have standard poll(), it has WSAPoll.
-	 * It's the same thing with different symbol names.
-	 * Microsoft gotta be different.
-	 */
-	#define poll(fds, nfds, timeout) WSAPoll(fds, nfds, timeout)
-	#define pollfd WSAPOLLFD
-	/* Windows sockets library */
-	#pragma comment(lib, "ws2_32")
 #else
-	/* Anyting other than Windows (e.g. sane OSes) */
-	#include <poll.h>
+	/* Anything other than Windows (e.g. sane OSes) */
 	#include <sys/socket.h>
 	#include <unistd.h>
 #endif
@@ -110,11 +101,6 @@ public:
  */
 thread_local std::unique_ptr<SSL_CTX, openssl_context_deleter> openssl_context;
 
-/**
- * @brief Keepalive sessions, per-thread
- */
-thread_local std::unordered_map<std::string, keepalive_cache_t> keepalives;
-
 bool close_socket(dpp::socket sfd)
 {
 	/* close_socket on an error socket is a non-op */
@@ -158,7 +144,7 @@ bool set_nonblocking(dpp::socket sockfd, bool non_blocking)
  * @param addr address to connect to
  * @param addrlen address length
  * @param timeout_ms timeout in milliseconds
- * @return int -1 on error, 0 on succcess just like POSIX connect()
+ * @return int -1 on error, 0 on success just like POSIX connect()
  * @throw dpp::connection_exception on failure
  */
 int start_connecting(dpp::socket sockfd, const struct sockaddr *addr, socklen_t addrlen, unsigned int timeout_ms) {
@@ -246,7 +232,6 @@ void ssl_client::connect()
 void ssl_client::socket_write(const std::string_view data)
 {
 	obuffer += data;
-	return;
 }
 
 void ssl_client::one_second_timer()
@@ -307,6 +292,7 @@ void ssl_client::on_read(socket fd, const struct socket_events& ev) {
 		}
 		buffer.append(server_to_client_buffer, r);
 		if (!this->handle_buffer(buffer)) {
+			this->close();
 			return;
 		}
 		bytes_in += r;
@@ -375,6 +361,12 @@ void ssl_client::on_read(socket fd, const struct socket_events& ev) {
 }
 
 void ssl_client::on_write(socket fd, const struct socket_events& e) {
+
+	if (!connected && plaintext) {
+		/* Plaintext sockets connect immediately on first write event */
+		connected = true;
+	}
+
 	if (connected) {
 		if (obuffer.length() && client_to_server_length == 0) {
 			memcpy(&client_to_server_buffer, obuffer.data(), obuffer.length() > DPP_BUFSIZE ? DPP_BUFSIZE : obuffer.length());
@@ -395,7 +387,7 @@ void ssl_client::on_write(socket fd, const struct socket_events& e) {
 			bytes_out += r;
 			if (client_to_server_length > 0) {
 				socket_events se{e};
-				se.flags = WANT_READ | WANT_ERROR;
+				se.flags = WANT_READ | WANT_WRITE | WANT_ERROR;
 				owner->socketengine->update_socket(se);
 			}
 		} else {

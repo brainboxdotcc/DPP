@@ -23,7 +23,6 @@
 #include <dpp/dpp.h>
 #include <iostream>
 #include <thread>
-#include <chrono>
 
 int main() {
 	using namespace std::chrono_literals;
@@ -35,6 +34,13 @@ int main() {
 			std::cout << "[" << dpp::utility::current_date_time() << "] " << dpp::utility::loglevel(log.severity) << ": " << log.message << std::endl;
 		});
 		soak_test.start(dpp::st_return);
+
+		dpp::https_client c2(&soak_test, "github.com", 80, "/", "GET", "", {}, true, 2, "1.1", [](dpp::https_client* c2) {
+			std::string hdr2 = c2->get_header("location");
+			std::string content2 = c2->get_content();
+			std::cout << "hdr2 == " << hdr2 << " ? https://github.com/ status = " << c2->get_status() << "\n";
+		});
+
 		while (true) {
 			std::this_thread::sleep_for(60s);
 			dpp::discord_client* dc = soak_test.get_shard(0);

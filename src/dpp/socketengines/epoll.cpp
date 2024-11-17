@@ -87,42 +87,27 @@ struct socket_engine_epoll : public socket_engine_base {
 			}
 
 			if ((ev.events & EPOLLHUP) != 0U) {
-				//eh->flags = modify_event(epoll_handle, eh, eh->flags & ~WANT_ERROR);
-				//pool->enqueue([this, eh, fd]() {
-					eh->on_error(fd, *eh, 0);
-				//	eh->flags = modify_event(epoll_handle, eh, eh->flags | WANT_ERROR);
-				//});
+				eh->on_error(fd, *eh, EPIPE);
 				continue;
 			}
 
 			if ((ev.events & EPOLLERR) != 0U) {
-				/* Get error number */
-				//eh->flags = modify_event(epoll_handle, eh, eh->flags & ~WANT_ERROR);
-				//pool->enqueue([this, eh, fd]() {
-					socklen_t codesize = sizeof(int);
-					int errcode{};
-					if (getsockopt(fd, SOL_SOCKET, SO_ERROR, &errcode, &codesize) < 0) {
-						errcode = errno;
-					}
-					eh->on_error(fd, *eh, errcode);
-				//	eh->flags = modify_event(epoll_handle, eh, eh->flags | WANT_ERROR);
-				//});
+				socklen_t codesize = sizeof(int);
+				int errcode{};
+				if (getsockopt(fd, SOL_SOCKET, SO_ERROR, &errcode, &codesize) < 0) {
+					errcode = errno;
+				}
+				eh->on_error(fd, *eh, errcode);
 				continue;
 			}
 
 			if ((ev.events & EPOLLOUT) != 0U) {
 				eh->flags = modify_event(epoll_handle, eh, eh->flags & ~WANT_WRITE);
-				//pool->enqueue([eh, fd]() {
-					eh->on_write(fd, *eh);
-				//});
+				eh->on_write(fd, *eh);
 			}
 
 			if ((ev.events & EPOLLIN) != 0U) {
-				//eh->flags = modify_event(epoll_handle, eh, eh->flags & ~WANT_READ);
-				//pool->enqueue([this, eh, fd]() {
-					eh->on_read(fd, *eh);
-				//	eh->flags = modify_event(epoll_handle, eh, eh->flags | WANT_READ);
-				//});
+				eh->on_read(fd, *eh);
 			}
 		}
 		prune();

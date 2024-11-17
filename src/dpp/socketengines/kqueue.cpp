@@ -44,10 +44,10 @@ struct socket_engine_kqueue : public socket_engine_base {
 	std::vector<struct kevent> change_list;
 	std::vector<struct kevent> ke_list;
 
-	socket_engine_kqueue(const socket_engine_kqueue&) = default;
-	socket_engine_kqueue(socket_engine_kqueue&&) = default;
-	socket_engine_kqueue& operator=(const socket_engine_kqueue&) = default;
-	socket_engine_kqueue& operator=(socket_engine_kqueue&&) = default;
+	socket_engine_kqueue(const socket_engine_kqueue&) = delete;
+	socket_engine_kqueue(socket_engine_kqueue&&) = delete;
+	socket_engine_kqueue& operator=(const socket_engine_kqueue&) = delete;
+	socket_engine_kqueue& operator=(socket_engine_kqueue&&) = delete;
 
 	explicit socket_engine_kqueue(cluster* creator) : socket_engine_base(creator), kqueue_handle(kqueue()) {
 		change_list.resize(8);

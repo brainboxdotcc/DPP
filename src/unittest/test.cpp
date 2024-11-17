@@ -2309,35 +2309,35 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 				std::cout << e.what() << "\n";
 				set_test(HTTPS, false);
 			}
-		}
 
-		set_test(HTTP, false);
-		try {
-			dpp::https_client c2(&bot, "github.com", 80, "/", "GET", "", {}, true, 5, "1.1", [](dpp::https_client* c2) {
-				std::string hdr2 = c2->get_header("location");
-				std::string content2 = c2->get_content();
-				set_test(HTTP, hdr2 == "https://github.com/" && c2->get_status() == 301);
-			});
-			std::this_thread::sleep_for(std::chrono::seconds(6));
-		}
-		catch (const dpp::exception& e) {
-			std::cout << e.what() << "\n";
 			set_test(HTTP, false);
-		}
+			try {
+				dpp::https_client c2(&bot, "github.com", 80, "/", "GET", "", {}, true, 5, "1.1", [](dpp::https_client* c2) {
+					std::string hdr2 = c2->get_header("location");
+					std::string content2 = c2->get_content();
+					set_test(HTTP, hdr2 == "https://github.com/" && c2->get_status() == 301);
+				});
+				std::this_thread::sleep_for(std::chrono::seconds(6));
+			}
+			catch (const dpp::exception& e) {
+				std::cout << e.what() << "\n";
+				set_test(HTTP, false);
+			}
 
-		set_test(MULTIHEADER, false);
-		try {
-			dpp::https_client c2(&bot, "dl.dpp.dev", 443, "/cookietest.php", "GET", "", {}, true, 5, "1.1", [](dpp::https_client* c2) {
-				size_t count = c2->get_header_count("set-cookie");
-				size_t count_list = c2->get_header_list("set-cookie").size();
-				// This test script sets a bunch of cookies when we request it.
-				set_test(MULTIHEADER, c2->get_status() == 200 && count > 1 && count == count_list);
-			});
-			std::this_thread::sleep_for(std::chrono::seconds(6));
-		}
-		catch (const dpp::exception& e) {
-			std::cout << e.what() << "\n";
 			set_test(MULTIHEADER, false);
+			try {
+				dpp::https_client c2(&bot, "dl.dpp.dev", 443, "/cookietest.php", "GET", "", {}, true, 5, "1.1", [](dpp::https_client* c2) {
+					size_t count = c2->get_header_count("set-cookie");
+					size_t count_list = c2->get_header_list("set-cookie").size();
+					// This test script sets a bunch of cookies when we request it.
+					set_test(MULTIHEADER, c2->get_status() == 200 && count > 1 && count == count_list);
+				});
+				std::this_thread::sleep_for(std::chrono::seconds(6));
+			}
+			catch (const dpp::exception& e) {
+				std::cout << e.what() << "\n";
+				set_test(MULTIHEADER, false);
+			}
 		}
 
 		set_test(TIMERSTART, false);

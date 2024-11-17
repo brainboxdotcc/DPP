@@ -137,7 +137,7 @@ DPP_TEST(OPTCHOICE_SNOWFLAKE, "command_option_choice::fill_from_json: snowflake"
 DPP_TEST(OPTCHOICE_STRING, "command_option_choice::fill_from_json: string", tf_offline);
 DPP_TEST(HOSTINFO, "https_client::get_host_info()", tf_offline);
 DPP_TEST(HTTPS, "https_client HTTPS request", tf_online);
-DPP_TEST(HTTP, "https_client HTTP request", tf_offline);
+DPP_TEST(HTTP, "https_client HTTP request", tf_online);
 DPP_TEST(RUNONCE, "run_once<T>", tf_offline);
 DPP_TEST(WEBHOOK, "webhook construct from URL", tf_offline);
 DPP_TEST(MD_ESC_1, "Markdown escaping (ignore code block contents)", tf_offline);
@@ -228,9 +228,9 @@ DPP_TEST(INVITE_CREATE, "cluster::channel_invite_create", tf_online);
 DPP_TEST(INVITE_GET, "cluster::invite_get", tf_online);
 DPP_TEST(INVITE_DELETE, "cluster::invite_delete", tf_online);
 
-/* Extended set -- Less important, skipped on the master branch due to rate limits and GitHub actions limitations*/
+/* Extended set -- Less important, skipped on the master branch due to rate limits and GitHub actions limitations */
 /* To execute, run unittests with "full" command line argument */
-DPP_TEST(MULTIHEADER, "multiheader cookie test", tf_offline | tf_extended); // Fails in the EU as cookies are not sent without acceptance
+DPP_TEST(MULTIHEADER, "multiheader cookie test", tf_online | tf_extended);
 
 DPP_TEST(VOICECONN, "Connect to voice channel", tf_online | tf_extended);
 DPP_TEST(VOICESEND, "Send audio to voice channel", tf_online | tf_extended); // udp unreliable on gitbub
@@ -290,7 +290,7 @@ extern dpp::snowflake TEST_EVENT_ID;
 
 /* True if we skip tt_online tests */
 extern bool offline;
-/* True if we skip tt_extended tests*/
+/* True if we skip tt_extended tests */
 extern bool extended;
 #ifdef DPP_CORO
 inline constexpr bool coro = true;
@@ -576,9 +576,9 @@ inline constexpr auto is_owner = [](auto &&user) noexcept {
 #endif
 
 #define DPP_CHECK_CONSTRUCT_ASSIGN(test, type, var) do { \
-  DPP_CHECK(test, std::is_default_constructible_v<type>, var); \
-  DPP_CHECK(test, std::is_copy_constructible_v<type>, var); \
-  DPP_CHECK(test, std::is_move_constructible_v<type>, var); \
-  DPP_CHECK(test, std::is_copy_assignable_v<type>, var); \
+	DPP_CHECK(test, std::is_default_constructible_v<type>, var); \
+	DPP_CHECK(test, std::is_copy_constructible_v<type>, var); \
+	DPP_CHECK(test, std::is_move_constructible_v<type>, var); \
+	DPP_CHECK(test, std::is_copy_assignable_v<type>, var); \
 	DPP_CHECK(test, std::is_move_assignable_v<type>, var); \
-  } while(0)
+} while(0)

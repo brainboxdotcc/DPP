@@ -192,10 +192,6 @@ bool https_client::handle_buffer(std::string &buffer)
 							} else {
 								content_length = ULLONG_MAX;
 							}
-							auto it_conn = response_headers.find("connection");
-							if (it_conn != response_headers.end() && it_conn->second == "close") {
-								keepalive = false;
-							}
 							chunked = false;
 							auto it_txenc = response_headers.find("transfer-encoding");
 							if (it_txenc != response_headers.end()) {
@@ -218,11 +214,9 @@ bool https_client::handle_buffer(std::string &buffer)
 							return true;
 						} else {
 							/* Non-HTTP-like response with invalid headers. Go no further. */
-							keepalive = false;
 							return false;
 						}
 					} else {
-						keepalive = false;
 						return false;
 					}
 
