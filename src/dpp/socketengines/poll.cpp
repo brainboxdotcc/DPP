@@ -145,7 +145,7 @@ struct socket_engine_poll : public socket_engine_base {
 		return r;
 	}
 
-	socket_engine_poll(cluster* creator) : socket_engine_base(creator) { };
+	explicit socket_engine_poll(cluster* creator) : socket_engine_base(creator) { };
 
 protected:
 

@@ -49,7 +49,7 @@ struct socket_engine_kqueue : public socket_engine_base {
 	socket_engine_kqueue& operator=(const socket_engine_kqueue&) = default;
 	socket_engine_kqueue& operator=(socket_engine_kqueue&&) = default;
 
-	socket_engine_kqueue(cluster* creator) : socket_engine_base(creator), kqueue_handle(kqueue()) {
+	explicit socket_engine_kqueue(cluster* creator) : socket_engine_base(creator), kqueue_handle(kqueue()) {
 		change_list.resize(8);
 		ke_list.resize(16);
 		if (kqueue_handle == -1) {

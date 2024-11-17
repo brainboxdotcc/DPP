@@ -22,10 +22,9 @@
 
 #include <dpp/dpp.h>
 #include <iostream>
-#include <thread>
 #include <unistd.h>
 #include <dpp/dns.h>
-#include <dpp/sslclient.h>
+#include <string_view>
 
 int main() {
 	dpp::cluster cl("no-token");
@@ -51,7 +50,7 @@ int main() {
 			int r = 0;
 			do {
 				char buf[128]{0};
-				r = ::read(e.fd, buf, 127);
+				r = ::read(e.fd, buf, sizeof(buf));
 				if (r > 0) {
 					buf[127] = 0;
 					std::cout << buf;
@@ -65,7 +64,9 @@ int main() {
 		},
 		[](dpp::socket fd, const struct dpp::socket_events& e) {
 			std::cout << "WANT_WRITE event on socket " << fd << "\n";
-			::write(e.fd, "GET / HTTP/1.0\r\nConnection: close\r\n\r\n", strlen("GET / HTTP/1.0\r\nConnection: close\r\n\r\n"));
+			constexpr std::string_view request{"GET / HTTP/1.0\r\nConnection: close\r\n\r\n"};
+			auto written = ::write(e.fd, request.data(), request.length());
+			std::cout << "Written: " << written << "\n";
 		},
 		[](dpp::socket fd, const struct dpp::socket_events&, int error_code) {
 		  std::cout << "WANT_ERROR event on socket " << fd << " with code " << error_code << "\n";

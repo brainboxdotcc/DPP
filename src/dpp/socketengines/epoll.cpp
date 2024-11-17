@@ -60,7 +60,7 @@ struct socket_engine_epoll : public socket_engine_base {
 	socket_engine_epoll& operator=(const socket_engine_epoll&) = delete;
 	socket_engine_epoll& operator=(socket_engine_epoll&&) = delete;
 
-	socket_engine_epoll(cluster* creator) : socket_engine_base(creator), epoll_handle(epoll_create(socket_engine_epoll::epoll_hint)) {
+	explicit socket_engine_epoll(cluster* creator) : socket_engine_base(creator), epoll_handle(epoll_create(socket_engine_epoll::epoll_hint)) {
 		events.resize(socket_engine_epoll::epoll_hint);
 		if (epoll_handle == -1) {
 			throw dpp::connection_exception("Failed to initialise epoll()");
