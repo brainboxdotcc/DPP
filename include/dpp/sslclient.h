@@ -148,6 +148,16 @@ protected:
 	time_t last_tick;
 
 	/**
+	 * @brief Start time of connection
+	 */
+	time_t start;
+
+	/**
+	 * @brief How many times we retried connect()
+	 */
+	uint8_t connect_retries{0};
+
+	/**
 	 * @brief Hostname connected to
 	 */
 	std::string hostname;
@@ -178,10 +188,23 @@ protected:
 	bool connected{false};
 
 	/**
+	 * @brief True if tcp connect() succeeded
+	 */
+	bool tcp_connect_done{false};
+
+	/**
 	 * @brief Timer handle for one second timer
 	 */
 	timer timer_handle;
 
+	/**
+	 * @brief Unique ID of socket used as a nonce
+	 * You can use this to identify requests vs reply
+	 * if you want. D++ itself only sets this, and does
+	 * not use it in any logic. It starts at 1 and increments
+	 * for each request made.
+	 */
+	uint64_t unique_id;
 
 	/**
 	 * @brief Called every second
@@ -206,6 +229,14 @@ public:
 	 * @return uint64_t bytes received
 	 */
 	uint64_t get_bytes_in();
+
+	/**
+	 * @brief Every request made has a unique ID. This increments
+	 * for every request, starting at 1. You can use this for statistics,
+	 * or to associate requests and replies in external event loops.
+	 * @return Unique ID
+	 */
+	uint64_t get_unique_id() const;
 
 	/**
 	 * @brief Get SSL cipher name

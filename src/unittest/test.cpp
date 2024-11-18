@@ -1144,8 +1144,8 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 				if (g) {
 					set_test(CACHE, true);
 					set_test(VOICECONN, false);
-					dpp::discord_client* s = bot.get_shard(0);
-					s->connect_voice(g->id, TEST_VC_ID, false, false);
+					//dpp::discord_client* s = bot.get_shard(0);
+					//s->connect_voice(g->id, TEST_VC_ID, false, false);
 				}
 				else {
 					set_test(CACHE, false);
@@ -1602,7 +1602,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		});
 
 		bool message_tested = false;
-		bot.on_message_create([&](const dpp::message_create_t & event) {
+		bot.on_message_create([&message_tested,&bot,&message_helper,&thread_helper](const dpp::message_create_t & event) {
 			if (event.msg.author.id == bot.me.id) {
 				if (event.msg.content == "test message" && !message_tested) {
 					message_tested = true;
@@ -1652,7 +1652,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 			}
 		});
 
-		bot.on_message_reaction_add([&](const dpp::message_reaction_add_t & event) {
+		bot.on_message_reaction_add([&bot,&thread_helper](const dpp::message_reaction_add_t & event) {
 			if (event.reacting_user.id == bot.me.id) {
 				if (event.reacting_emoji.name == "😄") {
 					set_test(REACTEVENT, true);
@@ -1664,7 +1664,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 			}
 		});
 
-		bot.on_message_reaction_remove([&](const dpp::message_reaction_remove_t & event) {
+		bot.on_message_reaction_remove([&bot,&thread_helper](const dpp::message_reaction_remove_t & event) {
 			if (event.reacting_user_id == bot.me.id) {
 				if (event.channel_id == thread_helper.thread_id && event.reacting_emoji.name == dpp::unicode_emoji::thread) {
 					set_test(THREAD_MESSAGE_REACT_REMOVE_EVENT, true);
@@ -1673,7 +1673,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 			}
 		});
 
-		bot.on_message_delete([&](const dpp::message_delete_t & event) {
+		bot.on_message_delete([&bot,&thread_helper](const dpp::message_delete_t & event) {
 			if (event.channel_id == thread_helper.thread_id) {
 				set_test(THREAD_MESSAGE_DELETE_EVENT, true);
 				thread_helper.notify_event_tested(thread_test_helper::MESSAGE_DELETE);
@@ -1681,7 +1681,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		});
 
 		bool message_edit_tested = false;
-		bot.on_message_update([&](const dpp::message_update_t &event) {
+		bot.on_message_update([&bot,&thread_helper,&message_edit_tested](const dpp::message_update_t &event) {
 			if (event.msg.author == bot.me.id) {
 				if (event.msg.content == "test edit" && !message_edit_tested) {
 					message_edit_tested = true;
@@ -1974,22 +1974,22 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 						// testing all user flags from https://discord.com/developers/docs/resources/user#user-object-user-flags
 						// they're manually set here because the dpp::user_flags don't match to the discord API, so we can't use them to compare with the raw flags!
 						if (
-								u.is_discord_employee() == 			((raw_flags & (1 << 0)) != 0) &&
-								u.is_partnered_owner() == 			((raw_flags & (1 << 1)) != 0) &&
-								u.has_hypesquad_events() == 		((raw_flags & (1 << 2)) != 0) &&
-								u.is_bughunter_1() == 				((raw_flags & (1 << 3)) != 0) &&
-								u.is_house_bravery() == 			((raw_flags & (1 << 6)) != 0) &&
-								u.is_house_brilliance() == 			((raw_flags & (1 << 7)) != 0) &&
-								u.is_house_balance() == 			((raw_flags & (1 << 8)) != 0) &&
-								u.is_early_supporter() == 			((raw_flags & (1 << 9)) != 0) &&
-								u.is_team_user() == 				((raw_flags & (1 << 10)) != 0) &&
-								u.is_bughunter_2() == 				((raw_flags & (1 << 14)) != 0) &&
-								u.is_verified_bot() == 				((raw_flags & (1 << 16)) != 0) &&
-								u.is_verified_bot_dev() == 			((raw_flags & (1 << 17)) != 0) &&
-								u.is_certified_moderator() == 		((raw_flags & (1 << 18)) != 0) &&
-								u.is_bot_http_interactions() == 	((raw_flags & (1 << 19)) != 0) &&
-								u.is_active_developer() == 			((raw_flags & (1 << 22)) != 0)
-								) {
+							u.is_discord_employee() == 	((raw_flags & (1 << 0)) != 0) &&
+							u.is_partnered_owner() == 	((raw_flags & (1 << 1)) != 0) &&
+							u.has_hypesquad_events() == 	((raw_flags & (1 << 2)) != 0) &&
+							u.is_bughunter_1() == 		((raw_flags & (1 << 3)) != 0) &&
+							u.is_house_bravery() == 	((raw_flags & (1 << 6)) != 0) &&
+							u.is_house_brilliance() == 	((raw_flags & (1 << 7)) != 0) &&
+							u.is_house_balance() == 	((raw_flags & (1 << 8)) != 0) &&
+							u.is_early_supporter() == 	((raw_flags & (1 << 9)) != 0) &&
+							u.is_team_user() == 		((raw_flags & (1 << 10)) != 0) &&
+							u.is_bughunter_2() == 		((raw_flags & (1 << 14)) != 0) &&
+							u.is_verified_bot() == 		((raw_flags & (1 << 16)) != 0) &&
+							u.is_verified_bot_dev() == 	((raw_flags & (1 << 17)) != 0) &&
+							u.is_certified_moderator() == 	((raw_flags & (1 << 18)) != 0) &&
+							u.is_bot_http_interactions() == ((raw_flags & (1 << 19)) != 0) &&
+							u.is_active_developer() == 	((raw_flags & (1 << 22)) != 0)
+						) {
 							set_test(USER_GET_FLAGS, true);
 						} else {
 							set_test(USER_GET_FLAGS, false);

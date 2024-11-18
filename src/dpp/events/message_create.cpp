@@ -22,7 +22,6 @@
 #include <dpp/discordevents.h>
 #include <dpp/cluster.h>
 #include <dpp/message.h>
-#include <dpp/stringops.h>
 #include <dpp/json.h>
 
 
@@ -39,11 +38,12 @@ namespace dpp::events {
 void message_create::handle(discord_client* client, json &j, const std::string &raw) {
 
 	if (!client->creator->on_message_create.empty()) {
-		json d = j["d"];
-		dpp::message_create_t msg(client, raw);
-		msg.msg.fill_from_json(&d, client->creator->cache_policy);
-		msg.msg.owner = client->creator;
-		client->creator->queue_work(1, [client, msg]() {
+		json js = j;
+		client->creator->queue_work(1, [client, js, raw]() {
+			json d = js["d"];
+			dpp::message_create_t msg(client, raw);
+			msg.msg = message(client->owner).fill_from_json(&d, client->creator->cache_policy);
+			msg.msg.owner = client->creator;
 			client->creator->on_message_create.call(msg);
 		});
 	}

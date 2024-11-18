@@ -137,10 +137,6 @@ using https_client_completion_event = std::function<void(class https_client*)>;
  * @note plaintext HTTP without SSL is also supported via a "downgrade" setting
  */
 class DPP_EXPORT https_client : public ssl_client {
-	/**
-	 * @brief Current connection state
-	 */
-	http_state state;
 
 	/**
 	 * @brief The type of the request, e.g. GET, POST
@@ -241,7 +237,12 @@ public:
 	 * @brief Function to call when HTTP request is completed
 	 */
 	https_client_completion_event completed;
-	
+
+	/**
+	 * @brief Current connection state
+	 */
+	http_state state;
+
 	/**
 	 * @brief Connect to a specific HTTP(S) server and complete a request.
 	 * 
@@ -361,7 +362,6 @@ public:
 	 * @return Split URL
 	 */
 	static http_connect_info get_host_info(std::string url);
-
 };
 
 }

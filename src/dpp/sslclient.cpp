@@ -54,7 +54,6 @@
 #include <dpp/cluster.h>
 #include <dpp/sslclient.h>
 #include <dpp/exception.h>
-#include <dpp/utility.h>
 #include <dpp/stringops.h>
 #include <dpp/dns.h>
 #include <dpp/socketengine.h>
@@ -63,6 +62,8 @@
 constexpr uint16_t SOCKET_OP_TIMEOUT{5000};
 
 namespace dpp {
+
+uint64_t last_unique_id{1};
 
 /**
  * @brief This is an opaque class containing openssl library specific structures.
@@ -182,17 +183,23 @@ void set_signal_handler(int signal)
 }
 #endif
 
+uint64_t ssl_client::get_unique_id() const {
+	return unique_id;
+}
+
 ssl_client::ssl_client(cluster* creator, const std::string &_hostname, const std::string &_port, bool plaintext_downgrade, bool reuse) :
 	nonblocking(false),
 	sfd(INVALID_SOCKET),
 	ssl(nullptr),
 	last_tick(time(nullptr)),
+	start(time(nullptr)),
 	hostname(_hostname),
 	port(_port),
 	bytes_out(0),
 	bytes_in(0),
 	plaintext(plaintext_downgrade),
 	timer_handle(0),
+	unique_id(last_unique_id++),
 	keepalive(reuse),
 	owner(creator)
 {
@@ -254,6 +261,9 @@ void ssl_client::complete_handshake(const socket_events* ev)
 		switch (code) {
 			case SSL_ERROR_NONE: {
 				connected = true;
+				socket_events se{*ev};
+				se.flags = dpp::WANT_READ | dpp::WANT_WRITE | dpp::WANT_ERROR;
+				owner->socketengine->update_socket(se);
 				break;
 			}
 			case SSL_ERROR_WANT_WRITE: {
@@ -297,7 +307,7 @@ void ssl_client::on_read(socket fd, const struct socket_events& ev) {
 		}
 		bytes_in += r;
 	} else if (!plaintext && connected) {
-		int r = SSL_read(ssl->ssl,server_to_client_buffer,DPP_BUFSIZE);
+		int r = SSL_read(ssl->ssl, server_to_client_buffer, DPP_BUFSIZE);
 		int e = SSL_get_error(ssl->ssl,r);
 
 		switch (e) {
@@ -307,6 +317,7 @@ void ssl_client::on_read(socket fd, const struct socket_events& ev) {
 					buffer.append(server_to_client_buffer, r);
 
 					if (!this->handle_buffer(buffer)) {
+						this->close();
 						return;
 					} else {
 						socket_events se{ev};
@@ -320,16 +331,15 @@ void ssl_client::on_read(socket fd, const struct socket_events& ev) {
 				/* End of data */
 				SSL_shutdown(ssl->ssl);
 				return;
-				break;
 			case SSL_ERROR_WANT_READ: {
 				socket_events se{ev};
 				se.flags = WANT_READ | WANT_ERROR;
 				owner->socketengine->update_socket(se);
 				break;
 			}
-				/* We get a WANT_WRITE if we're trying to rehandshake, and we block on a write during that rehandshake.
-				* We need to wait on the socket to be writeable but initiate the read when it is
-				*/
+			/* We get a WANT_WRITE if we're trying to rehandshake, and we block on a write during that rehandshake.
+			 * We need to wait on the socket to be writeable but initiate the read when it is
+			 */
 			case SSL_ERROR_WANT_WRITE: {
 				socket_events se{ev};
 				se.flags = WANT_READ | WANT_WRITE | WANT_ERROR;
@@ -362,9 +372,49 @@ void ssl_client::on_read(socket fd, const struct socket_events& ev) {
 
 void ssl_client::on_write(socket fd, const struct socket_events& e) {
 
+	if (!tcp_connect_done) {
+		tcp_connect_done = true;
+	}
 	if (!connected && plaintext) {
 		/* Plaintext sockets connect immediately on first write event */
 		connected = true;
+	} else if (!connected) {
+		/* SSL handshake and session setup */
+
+		/* Each thread needs a context, but we don't need to make a new one for each connection */
+		if (!openssl_context) {
+			/* We're good to go - hand the fd over to openssl */
+			const SSL_METHOD *method = TLS_client_method(); /* Create new client-method instance */
+
+			/* Create SSL context */
+			openssl_context.reset(SSL_CTX_new(method));
+			if (!openssl_context) {
+				throw dpp::connection_exception(err_ssl_context, "Failed to create SSL client context!");
+			}
+
+			/* Do not allow SSL 3.0, TLS 1.0 or 1.1
+			* https://www.packetlabs.net/posts/tls-1-1-no-longer-secure/
+			*/
+			if (!SSL_CTX_set_min_proto_version(openssl_context.get(), TLS1_2_VERSION)) {
+				throw dpp::connection_exception(err_ssl_version, "Failed to set minimum SSL version!");
+			}
+		}
+		if (!ssl->ssl) {
+			/* Create SSL session */
+			ssl->ssl = SSL_new(openssl_context.get());
+			if (ssl->ssl == nullptr) {
+				throw dpp::connection_exception(err_ssl_new, "SSL_new failed!");
+			}
+
+			SSL_set_fd(ssl->ssl, (int) sfd);
+			SSL_set_connect_state(ssl->ssl);
+
+			/* Server name identification (SNI) */
+			SSL_set_tlsext_host_name(ssl->ssl, hostname.c_str());
+		}
+
+		/* If this completes, we fall straight through into if (connected) */
+		complete_handshake(&e);
 	}
 
 	if (connected) {
@@ -426,44 +476,6 @@ void ssl_client::on_write(socket fd, const struct socket_events& e) {
 				}
 			}
 		}
-	} else {
-		if (!plaintext) {
-			/* Each thread needs a context, but we don't need to make a new one for each connection */
-			if (!openssl_context) {
-				/* We're good to go - hand the fd over to openssl */
-				const SSL_METHOD *method = TLS_client_method(); /* Create new client-method instance */
-
-				/* Create SSL context */
-				openssl_context.reset(SSL_CTX_new(method));
-				if (!openssl_context) {
-					throw dpp::connection_exception(err_ssl_context, "Failed to create SSL client context!");
-				}
-
-				/* Do not allow SSL 3.0, TLS 1.0 or 1.1
-				* https://www.packetlabs.net/posts/tls-1-1-no-longer-secure/
-				*/
-				if (!SSL_CTX_set_min_proto_version(openssl_context.get(), TLS1_2_VERSION)) {
-					throw dpp::connection_exception(err_ssl_version, "Failed to set minimum SSL version!");
-				}
-			}
-			if (!ssl->ssl) {
-				/* Create SSL session */
-				ssl->ssl = SSL_new(openssl_context.get());
-				if (ssl->ssl == nullptr) {
-					throw dpp::connection_exception(err_ssl_new, "SSL_new failed!");
-				}
-
-				SSL_set_fd(ssl->ssl, (int) sfd);
-				SSL_set_connect_state(ssl->ssl);
-
-				/* Server name identification (SNI) */
-				SSL_set_tlsext_host_name(ssl->ssl, hostname.c_str());
-			}
-		}
-	}
-
-	if (!connected && !plaintext) {
-		complete_handshake(&e);
 	}
 }
 
@@ -473,16 +485,34 @@ void ssl_client::on_error(socket fd, const struct socket_events&, int error_code
 
 void ssl_client::read_loop()
 {
-	dpp::socket_events events(
-		sfd,
-		WANT_READ | WANT_WRITE | WANT_ERROR,
-		[this](socket fd, const struct socket_events& e) { on_read(fd, e); },
-		[this](socket fd, const struct socket_events& e) { on_write(fd, e); },
-		[this](socket fd, const struct socket_events& e, int error_code) { on_error(fd, e, error_code); }
-	);
-	owner->socketengine->register_socket(events);
-	timer_handle = owner->start_timer([this](auto handle) {
+	auto setup_events = [this]() {
+		dpp::socket_events events(
+			sfd,
+			WANT_READ | WANT_WRITE | WANT_ERROR,
+			[this](socket fd, const struct socket_events &e) { on_read(fd, e); },
+			[this](socket fd, const struct socket_events &e) { on_write(fd, e); },
+			[this](socket fd, const struct socket_events &e, int error_code) { on_error(fd, e, error_code); }
+		);
+		owner->socketengine->register_socket(events);
+	};
+	setup_events();
+	timer_handle = owner->start_timer([this, setup_events](auto handle) {
 		one_second_timer();
+		if (!tcp_connect_done && time(nullptr) > start + 2 && connect_retries < 3) {
+			/* Retry failed connect(). This can happen even in the best situation with bullet-proof hosting.
+			 * Previously with blocking connect() there was some leniency in this, but now we have to do this
+			 * ourselves.
+			 *
+			 * Retry up to 3 times, 2 seconds between retries. After this, give up and let timeout code
+			 * take the wheel (will likely end with an exception).
+			 */
+			close_socket(sfd);
+			owner->socketengine->delete_socket(sfd);
+			ssl_client::connect();
+			setup_events();
+			start = time(nullptr) + 2;
+			connect_retries++;
+		}
 	}, 1);
 }
 

@@ -32,7 +32,6 @@ namespace dpp {
 
 https_client::https_client(cluster* creator, const std::string &hostname, uint16_t port,  const std::string &urlpath, const std::string &verb, const std::string &req_body, const http_headers& extra_headers, bool plaintext_connection, uint16_t request_timeout, const std::string &protocol, https_client_completion_event done)
 	: ssl_client(creator, hostname, std::to_string(port), plaintext_connection, false),
-	state(HTTPS_HEADERS),
 	request_type(verb),
 	path(urlpath),
 	request_body(req_body),
@@ -42,7 +41,8 @@ https_client::https_client(cluster* creator, const std::string &hostname, uint16
 	http_protocol(protocol),
 	timeout(time(nullptr) + request_timeout),
 	timed_out(false),
-	completed(done)
+	completed(done),
+	state(HTTPS_HEADERS)
 {
 	nonblocking = false;
 	https_client::connect();
@@ -157,6 +157,10 @@ bool https_client::handle_buffer(std::string &buffer)
 		switch (state) {
 			case HTTPS_HEADERS:
 				if (buffer.find("\r\n\r\n") != std::string::npos) {
+
+					/* Add 10 seconds to retrieve body */
+					timeout += 10;
+
 					/* Got all headers, proceed to new state */
 
 					std::string unparsed = buffer;
@@ -211,6 +215,10 @@ bool https_client::handle_buffer(std::string &buffer)
 								state_changed = true;
 								continue;
 							}
+							if (!buffer.empty()) {
+								/* Got a bit of body content in the same read as the headers */
+								continue;
+							}
 							return true;
 						} else {
 							/* Non-HTTP-like response with invalid headers. Go no further. */
@@ -242,11 +250,11 @@ bool https_client::handle_buffer(std::string &buffer)
 			case HTTPS_CHUNK_TRAILER:
 				if (buffer.length() >= 2 && buffer.substr(0, 2) == "\r\n") {
 					if (state == HTTPS_CHUNK_LAST) {
-						state = HTTPS_DONE;
 						if (completed) {
 							completed(this);
 							completed = {};
 						}
+						state = HTTPS_DONE;
 						this->close();
 						return false;
 					} else {
@@ -281,11 +289,11 @@ bool https_client::handle_buffer(std::string &buffer)
 				body += buffer;
 				buffer.clear();
 				if (content_length == ULLONG_MAX || body.length() >= content_length) {
-					state = HTTPS_DONE;
 					if (completed) {
 						completed(this);
 						completed = {};
 					}
+					state = HTTPS_DONE;
 					this->close();
 					return false;
 				}
@@ -317,24 +325,26 @@ http_state https_client::get_state() {
 }
 
 void https_client::one_second_timer() {
-	if ((this->sfd == SOCKET_ERROR || time(nullptr) >= timeout) && this->state != HTTPS_DONE) {
-		/* if and only if response is timed out */
-		if (this->sfd != SOCKET_ERROR) {
-			timed_out = true;
-		}
-		keepalive = false;
+	if (!tcp_connect_done && time(nullptr) >= timeout) {
+		timed_out = true;
 		this->close();
+	} else if (tcp_connect_done && !connected && time(nullptr) >= timeout && this->state != HTTPS_DONE) {
+		this->close();
+		timed_out = true;
+	} else if (time(nullptr) >= timeout && this->state != HTTPS_DONE) {
+		this->close();
+		timed_out = true;
 	}
 }
 
 void https_client::close() {
 	if (state != HTTPS_DONE) {
-		state = HTTPS_DONE;
-		ssl_client::close();
 		if (completed) {
 			completed(this);
 			completed = {};
 		}
+		state = HTTPS_DONE;
+		ssl_client::close();
 	}
 }
 
