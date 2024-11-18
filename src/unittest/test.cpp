@@ -2011,48 +2011,42 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 					.set_name("voice1")
 					.add_permission_overwrite(TEST_GUILD_ID, dpp::ot_role, 0, dpp::p_view_channel)
 					.set_user_limit(99);
-				dpp::channel createdChannel;
-				try {
-					createdChannel = dpp::sync<dpp::channel>(&bot, &dpp::cluster::channel_create, channel1);
-				} catch (dpp::rest_exception &exception) {
-					set_test(VOICE_CHANNEL_CREATE, false);
-				}
-				if (createdChannel.name == channel1.name &&
-						createdChannel.user_limit == 99 &&
-						createdChannel.name == "voice1") {
-					for (auto overwrite: createdChannel.permission_overwrites) {
-						if (overwrite.id == TEST_GUILD_ID && overwrite.type == dpp::ot_role && overwrite.deny == dpp::p_view_channel) {
-							set_test(VOICE_CHANNEL_CREATE, true);
-						}
+				bot.channel_create(channel1, [&bot,channel1](const auto& response) {
+					if (response.is_error()) {
+						set_test(VOICE_CHANNEL_CREATE, false);
+						return;
 					}
+					dpp::channel createdChannel = std::get<dpp::channel>(response.value);
+					if (createdChannel.name == channel1.name && createdChannel.user_limit == 99 && createdChannel.name == "voice1") {
+						for (auto overwrite: createdChannel.permission_overwrites) {
+							if (overwrite.id == TEST_GUILD_ID && overwrite.type == dpp::ot_role && overwrite.deny == dpp::p_view_channel) {
+								set_test(VOICE_CHANNEL_CREATE, true);
+								break;
+							}
+						}
 
-					// edit the voice channel
-					createdChannel.set_name("foobar2");
-					createdChannel.set_user_limit(2);
-					for (auto overwrite: createdChannel.permission_overwrites) {
-						if (overwrite.id == TEST_GUILD_ID) {
-							overwrite.deny.set(0);
-							overwrite.allow.set(dpp::p_view_channel);
+						// edit the voice channel
+						createdChannel.set_name("foobar2");
+						createdChannel.set_user_limit(2);
+						for (auto overwrite: createdChannel.permission_overwrites) {
+							if (overwrite.id == TEST_GUILD_ID) {
+								overwrite.deny.set(0);
+								overwrite.allow.set(dpp::p_view_channel);
+							}
 						}
+						bot.channel_edit(createdChannel, [&bot,createdChannel](const auto& response) {
+							if (response.is_error()) {
+								set_test(VOICE_CHANNEL_EDIT, false);
+								return;
+							}
+							dpp::channel edited = std::get<dpp::channel>(response.value);
+							set_test(VOICE_CHANNEL_EDIT, (edited.name == "foobar2" && edited.user_limit == 2));
+							bot.channel_delete(createdChannel.id,[](const auto& response) {
+								set_test(VOICE_CHANNEL_DELETE, !response.is_error());
+							});
+						});
 					}
-					try {
-						dpp::channel edited = dpp::sync<dpp::channel>(&bot, &dpp::cluster::channel_edit, createdChannel);
-						if (edited.name == "foobar2" && edited.user_limit == 2) {
-							set_test(VOICE_CHANNEL_EDIT, true);
-						}
-					} catch (dpp::rest_exception &exception) {
-						set_test(VOICE_CHANNEL_EDIT, false);
-					}
-
-					// delete the voice channel
-					try {
-						dpp::sync<dpp::confirmation>(&bot, &dpp::cluster::channel_delete, createdChannel.id);
-						set_test(VOICE_CHANNEL_DELETE, true);
-					} catch (dpp::rest_exception &exception) {
-						bot.log(dpp::ll_warning, "Exception: " + std::string(exception.what()));
-						set_test(VOICE_CHANNEL_DELETE, false);
-					}
-				}
+				});
 			}
 
 			set_test(FORUM_CREATION, false);
