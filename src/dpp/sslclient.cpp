@@ -255,6 +255,9 @@ void ssl_client::log(dpp::loglevel severity, const std::string &msg) const
 
 void ssl_client::complete_handshake(const socket_events* ev)
 {
+	if (!ssl || !ssl->ssl) {
+		return;
+	}
 	auto status = SSL_do_handshake(ssl->ssl);
 	if (status != 1) {
 		auto code = SSL_get_error(ssl->ssl, status);
@@ -306,7 +309,7 @@ void ssl_client::on_read(socket fd, const struct socket_events& ev) {
 			return;
 		}
 		bytes_in += r;
-	} else if (!plaintext && connected) {
+	} else if (!plaintext && connected && ssl && ssl->ssl) {
 		int r = SSL_read(ssl->ssl, server_to_client_buffer, DPP_BUFSIZE);
 		int e = SSL_get_error(ssl->ssl,r);
 
@@ -440,7 +443,7 @@ void ssl_client::on_write(socket fd, const struct socket_events& e) {
 				se.flags = WANT_READ | WANT_WRITE | WANT_ERROR;
 				owner->socketengine->update_socket(se);
 			}
-		} else {
+		} else if (ssl && ssl->ssl) {
 			int r = SSL_write(ssl->ssl, client_to_server_buffer + client_to_server_offset, (int)client_to_server_length);
 			int err = SSL_get_error(ssl->ssl, r);
 
