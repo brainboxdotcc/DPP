@@ -57,9 +57,7 @@ struct socket_engine_kqueue : public socket_engine_base {
 		struct timespec ts{};
 		ts.tv_sec = 1;
 
-		//int i = kevent(kqueue_handle, &change_list.front(), change_pos, &ke_list.front(), static_cast<int>(ke_list.size()), &ts);
 		int i = kevent(kqueue_handle, NULL, 0, &ke_list.front(), static_cast<int>(ke_list.size()), &ts);
-
 		if (i < 0) {
 			return;
 		}
@@ -94,14 +92,14 @@ struct socket_engine_kqueue : public socket_engine_base {
 			socket_events* se = fds.find(e.fd)->second.get();
 			if ((se->flags & WANT_READ) != 0) {
 				EV_SET(&ke, e.fd, EVFILT_READ, EV_ADD, 0, 0, static_cast<CAST_TYPE>(se));
-				int i = kevent(kqueue_handle, &ke, 1, 0, 0, NULL);	
+				kevent(kqueue_handle, &ke, 1, 0, 0, nullptr);
 			}
 			if ((se->flags & WANT_WRITE) != 0) {
 				EV_SET(&ke, e.fd, EVFILT_WRITE, EV_ADD | EV_ONESHOT, 0, 0, static_cast<CAST_TYPE>(se));
-				int i = kevent(kqueue_handle, &ke, 1, 0, 0, NULL);
+				kevent(kqueue_handle, &ke, 1, 0, 0, nullptr);
 			}
-			if (fds.size() * 2 > ke_list.size()) {
-				ke_list.resize(fds.size() * 2);
+			if (fds.size() * 3 > ke_list.size()) {
+				ke_list.resize(fds.size() * 3);
 			}
 		}
 		return r;
@@ -114,14 +112,14 @@ struct socket_engine_kqueue : public socket_engine_base {
 			struct kevent ke;
 			if ((e.flags & WANT_READ) != 0) {
 				EV_SET(&ke, e.fd, EVFILT_READ, EV_ADD, 0, 0, static_cast<CAST_TYPE>(se));
-				int i = kevent(kqueue_handle, &ke, 1, 0, 0, NULL);
+				kevent(kqueue_handle, &ke, 1, 0, 0, nullptr);
 			}
 			if ((e.flags & WANT_WRITE) != 0) {
 				EV_SET(&ke, e.fd, EVFILT_WRITE, EV_ADD | EV_ONESHOT, 0, 0, static_cast<CAST_TYPE>(se));
-				int i = kevent(kqueue_handle, &ke, 1, 0, 0, NULL);
+				kevent(kqueue_handle, &ke, 1, 0, 0, nullptr);
 			}
-			if (fds.size() * 2 > ke_list.size()) {
-				ke_list.resize(fds.size() * 2);
+			if (fds.size() * 3 > ke_list.size()) {
+				ke_list.resize(fds.size() * 3);
 			}
 		}
 		return r;
@@ -134,10 +132,9 @@ protected:
 		if (r) {
 			struct kevent ke;
 			EV_SET(&ke, fd, EVFILT_WRITE, EV_DELETE, 0, 0, nullptr);
-			int i = kevent(kqueue_handle, &ke, 1, 0, 0, NULL);
-			// Then remove the read filter.
+			kevent(kqueue_handle, &ke, 1, 0, 0, nullptr);
 			EV_SET(&ke, fd, EVFILT_READ, EV_DELETE, 0, 0, nullptr);
-			i = kevent(kqueue_handle, &ke, 1, 0, 0, NULL);
+			kevent(kqueue_handle, &ke, 1, 0, 0, nullptr);
 		}
 		return r;
 	}
