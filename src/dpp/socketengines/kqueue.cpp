@@ -24,24 +24,15 @@
 #include <memory>
 #include <vector>
 #include <sys/types.h>
-#include <sys/event.h>
-#include <sys/sysctl.h>
 #include <unistd.h>
 #include <dpp/cluster.h>
-
-#if defined __NetBSD__ && __NetBSD_Version__ <= 999001400
-	#define CAST_TYPE intptr_t
-#else
-	#define CAST_TYPE void*
-#endif
+#include "kqueue-facade.h"
 
 namespace dpp {
 
 struct socket_engine_kqueue : public socket_engine_base {
 
 	int kqueue_handle{INVALID_SOCKET};
-	unsigned int change_pos = 0;
-	std::vector<struct kevent> change_list;
 	std::vector<struct kevent> ke_list;
 
 	socket_engine_kqueue(const socket_engine_kqueue&) = delete;
@@ -50,7 +41,6 @@ struct socket_engine_kqueue : public socket_engine_base {
 	socket_engine_kqueue& operator=(socket_engine_kqueue&&) = delete;
 
 	explicit socket_engine_kqueue(cluster* creator) : socket_engine_base(creator), kqueue_handle(kqueue()) {
-		change_list.resize(8);
 		ke_list.resize(16);
 		if (kqueue_handle == -1) {
 			throw dpp::connection_exception("Failed to initialise kqueue()");
@@ -63,20 +53,12 @@ struct socket_engine_kqueue : public socket_engine_base {
 		}
 	}
 
-	struct kevent* get_change_kevent()
-	{
-		if (change_pos >= change_list.size()) {
-			change_list.resize(change_list.size() * 2);
-		}
-		return &change_list[change_pos++];
-	}
-
 	void process_events() final {
 		struct timespec ts{};
 		ts.tv_sec = 1;
 
-		int i = kevent(kqueue_handle, &change_list.front(), change_pos, &ke_list.front(), static_cast<int>(ke_list.size()), &ts);
-		change_pos = 0;
+		//int i = kevent(kqueue_handle, &change_list.front(), change_pos, &ke_list.front(), static_cast<int>(ke_list.size()), &ts);
+		int i = kevent(kqueue_handle, NULL, 0, &ke_list.front(), static_cast<int>(ke_list.size()), &ts);
 
 		if (i < 0) {
 			return;
@@ -90,7 +72,7 @@ struct socket_engine_kqueue : public socket_engine_base {
 			}
 
 			const short filter = kev.filter;
-			if (kev.flags & EV_EOF) {
+			if (kev.flags & EV_EOF || kev.flags & EV_ERROR) {
 				eh->on_error(kev.ident, *eh, kev.fflags);
 				continue;
 			}
@@ -105,29 +87,19 @@ struct socket_engine_kqueue : public socket_engine_base {
 		}
 	}
 
-	void set_event_write_flags(dpp::socket fd, socket_events* eh, uint8_t old_mask, uint8_t new_mask)
-	{
-		if (((new_mask & WANT_WRITE) != 0) && ((old_mask & WANT_WRITE) == 0))
-		{
-			struct kevent* ke = get_change_kevent();
-			EV_SET(ke, fd, EVFILT_WRITE, EV_ADD | EV_ONESHOT, 0, 0, static_cast<CAST_TYPE>(eh));
-		}
-		else if (((old_mask & WANT_WRITE) != 0) && ((new_mask & WANT_WRITE) == 0))
-		{
-			struct kevent* ke = get_change_kevent();
-			EV_SET(ke, fd, EVFILT_WRITE, EV_DELETE, 0, 0, nullptr);
-		}
-	}
-
 	bool register_socket(const socket_events& e) final {
 		bool r = socket_engine_base::register_socket(e);
 		if (r) {
-			struct kevent* ke = get_change_kevent();
+			struct kevent ke;
 			socket_events* se = fds.find(e.fd)->second.get();
 			if ((se->flags & WANT_READ) != 0) {
-				EV_SET(ke, e.fd, EVFILT_READ, EV_ADD, 0, 0, static_cast<CAST_TYPE>(se));
+				EV_SET(&ke, e.fd, EVFILT_READ, EV_ADD, 0, 0, static_cast<CAST_TYPE>(se));
+				int i = kevent(kqueue_handle, &ke, 1, 0, 0, NULL);	
 			}
-			set_event_write_flags(e.fd, se, 0, e.flags);
+			if ((se->flags & WANT_WRITE) != 0) {
+				EV_SET(&ke, e.fd, EVFILT_WRITE, EV_ADD | EV_ONESHOT, 0, 0, static_cast<CAST_TYPE>(se));
+				int i = kevent(kqueue_handle, &ke, 1, 0, 0, NULL);
+			}
 			if (fds.size() * 2 > ke_list.size()) {
 				ke_list.resize(fds.size() * 2);
 			}
@@ -138,12 +110,16 @@ struct socket_engine_kqueue : public socket_engine_base {
 	bool update_socket(const socket_events& e) final {
 		bool r = socket_engine_base::update_socket(e);
 		if (r) {
-			struct kevent* ke = get_change_kevent();
 			socket_events* se = fds.find(e.fd)->second.get();
-			if ((se->flags & WANT_READ) != 0) {
-				EV_SET(ke, e.fd, EVFILT_READ, EV_ADD, 0, 0, static_cast<CAST_TYPE>(se));
+			struct kevent ke;
+			if ((e.flags & WANT_READ) != 0) {
+				EV_SET(&ke, e.fd, EVFILT_READ, EV_ADD, 0, 0, static_cast<CAST_TYPE>(se));
+				int i = kevent(kqueue_handle, &ke, 1, 0, 0, NULL);
 			}
-			set_event_write_flags(e.fd, se, 0, e.flags);
+			if ((e.flags & WANT_WRITE) != 0) {
+				EV_SET(&ke, e.fd, EVFILT_WRITE, EV_ADD | EV_ONESHOT, 0, 0, static_cast<CAST_TYPE>(se));
+				int i = kevent(kqueue_handle, &ke, 1, 0, 0, NULL);
+			}
 			if (fds.size() * 2 > ke_list.size()) {
 				ke_list.resize(fds.size() * 2);
 			}
@@ -156,12 +132,12 @@ protected:
 	bool remove_socket(dpp::socket fd) final {
 		bool r = socket_engine_base::remove_socket(fd);
 		if (r) {
-			struct kevent* ke = get_change_kevent();
-			EV_SET(ke, fd, EVFILT_WRITE, EV_DELETE, 0, 0, nullptr);
-
+			struct kevent ke;
+			EV_SET(&ke, fd, EVFILT_WRITE, EV_DELETE, 0, 0, nullptr);
+			int i = kevent(kqueue_handle, &ke, 1, 0, 0, NULL);
 			// Then remove the read filter.
-			ke = get_change_kevent();
-			EV_SET(ke, fd, EVFILT_READ, EV_DELETE, 0, 0, nullptr);
+			EV_SET(&ke, fd, EVFILT_READ, EV_DELETE, 0, 0, nullptr);
+			i = kevent(kqueue_handle, &ke, 1, 0, 0, NULL);
 		}
 		return r;
 	}
