@@ -23,6 +23,7 @@
 #include <dpp/exception.h>
 #include <memory>
 #include <vector>
+#include <array>
 #include <sys/types.h>
 #include <unistd.h>
 #include <dpp/cluster.h>
@@ -33,7 +34,7 @@ namespace dpp {
 struct socket_engine_kqueue : public socket_engine_base {
 
 	int kqueue_handle{INVALID_SOCKET};
-	std::vector<struct kevent> ke_list;
+	std::array<struct kevent, 65536> ke_list;
 
 	socket_engine_kqueue(const socket_engine_kqueue&) = delete;
 	socket_engine_kqueue(socket_engine_kqueue&&) = delete;
@@ -41,7 +42,6 @@ struct socket_engine_kqueue : public socket_engine_base {
 	socket_engine_kqueue& operator=(socket_engine_kqueue&&) = delete;
 
 	explicit socket_engine_kqueue(cluster* creator) : socket_engine_base(creator), kqueue_handle(kqueue()) {
-		ke_list.resize(16);
 		if (kqueue_handle == -1) {
 			throw dpp::connection_exception("Failed to initialise kqueue()");
 		}
@@ -57,7 +57,7 @@ struct socket_engine_kqueue : public socket_engine_base {
 		struct timespec ts{};
 		ts.tv_sec = 1;
 
-		int i = kevent(kqueue_handle, NULL, 0, &ke_list.front(), static_cast<int>(ke_list.size()), &ts);
+		int i = kevent(kqueue_handle, NULL, 0, ke_list.data(), static_cast<int>(ke_list.size()), &ts);
 		if (i < 0) {
 			return;
 		}
@@ -111,9 +111,6 @@ struct socket_engine_kqueue : public socket_engine_base {
 				EV_SET(&ke, e.fd, EVFILT_WRITE, EV_ADD | EV_ONESHOT, 0, 0, static_cast<CAST_TYPE>(se));
 				kevent(kqueue_handle, &ke, 1, 0, 0, nullptr);
 			}
-			if (fds.size() * 3 > ke_list.size()) {
-				ke_list.resize(fds.size() * 3);
-			}
 		}
 		return r;
 	}
@@ -130,9 +127,6 @@ struct socket_engine_kqueue : public socket_engine_base {
 			if ((e.flags & WANT_WRITE) != 0) {
 				EV_SET(&ke, e.fd, EVFILT_WRITE, EV_ADD | EV_ONESHOT, 0, 0, static_cast<CAST_TYPE>(se));
 				kevent(kqueue_handle, &ke, 1, 0, 0, nullptr);
-			}
-			if (fds.size() * 3 > ke_list.size()) {
-				ke_list.resize(fds.size() * 3);
 			}
 		}
 		return r;
