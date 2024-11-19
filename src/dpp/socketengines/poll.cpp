@@ -108,6 +108,12 @@ struct socket_engine_poll : public socket_engine_base {
 		prune();
 	}
 
+#if _WIN32
+	~socket_engine_poll() override {
+		WSACleanup();
+	}
+#endif
+
 	bool register_socket(const socket_events& e) final {
 		bool r = socket_engine_base::register_socket(e);
 		if (r) {

@@ -501,24 +501,26 @@ void ssl_client::read_loop()
 		owner->socketengine->register_socket(events);
 	};
 	setup_events();
-	timer_handle = owner->start_timer([this, setup_events](auto handle) {
-		one_second_timer();
-		if (!tcp_connect_done && time(nullptr) > start + 2 && connect_retries < 3) {
-			/* Retry failed connect(). This can happen even in the best situation with bullet-proof hosting.
-			 * Previously with blocking connect() there was some leniency in this, but now we have to do this
-			 * ourselves.
-			 *
-			 * Retry up to 3 times, 2 seconds between retries. After this, give up and let timeout code
-			 * take the wheel (will likely end with an exception).
-			 */
-			close_socket(sfd);
-			owner->socketengine->delete_socket(sfd);
-			ssl_client::connect();
-			setup_events();
-			start = time(nullptr) + 2;
-			connect_retries++;
-		}
-	}, 1);
+	if (!timer_handle) {
+		timer_handle = owner->start_timer([this, setup_events](auto handle) {
+			one_second_timer();
+			if (!tcp_connect_done && time(nullptr) > start + 2 && connect_retries < 3) {
+				/* Retry failed connect(). This can happen even in the best situation with bullet-proof hosting.
+				 * Previously with blocking connect() there was some leniency in this, but now we have to do this
+				 * ourselves.
+				 *
+				 * Retry up to 3 times, 2 seconds between retries. After this, give up and let timeout code
+				 * take the wheel (will likely end with an exception).
+				 */
+				close_socket(sfd);
+				owner->socketengine->delete_socket(sfd);
+				ssl_client::connect();
+				setup_events();
+				start = time(nullptr) + 2;
+				connect_retries++;
+			}
+		}, 1);
+	}
 }
 
 uint64_t ssl_client::get_bytes_out()

@@ -152,12 +152,9 @@ cluster::cluster(const std::string &_token, uint32_t _intents, uint32_t _shards,
 
 cluster::~cluster()
 {
-	this->shutdown();
 	delete rest;
 	delete raw_rest;
-#ifdef _WIN32
-	WSACleanup();
-#endif
+	this->shutdown();
 }
 
 request_queue* cluster::get_rest() {
@@ -315,7 +312,6 @@ void cluster::shutdown() {
 	terminating = true;
 	{
 		std::lock_guard<std::mutex> l(timer_guard);
-		log(ll_info, "Terminating " + std::to_string(timer_list.size()) + "timers");
 		/* Free memory for active timers */
 		for (auto &t: timer_list) {
 			delete t.second;
@@ -325,13 +321,12 @@ void cluster::shutdown() {
 	}
 	/* Terminate shards */
 	for (const auto& sh : shards) {
-		log(ll_info, "Terminating shard id " + std::to_string(sh.second->shard_id));
 		delete sh.second;
 	}
+	shards.clear();
 	if (engine_thread) {
 		engine_thread->join();
 	}
-	shards.clear();
 }
 
 snowflake cluster::get_dm_channel(snowflake user_id) {
