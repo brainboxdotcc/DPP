@@ -185,6 +185,11 @@ class DPP_EXPORT cluster {
 	 */
 	std::unique_ptr<std::thread> engine_thread{nullptr};
 
+	/**
+	 * @brief Protection mutex for timers
+	 */
+	std::mutex timer_guard;
+
 public:
 	/**
 	 * @brief Current bot token for all shards on this cluster and all commands sent via HTTP

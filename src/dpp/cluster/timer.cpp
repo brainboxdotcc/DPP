@@ -25,7 +25,6 @@
 namespace dpp {
 
 timer lasthandle = 1;
-std::mutex timer_guard;
 
 timer cluster::start_timer(timer_callback_t on_tick, uint64_t frequency, timer_callback_t on_stop) {
 	std::lock_guard<std::mutex> l(timer_guard);

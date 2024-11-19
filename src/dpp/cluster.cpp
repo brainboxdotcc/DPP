@@ -313,12 +313,16 @@ void cluster::start(bool return_after) {
 void cluster::shutdown() {
 	/* Signal termination */
 	terminating = true;
-	/* Free memory for active timers */
-	for (auto & t : timer_list) {
-		delete t.second;
+	{
+		std::lock_guard<std::mutex> l(timer_guard);
+		log(ll_info, "Terminating " + std::to_string(timer_list.size()) + "timers");
+		/* Free memory for active timers */
+		for (auto &t: timer_list) {
+			delete t.second;
+		}
+		timer_list.clear();
+		next_timer.clear();
 	}
-	timer_list.clear();
-	next_timer.clear();
 	/* Terminate shards */
 	for (const auto& sh : shards) {
 		log(ll_info, "Terminating shard id " + std::to_string(sh.second->shard_id));
