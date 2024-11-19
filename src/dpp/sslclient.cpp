@@ -484,7 +484,7 @@ void ssl_client::on_write(socket fd, const struct socket_events& e) {
 
 void ssl_client::on_error(socket fd, const struct socket_events&, int error_code) {
 	if (sfd != INVALID_SOCKET) {
-		this->close();
+		ssl_client::close();
 	}
 }
 
