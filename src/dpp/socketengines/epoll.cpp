@@ -81,13 +81,19 @@ struct socket_engine_epoll : public socket_engine_base {
 			epoll_event ev = events[j];
 
 			auto* const eh = static_cast<socket_events*>(ev.data.ptr);
+			if (!eh) {
+				continue;
+			}
+
 			const int fd = eh->fd;
 			if (fd == INVALID_SOCKET) {
 				continue;
 			}
 
 			if ((ev.events & EPOLLHUP) != 0U) {
-				eh->on_error(fd, *eh, EPIPE);
+				if (eh->on_error) {
+					eh->on_error(fd, *eh, EPIPE);
+				}
 				continue;
 			}
 
@@ -97,17 +103,23 @@ struct socket_engine_epoll : public socket_engine_base {
 				if (getsockopt(fd, SOL_SOCKET, SO_ERROR, &errcode, &codesize) < 0) {
 					errcode = errno;
 				}
-				eh->on_error(fd, *eh, errcode);
+				if (eh->on_error) {
+					eh->on_error(fd, *eh, errcode);
+				}
 				continue;
 			}
 
 			if ((ev.events & EPOLLOUT) != 0U) {
 				eh->flags = modify_event(epoll_handle, eh, eh->flags & ~WANT_WRITE);
-				eh->on_write(fd, *eh);
+				if (eh->on_write) {
+					eh->on_write(fd, *eh);
+				}
 			}
 
 			if ((ev.events & EPOLLIN) != 0U) {
-				eh->on_read(fd, *eh);
+				if (eh->on_read) {
+					eh->on_read(fd, *eh);
+				}
 			}
 		}
 		prune();
