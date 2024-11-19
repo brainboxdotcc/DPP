@@ -99,6 +99,7 @@ struct socket_engine_poll : public socket_engine_base {
 				eh->on_write(fd, *eh);
 			}
 		}
+		prune();
 	}
 
 	bool register_socket(const socket_events& e) final {

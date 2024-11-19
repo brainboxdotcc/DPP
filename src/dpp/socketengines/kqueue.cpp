@@ -89,6 +89,7 @@ struct socket_engine_kqueue : public socket_engine_base {
 				}
 			}
 		}
+		prune();
 	}
 
 	bool register_socket(const socket_events& e) final {
