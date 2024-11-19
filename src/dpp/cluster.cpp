@@ -310,6 +310,9 @@ void cluster::start(bool return_after) {
 void cluster::shutdown() {
 	/* Signal termination */
 	terminating = true;
+	if (engine_thread) {
+		engine_thread->join();
+	}
 	{
 		std::lock_guard<std::mutex> l(timer_guard);
 		/* Free memory for active timers */
@@ -324,9 +327,6 @@ void cluster::shutdown() {
 		delete sh.second;
 	}
 	shards.clear();
-	if (engine_thread) {
-		engine_thread->join();
-	}
 }
 
 snowflake cluster::get_dm_channel(snowflake user_id) {
