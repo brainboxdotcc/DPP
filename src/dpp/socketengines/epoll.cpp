@@ -90,36 +90,42 @@ struct socket_engine_epoll : public socket_engine_base {
 				continue;
 			}
 
-			if ((ev.events & EPOLLHUP) != 0U) {
-				if (eh->on_error) {
-					eh->on_error(fd, *eh, EPIPE);
-				}
-				continue;
-			}
+			try {
 
-			if ((ev.events & EPOLLERR) != 0U) {
-				socklen_t codesize = sizeof(int);
-				int errcode{};
-				if (getsockopt(fd, SOL_SOCKET, SO_ERROR, &errcode, &codesize) < 0) {
-					errcode = errno;
+				if ((ev.events & EPOLLHUP) != 0U) {
+					if (eh->on_error) {
+						eh->on_error(fd, *eh, EPIPE);
+					}
+					continue;
 				}
-				if (eh->on_error) {
-					eh->on_error(fd, *eh, errcode);
-				}
-				continue;
-			}
 
-			if ((ev.events & EPOLLOUT) != 0U) {
-				eh->flags = modify_event(epoll_handle, eh, eh->flags & ~WANT_WRITE);
-				if (eh->on_write) {
-					eh->on_write(fd, *eh);
+				if ((ev.events & EPOLLERR) != 0U) {
+					socklen_t codesize = sizeof(int);
+					int errcode{};
+					if (getsockopt(fd, SOL_SOCKET, SO_ERROR, &errcode, &codesize) < 0) {
+						errcode = errno;
+					}
+					if (eh->on_error) {
+						eh->on_error(fd, *eh, errcode);
+					}
+					continue;
 				}
-			}
 
-			if ((ev.events & EPOLLIN) != 0U) {
-				if (eh->on_read) {
-					eh->on_read(fd, *eh);
+				if ((ev.events & EPOLLOUT) != 0U) {
+					eh->flags = modify_event(epoll_handle, eh, eh->flags & ~WANT_WRITE);
+					if (eh->on_write) {
+						eh->on_write(fd, *eh);
+					}
 				}
+
+				if ((ev.events & EPOLLIN) != 0U) {
+					if (eh->on_read) {
+						eh->on_read(fd, *eh);
+					}
+				}
+
+			} catch (const std::exception& e) {
+				eh->on_error(fd, *eh, 0);
 			}
 		}
 		prune();

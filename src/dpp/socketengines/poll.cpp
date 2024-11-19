@@ -73,30 +73,36 @@ struct socket_engine_poll : public socket_engine_base {
 			}
 			socket_events* eh = iter->second.get();
 
-			if ((revents & POLLHUP) != 0) {
-				eh->on_error(fd, *eh, 0);
-				continue;
-			}
+			try {
 
-			if ((revents & POLLERR) != 0) {
-				socklen_t codesize = sizeof(int);
-				int errcode{};
-				if (getsockopt(fd, SOL_SOCKET, SO_ERROR, (char*)&errcode, &codesize) < 0) {
-					errcode = errno;
+				if ((revents & POLLHUP) != 0) {
+					eh->on_error(fd, *eh, 0);
+					continue;
 				}
-				eh->on_error(fd, *eh, errcode);
-				continue;
-			}
 
-			if ((revents & POLLIN) != 0) {
-				eh->on_read(fd, *eh);
-			}
+				if ((revents & POLLERR) != 0) {
+					socklen_t codesize = sizeof(int);
+					int errcode{};
+					if (getsockopt(fd, SOL_SOCKET, SO_ERROR, (char*)&errcode, &codesize) < 0) {
+						errcode = errno;
+					}
+					eh->on_error(fd, *eh, errcode);
+					continue;
+				}
 
-			if ((revents & POLLOUT) != 0) {
-				int mask = eh->flags;
-				mask &= ~WANT_WRITE;
-				eh->flags = mask;
-				eh->on_write(fd, *eh);
+				if ((revents & POLLIN) != 0) {
+					eh->on_read(fd, *eh);
+				}
+
+				if ((revents & POLLOUT) != 0) {
+					int mask = eh->flags;
+					mask &= ~WANT_WRITE;
+					eh->flags = mask;
+					eh->on_write(fd, *eh);
+				}
+
+			} catch (const std::exception& e) {
+				eh->on_error(fd, *eh, 0);
 			}
 		}
 		prune();

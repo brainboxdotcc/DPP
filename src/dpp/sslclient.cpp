@@ -483,7 +483,9 @@ void ssl_client::on_write(socket fd, const struct socket_events& e) {
 }
 
 void ssl_client::on_error(socket fd, const struct socket_events&, int error_code) {
-	throw dpp::connection_exception(err_socket_error, strerror(errno));
+	if (sfd != INVALID_SOCKET) {
+		this->close();
+	}
 }
 
 void ssl_client::read_loop()

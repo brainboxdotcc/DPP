@@ -79,11 +79,15 @@ void socket_engine_base::prune() {
 		to_delete_count = 0;
 	}
 	if (time(nullptr) != last_time) {
-		/* Every minute, rehash all cache containers.
-		 * We do this from the socket engine now, not from
-		 * shard 0, so no need to run shards to have timers!
-		 */
-		owner->tick_timers();
+		try {
+			/* Every minute, rehash all cache containers.
+			 * We do this from the socket engine now, not from
+			 * shard 0, so no need to run shards to have timers!
+			 */
+			owner->tick_timers();
+		} catch (const std::exception& e) {
+			owner->log(dpp::ll_error, "Uncaught exception in tick_timers: " + std::string(e.what()));
+		}
 
 		if ((time(nullptr) % 60) == 0) {
 			dpp::garbage_collection();

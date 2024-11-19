@@ -69,24 +69,30 @@ struct socket_engine_kqueue : public socket_engine_base {
 				continue;
 			}
 
-			const short filter = kev.filter;
-			if (kev.flags & EV_EOF || kev.flags & EV_ERROR) {
-				if (eh->on_error) {
-					eh->on_error(kev.ident, *eh, kev.fflags);
+			try {
+
+				const short filter = kev.filter;
+				if (kev.flags & EV_EOF || kev.flags & EV_ERROR) {
+					if (eh->on_error) {
+						eh->on_error(kev.ident, *eh, kev.fflags);
+					}
+					continue;
 				}
-				continue;
-			}
-			if (filter == EVFILT_WRITE) {
-				const int bits_to_clr = WANT_WRITE;
-				eh->flags &= ~bits_to_clr;
-				if (eh->on_write) {
-					eh->on_write(kev.ident, *eh);
+				if (filter == EVFILT_WRITE) {
+					const int bits_to_clr = WANT_WRITE;
+					eh->flags &= ~bits_to_clr;
+					if (eh->on_write) {
+						eh->on_write(kev.ident, *eh);
+					}
 				}
-			}
-			else if (filter == EVFILT_READ) {
-				if (eh->on_read) {
-					eh->on_read(kev.ident, *eh);
+				else if (filter == EVFILT_READ) {
+					if (eh->on_read) {
+						eh->on_read(kev.ident, *eh);
+					}
 				}
+
+			} catch (const std::exception& e) {
+				eh->on_error(kev.ident, *eh, 0);
 			}
 		}
 		prune();
