@@ -31,7 +31,7 @@
 namespace dpp {
 
 bool socket_engine_base::register_socket(const socket_events &e) {
-	if (e.fd > INVALID_SOCKET && fds.find(e.fd) == fds.end()) {
+	if (e.fd != INVALID_SOCKET && fds.find(e.fd) == fds.end()) {
 		fds.emplace(e.fd, std::make_unique<socket_events>(e));
 		return true;
 	}
@@ -39,7 +39,7 @@ bool socket_engine_base::register_socket(const socket_events &e) {
 }
 
 bool socket_engine_base::update_socket(const socket_events &e) {
-	if (e.fd > INVALID_SOCKET && fds.find(e.fd) != fds.end()) {
+	if (e.fd != INVALID_SOCKET && fds.find(e.fd) != fds.end()) {
 		auto iter = fds.find(e.fd);
 		*(iter->second) = e;
 		return true;
@@ -48,7 +48,7 @@ bool socket_engine_base::update_socket(const socket_events &e) {
 }
 
 socket_engine_base::socket_engine_base(cluster* creator) : owner(creator) {
-#ifndef WIN32
+#ifndef _WIN32
 	set_signal_handler(SIGALRM);
 	set_signal_handler(SIGXFSZ);
 	set_signal_handler(SIGCHLD);
@@ -108,7 +108,7 @@ bool socket_engine_base::delete_socket(dpp::socket fd) {
 }
 
 bool socket_engine_base::remove_socket(dpp::socket fd) {
-	return false;
+	return true;
 }
 
 }

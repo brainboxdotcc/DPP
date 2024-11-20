@@ -22,9 +22,18 @@
 
 #include <dpp/dpp.h>
 #include <iostream>
-#include <unistd.h>
 #include <dpp/dns.h>
 #include <string_view>
+#ifndef _WIN32
+	#include <unistd.h>
+#else
+	/* Windows-specific sockets includes */
+	#include <WinSock2.h>
+	#include <WS2tcpip.h>
+	#include <io.h>
+	/* Windows sockets library */
+	#pragma comment(lib, "ws2_32")
+#endif
 
 int main() {
 	dpp::cluster cl("no-token");
@@ -37,7 +46,11 @@ int main() {
 	if (sfd == INVALID_SOCKET) {
 		std::cerr << "Couldn't create outbound socket on port 80\n";
 		exit(1);
+#ifndef _WIN32
 	} else if (::connect(sfd, destination.get_socket_address(), destination.size()) != 0) {
+#else
+	} else if (::WSAConnect(sfd, destination.get_socket_address(), destination.size(), nullptr, nullptr, nullptr, nullptr) != 0) {
+#endif
 		dpp::close_socket(sfd);
 		std::cerr << "Couldn't connect outbound socket on port 80\n";
 		exit(1);
@@ -50,7 +63,7 @@ int main() {
 			int r = 0;
 			do {
 				char buf[128]{0};
-				r = ::read(e.fd, buf, sizeof(buf));
+				r = ::recv(e.fd, buf, sizeof(buf), 0);
 				if (r > 0) {
 					buf[127] = 0;
 					std::cout << buf;
@@ -65,7 +78,8 @@ int main() {
 		[](dpp::socket fd, const struct dpp::socket_events& e) {
 			std::cout << "WANT_WRITE event on socket " << fd << "\n";
 			constexpr std::string_view request{"GET / HTTP/1.0\r\nConnection: close\r\n\r\n"};
-			auto written = ::write(e.fd, request.data(), request.length());
+			std::cout << "Writing: " << request.data() << "\n";
+			auto written = ::send(e.fd, request.data(), request.length(), 0);
 			std::cout << "Written: " << written << "\n";
 		},
 		[](dpp::socket fd, const struct dpp::socket_events&, int error_code) {

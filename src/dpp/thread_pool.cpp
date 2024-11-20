@@ -24,6 +24,8 @@
 #include <dpp/thread_pool.h>
 #include <shared_mutex>
 
+namespace dpp {
+
 thread_pool::thread_pool(size_t num_threads) {
 	for (size_t i = 0; i < num_threads; ++i) {
 		threads.emplace_back([this, i]() {
@@ -51,24 +53,24 @@ thread_pool::thread_pool(size_t num_threads) {
 	}
 }
 
-thread_pool::~thread_pool()
-{
+thread_pool::~thread_pool() {
 	{
 		std::unique_lock<std::mutex> lock(queue_mutex);
 		stop = true;
 	}
 
 	cv.notify_all();
-	for (auto& thread : threads) {
+	for (auto &thread: threads) {
 		thread.join();
 	}
 }
 
-void thread_pool::enqueue(thread_pool_task task)
-{
+void thread_pool::enqueue(thread_pool_task task) {
 	{
 		std::unique_lock<std::mutex> lock(queue_mutex);
 		tasks.emplace(std::move(task));
 	}
 	cv.notify_one();
+}
+
 }

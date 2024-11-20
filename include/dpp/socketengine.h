@@ -83,7 +83,7 @@ using socket_error_event = std::function<void(dpp::socket fd, const struct socke
  * storm which will consume 100% CPU (e.g. if you request to receive write events all
  * the time).
  */
-struct socket_events {
+struct DPP_EXPORT socket_events {
 	/**
 	 * @brief File descriptor
 	 *
@@ -143,7 +143,7 @@ using socket_container = std::unordered_map<dpp::socket, std::unique_ptr<socket_
  * out implementation-specific behaviours (e.g. difference between edge and level triggered
  * event mechanisms etc).
  */
-struct socket_engine_base {
+struct DPP_EXPORT socket_engine_base {
 	/**
 	 * @brief File descriptors, and their states
 	 */
@@ -242,7 +242,7 @@ protected:
  * @brief This is implemented by whatever derived form socket_engine takes
  * @param creator Creating cluster
  */
-std::unique_ptr<socket_engine_base> create_socket_engine(class cluster* creator);
+DPP_EXPORT std::unique_ptr<socket_engine_base> create_socket_engine(class cluster *creator);
 
 #ifndef _WIN32
 	void set_signal_handler(int signal);

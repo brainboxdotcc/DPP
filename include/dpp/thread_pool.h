@@ -28,27 +28,29 @@
 #include <mutex>
 #include <functional>
 
+namespace dpp {
+
 using work_unit = std::function<void()>;
 
 /**
  * A task within a thread pool. A simple lambda that accepts no parameters and returns void.
  */
-struct thread_pool_task {
+struct DPP_EXPORT thread_pool_task {
 	int priority;
 	work_unit function;
 };
 
-struct thread_pool_task_comparator {
-    bool operator()(const thread_pool_task &a, const thread_pool_task &b) {
-        return a.priority < b.priority;
-    };
+struct DPP_EXPORT thread_pool_task_comparator {
+	bool operator()(const thread_pool_task &a, const thread_pool_task &b) {
+		return a.priority < b.priority;
+	};
 };
 
 /**
  * @brief A thread pool contains 1 or more worker threads which accept thread_pool_task lambadas
  * into a queue, which is processed in-order by whichever thread is free.
  */
-struct thread_pool {
+struct DPP_EXPORT thread_pool {
 	std::vector<std::thread> threads;
 	std::priority_queue<thread_pool_task, std::vector<thread_pool_task>, thread_pool_task_comparator> tasks;
 	std::mutex queue_mutex;
@@ -59,3 +61,5 @@ struct thread_pool {
 	~thread_pool();
 	void enqueue(thread_pool_task task);
 };
+
+}

@@ -31,7 +31,7 @@
 
 namespace dpp {
 
-struct socket_engine_kqueue : public socket_engine_base {
+struct DPP_EXPORT socket_engine_kqueue : public socket_engine_base {
 
 	int kqueue_handle{INVALID_SOCKET};
 	std::array<struct kevent, 65536> ke_list;
@@ -147,7 +147,7 @@ protected:
 	}
 };
 
-std::unique_ptr<socket_engine_base> create_socket_engine(cluster* creator) {
+DPP_EXPORT std::unique_ptr<socket_engine_base> create_socket_engine(cluster *creator) {
 	return std::make_unique<socket_engine_kqueue>(creator);
 }
 

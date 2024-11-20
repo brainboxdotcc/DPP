@@ -54,7 +54,7 @@ typedef std::function<void()> socket_notification_t;
  * @param sfd Socket to close
  * @return false on error, true on success
  */
-bool close_socket(dpp::socket sfd);
+DPP_EXPORT bool close_socket(dpp::socket sfd);
 
 /**
  * @brief Set a socket to blocking or non-blocking IO
@@ -63,7 +63,7 @@ bool close_socket(dpp::socket sfd);
  * @param non_blocking should socket be non-blocking?
  * @return false on error, true on success
  */
-bool set_nonblocking(dpp::socket sockfd, bool non_blocking);
+DPP_EXPORT bool set_nonblocking(dpp::socket sockfd, bool non_blocking);
 
 /* You'd think that we would get better performance with a bigger buffer, but SSL frames are 16k each.
  * SSL_read in non-blocking mode will only read 16k at a time. There's no point in a bigger buffer as

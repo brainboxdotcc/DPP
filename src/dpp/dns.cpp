@@ -54,8 +54,7 @@ socket dns_cache_entry::make_connecting_socket() const {
 	return ::socket(addr.ai_family, addr.ai_socktype, addr.ai_protocol);
 }
 
-const dns_cache_entry* resolve_hostname(const std::string& hostname, const std::string& port)
-{
+const dns_cache_entry *resolve_hostname(const std::string &hostname, const std::string &port) {
 	addrinfo hints, *addrs;
 	dns_cache_t::const_iterator iter;
 	time_t now = time(nullptr);

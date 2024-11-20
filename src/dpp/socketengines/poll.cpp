@@ -44,7 +44,7 @@
 
 namespace dpp {
 
-struct socket_engine_poll : public socket_engine_base {
+struct DPP_EXPORT socket_engine_poll : public socket_engine_base {
 
 	/* We store the pollfds as a vector. This means that insertion, deletion and updating
 	 * are comparatively slow O(n), but these operations don't happen too often. Obtaining the
@@ -53,56 +53,68 @@ struct socket_engine_poll : public socket_engine_base {
 	 * anyway.
 	 */
 	std::vector<pollfd> poll_set;
+	pollfd out_set[FD_SETSIZE]{0};
 
 	void process_events() final {
 		const int poll_delay = 1000;
-		int i = poll(poll_set.data(), static_cast<unsigned int>(poll_set.size()), poll_delay);
-		int processed = 0;
 
-		for (size_t index = 0; index < poll_set.size() && processed < i; index++) {
-			const int fd = poll_set[index].fd;
-			const short revents = poll_set[index].revents;
-
-			if (revents > 0) {
-				processed++;
+		if (poll_set.empty()) {
+			/* On many platforms, it is not possible to wait on an empty set */
+			std::this_thread::sleep_for(std::chrono::milliseconds(10));
+		} else {
+			if (poll_set.size() > FD_SETSIZE) {
+				throw dpp::connection_exception("poll() does not support more than FD_SETSIZE active sockets at once!");
 			}
 
-			auto iter = fds.find(fd);
-			if (iter == fds.end()) {
-				continue;
-			}
-			socket_events* eh = iter->second.get();
+			std::copy(poll_set.begin(), poll_set.end(), out_set);
 
-			try {
+			int i = poll(out_set, static_cast<unsigned int>(poll_set.size()), poll_delay);
+			int processed = 0;
 
-				if ((revents & POLLHUP) != 0) {
-					eh->on_error(fd, *eh, 0);
-					continue;
+			for (size_t index = 0; index < poll_set.size() && processed < i; index++) {
+				const int fd = out_set[index].fd;
+				const short revents = out_set[index].revents;
+
+				if (revents > 0) {
+					processed++;
 				}
 
-				if ((revents & POLLERR) != 0) {
-					socklen_t codesize = sizeof(int);
-					int errcode{};
-					if (getsockopt(fd, SOL_SOCKET, SO_ERROR, (char*)&errcode, &codesize) < 0) {
-						errcode = errno;
+				auto iter = fds.find(fd);
+				if (iter == fds.end()) {
+					continue;
+				}
+				socket_events *eh = iter->second.get();
+
+				try {
+
+					if ((revents & POLLHUP) != 0) {
+						eh->on_error(fd, *eh, 0);
+						continue;
 					}
-					eh->on_error(fd, *eh, errcode);
-					continue;
-				}
 
-				if ((revents & POLLIN) != 0) {
-					eh->on_read(fd, *eh);
-				}
+					if ((revents & POLLERR) != 0) {
+						socklen_t codesize = sizeof(int);
+						int errcode{};
+						if (getsockopt(fd, SOL_SOCKET, SO_ERROR, (char *) &errcode, &codesize) < 0) {
+							errcode = errno;
+						}
+						eh->on_error(fd, *eh, errcode);
+						continue;
+					}
 
-				if ((revents & POLLOUT) != 0) {
-					int mask = eh->flags;
-					mask &= ~WANT_WRITE;
-					eh->flags = mask;
-					eh->on_write(fd, *eh);
-				}
+					if ((revents & POLLIN) != 0) {
+						eh->on_read(fd, *eh);
+					}
 
-			} catch (const std::exception& e) {
-				eh->on_error(fd, *eh, 0);
+					if ((revents & POLLOUT) != 0) {
+						eh->flags &= ~WANT_WRITE;
+						update_socket(*eh);
+						eh->on_write(fd, *eh);
+					}
+
+				} catch (const std::exception &e) {
+					eh->on_error(fd, *eh, 0);
+				}
 			}
 		}
 		prune();
@@ -126,9 +138,6 @@ struct socket_engine_poll : public socket_engine_base {
 			if ((e.flags & WANT_WRITE) != 0) {
 				fd_info.events |= POLLOUT;
 			}
-			if ((e.flags & WANT_ERROR) != 0) {
-				fd_info.events |= POLLERR;
-			}
 			poll_set.push_back(fd_info);
 		}
 		return r;
@@ -148,9 +157,6 @@ struct socket_engine_poll : public socket_engine_base {
 				}
 				if ((e.flags & WANT_WRITE) != 0) {
 					fd_info.events |= POLLOUT;
-				}
-				if ((e.flags & WANT_ERROR) != 0) {
-					fd_info.events |= POLLERR;
 				}
 				break;
 			}
@@ -176,7 +182,7 @@ protected:
 	}
 };
 
-std::unique_ptr<socket_engine_base> create_socket_engine(cluster* creator) {
+DPP_EXPORT std::unique_ptr<socket_engine_base> create_socket_engine(cluster* creator) {
 	return std::make_unique<socket_engine_poll>(creator);
 }
 
