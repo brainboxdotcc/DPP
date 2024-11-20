@@ -186,11 +186,7 @@ protected:
 		bool r = socket_engine_base::remove_socket(fd);
 		if (r) {
 			struct epoll_event ev{};
-			int i = epoll_ctl(epoll_handle, EPOLL_CTL_DEL, fd, &ev);
-			if (i < 0) {
-				throw dpp::connection_exception("Failed to deregister socket with epoll_ctl()");
-			}
-
+			epoll_ctl(epoll_handle, EPOLL_CTL_DEL, fd, &ev);
 		}
 		return r;
 	}
