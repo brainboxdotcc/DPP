@@ -512,7 +512,6 @@ public:
 	 * @brief Obtain an awaitable object that refers to any event.
 	 * It can be co_await-ed to wait for the next event.
 	 *
-	 * Example:
 	 * @details Example: @code{cpp}
 	 * dpp::task<> my_handler(const dpp::slashcommand_t& event) {
 	 *	co_await event.co_reply(dpp::message().add_component(dpp::component().add_component().set_label("click me!").set_id("test")));
