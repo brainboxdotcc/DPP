@@ -1,10 +1,10 @@
 \page checking-member-permissions Checking Permissions
 
-Of course most people do just iterate over the roles of a member to check for a permission. But there's a helper method for that: dpp::guild::base_permissions gets a member's permission taking into account the server owner and role permissions.
+Of course most people typically iterate over the roles of a member to check for a permission. But there is a helper method for this: dpp::guild::base_permissions retrieves a member's permissions, taking into account role permissions **and** the server owner.
 
 For total member permissions including channel overwrites use either the dpp::channel::get_user_permissions or dpp::guild::permission_overwrites method. Both do the same under the hood.
 
-They all return a dpp::permission class, which is a wrapper around a permission bitmask containing bits of the dpp::permissions enum.
+They all return a dpp::permission class, which is a wrapper around a permission bitmask with several helpful methods for easier manipulation and checking of permissions. This bitmask contains flags from the dpp::permissions enum.
 
 Demonstration:
 
@@ -17,11 +17,9 @@ if (c && c->get_user_permissions(member).can(dpp::p_send_messages)) {
 
 ### Role Hierarchy
 
-The recommended and correct way to compare for roles in the hierarchy is using the comparison operators (`<`, `>`) on the \ref dpp::role::operator<(dpp::role, dpp::role) "dpp::role" objects themselves.
-Keep in mind that multiple roles can have the same position number.
-As a result, comparing roles by position alone can lead to subtle bugs when checking for role hierarchy.
+The recommended and correct way to compare for roles in the hierarchy is using the comparison operators (`<`, `>`) on the dpp::role objects themselves. Keep in mind that multiple roles can have the same position number. As a result, comparing roles by position alone can lead to subtle bugs when checking for role hierarchy.
 
-For example let's say you have a ban command, and want to make sure that any issuer of the command can only ban members lower position than their own highest role.
+For example let's say you have a ban command, and want to make sure that any issuer of the command can only ban members of lower position than their own highest role:
 
 ```cpp
 bot.on_interaction_create([](const dpp::interaction_create_t& event) {
@@ -47,7 +45,7 @@ bot.on_interaction_create([](const dpp::interaction_create_t& event) {
 
 ### Default Command Permissions
 
-Discord's intended way to manage permissions for commands is through default member permissions. You set them using dpp::slashcommand::set_default_permissions when creating or updating a command to set the default permissions a user must have to use it. However, server administrators can then overwrite these permissions by their own restrictions.
+Discord's intended way of managing permissions for commands is through "default member permissions". In a nutshell you tell Discord which permissions a user must have to use the command. Discord completely hides the command for members who don't have the required permissions. You set them using dpp::slashcommand::set_default_permissions when creating or updating a command.
 
 The corresponding code to create a command with default permissions would look something like this:
 
@@ -62,9 +60,15 @@ command.add_option(dpp::command_option(dpp::co_string, "reason", "The reason for
 bot.global_command_create(command);
 ```
 
+You can set the default member permissions to "0" to disable the command for everyone except admins by default.
+
+For more customization for server owners, they can override these permissions by their own restrictions in the server settings. This is why they are referred to as "default" permissions.
+
 ### Checking Permissions on Your Own
 
-If you want to check permissions on your own, the easiest way to check if a member has certain permissions in interaction events is by using the dpp::interaction::get_resolved_permission function. The resolved list contains associated structures for the command and does not use the cache or require any extra API calls. Note that the permissions in the resolved set are pre-calculated by Discord and taking into account channel overwrites, roles and admin privileges. So no need to loop through roles or stuff like that.
+When using default permissions you don't necessarily need to check the issuing user for any permissions in the interaction event as Discord handles all that for you. However, if you don't want server admins to be able to override the command restrictions, you can make those permission checks on your own.
+
+To check if a member has certain permissions during interaction events, the easiest way is to use the dpp::interaction::get_resolved_permission function. The resolved list contains associated structures for the command and does not rely on the cache or require any extra API calls. Additionally, the permissions in the resolved set are pre-calculated by Discord and taking into account channel overwrites, roles and admin privileges. So, there's no need to loop through roles or stuff like that.
 
 Let's imagine the following scenario:
 
@@ -79,8 +83,6 @@ bot.on_interaction_create([](const dpp::interaction_create_t& event) {
 	}
 });
 ```
-
-\note When using default permissions you don't necessarily need to check the issuing user for any permissions in the interaction event as Discord handles all that for you. But if you'd sleep better...
 
 ### From Parameters
 
@@ -113,3 +115,7 @@ bot.on_interaction_create([](const dpp::interaction_create_t& event) {
 	}
 });
 ```
+
+### Things to Keep in Mind
+
+When replying to interactions using dpp::interaction_create_t::reply, you do **not** need to manually check whether the bot has permission to send messages. A bot always has permissions to reply to an interaction.
