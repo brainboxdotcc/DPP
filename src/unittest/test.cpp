@@ -1675,7 +1675,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 			}
 		});
 
-		bot.on_message_delete([&bot,&thread_helper](const dpp::message_delete_t & event) {
+		bot.on_message_delete([&thread_helper](const dpp::message_delete_t & event) {
 			if (event.channel_id == thread_helper.thread_id) {
 				set_test(THREAD_MESSAGE_DELETE_EVENT, true);
 				thread_helper.notify_event_tested(thread_test_helper::MESSAGE_DELETE);
@@ -1764,7 +1764,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 												&& bans.find(deadUser3) != bans.end()
 											);
 											// unban all three
-											bot.guild_ban_delete(TEST_GUILD_ID, deadUser1, [&bot, deadUser1, deadUser2, deadUser3](const dpp::confirmation_callback_t &event) {
+											bot.guild_ban_delete(TEST_GUILD_ID, deadUser1, [&bot, deadUser2, deadUser3](const dpp::confirmation_callback_t &event) {
 												if (!event.is_error()) {
 													bot.guild_ban_delete(TEST_GUILD_ID, deadUser2, [&bot, deadUser3](const dpp::confirmation_callback_t &event) {
 														if (!event.is_error()) {
