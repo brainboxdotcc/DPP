@@ -105,7 +105,11 @@ struct DPP_EXPORT socket_engine_kqueue : public socket_engine_base {
 		bool r = socket_engine_base::register_socket(e);
 		if (r) {
 			struct kevent ke{};
-			socket_events* se = fds.find(e.fd)->second.get();
+			socket_events* se{};
+			{
+				std::unique_lock lock(fds_mutex);
+				se = fds.find(e.fd)->second.get();
+			}
 			if ((se->flags & WANT_READ) != 0) {
 				EV_SET(&ke, e.fd, EVFILT_READ, EV_ADD, 0, 0, static_cast<CAST_TYPE>(se));
 				kevent(kqueue_handle, &ke, 1, nullptr, 0, nullptr);
@@ -122,6 +126,11 @@ struct DPP_EXPORT socket_engine_kqueue : public socket_engine_base {
 		bool r = socket_engine_base::update_socket(e);
 		if (r) {
 			struct kevent ke{};
+			socket_events* se{};
+			{
+				std::unique_lock lock(fds_mutex);
+				se = fds.find(e.fd)->second.get();
+			}
 			if ((e.flags & WANT_READ) != 0) {
 				EV_SET(&ke, e.fd, EVFILT_READ, EV_ADD, 0, 0, static_cast<CAST_TYPE>(se));
 				kevent(kqueue_handle, &ke, 1, nullptr, 0, nullptr);
