@@ -21,6 +21,7 @@
 
 #include <dpp/socketengine.h>
 #include <vector>
+#include <shared_mutex>
 #ifdef _WIN32
 /* Windows-specific sockets includes */
 	#include <WinSock2.h>
@@ -54,70 +55,78 @@ struct DPP_EXPORT socket_engine_poll : public socket_engine_base {
 	 */
 	std::vector<pollfd> poll_set;
 	pollfd out_set[FD_SETSIZE]{0};
+	std::shared_mutex poll_set_mutex;
 
 	void process_events() final {
 		const int poll_delay = 1000;
 
-		if (poll_set.empty()) {
-			/* On many platforms, it is not possible to wait on an empty set */
-			std::this_thread::sleep_for(std::chrono::milliseconds(10));
-		} else {
-			if (poll_set.size() > FD_SETSIZE) {
-				throw dpp::connection_exception("poll() does not support more than FD_SETSIZE active sockets at once!");
-			}
-
-			std::copy(poll_set.begin(), poll_set.end(), out_set);
-
-			int i = poll(out_set, static_cast<unsigned int>(poll_set.size()), poll_delay);
-			int processed = 0;
-
-			for (size_t index = 0; index < poll_set.size() && processed < i; index++) {
-				const int fd = out_set[index].fd;
-				const short revents = out_set[index].revents;
-
-				if (revents > 0) {
-					processed++;
+		prune();
+		{
+			std::shared_lock lock(poll_set_mutex);
+			if (poll_set.empty()) {
+				/* On many platforms, it is not possible to wait on an empty set */
+				std::this_thread::sleep_for(std::chrono::milliseconds(1));
+				return;
+			} else {
+				if (poll_set.size() > FD_SETSIZE) {
+					throw dpp::connection_exception("poll() does not support more than FD_SETSIZE active sockets at once!");
 				}
-
-				auto iter = fds.find(fd);
-				if (iter == fds.end()) {
-					continue;
-				}
-				socket_events *eh = iter->second.get();
-
-				try {
-
-					if ((revents & POLLHUP) != 0) {
-						eh->on_error(fd, *eh, 0);
-						continue;
-					}
-
-					if ((revents & POLLERR) != 0) {
-						socklen_t codesize = sizeof(int);
-						int errcode{};
-						if (getsockopt(fd, SOL_SOCKET, SO_ERROR, (char *) &errcode, &codesize) < 0) {
-							errcode = errno;
-						}
-						eh->on_error(fd, *eh, errcode);
-						continue;
-					}
-
-					if ((revents & POLLIN) != 0) {
-						eh->on_read(fd, *eh);
-					}
-
-					if ((revents & POLLOUT) != 0) {
-						eh->flags &= ~WANT_WRITE;
-						update_socket(*eh);
-						eh->on_write(fd, *eh);
-					}
-
-				} catch (const std::exception &e) {
-					eh->on_error(fd, *eh, 0);
-				}
+				/**
+				 * We must make a copy of the poll_set, because it would cause thread locking/contention
+				 * issues if we had it locked for read during poll/iteration of the returned set.
+				 */
+				std::copy(poll_set.begin(), poll_set.end(), out_set);
 			}
 		}
-		prune();
+
+		int i = poll(out_set, static_cast<unsigned int>(poll_set.size()), poll_delay);
+		int processed = 0;
+
+		for (size_t index = 0; index < poll_set.size() && processed < i; index++) {
+			const int fd = out_set[index].fd;
+			const short revents = out_set[index].revents;
+
+			if (revents > 0) {
+				processed++;
+			}
+
+			auto iter = fds.find(fd);
+			if (iter == fds.end()) {
+				continue;
+			}
+			socket_events *eh = iter->second.get();
+
+			try {
+
+				if ((revents & POLLHUP) != 0) {
+					eh->on_error(fd, *eh, 0);
+					continue;
+				}
+
+				if ((revents & POLLERR) != 0) {
+					socklen_t codesize = sizeof(int);
+					int errcode{};
+					if (getsockopt(fd, SOL_SOCKET, SO_ERROR, (char *) &errcode, &codesize) < 0) {
+						errcode = errno;
+					}
+					eh->on_error(fd, *eh, errcode);
+					continue;
+				}
+
+				if ((revents & POLLIN) != 0) {
+					eh->on_read(fd, *eh);
+				}
+
+				if ((revents & POLLOUT) != 0) {
+					eh->flags &= ~WANT_WRITE;
+					update_socket(*eh);
+					eh->on_write(fd, *eh);
+				}
+
+			} catch (const std::exception &e) {
+				eh->on_error(fd, *eh, 0);
+			}
+		}
 	}
 
 #if _WIN32
@@ -129,6 +138,7 @@ struct DPP_EXPORT socket_engine_poll : public socket_engine_base {
 	bool register_socket(const socket_events& e) final {
 		bool r = socket_engine_base::register_socket(e);
 		if (r) {
+			std::unique_lock lock(poll_set_mutex);
 			pollfd fd_info{};
 			fd_info.fd = e.fd;
 			fd_info.events = 0;
@@ -146,6 +156,7 @@ struct DPP_EXPORT socket_engine_poll : public socket_engine_base {
 	bool update_socket(const socket_events& e) final {
 		bool r = socket_engine_base::update_socket(e);
 		if (r) {
+			std::unique_lock lock(poll_set_mutex);
 			/* We know this will succeed */
 			for (pollfd& fd_info : poll_set) {
 				if (fd_info.fd != e.fd) {
@@ -171,6 +182,7 @@ protected:
 	bool remove_socket(dpp::socket fd) final {
 		bool r = socket_engine_base::remove_socket(fd);
 		if (r) {
+			std::unique_lock lock(poll_set_mutex);
 			for (auto i = poll_set.begin(); i != poll_set.end(); ++i) {
 				if (i->fd == fd) {
 					poll_set.erase(i);

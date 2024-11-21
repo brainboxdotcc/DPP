@@ -38,8 +38,7 @@ test_t::test_t(std::string_view testname, std::string_view testdesc, int testfla
 }
 
 void set_status(test_t &test, test_status_t newstatus, std::string_view message) {
-	static std::mutex m;
-	std::scoped_lock lock{m};
+	std::lock_guard<std::mutex> locker(loglock);
 
 	if (is_skipped(test) || newstatus == test.status) {
 		return;
@@ -99,6 +98,7 @@ double get_time() {
 
 int test_summary() {
 	/* Report on all test cases */
+	std::lock_guard<std::mutex> locker(loglock);
 	int failed = 0, passed = 0, skipped = 0;
 	std::cout << "\u001b[37;1m\n\nUNIT TEST SUMMARY\n==================\n\u001b[0m";
 	for (auto & t : tests) {
@@ -193,7 +193,7 @@ void wait_for_tests() {
 			}
 		}
 		if (finished == tests.size()) {
-			std::this_thread::sleep_for(std::chrono::seconds(10));
+			std::this_thread::sleep_for(std::chrono::seconds(5));
 			return;
 		}
 		std::this_thread::sleep_for(std::chrono::seconds(1));

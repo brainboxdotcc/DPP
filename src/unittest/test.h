@@ -39,6 +39,8 @@ _Pragma("warning( disable : 5105 )"); // 4251 warns when we export classes or st
 
 using json = nlohmann::json;
 
+extern std::mutex loglock;
+
 enum test_flags_t {
 	tf_offline = 0,
 	/* A test that requires discord connectivity */

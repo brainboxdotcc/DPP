@@ -25,6 +25,7 @@
 #include <unordered_map>
 #include <memory>
 #include <functional>
+#include <shared_mutex>
 #include <dpp/thread_pool.h>
 
 namespace dpp {
@@ -144,6 +145,12 @@ using socket_container = std::unordered_map<dpp::socket, std::unique_ptr<socket_
  * event mechanisms etc).
  */
 struct DPP_EXPORT socket_engine_base {
+
+	/**
+	 * @brief Mutex for fds
+	 */
+	std::shared_mutex fds_mutex;
+
 	/**
 	 * @brief File descriptors, and their states
 	 */

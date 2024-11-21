@@ -31,6 +31,7 @@
 namespace dpp {
 
 bool socket_engine_base::register_socket(const socket_events &e) {
+	std::unique_lock lock(fds_mutex);
 	if (e.fd != INVALID_SOCKET && fds.find(e.fd) == fds.end()) {
 		fds.emplace(e.fd, std::make_unique<socket_events>(e));
 		return true;
@@ -39,6 +40,7 @@ bool socket_engine_base::register_socket(const socket_events &e) {
 }
 
 bool socket_engine_base::update_socket(const socket_events &e) {
+	std::unique_lock lock(fds_mutex);
 	if (e.fd != INVALID_SOCKET && fds.find(e.fd) != fds.end()) {
 		auto iter = fds.find(e.fd);
 		*(iter->second) = e;
@@ -68,6 +70,7 @@ time_t last_time = time(nullptr);
 
 void socket_engine_base::prune() {
 	if (to_delete_count > 0) {
+		std::unique_lock lock(fds_mutex);
 		for (auto it = fds.cbegin(); it != fds.cend();) {
 			if ((it->second->flags & WANT_DELETION) != 0L) {
 				remove_socket(it->second->fd);
@@ -98,6 +101,7 @@ void socket_engine_base::prune() {
 }
 
 bool socket_engine_base::delete_socket(dpp::socket fd) {
+	std::unique_lock lock(fds_mutex);
 	auto iter = fds.find(fd);
 	if (iter == fds.end() || ((iter->second->flags & WANT_DELETION) != 0L)) {
 		return false;

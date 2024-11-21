@@ -27,6 +27,11 @@
 #include <dpp/json.h>
 
 /**
+ * @brief global lock for log output
+ */
+std::mutex loglock;
+
+/**
  * @brief Type trait to check if a certain type has a build_json method
  *
  * @tparam T type to check for
@@ -926,6 +931,9 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		coro_offline_tests();
 	}
 
+	std::promise<void> ready_promise;
+	std::future ready_future = ready_promise.get_future();
+
 	std::vector<std::byte> dpp_logo = load_data("DPP-Logo.png");
 
 	set_test(PRESENCE, false);
@@ -971,9 +979,6 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		/* This ensures we test both protocols, as voice is json and shard is etf */
 		bot.set_websocket_protocol(dpp::ws_etf);
 
-		bot.on_form_submit([&](const dpp::form_submit_t & event) {
-		});
-
 		/* This is near impossible to test without a 'clean room' voice channel.
 		 * We attach this event just so that the decoder events are fired while we
 		 * are sending audio later, this way if the audio receive code is plain unstable
@@ -982,7 +987,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		bot.on_voice_receive_combined([&](const auto& event) {
 		});
 
-		bot.on_guild_create([&](const dpp::guild_create_t& event) {
+		bot.on_guild_create([dpp_logo,&bot](const dpp::guild_create_t& event) {
 			dpp::guild *g = event.created;
 
 			if (g->id == TEST_GUILD_ID) {
@@ -1016,9 +1021,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 			}
 		});
 
-		std::promise<void> ready_promise;
-		std::future ready_future = ready_promise.get_future();
-		bot.on_ready([&](const dpp::ready_t & event) {
+		bot.on_ready([&ready_promise,&bot,dpp_logo](const dpp::ready_t & event) {
 			set_test(CONNECTION, true);
 			ready_promise.set_value();
 
@@ -1076,10 +1079,9 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 				});
 		});
 
-		std::mutex loglock;
-		bot.on_log([&](const dpp::log_t & event) {
-			std::lock_guard<std::mutex> locker(loglock);
+		bot.on_log([](const dpp::log_t & event) {
 			if (event.severity > dpp::ll_trace) {
+				std::lock_guard<std::mutex> locker(loglock);
 				std::cout << "[" << std::fixed << std::setprecision(3) << (dpp::utility::time_f() - get_start_time()) << "]: [\u001b[36m" << dpp::utility::loglevel(event.severity) << "\u001b[0m] " << event.message << "\n";
 			}
 			if (event.message == "Test log message") {
@@ -1096,7 +1098,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		}
 		set_test(RUNONCE, (runs == 1));
 
-		bot.on_voice_ready([&](const dpp::voice_ready_t & event) {
+		bot.on_voice_ready([&testaudio](const dpp::voice_ready_t & event) {
 			set_test(VOICECONN, true);
 			dpp::discord_voice_client* v = event.voice_client;
 			set_test(VOICESEND, false);
@@ -1121,7 +1123,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 			}
 		});
 
-		bot.on_voice_buffer_send([&](const dpp::voice_buffer_send_t & event) {
+		bot.on_voice_buffer_send([](const dpp::voice_buffer_send_t & event) {
 			static bool sent_some_data = false;
 
 			if (event.buffer_size > 0) {
@@ -1133,7 +1135,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 			}
 		});
 
-		bot.on_guild_create([&](const dpp::guild_create_t & event) {
+		bot.on_guild_create([](const dpp::guild_create_t & event) {
 			if (event.created->id == TEST_GUILD_ID) {
 				set_test(GUILDCREATE, true);
 				if (event.presences.size() && event.presences.begin()->second.user_id > 0) {
@@ -1230,21 +1232,21 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 							return false;
 						}
 					};
-					message.attachments[0].download([&](const dpp::http_request_completion_t &callback) {
+					message.attachments[0].download([this](const dpp::http_request_completion_t &callback) {
 						std::lock_guard lock(mutex);
 						if (callback.status == 200 && callback.body == "test") {
 							files_success[0] = true;
 						}
 						set_file_tested(0);
 					});
-					message.attachments[1].download([&](const dpp::http_request_completion_t &callback) {
+					message.attachments[1].download([this](const dpp::http_request_completion_t &callback) {
 						std::lock_guard lock(mutex);
 						if (callback.status == 200 && check_mimetype(callback.headers, "text/plain") && callback.body == "test") {
 							files_success[1] = true;
 						}
 						set_file_tested(1);
 					});
-					message.attachments[2].download([&](const dpp::http_request_completion_t &callback) {
+					message.attachments[2].download([this](const dpp::http_request_completion_t &callback) {
 						std::lock_guard lock(mutex);
 						// do not check the contents here because discord can change compression
 						if (callback.status == 200 && check_mimetype(callback.headers, "image/png")) {
@@ -1594,7 +1596,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 
 		thread_test_helper thread_helper(bot);
 
-		bot.on_thread_create([&](const dpp::thread_create_t &event) {
+		bot.on_thread_create([&thread_helper](const dpp::thread_create_t &event) {
 			if (event.created.name == "thread test") {
 				set_test(THREAD_CREATE_EVENT, true);
 				thread_helper.run(event.created);
@@ -1694,7 +1696,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 			}
 		});
 
-		bot.on_thread_update([&](const dpp::thread_update_t &event) {
+		bot.on_thread_update([&thread_helper](const dpp::thread_update_t &event) {
 			if (event.updating_guild->id == TEST_GUILD_ID && event.updated.id == thread_helper.thread_id && event.updated.name == "edited") {
 				set_test(THREAD_UPDATE_EVENT, true);
 			}
@@ -2281,13 +2283,17 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 			set_test(BOTSTART, false);
 		}
 
+		dpp::https_client *c{};
+		dpp::https_client *c2{};
+		dpp::https_client *c3{};
+
 		set_test(HTTPS, false);
 		if (!offline) {
 			dpp::multipart_content multipart = dpp::https_client::build_multipart(
 				"{\"content\":\"test\"}", {"test.txt", "blob.blob"}, {"ABCDEFGHI", "BLOB!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"}, {"text/plain", "application/octet-stream"}
 			);
 			try {
-				dpp::https_client c(&bot, "discord.com", 443, "/api/channels/" + std::to_string(TEST_TEXT_CHANNEL_ID) + "/messages", "POST", multipart.body,
+				c = new dpp::https_client(&bot, "discord.com", 443, "/api/channels/" + std::to_string(TEST_TEXT_CHANNEL_ID) + "/messages", "POST", multipart.body,
 						    {
 							    {"Content-Type", multipart.mimetype},
 							    {"Authorization", "Bot " + token}
@@ -2297,49 +2303,43 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 						set_test(HTTPS, hdr1 == "cloudflare" && c->get_status() == 200);
 					}
 				);
-				std::this_thread::sleep_for(std::chrono::seconds(6));
 			}
 			catch (const dpp::exception& e) {
-				std::cout << e.what() << "\n";
-				set_test(HTTPS, false);
+				set_status(HTTPS, ts_failed, e.what());
 			}
 
 			set_test(HTTP, false);
 			try {
-				dpp::https_client c2(&bot, "github.com", 80, "/", "GET", "", {}, true, 5, "1.1", [](dpp::https_client* c2) {
+				c2 = new dpp::https_client(&bot, "github.com", 80, "/", "GET", "", {}, true, 5, "1.1", [](dpp::https_client *c2) {
 					std::string hdr2 = c2->get_header("location");
 					std::string content2 = c2->get_content();
 					set_test(HTTP, hdr2 == "https://github.com/" && c2->get_status() == 301);
 				});
-				std::this_thread::sleep_for(std::chrono::seconds(6));
 			}
 			catch (const dpp::exception& e) {
-				std::cout << e.what() << "\n";
-				set_test(HTTP, false);
+				set_status(HTTP, ts_failed, e.what());
 			}
 
 			set_test(MULTIHEADER, false);
 			try {
-				dpp::https_client c2(&bot, "dl.dpp.dev", 443, "/cookietest.php", "GET", "", {}, true, 5, "1.1", [](dpp::https_client* c2) {
+				c3 = new dpp::https_client(&bot, "dl.dpp.dev", 443, "/cookietest.php", "GET", "", {}, true, 5, "1.1", [](dpp::https_client *c2) {
 					size_t count = c2->get_header_count("set-cookie");
 					size_t count_list = c2->get_header_list("set-cookie").size();
 					// This test script sets a bunch of cookies when we request it.
 					set_test(MULTIHEADER, c2->get_status() == 200 && count > 1 && count == count_list);
 				});
-				std::this_thread::sleep_for(std::chrono::seconds(6));
 			}
 			catch (const dpp::exception& e) {
-				std::cout << e.what() << "\n";
-				set_test(MULTIHEADER, false);
+				set_status(MULTIHEADER, ts_failed, e.what());
 			}
 		}
 
 		set_test(TIMERSTART, false);
-		uint32_t ticks = 0;
-		dpp::timer th = bot.start_timer([&](dpp::timer timer_handle) {
-			if (ticks == 5) {
+		static uint32_t ticks = 0;
+		dpp::timer th = bot.start_timer([](dpp::timer timer_handle) {
+			if (ticks == 2) {
 				/* The simple test timer ticks every second.
-				 * If we get to 5 seconds, we know the timer is working.
+				 * If we get to 2 seconds, we know the timer is working.
 				 */
 				set_test(TIMERSTART, true);
 			}
@@ -2451,10 +2451,13 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 
 		wait_for_tests();
 
+		delete c;
+		delete c2;
+		delete c3;
+
 	}
 	catch (const std::exception &e) {
-		std::cout << e.what() << "\n";
-		set_test(CLUSTER, false);
+		set_status(CLUSTER, ts_failed, e.what());
 	}
 
 	/* Return value = number of failed tests, exit code 0 = success */
