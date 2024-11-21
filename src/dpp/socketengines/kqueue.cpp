@@ -24,6 +24,7 @@
 #include <memory>
 #include <vector>
 #include <array>
+#include <cstdint>
 #include <sys/types.h>
 #include <unistd.h>
 #include <dpp/cluster.h>
@@ -33,8 +34,10 @@ namespace dpp {
 
 struct DPP_EXPORT socket_engine_kqueue : public socket_engine_base {
 
+	static constexpr size_t MAX_SOCKET_VALUE = 65536;
+
 	int kqueue_handle{INVALID_SOCKET};
-	std::array<struct kevent, 65536> ke_list;
+	std::array<struct kevent, MAX_SOCKET_VALUE> ke_list;
 
 	socket_engine_kqueue(const socket_engine_kqueue&) = delete;
 	socket_engine_kqueue(socket_engine_kqueue&&) = delete;
@@ -57,7 +60,7 @@ struct DPP_EXPORT socket_engine_kqueue : public socket_engine_base {
 		struct timespec ts{};
 		ts.tv_sec = 1;
 
-		int i = kevent(kqueue_handle, NULL, 0, ke_list.data(), static_cast<int>(ke_list.size()), &ts);
+		int i = kevent(kqueue_handle, nullptr, 0, ke_list.data(), static_cast<int>(ke_list.size()), &ts);
 		if (i < 0) {
 			return;
 		}
@@ -101,15 +104,15 @@ struct DPP_EXPORT socket_engine_kqueue : public socket_engine_base {
 	bool register_socket(const socket_events& e) final {
 		bool r = socket_engine_base::register_socket(e);
 		if (r) {
-			struct kevent ke;
+			struct kevent ke{};
 			socket_events* se = fds.find(e.fd)->second.get();
 			if ((se->flags & WANT_READ) != 0) {
 				EV_SET(&ke, e.fd, EVFILT_READ, EV_ADD, 0, 0, static_cast<CAST_TYPE>(se));
-				kevent(kqueue_handle, &ke, 1, 0, 0, nullptr);
+				kevent(kqueue_handle, &ke, 1, nullptr, 0, nullptr);
 			}
 			if ((se->flags & WANT_WRITE) != 0) {
 				EV_SET(&ke, e.fd, EVFILT_WRITE, EV_ADD | EV_ONESHOT, 0, 0, static_cast<CAST_TYPE>(se));
-				kevent(kqueue_handle, &ke, 1, 0, 0, nullptr);
+				kevent(kqueue_handle, &ke, 1, nullptr, 0, nullptr);
 			}
 		}
 		return r;
@@ -118,15 +121,14 @@ struct DPP_EXPORT socket_engine_kqueue : public socket_engine_base {
 	bool update_socket(const socket_events& e) final {
 		bool r = socket_engine_base::update_socket(e);
 		if (r) {
-			socket_events* se = fds.find(e.fd)->second.get();
-			struct kevent ke;
+			struct kevent ke{};
 			if ((e.flags & WANT_READ) != 0) {
 				EV_SET(&ke, e.fd, EVFILT_READ, EV_ADD, 0, 0, static_cast<CAST_TYPE>(se));
-				kevent(kqueue_handle, &ke, 1, 0, 0, nullptr);
+				kevent(kqueue_handle, &ke, 1, nullptr, 0, nullptr);
 			}
 			if ((e.flags & WANT_WRITE) != 0) {
 				EV_SET(&ke, e.fd, EVFILT_WRITE, EV_ADD | EV_ONESHOT, 0, 0, static_cast<CAST_TYPE>(se));
-				kevent(kqueue_handle, &ke, 1, 0, 0, nullptr);
+				kevent(kqueue_handle, &ke, 1, nullptr, 0, nullptr);
 			}
 		}
 		return r;
@@ -139,9 +141,9 @@ protected:
 		if (r) {
 			struct kevent ke;
 			EV_SET(&ke, fd, EVFILT_WRITE, EV_DELETE, 0, 0, nullptr);
-			kevent(kqueue_handle, &ke, 1, 0, 0, nullptr);
+			kevent(kqueue_handle, &ke, 1, nullptr, 0, nullptr);
 			EV_SET(&ke, fd, EVFILT_READ, EV_DELETE, 0, 0, nullptr);
-			kevent(kqueue_handle, &ke, 1, 0, 0, nullptr);
+			kevent(kqueue_handle, &ke, 1, nullptr, 0, nullptr);
 		}
 		return r;
 	}

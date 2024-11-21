@@ -52,16 +52,15 @@ int modify_event(int epoll_handle, socket_events* eh, int new_events) {
 struct DPP_EXPORT socket_engine_epoll : public socket_engine_base {
 
 	int epoll_handle{INVALID_SOCKET};
-	static const int epoll_hint = 128;
-	std::vector<struct epoll_event> events;
+	static constexpr size_t MAX_EVENTS = 65536;
+	std::array<struct epoll_event, MAX_EVENTS> events;
 
 	socket_engine_epoll(const socket_engine_epoll&) = delete;
 	socket_engine_epoll(socket_engine_epoll&&) = delete;
 	socket_engine_epoll& operator=(const socket_engine_epoll&) = delete;
 	socket_engine_epoll& operator=(socket_engine_epoll&&) = delete;
 
-	explicit socket_engine_epoll(cluster* creator) : socket_engine_base(creator), epoll_handle(epoll_create(socket_engine_epoll::epoll_hint)) {
-		events.resize(socket_engine_epoll::epoll_hint);
+	explicit socket_engine_epoll(cluster* creator) : socket_engine_base(creator), epoll_handle(epoll_create(MAX_EVENTS)) {
 		if (epoll_handle == -1) {
 			throw dpp::connection_exception("Failed to initialise epoll()");
 		}
@@ -75,7 +74,7 @@ struct DPP_EXPORT socket_engine_epoll : public socket_engine_base {
 
 	void process_events() final {
 		const int sleep_length = 1000;
-		int i = epoll_wait(epoll_handle, events.data(), static_cast<int>(events.size()), sleep_length);
+		int i = epoll_wait(epoll_handle, events.data(), MAX_EVENTS, sleep_length);
 
 		for (int j = 0; j < i; j++) {
 			epoll_event ev = events[j];
@@ -145,13 +144,13 @@ struct DPP_EXPORT socket_engine_epoll : public socket_engine_base {
 			if ((e.flags & WANT_ERROR) != 0) {
 				ev.events |= EPOLLERR;
 			}
-			ev.data.ptr = fds.find(e.fd)->second.get();
+			{
+				std::unique_lock lock(fds_mutex);
+				ev.data.ptr = fds.find(e.fd)->second.get();
+			}
 			int i = epoll_ctl(epoll_handle, EPOLL_CTL_ADD, e.fd, &ev);
 			if (i < 0) {
 				throw dpp::connection_exception("Failed to register socket to epoll_ctl()");
-			}
-			if (fds.size() * 2 > events.size()) {
-				events.resize(fds.size() * 2);
 			}
 		}
 		return r;
@@ -171,7 +170,10 @@ struct DPP_EXPORT socket_engine_epoll : public socket_engine_base {
 			if ((e.flags & WANT_ERROR) != 0) {
 				ev.events |= EPOLLERR;
 			}
-			ev.data.ptr = fds.find(e.fd)->second.get();
+			{
+				std::unique_lock lock(fds_mutex);
+				ev.data.ptr = fds.find(e.fd)->second.get();
+			}
 			int i = epoll_ctl(epoll_handle, EPOLL_CTL_MOD, e.fd, &ev);
 			if (i < 0) {
 				throw dpp::connection_exception("Failed to modify socket with epoll_ctl()");

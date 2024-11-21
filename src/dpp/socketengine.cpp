@@ -63,7 +63,6 @@ socket_engine_base::socket_engine_base(cluster* creator) : owner(creator) {
 		throw dpp::connection_exception(err_connect_failure, "WSAStartup failure");
 	}
 #endif
-	//pool = std::make_unique<thread_pool>();
 }
 
 time_t last_time = time(nullptr);
