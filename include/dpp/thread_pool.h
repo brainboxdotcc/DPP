@@ -41,7 +41,7 @@ struct DPP_EXPORT thread_pool_task {
 };
 
 struct DPP_EXPORT thread_pool_task_comparator {
-	bool operator()(const thread_pool_task &a, const thread_pool_task &b) {
+	bool operator()(const thread_pool_task &a, const thread_pool_task &b) const {
 		return a.priority < b.priority;
 	};
 };
@@ -57,7 +57,12 @@ struct DPP_EXPORT thread_pool {
 	std::condition_variable cv;
 	bool stop{false};
 
-	explicit thread_pool(size_t num_threads = std::thread::hardware_concurrency());
+	/**
+	 * @brief Create a new priority thread pool
+	 * @param creator creating cluster (for logging)
+	 * @param num_threads number of threads in the pool
+	 */
+	explicit thread_pool(class cluster* creator, size_t num_threads = std::thread::hardware_concurrency());
 	~thread_pool();
 	void enqueue(thread_pool_task task);
 };

@@ -235,6 +235,11 @@ public:
 	 * This indicates graceful close.
 	 */
 	void send_close_packet();
+
+	/**
+	 * @brief Called on HTTP socket closure
+	 */
+	virtual void on_disconnect();
 };
 
 }

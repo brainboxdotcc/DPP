@@ -23,12 +23,13 @@
 #include <dpp/utility.h>
 #include <dpp/thread_pool.h>
 #include <shared_mutex>
+#include <dpp/cluster.h>
 
 namespace dpp {
 
-thread_pool::thread_pool(size_t num_threads) {
+thread_pool::thread_pool(cluster* creator, size_t num_threads) {
 	for (size_t i = 0; i < num_threads; ++i) {
-		threads.emplace_back([this, i]() {
+		threads.emplace_back([this, i, creator]() {
 			dpp::utility::set_thread_name("pool/exec/" + std::to_string(i));
 			while (true) {
 				thread_pool_task task;
@@ -47,7 +48,15 @@ thread_pool::thread_pool(size_t num_threads) {
 					tasks.pop();
 				}
 
-				task.function();
+				try {
+					task.function();
+				}
+				catch (const std::exception &e) {
+					creator->log(ll_warning, "Uncaught exception in thread pool: " + std::string(e.what()));
+				}
+				catch (...) {
+					creator->log(ll_warning, "Uncaught exception in thread pool, but not derived from std::exception!");
+				}
 			}
 		});
 	}

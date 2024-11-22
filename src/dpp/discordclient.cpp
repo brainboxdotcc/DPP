@@ -65,8 +65,7 @@ thread_local static std::string last_ping_message;
 
 discord_client::discord_client(dpp::cluster* _cluster, uint32_t _shard_id, uint32_t _max_shards, const std::string &_token, uint32_t _intents, bool comp, websocket_protocol_t ws_proto)
        : websocket_client(_cluster, _cluster->default_gateway, "443", comp ? (ws_proto == ws_json ? PATH_COMPRESSED_JSON : PATH_COMPRESSED_ETF) : (ws_proto == ws_json ? PATH_UNCOMPRESSED_JSON : PATH_UNCOMPRESSED_ETF)),
-        terminating(false),
-        runner(nullptr),
+	terminating(false),
 	compressed(comp),
 	decomp_buffer(nullptr),
 	zlib(nullptr),
@@ -90,6 +89,10 @@ discord_client::discord_client(dpp::cluster* _cluster, uint32_t _shard_id, uint3
 	protocol(ws_proto),
 	resume_gateway_url(_cluster->default_gateway)	
 {
+	start_connecting();
+}
+
+void discord_client::start_connecting() {
 	try {
 		zlib = new zlibcontext();
 		etf = new etf_parser();
@@ -112,10 +115,6 @@ discord_client::discord_client(dpp::cluster* _cluster, uint32_t _shard_id, uint3
 void discord_client::cleanup()
 {
 	terminating = true;
-	if (runner) {
-		runner->join();
-		delete runner;
-	}
 	delete etf;
 	delete zlib;
 }
@@ -123,6 +122,19 @@ void discord_client::cleanup()
 discord_client::~discord_client()
 {
 	cleanup();
+}
+
+void discord_client::on_disconnect()
+{
+	set_resume_hostname();
+	log(dpp::ll_debug, "Lost connection to websocket on shard " + std::to_string(shard_id) + ", reconnecting in 5 seconds...");
+	owner->start_timer([this](auto handle) {
+		owner->stop_timer(handle);
+		cleanup();
+		terminating = false;
+		start_connecting();
+		run();
+	}, 5);
 }
 
 uint64_t discord_client::get_decompressed_bytes_in()
@@ -159,20 +171,12 @@ void discord_client::set_resume_hostname()
 	hostname = resume_gateway_url;
 }
 
-void discord_client::thread_run()
-{
-}
-
 void discord_client::run()
 {
-	// TODO: This only runs once. Replace the reconnect mechanics.
-	// To make this work, we will need to intercept errors.
 	setup_zlib();
 	ready = false;
 	message_queue.clear();
 	ssl_client::read_loop();
-	//ssl_client::close();
-	//end_zlib();
 }
 
 bool discord_client::handle_frame(const std::string &buffer, ws_opcode opcode)

@@ -326,8 +326,13 @@ void websocket_client::error(uint32_t errorcode)
 {
 }
 
+void websocket_client::on_disconnect()
+{
+}
+
 void websocket_client::close()
 {
+	this->on_disconnect();
 	this->state = HTTP_HEADERS;
 	ssl_client::close();
 }

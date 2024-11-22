@@ -179,6 +179,13 @@ protected:
 	 */
 	void disconnect_voice_internal(snowflake guild_id, bool send_json = true);
 
+	/**
+	 * @brief Start connecting the websocket
+	 *
+	 * Called from the constructor, or during reconnection
+	 */
+	void start_connecting();
+
 private:
 
 	/**
@@ -190,17 +197,6 @@ private:
 	 * @brief Queue of outbound messages
 	 */
 	std::deque<std::string> message_queue;
-
-	/**
-	 * @brief Thread this shard is executing on
-	 */
-	std::thread* runner;
-
-	/**
-	 * @brief Run shard loop under a thread.
-	 * Calls discord_client::run() from within a std::thread.
-	 */
-	void thread_run();
 
 	/**
 	 * @brief If true, stream compression is enabled
@@ -498,6 +494,11 @@ public:
 	 * thread by whatever creates the object.
 	 */
 	void run();
+
+	/**
+	 * @brief Called when the HTTP socket is closed
+	 */
+	virtual void on_disconnect();
 
 	/**
 	 * @brief Connect to a voice channel
