@@ -148,10 +148,7 @@ struct DPP_EXPORT socket_engine_epoll : public socket_engine_base {
 				std::unique_lock lock(fds_mutex);
 				ev.data.ptr = fds.find(e.fd)->second.get();
 			}
-			int i = epoll_ctl(epoll_handle, EPOLL_CTL_ADD, e.fd, &ev);
-			if (i < 0) {
-				throw dpp::connection_exception("Failed to register socket to epoll_ctl()");
-			}
+			return epoll_ctl(epoll_handle, EPOLL_CTL_ADD, e.fd, &ev) >= 0;
 		}
 		return r;
 	}
@@ -174,10 +171,7 @@ struct DPP_EXPORT socket_engine_epoll : public socket_engine_base {
 				std::unique_lock lock(fds_mutex);
 				ev.data.ptr = fds.find(e.fd)->second.get();
 			}
-			int i = epoll_ctl(epoll_handle, EPOLL_CTL_MOD, e.fd, &ev);
-			if (i < 0) {
-				throw dpp::connection_exception("Failed to modify socket with epoll_ctl()");
-			}
+			return epoll_ctl(epoll_handle, EPOLL_CTL_MOD, e.fd, &ev) >= 0;
 		}
 		return r;
 	}
