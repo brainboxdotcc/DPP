@@ -46,8 +46,9 @@ void discord_voice_client::thread_run()
 		 * this gives us time to see if it's an actual disconnect, or an error.
 		 * This will prevent us from looping too much, meaning error codes do not cause an infinite loop.
 		 */
-		if (current_time - last_loop_time >= 3)
+		if (current_time - last_loop_time >= 3) {
 			times_looped = 0;
+		}
 
 		/* This does mean we'll always have times_looped at a minimum of 1, this is intended. */
 		times_looped++;

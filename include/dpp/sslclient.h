@@ -122,12 +122,6 @@ protected:
 	std::string obuffer;
 
 	/**
-	 * @brief True if in nonblocking mode. The socket switches to nonblocking mode
-	 * once ReadLoop is called.
-	 */
-	bool nonblocking;
-
-	/**
 	 * @brief Raw file descriptor of connection
 	 */
 	dpp::socket sfd;

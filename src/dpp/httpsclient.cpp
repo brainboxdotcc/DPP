@@ -44,7 +44,6 @@ https_client::https_client(cluster* creator, const std::string &hostname, uint16
 	completed(done),
 	state(HTTPS_HEADERS)
 {
-	nonblocking = false;
 	https_client::connect();
 }
 

@@ -188,7 +188,6 @@ uint64_t ssl_client::get_unique_id() const {
 }
 
 ssl_client::ssl_client(cluster* creator, const std::string &_hostname, const std::string &_port, bool plaintext_downgrade, bool reuse) :
-	nonblocking(false),
 	sfd(INVALID_SOCKET),
 	ssl(nullptr),
 	last_tick(time(nullptr)),
