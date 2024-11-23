@@ -149,6 +149,9 @@ jobs:
         with:
           xcode-version: ${{ matrix.cfg.xcode-version }}
 
+      - name: Force unlink pkg-config
+        run: brew link --overwrite pkgconf
+
       - name: Install homebrew packages
         run: brew install cmake make opus openssl pkg-config
 
