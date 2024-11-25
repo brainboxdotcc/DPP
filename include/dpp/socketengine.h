@@ -129,6 +129,10 @@ struct DPP_EXPORT socket_events {
 	socket_events(dpp::socket socket_fd, uint8_t _flags, const socket_read_event& read_event, const socket_write_event& write_event = {}, const socket_error_event& error_event = {})
 		: fd(socket_fd), flags(_flags), on_read(read_event), on_write(write_event), on_error(error_event) { }
 
+	/**
+	 * @brief Default constructor
+	 */
+	socket_events() = default;
 };
 
 /**

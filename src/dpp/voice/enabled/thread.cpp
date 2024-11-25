@@ -20,7 +20,6 @@
  *
  ************************************************************************************/
 
-#include <string_view>
 #include <dpp/exception.h>
 #include <dpp/isa_detection.h>
 #include <dpp/discordvoiceclient.h>
@@ -29,60 +28,42 @@
 
 namespace dpp {
 
-void discord_voice_client::thread_run()
-{
-	utility::set_thread_name(std::string("vc/") + std::to_string(server_id));
+void discord_voice_client::on_disconnect() {
 
-	size_t times_looped = 0;
-	time_t last_loop_time = time(nullptr);
+	time_t current_time = time(nullptr);
 
-	do {
-		bool error = false;
-		ssl_client::read_loop();
-		ssl_client::close();
+	/* Here, we check if it's been longer than 3 seconds since the previous loop,
+	 * this gives us time to see if it's an actual disconnect, or an error.
+	 * This will prevent us from looping too much, meaning error codes do not cause an infinite loop.
+	 */
+	if (current_time - last_loop_time >= 3) {
+		times_looped = 0;
+	}
 
-		time_t current_time = time(nullptr);
-		/* Here, we check if it's been longer than 3 seconds since the previous loop,
-		 * this gives us time to see if it's an actual disconnect, or an error.
-		 * This will prevent us from looping too much, meaning error codes do not cause an infinite loop.
-		 */
-		if (current_time - last_loop_time >= 3) {
-			times_looped = 0;
-		}
+	/* This does mean we'll always have times_looped at a minimum of 1, this is intended. */
+	times_looped++;
 
-		/* This does mean we'll always have times_looped at a minimum of 1, this is intended. */
-		times_looped++;
-		/* If we've looped 5 or more times, abort the loop. */
-		if (times_looped >= 5) {
-			log(dpp::ll_warning, "Reached max loops whilst attempting to read from the websocket. Aborting websocket.");
-			break;
-		}
+	/* If we've looped 5 or more times, abort the loop. */
+	if (terminating || times_looped >= 5) {
+		log(dpp::ll_warning, "Reached max loops whilst attempting to read from the websocket. Aborting websocket.");
+		return;
+	}
+	last_loop_time = current_time;
 
-		last_loop_time = current_time;
-
-		if (!terminating) {
-			log(dpp::ll_debug, "Attempting to reconnect the websocket...");
-			do {
-				try {
-					ssl_client::connect();
-					websocket_client::connect();
-				}
-				catch (const std::exception &e) {
-					log(dpp::ll_error, std::string("Error establishing voice websocket connection, retry in 5 seconds: ") + e.what());
-					ssl_client::close();
-					std::this_thread::sleep_for(std::chrono::seconds(5));
-					error = true;
-				}
-			} while (error && !terminating);
-		}
-	} while(!terminating);
+	log(dpp::ll_debug, "Attempting to reconnect the websocket...");
+	owner->start_timer([this](auto handle) {
+		owner->stop_timer(handle);
+		cleanup();
+		setup();
+		terminating = false;
+		ssl_client::connect();
+		websocket_client::connect();
+		run();
+	}, 1);
 }
 
-void discord_voice_client::run()
-{
-	this->runner = new std::thread(&discord_voice_client::thread_run, this);
-	this->thread_id = runner->native_handle();
+void discord_voice_client::run() {
+	ssl_client::read_loop();
 }
-
 
 }

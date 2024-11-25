@@ -59,6 +59,10 @@ void discord_voice_client::write_ready() {
 					bufsize = outbuf[0].packet.length();
 					outbuf.erase(outbuf.begin());
 				}
+				if (!outbuf.empty()) {
+					udp_events.flags = WANT_READ | WANT_WRITE | WANT_ERROR;
+					owner->socketengine->update_socket(udp_events);
+				}
 			}
 		}
 	}
@@ -122,6 +126,5 @@ void discord_voice_client::write_ready() {
 		}
 	}
 }
-
 
 }

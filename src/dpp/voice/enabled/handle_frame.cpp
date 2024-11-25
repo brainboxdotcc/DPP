@@ -461,10 +461,17 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 
 					/* Hook poll() in the ssl_client to add a new file descriptor */
 					this->fd = newfd;
-					this->custom_writeable_fd = [this] { return want_write(); };
-					this->custom_readable_fd = [this] { return want_read(); };
-					this->custom_writeable_ready = [this] { write_ready(); };
-					this->custom_readable_ready = [this] { read_ready(); };
+
+					udp_events = dpp::socket_events(
+						fd,
+						WANT_READ | WANT_WRITE | WANT_ERROR,
+						[this](socket fd, const struct socket_events &e) { read_ready(); },
+						[this](socket fd, const struct socket_events &e) { write_ready(); },
+						[this](socket fd, const struct socket_events &e, int error_code) {
+							this->close();
+						}
+					);
+					owner->socketengine->register_socket(udp_events);
 
 					int bound_port = address_t().get_port(this->fd);
 					this->write(json({

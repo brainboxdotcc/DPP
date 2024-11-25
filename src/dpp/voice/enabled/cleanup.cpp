@@ -33,12 +33,6 @@ namespace dpp {
 
 void discord_voice_client::cleanup()
 {
-	if (runner) {
-		this->terminating = true;
-		runner->join();
-		delete runner;
-		runner = nullptr;
-	}
 	if (encoder) {
 		opus_encoder_destroy(encoder);
 		encoder = nullptr;
@@ -54,6 +48,9 @@ void discord_voice_client::cleanup()
 		}
 		voice_courier_shared_state.signal_iteration.notify_one();
 		voice_courier.join();
+	}
+	if (fd != INVALID_SOCKET) {
+		owner->socketengine->delete_socket(fd);
 	}
 }
 

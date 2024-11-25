@@ -39,6 +39,7 @@
 #include <dpp/cluster.h>
 #include <dpp/discordevents.h>
 #include <dpp/socket.h>
+#include <dpp/socketengine.h>
 #include <queue>
 #include <thread>
 #include <deque>
@@ -268,16 +269,6 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	std::deque<std::string> message_queue;
 
 	/**
-	 * @brief Thread this connection is executing on
-	 */
-	std::thread* runner;
-
-	/**
-	 * @brief Run shard loop under a thread
-	 */
-	void thread_run();
-
-	/**
 	 * @brief Last connect time of voice session
 	 */
 	time_t connect_time;
@@ -445,6 +436,16 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	 * This is to avoid unintended Opus interpolation with subsequent transmissions.
 	 */
 	bool sent_stop_frames;
+
+	/**
+	 * @brief Number of times we have tried to reconnect in the last few seconds
+	 */
+	size_t times_looped{0};
+
+	/**
+	 * @brief Last time we reconnected
+	 */
+	time_t last_loop_time{0};
 
 #ifdef HAVE_VOICE
 	/**
@@ -623,25 +624,7 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	int udp_recv(char* data, size_t max_length);
 
 	/**
-	 * @brief This hooks the ssl_client, returning the file
-	 * descriptor if we want to send buffered data, or
-	 * -1 if there is nothing to send
-	 * 
-	 * @return int file descriptor or -1
-	 */
-	dpp::socket want_write();
-
-	/**
-	 * @brief This hooks the ssl_client, returning the file
-	 * descriptor if we want to receive buffered data, or
-	 * -1 if we are not wanting to receive
-	 * 
-	 * @return int file descriptor or -1
-	 */
-	dpp::socket want_read();
-
-	/**
-	 * @brief Called by ssl_client when the socket is ready
+	 * @brief Called by socketengine when the socket is ready
 	 * for writing, at this point we pick the head item off
 	 * the buffer and send it. So long as it doesn't error
 	 * completely, we pop it off the head of the queue.
@@ -649,7 +632,7 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	void write_ready();
 
 	/**
-	 * @brief Called by ssl_client when there is data to be
+	 * @brief Called by socketengine when there is data to be
 	 * read. At this point we insert that data into the
 	 * input queue.
 	 * @throw dpp::voice_exception if voice support is not compiled into D++
@@ -710,6 +693,16 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	 */
 	void update_ratchets(bool force = false);
 
+	/**
+	 * @brief Called in constructor and on reconnection of websocket
+	 */
+	void setup();
+
+	/**
+	 * @brief Events for UDP Socket IO
+	 */
+	dpp::socket_events udp_events;
+
 public:
 
 	/**
@@ -746,11 +739,6 @@ public:
 	 * @brief Last voice channel websocket heartbeat
 	 */
 	time_t last_heartbeat;
-
-	/**
-	 * @brief Thread ID
-	 */
-	std::thread::native_handle_type thread_id;
 
 	/**
 	 * @brief Discord voice session token
@@ -1269,6 +1257,11 @@ public:
 	 * @param rmap Roster map
 	 */
 	void process_mls_group_rosters(const std::map<uint64_t, std::vector<uint8_t>>& rmap);
+
+	/**
+	 * @brief Called on websocket disconnection
+	 */
+	void on_disconnect();
 };
 
 }
