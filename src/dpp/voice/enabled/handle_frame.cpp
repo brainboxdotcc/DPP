@@ -465,9 +465,9 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 					udp_events = dpp::socket_events(
 						fd,
 						WANT_READ | WANT_WRITE | WANT_ERROR,
-						[this](socket fd, const struct socket_events &e) { read_ready(); },
-						[this](socket fd, const struct socket_events &e) { write_ready(); },
-						[this](socket fd, const struct socket_events &e, int error_code) {
+						[this](socket, const struct socket_events &e) { read_ready(); },
+						[this](socket, const struct socket_events &e) { write_ready(); },
+						[this](socket, const struct socket_events &e, int error_code) {
 							this->close();
 						}
 					);

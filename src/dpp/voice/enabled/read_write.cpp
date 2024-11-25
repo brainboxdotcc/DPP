@@ -36,12 +36,12 @@ void discord_voice_client::send(const char* packet, size_t len, uint64_t duratio
 
 		std::lock_guard<std::mutex> lock(this->stream_mutex);
 		outbuf.emplace_back(frame);
-		if (!this->sent_stop_frames) {
-			udp_events.flags = WANT_READ | WANT_WRITE | WANT_ERROR;
-			owner->socketengine->update_socket(udp_events);
-		}
 	} else [[unlikely]] {
 		this->udp_send(packet, len);
+	}
+	if (!this->sent_stop_frames) {
+		udp_events.flags = WANT_READ | WANT_WRITE | WANT_ERROR;
+		owner->socketengine->update_socket(udp_events);
 	}
 }
 
