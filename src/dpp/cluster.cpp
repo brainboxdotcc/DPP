@@ -298,7 +298,7 @@ void cluster::start(bool return_after) {
 	});
 
 	if (return_after) {
-		engine_thread = std::make_unique<std::thread>([event_loop]() {
+		engine_thread = std::thread([event_loop]() {
 			dpp::utility::set_thread_name("event_loop");
 			event_loop();
 		});
@@ -310,13 +310,12 @@ void cluster::start(bool return_after) {
 void cluster::shutdown() {
 	/* Signal termination */
 	terminating = true;
-	if (engine_thread) {
-		if (engine_thread->joinable()) {
-			engine_thread->join();
-		} else {
-			log(ll_warning, "Cluster engine_thread is not joinable on dtor");
-		}
+
+	if (engine_thread.joinable()) {
+		/* Join engine_thread if it ever started */
+		engine_thread.join();
 	}
+
 	{
 		std::lock_guard<std::mutex> l(timer_guard);
 		/* Free memory for active timers */
@@ -326,6 +325,7 @@ void cluster::shutdown() {
 		timer_list.clear();
 		next_timer.clear();
 	}
+
 	/* Terminate shards */
 	for (const auto& sh : shards) {
 		delete sh.second;

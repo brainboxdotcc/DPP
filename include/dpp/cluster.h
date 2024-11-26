@@ -183,7 +183,7 @@ class DPP_EXPORT cluster {
 	 * @brief Used to spawn the socket engine into its own thread if
 	 * the cluster is started with dpp::st_return. It is unused otherwise.
 	 */
-	std::unique_ptr<std::thread> engine_thread{nullptr};
+	std::thread engine_thread;
 
 	/**
 	 * @brief Protection mutex for timers
