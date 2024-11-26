@@ -111,6 +111,7 @@ struct DPP_EXPORT socket_engine_epoll : public socket_engine_base {
 				}
 
 				if ((ev.events & EPOLLOUT) != 0U) {
+					/* Should we have a flag to allow keeping WANT_WRITE? Maybe like WANT_WRITE_ONCE or GREEDY_WANT_WRITE, eh */
 					eh->flags = modify_event(epoll_handle, eh, eh->flags & ~WANT_WRITE);
 					if (eh->on_write) {
 						eh->on_write(fd, *eh);

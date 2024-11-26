@@ -31,6 +31,13 @@
 namespace dpp {
 
 void discord_voice_client::write_ready() {
+	/* 
+	 * WANT_WRITE has been reset everytime this method is being called,
+	 * ALWAYS set it again no matter what we're gonna do.
+	 */
+	udp_events.flags = WANT_READ | WANT_WRITE | WANT_ERROR;
+	owner->socketengine->update_socket(udp_events);
+
 	uint64_t duration = 0;
 	bool track_marker_found = false;
 	uint64_t bufsize = 0;
@@ -54,14 +61,11 @@ void discord_voice_client::write_ready() {
 				}
 			}
 			if (!outbuf.empty()) {
-				if (this->udp_send(outbuf[0].packet.data(), outbuf[0].packet.length()) == (int)outbuf[0].packet.length()) {
+				int sent_siz = this->udp_send(outbuf[0].packet.data(), outbuf[0].packet.length());
+				if (sent_siz == (int)outbuf[0].packet.length()) {
 					duration = outbuf[0].duration * timescale;
 					bufsize = outbuf[0].packet.length();
 					outbuf.erase(outbuf.begin());
-				}
-				if (!outbuf.empty()) {
-					udp_events.flags = WANT_READ | WANT_WRITE | WANT_ERROR;
-					owner->socketengine->update_socket(udp_events);
 				}
 			}
 		}

@@ -311,7 +311,11 @@ void cluster::shutdown() {
 	/* Signal termination */
 	terminating = true;
 	if (engine_thread) {
-		engine_thread->join();
+		if (engine_thread->joinable()) {
+			engine_thread->join();
+		} else {
+			log(ll_warning, "Cluster engine_thread is not joinable on dtor");
+		}
 	}
 	{
 		std::lock_guard<std::mutex> l(timer_guard);
