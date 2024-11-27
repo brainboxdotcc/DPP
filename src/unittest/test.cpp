@@ -1135,7 +1135,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 			}
 		});
 
-		bot.on_guild_create([](const dpp::guild_create_t & event) {
+		bot.on_guild_create([&bot](const dpp::guild_create_t & event) {
 			if (event.created->id == TEST_GUILD_ID) {
 				set_test(GUILDCREATE, true);
 				if (event.presences.size() && event.presences.begin()->second.user_id > 0) {
@@ -1146,8 +1146,8 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 				if (g) {
 					set_test(CACHE, true);
 					set_test(VOICECONN, false);
-					//dpp::discord_client* s = bot.get_shard(0);
-					//s->connect_voice(g->id, TEST_VC_ID, false, false);
+					dpp::discord_client* s = bot.get_shard(0);
+					s->connect_voice(g->id, TEST_VC_ID, false, false);
 				}
 				else {
 					set_test(CACHE, false);
