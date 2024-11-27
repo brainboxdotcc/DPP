@@ -90,7 +90,7 @@ namespace dpp {
 	void discord_voice_client::setup() {
 	}
 
-	void on_disconnect() {
+	void discord_voice_client::on_disconnect() {
 	}
 
 }
