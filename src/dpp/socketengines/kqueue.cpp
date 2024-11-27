@@ -68,7 +68,7 @@ struct DPP_EXPORT socket_engine_kqueue : public socket_engine_base {
 		for (int j = 0; j < i; j++) {
 			const struct kevent& kev = ke_list[j];
 			auto* eh = reinterpret_cast<socket_events*>(kev.udata);
-			if (eh == nullptr) {
+			if (eh == nullptr || eh->flags & WANT_DELETION) {
 				continue;
 			}
 

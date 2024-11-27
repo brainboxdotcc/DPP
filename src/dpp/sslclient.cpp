@@ -547,8 +547,8 @@ void ssl_client::close()
 		SSL_free(ssl->ssl);
 		ssl->ssl = nullptr;
 	}
-	close_socket(sfd);
 	owner->socketengine->delete_socket(sfd);
+	close_socket(sfd);
 	sfd = INVALID_SOCKET;
 	obuffer.clear();
 	buffer.clear();
@@ -565,6 +565,7 @@ ssl_client::~ssl_client()
 	cleanup();
 	if (timer_handle) {
 		owner->stop_timer(timer_handle);
+		timer_handle = 0;
 	}
 }
 

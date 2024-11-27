@@ -25,11 +25,10 @@
 #include <string>
 #include <queue>
 #include <map>
-#include <thread>
 #include <shared_mutex>
+#include <memory>
 #include <vector>
 #include <functional>
-#include <condition_variable>
 #include <atomic>
 #include <dpp/httpsclient.h>
 
@@ -172,8 +171,11 @@ struct DPP_EXPORT http_request_completion_t {
  * @brief Results of HTTP requests are called back to these std::function types.
  *
  * @note Returned http_completion_events are called ASYNCHRONOUSLY in your
- * code which means they execute in a separate thread. The completion events
- * arrive in order.
+ * code which means they execute in a separate thread, results for the requests going
+ * into a dpp::thread_pool. Completion events may not arrive in order depending on if
+ * one request takes longer than another. Using the callbacks or using coroutines
+ * correctly ensures that the order they arrive in the queue does not negatively affect
+ * your code.
  */
 typedef std::function<void(const http_request_completion_t&)> http_completion_event;
 
@@ -377,7 +379,7 @@ public:
 	 * @brief Execute the HTTP request and mark the request complete.
 	 * @param owner creating cluster
 	 */
-	http_request_completion_t run(class in_thread* processor, class cluster* owner);
+	http_request_completion_t run(class request_concurrency_queue* processor, class cluster* owner);
 
 	/** @brief Returns true if the request is complete */
 	bool is_completed();
@@ -416,27 +418,32 @@ struct DPP_EXPORT bucket_t {
 
 
 /**
- * @brief Represents a thread in the thread pool handling requests to HTTP(S) servers.
- * There are several of these, the total defined by a constant in queues.cpp, and each
+ * @brief Represents a timer instance in a pool handling requests to HTTP(S) servers.
+ * There are several of these, the total defined by a constant in cluster.cpp, and each
  * one will always receive requests for the same rate limit bucket based on its endpoint
  * portion of the url. This makes rate limit handling reliable and easy to manage.
- * Each of these also has its own mutex, so that requests are less likely to block while
- * waiting for internal containers to be usable.
+ * Each of these also has its own mutex, making it thread safe to call and use these
+ * from anywhere in the code.
  */
-class DPP_EXPORT in_thread {
+class DPP_EXPORT request_concurrency_queue {
 public:
+	/**
+	 * @brief Queue index
+	 */
+	int in_index{0};
+
 	/**
 	 * @brief True if ending.
 	 */
 	std::atomic<bool> terminating;
 
 	/**
-	 * @brief Request queue that owns this in_thread.
+	 * @brief Request queue that owns this request_concurrency_queue.
 	 */
 	class request_queue* requests;
 
 	/**
-	 * @brief The cluster that owns this in_thread.
+	 * @brief The cluster that owns this request_concurrency_queue.
 	 */
 	class cluster* creator;
 
@@ -446,14 +453,12 @@ public:
 	std::shared_mutex in_mutex;
 
 	/**
-	 * @brief Inbound queue thread.
+	 * @brief Inbound queue timer. The timer is called every second,
+	 * and when it wakes up it checks for requests pending to be sent in the queue.
+	 * If there are any requests and we are not waiting on rate limit, it will send them,
+	 * else it will wait for the rate limit to expire.
 	 */
-	std::thread* in_thr;
-
-	/**
-	 * @brief Inbound queue condition, signalled when there are requests to fulfill.
-	 */
-	std::condition_variable in_ready;
+	dpp::timer in_timer;
 
 	/**
 	 * @brief Rate-limit bucket counters.
@@ -466,34 +471,34 @@ public:
 	std::vector<std::unique_ptr<http_request>> requests_in;
 
 	/**
-	 * @brief Inbound queue thread loop.
-	 * @param index Thread index
+	 * @brief Timer callback
+	 * @param index Index ID for this timer
 	 */
-	void in_loop(uint32_t index);
+	void tick_and_deliver_requests(uint32_t index);
 
 	/**
-	 * @brief Construct a new in thread object
+	 * @brief Construct a new concurrency queue object
 	 * 
 	 * @param owner Owning cluster
 	 * @param req_q Owning request queue
-	 * @param index Thread index number
+	 * @param index Queue index number, uniquely identifies this queue for hashing
 	 */
-	in_thread(class cluster* owner, class request_queue* req_q, uint32_t index);
+	request_concurrency_queue(class cluster* owner, class request_queue* req_q, uint32_t index);
 
 	/**
-	 * @brief Destroy the in thread object
-	 * This will end the thread that is owned by this object by joining it.
+	 * @brief Destroy the concurrency queue object
+	 * This will stop the timer.
 	 */
-	~in_thread();
+	~request_concurrency_queue();
 
 	/**
-	 * @brief Terminates the thread
-	 * This will end the thread that is owned by this object, but will not join it.
+	 * @brief Flags the queue as terminating
+	 * This will set the internal atomic bool that indicates this queue is to accept no more requests
 	 */
 	void terminate();
 
 	/**
-	 * @brief Post a http_request to this thread.
+	 * @brief Post a http_request to this queue.
 	 * 
 	 * @param req http_request to post. The pointer will be freed when it has
 	 * been executed.
@@ -507,22 +512,24 @@ public:
  * 
  * It ensures asynchronous delivery of events and queueing of requests.
  *
- * It will spawn two threads, one to make outbound HTTP requests and push the returned
- * results into a queue, and the second to call the callback methods with these results.
- * They are separated so that if the user decides to take a long time processing a reply
- * in their callback it won't affect when other requests are sent, and if a HTTP request
- * takes a long time due to latency, it won't hold up user processing.
+ * It will spawn multiple timers to make outbound HTTP requests and then call the callbacks
+ * of those requests on completion within the dpp::thread_pool for the cluster.
+ * If the user decides to take a long time processing a reply in their callback it won't affect
+ * when other requests are sent, and if a HTTP request takes a long time due to latency, it won't
+ * hold up user processing.
  *
  * There are usually two request_queue objects in each dpp::cluster, one of which is used
  * internally for the various REST methods to Discord such as sending messages, and the other
- * used to support user REST calls via dpp::cluster::request().
+ * used to support user REST calls via dpp::cluster::request(). They are separated so that the
+ * one for user requests can be specifically configured to never ever send the Discord token
+ * unless it is explicitly placed into the request, for security reasons.
  */
 class DPP_EXPORT request_queue {
 public:
 	/**
-	 * @brief Required so in_thread can access these member variables
+	 * @brief Required so request_concurrency_queue can access these member variables
 	 */
-	friend class in_thread;
+	friend class request_concurrency_queue;
 
 	/**
 	 * @brief The cluster that owns this request_queue
@@ -545,66 +552,69 @@ public:
 	};
 
 	/**
-	 * @brief A vector of inbound request threads forming a pool.
-	 * There are a set number of these defined by a constant in queues.cpp. A request is always placed
+	 * @brief A vector of timers forming a pool.
+	 *
+	 * There are a set number of these defined by a constant in cluster.cpp. A request is always placed
 	 * on the same element in this vector, based upon its url, so that two conditions are satisfied:
-	 * 1) Any requests for the same ratelimit bucket are handled by the same thread in the pool so that
+	 *
+	 * 1) Any requests for the same ratelimit bucket are handled by the same concurrency queue in the pool so that
 	 * they do not create unnecessary 429 errors,
 	 * 2) Requests for different endpoints go into different buckets, so that they may be requested in parallel
-	 * A global ratelimit event pauses all threads in the pool. These are few and far between.
+	 * A global ratelimit event pauses all timers in the pool. These are few and far between.
 	 */
-	std::vector<std::unique_ptr<in_thread>> requests_in;
+	std::vector<std::unique_ptr<request_concurrency_queue>> requests_in;
 
 	/**
-	 * @brief Set to true if the threads should terminate
+	 * @brief Set to true if the timers should terminate.
+	 * When this is set to true no further requests are accepted to the queues.
 	 */
 	std::atomic<bool> terminating;
 
 	/**
-	 * @brief True if globally rate limited - makes the entire request thread wait
+	 * @brief True if globally rate limited
+	 *
+	 * When globally rate limited the concurrency queues associated with this request queue
+	 * will not process any requests in their timers until the global rate limit expires.
 	 */
 	bool globally_ratelimited;
 
 	/**
-	 * @brief How many seconds we are globally rate limited for
+	 * @brief When we are globally rate limited until (unix epoch)
 	 *
-	 * @note Only if globally_ratelimited is true.
+	 * @note Only valid if globally_rate limited is true. If we are globally rate limited,
+	 * queues in this class will not process requests until the current unix epoch time
+	 * is greater than this time.
 	 */
-	uint64_t globally_limited_for;
+	time_t globally_limited_until;
 
 	/**
-	 * @brief Number of request threads in the thread pool
+	 * @brief Number of request queues in the pool. This is the direct size of the requests_in
+	 * vector.
 	 */
-	uint32_t in_thread_pool_size;
+	uint32_t in_queue_pool_size;
 
 	/**
 	 * @brief constructor
 	 * @param owner The creating cluster.
-	 * @param request_threads The number of http request threads to allocate to the threadpool.
-	 * By default eight threads are allocated.
-	 * Side effects: Creates threads for the queue
+	 * @param request_concurrency The number of http request queues to allocate.
+	 * Each request queue is a dpp::timer which ticks every second looking for new
+	 * requests to run. The timer will hold back requests if we are waiting as to comply
+	 * with rate limits. Adding a request to this class will cause the queue it is placed in
+	 * to run immediately but this cannot override rate limits.
+	 * By default eight concurrency queues are allocated.
+	 * Side effects: Creates timers for the queue
 	 */
-	request_queue(class cluster* owner, uint32_t request_threads = 8);
+	request_queue(class cluster* owner, uint32_t request_concurrency = 8);
 
 	/**
-	 * @brief Add more request threads to the library at runtime.
-	 * @note You should do this at a quiet time when there are few requests happening.
-	 * This will reorganise the hashing used to place requests into the thread pool so if you do
-	 * this while the bot is busy there is a small chance of receiving "429 rate limited" errors.
-	 * @param request_threads Number of threads to add. It is not possible to scale down at runtime.
-	 * @return reference to self
+	 * @brief Get the request queue concurrency count
+	 * @return uint32_t number of request queues that are active
 	 */
-	request_queue& add_request_threads(uint32_t request_threads);
-
-	/**
-	 * @brief Get the request thread count
-	 * @return uint32_t number of request threads that are active
-	 */
-	uint32_t get_request_thread_count() const;
+	uint32_t get_request_queue_count() const;
 
 	/**
 	 * @brief Destroy the request queue object.
-	 * Side effects: Joins and deletes queue threads
+	 * Side effects: Ends and deletes concurrency timers
 	 */
 	~request_queue();
 

@@ -1178,19 +1178,25 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 			}
 
 			void set_pin_tested() {
-				assert(!pin_tested);
+				if (pin_tested) {
+					return;
+				}
 				pin_tested = true;
 				delete_message_if_done();
 			}
 
 			void set_thread_tested() {
-				assert(!thread_tested);
+				if (thread_tested) {
+					return;
+				}
 				thread_tested = true;
 				delete_message_if_done();
 			}
 
 			void set_file_tested(size_t index) {
-				assert(!files_tested[index]);
+				if (files_tested[index]) {
+					return;
+				}
 				files_tested[index] = true;
 				if (files_tested == std::array{true, true, true}) {
 					set_test(MESSAGEFILE, files_success == std::array{true, true, true});

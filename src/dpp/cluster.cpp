@@ -84,16 +84,17 @@ template bool DPP_EXPORT validate_configuration<build_type::release>();
 
 template bool DPP_EXPORT validate_configuration<build_type::universal>();
 
-cluster::cluster(const std::string &_token, uint32_t _intents, uint32_t _shards, uint32_t _cluster_id, uint32_t _maxclusters, bool comp, cache_policy_t policy, uint32_t request_threads, uint32_t request_threads_raw)
+cluster::cluster(const std::string &_token, uint32_t _intents, uint32_t _shards, uint32_t _cluster_id, uint32_t _maxclusters, bool comp, cache_policy_t policy, uint32_t pool_threads)
 	: default_gateway("gateway.discord.gg"), rest(nullptr), raw_rest(nullptr), compressed(comp), start_time(0), token(_token), last_identify(time(nullptr) - 5), intents(_intents),
 	numshards(_shards), cluster_id(_cluster_id), maxclusters(_maxclusters), rest_ping(0.0), cache_policy(policy), ws_mode(ws_json)
 {
 	socketengine = create_socket_engine(this);
-	pool = std::make_unique<thread_pool>(this, request_threads);
+	pool = std::make_unique<thread_pool>(this, pool_threads > 4 ? pool_threads : 4);
 	/* Instantiate REST request queues */
 	try {
-		rest = new request_queue(this, request_threads);
-		raw_rest = new request_queue(this, request_threads_raw);
+		/* NOTE: These no longer use threads. This instantiates 16+4 dpp::timer instances. */
+		rest = new request_queue(this, 16);
+		raw_rest = new request_queue(this, 4);
 	}
 	catch (std::bad_alloc&) {
 		delete rest;

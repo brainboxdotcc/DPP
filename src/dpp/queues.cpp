@@ -20,16 +20,20 @@
  *
  ************************************************************************************/
 #include <dpp/export.h>
-#ifdef _WIN32
-/* Central point for forcing inclusion of winsock library for all socket code */
-#include <io.h>
-#endif
 #include <dpp/queues.h>
 #include <dpp/cluster.h>
 #include <dpp/httpsclient.h>
+#ifdef _WIN32
+	#include <io.h>
+#endif
 
 namespace dpp {
 
+/**
+ * @brief List of possible request verbs.
+ *
+ * This MUST MATCH the size of the dpp::http_method enum!
+ */
 constexpr std::array request_verb {
 	"GET",
 	"POST",
@@ -151,7 +155,7 @@ bool http_request::is_completed()
 }
 
 /* Execute a HTTP request */
-http_request_completion_t http_request::run(in_thread* processor, cluster* owner) {
+http_request_completion_t http_request::run(request_concurrency_queue* processor, cluster* owner) {
 
 	http_request_completion_t rv;
 	double start = dpp::utility::time_f();
@@ -247,7 +251,8 @@ http_request_completion_t http_request::run(in_thread* processor, cluster* owner
 				newbucket.timestamp = time(nullptr);
 				processor->requests->globally_ratelimited = rv.ratelimit_global;
 				if (processor->requests->globally_ratelimited) {
-					processor->requests->globally_limited_for = (newbucket.retry_after ? newbucket.retry_after : newbucket.reset_after);
+					/* We are globally rate limited - user up to shenanigans */
+					processor->requests->globally_limited_until = (newbucket.retry_after ? newbucket.retry_after : newbucket.reset_after) + newbucket.timestamp;
 				}
 				processor->buckets[this->endpoint] = newbucket;
 
@@ -269,141 +274,131 @@ void http_request::stash_self(std::unique_ptr<http_request> self) {
 	me = std::move(self);
 }
 
-request_queue::request_queue(class cluster* owner, uint32_t request_threads) : creator(owner), terminating(false), globally_ratelimited(false), globally_limited_for(0), in_thread_pool_size(request_threads)
+request_queue::request_queue(class cluster* owner, uint32_t request_concurrency) : creator(owner), terminating(false), globally_ratelimited(false), globally_limited_until(0), in_queue_pool_size(request_concurrency)
 {
-	for (uint32_t in_alloc = 0; in_alloc < in_thread_pool_size; ++in_alloc) {
-		requests_in.push_back(std::make_unique<in_thread>(owner, this, in_alloc));
+	/* Create request_concurrency timer instances */
+	for (uint32_t in_alloc = 0; in_alloc < in_queue_pool_size; ++in_alloc) {
+		requests_in.push_back(std::make_unique<request_concurrency_queue>(owner, this, in_alloc));
 	}
 }
 
-request_queue& request_queue::add_request_threads(uint32_t request_threads)
+uint32_t request_queue::get_request_queue_count() const
 {
-	for (uint32_t in_alloc_ex = 0; in_alloc_ex < request_threads; ++in_alloc_ex) {
-		requests_in.push_back(std::make_unique<in_thread>(creator, this, in_alloc_ex + in_thread_pool_size));
-	}
-	in_thread_pool_size += request_threads;
-	return *this;
+	return in_queue_pool_size;
 }
 
-uint32_t request_queue::get_request_thread_count() const
+request_concurrency_queue::request_concurrency_queue(class cluster* owner, class request_queue* req_q, uint32_t index) : in_index(index), terminating(false), requests(req_q), creator(owner)
 {
-	return in_thread_pool_size;
+	in_timer = creator->start_timer([this](auto timer_handle) {
+		tick_and_deliver_requests(in_index);
+	}, 1);
 }
 
-in_thread::in_thread(class cluster* owner, class request_queue* req_q, uint32_t index) : terminating(false), requests(req_q), creator(owner)
-{
-	this->in_thr = new std::thread(&in_thread::in_loop, this, index);
-}
-
-in_thread::~in_thread()
+request_concurrency_queue::~request_concurrency_queue()
 {
 	terminate();
-	in_thr->join();
-	delete in_thr;
+	creator->stop_timer(in_timer);
 }
 
-void in_thread::terminate()
+void request_concurrency_queue::terminate()
 {
 	terminating.store(true, std::memory_order_relaxed);
-	in_ready.notify_one();
 }
 
 request_queue::~request_queue()
 {
 	terminating.store(true, std::memory_order_relaxed);
 	for (auto& in_thr : requests_in) {
-		in_thr->terminate(); // signal all of them here, otherwise they will all join 1 by 1 and it will take forever
+		/* Note: We don't need to set the atomic to make timers quit, this is purely
+		 * to prevent additional requests going into the queue while it is being destructed
+		 * from other threads,
+		 */
+		in_thr->terminate();
 	}
 }
 
-void in_thread::in_loop(uint32_t index)
+void request_concurrency_queue::tick_and_deliver_requests(uint32_t index)
 {
-	utility::set_thread_name(std::string("http_req/") + std::to_string(index));
-	while (!terminating.load(std::memory_order_relaxed)) {
-		std::mutex mtx;
-		std::unique_lock<std::mutex> lock{ mtx };
-		in_ready.wait_for(lock, std::chrono::seconds(1));
-		/* New request to be sent! */
+	if (terminating) {
+		return;
+	}
 
-		if (!requests->globally_ratelimited) {
+	if (!requests->globally_ratelimited) {
 
-			std::vector<http_request*> requests_view;
-			{
-				/* Gather all the requests first within a mutex */
-				std::shared_lock lock(in_mutex);
-				if (requests_in.empty()) {
-					/* Nothing to copy, wait again */
-					continue;
-				}
-				requests_view.reserve(requests_in.size());
-				std::transform(requests_in.begin(), requests_in.end(), std::back_inserter(requests_view), [](const std::unique_ptr<http_request> &r) {
-					return r.get();
-				});
+		std::vector<http_request*> requests_view;
+		{
+			/* Gather all the requests first within a mutex */
+			std::shared_lock lock(in_mutex);
+			if (requests_in.empty()) {
+				/* Nothing to copy, check again when we call the timer in a second */
+				return;
 			}
+			requests_view.reserve(requests_in.size());
+			std::transform(requests_in.begin(), requests_in.end(), std::back_inserter(requests_view), [](const std::unique_ptr<http_request> &r) {
+				return r.get();
+			});
+		}
 
-			for (auto& request_view : requests_view) {
-				const std::string &key = request_view->endpoint;
-				http_request_completion_t rv;
-				auto currbucket = buckets.find(key);
+		for (auto& request_view : requests_view) {
+			const std::string &key = request_view->endpoint;
+			http_request_completion_t rv;
+			auto currbucket = buckets.find(key);
 
-				if (currbucket != buckets.end()) {
-					/* There's a bucket for this request. Check its status. If the bucket says to wait,
-					* skip all requests in this bucket till its ok.
-					*/
-					if (currbucket->second.remaining < 1) {
-						uint64_t wait = (currbucket->second.retry_after ? currbucket->second.retry_after : currbucket->second.reset_after);
-						if ((uint64_t)time(nullptr) > currbucket->second.timestamp + wait) {
-							/* Time has passed, we can process this bucket again. send its request. */
-							request_view->run(this, creator);
-						} else {
-							if (!request_view->waiting) {
-								request_view->waiting = true;
-							}
-							/* Time not up yet, wait more */
-							break;
-						}
-					} else {
-						/* There's limit remaining, we can just run the request */
+			if (currbucket != buckets.end()) {
+				/* There's a bucket for this request. Check its status. If the bucket says to wait,
+				 * skip all requests until the timer value indicates the rate limit won't be hit
+				 */
+				if (currbucket->second.remaining < 1) {
+					uint64_t wait = (currbucket->second.retry_after ? currbucket->second.retry_after : currbucket->second.reset_after);
+					if ((uint64_t)time(nullptr) > currbucket->second.timestamp + wait) {
+						/* Time has passed, we can process this bucket again. send its request. */
 						request_view->run(this, creator);
+					} else {
+						if (!request_view->waiting) {
+							request_view->waiting = true;
+						}
+						/* Time not up yet, wait more */
+						break;
 					}
 				} else {
-					/* No bucket for this endpoint yet. Just send it, and make one from its reply */
+					/* We aren't at the limit, so we can just run the request */
 					request_view->run(this, creator);
 				}
+			} else {
+				/* No bucket for this endpoint yet. Just send it, and make one from its reply */
+				request_view->run(this, creator);
+			}
 
-				/* Remove from inbound requests */
-				std::unique_ptr<http_request> rq;
-				{
-					/* Find the owned pointer in requests_in */
-					std::scoped_lock lock1{in_mutex};
+			/* Remove from inbound requests */
+			std::unique_ptr<http_request> rq;
+			{
+				/* Find the owned pointer in requests_in */
+				std::scoped_lock lock1{in_mutex};
 
-					const std::string &key = request_view->endpoint;
-					auto [begin, end] = std::equal_range(requests_in.begin(), requests_in.end(), key, compare_request{});
-					for (auto it = begin; it != end; ++it) {
-						if (it->get() == request_view) {
-							/* Grab and remove */
-							// NOTE: Where to move this to?!
-							request_view->stash_self(std::move(*it));
-							requests_in.erase(it);
-							break;
-						}
+				const std::string &key = request_view->endpoint;
+				auto [begin, end] = std::equal_range(requests_in.begin(), requests_in.end(), key, compare_request{});
+				for (auto it = begin; it != end; ++it) {
+					if (it->get() == request_view) {
+						/* Grab and remove */
+						request_view->stash_self(std::move(*it));
+						requests_in.erase(it);
+						break;
 					}
 				}
 			}
+		}
 
-		} else {
-			if (requests->globally_limited_for > 0) {
-				std::this_thread::sleep_for(std::chrono::seconds(requests->globally_limited_for));
-				requests->globally_limited_for = 0;
-			}
+	} else {
+		/* If we are globally rate limited, do nothing until we are not */
+		if (time(nullptr) > requests->globally_limited_until) {
+			requests->globally_limited_until = 0;
 			requests->globally_ratelimited = false;
-			in_ready.notify_one();
 		}
 	}
 }
 
 /* Post a http_request into the queue */
-void in_thread::post_request(std::unique_ptr<http_request> req)
+void request_concurrency_queue::post_request(std::unique_ptr<http_request> req)
 {
 	{
 		std::scoped_lock lock(in_mutex);
@@ -411,17 +406,21 @@ void in_thread::post_request(std::unique_ptr<http_request> req)
 		auto where = std::lower_bound(requests_in.begin(), requests_in.end(), req->endpoint, compare_request{});
 		requests_in.emplace(where, std::move(req));
 	}
-	in_ready.notify_one();
+	/* Immediately trigger requests in this queue */
+	tick_and_deliver_requests(in_index);
 }
 
-/* Simple hash function for hashing urls into thread pool values,
- * ensuring that the same url always ends up on the same thread,
+/* @brief Simple hash function for hashing urls into request pool values,
+ * ensuring that the same url always ends up in the same queue,
  * which means that it will be part of the same ratelimit bucket.
  * I did consider std::hash for this, but std::hash returned even
  * numbers for absolutely every string i passed it on g++ 10.0,
  * so this was a no-no. There are also much bigger more complex
  * hash functions that claim to be really fast, but this is
  * readable and small and fits the requirement exactly.
+ *
+ * @param s String to hash
+ * @return Hash value
  */
 inline uint32_t hash(const char *s)
 {
@@ -435,7 +434,9 @@ inline uint32_t hash(const char *s)
 /* Post a http_request into a request queue */
 request_queue& request_queue::post_request(std::unique_ptr<http_request> req)
 {
-	requests_in[hash(req->endpoint.c_str()) % in_thread_pool_size]->post_request(std::move(req));
+	if (!terminating) {
+		requests_in[hash(req->endpoint.c_str()) % in_queue_pool_size]->post_request(std::move(req));
+	}
 	return *this;
 }
 

@@ -96,6 +96,10 @@ struct DPP_EXPORT socket_engine_poll : public socket_engine_base {
 			}
 			socket_events *eh = iter->second.get();
 
+			if (eh == nullptr || eh->flags & WANT_DELETION) {
+				continue;
+			}
+
 			try {
 
 				if ((revents & POLLHUP) != 0) {

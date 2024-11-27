@@ -271,7 +271,7 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	/**
 	 * @brief Last connect time of voice session
 	 */
-	time_t connect_time;
+	time_t connect_time{};
 
 	/*
 	* @brief For mixing outgoing voice data.
@@ -286,12 +286,12 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	/**
 	 * @brief Port number of UDP/RTP endpoint
 	 */
-	uint16_t port;
+	uint16_t port{};
 
 	/**
 	 * @brief SSRC value 
 	 */
-	uint64_t ssrc;
+	uint64_t ssrc{};
 
 	/**
 	 * @brief List of supported audio encoding modes
@@ -301,7 +301,7 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	/**
 	 * @brief Timescale in nanoseconds
 	 */
-	uint64_t timescale;
+	uint64_t timescale{};
 
 	/**
 	 * @brief Output buffer
@@ -428,14 +428,14 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	/**
 	 * @brief If true, audio packet sending is paused
 	 */
-	bool paused;
+	bool paused{};
 
 	/**
 	 * @brief Whether has sent 5 frame of silence before stopping on pause.
 	 *
 	 * This is to avoid unintended Opus interpolation with subsequent transmissions.
 	 */
-	bool sent_stop_frames;
+	bool sent_stop_frames{};
 
 	/**
 	 * @brief Number of times we have tried to reconnect in the last few seconds
@@ -451,13 +451,13 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	/**
 	 * @brief libopus encoder
 	 */
-	OpusEncoder* encoder;
+	OpusEncoder* encoder{};
 
 	/**
 	 * @brief libopus repacketizer
 	 * (merges frames into one packet)
 	 */
-	OpusRepacketizer* repacketizer;
+	OpusRepacketizer* repacketizer{};
 
 	/**
 	 * @brief This holds the state information for DAVE E2EE.
@@ -499,14 +499,14 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	/**
 	 * @brief File descriptor for UDP connection
 	 */
-	dpp::socket fd;
+	dpp::socket fd{};
 
 	/**
 	 * @brief Secret key for encrypting voice.
 	 * If it has been sent, this contains a sequence of exactly 32 bytes
 	 * (secret_key_size) and has_secret_key is set to true.
 	 */
-	std::array<uint8_t, secret_key_size> secret_key;
+	std::array<uint8_t, secret_key_size> secret_key{};
 
 	/**
 	 * @brief True if the voice client has a secret key
@@ -517,21 +517,21 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	 * @brief Sequence number of outbound audio. This is incremented
 	 * once per frame sent.
 	 */
-	uint16_t sequence;
+	uint16_t sequence{};
 
 	/**
 	 * @brief Last received sequence from gateway.
 	 *
 	 * Needed for heartbeat and resume payload.
 	 */
-	int32_t receive_sequence;
+	int32_t receive_sequence{};
 
 	/**
 	 * @brief Timestamp value used in outbound audio. Each packet
 	 * has the timestamp value which is incremented to match
 	 * how many frames are sent.
 	 */
-	uint32_t timestamp;
+	uint32_t timestamp{};
 
 	/**
 	 * @brief Each packet should have a nonce, a 32-bit incremental
@@ -542,7 +542,7 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	 *
 	 * Current initial value is hardcoded to 1.
 	 */
-	uint32_t packet_nonce;
+	uint32_t packet_nonce{};
 
 	/**
 	 * @brief Last sent packet high-resolution timestamp
@@ -552,7 +552,7 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	/**
 	 * @brief Fraction of the sleep that was not executed after the last audio packet was sent
 	 */
-	std::chrono::nanoseconds last_sleep_remainder;
+	std::chrono::nanoseconds last_sleep_remainder{};
 
 	/**
 	 * @brief Maps receiving ssrc to user id
@@ -564,7 +564,7 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	 * When this moves from false to true, this causes the
 	 * client to send the 'talking' notification to the websocket.
 	 */
-	bool sending;
+	bool sending{};
 
 	/**
 	 * @brief Number of track markers in the buffer. For example if there
@@ -575,7 +575,7 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	 * If the buffer is empty, there are zero tracks in the
 	 * buffer.
 	 */
-	uint32_t tracks;
+	uint32_t tracks{};
 
 	/**
 	 * @brief Meta data associated with each track.
@@ -587,7 +587,7 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	/** 
 	 * @brief Encoding buffer for opus repacketizer and encode
 	 */
-	uint8_t encode_buffer[65536];
+	uint8_t encode_buffer[65536]{};
 
 	/**
 	 * @brief DAVE - Discord Audio Visual Encryption
@@ -708,37 +708,37 @@ public:
 	/**
 	 * @brief Owning cluster
 	 */
-	class dpp::cluster* creator;
+	class dpp::cluster* creator{};
 
 	/**
 	 * @brief True when the thread is shutting down
 	 */
-	bool terminating;
+	bool terminating{};
 
 	/**
 	 * @brief The gain value for the end of the current voice iteration.
 	 */
-	float end_gain;
+	float end_gain{};
 
 	/**
 	 * @brief The gain value for the current voice iteration.
 	 */
-	float current_gain;
+	float current_gain{};
 
 	/**
 	 * @brief The amount to increment each successive sample for, for the current voice iteration.
 	 */
-	float increment;
+	float increment{};
 
 	/**
 	 * @brief Heartbeat interval for sending heartbeat keepalive
 	 */
-	uint32_t heartbeat_interval;
+	uint32_t heartbeat_interval{};
 
 	/**
 	 * @brief Last voice channel websocket heartbeat
 	 */
-	time_t last_heartbeat;
+	time_t last_heartbeat{};
 
 	/**
 	 * @brief Discord voice session token

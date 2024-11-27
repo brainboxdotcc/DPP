@@ -85,7 +85,7 @@ struct DPP_EXPORT socket_engine_epoll : public socket_engine_base {
 			}
 
 			const int fd = eh->fd;
-			if (fd == INVALID_SOCKET) {
+			if (fd == INVALID_SOCKET || eh->flags & WANT_DELETION) {
 				continue;
 			}
 

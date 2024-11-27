@@ -272,11 +272,11 @@ public:
 	 * @param maxclusters The total number of clusters that are active, which may be on separate processes or even separate machines.
 	 * @param compressed Whether or not to use compression for shards on this cluster. Saves a ton of bandwidth at the cost of some CPU
 	 * @param policy Set the caching policy for the cluster, either lazy (only cache users/members when they message the bot) or aggressive (request whole member lists on seeing new guilds too)
-	 * @param request_threads The number of threads to allocate for making HTTP requests to Discord. This defaults to 12. You can increase this at runtime via the object returned from get_rest().
-	 * @param request_threads_raw The number of threads to allocate for making HTTP requests to sites outside of Discord. This defaults to 1. You can increase this at runtime via the object returned from get_raw_rest().
+	 * @param pool_threads The number of threads to allocate for the thread pool. This defaults to half your system concurrency and if set to a number less than 4, will default to 4.
+	 * All callbacks and events are placed into the thread pool. The bigger you make this pool (but generally no bigger than your number of cores), the more your bot will scale.
 	 * @throw dpp::exception Thrown on windows, if WinSock fails to initialise, or on any other system if a dpp::request_queue fails to construct
 	 */
-	cluster(const std::string& token, uint32_t intents = i_default_intents, uint32_t shards = 0, uint32_t cluster_id = 0, uint32_t maxclusters = 1, bool compressed = true, cache_policy_t policy = cache_policy::cpol_default, uint32_t request_threads = 12, uint32_t request_threads_raw = 1);
+	cluster(const std::string& token, uint32_t intents = i_default_intents, uint32_t shards = 0, uint32_t cluster_id = 0, uint32_t maxclusters = 1, bool compressed = true, cache_policy_t policy = cache_policy::cpol_default, uint32_t pool_threads = std::thread::hardware_concurrency() / 2);
 
 	/**
 	 * @brief Place some arbitrary work into the thread pool for execution when time permits.
