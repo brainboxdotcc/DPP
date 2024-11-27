@@ -373,11 +373,6 @@ void ssl_client::on_read(socket fd, const struct socket_events& ev) {
 }
 
 void ssl_client::on_write(socket fd, const struct socket_events& e) {
-	/* We wanted to write before so keep it */
-	socket_events new_se{e};
-	new_se.flags |= WANT_WRITE;
-	owner->socketengine->update_socket(new_se);
-
 	if (!tcp_connect_done) {
 		tcp_connect_done = true;
 	}
