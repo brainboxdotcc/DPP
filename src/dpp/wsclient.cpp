@@ -129,6 +129,23 @@ void websocket_client::write(const std::string_view data, ws_opcode _opcode)
 		ssl_client::socket_write(header);
 		ssl_client::socket_write(data);
 	}
+
+	bool should_append_want_write = false;
+	socket_events *new_se = nullptr;
+	{
+		std::lock_guard lk(owner->socketengine->fds_mutex);
+		auto i = owner->socketengine->fds.find(sfd);
+
+		should_append_want_write = i != owner->socketengine->fds.end() && (i->second->flags & WANT_WRITE) != WANT_WRITE;
+		if (should_append_want_write) {
+			new_se = i->second.get();
+			new_se->flags |= WANT_WRITE;
+		}
+	}
+
+	if (should_append_want_write) {
+		owner->socketengine->update_socket(*new_se);
+	}
 }
 
 bool websocket_client::handle_buffer(std::string& buffer)

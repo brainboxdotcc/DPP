@@ -88,27 +88,6 @@ void discord_voice_client::update_ratchets(bool force) {
 
 }
 
-void discord_voice_client::write(const std::string_view data, ws_opcode _opcode) {
-	websocket_client::write(data, _opcode);
-
-	bool should_append_want_write = false;
-	socket_events *new_se = nullptr;
-	{
-		std::lock_guard lk(owner->socketengine->fds_mutex);
-		auto i = owner->socketengine->fds.find(sfd);
-
-		should_append_want_write = i != owner->socketengine->fds.end() && (i->second->flags & WANT_WRITE) != WANT_WRITE;
-		if (should_append_want_write) {
-			new_se = i->second.get();
-			new_se->flags |= WANT_WRITE;
-		}
-	}
-
-	if (should_append_want_write) {
-		owner->socketengine->update_socket(*new_se);
-	}
-}
-
 bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcode) {
 	json j;
 

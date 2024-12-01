@@ -890,14 +890,6 @@ public:
 	virtual ~discord_voice_client();
 
 	/**
-	 * @brief Write to websocket. Encapsulates data in frames if the status is CONNECTED.
-	 * @param data The data to send.
-	 * @param _opcode The opcode of the data to send, either binary or text. The default
-	 * is to use the socket's opcode as set in the constructor.
-	 */
-	void write(const std::string_view data, ws_opcode _opcode = OP_AUTO) override;
-
-	/**
 	 * @brief Handle JSON from the websocket.
 	 * @param buffer The entire buffer content from the websocket client
 	 * @param opcode Frame type, e.g. OP_TEXT, OP_BINARY
