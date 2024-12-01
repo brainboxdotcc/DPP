@@ -23,17 +23,32 @@
 #include <dpp/dpp.h>
 #include <iostream>
 #include <thread>
+#ifndef _WIN32
+	#include <csignal>
+#endif
+
+dpp::cluster* s{nullptr};
 
 int main() {
 	using namespace std::chrono_literals;
 	char* t = getenv("DPP_UNIT_TEST_TOKEN");
 	if (t) {
 		dpp::cluster soak_test(t, dpp::i_default_intents | dpp::i_guild_members, 1, 0, 1);
+		s = &soak_test;
 		//soak_test.set_websocket_protocol(dpp::ws_etf);
 		soak_test.on_log([&](const dpp::log_t& log) {
 			std::cout << "[" << dpp::utility::current_date_time() << "] " << dpp::utility::loglevel(log.severity) << ": " << log.message << std::endl;
 		});
 		soak_test.start(dpp::st_return);
+
+#ifndef _WIN32
+		signal(SIGINT, [](int sig) {
+			dpp::discord_client* dc = s->get_shard(0);
+			if (dc != nullptr) {
+				dc->close();
+			}
+		});
+#endif
 
 		while (true) {
 			std::this_thread::sleep_for(60s);

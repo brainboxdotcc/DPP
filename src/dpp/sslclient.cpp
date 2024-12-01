@@ -482,7 +482,7 @@ void ssl_client::on_write(socket fd, const struct socket_events& e) {
 
 void ssl_client::on_error(socket fd, const struct socket_events&, int error_code) {
 	if (sfd != INVALID_SOCKET) {
-		ssl_client::close();
+		this->close();
 	}
 }
 
@@ -542,6 +542,10 @@ void ssl_client::close()
 		SSL_free(ssl->ssl);
 		ssl->ssl = nullptr;
 	}
+	connected = tcp_connect_done = false;
+	client_to_server_length = client_to_server_offset = 0;
+	last_tick = time(nullptr);
+	bytes_in = bytes_out = 0;
 	owner->socketengine->delete_socket(sfd);
 	close_socket(sfd);
 	sfd = INVALID_SOCKET;
@@ -552,7 +556,6 @@ void ssl_client::close()
 void ssl_client::cleanup()
 {
 	this->close();
-	delete ssl;
 }
 
 ssl_client::~ssl_client()
@@ -562,6 +565,8 @@ ssl_client::~ssl_client()
 		owner->stop_timer(timer_handle);
 		timer_handle = 0;
 	}
+	delete ssl;
+	ssl = nullptr;
 }
 
 }

@@ -473,7 +473,7 @@ public:
 	 *
 	 * @param return_after If true the bot will return to your program after starting shards, if false this function will never return.
 	 */
-	void start(bool return_after = true);
+	void start(start_type return_after = st_wait);
 
 	/**
 	 * @brief Set the presence for all shards on the cluster

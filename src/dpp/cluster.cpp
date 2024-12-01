@@ -198,7 +198,7 @@ dpp::utility::uptime cluster::uptime()
 	return dpp::utility::uptime(time(nullptr) - start_time);
 }
 
-void cluster::start(bool return_after) {
+void cluster::start(start_type return_after) {
 
 	auto event_loop = [this]() -> void {
 		while (!this->terminating && socketengine.get()) {

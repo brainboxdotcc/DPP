@@ -128,10 +128,19 @@ void discord_client::on_disconnect()
 {
 	set_resume_hostname();
 	log(dpp::ll_debug, "Lost connection to websocket on shard " + std::to_string(shard_id) + ", reconnecting in 5 seconds...");
+	ssl_client::close();
+	end_zlib();
 	owner->start_timer([this](auto handle) {
+		log(dpp::ll_debug, "Reconnecting shard " + std::to_string(shard_id) + " to wss://" + hostname + "...");
 		owner->stop_timer(handle);
 		cleanup();
 		terminating = false;
+		if (timer_handle) {
+			owner->stop_timer(timer_handle);
+			timer_handle = 0;
+		}
+		start = time(nullptr);
+		ssl_client::connect();
 		start_connecting();
 		run();
 	}, 5);
@@ -305,34 +314,40 @@ bool discord_client::handle_frame(const std::string &buffer, ws_opcode opcode)
 					resumes++;
 				} else {
 					/* Full connect */
-					while (time(nullptr) < creator->last_identify + 5) {
-						time_t wait = (creator->last_identify + 5) - time(nullptr);
-						std::this_thread::sleep_for(std::chrono::seconds(wait));
-					}
-					log(dpp::ll_debug, "Connecting new session...");
-					json obj = {
-						{ "op", 2 },
-						{
-							"d",
+					auto connect_now = [this]() {
+						log(dpp::ll_debug, "Connecting new session...");
+						json obj = {
+							{ "op", 2 },
 							{
-								{ "token", this->token },
-								{ "properties",
-									{
-										{ "os", STRINGIFY(DPP_OS) },
-										{ "browser", "D++" },
-										{ "device", "D++" }
-									}
-								},
-								{ "shard", json::array({ shard_id, max_shards }) },
-								{ "compress", false },
-								{ "large_threshold", 250 },
-								{ "intents", this->intents }
+							  "d",
+								{
+									{ "token", this->token },
+									{ "properties",
+										{
+											{ "os", STRINGIFY(DPP_OS) },
+											{ "browser", "D++" },
+											{ "device", "D++" }
+										}
+									},
+									{ "shard", json::array({ shard_id, max_shards }) },
+									{ "compress", false },
+									{ "large_threshold", 250 },
+									{ "intents", this->intents }
+								}
 							}
-						}
+						};
+						this->write(jsonobj_to_string(obj), protocol == ws_etf ? OP_BINARY : OP_TEXT);
+						this->connect_time = creator->last_identify = time(nullptr);
+						reconnects++;
 					};
-					this->write(jsonobj_to_string(obj), protocol == ws_etf ? OP_BINARY : OP_TEXT);
-					this->connect_time = creator->last_identify = time(nullptr);
-					reconnects++;
+					if (time(nullptr) < creator->last_identify + 5) {
+						owner->start_timer([this, connect_now](timer h) {
+							owner->stop_timer(h);
+							connect_now();
+						}, (creator->last_identify + 5) - time(nullptr));
+					} else {
+						connect_now();
+					}
 				}
 				this->last_heartbeat_ack = time(nullptr);
 				websocket_ping = 0;
@@ -345,7 +360,7 @@ bool discord_client::handle_frame(const std::string &buffer, ws_opcode opcode)
 			case 7:
 				log(dpp::ll_debug, "Reconnection requested, closing socket " + sessionid);
 				message_queue.clear();
-				throw dpp::connection_exception(err_reconnection, "Remote site requested reconnection");
+				this->close();
 			break;
 			/* Heartbeat ack */
 			case 11:
@@ -411,6 +426,7 @@ void discord_client::error(uint32_t errorcode)
 		error = i->second;
 	}
 	log(dpp::ll_warning, "OOF! Error from underlying websocket: " + std::to_string(errorcode) + ": " + error);
+	this->close();
 }
 
 void discord_client::log(dpp::loglevel severity, const std::string &msg) const
@@ -454,10 +470,6 @@ size_t discord_client::get_queue_size()
 
 void discord_client::one_second_timer()
 {
-	if (terminating) {
-		throw dpp::exception("Shard terminating due to cluster shutdown");
-	}
-
 	websocket_client::one_second_timer();
 
 	/* This all only triggers if we are connected (have completed websocket, and received READY or RESUMED) */
