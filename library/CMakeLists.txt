@@ -425,17 +425,20 @@ if(DPP_FORMATTERS)
 endif()
 
 if (NOT BUILD_SHARED_LIBS)
-	add_library(dppstatic STATIC
+	if (HAVE_VOICE)
+		add_library(dppstatic STATIC
 			$<TARGET_OBJECTS:dpp>
 			$<TARGET_OBJECTS:hpke>
 			$<TARGET_OBJECTS:tls_syntax>
 			$<TARGET_OBJECTS:mls_vectors>
 			$<TARGET_OBJECTS:mlspp>
 			$<TARGET_OBJECTS:bytes>
-	)
-	if (HAVE_VOICE)
+	        )
 		target_link_libraries(dppstatic ${ZLIB_LIBRARIES} ${OPENSSL_LIBRARIES} ${OPUS_LIBRARIES} -static-libgcc -static-libstdc++)
 	else()
+ 		add_library(dppstatic STATIC
+			$<TARGET_OBJECTS:dpp>
+	        )
 		target_link_libraries(dppstatic ${ZLIB_LIBRARIES} ${OPENSSL_LIBRARIES})
 	endif()
 endif()
