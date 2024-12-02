@@ -65,7 +65,6 @@ thread_local static std::string last_ping_message;
 
 discord_client::discord_client(dpp::cluster* _cluster, uint32_t _shard_id, uint32_t _max_shards, const std::string &_token, uint32_t _intents, bool comp, websocket_protocol_t ws_proto)
        : websocket_client(_cluster, _cluster->default_gateway, "443", comp ? (ws_proto == ws_json ? PATH_COMPRESSED_JSON : PATH_COMPRESSED_ETF) : (ws_proto == ws_json ? PATH_UNCOMPRESSED_JSON : PATH_UNCOMPRESSED_ETF)),
-	terminating(false),
 	compressed(comp),
 	decomp_buffer(nullptr),
 	zlib(nullptr),
@@ -98,8 +97,7 @@ void discord_client::start_connecting() {
 		etf = new etf_parser();
 	}
 	catch (std::bad_alloc&) {
-		delete zlib;
-		delete etf;
+		cleanup();
 		/* Clean up and rethrow to caller */
 		throw std::bad_alloc();
 	}
@@ -114,7 +112,6 @@ void discord_client::start_connecting() {
 
 void discord_client::cleanup()
 {
-	terminating = true;
 	delete etf;
 	delete zlib;
 }
@@ -134,7 +131,6 @@ void discord_client::on_disconnect()
 		log(dpp::ll_debug, "Reconnecting shard " + std::to_string(shard_id) + " to wss://" + hostname + "...");
 		owner->stop_timer(handle);
 		cleanup();
-		terminating = false;
 		if (timer_handle) {
 			owner->stop_timer(timer_handle);
 			timer_handle = 0;

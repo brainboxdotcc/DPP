@@ -223,25 +223,39 @@ void cluster::start(start_type return_after) {
 	}
 
 	/* Start up all shards */
-	get_gateway_bot([this](const auto& response) {
+	get_gateway_bot([this, return_after](const auto& response) {
+
+		auto throw_if_not_threaded = [this, return_after](exception_error_code error_id, const std::string& msg) {
+			log(ll_critical, msg);
+			if (return_after == st_wait) {
+				throw dpp::connection_exception(error_id, msg);
+			}
+		};
+
 		if (response.is_error()) {
-			// TODO: Check for 401 unauthorized
-			// throw dpp::invalid_token_exception(err_unauthorized, "Invalid bot token (401: Unauthorized when getting gateway shard count)");
+			if (response.http_info.status == 401) {
+				throw_if_not_threaded(err_unauthorized, "Invalid bot token (401: Unauthorized when getting gateway shard count)");
+			} else {
+				throw_if_not_threaded(err_auto_shard, "get_gateway_bot: " + response.http_info.body);
+			}
 			return;
 		}
 		auto g = std::get<gateway>(response.value);
 		log(ll_debug, "Cluster: " + std::to_string(g.session_start_remaining) + " of " + std::to_string(g.session_start_total) + " session starts remaining");
 		if (g.session_start_remaining < g.shards || g.shards == 0) {
-			throw dpp::connection_exception(err_no_sessions_left, "Discord indicates you cannot start enough sessions to boot this cluster! Cluster startup aborted. Try again later.");
+			throw_if_not_threaded(err_no_sessions_left, "Discord indicates you cannot start enough sessions to boot this cluster! Cluster startup aborted. Try again later.");
+			return;
 		} else if (g. session_start_max_concurrency == 0) {
-			throw dpp::connection_exception(err_auto_shard, "Cluster: Could not determine concurrency, startup aborted!");
+			throw_if_not_threaded(err_auto_shard, "Cluster: Could not determine concurrency, startup aborted!");
+			return;
 		} else if (g.session_start_max_concurrency > 1) {
 			log(ll_debug, "Cluster: Large bot sharding; Using session concurrency: " + std::to_string(g.session_start_max_concurrency));
 		} else if (numshards == 0) {
 			if (g.shards) {
 				log(ll_info, "Auto Shard: Bot requires " + std::to_string(g.shards) + std::string(" shard") + ((g.shards > 1) ? "s" : ""));
 			} else {
-				throw dpp::connection_exception(err_auto_shard, "Auto Shard: Cannot determine number of shards. Cluster startup aborted. Check your connection.");
+				throw_if_not_threaded(err_auto_shard, "Auto Shard: Cannot determine number of shards. Cluster startup aborted. Check your connection.");
+				return;
 			}
 			numshards = g.shards;
 		}
@@ -257,7 +271,8 @@ void cluster::start(start_type return_after) {
 					this->shards[s]->run();
 				}
 				catch (const std::exception &e) {
-					log(dpp::ll_critical, "Could not start shard " + std::to_string(s) + ": " + std::string(e.what()));
+					throw_if_not_threaded(err_cant_start_shard, "Could not start shard " + std::to_string(s) + ": " + std::string(e.what()));
+					return;
 				}
 				/* Stagger the shard startups, pausing every 'session_start_max_concurrency' shards for 5 seconds.
 				 * This means that for bots that don't have large bot sharding, any number % 1 is always 0,
@@ -287,6 +302,10 @@ void cluster::start(start_type return_after) {
 
 		/* Get all active DM channels and map them to user id -> dm id */
 		current_user_get_dms([this](const dpp::confirmation_callback_t& completion) {
+			if (completion.is_error()) {
+				log(dpp::ll_debug, "Failed to get bot DM list");
+				return;
+			}
 			dpp::channel_map dmchannels = std::get<channel_map>(completion.value);
 			for (auto & c : dmchannels) {
 				for (auto & u : c.second.recipients) {
@@ -298,7 +317,7 @@ void cluster::start(start_type return_after) {
 		log(ll_debug, "Shards started.");
 	});
 
-	if (return_after) {
+	if (return_after == st_return) {
 		engine_thread = std::thread([event_loop]() {
 			dpp::utility::set_thread_name("event_loop");
 			event_loop();
