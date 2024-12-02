@@ -33,11 +33,11 @@ namespace dpp {
 
 void discord_voice_client::cleanup()
 {
-	if (encoder) {
+	if (encoder != nullptr) {
 		opus_encoder_destroy(encoder);
 		encoder = nullptr;
 	}
-	if (repacketizer) {
+	if (repacketizer != nullptr) {
 		opus_repacketizer_destroy(repacketizer);
 		repacketizer = nullptr;
 	}

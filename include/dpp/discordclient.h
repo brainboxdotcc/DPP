@@ -35,10 +35,9 @@
 #include <mutex>
 #include <shared_mutex>
 
-
-
 #define DISCORD_API_VERSION	"10"
 #define API_PATH	        "/api/v" DISCORD_API_VERSION
+
 namespace dpp {
 
 // Forward declarations

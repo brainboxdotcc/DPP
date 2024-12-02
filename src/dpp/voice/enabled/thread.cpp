@@ -50,10 +50,16 @@ void discord_voice_client::on_disconnect() {
 	}
 	last_loop_time = current_time;
 
-	log(dpp::ll_debug, "Attempting to reconnect the websocket...");
+	ssl_client::close();
 	owner->start_timer([this](auto handle) {
+		log(dpp::ll_debug, "Attempting to reconnect voice websocket " + std::to_string(channel_id) + " to wss://" + hostname + "...");
 		owner->stop_timer(handle);
 		cleanup();
+		if (timer_handle) {
+			owner->stop_timer(timer_handle);
+			timer_handle = 0;
+		}
+		start = time(nullptr);
 		setup();
 		terminating = false;
 		ssl_client::connect();

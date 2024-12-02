@@ -136,15 +136,6 @@ class DPP_EXPORT websocket_client : public ssl_client {
 	bool parseheader(std::string& buffer);
 
 	/**
-	 * @brief Unpack a frame and pass completed frames up the stack.
-	 * @param buffer The buffer to operate on. Gets modified to remove completed frames on the head of the buffer
-	 * @param offset The offset to start at (reserved for future use)
-	 * @param first True if is the first element (reserved for future use)
-	 * @return true if a complete frame has been received
-	 */
-	bool unpack(std::string& buffer, uint32_t offset, bool first = true);
-
-	/**
 	 * @brief Fill a header for outbound messages
 	 * @param outbuf The raw frame to fill
 	 * @param sendlength The size of the data to encapsulate
@@ -233,6 +224,7 @@ public:
 	/**
 	 * @brief Send OP_CLOSE error code 1000 to the other side of the connection.
 	 * This indicates graceful close.
+	 * @note This informs Discord to invalidate the session, you cannot resume if you send this
 	 */
 	void send_close_packet();
 
