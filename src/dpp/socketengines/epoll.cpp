@@ -146,7 +146,7 @@ struct DPP_EXPORT socket_engine_epoll : public socket_engine_base {
 				ev.events |= EPOLLERR;
 			}
 			{
-				std::unique_lock lock(fds_mutex);
+				std::shared_lock lock(fds_mutex);
 				ev.data.ptr = fds.find(e.fd)->second.get();
 			}
 			return epoll_ctl(epoll_handle, EPOLL_CTL_ADD, e.fd, &ev) >= 0;
@@ -169,7 +169,7 @@ struct DPP_EXPORT socket_engine_epoll : public socket_engine_base {
 				ev.events |= EPOLLERR;
 			}
 			{
-				std::unique_lock lock(fds_mutex);
+				std::shared_lock lock(fds_mutex);
 				ev.data.ptr = fds.find(e.fd)->second.get();
 			}
 			return epoll_ctl(epoll_handle, EPOLL_CTL_MOD, e.fd, &ev) >= 0;

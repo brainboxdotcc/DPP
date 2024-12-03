@@ -180,6 +180,11 @@ protected:
 	 */
 	void start_connecting();
 
+	/**
+	 * @brief Timer for reconnecting
+	 */
+	timer reconnect_timer{0};
+
 private:
 
 	/**

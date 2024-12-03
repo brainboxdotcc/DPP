@@ -114,6 +114,8 @@ void discord_client::cleanup()
 {
 	delete etf;
 	delete zlib;
+	etf = nullptr;
+	zlib = nullptr;
 }
 
 discord_client::~discord_client()
@@ -127,9 +129,15 @@ void discord_client::on_disconnect()
 	log(dpp::ll_debug, "Lost connection to websocket on shard " + std::to_string(shard_id) + ", reconnecting in 5 seconds...");
 	ssl_client::close();
 	end_zlib();
-	owner->start_timer([this](auto handle) {
+	/* Stop the timer first if its already ticking, to prevent concurrent reconnects */
+	if (reconnect_timer) {
+		owner->stop_timer(reconnect_timer);
+		reconnect_timer = 0;
+	}
+	reconnect_timer = owner->start_timer([this](auto handle) {
 		log(dpp::ll_debug, "Reconnecting shard " + std::to_string(shard_id) + " to wss://" + hostname + "...");
 		owner->stop_timer(handle);
+		reconnect_timer = 0;
 		cleanup();
 		if (timer_handle) {
 			owner->stop_timer(timer_handle);
