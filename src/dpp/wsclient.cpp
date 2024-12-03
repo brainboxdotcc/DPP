@@ -349,7 +349,9 @@ void websocket_client::on_disconnect()
 
 void websocket_client::close()
 {
-	this->on_disconnect();
+	if (sfd != INVALID_SOCKET) {
+		this->on_disconnect();
+	}
 	this->state = HTTP_HEADERS;
 	ssl_client::close();
 }

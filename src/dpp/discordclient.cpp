@@ -125,28 +125,36 @@ discord_client::~discord_client()
 
 void discord_client::on_disconnect()
 {
+	if (reconnect_timer != 0U) {
+		log(dpp::ll_debug, "Lost connection to websocket on shard " + std::to_string(shard_id) + ", reconnection already in progress...");
+		return;
+	}
 	set_resume_hostname();
 	log(dpp::ll_debug, "Lost connection to websocket on shard " + std::to_string(shard_id) + ", reconnecting in 5 seconds...");
 	ssl_client::close();
 	end_zlib();
 	/* Stop the timer first if its already ticking, to prevent concurrent reconnects */
-	if (reconnect_timer != 0U) {
-		owner->stop_timer(reconnect_timer);
-		reconnect_timer = 0;
-	}
 	reconnect_timer = owner->start_timer([this](auto handle) {
 		log(dpp::ll_debug, "Reconnecting shard " + std::to_string(shard_id) + " to wss://" + hostname + "...");
-		owner->stop_timer(handle);
-		reconnect_timer = 0;
-		cleanup();
-		if (timer_handle) {
-			owner->stop_timer(timer_handle);
-			timer_handle = 0;
+		try {
+			cleanup();
+			if (timer_handle) {
+				owner->stop_timer(timer_handle);
+				timer_handle = 0;
+			}
+			start = time(nullptr);
+			ssl_client::connect();
+			start_connecting();
+			run();
+			owner->stop_timer(handle);
+			reconnect_timer = 0;
 		}
-		start = time(nullptr);
-		ssl_client::connect();
-		start_connecting();
-		run();
+		catch (const std::exception &e) {
+			/* If we get here, the timer will tick again */
+			ssl_client::close();
+			end_zlib();
+			log(dpp::ll_debug, "Error reconnecting shard " + std::to_string(shard_id) + ": " + std::string(e.what()) + "; Retry in 5 seconds...");
+		}
 	}, 5);
 }
 
