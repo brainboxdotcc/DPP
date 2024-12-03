@@ -66,7 +66,6 @@ thread_local static std::string last_ping_message;
 discord_client::discord_client(dpp::cluster* _cluster, uint32_t _shard_id, uint32_t _max_shards, const std::string &_token, uint32_t _intents, bool comp, websocket_protocol_t ws_proto)
        : websocket_client(_cluster, _cluster->default_gateway, "443", comp ? (ws_proto == ws_json ? PATH_COMPRESSED_JSON : PATH_COMPRESSED_ETF) : (ws_proto == ws_json ? PATH_UNCOMPRESSED_JSON : PATH_UNCOMPRESSED_ETF)),
 	compressed(comp),
-	decomp_buffer(nullptr),
 	zlib(nullptr),
 	decompressed_total(0),
 	connect_time(0),
@@ -86,41 +85,23 @@ discord_client::discord_client(dpp::cluster* _cluster, uint32_t _shard_id, uint3
 	ready(false),
 	last_heartbeat_ack(time(nullptr)),
 	protocol(ws_proto),
-	resume_gateway_url(_cluster->default_gateway)	
+	resume_gateway_url(_cluster->default_gateway)
 {
+	etf = std::make_unique<etf_parser>(etf_parser());
 	start_connecting();
 }
 
 void discord_client::start_connecting() {
-	try {
-		zlib = new zlibcontext();
-		etf = new etf_parser();
-	}
-	catch (std::bad_alloc&) {
-		cleanup();
-		/* Clean up and rethrow to caller */
-		throw std::bad_alloc();
-	}
-	try {
-		this->connect();
-	}
-	catch (std::exception&) {
-		cleanup();
-		throw;
-	}
+	this->connect();
 }
 
 void discord_client::cleanup()
 {
-	delete etf;
-	delete zlib;
-	etf = nullptr;
-	zlib = nullptr;
 }
 
 discord_client::~discord_client()
 {
-	cleanup();
+	end_zlib();
 }
 
 void discord_client::on_disconnect()
@@ -137,7 +118,6 @@ void discord_client::on_disconnect()
 	reconnect_timer = owner->start_timer([this](auto handle) {
 		log(dpp::ll_debug, "Reconnecting shard " + std::to_string(shard_id) + " to wss://" + hostname + "...");
 		try {
-			cleanup();
 			if (timer_handle) {
 				owner->stop_timer(timer_handle);
 				timer_handle = 0;
@@ -165,7 +145,11 @@ uint64_t discord_client::get_decompressed_bytes_in()
 
 void discord_client::setup_zlib()
 {
+	std::lock_guard<std::mutex> lock(zlib_mutex);
 	if (compressed) {
+		if (zlib == nullptr) {
+			zlib = new zlibcontext();
+		}
 		zlib->d_stream.zalloc = (alloc_func)0;
 		zlib->d_stream.zfree = (free_func)0;
 		zlib->d_stream.opaque = (voidpf)0;
@@ -173,18 +157,19 @@ void discord_client::setup_zlib()
 		if (error != Z_OK) {
 			throw dpp::connection_exception((exception_error_code)error, "Can't initialise stream compression!");
 		}
-		this->decomp_buffer = new unsigned char[DECOMP_BUFFER_SIZE];
+		decomp_buffer.resize(DECOMP_BUFFER_SIZE);
 	}
 
 }
 
 void discord_client::end_zlib()
 {
-	if (compressed) {
+	std::lock_guard<std::mutex> lock(zlib_mutex);
+	if (compressed && zlib) {
 		inflateEnd(&(zlib->d_stream));
-		delete[] this->decomp_buffer;
-		this->decomp_buffer = nullptr;
 	}
+	delete zlib;
+	zlib = nullptr;
 }
 
 void discord_client::set_resume_hostname()
@@ -214,7 +199,7 @@ bool discord_client::handle_frame(const std::string &buffer, ws_opcode opcode)
 			zlib->d_stream.next_in = (Bytef *)buffer.c_str();
 			zlib->d_stream.avail_in = (uInt)buffer.size();
 			do {
-				zlib->d_stream.next_out = (Bytef*)decomp_buffer;
+				zlib->d_stream.next_out = (Bytef*)decomp_buffer.data();
 				zlib->d_stream.avail_out = DECOMP_BUFFER_SIZE;
 				int ret = inflate(&(zlib->d_stream), Z_NO_FLUSH);
 				int have = DECOMP_BUFFER_SIZE - zlib->d_stream.avail_out;
@@ -234,7 +219,7 @@ bool discord_client::handle_frame(const std::string &buffer, ws_opcode opcode)
 						this->close();
 					return true;
 					case Z_OK:
-						this->decompressed.append((const char*)decomp_buffer, have);
+						this->decompressed.append((const char*)decomp_buffer.data(), have);
 						this->decompressed_total += have;
 					break;
 					default:

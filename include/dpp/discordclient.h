@@ -31,7 +31,9 @@
 #include <dpp/event.h>
 #include <queue>
 #include <thread>
+#include <memory>
 #include <deque>
+#include <dpp/etf.h>
 #include <mutex>
 #include <shared_mutex>
 
@@ -271,6 +273,11 @@ private:
 	std::shared_mutex queue_mutex;
 
 	/**
+	 * @brief Mutex for zlib pointer
+	 */
+	std::mutex zlib_mutex;
+
+	/**
 	 * @brief Queue of outbound messages
 	 */
 	std::deque<std::string> message_queue;
@@ -283,7 +290,7 @@ private:
 	/**
 	 * @brief ZLib decompression buffer
 	 */
-	unsigned char* decomp_buffer;
+	std::vector<unsigned char*> decomp_buffer;
 
 	/**
 	 * @brief Decompressed string
@@ -316,7 +323,7 @@ private:
 	/**
 	 * @brief ETF parser for when in ws_etf mode
 	 */
-	class etf_parser* etf;
+	std::unique_ptr<etf_parser> etf;
 
 	/**
 	 * @brief Convert a JSON object to string.

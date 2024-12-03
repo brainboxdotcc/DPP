@@ -25,6 +25,7 @@
 #include <string>
 #include <functional>
 #include <ctime>
+#include <mutex>
 #include <dpp/socket.h>
 #include <cstdint>
 #include <dpp/timer.h>
@@ -89,6 +90,8 @@ private:
 	 * @brief Clean up resources
 	 */
 	void cleanup();
+
+	std::mutex ssl_mutex;
 
 	/**
 	 * @brief Start offset into internal ring buffer for client to server IO

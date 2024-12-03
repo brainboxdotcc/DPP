@@ -23,11 +23,13 @@
 #include <dpp/dpp.h>
 #include <iostream>
 #include <thread>
+#include <atomic>
 #ifndef _WIN32
 	#include <csignal>
 #endif
 
 dpp::cluster* s{nullptr};
+std::atomic_bool signalled{false};
 
 int main() {
 	using namespace std::chrono_literals;
@@ -42,19 +44,22 @@ int main() {
 		soak_test.start(dpp::st_return);
 
 #ifndef _WIN32
-		signal(SIGINT, [](int sig) {
-			dpp::discord_client* dc = s->get_shard(0);
-			if (dc != nullptr) {
-				dc->close();
-			}
+		signal(SIGUSR1, [](int sig) {
+			signalled = true;
 		});
 #endif
 
 		while (true) {
-			std::this_thread::sleep_for(60s);
+			std::this_thread::sleep_for(1s);
 			dpp::discord_client* dc = soak_test.get_shard(0);
 			if (dc != nullptr) {
-				std::cout << "Websocket latency: " << std::fixed << dc->websocket_ping << " Guilds: " << dpp::get_guild_count() << " Users: " << dpp::get_user_count() << "\n";
+				if (time(nullptr) % 60 == 0) {
+					std::cout << "Websocket latency: " << std::fixed << dc->websocket_ping << " Guilds: " << dpp::get_guild_count() << " Users: " << dpp::get_user_count() << "\n";
+				}
+				if (signalled) {
+					signalled = false;
+					dc->close();
+				}
 			}
 		}
 	}

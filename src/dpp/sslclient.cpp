@@ -402,6 +402,7 @@ void ssl_client::on_write(socket fd, const struct socket_events& e) {
 		}
 		if (!ssl->ssl) {
 			/* Create SSL session */
+			std::lock_guard<std::mutex> lock(ssl_mutex);
 			ssl->ssl = SSL_new(openssl_context.get());
 			if (ssl->ssl == nullptr) {
 				throw dpp::connection_exception(err_ssl_new, "SSL_new failed!");
@@ -539,6 +540,7 @@ bool ssl_client::handle_buffer(std::string &buffer)
 void ssl_client::close()
 {
 	if (!plaintext && ssl->ssl) {
+		std::lock_guard<std::mutex> lock(ssl_mutex);
 		SSL_free(ssl->ssl);
 		ssl->ssl = nullptr;
 	}
