@@ -28,17 +28,17 @@ timer lasthandle = 1;
 
 timer cluster::start_timer(timer_callback_t on_tick, uint64_t frequency, timer_callback_t on_stop) {
 	std::lock_guard<std::mutex> l(timer_guard);
-	timer_t* newtimer = new timer_t();
+	timer_t newtimer;
 
-	newtimer->handle = lasthandle++;
-	newtimer->next_tick = time(nullptr) + frequency;
-	newtimer->on_tick = on_tick;
-	newtimer->on_stop = on_stop;
-	newtimer->frequency = frequency;
-	timer_list[newtimer->handle] = newtimer;
-	next_timer.emplace(newtimer->next_tick, newtimer);
+	newtimer.handle = lasthandle++;
+	newtimer.next_tick = time(nullptr) + frequency;
+	newtimer.on_tick = on_tick;
+	newtimer.on_stop = on_stop;
+	newtimer.frequency = frequency;
+	timer_list[newtimer.handle] = newtimer;
+	next_timer.emplace(newtimer.next_tick, newtimer);
 
-	return newtimer->handle;
+	return newtimer.handle;
 }
 
 bool cluster::stop_timer(timer t) {
@@ -46,47 +46,51 @@ bool cluster::stop_timer(timer t) {
 
 	auto i = timer_list.find(t);
 	if (i != timer_list.end()) {
-		timer_t* tptr = i->second;
-		if (tptr->on_stop) {
+		timer_t timer_current = i->second;
+		if (timer_current.on_stop) {
 			/* If there is an on_stop event, call it */
-			tptr->on_stop(t);
+			timer_current.on_stop(t);
 		}
 		timer_list.erase(i);
-		for (auto this_timer = next_timer.begin(); this_timer != next_timer.end(); ++this_timer) {
-			if (this_timer->second == tptr) {
-				next_timer.erase(this_timer);
-				break;
+		bool again;
+		do {
+			again = false;
+			for (auto this_timer = next_timer.begin(); this_timer != next_timer.end(); ++this_timer) {
+				if (this_timer->second.handle == t) {
+					next_timer.erase(this_timer);
+					again = true;
+					break;
+				}
 			}
-		}
-		delete tptr;
+		} while(again);
 		return true;
 	}
 	return false;
 }
 
-void cluster::timer_reschedule(timer_t* t) {
+void cluster::timer_reschedule(timer_t t) {
 	std::lock_guard<std::mutex> l(timer_guard);
 	for (auto i = next_timer.begin(); i != next_timer.end(); ++i) {
 		/* Rescheduling the timer means finding it in the next tick map.
 		 * It should be pretty much near the start of the map so this loop
 		 * should only be at most a handful of iterations.
 		 */
-		if (i->second->handle == t->handle) {
+		if (i->second.handle == t.handle) {
 			next_timer.erase(i);
-			t->next_tick = time(nullptr) + t->frequency;
-			next_timer.emplace(t->next_tick, t);
+			t.next_tick = time(nullptr) + t.frequency;
+			next_timer.emplace(t.next_tick, t);
 			break;
 		}
 	}
 }
 
 void cluster::tick_timers() {
-	std::vector<timer_t*> scheduled;
+	std::vector<timer_t> scheduled;
 	{
 		time_t now = time(nullptr);
 		std::lock_guard<std::mutex> l(timer_guard);
 		for (auto & i : next_timer) {
-			if (now >= i.second->next_tick) {
+			if (now >= i.second.next_tick) {
 				scheduled.push_back(i.second);
 			} else {
 				/* The first time we encounter an entry which is not due,
@@ -98,9 +102,9 @@ void cluster::tick_timers() {
 		}
 	}
 	for (auto & t : scheduled) {
-		timer handle = t->handle;
+		timer handle = t.handle;
 		/* Call handler */
-		t->on_tick(t->handle);
+		t.on_tick(handle);
 		/* Reschedule if it wasn't deleted.
 		 * Note: We wrap the .contains() check in a lambda as it needs locking
 		 * for thread safety, but timer_rescheudle also locks the container, so this

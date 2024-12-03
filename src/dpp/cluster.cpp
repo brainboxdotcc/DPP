@@ -338,10 +338,6 @@ void cluster::shutdown() {
 
 	{
 		std::lock_guard<std::mutex> l(timer_guard);
-		/* Free memory for active timers */
-		for (auto &t: timer_list) {
-			delete t.second;
-		}
 		timer_list.clear();
 		next_timer.clear();
 	}

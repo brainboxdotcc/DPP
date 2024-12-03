@@ -172,7 +172,7 @@ class DPP_EXPORT cluster {
 	 * 
 	 * @param t Timer to reschedule
 	 */
-	void timer_reschedule(timer_t* t);
+	void timer_reschedule(timer_t t);
 
 	/**
 	 * @brief Thread pool

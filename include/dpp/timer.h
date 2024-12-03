@@ -22,10 +22,10 @@
 
 #pragma once
 #include <dpp/export.h>
-#include <stdint.h>
+#include <cstdint>
 #include <map>
 #include <unordered_map>
-#include <stddef.h>
+#include <cstddef>
 #include <ctime>
 #include <functional>
 
@@ -77,12 +77,12 @@ struct DPP_EXPORT timer_t {
  * @brief A map of timers, ordered by earliest first so that map::begin() is always the 
  * soonest to be due.
  */
-typedef std::multimap<time_t, timer_t*> timer_next_t;
+typedef std::multimap<time_t, timer_t> timer_next_t;
 
 /**
  * @brief A map of timers stored by handle
  */
-typedef std::unordered_map<timer, timer_t*> timer_reg_t;
+typedef std::unordered_map<timer, timer_t> timer_reg_t;
 
 /**
  * @brief Trigger a timed event once.
