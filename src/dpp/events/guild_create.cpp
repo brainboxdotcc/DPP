@@ -21,6 +21,7 @@
  ************************************************************************************/
 #include <dpp/discordevents.h>
 #include <dpp/cluster.h>
+#include <dpp/discordclient.h>
 #include <dpp/guild.h>
 #include <dpp/cache.h>
 #include <dpp/stringops.h>
@@ -136,7 +137,7 @@ void guild_create::handle(discord_client* client, json &j, const std::string &ra
 		dpp::get_guild_cache()->store(g);
 		if (is_new_guild && g->id && (client->intents & dpp::i_guild_members)) {
 			if (client->creator->cache_policy.user_policy == cp_aggressive) {
-				json chunk_req = json({{"op", 8}, {"d", {{"guild_id",std::to_string(g->id)},{"query",""},{"limit",0}}}});
+				json chunk_req = json({{"op", ft_request_guild_members}, {"d", {{"guild_id",std::to_string(g->id)},{"query",""},{"limit",0}}}});
 				if (client->intents & dpp::i_guild_presences) {
 					chunk_req["d"]["presences"] = true;
 				}

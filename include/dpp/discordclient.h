@@ -51,6 +51,84 @@ class cluster;
 class zlibcontext;
 
 /**
+ * @brief Represents different event opcodes sent and received on a shard websocket
+ */
+enum shard_frame_type : int {
+
+	/**
+	 * @brief An event was dispatched.
+	 * @note Receive only
+	 */
+	ft_dispatch = 0,
+
+	/**
+	 * @brief Fired periodically by the client to keep the connection alive.
+	 * @note Send/Receive
+	 */
+	ft_heartbeat = 1,
+
+	/**
+	 * @brief Starts a new session during the initial handshake.
+	 * @note Send only
+	 */
+	ft_identify = 2,
+
+	/**
+	 * @brief Update the client's presence.
+	 * @note Send only
+	 */
+	ft_presence = 3,
+
+	/**
+	 * @brief Used to join/leave or move between voice channels.
+	 * @note Send only
+	 */
+	ft_voice_state_update = 4,
+
+	/**
+	 * @brief Resume a previous session that was disconnected.
+	 * @note Send only
+	 */
+	ft_resume = 6,
+
+	/**
+	 * @brief You should attempt to reconnect and resume immediately.
+	 * @note Receive only
+	 */
+	ft_reconnect = 7,
+
+	/**
+	 * @brief Request information about offline guild members in a large guild.
+	 * @note Send only
+	 */
+	ft_request_guild_members = 8,
+
+	/**
+	 * @brief The session has been invalidated. You should reconnect and identify/resume accordingly.
+	 * @note Receive only
+	 */
+	ft_invalid_session = 9,
+
+	/**
+	 * @brief Sent immediately after connecting, contains the heartbeat interval to use.
+	 * @note Receive only
+	 */
+	ft_hello = 10,
+
+	/**
+	 * @brief Sent in response to receiving a heartbeat to acknowledge that it has been received.
+	 * @note Receive only
+	 */
+	ft_heartbeat_ack = 11,
+
+	/**
+	 * @brief Request information about soundboard sounds in a set of guilds.
+	 * @note Send only
+	 */
+	ft_request_soundboard_sounds = 31,
+};
+
+/**
  * @brief Represents a connection to a voice channel.
  * A client can only connect to one voice channel per guild at a time, so these are stored in a map
  * in the dpp::discord_client keyed by guild_id.
@@ -118,14 +196,14 @@ public:
 	 * 
 	 * @return true if ready to connect
 	 */
-	bool is_ready();
+	bool is_ready() const;
 	
 	/**
 	 * @brief return true if the connection is active (websocket exists)
 	 * 
 	 * @return true if has an active websocket
 	 */
-	bool is_active();
+	bool is_active() const;
 
 	/**
 	 * @brief Create websocket object and connect it.

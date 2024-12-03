@@ -34,16 +34,16 @@
 #define PATH_COMPRESSED_JSON	"/?v=" DISCORD_API_VERSION "&encoding=json&compress=zlib-stream"
 #define PATH_UNCOMPRESSED_ETF	"/?v=" DISCORD_API_VERSION "&encoding=etf"
 #define PATH_COMPRESSED_ETF	"/?v=" DISCORD_API_VERSION "&encoding=etf&compress=zlib-stream"
-#define DECOMP_BUFFER_SIZE	512 * 1024
-
 #define STRINGIFY(a) STRINGIFY_(a)
 #define STRINGIFY_(a) #a
 
 #ifndef DPP_OS
-#define DPP_OS unknown
+	#define DPP_OS unknown
 #endif
 
 namespace dpp {
+
+constexpr size_t DECOMP_BUFFER_SIZE = 512 * 1024;
 
 /**
  * @brief This is an opaque class containing zlib library specific structures.
@@ -130,7 +130,7 @@ void discord_client::on_disconnect()
 	ssl_client::close();
 	end_zlib();
 	/* Stop the timer first if its already ticking, to prevent concurrent reconnects */
-	if (reconnect_timer) {
+	if (reconnect_timer != 0U) {
 		owner->stop_timer(reconnect_timer);
 		reconnect_timer = 0;
 	}
@@ -206,29 +206,25 @@ bool discord_client::handle_frame(const std::string &buffer, ws_opcode opcode)
 			zlib->d_stream.next_in = (Bytef *)buffer.c_str();
 			zlib->d_stream.avail_in = (uInt)buffer.size();
 			do {
-				int have = 0;
 				zlib->d_stream.next_out = (Bytef*)decomp_buffer;
 				zlib->d_stream.avail_out = DECOMP_BUFFER_SIZE;
 				int ret = inflate(&(zlib->d_stream), Z_NO_FLUSH);
-				have = DECOMP_BUFFER_SIZE - zlib->d_stream.avail_out;
+				int have = DECOMP_BUFFER_SIZE - zlib->d_stream.avail_out;
 				switch (ret)
 				{
 					case Z_NEED_DICT:
 					case Z_STREAM_ERROR:
 						this->error(err_compression_stream);
 						this->close();
-						return true;
-					break;
+					return true;
 					case Z_DATA_ERROR:
 						this->error(err_compression_data);
 						this->close();
-						return true;
-					break;
+					return true;
 					case Z_MEM_ERROR:
 						this->error(err_compression_memory);
 						this->close();
-						return true;
-					break;
+					return true;
 					case Z_OK:
 						this->decompressed.append((const char*)decomp_buffer, have);
 						this->decompressed_total += have;
@@ -288,7 +284,7 @@ bool discord_client::handle_frame(const std::string &buffer, ws_opcode opcode)
 		uint32_t op = o->get<uint32_t>();
 
 		switch (op) {
-			case 9:
+			case ft_invalid_session:
 				/* Reset session state and fall through to 10 */
 				op = 10;
 				log(dpp::ll_debug, "Failed to resume session " + sessionid + ", will reidentify");
@@ -296,7 +292,7 @@ bool discord_client::handle_frame(const std::string &buffer, ws_opcode opcode)
 				this->last_seq = 0;
 				/* No break here, falls through to state 10 to cause a reidentify */
 				[[fallthrough]];
-			case 10:
+			case ft_hello:
 				/* Need to check carefully for the existence of this before we try to access it! */
 				if (j.find("d") != j.end() && j["d"].find("heartbeat_interval") != j["d"].end() && !j["d"]["heartbeat_interval"].is_null()) {
 					this->heartbeat_interval = j["d"]["heartbeat_interval"].get<uint32_t>();
@@ -306,7 +302,7 @@ bool discord_client::handle_frame(const std::string &buffer, ws_opcode opcode)
 					/* Resume */
 					log(dpp::ll_debug, "Resuming session " + sessionid + " with seq=" + std::to_string(last_seq));
 					json obj = {
-						{ "op", 6 },
+						{ "op", ft_resume },
 						{ "d", {
 								{"token", this->token },
 								{"session_id", this->sessionid },
@@ -321,9 +317,8 @@ bool discord_client::handle_frame(const std::string &buffer, ws_opcode opcode)
 					auto connect_now = [this]() {
 						log(dpp::ll_debug, "Connecting new session...");
 						json obj = {
-							{ "op", 2 },
-							{
-							  "d",
+							{ "op", ft_identify },
+							{ "d",
 								{
 									{ "token", this->token },
 									{ "properties",
@@ -356,18 +351,18 @@ bool discord_client::handle_frame(const std::string &buffer, ws_opcode opcode)
 				this->last_heartbeat_ack = time(nullptr);
 				websocket_ping = 0;
 			break;
-			case 0: {
+			case ft_dispatch: {
 				std::string event = j["t"];
 				handle_event(event, j, data);
 			}
 			break;
-			case 7:
+			case ft_reconnect:
 				log(dpp::ll_debug, "Reconnection requested, closing socket " + sessionid);
 				message_queue.clear();
 				this->close();
 			break;
 			/* Heartbeat ack */
-			case 11:
+			case ft_heartbeat_ack:
 				this->last_heartbeat_ack = time(nullptr);
 				websocket_ping = utility::time_f() - ping_start;
 			break;
@@ -514,7 +509,7 @@ void discord_client::one_second_timer()
 		if (this->heartbeat_interval && this->last_seq) {
 			/* Check if we're due to emit a heartbeat */
 			if (time(nullptr) > last_heartbeat + ((heartbeat_interval / 1000.0) * 0.75)) {
-				last_ping_message = jsonobj_to_string(json({{"op", 1}, {"d", last_seq}}));
+				last_ping_message = jsonobj_to_string(json({{"op", ft_heartbeat}, {"d", last_seq}}));
 				queue_message(last_ping_message, true);
 				last_heartbeat = time(nullptr);
 			}
@@ -588,7 +583,7 @@ discord_client& discord_client::connect_voice(snowflake guild_id, snowflake chan
 	*/
 	log(ll_debug, "Sending op 4 to join VC, guild " + std::to_string(guild_id) + " channel " + std::to_string(channel_id) + (enable_dave ? " WITH DAVE" : ""));
 	queue_message(jsonobj_to_string(json({
-		{ "op", 4 },
+		{ "op", ft_voice_state_update },
 		{ "d", {
 				{ "guild_id", std::to_string(guild_id) },
 				{ "channel_id", std::to_string(channel_id) },
@@ -617,7 +612,7 @@ void discord_client::disconnect_voice_internal(snowflake guild_id, bool emit_jso
 		log(ll_debug, "Disconnecting voice, guild: " + std::to_string(guild_id));
 		if (emit_json) {
 			queue_message(jsonobj_to_string(json({
-				{ "op", 4 },
+				{ "op", ft_voice_state_update },
 				{ "d", {
 						{ "guild_id", std::to_string(guild_id) },
 						{ "channel_id", json::value_t::null },
@@ -652,11 +647,11 @@ voiceconn* discord_client::get_voice(snowflake guild_id) {
 voiceconn::voiceconn(discord_client* o, snowflake _channel_id, bool enable_dave) : creator(o), channel_id(_channel_id), voiceclient(nullptr), dave(enable_dave) {
 }
 
-bool voiceconn::is_ready() {
+bool voiceconn::is_ready() const {
 	return (!websocket_hostname.empty() && !session_id.empty() && !token.empty());
 }
 
-bool voiceconn::is_active() {
+bool voiceconn::is_active() const {
 	return voiceclient != nullptr;
 }
 
