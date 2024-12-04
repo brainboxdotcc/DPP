@@ -37,12 +37,19 @@
 #include <mutex>
 #include <shared_mutex>
 
+/**
+ * @brief Discord API version for shard websockets and HTTPS API requests
+ */
 #define DISCORD_API_VERSION	"10"
+
+/**
+ * @brief HTTPS Request base path for API calls
+ */
 #define API_PATH	        "/api/v" DISCORD_API_VERSION
 
 namespace dpp {
 
-// Forward declarations
+/* Forward declarations */
 class cluster;
 
 /**
@@ -53,7 +60,14 @@ class cluster;
 class zlibcontext;
 
 /**
+ * @brief Size of decompression buffer for zlib compressed traffic
+ */
+constexpr size_t DECOMP_BUFFER_SIZE = 512 * 1024;
+
+/**
  * @brief Represents different event opcodes sent and received on a shard websocket
+ *
+ * These are used internally to route frames.
  */
 enum shard_frame_type : int {
 
@@ -261,9 +275,18 @@ protected:
 	void start_connecting();
 
 	/**
-	 * @brief Timer for reconnecting
+	 * @brief Timer for use when reconnecting.
+	 *
+	 * The client will wait 5 seconds before retrying a connection, to comply
+	 * with Discord rate limiting for websocket connections.
 	 */
 	timer reconnect_timer{0};
+
+	/**
+	 * @brief Stores the most recent ping message on this shard, which we check
+	 * for to monitor latency
+	 */
+	std::string last_ping_message;
 
 private:
 
@@ -289,6 +312,10 @@ private:
 
 	/**
 	 * @brief ZLib decompression buffer
+	 *
+	 * If compression is not in use, this remains set to
+	 * a vector of length zero, but when compression is
+	 * enabled it will be resized to a DECOMP_BUFFER_SIZE buffer.
 	 */
 	std::vector<unsigned char*> decomp_buffer;
 

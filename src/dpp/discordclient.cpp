@@ -43,8 +43,6 @@
 
 namespace dpp {
 
-constexpr size_t DECOMP_BUFFER_SIZE = 512 * 1024;
-
 /**
  * @brief This is an opaque class containing zlib library specific structures.
  * We define it this way so that the public facing D++ library doesn't require
@@ -57,11 +55,6 @@ public:
 	 */
 	z_stream d_stream;
 };
-
-/**
- * @brief Stores the most recent ping message on this shard, which we check for to monitor latency
- */
-thread_local static std::string last_ping_message;
 
 discord_client::discord_client(dpp::cluster* _cluster, uint32_t _shard_id, uint32_t _max_shards, const std::string &_token, uint32_t _intents, bool comp, websocket_protocol_t ws_proto)
        : websocket_client(_cluster, _cluster->default_gateway, "443", comp ? (ws_proto == ws_json ? PATH_COMPRESSED_JSON : PATH_COMPRESSED_ETF) : (ws_proto == ws_json ? PATH_UNCOMPRESSED_JSON : PATH_UNCOMPRESSED_ETF)),
@@ -189,7 +182,7 @@ void discord_client::run()
 
 bool discord_client::handle_frame(const std::string &buffer, ws_opcode opcode)
 {
-	std::string& data = (std::string&)buffer;
+	auto& data = (std::string&)buffer;
 
 	/* gzip compression is a special case */
 	if (compressed) {
@@ -198,13 +191,13 @@ bool discord_client::handle_frame(const std::string &buffer, ws_opcode opcode)
 		&& (uint8_t)buffer[buffer.size() - 1] == 0xFF) {
 			/* Decompress buffer */
 			decompressed.clear();
-			zlib->d_stream.next_in = (Bytef *)buffer.c_str();
-			zlib->d_stream.avail_in = (uInt)buffer.size();
+			zlib->d_stream.next_in = (Bytef*)buffer.data();
+			zlib->d_stream.avail_in = static_cast<uInt>(buffer.size());
 			do {
-				zlib->d_stream.next_out = (Bytef*)decomp_buffer.data();
+				zlib->d_stream.next_out = reinterpret_cast<Bytef*>(decomp_buffer.data());
 				zlib->d_stream.avail_out = DECOMP_BUFFER_SIZE;
 				int ret = inflate(&(zlib->d_stream), Z_NO_FLUSH);
-				int have = DECOMP_BUFFER_SIZE - zlib->d_stream.avail_out;
+				size_t have = DECOMP_BUFFER_SIZE - zlib->d_stream.avail_out;
 				switch (ret)
 				{
 					case Z_NEED_DICT:
@@ -486,9 +479,8 @@ void discord_client::one_second_timer()
 			if (message_queue.size()) {
 				std::string message = message_queue.front();
 				message_queue.pop_front();
-				/* Checking here with .find() saves us having to deserialise the json
-				 * to find pings in our queue. The assumption is that the format of the
-				 * ping isn't going to change.
+				/* Checking here by string comparison saves us having to deserialise the json
+				 * to find pings in our queue.
 				 */
 				if (!last_ping_message.empty() && message == last_ping_message) {
 					ping_start = utility::time_f();

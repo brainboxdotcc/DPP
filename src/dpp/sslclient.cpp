@@ -296,6 +296,10 @@ void ssl_client::complete_handshake(const socket_events* ev)
 
 void ssl_client::on_read(socket fd, const struct socket_events& ev) {
 
+	if (sfd == INVALID_SOCKET) {
+		return;
+	}
+
 	if (plaintext && connected) {
 		int r = (int) ::recv(sfd, server_to_client_buffer, DPP_BUFSIZE, 0);
 		if (r <= 0) {
@@ -373,6 +377,11 @@ void ssl_client::on_read(socket fd, const struct socket_events& ev) {
 }
 
 void ssl_client::on_write(socket fd, const struct socket_events& e) {
+
+	if (sfd == INVALID_SOCKET) {
+		return;
+	}
+
 	if (!tcp_connect_done) {
 		tcp_connect_done = true;
 	}
@@ -400,7 +409,7 @@ void ssl_client::on_write(socket fd, const struct socket_events& e) {
 				throw dpp::connection_exception(err_ssl_version, "Failed to set minimum SSL version!");
 			}
 		}
-		if (!ssl->ssl) {
+		if (ssl != nullptr && ssl->ssl == nullptr) {
 			/* Create SSL session */
 			std::lock_guard<std::mutex> lock(ssl_mutex);
 			ssl->ssl = SSL_new(openssl_context.get());

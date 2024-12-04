@@ -21,29 +21,30 @@
 #include <dpp/timer.h>
 #include <dpp/cluster.h>
 #include <dpp/json.h>
+#include <atomic>
 
 namespace dpp {
 
-timer lasthandle = 1;
+std::atomic<timer> next_handle = 1;
 
 timer cluster::start_timer(timer_callback_t on_tick, uint64_t frequency, timer_callback_t on_stop) {
+	timer_t new_timer;
+
+	new_timer.handle = next_handle++;
+	new_timer.next_tick = time(nullptr) + frequency;
+	new_timer.on_tick = on_tick;
+	new_timer.on_stop = on_stop;
+	new_timer.frequency = frequency;
+
 	std::lock_guard<std::mutex> l(timer_guard);
-	timer_t newtimer;
+	next_timer.emplace(new_timer);
 
-	newtimer.handle = lasthandle++;
-	newtimer.next_tick = time(nullptr) + frequency;
-	newtimer.on_tick = on_tick;
-	newtimer.on_stop = on_stop;
-	newtimer.frequency = frequency;
-
-	next_timer.emplace(newtimer);
-
-	return newtimer.handle;
+	return new_timer.handle;
 }
 
 bool cluster::stop_timer(timer t) {
 	/*
-	 * Because iterating a priority queue is O(log n) we don't actually walk the queue
+	 * Because iterating a priority queue is at best O(log n) we don't actually walk the queue
 	 * looking for the timer to remove. Instead, we just insert the timer handle into a std::set
 	 * to inform the tick_timers() function later if it sees a handle in this set, it is to
 	 * have its on_stop() called and it is not to be rescheduled.
@@ -53,13 +54,9 @@ bool cluster::stop_timer(timer t) {
 	return true;
 }
 
-void cluster::timer_reschedule(timer_t& t) {
-
-}
-
 void cluster::tick_timers() {
 	time_t now = time(nullptr);
-	time_t time_frame{};
+
 	if (next_timer.empty()) {
 		return;
 	}

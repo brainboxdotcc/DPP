@@ -166,14 +166,6 @@ class DPP_EXPORT cluster {
 	 */
 	std::map<std::string,slashcommand_handler_t> named_commands;
 #endif
-
-	/**
-	 * @brief Reschedule a timer for its next tick
-	 * 
-	 * @param t Timer to reschedule
-	 */
-	void timer_reschedule(timer_t& t);
-
 	/**
 	 * @brief Thread pool
 	 */
