@@ -239,7 +239,7 @@ http_request_completion_t http_request::run(request_concurrency_queue* processor
 				if (client->timed_out) {
 					result.error = h_connection;
 					owner->log(ll_error, "HTTP(S) error on " + hci.scheme + " connection to " + request_verb[method] + " "  + hci.hostname + ":" + std::to_string(hci.port) + _url + ": Timed out while waiting for the response");
-				} else if (cli->get_status() < 100) {
+				} else if (client->get_status() < 100) {
 					result.error = h_connection;
 					owner->log(ll_error, "HTTP(S) error on " + hci.scheme + " connection to " + request_verb[method] + " "  + hci.hostname + ":" + std::to_string(hci.port) + _url + ": Malformed HTTP response");
 				}
@@ -403,7 +403,8 @@ void request_concurrency_queue::tick_and_deliver_requests(uint32_t index)
 				for (auto it = begin; it != end; ++it) {
 					if (it->get() == request_view) {
 						/* Grab and remove */
-						removals.emplace_back(std::move(*it));
+						rq = std::move(*it);
+						removals.push_back(std::move(rq));
 						requests_in.erase(it);
 						break;
 					}

@@ -349,7 +349,7 @@ void https_client::close() {
 
 https_client::~https_client() {
 	if (sfd != INVALID_SOCKET) {
-		https_client::close();
+		ssl_client::close();
 	}
 }
 

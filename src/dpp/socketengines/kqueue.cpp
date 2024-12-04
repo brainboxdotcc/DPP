@@ -148,7 +148,7 @@ protected:
 	bool remove_socket(dpp::socket fd) final {
 		bool r = socket_engine_base::remove_socket(fd);
 		if (r) {
-			struct kevent ke;
+			struct kevent ke{};
 			EV_SET(&ke, fd, EVFILT_WRITE, EV_DELETE, 0, 0, nullptr);
 			kevent(kqueue_handle, &ke, 1, nullptr, 0, nullptr);
 			EV_SET(&ke, fd, EVFILT_READ, EV_DELETE, 0, 0, nullptr);
