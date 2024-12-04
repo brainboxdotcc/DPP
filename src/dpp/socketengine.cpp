@@ -32,7 +32,12 @@ namespace dpp {
 
 bool socket_engine_base::register_socket(const socket_events &e) {
 	std::unique_lock lock(fds_mutex);
-	if (e.fd != INVALID_SOCKET && fds.find(e.fd) == fds.end()) {
+	auto i = fds.find(e.fd);
+	if (e.fd != INVALID_SOCKET && i == fds.end()) {
+		fds.emplace(e.fd, std::make_unique<socket_events>(e));
+		return true;
+	} else if (e.fd != INVALID_SOCKET && i != fds.end()) {
+		this->remove_socket(e.fd);
 		fds.emplace(e.fd, std::make_unique<socket_events>(e));
 		return true;
 	}

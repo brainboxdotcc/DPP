@@ -42,7 +42,7 @@ struct DPP_EXPORT thread_pool_task {
 
 struct DPP_EXPORT thread_pool_task_comparator {
 	bool operator()(const thread_pool_task &a, const thread_pool_task &b) const {
-		return a.priority < b.priority;
+		return a.priority > b.priority;
 	};
 };
 

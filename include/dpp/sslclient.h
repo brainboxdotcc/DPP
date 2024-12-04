@@ -66,14 +66,24 @@ DPP_EXPORT bool close_socket(dpp::socket sfd);
  */
 DPP_EXPORT bool set_nonblocking(dpp::socket sockfd, bool non_blocking);
 
-/* You'd think that we would get better performance with a bigger buffer, but SSL frames are 16k each.
+/**
+ * @brief SSL_read buffer size
+ *
+ * You'd think that we would get better performance with a bigger buffer, but SSL frames are 16k each.
  * SSL_read in non-blocking mode will only read 16k at a time. There's no point in a bigger buffer as
  * it'd go unused.
  */
 constexpr uint16_t DPP_BUFSIZE{16 * 1024};
 
-/* Represents a failed socket system call, e.g. connect() failure */
+/**
+ * @brief Represents a failed socket system call, e.g. connect() failure
+ */
 constexpr int ERROR_STATUS{-1};
+
+/**
+ * @brief Maximum number of internal connect() retries on TCP connections
+ */
+constexpr int MAX_RETRIES{4};
 
 
 /**
@@ -91,6 +101,9 @@ private:
 	 */
 	void cleanup();
 
+	/**
+	 * @brief Mutex for creation of internal SSL pointers by openssl
+	 */
 	std::mutex ssl_mutex;
 
 	/**

@@ -338,8 +338,7 @@ void cluster::shutdown() {
 
 	{
 		std::lock_guard<std::mutex> l(timer_guard);
-		timer_list.clear();
-		next_timer.clear();
+		next_timer = {};
 	}
 
 	/* Terminate shards */

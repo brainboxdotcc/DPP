@@ -503,7 +503,7 @@ void ssl_client::read_loop()
 	if (!timer_handle) {
 		timer_handle = owner->start_timer([this, setup_events](auto handle) {
 			one_second_timer();
-			if (!tcp_connect_done && time(nullptr) > start + 2 && connect_retries < 3) {
+			if (!tcp_connect_done && time(nullptr) > start + 2 && connect_retries < MAX_RETRIES) {
 				/* Retry failed connect(). This can happen even in the best situation with bullet-proof hosting.
 				 * Previously with blocking connect() there was some leniency in this, but now we have to do this
 				 * ourselves.

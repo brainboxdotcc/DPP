@@ -35,89 +35,71 @@ timer cluster::start_timer(timer_callback_t on_tick, uint64_t frequency, timer_c
 	newtimer.on_tick = on_tick;
 	newtimer.on_stop = on_stop;
 	newtimer.frequency = frequency;
-	timer_list[newtimer.handle] = newtimer;
-	next_timer.emplace(newtimer.next_tick, newtimer);
+
+	next_timer.emplace(newtimer);
 
 	return newtimer.handle;
 }
 
 bool cluster::stop_timer(timer t) {
+	/*
+	 * Because iterating a priority queue is O(log n) we don't actually walk the queue
+	 * looking for the timer to remove. Instead, we just insert the timer handle into a std::set
+	 * to inform the tick_timers() function later if it sees a handle in this set, it is to
+	 * have its on_stop() called and it is not to be rescheduled.
+	 */
 	std::lock_guard<std::mutex> l(timer_guard);
-
-	auto i = timer_list.find(t);
-	if (i != timer_list.end()) {
-		timer_t timer_current = i->second;
-		if (timer_current.on_stop) {
-			/* If there is an on_stop event, call it */
-			timer_current.on_stop(t);
-		}
-		timer_list.erase(i);
-		bool again;
-		do {
-			again = false;
-			for (auto this_timer = next_timer.begin(); this_timer != next_timer.end(); ++this_timer) {
-				if (this_timer->second.handle == t) {
-					next_timer.erase(this_timer);
-					again = true;
-					break;
-				}
-			}
-		} while(again);
-		return true;
-	}
-	return false;
+	deleted_timers.emplace(t);
+	return true;
 }
 
-void cluster::timer_reschedule(timer_t t) {
-	std::lock_guard<std::mutex> l(timer_guard);
-	for (auto i = next_timer.begin(); i != next_timer.end(); ++i) {
-		/* Rescheduling the timer means finding it in the next tick map.
-		 * It should be pretty much near the start of the map so this loop
-		 * should only be at most a handful of iterations.
-		 */
-		if (i->second.handle == t.handle) {
-			next_timer.erase(i);
-			t.next_tick = time(nullptr) + t.frequency;
-			next_timer.emplace(t.next_tick, t);
-			break;
-		}
-	}
+void cluster::timer_reschedule(timer_t& t) {
+
 }
 
 void cluster::tick_timers() {
-	std::vector<timer_t> scheduled;
-	{
-		time_t now = time(nullptr);
-		std::lock_guard<std::mutex> l(timer_guard);
-		for (auto & i : next_timer) {
-			if (now >= i.second.next_tick) {
-				scheduled.push_back(i.second);
-			} else {
-				/* The first time we encounter an entry which is not due,
-				 * we can bail out, because std::map is ordered storage, so
-				 * we know at this point no more will match either.
-				 */
+	time_t now = time(nullptr);
+	time_t time_frame{};
+	if (next_timer.empty()) {
+		return;
+	}
+	do {
+		timer_t cur_timer;
+		{
+			std::lock_guard<std::mutex> l(timer_guard);
+			cur_timer = next_timer.top();
+			if (cur_timer.next_tick > now) {
+				/* Nothing to do */
 				break;
 			}
+			next_timer.pop();
 		}
-	}
-	for (auto & t : scheduled) {
-		timer handle = t.handle;
-		/* Call handler */
-		t.on_tick(handle);
-		/* Reschedule if it wasn't deleted.
-		 * Note: We wrap the .contains() check in a lambda as it needs locking
-		 * for thread safety, but timer_rescheudle also locks the container, so this
-		 * is the cleanest way to do it.
-		 */
-		bool not_deleted = ([handle, this]() -> bool {
-			std::lock_guard<std::mutex> l(timer_guard);
-			return timer_list.find(handle) != timer_list.end();
-		}());
-		if (not_deleted) {
-			timer_reschedule(t);
+		timers_deleted_t::iterator deleted_iter{};
+		bool deleted{};
+		{
+			deleted_iter = deleted_timers.find(cur_timer.handle);
+			deleted = deleted_iter != deleted_timers.end();
 		}
-	}
+
+		if (!deleted) {
+			cur_timer.on_tick(cur_timer.handle);
+			cur_timer.next_tick += cur_timer.frequency;
+			{
+				std::lock_guard<std::mutex> l(timer_guard);
+				next_timer.emplace(cur_timer);
+			}
+		} else {
+			/* Deleted timers are not reinserted into the priority queue and their on_stop is called */
+			if (cur_timer.on_stop) {
+				cur_timer.on_stop(cur_timer.handle);
+			}
+			{
+				std::lock_guard<std::mutex> l(timer_guard);
+				deleted_timers.erase(deleted_iter);
+			}
+		}
+
+	} while (true);
 }
 
 #ifdef DPP_CORO

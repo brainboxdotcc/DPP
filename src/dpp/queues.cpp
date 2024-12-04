@@ -258,6 +258,11 @@ http_request_completion_t http_request::run(request_concurrency_queue* processor
 
 				/* Transfer it to completed requests */
 				owner->queue_work(0, [this, result]() {
+					/* Manually release this unique_ptr now, to keep memory consumption and file descriptor consumption low.
+					 * Note we do this BEFORE we call complete(), becasue if user code throws an exception we need to be sure
+					 * we freed this first to avoid dangling pointer leaks.
+					 */
+					this->cli.reset();
 					complete(result);
 				});
 			}

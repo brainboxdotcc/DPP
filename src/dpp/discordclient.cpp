@@ -113,6 +113,8 @@ void discord_client::on_disconnect()
 	set_resume_hostname();
 	log(dpp::ll_debug, "Lost connection to websocket on shard " + std::to_string(shard_id) + ", reconnecting in 5 seconds...");
 	ssl_client::close();
+	/* Prevent low level connect retries here, as we are handling it ourselves */
+	connect_retries = MAX_RETRIES + 1;
 	end_zlib();
 	/* Stop the timer first if its already ticking, to prevent concurrent reconnects */
 	reconnect_timer = owner->start_timer([this](auto handle) {

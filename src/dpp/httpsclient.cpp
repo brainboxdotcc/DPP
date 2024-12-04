@@ -342,9 +342,9 @@ void https_client::close() {
 			completed(this);
 			completed = {};
 		}
-		state = HTTPS_DONE;
-		ssl_client::close();
 	}
+	state = HTTPS_DONE;
+	ssl_client::close();
 }
 
 https_client::~https_client() {

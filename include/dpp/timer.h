@@ -27,6 +27,8 @@
 #include <unordered_map>
 #include <cstddef>
 #include <ctime>
+#include <set>
+#include <queue>
 #include <functional>
 
 namespace dpp {
@@ -50,39 +52,46 @@ struct DPP_EXPORT timer_t {
 	/**
 	 * @brief Timer handle
 	 */
-	timer handle;
+	timer handle{0};
 
 	/**
 	 * @brief Next timer tick as unix epoch
 	 */
-	time_t next_tick;
+	time_t next_tick{0};
 
 	/**
 	 * @brief Frequency between ticks
 	 */
-	uint64_t frequency;
+	uint64_t frequency{0};
 
 	/**
 	 * @brief Lambda to call on tick
 	 */
-	timer_callback_t on_tick;
+	timer_callback_t on_tick{};
 
 	/**
 	 * @brief Lambda to call on stop (optional)
 	 */
-	timer_callback_t on_stop;
+	timer_callback_t on_stop{};
 };
 
-/**
- * @brief A map of timers, ordered by earliest first so that map::begin() is always the 
- * soonest to be due.
- */
-typedef std::multimap<time_t, timer_t> timer_next_t;
+struct DPP_EXPORT timer_comparator {
+	bool operator()(const timer_t &a, const timer_t &b) const {
+		return a.next_tick > b.next_tick;
+	};
+};
+
 
 /**
- * @brief A map of timers stored by handle
+ * @brief A priority timers, ordered by earliest first so that the head is always the
+ * soonest to be due.
  */
-typedef std::unordered_map<timer, timer_t> timer_reg_t;
+typedef std::priority_queue<timer_t, std::vector<timer_t>, timer_comparator> timer_next_t;
+
+/**
+ * @brief A set of deleted timer handles
+ */
+typedef std::set<timer> timers_deleted_t;
 
 /**
  * @brief Trigger a timed event once.

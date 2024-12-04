@@ -126,12 +126,12 @@ class DPP_EXPORT cluster {
 	shard_list shards;
 
 	/**
-	 * @brief List of all active registered timers
+	 * @brief Ephemeral list of deleted timer ids
 	 */
-	timer_reg_t timer_list;
+	timers_deleted_t deleted_timers;
 
 	/**
-	 * @brief List of timers by time
+	 * @brief Priority queue of of timers by time
 	 */
 	timer_next_t next_timer;
 
@@ -172,7 +172,7 @@ class DPP_EXPORT cluster {
 	 * 
 	 * @param t Timer to reschedule
 	 */
-	void timer_reschedule(timer_t t);
+	void timer_reschedule(timer_t& t);
 
 	/**
 	 * @brief Thread pool
