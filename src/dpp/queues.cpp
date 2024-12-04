@@ -107,11 +107,10 @@ http_request::http_request(const std::string &_url, http_completion_event comple
 {
 }
 
-http_request::~http_request() = default;
+http_request::~http_request()  = default;
 
 void http_request::complete(const http_request_completion_t &c) {
-	/* Call completion handler only if the request has been completed */
-	if (is_completed() && complete_handler) {
+	if (complete_handler) {
 		complete_handler(c);
 	}
 }
@@ -152,6 +151,11 @@ void populate_result(const std::string &url, cluster* owner, http_request_comple
 bool http_request::is_completed()
 {
 	return completed;
+}
+
+https_client* http_request::get_client() const
+{
+	return cli.get();
 }
 
 /* Execute a HTTP request */
@@ -241,7 +245,6 @@ http_request_completion_t http_request::run(request_concurrency_queue* processor
 				}
 				populate_result(_url, owner, result, *client);
 				/* Set completion flag */
-				completed = true;
 
 				bucket_t newbucket;
 				newbucket.limit = result.ratelimit_limit;
@@ -257,13 +260,17 @@ http_request_completion_t http_request::run(request_concurrency_queue* processor
 				processor->buckets[this->endpoint] = newbucket;
 
 				/* Transfer it to completed requests */
-				owner->queue_work(0, [this, result]() {
-					/* Manually release this unique_ptr now, to keep memory consumption and file descriptor consumption low.
-					 * Note we do this BEFORE we call complete(), becasue if user code throws an exception we need to be sure
-					 * we freed this first to avoid dangling pointer leaks.
-					 */
-					this->cli.reset();
-					complete(result);
+				owner->queue_work(0, [owner, this, result, hci, _url]() {
+					try {
+						complete(result);
+					}
+					catch (const std::exception& e) {
+						owner->log(ll_error, "Uncaught exception thrown in HTTPS callback for " + std::string(request_verb[method]) + " "  + hci.hostname + ":" + std::to_string(hci.port) + _url + ": " + std::string(e.what()));
+					}
+					catch (...) {
+						owner->log(ll_error, "Uncaught exception thrown in HTTPS callback for " + std::string(request_verb[method]) + " "  + hci.hostname + ":" + std::to_string(hci.port) + _url + ": <non exception value>");
+					}
+					completed = true;
 				});
 			}
 		);
@@ -296,6 +303,17 @@ request_concurrency_queue::request_concurrency_queue(class cluster* owner, class
 {
 	in_timer = creator->start_timer([this](auto timer_handle) {
 		tick_and_deliver_requests(in_index);
+		/* Clear pending removals in the removals queue */
+		if (time(nullptr) % 90 == 0) {
+			std::scoped_lock lock1{in_mutex};
+			for (auto it = removals.cbegin(); it != removals.cend();) {
+				if ((*it)->is_completed()) {
+					it = removals.erase(it);
+				} else {
+					++it;
+				}
+			}
+		}
 	}, 1);
 }
 
@@ -385,7 +403,7 @@ void request_concurrency_queue::tick_and_deliver_requests(uint32_t index)
 				for (auto it = begin; it != end; ++it) {
 					if (it->get() == request_view) {
 						/* Grab and remove */
-						request_view->stash_self(std::move(*it));
+						removals.emplace_back(std::move(*it));
 						requests_in.erase(it);
 						break;
 					}

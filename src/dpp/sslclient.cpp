@@ -548,18 +548,22 @@ bool ssl_client::handle_buffer(std::string &buffer)
 
 void ssl_client::close()
 {
-	if (!plaintext && ssl->ssl) {
+	if (!plaintext) {
 		std::lock_guard<std::mutex> lock(ssl_mutex);
-		SSL_free(ssl->ssl);
-		ssl->ssl = nullptr;
+		if (ssl != nullptr && ssl->ssl != nullptr) {
+			SSL_free(ssl->ssl);
+			ssl->ssl = nullptr;
+		}
 	}
 	connected = tcp_connect_done = false;
 	client_to_server_length = client_to_server_offset = 0;
 	last_tick = time(nullptr);
 	bytes_in = bytes_out = 0;
-	owner->socketengine->delete_socket(sfd);
-	close_socket(sfd);
-	sfd = INVALID_SOCKET;
+	if (sfd != INVALID_SOCKET) {
+		owner->socketengine->delete_socket(sfd);
+		close_socket(sfd);
+		sfd = INVALID_SOCKET;
+	}
 	obuffer.clear();
 	buffer.clear();
 }

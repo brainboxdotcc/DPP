@@ -383,6 +383,11 @@ public:
 
 	/** @brief Returns true if the request is complete */
 	bool is_completed();
+
+	/**
+	 * @brief Get the HTTPS client used to perform this request, or nullptr if there is none
+	 */
+	https_client* get_client() const;
 };
 
 /**
@@ -469,6 +474,11 @@ public:
 	 * @brief Queue of requests to be made. Sorted by http_request::endpoint.
 	 */
 	std::vector<std::unique_ptr<http_request>> requests_in;
+
+	/**
+	 * @brief Requests to remove after a set amount of time has passed
+	 */
+	std::vector<std::unique_ptr<http_request>> removals;
 
 	/**
 	 * @brief Timer callback
