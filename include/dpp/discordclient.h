@@ -519,7 +519,10 @@ public:
 	 */
 	uint64_t get_channel_count();
 
-	/** Fires every second from the underlying socket I/O loop, used for sending heartbeats */
+	/**
+	 * @brief Fires every second from the underlying socket I/O loop, used for sending heartbeats
+	 * and any queued outbound websocket frames.
+	 */
 	virtual void one_second_timer();
 
 	/**

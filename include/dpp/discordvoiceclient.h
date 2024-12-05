@@ -201,7 +201,6 @@ struct dave_binary_header_t {
 	/**
 	 * Get the data package from the packed binary frame, as a vector of uint8_t
 	 * for use in the libdave functions
-
 	 * @return data blob
 	 */
 	[[nodiscard]] std::vector<uint8_t> get_data() const;
@@ -905,7 +904,7 @@ public:
 	virtual void error(uint32_t errorcode);
 
 	/**
-	 * @brief Start and monitor I/O loop
+	 * @brief Start and monitor websocket I/O
 	 */
 	void run();
 

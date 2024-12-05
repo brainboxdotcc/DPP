@@ -246,6 +246,11 @@ struct DPP_EXPORT socket_engine_base {
 	void prune();
 protected:
 
+	/**
+	 * @brief Called by the prune() function to remove sockets when safe to do so.
+	 * This is normally at the end or before an iteration of the event loop.
+	 * @param fd File descriptor to remove
+	 */
 	virtual bool remove_socket(dpp::socket fd);
 };
 
@@ -256,6 +261,11 @@ protected:
 DPP_EXPORT std::unique_ptr<socket_engine_base> create_socket_engine(class cluster *creator);
 
 #ifndef _WIN32
+	/**
+	 * @brief Set up a signal handler to be ignored
+	 * @param signal Signal to set. If the signal is already set up with a handler,
+	 * this will do nothing.
+	 */
 	void set_signal_handler(int signal);
 #endif
 

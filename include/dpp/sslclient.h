@@ -40,16 +40,6 @@ namespace dpp {
 class openssl_connection;
 
 /**
- * @brief A callback for socket status
- */
-typedef std::function<dpp::socket()> socket_callback_t;
-
-/**
- * @brief A socket notification callback
- */
-typedef std::function<void()> socket_notification_t;
-
-/**
  * @brief Close a socket 
  * 
  * @param sfd Socket to close
@@ -255,33 +245,6 @@ public:
 	std::string get_cipher();
 
 	/**
-	 * @brief Attaching an additional file descriptor to this function will send notifications when there is data to read.
-	 * 
-	 * NOTE: Only hook this if you NEED it as it can increase CPU usage of the thread!
-	 * Returning -1 means that you don't want to be notified.
-	 */
-	socket_callback_t custom_readable_fd;
-
-	/**
-	 * @brief Attaching an additional file descriptor to this function will send notifications when you are able to write
-	 * to the socket.
-	 * 
-	 * NOTE: Only hook this if you NEED it as it can increase CPU usage of the thread! You should toggle this
-	 * to -1 when you do not have anything to write otherwise it'll keep triggering repeatedly (it is level triggered).
-	 */
-	socket_callback_t custom_writeable_fd;
-
-	/**
-	 * @brief This event will be called when you can read from the custom fd
-	 */
-	socket_notification_t custom_readable_ready;
-
-	/**
-	 * @brief This event will be called when you can write to a custom fd
-	 */
-	socket_notification_t custom_writeable_ready;
-
-	/**
 	 * @brief True if we are keeping the connection alive after it has finished
 	 */
 	bool keepalive;
@@ -304,8 +267,8 @@ public:
 	ssl_client(cluster* creator, const std::string &_hostname, const std::string &_port = "443", bool plaintext_downgrade = false, bool reuse = false);
 
 	/**
-	 * @brief Nonblocking I/O loop
-	 * @throw std::exception Any std::exception (or derivative) thrown from read_loop() causes reconnection of the shard
+	 * @brief Set up non blocking I/O and configure on_read, on_write and on_error.
+	 * @throw std::exception Any std::exception (or derivative) thrown from read_loop() indicates setup failed
 	 */
 	void read_loop();
 
@@ -341,12 +304,33 @@ public:
 	 */
 	virtual void log(dpp::loglevel severity, const std::string &msg) const;
 
+	/**
+	 * @brief Called while SSL handshake is in progress.
+	 * If the handshake completes, the state of the socket is progressed to
+	 * an established state.
+	 * @param ev Socket events for the socket
+	 */
 	void complete_handshake(const struct socket_events* ev);
 
+	/**
+	 * @brief Called when the TCP socket has data to read
+	 * @param fd Fild descriptor
+	 * @param ev Socket events
+	 */
 	void on_read(dpp::socket fd, const struct dpp::socket_events& ev);
 
+	/**
+	 * @brief Called when the TCP socket can be written to without blocking
+	 * @param fd File descriptor
+	 * @param e Socket events
+	 */
 	void on_write(dpp::socket fd, const struct dpp::socket_events& e);
 
+	/**
+	 * @brief Called when there is an error on the TCP socket
+	 * @param fd File descriptor
+	 * @param error_code Error code
+	 */
 	void on_error(dpp::socket fd, const struct dpp::socket_events&, int error_code);
 };
 
