@@ -578,6 +578,15 @@ public:
 	discord_client(dpp::cluster* _cluster, uint32_t _shard_id, uint32_t _max_shards, const std::string &_token, uint32_t intents = 0, bool compressed = true, websocket_protocol_t ws_protocol = ws_json);
 
 	/**
+	 * @brief Construct a discord_client object from another discord_client object
+	 * Used when resuming, the url to connect to will be taken from the resume url of the
+	 * other object, along with the seq number.
+	 *
+	 * @param old Previous connection to resume from
+	 */
+	explicit discord_client(discord_client& old);
+
+	/**
 	 * @brief Destroy the discord client object
 	 */
 	virtual ~discord_client();
