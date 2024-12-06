@@ -633,6 +633,13 @@ public:
 	 * @param allowed_permissions bitmask of dpp::permissions you want to allow for this user/role in this channel. Note: You can use the dpp::permission class
 	 * @param denied_permissions bitmask of dpp::permissions you want to deny for this user/role in this channel. Note: You can use the dpp::permission class
 	 *
+	 * **Example:**
+	 *
+	 * ```cpp
+	 * channel.add_permission_overwrite(388499352297406481, dpp::ot_role, dpp::p_manage_channels | dpp::p_manage_messages, 0);
+	 * // Allows p_manage_channels and p_manage_messages permissions for the provided role.
+	 * ```
+	 *
 	 * @return Reference to self, so these method calls may be chained
 	 */
 	channel& add_permission_overwrite(const snowflake target, const overwrite_type type, const uint64_t allowed_permissions, const uint64_t denied_permissions);
@@ -643,6 +650,13 @@ public:
 	 * @param type type of overwrite
 	 * @param allowed_permissions bitmask of allowed dpp::permissions for this user/role in this channel. Note: You can use the dpp::permission class
 	 * @param denied_permissions bitmask of denied dpp::permissions for this user/role in this channel. Note: You can use the dpp::permission class
+	 *
+	 * **Example:**
+	 *
+	 * ```cpp
+	 * channel.set_permission_overwrite(388499352297406481, dpp::ot_role, dpp::p_manage_channels | dpp::p_manage_messages, 0);
+	 * // Sets the allowed permissions to p_manage_channels and p_manage_messages and removes all denied permission flags for the provided role.
+	 * ```
 	 *
 	 * @return Reference to self, so these method calls may be chained
 	 *

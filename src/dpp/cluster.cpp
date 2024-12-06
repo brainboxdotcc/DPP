@@ -319,6 +319,7 @@ void cluster::shutdown() {
 		delete t.second;
 	}
 	timer_list.clear();
+	next_timer.clear();
 	/* Terminate shards */
 	for (const auto& sh : shards) {
 		log(ll_info, "Terminating shard id " + std::to_string(sh.second->shard_id));
