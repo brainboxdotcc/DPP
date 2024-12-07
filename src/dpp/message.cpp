@@ -663,8 +663,9 @@ embed::embed() : timestamp(0) {
 }
 
 message::message() : managed(0), channel_id(0), guild_id(0), sent(0), edited(0), webhook_id(0), interaction_metadata{},
-	owner(nullptr), type(mt_default), flags(0), pinned(false), tts(false), mention_everyone(false)
+	type(mt_default), flags(0), pinned(false), tts(false), mention_everyone(false)
 {
+	owner = nullptr;
 	message_reference.channel_id = 0;
 	message_reference.guild_id = 0;
 	message_reference.message_id = 0;
@@ -1059,8 +1060,10 @@ attachment::attachment(struct message* o, json *j) : attachment(o) {
 
 void attachment::download(http_completion_event callback) const {
 	/* Download attachment if there is one attached to this object */
-	if (owner == nullptr || owner->owner == nullptr) {
-		throw dpp::logic_exception(err_no_owning_message, "attachment has no owning message/cluster");
+	if (owner == nullptr) {
+		throw dpp::logic_exception(err_no_owning_message, "attachment has no owning message");
+	} else if (owner->owner == nullptr) {
+		throw dpp::logic_exception(err_no_owning_message, "attachment has no owning cluster");
 	}
 	if (callback && this->id && !this->url.empty()) {
 		owner->owner->request(this->url, dpp::m_get, callback);

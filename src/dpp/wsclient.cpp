@@ -26,6 +26,7 @@
 #include <dpp/utility.h>
 #include <dpp/httpsclient.h>
 #include <dpp/discordevents.h>
+#include <dpp/cluster.h>
 
 namespace dpp {
 
@@ -37,8 +38,8 @@ constexpr size_t WS_MAX_PAYLOAD_LENGTH_SMALL = 125;
 constexpr size_t WS_MAX_PAYLOAD_LENGTH_LARGE = 65535;
 constexpr size_t MAXHEADERSIZE = sizeof(uint64_t) + 2;
 
-websocket_client::websocket_client(const std::string& hostname, const std::string& port, const std::string& urlpath, ws_opcode opcode)
-	: ssl_client(hostname, port),
+websocket_client::websocket_client(cluster* creator, const std::string& hostname, const std::string& port, const std::string& urlpath, ws_opcode opcode)
+	: ssl_client(creator, hostname, port),
 	state(HTTP_HEADERS),
 	path(urlpath),
 	data_opcode(opcode)
@@ -127,6 +128,23 @@ void websocket_client::write(const std::string_view data, ws_opcode _opcode)
 		std::string header((const char*)out, s);
 		ssl_client::socket_write(header);
 		ssl_client::socket_write(data);
+	}
+
+	bool should_append_want_write = false;
+	socket_events *new_se = nullptr;
+	{
+		std::lock_guard lk(owner->socketengine->fds_mutex);
+		auto i = owner->socketengine->fds.find(sfd);
+
+		should_append_want_write = i != owner->socketengine->fds.end() && (i->second->flags & WANT_WRITE) != WANT_WRITE;
+		if (should_append_want_write) {
+			new_se = i->second.get();
+			new_se->flags |= WANT_WRITE;
+		}
+	}
+
+	if (should_append_want_write) {
+		owner->socketengine->update_socket(*new_se);
 	}
 }
 
@@ -325,8 +343,15 @@ void websocket_client::error(uint32_t errorcode)
 {
 }
 
+void websocket_client::on_disconnect()
+{
+}
+
 void websocket_client::close()
 {
+	if (sfd != INVALID_SOCKET) {
+		this->on_disconnect();
+	}
 	this->state = HTTP_HEADERS;
 	ssl_client::close();
 }

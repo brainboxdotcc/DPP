@@ -31,17 +31,25 @@
 #include <dpp/event.h>
 #include <queue>
 #include <thread>
+#include <memory>
 #include <deque>
+#include <dpp/etf.h>
 #include <mutex>
 #include <shared_mutex>
 
-
-
+/**
+ * @brief Discord API version for shard websockets and HTTPS API requests
+ */
 #define DISCORD_API_VERSION	"10"
+
+/**
+ * @brief HTTPS Request base path for API calls
+ */
 #define API_PATH	        "/api/v" DISCORD_API_VERSION
+
 namespace dpp {
 
-// Forward declarations
+/* Forward declarations */
 class cluster;
 
 /**
@@ -50,6 +58,91 @@ class cluster;
  * the zlib headers be available to build against it.
  */
 class zlibcontext;
+
+/**
+ * @brief Size of decompression buffer for zlib compressed traffic
+ */
+constexpr size_t DECOMP_BUFFER_SIZE = 512 * 1024;
+
+/**
+ * @brief Represents different event opcodes sent and received on a shard websocket
+ *
+ * These are used internally to route frames.
+ */
+enum shard_frame_type : int {
+
+	/**
+	 * @brief An event was dispatched.
+	 * @note Receive only
+	 */
+	ft_dispatch = 0,
+
+	/**
+	 * @brief Fired periodically by the client to keep the connection alive.
+	 * @note Send/Receive
+	 */
+	ft_heartbeat = 1,
+
+	/**
+	 * @brief Starts a new session during the initial handshake.
+	 * @note Send only
+	 */
+	ft_identify = 2,
+
+	/**
+	 * @brief Update the client's presence.
+	 * @note Send only
+	 */
+	ft_presence = 3,
+
+	/**
+	 * @brief Used to join/leave or move between voice channels.
+	 * @note Send only
+	 */
+	ft_voice_state_update = 4,
+
+	/**
+	 * @brief Resume a previous session that was disconnected.
+	 * @note Send only
+	 */
+	ft_resume = 6,
+
+	/**
+	 * @brief You should attempt to reconnect and resume immediately.
+	 * @note Receive only
+	 */
+	ft_reconnect = 7,
+
+	/**
+	 * @brief Request information about offline guild members in a large guild.
+	 * @note Send only
+	 */
+	ft_request_guild_members = 8,
+
+	/**
+	 * @brief The session has been invalidated. You should reconnect and identify/resume accordingly.
+	 * @note Receive only
+	 */
+	ft_invalid_session = 9,
+
+	/**
+	 * @brief Sent immediately after connecting, contains the heartbeat interval to use.
+	 * @note Receive only
+	 */
+	ft_hello = 10,
+
+	/**
+	 * @brief Sent in response to receiving a heartbeat to acknowledge that it has been received.
+	 * @note Receive only
+	 */
+	ft_heartbeat_ack = 11,
+
+	/**
+	 * @brief Request information about soundboard sounds in a set of guilds.
+	 * @note Send only
+	 */
+	ft_request_soundboard_sounds = 31,
+};
 
 /**
  * @brief Represents a connection to a voice channel.
@@ -119,14 +212,14 @@ public:
 	 * 
 	 * @return true if ready to connect
 	 */
-	bool is_ready();
+	bool is_ready() const;
 	
 	/**
 	 * @brief return true if the connection is active (websocket exists)
 	 * 
 	 * @return true if has an active websocket
 	 */
-	bool is_active();
+	bool is_active() const;
 
 	/**
 	 * @brief Create websocket object and connect it.
@@ -166,11 +259,6 @@ protected:
 	friend class dpp::cluster;
 
 	/**
-	 * @brief True if the shard is terminating
-	 */
-	bool terminating;
-
-	/**
 	 * @brief Disconnect from the connected voice channel on a guild
 	 * 
 	 * @param guild_id The guild who's voice channel you wish to disconnect from
@@ -178,6 +266,19 @@ protected:
 	 * Should be set to false if we already receive this message in an event.
 	 */
 	void disconnect_voice_internal(snowflake guild_id, bool send_json = true);
+
+	/**
+	 * @brief Start connecting the websocket
+	 *
+	 * Called from the constructor, or during reconnection
+	 */
+	void start_connecting();
+
+	/**
+	 * @brief Stores the most recent ping message on this shard, which we check
+	 * for to monitor latency
+	 */
+	std::string last_ping_message;
 
 private:
 
@@ -187,20 +288,14 @@ private:
 	std::shared_mutex queue_mutex;
 
 	/**
+	 * @brief Mutex for zlib pointer
+	 */
+	std::mutex zlib_mutex;
+
+	/**
 	 * @brief Queue of outbound messages
 	 */
 	std::deque<std::string> message_queue;
-
-	/**
-	 * @brief Thread this shard is executing on
-	 */
-	std::thread* runner;
-
-	/**
-	 * @brief Run shard loop under a thread.
-	 * Calls discord_client::run() from within a std::thread.
-	 */
-	void thread_run();
 
 	/**
 	 * @brief If true, stream compression is enabled
@@ -209,8 +304,12 @@ private:
 
 	/**
 	 * @brief ZLib decompression buffer
+	 *
+	 * If compression is not in use, this remains set to
+	 * a vector of length zero, but when compression is
+	 * enabled it will be resized to a DECOMP_BUFFER_SIZE buffer.
 	 */
-	unsigned char* decomp_buffer;
+	std::vector<unsigned char*> decomp_buffer;
 
 	/**
 	 * @brief Decompressed string
@@ -243,7 +342,7 @@ private:
 	/**
 	 * @brief ETF parser for when in ws_etf mode
 	 */
-	class etf_parser* etf;
+	std::unique_ptr<etf_parser> etf;
 
 	/**
 	 * @brief Convert a JSON object to string.
@@ -302,11 +401,6 @@ public:
 	 * @brief Total number of shards
 	 */
 	uint32_t max_shards;
-
-	/**
-	 * @brief Thread ID
-	 */
-	std::thread::native_handle_type thread_id;
 
 	/**
 	 * @brief Last sequence number received, for resumes and pings
@@ -412,7 +506,10 @@ public:
 	 */
 	uint64_t get_channel_count();
 
-	/** Fires every second from the underlying socket I/O loop, used for sending heartbeats */
+	/**
+	 * @brief Fires every second from the underlying socket I/O loop, used for sending heartbeats
+	 * and any queued outbound websocket frames.
+	 */
 	virtual void one_second_timer();
 
 	/**
@@ -468,6 +565,17 @@ public:
 	discord_client(dpp::cluster* _cluster, uint32_t _shard_id, uint32_t _max_shards, const std::string &_token, uint32_t intents = 0, bool compressed = true, websocket_protocol_t ws_protocol = ws_json);
 
 	/**
+	 * @brief Construct a discord_client object from another discord_client object
+	 * Used when resuming, the url to connect to will be taken from the resume url of the
+	 * other object, along with the seq number.
+	 *
+	 * @param old Previous connection to resume from
+	 * @param sequence Sequence number of previous session
+	 * @param session_id Session ID of previous session
+	 */
+	explicit discord_client(discord_client& old, uint64_t sequence, const std::string& session_id);
+
+	/**
 	 * @brief Destroy the discord client object
 	 */
 	virtual ~discord_client();
@@ -494,10 +602,13 @@ public:
 
 	/**
 	 * @brief Start and monitor I/O loop.
-	 * @note this is a blocking call and is usually executed within a
-	 * thread by whatever creates the object.
 	 */
 	void run();
+
+	/**
+	 * @brief Called when the HTTP socket is closed
+	 */
+	virtual void on_disconnect();
 
 	/**
 	 * @brief Connect to a voice channel

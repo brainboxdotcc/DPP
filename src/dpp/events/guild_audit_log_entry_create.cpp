@@ -37,7 +37,9 @@ void guild_audit_log_entry_create::handle(discord_client* client, json &j, const
 	if (!client->creator->on_guild_audit_log_entry_create.empty()) {
 		dpp::guild_audit_log_entry_create_t ec(client, raw);
 		ec.entry.fill_from_json(&d);
-		client->creator->on_guild_audit_log_entry_create.call(ec);
+		client->creator->queue_work(2, [client, ec]() {
+			client->creator->on_guild_audit_log_entry_create.call(ec);
+		});
 	}
 }
 

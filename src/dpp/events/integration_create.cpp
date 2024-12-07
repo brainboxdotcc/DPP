@@ -42,7 +42,9 @@ void integration_create::handle(discord_client* client, json &j, const std::stri
 		json& d = j["d"];
 		dpp::integration_create_t ic(client, raw);
 		ic.created_integration = dpp::integration().fill_from_json(&d);
-		client->creator->on_integration_create.call(ic);
+		client->creator->queue_work(1, [client, ic]() {
+			client->creator->on_integration_create.call(ic);
+		});
 	}
 }
 

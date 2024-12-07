@@ -41,7 +41,9 @@ void entitlement_update::handle(discord_client* client, json &j, const std::stri
 		dpp::entitlement_update_t entitlement_event(client, raw);
 		entitlement_event.updating_entitlement = ent;
 
-		client->creator->on_entitlement_update.call(entitlement_event);
+		client->creator->queue_work(0, [client, entitlement_event]() {
+			client->creator->on_entitlement_update.call(entitlement_event);
+		});
 	}
 }
 
