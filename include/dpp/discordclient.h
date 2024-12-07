@@ -275,14 +275,6 @@ protected:
 	void start_connecting();
 
 	/**
-	 * @brief Timer for use when reconnecting.
-	 *
-	 * The client will wait 5 seconds before retrying a connection, to comply
-	 * with Discord rate limiting for websocket connections.
-	 */
-	timer reconnect_timer{0};
-
-	/**
 	 * @brief Stores the most recent ping message on this shard, which we check
 	 * for to monitor latency
 	 */
@@ -409,11 +401,6 @@ public:
 	 * @brief Total number of shards
 	 */
 	uint32_t max_shards;
-
-	/**
-	 * @brief Thread ID
-	 */
-	std::thread::native_handle_type thread_id;
 
 	/**
 	 * @brief Last sequence number received, for resumes and pings
@@ -583,8 +570,10 @@ public:
 	 * other object, along with the seq number.
 	 *
 	 * @param old Previous connection to resume from
+	 * @param sequence Sequence number of previous session
+	 * @param session_id Session ID of previous session
 	 */
-	explicit discord_client(discord_client& old);
+	explicit discord_client(discord_client& old, uint64_t sequence, const std::string& session_id);
 
 	/**
 	 * @brief Destroy the discord client object
@@ -613,8 +602,6 @@ public:
 
 	/**
 	 * @brief Start and monitor I/O loop.
-	 * @note this is a blocking call and is usually executed within a
-	 * thread by whatever creates the object.
 	 */
 	void run();
 

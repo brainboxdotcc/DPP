@@ -54,6 +54,11 @@ namespace dpp {
 typedef std::map<uint32_t, class discord_client*> shard_list;
 
 /**
+ * @brief List of shards awaiting reconnection, by id with earliest possible reconnect time
+ */
+typedef std::map<uint32_t, time_t> reconnect_list;
+
+/**
  * @brief Represents the various information from the 'get gateway bot' api call
  */
 struct DPP_EXPORT gateway : public json_interface<gateway> {

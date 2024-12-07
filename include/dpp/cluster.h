@@ -126,6 +126,11 @@ class DPP_EXPORT cluster {
 	shard_list shards;
 
 	/**
+	 * @brief List of shards waiting for reconnection
+	 */
+	reconnect_list reconnections;
+
+	/**
 	 * @brief Ephemeral list of deleted timer ids
 	 */
 	timers_deleted_t deleted_timers;
@@ -181,6 +186,14 @@ class DPP_EXPORT cluster {
 	 * @brief Protection mutex for timers
 	 */
 	std::mutex timer_guard;
+
+	/**
+	 * @brief Mark a shard as requiring reconnection.
+	 * Destructs the old shard in 5 seconds and creates a new one attempting to resume.
+	 *
+	 * @param shard_id Shard ID
+	 */
+	void add_reconnect(uint32_t shard_id);
 
 public:
 	/**

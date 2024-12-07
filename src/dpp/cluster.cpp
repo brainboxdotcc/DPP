@@ -198,12 +198,48 @@ dpp::utility::uptime cluster::uptime()
 	return dpp::utility::uptime(time(nullptr) - start_time);
 }
 
+void cluster::add_reconnect(uint32_t shard_id) {
+	reconnections.emplace(shard_id, time(nullptr));
+}
+
 void cluster::start(start_type return_after) {
 
 	auto event_loop = [this]() -> void {
+		auto reconnect_monitor = start_timer([this](auto t) {
+			time_t now = time(nullptr);
+			for (auto reconnect = reconnections.begin(); reconnect != reconnections.end(); ++reconnect) {
+				auto shard_id = reconnect->first;
+				auto shard_reconnect_time = reconnect->second;
+				if (now >= shard_reconnect_time) {
+					/* This shard needs to be reconnected */
+					reconnections.erase(reconnect);
+					discord_client* old = shards[shard_id];
+					/* These values must be copied to the new connection
+					 * to attempt to resume it
+					 */
+					auto seq_no = old->last_seq;
+					auto session_id = old->sessionid;
+					log(ll_info, "Reconnecting shard " + std::to_string(shard_id));
+					/* Make a new resumed connection based off the old one */
+					shards[shard_id] = new discord_client(*old, seq_no, session_id);
+					/* Delete the old one */
+					delete old;
+					/* Set up the new shard's IO events */
+					shards[shard_id]->run();
+					/* It is not possible to reconnect another shard within the same 5-second window,
+					 * due to discords strict rate limiting on shard connections, so we bail out here
+					 * and only try another reconnect in the next timer interval. Do not try and make
+					 * this support multiple reconnects per loop iteration or Discord will smack us
+					 * with the rate limiting clue-by-four.
+					 */
+					return;
+				}
+			}
+		}, 5);
 		while (!this->terminating && socketengine.get()) {
 			socketengine->process_events();
 		}
+		stop_timer(reconnect_monitor);
 	};
 
 	if (on_guild_member_add && !(intents & dpp::i_guild_members)) {

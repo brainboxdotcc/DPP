@@ -56,6 +56,39 @@ public:
 	z_stream d_stream;
 };
 
+
+/**
+ * @brief Resume constructor for websocket client
+ */
+discord_client::discord_client(discord_client &old, uint64_t sequence, const std::string& session_id)
+	: websocket_client(old.owner, old.resume_gateway_url, "443", old.compressed ? (old.protocol == ws_json ? PATH_COMPRESSED_JSON : PATH_COMPRESSED_ETF) : (old.protocol == ws_json ? PATH_UNCOMPRESSED_JSON : PATH_UNCOMPRESSED_ETF)),
+	  compressed(old.compressed),
+	  zlib(nullptr),
+	  decompressed_total(old.decompressed_total),
+	  connect_time(0),
+	  ping_start(0.0),
+	  etf(nullptr),
+	  creator(old.owner),
+	  heartbeat_interval(0),
+	  last_heartbeat(time(nullptr)),
+	  shard_id(old.shard_id),
+	  max_shards(old.max_shards),
+	  last_seq(sequence),
+	  token(old.token),
+	  intents(old.intents),
+	  sessionid(session_id),
+	  resumes(old.resumes),
+	  reconnects(old.reconnects),
+	  websocket_ping(old.websocket_ping),
+	  ready(false),
+	  last_heartbeat_ack(time(nullptr)),
+	  protocol(old.protocol),
+	  resume_gateway_url(old.resume_gateway_url)
+{
+	etf = std::make_unique<etf_parser>(etf_parser());
+	start_connecting();
+}
+
 discord_client::discord_client(dpp::cluster* _cluster, uint32_t _shard_id, uint32_t _max_shards, const std::string &_token, uint32_t _intents, bool comp, websocket_protocol_t ws_proto)
        : websocket_client(_cluster, _cluster->default_gateway, "443", comp ? (ws_proto == ws_json ? PATH_COMPRESSED_JSON : PATH_COMPRESSED_ETF) : (ws_proto == ws_json ? PATH_UNCOMPRESSED_JSON : PATH_UNCOMPRESSED_ETF)),
 	compressed(comp),
@@ -99,38 +132,10 @@ discord_client::~discord_client()
 
 void discord_client::on_disconnect()
 {
-	if (reconnect_timer != 0U) {
-		log(dpp::ll_debug, "Lost connection to websocket on shard " + std::to_string(shard_id) + ", reconnection already in progress...");
-		return;
-	}
 	set_resume_hostname();
-	log(dpp::ll_debug, "Lost connection to websocket on shard " + std::to_string(shard_id) + ", reconnecting in 5 seconds...");
+	log(dpp::ll_debug, "Lost connection to websocket on shard " + std::to_string(shard_id) + ", reconnecting...");
 	ssl_client::close();
-	/* Prevent low level connect retries here, as we are handling it ourselves */
-	connect_retries = MAX_RETRIES + 1;
-	end_zlib();
-	/* Stop the timer first if its already ticking, to prevent concurrent reconnects */
-	reconnect_timer = owner->start_timer([this](auto handle) {
-		log(dpp::ll_debug, "Reconnecting shard " + std::to_string(shard_id) + " to wss://" + hostname + "...");
-		try {
-			if (timer_handle) {
-				owner->stop_timer(timer_handle);
-				timer_handle = 0;
-			}
-			start = time(nullptr);
-			ssl_client::connect();
-			start_connecting();
-			run();
-			owner->stop_timer(handle);
-			reconnect_timer = 0;
-		}
-		catch (const std::exception &e) {
-			/* If we get here, the timer will tick again */
-			ssl_client::close();
-			end_zlib();
-			log(dpp::ll_debug, "Error reconnecting shard " + std::to_string(shard_id) + ": " + std::string(e.what()) + "; Retry in 5 seconds...");
-		}
-	}, 5);
+	owner->add_reconnect(this->shard_id);
 }
 
 uint64_t discord_client::get_decompressed_bytes_in()
