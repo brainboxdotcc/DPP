@@ -41,6 +41,7 @@ discord_voice_client::discord_voice_client(dpp::cluster* _cluster, snowflake _ch
 	ssrc(0),
 	timescale(1000000),
 	paused(false),
+	sent_stop_frames(false),
 	encoder(nullptr),
 	repacketizer(nullptr),
 	fd(INVALID_SOCKET),
