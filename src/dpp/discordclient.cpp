@@ -274,12 +274,12 @@ bool discord_client::handle_frame(const std::string &buffer, ws_opcode opcode)
 
 	auto o = j.find("op");
 	if (o != j.end() && !o->is_null()) {
-		uint32_t op = o->get<uint32_t>();
+		shard_frame_type op = o->get<shard_frame_type>();
 
 		switch (op) {
 			case ft_invalid_session:
 				/* Reset session state and fall through to 10 */
-				op = 10;
+				op = ft_hello;
 				log(dpp::ll_debug, "Failed to resume session " + sessionid + ", will reidentify");
 				this->sessionid.clear();
 				this->last_seq = 0;
@@ -359,6 +359,15 @@ bool discord_client::handle_frame(const std::string &buffer, ws_opcode opcode)
 				this->last_heartbeat_ack = time(nullptr);
 				websocket_ping = utility::time_f() - ping_start;
 			break;
+			case ft_heartbeat:
+			case ft_identify:
+			case ft_presence:
+			case ft_voice_state_update:
+			case ft_resume:
+			case ft_request_guild_members:
+			case ft_request_soundboard_sounds:
+				log(dpp::ll_error, "Received invalid opcode on websocket for session " + sessionid);
+				break;
 		}
 	}
 	return true;

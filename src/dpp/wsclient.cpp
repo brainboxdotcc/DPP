@@ -42,7 +42,9 @@ websocket_client::websocket_client(cluster* creator, const std::string& hostname
 	: ssl_client(creator, hostname, port),
 	state(HTTP_HEADERS),
 	path(urlpath),
-	data_opcode(opcode)
+	data_opcode(opcode),
+	timed_out(false),
+	timeout(time(nullptr) + 5)
 {
 	uint64_t k = (time(nullptr) * time(nullptr));
 	/* A 64 bit value as hex with leading zeroes is always 16 chars.
@@ -303,7 +305,9 @@ bool websocket_client::parseheader(std::string& data)
 
 void websocket_client::one_second_timer()
 {
-	if (((time(nullptr) % 20) == 0) && (state == CONNECTED)) {
+	time_t now = time(nullptr);
+
+	if (((now % 20) == 0) && (state == CONNECTED)) {
 		/* For sending pings, we send with payload */
 		unsigned char out[MAXHEADERSIZE];
 		std::string payload = "keepalive";
@@ -311,6 +315,23 @@ void websocket_client::one_second_timer()
 		std::string header((const char*)out, s);
 		ssl_client::socket_write(header);
 		ssl_client::socket_write(payload);
+	}
+
+	/* Handle timeouts for connect(), SSL negotiation and HTTP negotiation */
+	if (!timed_out && sfd != INVALID_SOCKET) {
+		if (!tcp_connect_done && now >= timeout) {
+			log(ll_warning, "Websocket connection timed out: connect()");
+			timed_out = true;
+			this->close();
+		} else if (tcp_connect_done && !connected && now >= timeout && this->state != CONNECTED) {
+			log(ll_warning, "Websocket connection timed out: SSL handshake");
+			timed_out = true;
+			this->close();
+		} else if (now >= timeout && this->state != CONNECTED) {
+			log(ll_warning, "Websocket connection timed out: HTTP negotiation");
+			timed_out = true;
+			this->close();
+		}
 	}
 }
 

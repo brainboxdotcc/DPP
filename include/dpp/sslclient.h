@@ -314,7 +314,7 @@ public:
 
 	/**
 	 * @brief Called when the TCP socket has data to read
-	 * @param fd Fild descriptor
+	 * @param fd File descriptor
 	 * @param ev Socket events
 	 */
 	void on_read(dpp::socket fd, const struct dpp::socket_events& ev);

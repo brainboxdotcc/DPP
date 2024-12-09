@@ -221,11 +221,22 @@ void cluster::start(start_type return_after) {
 					auto session_id = old->sessionid;
 					log(ll_info, "Reconnecting shard " + std::to_string(shard_id));
 					/* Make a new resumed connection based off the old one */
-					shards[shard_id] = new discord_client(*old, seq_no, session_id);
-					/* Delete the old one */
-					delete old;
-					/* Set up the new shard's IO events */
-					shards[shard_id]->run();
+					try {
+						shards[shard_id] = nullptr;
+						shards[shard_id] = new discord_client(*old, seq_no, session_id);
+						/* Delete the old one */
+						delete old;
+						old = nullptr;
+						/* Set up the new shard's IO events */
+						shards[shard_id]->run();
+					}
+					catch (const std::exception& e) {
+						log(ll_info, "Exception when reconnecting shard " + std::to_string(shard_id) + ": " + std::string(e.what()));
+						delete shards[shard_id];
+						delete old;
+						old = nullptr;
+						add_reconnect(shard_id);
+					}
 					/* It is not possible to reconnect another shard within the same 5-second window,
 					 * due to discords strict rate limiting on shard connections, so we bail out here
 					 * and only try another reconnect in the next timer interval. Do not try and make
