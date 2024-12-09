@@ -491,9 +491,7 @@ void ssl_client::on_write(socket fd, const struct socket_events& e) {
 }
 
 void ssl_client::on_error(socket fd, const struct socket_events&, int error_code) {
-	if (sfd != INVALID_SOCKET) {
-		this->close();
-	}
+	this->close();
 }
 
 void ssl_client::read_loop()
@@ -502,8 +500,24 @@ void ssl_client::read_loop()
 		dpp::socket_events events(
 			sfd,
 			WANT_READ | WANT_WRITE | WANT_ERROR,
-			[this](socket fd, const struct socket_events &e) { on_read(fd, e); },
-			[this](socket fd, const struct socket_events &e) { on_write(fd, e); },
+			[this](socket fd, const struct socket_events &e) {
+				if (this->sfd == INVALID_SOCKET) {
+					close_socket(fd);
+					owner->socketengine->delete_socket(fd);
+					on_error(fd, e, 0);
+					return;
+				}
+				on_read(fd, e);
+			},
+			[this](socket fd, const struct socket_events &e) {
+				if (this->sfd == INVALID_SOCKET) {
+					close_socket(fd);
+					owner->socketengine->delete_socket(fd);
+					on_error(fd, e, 0);
+					return;
+				}
+				on_write(fd, e);
+			},
 			[this](socket fd, const struct socket_events &e, int error_code) { on_error(fd, e, error_code); }
 		);
 		owner->socketengine->register_socket(events);
