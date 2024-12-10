@@ -320,15 +320,15 @@ void websocket_client::one_second_timer()
 	/* Handle timeouts for connect(), SSL negotiation and HTTP negotiation */
 	if (!timed_out && sfd != INVALID_SOCKET) {
 		if (!tcp_connect_done && now >= timeout) {
-			log(ll_warning, "Websocket connection timed out: connect()");
+			log(ll_trace, "Websocket connection timed out: connect()");
 			timed_out = true;
 			this->close();
 		} else if (tcp_connect_done && !connected && now >= timeout && this->state != CONNECTED) {
-			log(ll_warning, "Websocket connection timed out: SSL handshake");
+			log(ll_trace, "Websocket connection timed out: SSL handshake");
 			timed_out = true;
 			this->close();
 		} else if (now >= timeout && this->state != CONNECTED) {
-			log(ll_warning, "Websocket connection timed out: HTTP negotiation");
+			log(ll_trace, "Websocket connection timed out: HTTP negotiation");
 			timed_out = true;
 			this->close();
 		}
@@ -370,9 +370,7 @@ void websocket_client::on_disconnect()
 
 void websocket_client::close()
 {
-	if (sfd != INVALID_SOCKET) {
-		this->on_disconnect();
-	}
+	this->on_disconnect();
 	this->state = HTTP_HEADERS;
 	ssl_client::close();
 }

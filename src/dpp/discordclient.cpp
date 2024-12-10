@@ -133,7 +133,9 @@ discord_client::~discord_client()
 void discord_client::on_disconnect()
 {
 	set_resume_hostname();
-	log(dpp::ll_debug, "Lost connection to websocket on shard " + std::to_string(shard_id) + ", reconnecting...");
+	if (sfd != INVALID_SOCKET) {
+		log(dpp::ll_debug, "Lost connection to websocket on shard " + std::to_string(shard_id) + ", reconnecting...");
+	}
 	ssl_client::close();
 	owner->add_reconnect(this->shard_id);
 }
