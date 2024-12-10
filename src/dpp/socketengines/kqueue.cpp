@@ -95,6 +95,7 @@ struct DPP_EXPORT socket_engine_kqueue : public socket_engine_base {
 				}
 
 			} catch (const std::exception& e) {
+				owner->log(ll_trace, "Socket loop exception: " + std::string(e.what()));
 				eh->on_error(kev.ident, *eh, 0);
 			}
 		}

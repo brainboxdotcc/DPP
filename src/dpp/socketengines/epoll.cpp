@@ -21,6 +21,7 @@
 
 #include <dpp/socketengine.h>
 #include <dpp/exception.h>
+#include <dpp/cluster.h>
 #include <memory>
 #include <sys/epoll.h>
 #include <sys/socket.h>
@@ -125,6 +126,7 @@ struct DPP_EXPORT socket_engine_epoll : public socket_engine_base {
 				}
 
 			} catch (const std::exception& e) {
+				owner->log(ll_trace, "Socket loop exception: " + std::string(e.what()));
 				eh->on_error(fd, *eh, 0);
 			}
 		}

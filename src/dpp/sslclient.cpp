@@ -208,7 +208,8 @@ ssl_client::ssl_client(cluster* creator, const std::string &_hostname, const std
 		ssl = new openssl_connection();
 	}
 	try {
-		this->connect();
+		//this->connect();
+		ssl_client::connect();
 	}
 	catch (std::exception&) {
 		cleanup();
@@ -526,7 +527,7 @@ void ssl_client::read_loop()
 	if (!timer_handle) {
 		timer_handle = owner->start_timer([this, setup_events](auto handle) {
 			one_second_timer();
-			if (!tcp_connect_done && time(nullptr) > start + 2 && connect_retries < MAX_RETRIES) {
+			if (!tcp_connect_done && time(nullptr) > start + 2 && connect_retries < MAX_RETRIES && sfd != INVALID_SOCKET) {
 				/* Retry failed connect(). This can happen even in the best situation with bullet-proof hosting.
 				 * Previously with blocking connect() there was some leniency in this, but now we have to do this
 				 * ourselves.
@@ -534,9 +535,15 @@ void ssl_client::read_loop()
 				 * Retry up to 3 times, 2 seconds between retries. After this, give up and let timeout code
 				 * take the wheel (will likely end with an exception).
 				 */
+				log(ll_trace, "connect() retry #" + std::to_string(connect_retries + 1));
 				close_socket(sfd);
 				owner->socketengine->delete_socket(sfd);
-				ssl_client::connect();
+				try {
+					ssl_client::connect();
+				}
+				catch (const std::exception& e) {
+					log(ll_trace, "connect() exception: " + std::string(e.what()));
+				}
 				setup_events();
 				start = time(nullptr) + 2;
 				connect_retries++;

@@ -199,7 +199,8 @@ dpp::utility::uptime cluster::uptime()
 }
 
 void cluster::add_reconnect(uint32_t shard_id) {
-	reconnections.emplace(shard_id, time(nullptr));
+	reconnections.emplace(shard_id, time(nullptr) + 5);
+	log(ll_trace, "Reconnecting in 5 seconds...");
 }
 
 void cluster::start(start_type return_after) {
@@ -222,12 +223,20 @@ void cluster::start(start_type return_after) {
 					log(ll_info, "Reconnecting shard " + std::to_string(shard_id));
 					/* Make a new resumed connection based off the old one */
 					try {
-						shards[shard_id] = nullptr;
-						shards[shard_id] = new discord_client(*old, seq_no, session_id);
+						if (shards[shard_id] != nullptr) {
+							log(ll_trace, "Attempting resume...");
+							shards[shard_id] = nullptr;
+							shards[shard_id] = new discord_client(*old, seq_no, session_id);
+						} else {
+							log(ll_trace, "Attempting full reconnection...");
+							shards[shard_id] = new discord_client(this, shard_id, numshards, token, intents, compressed, ws_mode);
+						}
 						/* Delete the old one */
+						log(ll_trace, "Attempting to delete old connection...");
 						delete old;
 						old = nullptr;
 						/* Set up the new shard's IO events */
+						log(ll_trace, "Running new connection...");
 						shards[shard_id]->run();
 					}
 					catch (const std::exception& e) {
@@ -235,6 +244,7 @@ void cluster::start(start_type return_after) {
 						delete shards[shard_id];
 						delete old;
 						old = nullptr;
+						shards[shard_id] = nullptr;
 						add_reconnect(shard_id);
 					}
 					/* It is not possible to reconnect another shard within the same 5-second window,
@@ -244,6 +254,8 @@ void cluster::start(start_type return_after) {
 					 * with the rate limiting clue-by-four.
 					 */
 					return;
+				} else {
+					log(ll_trace, "Shard " + std::to_string(shard_id) + " not ready to reconnect yet.");
 				}
 			}
 		}, 5);

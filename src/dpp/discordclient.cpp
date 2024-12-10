@@ -118,7 +118,7 @@ discord_client::discord_client(dpp::cluster* _cluster, uint32_t _shard_id, uint3
 }
 
 void discord_client::start_connecting() {
-	this->connect();
+	websocket_client::connect();
 }
 
 void discord_client::cleanup()
