@@ -21,6 +21,7 @@
  ************************************************************************************/
 #include <dpp/presence.h>
 #include <dpp/discordevents.h>
+#include <dpp/discordclient.h>
 #include <dpp/json.h>
 
 namespace dpp {
@@ -250,7 +251,7 @@ json presence::to_json_impl(bool with_id) const {
 	};
 	json j({
 
-		{"op", 3},
+		{"op", ft_presence},
 		{"d",	
 			{
 				{ "status", status_name_mapping[status()] },

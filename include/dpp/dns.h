@@ -40,7 +40,7 @@ namespace dpp {
 	 * @brief Represents a cached DNS result.
 	 * Used by the ssl_client class to store cached copies of dns lookups.
 	 */
-	struct dns_cache_entry {
+	struct DPP_EXPORT dns_cache_entry {
 		/**
 		 * @brief Resolved address metadata
 		 */
@@ -93,5 +93,5 @@ namespace dpp {
 	 * @return dns_cache_entry* First IP address associated with the hostname DNS record
 	 * @throw dpp::connection_exception On failure to resolve hostname
 	 */
-	const dns_cache_entry* resolve_hostname(const std::string& hostname, const std::string& port);
-}
+	DPP_EXPORT const dns_cache_entry *resolve_hostname(const std::string &hostname, const std::string &port);
+	}

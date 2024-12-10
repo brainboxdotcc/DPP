@@ -39,7 +39,9 @@ void automod_rule_update::handle(discord_client* client, json &j, const std::str
 		json& d = j["d"];
 		automod_rule_update_t aru(client, raw);
 		aru.updated = automod_rule().fill_from_json(&d);
-		client->creator->on_automod_rule_update.call(aru);
+		client->creator->queue_work(0, [client, aru]() {
+			client->creator->on_automod_rule_update.call(aru);
+		});
 	}
 }
 

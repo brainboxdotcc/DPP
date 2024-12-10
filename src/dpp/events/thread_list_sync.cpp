@@ -52,7 +52,9 @@ void thread_list_sync::handle(discord_client* client, json& j, const std::string
 				tls.members.push_back(thread_member().fill_from_json(&tm));
 			}
 		}
-		client->creator->on_thread_list_sync.call(tls);
+		client->creator->queue_work(1, [client, tls]() {
+			client->creator->on_thread_list_sync.call(tls);
+		});
 	}
 }
 };
