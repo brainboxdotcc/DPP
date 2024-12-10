@@ -43,7 +43,9 @@ void message_update::handle(discord_client* client, json &j, const std::string &
 		dpp::message m(client->creator);
 		m.fill_from_json(&d);
 	      	msg.msg = m;
-		client->creator->on_message_update.call(msg);
+		client->creator->queue_work(1, [client, msg]() {
+			client->creator->on_message_update.call(msg);
+		});
 	}
 
 }

@@ -98,6 +98,7 @@ enum exception_error_code {
 	err_no_voice_support = 29,
 	err_invalid_voice_packet_length = 30,
 	err_opus = 31,
+	err_cant_start_shard = 32,
 	err_etf = 33,
 	err_cache = 34,
 	err_icon_size = 35,

@@ -102,7 +102,9 @@ void interaction_create::handle(discord_client* client, json &j, const std::stri
 				message_context_menu_t mcm(client, raw);
 				mcm.command = i;
 				mcm.set_message(i.resolved.messages.begin()->second);
-				client->creator->on_message_context_menu.call(mcm);
+				client->creator->queue_work(1, [client, mcm]() {
+					client->creator->on_message_context_menu.call(mcm);
+				});
 			}
 		} else if (cmd_data.type == ctxm_user && !client->creator->on_user_context_menu.empty()) {
 			if (i.resolved.users.size()) {
@@ -110,12 +112,16 @@ void interaction_create::handle(discord_client* client, json &j, const std::stri
 				user_context_menu_t ucm(client, raw);
 				ucm.command = i;
 				ucm.set_user(i.resolved.users.begin()->second);
-				client->creator->on_user_context_menu.call(ucm);
+				client->creator->queue_work(1, [client, ucm]() {
+					client->creator->on_user_context_menu.call(ucm);
+				});
 			}
 		} else if (cmd_data.type == ctxm_chat_input && !client->creator->on_slashcommand.empty()) {
 			dpp::slashcommand_t sc(client, raw);
 			sc.command = i;
-			client->creator->on_slashcommand.call(sc);
+			client->creator->queue_work(1, [client, sc]() {
+				client->creator->on_slashcommand.call(sc);
+			});
 		}
 		if (!client->creator->on_interaction_create.empty()) {
 			/* Standard chat input. Note that for backwards compatibility, context menu
@@ -124,7 +130,9 @@ void interaction_create::handle(discord_client* client, json &j, const std::stri
 			 */
 			dpp::interaction_create_t ic(client, raw);
 			ic.command = i;
-			client->creator->on_interaction_create.call(ic);
+			client->creator->queue_work(1, [client, ic]() {
+				client->creator->on_interaction_create.call(ic);
+			});
 		}
 	} else if (i.type == it_modal_submit) {
 		if (!client->creator->on_form_submit.empty()) {
@@ -134,7 +142,9 @@ void interaction_create::handle(discord_client* client, json &j, const std::stri
 			for (auto & c : d["data"]["components"]) {
 				fs.components.push_back(dpp::component().fill_from_json(&c));
 			}
-			client->creator->on_form_submit.call(fs);
+			client->creator->queue_work(1, [client, fs]() {
+				client->creator->on_form_submit.call(fs);
+			});
 		}
 	} else if (i.type == it_autocomplete) {
 		// "data":{"id":"903319628816728104","name":"blep","options":[{"focused":true,"name":"animal","type":3,"value":"a"}],"type":1}
@@ -144,7 +154,9 @@ void interaction_create::handle(discord_client* client, json &j, const std::stri
 			ac.name = string_not_null(&(d["data"]), "name");
 			fill_options(d["data"]["options"], ac.options);
 			ac.command = i;
-			client->creator->on_autocomplete.call(ac);
+			client->creator->queue_work(1, [client, ac]() {
+				client->creator->on_autocomplete.call(ac);
+			});
 		}
 	} else if (i.type == it_component_button) {
 		dpp::component_interaction bi = std::get<component_interaction>(i.data);
@@ -154,7 +166,9 @@ void interaction_create::handle(discord_client* client, json &j, const std::stri
 				ic.command = i;
 				ic.custom_id = bi.custom_id;
 				ic.component_type = bi.component_type;
-				client->creator->on_button_click.call(ic);
+				client->creator->queue_work(1, [client, ic]() {
+					client->creator->on_button_click.call(ic);
+				});
 			}
 		} else if (bi.component_type == cot_selectmenu || bi.component_type == cot_user_selectmenu ||
 				   bi.component_type == cot_role_selectmenu || bi.component_type == cot_mentionable_selectmenu ||
@@ -165,7 +179,9 @@ void interaction_create::handle(discord_client* client, json &j, const std::stri
 				ic.custom_id = bi.custom_id;
 				ic.component_type = bi.component_type;
 				ic.values = bi.values;
-				client->creator->on_select_click.call(ic);
+				client->creator->queue_work(1, [client, ic]() {
+					client->creator->on_select_click.call(ic);
+				});
 			}
 		}
 	}

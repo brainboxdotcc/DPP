@@ -53,7 +53,9 @@ void channel_update::handle(discord_client* client, json &j, const std::string &
 		dpp::channel_update_t cu(client, raw);
 		cu.updated = c;
 		cu.updating_guild = dpp::find_guild(c->guild_id);
-		client->creator->on_channel_update.call(cu);
+		client->creator->queue_work(1, [client, cu]() {
+			client->creator->on_channel_update.call(cu);
+		});
 	}
 }
 

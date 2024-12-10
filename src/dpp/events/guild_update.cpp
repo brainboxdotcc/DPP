@@ -67,7 +67,9 @@ void guild_update::handle(discord_client* client, json &j, const std::string &ra
 	if (!client->creator->on_guild_update.empty()) {
 		dpp::guild_update_t gu(client, raw);
 		gu.updated = g;
-		client->creator->on_guild_update.call(gu);
+		client->creator->queue_work(1, [client, gu]() {
+			client->creator->on_guild_update.call(gu);
+		});
 	}
 }
 

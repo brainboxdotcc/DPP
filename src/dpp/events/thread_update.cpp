@@ -38,7 +38,9 @@ void thread_update::handle(discord_client* client, json& j, const std::string& r
 		dpp::thread_update_t tu(client, raw);
 		tu.updated = t;
 		tu.updating_guild = g;
-		client->creator->on_thread_update.call(tu);
+		client->creator->queue_work(1, [client, tu]() {
+			client->creator->on_thread_update.call(tu);
+		});
 	}
 }
 };

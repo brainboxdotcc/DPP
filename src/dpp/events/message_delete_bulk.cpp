@@ -44,7 +44,9 @@ void message_delete_bulk::handle(discord_client* client, json &j, const std::str
 		for (auto& m : d["ids"]) {
 			msg.deleted.push_back(from_string<uint64_t>(m.get<std::string>()));
 		}
-		client->creator->on_message_delete_bulk.call(msg);
+		client->creator->queue_work(1, [client, msg]() {
+			client->creator->on_message_delete_bulk.call(msg);
+		});
 	}
 
 }

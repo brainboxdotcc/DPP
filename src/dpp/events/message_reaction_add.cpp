@@ -50,7 +50,9 @@ void message_reaction_add::handle(discord_client* client, json &j, const std::st
 		mra.message_author_id = snowflake_not_null(&d, "message_author_id");
 		mra.reacting_emoji = dpp::emoji().fill_from_json(&(d["emoji"]));
 		if (mra.channel_id && mra.message_id) {
-			client->creator->on_message_reaction_add.call(mra);
+			client->creator->queue_work(1, [client, mra]() {
+				client->creator->on_message_reaction_add.call(mra);
+			});
 		}
 	}
 }

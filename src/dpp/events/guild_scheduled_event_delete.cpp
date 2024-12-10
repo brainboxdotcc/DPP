@@ -42,7 +42,9 @@ void guild_scheduled_event_delete::handle(discord_client* client, json &j, const
 	if (!client->creator->on_guild_scheduled_event_delete.empty()) {
 		dpp::guild_scheduled_event_delete_t ed(client, raw);
 		ed.deleted.fill_from_json(&d);
-		client->creator->on_guild_scheduled_event_delete.call(ed);
+		client->creator->queue_work(1, [client, ed]() {
+			client->creator->on_guild_scheduled_event_delete.call(ed);
+		});
 	}
 }
 

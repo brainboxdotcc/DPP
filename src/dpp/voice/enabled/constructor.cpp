@@ -33,14 +33,15 @@
 namespace dpp {
 
 discord_voice_client::discord_voice_client(dpp::cluster* _cluster, snowflake _channel_id, snowflake _server_id, const std::string &_token, const std::string &_session_id, const std::string &_host, bool enable_dave)
-	: websocket_client(_host.substr(0, _host.find(':')), _host.substr(_host.find(':') + 1, _host.length()), "/?v=" + std::to_string(voice_protocol_version), OP_TEXT),
-	runner(nullptr),
+	: websocket_client(_cluster, _host.substr(0, _host.find(':')), _host.substr(_host.find(':') + 1, _host.length()), "/?v=" + std::to_string(voice_protocol_version), OP_TEXT),
 	connect_time(0),
 	mixer(std::make_unique<audio_mixer>()),
 	port(0),
 	ssrc(0),
 	timescale(1000000),
 	paused(false),
+	sent_stop_frames(false),
+	last_loop_time(time(nullptr)),
 	encoder(nullptr),
 	repacketizer(nullptr),
 	fd(INVALID_SOCKET),
@@ -60,6 +61,11 @@ discord_voice_client::discord_voice_client(dpp::cluster* _cluster, snowflake _ch
 	sessionid(_session_id),
 	server_id(_server_id),
 	channel_id(_channel_id)
+{
+	setup();
+}
+
+void discord_voice_client::setup()
 {
 	int opusError = 0;
 	encoder = opus_encoder_create(opus_sample_rate_hz, opus_channel_count, OPUS_APPLICATION_VOIP, &opusError);
