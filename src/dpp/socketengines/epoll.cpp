@@ -44,7 +44,7 @@ int modify_event(int epoll_handle, socket_events* eh, int new_events) {
 		if ((new_events & WANT_ERROR) != 0) {
 			new_ev.events |= EPOLLERR;
 		}
-		new_ev.data.ptr = static_cast<void *>(eh);
+		new_ev.data.fd = eh->fd;
 		epoll_ctl(epoll_handle, EPOLL_CTL_MOD, eh->fd, &new_ev);
 	}
 	return new_events;
@@ -80,13 +80,9 @@ struct DPP_EXPORT socket_engine_epoll : public socket_engine_base {
 		for (int j = 0; j < i; j++) {
 			epoll_event ev = events[j];
 
-			auto* const eh = static_cast<socket_events*>(ev.data.ptr);
-			if (!eh) {
-				continue;
-			}
-
-			const int fd = eh->fd;
-			if (fd == INVALID_SOCKET || eh->flags & WANT_DELETION) {
+			const int fd = ev.data.fd;
+			auto eh = get_fd(fd);
+			if (!eh || fd == INVALID_SOCKET) {
 				continue;
 			}
 
@@ -147,10 +143,7 @@ struct DPP_EXPORT socket_engine_epoll : public socket_engine_base {
 			if ((e.flags & WANT_ERROR) != 0) {
 				ev.events |= EPOLLERR;
 			}
-			{
-				std::shared_lock lock(fds_mutex);
-				ev.data.ptr = fds.find(e.fd)->second.get();
-			}
+			ev.data.fd = e.fd;
 			return epoll_ctl(epoll_handle, EPOLL_CTL_ADD, e.fd, &ev) >= 0;
 		}
 		return r;
@@ -170,10 +163,7 @@ struct DPP_EXPORT socket_engine_epoll : public socket_engine_base {
 			if ((e.flags & WANT_ERROR) != 0) {
 				ev.events |= EPOLLERR;
 			}
-			{
-				std::shared_lock lock(fds_mutex);
-				ev.data.ptr = fds.find(e.fd)->second.get();
-			}
+			ev.data.fd = e.fd;
 			return epoll_ctl(epoll_handle, EPOLL_CTL_MOD, e.fd, &ev) >= 0;
 		}
 		return r;

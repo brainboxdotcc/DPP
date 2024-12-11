@@ -161,13 +161,6 @@ struct DPP_EXPORT socket_engine_base {
 	socket_container fds;
 
 	/**
-	 * @brief Thread pool.
-	 * Event calls go into the thread pool and are called as
-	 * and when threads in the pool are available.
-	 */
-	std::unique_ptr<thread_pool> pool;
-
-	/**
 	 * @brief Number of file descriptors we are waiting to delete
 	 */
 	size_t to_delete_count{0};
@@ -244,6 +237,7 @@ struct DPP_EXPORT socket_engine_base {
 	 * remove_socket() on each entry to be removed.
 	 */
 	void prune();
+
 protected:
 
 	/**
@@ -252,6 +246,13 @@ protected:
 	 * @param fd File descriptor to remove
 	 */
 	virtual bool remove_socket(dpp::socket fd);
+
+	/**
+	 * @brief Find a file descriptors socket events
+	 * @param fd file descriptor
+	 * @return file descriptor or nullptr if doesn't exist
+	 */
+	socket_events* get_fd(dpp::socket fd);
 };
 
 /**

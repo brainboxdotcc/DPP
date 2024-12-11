@@ -505,7 +505,6 @@ void ssl_client::read_loop()
 				if (this->sfd == INVALID_SOCKET) {
 					close_socket(fd);
 					owner->socketengine->delete_socket(fd);
-					on_error(fd, e, 0);
 					return;
 				}
 				on_read(fd, e);
@@ -514,7 +513,6 @@ void ssl_client::read_loop()
 				if (this->sfd == INVALID_SOCKET) {
 					close_socket(fd);
 					owner->socketengine->delete_socket(fd);
-					on_error(fd, e, 0);
 					return;
 				}
 				on_write(fd, e);

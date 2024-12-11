@@ -199,8 +199,8 @@ dpp::utility::uptime cluster::uptime()
 }
 
 void cluster::add_reconnect(uint32_t shard_id) {
-	reconnections.emplace(shard_id, time(nullptr) + 5);
-	log(ll_trace, "Reconnecting in 5 seconds...");
+	reconnections[shard_id] =time(nullptr) + 5;
+	log(ll_trace, "Reconnecting shard " + std::to_string(shard_id) + " in 5 seconds...");
 }
 
 void cluster::start(start_type return_after) {

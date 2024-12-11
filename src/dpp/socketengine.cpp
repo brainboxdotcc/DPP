@@ -72,6 +72,15 @@ socket_engine_base::socket_engine_base(cluster* creator) : owner(creator) {
 
 time_t last_time = time(nullptr);
 
+socket_events* socket_engine_base::get_fd(dpp::socket fd) {
+	std::unique_lock lock(fds_mutex);
+	auto iter = fds.find(fd);
+	if (iter == fds.end() || ((iter->second->flags & WANT_DELETION) != 0L)) {
+		return nullptr;
+	}
+	return iter->second.get();
+}
+
 void socket_engine_base::prune() {
 	if (to_delete_count > 0) {
 		std::unique_lock lock(fds_mutex);
