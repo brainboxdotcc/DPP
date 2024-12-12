@@ -200,7 +200,13 @@ bool websocket_client::handle_buffer(std::string& buffer)
 		}
 	} else if (state == CONNECTED) {
 		/* Process packets until we can't (buffer will erase data until parseheader returns false) */
-		while (this->parseheader(buffer)) { }
+		try {
+			while (this->parseheader(buffer)) { }
+		}
+		catch (const std::exception &e) {
+			log(ll_debug, "Receiving exception: " + std::string(e.what()));
+			return false;
+		}
 	}
 
 	return true;
@@ -274,7 +280,9 @@ bool websocket_client::parseheader(std::string& data)
 				handle_ping(data.substr(payloadstartoffset, len));
 			} else if ((opcode & ~WS_FINBIT) != OP_PONG) { /* Otherwise, handle everything else apart from a PONG. */
 				/* Pass this frame to the deriving class */
-				this->handle_frame(data.substr(payloadstartoffset, len), static_cast<ws_opcode>(opcode & ~WS_FINBIT));
+				if (!this->handle_frame(data.substr(payloadstartoffset, len), static_cast<ws_opcode>(opcode & ~WS_FINBIT))) {
+					return false;
+				}
 			}
 
 			/* Remove this frame from the input buffer */

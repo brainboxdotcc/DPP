@@ -212,14 +212,17 @@ bool discord_client::handle_frame(const std::string &buffer, ws_opcode opcode)
 					case Z_STREAM_ERROR:
 						this->error(err_compression_stream);
 						this->close();
+						return false;
 					return true;
 					case Z_DATA_ERROR:
 						this->error(err_compression_data);
 						this->close();
+						return false;
 					return true;
 					case Z_MEM_ERROR:
 						this->error(err_compression_memory);
 						this->close();
+						return false;
 					return true;
 					case Z_OK:
 						this->decompressed.append((const char*)decomp_buffer.data(), have);
@@ -353,9 +356,8 @@ bool discord_client::handle_frame(const std::string &buffer, ws_opcode opcode)
 			}
 			break;
 			case ft_reconnect:
-				log(dpp::ll_debug, "Reconnection requested, closing socket " + sessionid);
 				message_queue.clear();
-				this->close();
+				throw dpp::connection_exception("Reconnection requested, closing socket " + sessionid);
 			break;
 			/* Heartbeat ack */
 			case ft_heartbeat_ack:
@@ -369,8 +371,7 @@ bool discord_client::handle_frame(const std::string &buffer, ws_opcode opcode)
 			case ft_resume:
 			case ft_request_guild_members:
 			case ft_request_soundboard_sounds:
-				log(dpp::ll_error, "Received invalid opcode on websocket for session " + sessionid);
-				break;
+				throw dpp::connection_exception("Received invalid opcode on websocket for session " + sessionid);
 		}
 	}
 	return true;
