@@ -190,7 +190,7 @@ void discord_client::run()
 
 bool discord_client::handle_frame(const std::string &buffer, ws_opcode opcode)
 {
-	auto& data = (std::string&)buffer;
+	auto& data = const_cast<std::string&>(buffer);
 
 	/* gzip compression is a special case */
 	if (compressed) {
@@ -202,7 +202,7 @@ bool discord_client::handle_frame(const std::string &buffer, ws_opcode opcode)
 			zlib->d_stream.next_in = (Bytef*)buffer.data();
 			zlib->d_stream.avail_in = static_cast<uInt>(buffer.size());
 			do {
-				zlib->d_stream.next_out = reinterpret_cast<Bytef*>(decomp_buffer.data());
+				zlib->d_stream.next_out = static_cast<Bytef*>(decomp_buffer.data());
 				zlib->d_stream.avail_out = DECOMP_BUFFER_SIZE;
 				int ret = inflate(&(zlib->d_stream), Z_NO_FLUSH);
 				size_t have = DECOMP_BUFFER_SIZE - zlib->d_stream.avail_out;
@@ -213,21 +213,18 @@ bool discord_client::handle_frame(const std::string &buffer, ws_opcode opcode)
 						this->error(err_compression_stream);
 						this->close();
 						return false;
-					return true;
 					case Z_DATA_ERROR:
 						this->error(err_compression_data);
 						this->close();
 						return false;
-					return true;
 					case Z_MEM_ERROR:
 						this->error(err_compression_memory);
 						this->close();
 						return false;
-					return true;
 					case Z_OK:
-						this->decompressed.append((const char*)decomp_buffer.data(), have);
+						this->decompressed.append(decomp_buffer.begin(), decomp_buffer.begin() + have);
 						this->decompressed_total += have;
-					break;
+						break;
 					default:
 						/* Stub */
 					break;

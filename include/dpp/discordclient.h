@@ -309,7 +309,7 @@ private:
 	 * a vector of length zero, but when compression is
 	 * enabled it will be resized to a DECOMP_BUFFER_SIZE buffer.
 	 */
-	std::vector<unsigned char*> decomp_buffer;
+	std::vector<unsigned char> decomp_buffer;
 
 	/**
 	 * @brief Decompressed string
