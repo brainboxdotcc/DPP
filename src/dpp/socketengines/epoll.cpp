@@ -82,11 +82,11 @@ struct DPP_EXPORT socket_engine_epoll : public socket_engine_base {
 
 			const int fd = ev.data.fd;
 			auto eh = get_fd(fd);
-			if (!eh || fd == INVALID_SOCKET) {
+			if (eh == nullptr || fd == INVALID_SOCKET) {
 				continue;
 			}
 
-			try {
+			if ((eh->flags & WANT_DELETION) == 0L) try {
 
 				if ((ev.events & EPOLLHUP) != 0U) {
 					if (eh->on_error) {
@@ -124,6 +124,11 @@ struct DPP_EXPORT socket_engine_epoll : public socket_engine_base {
 			} catch (const std::exception& e) {
 				owner->log(ll_trace, "Socket loop exception: " + std::string(e.what()));
 				eh->on_error(fd, *eh, 0);
+			}
+
+			if ((eh->flags & WANT_DELETION) != 0L) {
+				remove_socket(fd);
+				fds.erase(fd);
 			}
 		}
 		prune();
@@ -172,12 +177,9 @@ struct DPP_EXPORT socket_engine_epoll : public socket_engine_base {
 protected:
 
 	bool remove_socket(dpp::socket fd) final {
-		bool r = socket_engine_base::remove_socket(fd);
-		if (r) {
-			struct epoll_event ev{};
-			epoll_ctl(epoll_handle, EPOLL_CTL_DEL, fd, &ev);
-		}
-		return r;
+		struct epoll_event ev{};
+		epoll_ctl(epoll_handle, EPOLL_CTL_DEL, fd, &ev);
+		return true;
 	}
 };
 

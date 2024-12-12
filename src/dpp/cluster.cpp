@@ -199,7 +199,7 @@ dpp::utility::uptime cluster::uptime()
 }
 
 void cluster::add_reconnect(uint32_t shard_id) {
-	reconnections[shard_id] =time(nullptr) + 5;
+	reconnections[shard_id] = time(nullptr) + 5;
 	log(ll_trace, "Reconnecting shard " + std::to_string(shard_id) + " in 5 seconds...");
 }
 
@@ -208,6 +208,7 @@ void cluster::start(start_type return_after) {
 	auto event_loop = [this]() -> void {
 		auto reconnect_monitor = start_timer([this](auto t) {
 			time_t now = time(nullptr);
+			log(ll_trace, "Ticking reconnect monitor with " + std::to_string(reconnections.size()) + " queued reconnections");
 			for (auto reconnect = reconnections.begin(); reconnect != reconnections.end(); ++reconnect) {
 				auto shard_id = reconnect->first;
 				auto shard_reconnect_time = reconnect->second;

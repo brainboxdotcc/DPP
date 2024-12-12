@@ -370,6 +370,7 @@ void websocket_client::on_disconnect()
 
 void websocket_client::close()
 {
+	log(ll_trace, "websocket_client::close()");
 	this->on_disconnect();
 	this->state = HTTP_HEADERS;
 	ssl_client::close();

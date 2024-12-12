@@ -579,6 +579,7 @@ void ssl_client::close()
 	last_tick = time(nullptr);
 	bytes_in = bytes_out = 0;
 	if (sfd != INVALID_SOCKET) {
+		log(ll_trace, "ssl_client::close() with sfd");
 		owner->socketengine->delete_socket(sfd);
 		close_socket(sfd);
 		sfd = INVALID_SOCKET;

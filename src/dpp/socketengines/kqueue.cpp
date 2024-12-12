@@ -72,7 +72,7 @@ struct DPP_EXPORT socket_engine_kqueue : public socket_engine_base {
 				continue;
 			}
 
-			try {
+			if ((eh->flags & WANT_DELETION) == 0L) try {
 
 				const short filter = kev.filter;
 				if (kev.flags & EV_EOF || kev.flags & EV_ERROR) {
@@ -97,6 +97,12 @@ struct DPP_EXPORT socket_engine_kqueue : public socket_engine_base {
 			} catch (const std::exception& e) {
 				owner->log(ll_trace, "Socket loop exception: " + std::string(e.what()));
 				eh->on_error(kev.ident, *eh, 0);
+			}
+
+
+			if ((eh->flags & WANT_DELETION) != 0L) {
+				remove_socket(kev.ident);
+				fds.erase(kev.ident);
 			}
 		}
 		prune();
@@ -131,15 +137,12 @@ struct DPP_EXPORT socket_engine_kqueue : public socket_engine_base {
 protected:
 
 	bool remove_socket(dpp::socket fd) final {
-		bool r = socket_engine_base::remove_socket(fd);
-		if (r) {
-			struct kevent ke{};
-			EV_SET(&ke, fd, EVFILT_WRITE, EV_DELETE, 0, 0, nullptr);
-			kevent(kqueue_handle, &ke, 1, nullptr, 0, nullptr);
-			EV_SET(&ke, fd, EVFILT_READ, EV_DELETE, 0, 0, nullptr);
-			kevent(kqueue_handle, &ke, 1, nullptr, 0, nullptr);
-		}
-		return r;
+		struct kevent ke{};
+		EV_SET(&ke, fd, EVFILT_WRITE, EV_DELETE, 0, 0, nullptr);
+		kevent(kqueue_handle, &ke, 1, nullptr, 0, nullptr);
+		EV_SET(&ke, fd, EVFILT_READ, EV_DELETE, 0, 0, nullptr);
+		kevent(kqueue_handle, &ke, 1, nullptr, 0, nullptr);
+		return true;
 	}
 };
 

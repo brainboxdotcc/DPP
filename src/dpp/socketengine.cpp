@@ -36,8 +36,10 @@ bool socket_engine_base::register_socket(const socket_events &e) {
 	if (e.fd != INVALID_SOCKET && i == fds.end()) {
 		fds.emplace(e.fd, std::make_unique<socket_events>(e));
 		return true;
-	} else if (e.fd != INVALID_SOCKET && i != fds.end()) {
-		this->remove_socket(e.fd);
+	}
+	if (e.fd != INVALID_SOCKET && i != fds.end()) {
+		remove_socket(e.fd);
+		fds.erase(i);
 		fds.emplace(e.fd, std::make_unique<socket_events>(e));
 		return true;
 	}
@@ -75,37 +77,25 @@ time_t last_time = time(nullptr);
 socket_events* socket_engine_base::get_fd(dpp::socket fd) {
 	std::unique_lock lock(fds_mutex);
 	auto iter = fds.find(fd);
-	if (iter == fds.end() || ((iter->second->flags & WANT_DELETION) != 0L)) {
+	if (iter == fds.end()) {
 		return nullptr;
 	}
 	return iter->second.get();
 }
 
 void socket_engine_base::prune() {
-	if (to_delete_count > 0) {
-		std::unique_lock lock(fds_mutex);
-		for (auto it = fds.cbegin(); it != fds.cend();) {
-			if ((it->second->flags & WANT_DELETION) != 0L) {
-				remove_socket(it->second->fd);
-				it = fds.erase(it);
-			} else {
-				++it;
-			}
-		}
-		to_delete_count = 0;
-	}
 	if (time(nullptr) != last_time) {
 		try {
-			/* Every minute, rehash all cache containers.
-			 * We do this from the socket engine now, not from
-			 * shard 0, so no need to run shards to have timers!
-			 */
 			owner->tick_timers();
 		} catch (const std::exception& e) {
 			owner->log(dpp::ll_error, "Uncaught exception in tick_timers: " + std::string(e.what()));
 		}
 
 		if ((time(nullptr) % 60) == 0) {
+			/* Every minute, rehash all cache containers.
+			 * We do this from the socket engine now, not from
+			 * shard 0, so no need to run shards to have timers!
+			 */
 			dpp::garbage_collection();
 		}
 
@@ -120,7 +110,6 @@ bool socket_engine_base::delete_socket(dpp::socket fd) {
 		return false;
 	}
 	iter->second->flags |= WANT_DELETION;
-	to_delete_count++;
 	return true;
 }
 

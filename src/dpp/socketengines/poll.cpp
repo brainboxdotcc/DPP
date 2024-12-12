@@ -90,17 +90,12 @@ struct DPP_EXPORT socket_engine_poll : public socket_engine_base {
 				processed++;
 			}
 
-			auto iter = fds.find(fd);
-			if (iter == fds.end()) {
-				continue;
-			}
-			socket_events *eh = iter->second.get();
-
+			socket_events *eh = get_fd(fd);
 			if (eh == nullptr || eh->flags & WANT_DELETION) {
 				continue;
 			}
 
-			try {
+			if ((eh->flags & WANT_DELETION) == 0L) try {
 
 				if ((revents & POLLHUP) != 0) {
 					eh->on_error(fd, *eh, 0);
@@ -129,6 +124,12 @@ struct DPP_EXPORT socket_engine_poll : public socket_engine_base {
 
 			} catch (const std::exception &e) {
 				eh->on_error(fd, *eh, 0);
+			}
+
+			if ((eh->flags & WANT_DELETION) != 0L) {
+				remove_socket(fd);
+				std::unique_lock lock(fds_mutex);
+				fds.erase(fd);
 			}
 		}
 	}
@@ -184,14 +185,11 @@ struct DPP_EXPORT socket_engine_poll : public socket_engine_base {
 protected:
 
 	bool remove_socket(dpp::socket fd) final {
-		bool r = socket_engine_base::remove_socket(fd);
-		if (r) {
-			std::unique_lock lock(poll_set_mutex);
-			for (auto i = poll_set.begin(); i != poll_set.end(); ++i) {
-				if (i->fd == fd) {
-					poll_set.erase(i);
-					return true;
-				}
+		std::unique_lock lock(poll_set_mutex);
+		for (auto i = poll_set.begin(); i != poll_set.end(); ++i) {
+			if (i->fd == fd) {
+				poll_set.erase(i);
+				return true;
 			}
 		}
 		return false;
