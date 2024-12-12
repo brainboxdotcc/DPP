@@ -118,6 +118,7 @@ struct DPP_EXPORT socket_engine_kqueue : public socket_engine_base {
 			EV_SET(&ke, e.fd, EVFILT_WRITE, EV_ADD | EV_ONESHOT, 0, 0, nullptr);
 			kevent(kqueue_handle, &ke, 1, nullptr, 0, nullptr);
 		}
+		return true;
 	}
 
 	bool register_socket(const socket_events& e) final {
