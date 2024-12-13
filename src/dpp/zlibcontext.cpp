@@ -26,17 +26,19 @@
 namespace dpp {
 
 zlibcontext::zlibcontext() {
-	d_stream = std::make_unique<z_stream>();
-	std::memset(d_stream.get(), 0, sizeof(z_stream));
-	int error = inflateInit(d_stream.get());
+	d_stream = new z_stream();
+	std::memset(d_stream, 0, sizeof(z_stream));
+	int error = inflateInit(d_stream);
 	if (error != Z_OK) {
+		delete d_stream;
 		throw dpp::connection_exception((exception_error_code)error, "Can't initialise stream compression!");
 	}
 	decomp_buffer.resize(DECOMP_BUFFER_SIZE);
 }
 
 zlibcontext::~zlibcontext() {
-	inflateEnd(d_stream.get());
+	inflateEnd(d_stream);
+	delete d_stream;
 }
 
 exception_error_code zlibcontext::decompress(const std::string& buffer, std::string& decompressed) {
@@ -47,7 +49,7 @@ exception_error_code zlibcontext::decompress(const std::string& buffer, std::str
 	do {
 		d_stream->next_out = static_cast<Bytef*>(decomp_buffer.data());
 		d_stream->avail_out = DECOMP_BUFFER_SIZE;
-		int ret = inflate(d_stream.get(), Z_NO_FLUSH);
+		int ret = inflate(d_stream, Z_NO_FLUSH);
 		size_t have = DECOMP_BUFFER_SIZE - d_stream->avail_out;
 		switch (ret)
 		{

@@ -48,7 +48,7 @@ public:
 	 * @brief Zlib stream struct. The actual type is defined in zlib.h
 	 * so is only defined in the implementation file.
 	 */
-	std::unique_ptr<z_stream> d_stream{};
+	z_stream* d_stream{};
 
 	/**
 	 * @brief ZLib decompression buffer.
