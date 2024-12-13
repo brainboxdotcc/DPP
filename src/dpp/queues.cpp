@@ -456,17 +456,24 @@ inline uint32_t hash(const char *s)
 }
 
 /* Post a http_request into a request queue */
-request_queue& request_queue::post_request(std::unique_ptr<http_request> req)
-{
+request_queue& request_queue::post_request(std::unique_ptr<http_request> req) {
 	if (!terminating) {
 		requests_in[hash(req->endpoint.c_str()) % in_queue_pool_size]->post_request(std::move(req));
 	}
 	return *this;
 }
 
-bool request_queue::is_globally_ratelimited() const
-{
+bool request_queue::is_globally_ratelimited() const {
 	return this->globally_ratelimited;
+}
+
+size_t request_queue::get_active_request_count() const {
+	size_t total{};
+	for (auto& pool : requests_in) {
+		std::scoped_lock lock(pool->in_mutex);
+		total += pool->requests_in.size();
+	}
+	return total;
 }
 
 }

@@ -53,6 +53,8 @@
 
 namespace dpp {
 
+constexpr uint32_t NO_SHARDS = ~0U;
+
 /**
  * @brief Types of startup for cluster::start()
  */
@@ -266,6 +268,16 @@ public:
 	 * @brief Socket engine instance
 	 */
 	std::unique_ptr<socket_engine_base> socketengine;
+
+	/**
+	 * @brief Constructor for creating a cluster without a token.
+	 * A cluster created without a token has no shards, and just runs the event loop. You can use this to make asynchronous
+	 * HTTP requests via e.g. dpp::cluster::request without having to connect to a websocket to receive shard events.
+	 * @param pool_threads The number of threads to allocate for the thread pool. This defaults to half your system concurrency and if set to a number less than 4, will default to 4.
+	 * All callbacks and events are placed into the thread pool. The bigger you make this pool (but generally no bigger than your number of cores), the more your bot will scale.
+	 * @throw dpp::exception Thrown on windows, if WinSock fails to initialise, or on any other system if a dpp::request_queue fails to construct
+	 */
+	cluster(uint32_t pool_threads = std::thread::hardware_concurrency() / 2);
 
 	/**
 	 * @brief Constructor for creating a cluster. All but the token are optional.
@@ -523,6 +535,14 @@ public:
 	 * the command with the same name already exists
 	 */
 	bool register_command(const std::string& name, const slashcommand_handler_t handler);
+
+	/**
+	 * @brief Get the number of currently active HTTP(S) requests active in the cluster.
+	 * This total includes all in-flight API requests and calls to dpp::cluster::request().
+	 * Note that once a request is passed to the thread pool it is no longer counted here.
+	 * @return Total active request count
+	 */
+	size_t active_requests();
 
 #ifdef DPP_CORO
 	/**

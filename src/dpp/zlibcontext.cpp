@@ -25,8 +25,7 @@
 
 namespace dpp {
 
-zlibcontext::zlibcontext() {
-	d_stream = new z_stream();
+zlibcontext::zlibcontext() : d_stream(new z_stream()) {
 	std::memset(d_stream, 0, sizeof(z_stream));
 	int error = inflateInit(d_stream);
 	if (error != Z_OK) {
@@ -51,8 +50,7 @@ exception_error_code zlibcontext::decompress(const std::string& buffer, std::str
 		d_stream->avail_out = DECOMP_BUFFER_SIZE;
 		int ret = inflate(d_stream, Z_NO_FLUSH);
 		size_t have = DECOMP_BUFFER_SIZE - d_stream->avail_out;
-		switch (ret)
-		{
+		switch (ret) {
 			case Z_NEED_DICT:
 			case Z_STREAM_ERROR:
 				return err_compression_stream;

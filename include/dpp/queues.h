@@ -642,6 +642,8 @@ public:
 	 * @return true if globally rate limited
 	 */
 	bool is_globally_ratelimited() const;
+
+	size_t get_active_request_count() const;
 };
 
 }

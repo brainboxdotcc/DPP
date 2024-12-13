@@ -53,6 +53,7 @@ constexpr int LARGE_THRESHOLD = 250;
 discord_client::discord_client(discord_client &old, uint64_t sequence, const std::string& session_id)
 	: websocket_client(old.owner, old.resume_gateway_url, "443", old.compressed ? (old.protocol == ws_json ? PATH_COMPRESSED_JSON : PATH_COMPRESSED_ETF) : (old.protocol == ws_json ? PATH_UNCOMPRESSED_JSON : PATH_UNCOMPRESSED_ETF)),
 	  compressed(old.compressed),
+	  zlib(nullptr),
 	  connect_time(0),
 	  ping_start(0.0),
 	  etf(nullptr),
@@ -79,6 +80,7 @@ discord_client::discord_client(discord_client &old, uint64_t sequence, const std
 discord_client::discord_client(dpp::cluster* _cluster, uint32_t _shard_id, uint32_t _max_shards, const std::string &_token, uint32_t _intents, bool comp, websocket_protocol_t ws_proto)
        : websocket_client(_cluster, _cluster->default_gateway, "443", comp ? (ws_proto == ws_json ? PATH_COMPRESSED_JSON : PATH_COMPRESSED_ETF) : (ws_proto == ws_json ? PATH_UNCOMPRESSED_JSON : PATH_UNCOMPRESSED_ETF)),
 	compressed(comp),
+	zlib(nullptr),
 	connect_time(0),
 	ping_start(0.0),
 	etf(nullptr),
