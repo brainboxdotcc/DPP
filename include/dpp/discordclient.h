@@ -37,17 +37,17 @@
 #include <mutex>
 #include <shared_mutex>
 
+namespace dpp {
+
 /**
  * @brief Discord API version for shard websockets and HTTPS API requests
  */
-#define DISCORD_API_VERSION	"10"
+#define DISCORD_API_VERSION "10"
 
 /**
  * @brief HTTPS Request base path for API calls
  */
-#define API_PATH	        "/api/v" DISCORD_API_VERSION
-
-namespace dpp {
+#define API_PATH "/api/v" DISCORD_API_VERSION
 
 /* Forward declarations */
 class cluster;
@@ -63,6 +63,12 @@ class zlibcontext;
  * @brief Size of decompression buffer for zlib compressed traffic
  */
 constexpr size_t DECOMP_BUFFER_SIZE = 512 * 1024;
+
+/**
+ * @brief How many seconds to wait between (re)connections. DO NOT change this.
+ * It is mandated by the Discord API spec!
+ */
+constexpr time_t RECONNECT_INTERVAL = 5;
 
 /**
  * @brief Represents different event opcodes sent and received on a shard websocket

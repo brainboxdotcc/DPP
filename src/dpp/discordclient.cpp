@@ -30,10 +30,10 @@
 #include <dpp/etf.h>
 #include <zlib.h>
 
-#define PATH_UNCOMPRESSED_JSON	"/?v=" DISCORD_API_VERSION "&encoding=json"
-#define PATH_COMPRESSED_JSON	"/?v=" DISCORD_API_VERSION "&encoding=json&compress=zlib-stream"
-#define PATH_UNCOMPRESSED_ETF	"/?v=" DISCORD_API_VERSION "&encoding=etf"
-#define PATH_COMPRESSED_ETF	"/?v=" DISCORD_API_VERSION "&encoding=etf&compress=zlib-stream"
+#define PATH_UNCOMPRESSED_JSON "/?v=" DISCORD_API_VERSION "&encoding=json"
+#define PATH_COMPRESSED_JSON "/?v=" DISCORD_API_VERSION "&encoding=json&compress=zlib-stream"
+#define PATH_UNCOMPRESSED_ETF "/?v=" DISCORD_API_VERSION "&encoding=etf"
+#define PATH_COMPRESSED_ETF "/?v=" DISCORD_API_VERSION "&encoding=etf&compress=zlib-stream"
 #define STRINGIFY(a) STRINGIFY_(a)
 #define STRINGIFY_(a) #a
 
@@ -42,6 +42,11 @@
 #endif
 
 namespace dpp {
+
+/**
+ * @brief Used in IDENTIFY to indicate what a large guild is
+ */
+constexpr int LARGE_THRESHOLD = 250;
 
 /**
  * @brief This is an opaque class containing zlib library specific structures.
@@ -199,7 +204,8 @@ bool discord_client::handle_frame(const std::string &buffer, ws_opcode opcode)
 		&& (uint8_t)buffer[buffer.size() - 1] == 0xFF) {
 			/* Decompress buffer */
 			decompressed.clear();
-			zlib->d_stream.next_in = (Bytef*)buffer.data();
+			/* This is safe; zlib requires us to cast away the const. The underlying buffer is unchanged. */
+			zlib->d_stream.next_in = reinterpret_cast<Bytef*>(const_cast<char*>(buffer.data()));
 			zlib->d_stream.avail_in = static_cast<uInt>(buffer.size());
 			do {
 				zlib->d_stream.next_out = static_cast<Bytef*>(decomp_buffer.data());
@@ -281,29 +287,32 @@ bool discord_client::handle_frame(const std::string &buffer, ws_opcode opcode)
 
 		switch (op) {
 			case ft_invalid_session:
-				/* Reset session state and fall through to 10 */
+				/* Reset session state and fall through to ft_hello */
 				op = ft_hello;
 				log(dpp::ll_debug, "Failed to resume session " + sessionid + ", will reidentify");
 				this->sessionid.clear();
 				this->last_seq = 0;
-				/* No break here, falls through to state 10 to cause a reidentify */
+				/* No break here, falls through to state ft_hello to cause a re-identify */
 				[[fallthrough]];
-			case ft_hello:
+			case ft_hello: {
 				/* Need to check carefully for the existence of this before we try to access it! */
-				if (j.find("d") != j.end() && j["d"].find("heartbeat_interval") != j["d"].end() && !j["d"]["heartbeat_interval"].is_null()) {
-					this->heartbeat_interval = j["d"]["heartbeat_interval"].get<uint32_t>();
+				auto d = j.find("d");
+				if (d != j.end()) {
+					auto heartbeat = d->find("heartbeat_interval");
+					if (heartbeat != d->end() && !heartbeat->is_null())
+						this->heartbeat_interval = heartbeat->get<uint32_t>();
 				}
 
-				if (last_seq && !sessionid.empty()) {
+				if (last_seq != 0U && !sessionid.empty()) {
 					/* Resume */
 					log(dpp::ll_debug, "Resuming session " + sessionid + " with seq=" + std::to_string(last_seq));
 					json obj = {
-						{ "op", ft_resume },
-						{ "d", {
-								{"token", this->token },
-								{"session_id", this->sessionid },
-								{"seq", this->last_seq }
-							}
+						{"op", ft_resume},
+						{"d",  {
+							       {"token", this->token},
+							       {"session_id", this->sessionid},
+							       {"seq", this->last_seq}
+						       }
 						}
 					};
 					this->write(jsonobj_to_string(obj), protocol == ws_etf ? OP_BINARY : OP_TEXT);
@@ -313,39 +322,40 @@ bool discord_client::handle_frame(const std::string &buffer, ws_opcode opcode)
 					auto connect_now = [this]() {
 						log(dpp::ll_debug, "Connecting new session...");
 						json obj = {
-							{ "op", ft_identify },
-							{ "d",
-								{
-									{ "token", this->token },
-									{ "properties",
-										{
-											{ "os", STRINGIFY(DPP_OS) },
-											{ "browser", "D++" },
-											{ "device", "D++" }
-										}
-									},
-									{ "shard", json::array({ shard_id, max_shards }) },
-									{ "compress", false },
-									{ "large_threshold", 250 },
-									{ "intents", this->intents }
-								}
+							{"op", ft_identify},
+							{"d",
+							       {
+								       {"token", this->token},
+								       {"properties",
+									       {
+										       {"os", STRINGIFY(DPP_OS)},
+										       {"browser", "D++"},
+										       {"device", "D++"}
+									       }
+								       },
+								       {"shard", json::array({shard_id, max_shards})},
+								       {"compress", false},
+								       {"large_threshold", LARGE_THRESHOLD},
+								       {"intents", this->intents}
+							       }
 							}
 						};
 						this->write(jsonobj_to_string(obj), protocol == ws_etf ? OP_BINARY : OP_TEXT);
 						this->connect_time = creator->last_identify = time(nullptr);
 						reconnects++;
 					};
-					if (time(nullptr) < creator->last_identify + 5) {
+					if (time(nullptr) < creator->last_identify + RECONNECT_INTERVAL) {
 						owner->start_timer([this, connect_now](timer h) {
 							owner->stop_timer(h);
 							connect_now();
-						}, (creator->last_identify + 5) - time(nullptr));
+						}, (creator->last_identify + RECONNECT_INTERVAL) - time(nullptr));
 					} else {
 						connect_now();
 					}
 				}
 				this->last_heartbeat_ack = time(nullptr);
 				websocket_ping = 0;
+			}
 			break;
 			case ft_dispatch: {
 				std::string event = j["t"];
@@ -354,8 +364,7 @@ bool discord_client::handle_frame(const std::string &buffer, ws_opcode opcode)
 			break;
 			case ft_reconnect:
 				message_queue.clear();
-				throw dpp::connection_exception("Reconnection requested, closing socket " + sessionid);
-			break;
+				throw dpp::connection_exception("Reconnection requested, closing session " + sessionid);
 			/* Heartbeat ack */
 			case ft_heartbeat_ack:
 				this->last_heartbeat_ack = time(nullptr);
@@ -376,7 +385,7 @@ bool discord_client::handle_frame(const std::string &buffer, ws_opcode opcode)
 
 dpp::utility::uptime discord_client::get_uptime()
 {
-	return dpp::utility::uptime(time(nullptr) - connect_time);
+	return {time(nullptr) - connect_time};
 }
 
 bool discord_client::is_connected()

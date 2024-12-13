@@ -293,5 +293,4 @@ template<class T> inline void rest_request_vector(dpp::cluster* c, const char* b
 	});
 }
 
-
 }
