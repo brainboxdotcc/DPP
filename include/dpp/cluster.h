@@ -4040,9 +4040,8 @@ public:
 	 */
 	void channel_set_voice_status(snowflake channel_id, const std::string& status, command_completion_event_t callback = utility::log_error());
 
-#include <dpp/cluster_sync_calls.h>
 #ifdef DPP_CORO
-#include <dpp/cluster_coro_calls.h>
+	#include <dpp/cluster_coro_calls.h>
 #endif
 
 };

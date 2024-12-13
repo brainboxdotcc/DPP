@@ -311,23 +311,16 @@ void cluster::start(start_type return_after) {
 			if (g.session_start_remaining < g.shards || g.shards == 0) {
 				throw_if_not_threaded(err_no_sessions_left, "Discord indicates you cannot start enough sessions to boot this cluster! Cluster startup aborted. Try again later.");
 				return;
-			} else
-				if (g.session_start_max_concurrency == 0) {
-					throw_if_not_threaded(err_auto_shard, "Cluster: Could not determine concurrency, startup aborted!");
-					return;
-				} else
-					if (g.session_start_max_concurrency > 1) {
-						log(ll_debug, "Cluster: Large bot sharding; Using session concurrency: " + std::to_string(g.session_start_max_concurrency));
-					} else
-						if (numshards == 0) {
-							if (g.shards) {
-								log(ll_info, "Auto Shard: Bot requires " + std::to_string(g.shards) + std::string(" shard") + ((g.shards > 1) ? "s" : ""));
-							} else {
-								throw_if_not_threaded(err_auto_shard, "Auto Shard: Cannot determine number of shards. Cluster startup aborted. Check your connection.");
-								return;
-							}
-							numshards = g.shards;
-						}
+			} else if (g.session_start_max_concurrency == 0) {
+				throw_if_not_threaded(err_auto_shard, "Cluster: Could not determine concurrency, startup aborted!");
+				return;
+			} else if (g.session_start_max_concurrency > 1) {
+				log(ll_debug, "Cluster: Large bot sharding; Using session concurrency: " + std::to_string(g.session_start_max_concurrency));
+			}
+			if (numshards == 0) {
+				log(ll_info, "Auto Shard: Bot requires " + std::to_string(g.shards) + std::string(" shard") + ((g.shards > 1) ? "s" : ""));
+				numshards = g.shards;
+			}
 			log(ll_debug, "Starting with " + std::to_string(numshards) + " shards...");
 			start_time = time(nullptr);
 
