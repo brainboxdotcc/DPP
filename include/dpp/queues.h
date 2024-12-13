@@ -37,7 +37,7 @@ namespace dpp {
 /**
  * @brief Error values. Most of these are currently unused in https_client.
  */
-enum http_error {
+enum http_error : uint8_t {
 	/**
 	 * @brief Request successful.
 	 */
@@ -304,18 +304,6 @@ public:
 	std::string protocol;
 
 	/**
-	 * @brief How many seconds before the connection is considered failed if not finished
-	 *
-	 * @deprecated Please now use dpp::cluster::request_timeout
-	 */
-	DPP_DEPRECATED("Please now use dpp::cluster::request_timeout") time_t request_timeout;
-
-	/**
-	 * @brief Unique ptr to self
-	 */
-	std::unique_ptr<http_request> me{nullptr};
-
-	/**
 	 * @brief Constructor. When constructing one of these objects it should be passed to request_queue::post_request().
 	 * @param _endpoint The API endpoint, e.g. /api/guilds
 	 * @param _parameters Major and minor parameters for the endpoint e.g. a user id or guild id
@@ -354,20 +342,13 @@ public:
 	 * @param _mimetype POST data mime type
 	 * @param _headers HTTP headers to send
 	 * @param http_protocol HTTP protocol
-	 * @param _request_timeout How many seconds before the connection is considered failed if not finished
 	 */
-	http_request(const std::string &_url, http_completion_event completion, http_method method = m_get, const std::string &_postdata = "", const std::string &_mimetype = "text/plain", const std::multimap<std::string, std::string> &_headers = {}, const std::string &http_protocol = "1.1", time_t _request_timeout = 5);
+	http_request(const std::string &_url, http_completion_event completion, http_method method = m_get, const std::string &_postdata = "", const std::string &_mimetype = "text/plain", const std::multimap<std::string, std::string> &_headers = {}, const std::string &http_protocol = "1.1");
 
 	/**
 	 * @brief Destroy the http request object
 	 */
 	~http_request();
-
-	/**
-	 * @brief stash unique ptr to self for moving into outbound queue when done
-	 * @param self unique self
-	 */
-	void stash_self(std::unique_ptr<http_request> self);
 
 	/**
 	 * @brief Call the completion callback, if the request is complete.
@@ -377,15 +358,20 @@ public:
 
 	/**
 	 * @brief Execute the HTTP request and mark the request complete.
+	 * @param processor Request concurrency queue this request was created by
 	 * @param owner creating cluster
 	 */
 	http_request_completion_t run(class request_concurrency_queue* processor, class cluster* owner);
 
-	/** @brief Returns true if the request is complete */
+	/**
+	 * @brief Returns true if the request is complete
+	 * @return True if completed
+	 * */
 	bool is_completed();
 
 	/**
 	 * @brief Get the HTTPS client used to perform this request, or nullptr if there is none
+	 * @return https_client object
 	 */
 	https_client* get_client() const;
 };
@@ -643,6 +629,10 @@ public:
 	 */
 	bool is_globally_ratelimited() const;
 
+	/**
+	 * @brief Returns the number of active requests on this queue
+	 * @return Total number of active requests
+	 */
 	size_t get_active_request_count() const;
 };
 

@@ -2648,5 +2648,5 @@
 
 
 /* End of auto-generated definitions */
-[[nodiscard]] async<http_request_completion_t> co_request(const std::string &url, http_method method, const std::string &postdata = "", const std::string &mimetype = "text/plain", const std::multimap<std::string, std::string> &headers = {}, const std::string &protocol = "1.1", time_t request_timeout = 5);
+[[nodiscard]] async<http_request_completion_t> co_request(const std::string &url, http_method method, const std::string &postdata = "", const std::string &mimetype = "text/plain", const std::multimap<std::string, std::string> &headers = {}, const std::string &protocol = "1.1");
 
