@@ -32,6 +32,7 @@
 #include <string>
 #include <unordered_map>
 #include <cstring>
+#include <memory>
 #include <dpp/socket.h>
 
 namespace dpp {
@@ -83,7 +84,7 @@ namespace dpp {
 	/**
 	 * @brief Cache container type
 	 */
-	using dns_cache_t = std::unordered_map<std::string, dns_cache_entry*>;
+	using dns_cache_t = std::unordered_map<std::string, std::unique_ptr<dns_cache_entry>>;
 
 	/**
 	 * @brief Resolve a hostname to an addrinfo
