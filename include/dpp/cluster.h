@@ -41,7 +41,6 @@
 #include <dpp/cache.h>
 #include <dpp/intents.h>
 #include <dpp/discordevents.h>
-#include <dpp/sync.h>
 #include <algorithm>
 #include <iostream>
 #include <shared_mutex>

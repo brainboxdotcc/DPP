@@ -38,7 +38,6 @@
 #include <dpp/queues.h>
 #include <dpp/cache.h>
 #include <dpp/intents.h>
-#include <dpp/sync.h>
 #include <algorithm>
 #include <iostream>
 #include <shared_mutex>
