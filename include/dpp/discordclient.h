@@ -36,6 +36,7 @@
 #include <dpp/etf.h>
 #include <mutex>
 #include <shared_mutex>
+#include <dpp/zlibcontext.h>
 
 namespace dpp {
 
@@ -51,18 +52,6 @@ namespace dpp {
 
 /* Forward declarations */
 class cluster;
-
-/**
- * @brief This is an opaque class containing zlib library specific structures.
- * We define it this way so that the public facing D++ library doesn't require
- * the zlib headers be available to build against it.
- */
-class zlibcontext;
-
-/**
- * @brief Size of decompression buffer for zlib compressed traffic
- */
-constexpr size_t DECOMP_BUFFER_SIZE = 512 * 1024;
 
 /**
  * @brief How many seconds to wait between (re)connections. DO NOT change this.
@@ -309,15 +298,6 @@ private:
 	bool compressed;
 
 	/**
-	 * @brief ZLib decompression buffer
-	 *
-	 * If compression is not in use, this remains set to
-	 * a vector of length zero, but when compression is
-	 * enabled it will be resized to a DECOMP_BUFFER_SIZE buffer.
-	 */
-	std::vector<unsigned char> decomp_buffer;
-
-	/**
 	 * @brief Decompressed string
 	 */
 	std::string decompressed;
@@ -329,11 +309,6 @@ private:
 	 * file does not bring in a dependency on zlib.h.
 	 */
 	std::unique_ptr<zlibcontext> zlib{};
-
-	/**
-	 * @brief Total decompressed received bytes
-	 */
-	uint64_t decompressed_total;
 
 	/**
 	 * @brief Last connect time of cluster
@@ -573,11 +548,13 @@ public:
 	/**
 	 * @brief Destroy the discord client object
 	 */
-	virtual ~discord_client() override;
+	virtual ~discord_client() = default;
 
 	/**
-	 * @brief Get the decompressed bytes in objectGet decompressed total bytes received
-	 * @return uint64_t bytes received
+	 * @brief Get decompressed total bytes received
+	 *
+	 * This will always return 0 if the connection is not compressed
+	 * @return uint64_t compressed bytes received
 	 */
 	uint64_t get_decompressed_bytes_in();
 

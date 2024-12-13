@@ -3,7 +3,7 @@
  * D++, A Lightweight C++ library for Discord
  *
  * SPDX-License-Identifier: Apache-2.0
- * Copyright 2021 Craig Edwards and D++ contributors 
+#include <dpp/zlibcontext.h> * Copyright 2021 Craig Edwards and D++ contributors
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,7 +28,6 @@
 #include <thread>
 #include <dpp/json.h>
 #include <dpp/etf.h>
-#include <zlib.h>
 
 #define PATH_UNCOMPRESSED_JSON "/?v=" DISCORD_API_VERSION "&encoding=json"
 #define PATH_COMPRESSED_JSON "/?v=" DISCORD_API_VERSION "&encoding=json&compress=zlib-stream"
@@ -49,44 +48,11 @@ namespace dpp {
 constexpr int LARGE_THRESHOLD = 250;
 
 /**
- * @brief This is an opaque class containing zlib library specific structures.
- * We define it this way so that the public facing D++ library doesn't require
- * the zlib headers be available to build against it.
- */
-class zlibcontext {
-public:
-	/**
-	 * @brief Zlib stream struct
-	 */
-	z_stream d_stream{};
-
-	/**
-	 * @brief Initialise zlib struct via inflateInit()
-	 */
-	zlibcontext() {
-		int error = inflateInit(&d_stream);
-		if (error != Z_OK) {
-			throw dpp::connection_exception((exception_error_code)error, "Can't initialise stream compression!");
-		}
-	}
-
-	/**
-	 * @brief Destroy zlib struct via inflateEnd()
-	 */
-	~zlibcontext() {
-		inflateEnd(&d_stream);
-	}
-};
-
-
-/**
  * @brief Resume constructor for websocket client
  */
 discord_client::discord_client(discord_client &old, uint64_t sequence, const std::string& session_id)
 	: websocket_client(old.owner, old.resume_gateway_url, "443", old.compressed ? (old.protocol == ws_json ? PATH_COMPRESSED_JSON : PATH_COMPRESSED_ETF) : (old.protocol == ws_json ? PATH_UNCOMPRESSED_JSON : PATH_UNCOMPRESSED_ETF)),
 	  compressed(old.compressed),
-	  zlib(nullptr),
-	  decompressed_total(old.decompressed_total),
 	  connect_time(0),
 	  ping_start(0.0),
 	  etf(nullptr),
@@ -113,8 +79,6 @@ discord_client::discord_client(discord_client &old, uint64_t sequence, const std
 discord_client::discord_client(dpp::cluster* _cluster, uint32_t _shard_id, uint32_t _max_shards, const std::string &_token, uint32_t _intents, bool comp, websocket_protocol_t ws_proto)
        : websocket_client(_cluster, _cluster->default_gateway, "443", comp ? (ws_proto == ws_json ? PATH_COMPRESSED_JSON : PATH_COMPRESSED_ETF) : (ws_proto == ws_json ? PATH_UNCOMPRESSED_JSON : PATH_UNCOMPRESSED_ETF)),
 	compressed(comp),
-	zlib(nullptr),
-	decompressed_total(0),
 	connect_time(0),
 	ping_start(0.0),
 	etf(nullptr),
@@ -138,19 +102,14 @@ discord_client::discord_client(dpp::cluster* _cluster, uint32_t _shard_id, uint3
 }
 
 void discord_client::start_connecting() {
-	etf = std::make_unique<etf_parser>(etf_parser());
+	etf = std::make_unique<etf_parser>();
 	if (compressed) {
 		zlib = std::make_unique<zlibcontext>();
-		decomp_buffer.resize(DECOMP_BUFFER_SIZE);
 	}
 	websocket_client::connect();
 }
 
 void discord_client::cleanup()
-{
-}
-
-discord_client::~discord_client()
 {
 }
 
@@ -167,7 +126,7 @@ void discord_client::on_disconnect()
 
 uint64_t discord_client::get_decompressed_bytes_in()
 {
-	return decompressed_total;
+	return zlib ? zlib->decompressed_total : 0;
 }
 
 void discord_client::set_resume_hostname()
@@ -191,40 +150,12 @@ bool discord_client::handle_frame(const std::string &buffer, ws_opcode opcode)
 		/* Check that we have a complete compressed frame */
 		if ((uint8_t)buffer[buffer.size() - 4] == 0x00 && (uint8_t)buffer[buffer.size() - 3] == 0x00 && (uint8_t)buffer[buffer.size() - 2] == 0xFF
 		&& (uint8_t)buffer[buffer.size() - 1] == 0xFF) {
-			/* Decompress buffer */
-			decompressed.clear();
-			/* This is safe; zlib requires us to cast away the const. The underlying buffer is unchanged. */
-			zlib->d_stream.next_in = reinterpret_cast<Bytef*>(const_cast<char*>(buffer.data()));
-			zlib->d_stream.avail_in = static_cast<uInt>(buffer.size());
-			do {
-				zlib->d_stream.next_out = static_cast<Bytef*>(decomp_buffer.data());
-				zlib->d_stream.avail_out = DECOMP_BUFFER_SIZE;
-				int ret = inflate(&(zlib->d_stream), Z_NO_FLUSH);
-				size_t have = DECOMP_BUFFER_SIZE - zlib->d_stream.avail_out;
-				switch (ret)
-				{
-					case Z_NEED_DICT:
-					case Z_STREAM_ERROR:
-						this->error(err_compression_stream);
-						this->close();
-						return false;
-					case Z_DATA_ERROR:
-						this->error(err_compression_data);
-						this->close();
-						return false;
-					case Z_MEM_ERROR:
-						this->error(err_compression_memory);
-						this->close();
-						return false;
-					case Z_OK:
-						this->decompressed.append(decomp_buffer.begin(), decomp_buffer.begin() + have);
-						this->decompressed_total += have;
-						break;
-					default:
-						/* Stub */
-					break;
-				}
-			} while (zlib->d_stream.avail_out == 0);
+			auto result = zlib->decompress(buffer, decompressed);
+			if (result != err_no_code_specified) {
+				this->error(result);
+				this->close();
+				return false;
+			}
 			data = decompressed;
 		} else {
 			/* No complete compressed frame yet */
