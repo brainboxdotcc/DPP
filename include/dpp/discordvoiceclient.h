@@ -833,13 +833,13 @@ public:
 	 * @param severity The log level from dpp::loglevel
 	 * @param msg The log message to output
 	 */
-	virtual void log(dpp::loglevel severity, const std::string &msg) const;
+	virtual void log(dpp::loglevel severity, const std::string &msg) const override;
 
 	/**
 	 * @brief Fires every second from the underlying socket I/O loop, used for sending heartbeats
 	 * @throw dpp::exception if the socket needs to disconnect
 	 */
-	virtual void one_second_timer();
+	virtual void one_second_timer() override;
 
 	/**
 	 * @brief voice client is ready to stream audio.
@@ -886,7 +886,7 @@ public:
 	/**
 	 * @brief Destroy the discord voice client object
 	 */
-	virtual ~discord_voice_client();
+	virtual ~discord_voice_client() override;
 
 	/**
 	 * @brief Handle JSON from the websocket.
@@ -895,13 +895,13 @@ public:
 	 * @return bool True if a frame has been handled
 	 * @throw dpp::exception If there was an error processing the frame, or connection to UDP socket failed
 	 */
-	virtual bool handle_frame(const std::string &buffer, ws_opcode opcode);
+	virtual bool handle_frame(const std::string &buffer, ws_opcode opcode) override;
 
 	/**
 	 * @brief Handle a websocket error.
 	 * @param errorcode The error returned from the websocket
 	 */
-	virtual void error(uint32_t errorcode);
+	virtual void error(uint32_t errorcode) override;
 
 	/**
 	 * @brief Start and monitor websocket I/O
@@ -1260,7 +1260,7 @@ public:
 	/**
 	 * @brief Called on websocket disconnection
 	 */
-	void on_disconnect();
+	void on_disconnect() override;
 };
 
 }

@@ -155,7 +155,7 @@ protected:
 	/**
 	 * @brief Connect to websocket server
 	 */
-	virtual void connect();
+	virtual void connect() override;
 
 	/**
 	 * @brief Get websocket state
@@ -207,12 +207,12 @@ public:
 	 * @brief Processes incoming frames from the SSL socket input buffer.
 	 * @param buffer The buffer contents. Can modify this value removing the head elements when processed.
 	 */
-	virtual bool handle_buffer(std::string& buffer);
+	virtual bool handle_buffer(std::string& buffer) override;
 
 	/**
 	 * @brief Close websocket
 	 */
-	virtual void close();
+	virtual void close() override;
 
 	/**
 	 * @brief Receives raw frame content only without headers
@@ -233,7 +233,7 @@ public:
 	/**
 	 * @brief Fires every second from the underlying socket I/O loop, used for sending websocket pings
 	 */
-	virtual void one_second_timer();
+	virtual void one_second_timer() override;
 
 	/**
 	 * @brief Send OP_CLOSE error code 1000 to the other side of the connection.

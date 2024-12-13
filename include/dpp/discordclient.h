@@ -328,7 +328,7 @@ private:
 	 * are wrapped within this opaque object so that this header
 	 * file does not bring in a dependency on zlib.h.
 	 */
-	zlibcontext* zlib;
+	std::unique_ptr<zlibcontext> zlib{};
 
 	/**
 	 * @brief Total decompressed received bytes
@@ -359,17 +359,6 @@ private:
 	 * @return std::string string output in the correct format
 	 */
 	std::string jsonobj_to_string(const nlohmann::json& json);
-
-	/**
-	 * @brief Initialise ZLib (websocket compression)
-	 * @throw dpp::exception if ZLib cannot be initialised
-	 */
-	void setup_zlib();
-
-	/**
-	 * @brief Shut down ZLib (websocket compression)
-	 */
-	void end_zlib();
 
 	/**
 	 * @brief Update the websocket hostname with the resume url
@@ -481,7 +470,7 @@ public:
 	 * @param severity The log level from dpp::loglevel
 	 * @param msg The log message to output
 	 */
-	virtual void log(dpp::loglevel severity, const std::string &msg) const;
+	virtual void log(dpp::loglevel severity, const std::string &msg) const override;
 
 	/**
 	 * @brief Handle an event (opcode 0)
@@ -516,7 +505,7 @@ public:
 	 * @brief Fires every second from the underlying socket I/O loop, used for sending heartbeats
 	 * and any queued outbound websocket frames.
 	 */
-	virtual void one_second_timer();
+	virtual void one_second_timer() override;
 
 	/**
 	 * @brief Queue a message to be sent via the websocket
@@ -584,7 +573,7 @@ public:
 	/**
 	 * @brief Destroy the discord client object
 	 */
-	virtual ~discord_client();
+	virtual ~discord_client() override;
 
 	/**
 	 * @brief Get the decompressed bytes in objectGet decompressed total bytes received
@@ -598,13 +587,13 @@ public:
 	 * @param opcode The type of frame, e.g. text or binary
 	 * @returns True if a frame has been handled
 	 */
-	virtual bool handle_frame(const std::string &buffer, ws_opcode opcode);
+	virtual bool handle_frame(const std::string &buffer, ws_opcode opcode) override;
 
 	/**
 	 * @brief Handle a websocket error.
 	 * @param errorcode The error returned from the websocket
 	 */
-	virtual void error(uint32_t errorcode);
+	virtual void error(uint32_t errorcode) override;
 
 	/**
 	 * @brief Start and monitor I/O loop.
@@ -614,7 +603,7 @@ public:
 	/**
 	 * @brief Called when the HTTP socket is closed
 	 */
-	virtual void on_disconnect();
+	virtual void on_disconnect() override;
 
 	/**
 	 * @brief Connect to a voice channel

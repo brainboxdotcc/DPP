@@ -58,7 +58,24 @@ public:
 	/**
 	 * @brief Zlib stream struct
 	 */
-	z_stream d_stream;
+	z_stream d_stream{};
+
+	/**
+	 * @brief Initialise zlib struct via inflateInit()
+	 */
+	zlibcontext() {
+		int error = inflateInit(&d_stream);
+		if (error != Z_OK) {
+			throw dpp::connection_exception((exception_error_code)error, "Can't initialise stream compression!");
+		}
+	}
+
+	/**
+	 * @brief Destroy zlib struct via inflateEnd()
+	 */
+	~zlibcontext() {
+		inflateEnd(&d_stream);
+	}
 };
 
 
@@ -90,7 +107,6 @@ discord_client::discord_client(discord_client &old, uint64_t sequence, const std
 	  protocol(old.protocol),
 	  resume_gateway_url(old.resume_gateway_url)
 {
-	etf = std::make_unique<etf_parser>(etf_parser());
 	start_connecting();
 }
 
@@ -118,11 +134,15 @@ discord_client::discord_client(dpp::cluster* _cluster, uint32_t _shard_id, uint3
 	protocol(ws_proto),
 	resume_gateway_url(_cluster->default_gateway)
 {
-	etf = std::make_unique<etf_parser>(etf_parser());
 	start_connecting();
 }
 
 void discord_client::start_connecting() {
+	etf = std::make_unique<etf_parser>(etf_parser());
+	if (compressed) {
+		zlib = std::make_unique<zlibcontext>();
+		decomp_buffer.resize(DECOMP_BUFFER_SIZE);
+	}
 	websocket_client::connect();
 }
 
@@ -132,7 +152,6 @@ void discord_client::cleanup()
 
 discord_client::~discord_client()
 {
-	end_zlib();
 }
 
 void discord_client::on_disconnect()
@@ -151,35 +170,6 @@ uint64_t discord_client::get_decompressed_bytes_in()
 	return decompressed_total;
 }
 
-void discord_client::setup_zlib()
-{
-	std::lock_guard<std::mutex> lock(zlib_mutex);
-	if (compressed) {
-		if (zlib == nullptr) {
-			zlib = new zlibcontext();
-		}
-		zlib->d_stream.zalloc = (alloc_func)0;
-		zlib->d_stream.zfree = (free_func)0;
-		zlib->d_stream.opaque = (voidpf)0;
-		int error = inflateInit(&(zlib->d_stream));
-		if (error != Z_OK) {
-			throw dpp::connection_exception((exception_error_code)error, "Can't initialise stream compression!");
-		}
-		decomp_buffer.resize(DECOMP_BUFFER_SIZE);
-	}
-
-}
-
-void discord_client::end_zlib()
-{
-	std::lock_guard<std::mutex> lock(zlib_mutex);
-	if (compressed && zlib) {
-		inflateEnd(&(zlib->d_stream));
-	}
-	delete zlib;
-	zlib = nullptr;
-}
-
 void discord_client::set_resume_hostname()
 {
 	hostname = resume_gateway_url;
@@ -187,7 +177,6 @@ void discord_client::set_resume_hostname()
 
 void discord_client::run()
 {
-	setup_zlib();
 	ready = false;
 	message_queue.clear();
 	ssl_client::read_loop();
