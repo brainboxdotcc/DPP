@@ -39,12 +39,12 @@ void message_create::handle(discord_client* client, json &j, const std::string &
 
 	if (!client->creator->on_message_create.empty()) {
 		json js = j;
-		client->creator->queue_work(1, [client, js, raw]() {
+		client->creator->queue_work(1, [c = client->creator, js, raw]() {
 			json d = js["d"];
 			dpp::message_create_t msg(client, raw);
 			msg.msg = message(client->owner).fill_from_json(&d, client->creator->cache_policy);
 			msg.msg.owner = client->creator;
-			client->creator->on_message_create.call(msg);
+			c->on_message_create.call(msg);
 		});
 	}
 }

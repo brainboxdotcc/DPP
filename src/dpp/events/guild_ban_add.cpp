@@ -44,8 +44,8 @@ void guild_ban_add::handle(discord_client* client, json &j, const std::string &r
 		dpp::guild_ban_add_t gba(client, raw);
 		gba.banning_guild = dpp::find_guild(snowflake_not_null(&d, "guild_id"));
 		gba.banned = dpp::user().fill_from_json(&(d["user"]));
-		client->creator->queue_work(1, [client, gba]() {
-			client->creator->on_guild_ban_add.call(gba);
+		client->creator->queue_work(1, [c = client->creator, gba]() {
+			c->on_guild_ban_add.call(gba);
 		});
 	}
 }

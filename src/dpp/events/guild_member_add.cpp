@@ -47,8 +47,8 @@ void guild_member_add::handle(discord_client* client, json &j, const std::string
 		gmr.added = gm;
 		if (!client->creator->on_guild_member_add.empty()) {
 			gmr.adding_guild = g;
-			client->creator->queue_work(1, [client, gmr]() {
-				client->creator->on_guild_member_add.call(gmr);
+			client->creator->queue_work(1, [c = client->creator, gmr]() {
+				c->on_guild_member_add.call(gmr);
 			});
 		}
 	} else {
@@ -71,8 +71,8 @@ void guild_member_add::handle(discord_client* client, json &j, const std::string
 		}
 		if (!client->creator->on_guild_member_add.empty()) {
 			gmr.adding_guild = g;
-			client->creator->queue_work(1, [client, gmr]() {
-				client->creator->on_guild_member_add.call(gmr);
+			client->creator->queue_work(1, [c = client->creator, gmr]() {
+				c->on_guild_member_add.call(gmr);
 			});
 		}
 	}

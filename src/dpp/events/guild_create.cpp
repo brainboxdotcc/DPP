@@ -204,8 +204,8 @@ void guild_create::handle(discord_client* client, json &j, const std::string &ra
 			}
 		}
 
-		client->creator->queue_work(0, [client, gc]() {
-			client->creator->on_guild_create.call(gc);
+		client->creator->queue_work(0, [c = client->creator, gc]() {
+			c->on_guild_create.call(gc);
 		});
 	}
 }

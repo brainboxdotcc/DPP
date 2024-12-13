@@ -48,8 +48,8 @@ void guild_role_delete::handle(discord_client* client, json &j, const std::strin
 			grd.deleting_guild = g;
 			grd.role_id = role_id;
 			grd.deleted = nullptr;
-			client->creator->queue_work(1, [client, grd]() {
-				client->creator->on_guild_role_delete.call(grd);
+			client->creator->queue_work(1, [c = client->creator, grd]() {
+				c->on_guild_role_delete.call(grd);
 			});
 		}
 	} else {
@@ -59,8 +59,8 @@ void guild_role_delete::handle(discord_client* client, json &j, const std::strin
 			grd.deleting_guild = g;
 			grd.deleted = r;
 			grd.role_id = role_id;
-			client->creator->queue_work(1, [client, grd]() {
-				client->creator->on_guild_role_delete.call(grd);
+			client->creator->queue_work(1, [c = client->creator, grd]() {
+				c->on_guild_role_delete.call(grd);
 			});
 		}
 		if (r) {

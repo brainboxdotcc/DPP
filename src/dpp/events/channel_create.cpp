@@ -70,8 +70,8 @@ void channel_create::handle(discord_client* client, json &j, const std::string &
 		dpp::channel_create_t cc(client, raw);
 		cc.created = c;
 		cc.creating_guild = g;
-		client->creator->queue_work(1, [client, cc]() {
-			client->creator->on_channel_create.call(cc);
+		client->creator->queue_work(1, [c = client->creator, cc]() {
+			c->on_channel_create.call(cc);
 		});
 	}
 }

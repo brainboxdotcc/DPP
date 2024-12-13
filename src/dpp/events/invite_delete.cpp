@@ -41,8 +41,8 @@ void invite_delete::handle(discord_client* client, json &j, const std::string &r
 		json& d = j["d"];
 		dpp::invite_delete_t cd(client, raw);
 		cd.deleted_invite = dpp::invite().fill_from_json(&d);
-		client->creator->queue_work(1, [client, cd]() {
-			client->creator->on_invite_delete.call(cd);
+		client->creator->queue_work(1, [c = client->creator, cd]() {
+			c->on_invite_delete.call(cd);
 		});
 	}
 }

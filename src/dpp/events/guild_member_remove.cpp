@@ -45,8 +45,8 @@ void guild_member_remove::handle(discord_client* client, json &j, const std::str
 	gmr.removing_guild = dpp::find_guild(gmr.guild_id);
 
 	if (!client->creator->on_guild_member_remove.empty()) {
-		client->creator->queue_work(1, [client, gmr]() {
-			client->creator->on_guild_member_remove.call(gmr);
+		client->creator->queue_work(1, [c = client->creator, gmr]() {
+			c->on_guild_member_remove.call(gmr);
 		});
 	}
 

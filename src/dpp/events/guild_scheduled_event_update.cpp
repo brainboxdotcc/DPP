@@ -42,8 +42,8 @@ void guild_scheduled_event_update::handle(discord_client* client, json &j, const
 	if (!client->creator->on_guild_scheduled_event_update.empty()) {
 		dpp::guild_scheduled_event_update_t eu(client, raw);
 		eu.updated.fill_from_json(&d);
-		client->creator->queue_work(1, [client, eu]() {
-			client->creator->on_guild_scheduled_event_update.call(eu);
+		client->creator->queue_work(1, [c = client->creator, eu]() {
+			c->on_guild_scheduled_event_update.call(eu);
 		});
 	}
 }

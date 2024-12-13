@@ -46,8 +46,8 @@ void message_poll_vote_remove::handle(discord_client* client, json &j, const std
 		vote.channel_id = snowflake_not_null(&j, "channel_id");
 		vote.guild_id = snowflake_not_null(&j, "guild_id");
 		vote.answer_id = int32_not_null(&j, "answer_id");
-		client->creator->queue_work(1, [client, vote]() {
-			client->creator->on_message_poll_vote_remove.call(vote);
+		client->creator->queue_work(1, [c = client->creator, vote]() {
+			c->on_message_poll_vote_remove.call(vote);
 		});
 	}
 }

@@ -41,8 +41,8 @@ void guild_integrations_update::handle(class discord_client* client, json &j, co
 		json& d = j["d"];
 		dpp::guild_integrations_update_t giu(client, raw);
 		giu.updating_guild = dpp::find_guild(snowflake_not_null(&d, "guild_id"));
-		client->creator->queue_work(1, [client, giu]() {
-			client->creator->on_guild_integrations_update.call(giu);
+		client->creator->queue_work(1, [c = client->creator, giu]() {
+			c->on_guild_integrations_update.call(giu);
 		});
 	}
 }

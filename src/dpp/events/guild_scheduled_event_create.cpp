@@ -41,8 +41,8 @@ void guild_scheduled_event_create::handle(discord_client* client, json &j, const
 	if (!client->creator->on_guild_scheduled_event_create.empty()) {
 		dpp::guild_scheduled_event_create_t ec(client, raw);
 		ec.created.fill_from_json(&d);
-		client->creator->queue_work(1, [client, ec]() {
-			client->creator->on_guild_scheduled_event_create.call(ec);
+		client->creator->queue_work(1, [c = client->creator, ec]() {
+			c->on_guild_scheduled_event_create.call(ec);
 		});
 	}
 }

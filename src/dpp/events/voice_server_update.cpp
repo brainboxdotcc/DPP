@@ -60,8 +60,8 @@ void voice_server_update::handle(discord_client* client, json &j, const std::str
 	}
 
 	if (!client->creator->on_voice_server_update.empty()) {
-		client->creator->queue_work(1, [client, vsu]() {
-			client->creator->on_voice_server_update.call(vsu);
+		client->creator->queue_work(1, [c = client->creator, vsu]() {
+			c->on_voice_server_update.call(vsu);
 		});
 	}
 }

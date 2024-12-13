@@ -21,10 +21,7 @@
  ************************************************************************************/
 #include <dpp/discordevents.h>
 #include <dpp/cluster.h>
-#include <dpp/guild.h>
-#include <dpp/stringops.h>
 #include <dpp/json.h>
-
 
 namespace dpp::events {
 
@@ -50,10 +47,10 @@ void guild_member_update::handle(discord_client* client, json &j, const std::str
 			auto& user = d; // d contains roles and other member stuff already
 			m.fill_from_json(&user, guild_id, u.id);
 			gmu.updated = m;
+			client->creator->queue_work(1, [c = client->creator, gmu]() {
+				c->on_guild_member_update.call(gmu);
+			});
 		}
-		client->creator->queue_work(1, [client, gmu]() {
-			client->creator->on_guild_member_update.call(gmu);
-		});
 	} else {
 		dpp::user* u = dpp::find_user(from_string<uint64_t>(d["user"]["id"].get<std::string>()));
 		if (u) {
@@ -68,7 +65,9 @@ void guild_member_update::handle(discord_client* client, json &j, const std::str
 				dpp::guild_member_update_t gmu(client, raw);
 				gmu.updating_guild = g;
 				gmu.updated = m;
-				client->creator->on_guild_member_update.call(gmu);
+				client->creator->queue_work(0, [c = client->creator, gmu]() {
+					c->on_guild_member_update.call(gmu);
+				});
 			}
 		}
 	}

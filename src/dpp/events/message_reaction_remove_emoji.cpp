@@ -46,8 +46,8 @@ void message_reaction_remove_emoji::handle(discord_client* client, json &j, cons
 		mrre.message_id = snowflake_not_null(&d, "message_id");
 		mrre.reacting_emoji = dpp::emoji().fill_from_json(&(d["emoji"]));
 		if (mrre.channel_id && mrre.message_id) {
-			client->creator->queue_work(1, [client, mrre]() {
-				client->creator->on_message_reaction_remove_emoji.call(mrre);
+			client->creator->queue_work(1, [c = client->creator, mrre]() {
+				c->on_message_reaction_remove_emoji.call(mrre);
 			});
 		}
 	}

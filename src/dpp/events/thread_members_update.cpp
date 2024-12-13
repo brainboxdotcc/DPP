@@ -52,8 +52,8 @@ void thread_members_update::handle(discord_client* client, json& j, const std::s
 				client->creator->log(dpp::ll_error, std::string("thread_members_update: {}") + e.what());
 			}
 		}
-		client->creator->queue_work(1, [client, tms]() {
-			client->creator->on_thread_members_update.call(tms);
+		client->creator->queue_work(1, [c = client->creator, tms]() {
+			c->on_thread_members_update.call(tms);
 		});
 	}
 }

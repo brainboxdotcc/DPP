@@ -39,8 +39,8 @@ void automod_rule_delete::handle(discord_client* client, json &j, const std::str
 		json& d = j["d"];
 		automod_rule_delete_t ard(client, raw);
 		ard.deleted = automod_rule().fill_from_json(&d);
-		client->creator->queue_work(0, [client, ard]() {
-			client->creator->on_automod_rule_delete.call(ard);
+		client->creator->queue_work(0, [c = client->creator, ard]() {
+			c->on_automod_rule_delete.call(ard);
 		});
 	}
 }

@@ -74,8 +74,8 @@ void guild_emojis_update::handle(discord_client* client, json &j, const std::str
 		dpp::guild_emojis_update_t geu(client, raw);
 		geu.emojis = emojis;
 		geu.updating_guild = g;
-		client->creator->queue_work(1, [client, geu]() {
-			client->creator->on_guild_emojis_update.call(geu);
+		client->creator->queue_work(1, [c = client->creator, geu]() {
+			c->on_guild_emojis_update.call(geu);
 		});
 	}
 }

@@ -43,8 +43,8 @@ void typing_start::handle(discord_client* client, json &j, const std::string &ra
 		ts.user_id = snowflake_not_null(&d, "user_id");
 		ts.typing_user = dpp::find_user(ts.user_id);
 		ts.timestamp = ts_not_null(&d, "timestamp");
-		client->creator->queue_work(1, [client, ts]() {
-			client->creator->on_typing_start.call(ts);
+		client->creator->queue_work(1, [c = client->creator, ts]() {
+			c->on_typing_start.call(ts);
 		});
 	}
 }

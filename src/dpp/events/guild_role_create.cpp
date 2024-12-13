@@ -49,8 +49,8 @@ void guild_role_create::handle(discord_client* client, json &j, const std::strin
 			dpp::guild_role_create_t grc(client, raw);
 			grc.creating_guild = g;
 			grc.created = &r;
-			client->creator->queue_work(1, [client, grc]() {
-				client->creator->on_guild_role_create.call(grc);
+			client->creator->queue_work(1, [c = client->creator, grc]() {
+				c->on_guild_role_create.call(grc);
 			});
 		}
 	} else {
@@ -68,8 +68,8 @@ void guild_role_create::handle(discord_client* client, json &j, const std::strin
 			dpp::guild_role_create_t grc(client, raw);
 			grc.creating_guild = g;
 			grc.created = r;
-			client->creator->queue_work(1, [client, grc]() {
-				client->creator->on_guild_role_create.call(grc);
+			client->creator->queue_work(1, [c = client->creator, grc]() {
+				c->on_guild_role_create.call(grc);
 			});
 		}
 	}

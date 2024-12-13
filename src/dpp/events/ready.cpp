@@ -75,8 +75,8 @@ void ready::handle(discord_client* client, json &j, const std::string &raw) {
 			r.guilds.emplace_back(snowflake_not_null(&guild, "id"));
 		}
 		r.guild_count = r.guilds.size();
-		client->creator->queue_work(1, [client, r]() {
-			client->creator->on_ready.call(r);
+		client->creator->queue_work(1, [c = client->creator, r]() {
+			c->on_ready.call(r);
 		});
 	}
 }
