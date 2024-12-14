@@ -36,7 +36,7 @@ int main() {
 			/* Tell the user we joined their channel. */
 			event.reply("Joined your channel, now recording!");
 		} else if (event.command.get_command_name() == "stop") {
-			event.from->disconnect_voice(event.command.guild_id);
+			event.from()->disconnect_voice(event.command.guild_id);
 			fclose(fd);
 
 			event.reply("Stopped recording.");

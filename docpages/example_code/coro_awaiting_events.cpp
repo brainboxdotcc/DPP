@@ -20,7 +20,7 @@ int main() {
 			);
 			co_await event.co_reply(m);
 
-			dpp::button_click_t click_event = co_await event.from->creator->on_button_click.when(
+			dpp::button_click_t click_event = co_await event.owner->on_button_click.when(
 				// Note!! Due to a bug in g++11 and g++12, id must be captured as a reference here or the compiler will destroy it twice. This is fixed in g++13
 				[&id] (dpp::button_click_t const &b) {
 					return b.custom_id == id;
