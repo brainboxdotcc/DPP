@@ -75,7 +75,16 @@ struct DPP_EXPORT timer_t {
 	timer_callback_t on_stop{};
 };
 
+/**
+ * @brief Used to compare two timers next tick times in a priority queue
+ */
 struct DPP_EXPORT timer_comparator {
+	/**
+	 * @brief Compare two timers
+	 * @param a first timer
+	 * @param b second timer
+	 * @return returns true if a > b
+	 */
 	bool operator()(const timer_t &a, const timer_t &b) const {
 		return a.next_tick > b.next_tick;
 	};

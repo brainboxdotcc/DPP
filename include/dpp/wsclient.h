@@ -179,6 +179,7 @@ public:
 
 	/**
 	 * @brief Connect to a specific websocket server.
+	 * @param creator Creating cluster
 	 * @param hostname Hostname to connect to
 	 * @param port Port to connect to
 	 * @param urlpath The URL path components of the HTTP request to send

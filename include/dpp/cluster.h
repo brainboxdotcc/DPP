@@ -52,6 +52,12 @@
 
 namespace dpp {
 
+/**
+ * @brief Pass this value into the constructor of dpp::cluster for the shard count to create a cluster with no shards.
+ * A cluster with no shards does not connect to a websocket, but can still use the event loop to dispatch HTTPS API
+ * requests to Discord. This is useful for bots that do not need to receive websocket events as it will save a lot of
+ * resources.
+ */
 constexpr uint32_t NO_SHARDS = ~0U;
 
 /**
