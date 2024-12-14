@@ -282,7 +282,7 @@ public:
 	 * All callbacks and events are placed into the thread pool. The bigger you make this pool (but generally no bigger than your number of cores), the more your bot will scale.
 	 * @throw dpp::exception Thrown on windows, if WinSock fails to initialise, or on any other system if a dpp::request_queue fails to construct
 	 */
-	cluster(uint32_t pool_threads = std::thread::hardware_concurrency() / 2);
+	explicit cluster(uint32_t pool_threads = std::thread::hardware_concurrency() / 2);
 
 	/**
 	 * @brief Constructor for creating a cluster. All but the token are optional.
