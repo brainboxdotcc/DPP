@@ -40,7 +40,7 @@ void guild_member_update::handle(discord_client* client, json &j, const std::str
 	if (client->creator->cache_policy.user_policy == dpp::cp_none) {
 		dpp::user u;
 		u.fill_from_json(&(d["user"]));
-		dpp::guild_member_update_t gmu(client, raw);
+		dpp::guild_member_update_t gmu(client->owner, client->shard_id, raw);
 		gmu.updating_guild = g;
 		if (!client->creator->on_guild_member_update.empty()) {
 			guild_member m;
@@ -62,7 +62,7 @@ void guild_member_update::handle(discord_client* client, json &j, const std::str
 			}
 
 			if (!client->creator->on_guild_member_update.empty()) {
-				dpp::guild_member_update_t gmu(client, raw);
+				dpp::guild_member_update_t gmu(client->owner, client->shard_id, raw);
 				gmu.updating_guild = g;
 				gmu.updated = m;
 				client->creator->queue_work(0, [c = client->creator, gmu]() {

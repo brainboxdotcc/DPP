@@ -85,9 +85,13 @@ public:
 
 	/**
 	 * @brief Shard the event came from.
-	 * Note that for some events, notably voice events, this may be nullptr.
 	 */
-	discord_client* from = nullptr;
+	uint32_t shard = 0;
+
+	/**
+	 * @brief Cluster owning the event dispatch
+	 */
+	 dpp::cluster* owner = nullptr;
 
 	/**
 	 * @brief Whether the event was cancelled using cancel_event().
@@ -116,18 +120,24 @@ public:
 	/**
 	 * @brief Construct a new event_dispatch_t object
 	 *
-	 * @param client The shard the event originated on. May be a nullptr, e.g. for voice events
+	 * @param shard_id The shard the event originated on.
 	 * @param raw Raw event data as JSON or ETF
 	 */
-	event_dispatch_t(discord_client* client, const std::string& raw);
+	event_dispatch_t(dpp::cluster* creator, uint32_t shard_id, const std::string& raw);
+
+	/**
+	 * @brief Returns the shard object for the events shard id
+	 * @return discord client object
+	 */
+	discord_client* from() const;
 
 	/**
 	 * @brief Construct a new event_dispatch_t object
 	 *
-	 * @param client The shard the event originated on. May be a nullptr, e.g. for voice events
+	 * @param shard_id The shard the event originated on.
 	 * @param raw Raw event data as JSON or ETF
 	 */
-	event_dispatch_t(discord_client* client, std::string&& raw);
+	event_dispatch_t(dpp::cluster* creator, uint32_t shard_id, std::string&& raw);
 
 	/**
 	 * @brief Copy another event_dispatch_t object
@@ -2018,28 +2028,28 @@ struct DPP_EXPORT voice_receive_t : public event_dispatch_t {
 	/**
 	 * @brief Construct a new voice receive t object
 	 *
-	 * @param client The shard the event originated on.
-	 * WILL ALWAYS be NULL.
+	 * @param creator The creating cluster
+	 * @param shard_id Shard the voice channel exists on
 	 * @param raw Raw event text as UDP packet.
 	 * @param vc owning voice client pointer
 	 * @param _user_id user id who is speaking, 0 for a mix of all user audio
 	 * @param pcm user audio to set
 	 * @param length length of user audio in bytes
 	 */
-	voice_receive_t(discord_client* client, const std::string& raw, class discord_voice_client* vc, snowflake _user_id, const uint8_t* pcm, size_t length);
+	voice_receive_t(dpp::cluster* creator, uint32_t shard_id, const std::string& raw, class discord_voice_client* vc, snowflake _user_id, const uint8_t* pcm, size_t length);
 
 	/**
 	 * @brief Construct a new voice receive t object
 	 *
-	 * @param client The shard the event originated on.
-	 * WILL ALWAYS be NULL.
+	 * @param creator The creating cluster
+	 * @param shard_id Shard the voice channel exists on
 	 * @param raw Raw event text as UDP packet.
 	 * @param vc owning voice client pointer
 	 * @param _user_id user id who is speaking, 0 for a mix of all user audio
 	 * @param pcm user audio to set
 	 * @param length length of user audio in bytes
 	 */
-	voice_receive_t(discord_client* client, std::string&& raw, class discord_voice_client* vc, snowflake _user_id, const uint8_t* pcm, size_t length);
+	voice_receive_t(dpp::cluster* creator, uint32_t shard_id, std::string&& raw, class discord_voice_client* vc, snowflake _user_id, const uint8_t* pcm, size_t length);
 
 	/**
 	 * @brief Voice client

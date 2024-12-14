@@ -39,7 +39,7 @@ namespace dpp::events {
 void voice_server_update::handle(discord_client* client, json &j, const std::string &raw) {
 
 	json &d = j["d"];
-	dpp::voice_server_update_t vsu(client, raw);
+	dpp::voice_server_update_t vsu(client->owner, client->shard_id, raw);
 	vsu.guild_id = snowflake_not_null(&d, "guild_id");
 	vsu.token = string_not_null(&d, "token");
 	vsu.endpoint = string_not_null(&d, "endpoint");

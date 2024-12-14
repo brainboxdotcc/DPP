@@ -185,7 +185,7 @@ void cluster::queue_work(int priority, work_unit task) {
 void cluster::log(dpp::loglevel severity, const std::string &msg) const {
 	if (!on_log.empty()) {
 		/* Pass to user if they've hooked the event */
-		dpp::log_t logmsg(nullptr, msg);
+		dpp::log_t logmsg(nullptr, 0, msg);
 		logmsg.severity = severity;
 		logmsg.message = msg;
 		size_t pos{0};

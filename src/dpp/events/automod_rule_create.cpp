@@ -39,7 +39,7 @@ namespace dpp::events {
 void automod_rule_create::handle(discord_client* client, json &j, const std::string &raw) {
 	if (!client->creator->on_automod_rule_create.empty()) {
 		json& d = j["d"];
-		automod_rule_create_t arc(client, raw);
+		automod_rule_create_t arc(client->owner, client->shard_id, raw);
 		arc.created = automod_rule().fill_from_json(&d);
 		client->creator->queue_work(0, [c = client->creator, arc]() {
 			c->on_automod_rule_create.call(arc);

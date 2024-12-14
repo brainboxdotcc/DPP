@@ -38,7 +38,7 @@ namespace dpp::events {
 void guild_join_request_delete::handle(class discord_client* client, json &j, const std::string &raw) {
 	if (!client->creator->on_guild_join_request_delete.empty()) {
 		json& d = j["d"];
-		dpp::guild_join_request_delete_t grd(client, raw);
+		dpp::guild_join_request_delete_t grd(client->owner, client->shard_id, raw);
 		grd.user_id = snowflake_not_null(&d, "user_id");
 		grd.guild_id = snowflake_not_null(&d, "guild_id");
 		client->creator->queue_work(1, [c = client->creator, grd]() {

@@ -37,10 +37,10 @@ namespace dpp::events {
  */
 void logger::handle(discord_client* client, json &j, const std::string &raw) {
 	if (!client->creator->on_log.empty()) {
-		dpp::log_t logmsg(client, raw);
+		dpp::log_t logmsg(client->owner, client->shard_id, raw);
 		logmsg.severity = (dpp::loglevel)from_string<uint32_t>(raw.substr(0, raw.find(';')));
 		logmsg.message = raw.substr(raw.find(';') + 1, raw.length());
-		c->on_log.call(logmsg);
+		client->creator->on_log.call(logmsg);
 	}
 }
 

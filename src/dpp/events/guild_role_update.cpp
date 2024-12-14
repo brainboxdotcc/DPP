@@ -44,7 +44,7 @@ void guild_role_update::handle(discord_client* client, json &j, const std::strin
 		dpp::role r;
 		r.fill_from_json(guild_id, &d);
 		if (!client->creator->on_guild_role_update.empty()) {
-			dpp::guild_role_update_t gru(client, raw);
+			dpp::guild_role_update_t gru(client->owner, client->shard_id, raw);
 			gru.updating_guild = g;
 			gru.updated = &r;
 			client->creator->queue_work(1, [c = client->creator, gru]() {
@@ -57,7 +57,7 @@ void guild_role_update::handle(discord_client* client, json &j, const std::strin
 		if (r) {
 			r->fill_from_json(g->id, &role);
 			if (!client->creator->on_guild_role_update.empty()) {
-				dpp::guild_role_update_t gru(client, raw);
+				dpp::guild_role_update_t gru(client->owner, client->shard_id, raw);
 				gru.updating_guild = g;
 				gru.updated = r;
 				client->creator->queue_work(1, [c = client->creator, gru]() {

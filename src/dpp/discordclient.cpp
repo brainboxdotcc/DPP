@@ -366,7 +366,7 @@ void discord_client::log(dpp::loglevel severity, const std::string &msg) const
 {
 	if (!creator->on_log.empty()) {
 		/* Pass to user if they've hooked the event */
-		dpp::log_t logmsg(nullptr, msg);
+		dpp::log_t logmsg(creator, shard_id, msg);
 		logmsg.severity = severity;
 		logmsg.message = msg;
 		size_t pos{0};

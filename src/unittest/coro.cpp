@@ -523,7 +523,7 @@ void coro_offline_tests()
 void event_handler_test(dpp::cluster *bot) {
 	bot->on_message_create([](dpp::message_create_t event) -> dpp::task<void> {
 		if (event.msg.content == "coro test") {
-			dpp::cluster *bot = event.from->creator;
+			dpp::cluster *bot = event.owner;
 
 			set_status(CORO_EVENT_HANDLER, ts_success);
 			start_test(CORO_API_CALLS);

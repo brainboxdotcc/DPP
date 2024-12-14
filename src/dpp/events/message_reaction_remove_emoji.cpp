@@ -39,7 +39,7 @@ namespace dpp::events {
 void message_reaction_remove_emoji::handle(discord_client* client, json &j, const std::string &raw) {
 	if (!client->creator->on_message_reaction_remove_emoji.empty()) {
 		json &d = j["d"];
-		dpp::message_reaction_remove_emoji_t mrre(client, raw);
+		dpp::message_reaction_remove_emoji_t mrre(client->owner, client->shard_id, raw);
 		mrre.reacting_guild = dpp::find_guild(snowflake_not_null(&d, "guild_id"));
 		mrre.channel_id = snowflake_not_null(&d, "channel_id");
 		mrre.reacting_channel = dpp::find_channel(mrre.channel_id);

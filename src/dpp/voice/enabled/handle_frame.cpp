@@ -204,7 +204,7 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 			}
 			break;
 			case voice_client_platform: {
-				voice_client_platform_t vcp(nullptr, data);
+				voice_client_platform_t vcp(owner, 0, data);
 				vcp.voice_client = this;
 				vcp.user_id = snowflake_not_null(&j["d"], "user_id");
 				vcp.platform = static_cast<client_platform_t>(int8_not_null(&j["d"], "platform"));
@@ -302,7 +302,7 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 					dave_mls_pending_remove_list.insert(u_id);
 
 					if (!creator->on_voice_client_disconnect.empty()) {
-						voice_client_disconnect_t vcd(nullptr, data);
+						voice_client_disconnect_t vcd(owner, 0, data);
 						vcd.voice_client = this;
 						vcd.user_id = u_id;
 						creator->queue_work(0, [this, vcd]() {
@@ -322,7 +322,7 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 					ssrc_map[u_ssrc] = u_id;
 
 					if (!creator->on_voice_client_speaking.empty()) {
-						voice_client_speaking_t vcs(nullptr, data);
+						voice_client_speaking_t vcs(owner, 0, data);
 						vcs.voice_client = this;
 						vcs.user_id = u_id;
 						vcs.ssrc = u_ssrc;
@@ -422,7 +422,7 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 					send_silence(20);
 					/* Fire on_voice_ready */
 					if (!creator->on_voice_ready.empty()) {
-						voice_ready_t rdy(nullptr, data);
+						voice_ready_t rdy(owner, 0, data);
 						rdy.voice_client = this;
 						rdy.voice_channel_id = this->channel_id;
 						creator->queue_work(0, [this, rdy]() {
@@ -533,7 +533,7 @@ void discord_voice_client::ready_for_transition(const std::string &data) {
 		mls_state->done_ready = true;
 
 		if (!creator->on_voice_ready.empty()) {
-			voice_ready_t rdy(nullptr, data);
+			voice_ready_t rdy(owner, 0, data);
 			rdy.voice_client = this;
 			rdy.voice_channel_id = this->channel_id;
 			creator->queue_work(0, [this, rdy]() {

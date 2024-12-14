@@ -42,7 +42,7 @@ void guild_stickers_update::handle(discord_client* client, json &j, const std::s
 	if (!client->creator->on_guild_stickers_update.empty()) {
 		dpp::snowflake guild_id = snowflake_not_null(&d, "guild_id");
 		dpp::guild* g = dpp::find_guild(guild_id);
-		dpp::guild_stickers_update_t gsu(client, raw);
+		dpp::guild_stickers_update_t gsu(client->owner, client->shard_id, raw);
 		for (auto & sticker : d["stickers"]) {
 			dpp::sticker s;
 			s.fill_from_json(&sticker);

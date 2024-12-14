@@ -40,7 +40,7 @@ void message_poll_vote_add::handle(discord_client* client, json &j, const std::s
 
 	if (!client->creator->on_message_poll_vote_add.empty()) {
 		json d = j["d"];
-		dpp::message_poll_vote_add_t vote(client, raw);
+		dpp::message_poll_vote_add_t vote(client->owner, client->shard_id, raw);
 		vote.user_id = snowflake_not_null(&j, "user_id");
 		vote.message_id = snowflake_not_null(&j, "message_id");
 		vote.channel_id = snowflake_not_null(&j, "channel_id");

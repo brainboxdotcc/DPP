@@ -411,7 +411,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		// create a fake interaction
 		dpp::cluster cluster("");
 		dpp::discord_client client(&cluster, 1, 1, "");
-		dpp::interaction_create_t interaction(&client, "");
+		dpp::interaction_create_t interaction(nullptr, 0, "");
 
 		/* Check the method with subcommands */
 		set_test(GET_PARAMETER_WITH_SUBCOMMANDS, false);

@@ -103,7 +103,7 @@ void discord_voice_client::write_ready() {
 
 		last_timestamp = std::chrono::high_resolution_clock::now();
 		if (!creator->on_voice_buffer_send.empty()) {
-			voice_buffer_send_t snd(nullptr, "");
+			voice_buffer_send_t snd(owner, 0, "");
 			snd.buffer_size = bufsize;
 			snd.packets_left = outbuf.size();
 			snd.voice_client = this;
@@ -114,7 +114,7 @@ void discord_voice_client::write_ready() {
 	}
 	if (track_marker_found) {
 		if (!creator->on_voice_track_marker.empty()) {
-			voice_track_marker_t vtm(nullptr, "");
+			voice_track_marker_t vtm(owner, 0, "");
 			vtm.voice_client = this;
 			{
 				std::lock_guard<std::mutex> lock(this->stream_mutex);

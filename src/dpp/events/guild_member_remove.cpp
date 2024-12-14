@@ -39,7 +39,7 @@ namespace dpp::events {
 void guild_member_remove::handle(discord_client* client, json &j, const std::string &raw) {
 	json d = j["d"];
 
-	dpp::guild_member_remove_t gmr(client, raw);
+	dpp::guild_member_remove_t gmr(client->owner, client->shard_id, raw);
 	gmr.removed.fill_from_json(&(d["user"]));
 	gmr.guild_id = snowflake_not_null(&d, "guild_id");
 	gmr.removing_guild = dpp::find_guild(gmr.guild_id);

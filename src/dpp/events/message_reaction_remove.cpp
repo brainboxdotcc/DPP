@@ -39,7 +39,7 @@ namespace dpp::events {
 void message_reaction_remove::handle(discord_client* client, json &j, const std::string &raw) {
 	if (!client->creator->on_message_reaction_remove.empty()) {
 		json &d = j["d"];
-		dpp::message_reaction_remove_t mrr(client, raw);
+		dpp::message_reaction_remove_t mrr(client->owner, client->shard_id, raw);
 		dpp::snowflake guild_id = snowflake_not_null(&d, "guild_id");
 		mrr.reacting_guild = dpp::find_guild(guild_id);
 		mrr.reacting_user_id = snowflake_not_null(&d, "user_id");

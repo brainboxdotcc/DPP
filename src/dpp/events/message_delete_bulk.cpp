@@ -37,7 +37,7 @@ namespace dpp::events {
 void message_delete_bulk::handle(discord_client* client, json &j, const std::string &raw) {
 	if (!client->creator->on_message_delete_bulk.empty()) {
 		json& d = j["d"];
-		dpp::message_delete_bulk_t msg(client, raw);
+		dpp::message_delete_bulk_t msg(client->owner, client->shard_id, raw);
 		msg.deleting_guild = dpp::find_guild(snowflake_not_null(&d, "guild_id"));
 		msg.deleting_channel = dpp::find_channel(snowflake_not_null(&d, "channel_id"));
 		msg.deleting_user = dpp::find_user(snowflake_not_null(&d, "user_id"));

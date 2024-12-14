@@ -99,7 +99,7 @@ void interaction_create::handle(discord_client* client, json &j, const std::stri
 		if (cmd_data.type == ctxm_message && !client->creator->on_message_context_menu.empty()) {
 			if (i.resolved.messages.size()) {
 				/* Message right-click context menu */
-				message_context_menu_t mcm(client, raw);
+				message_context_menu_t mcm(client->owner, client->shard_id, raw);
 				mcm.command = i;
 				mcm.set_message(i.resolved.messages.begin()->second);
 				client->creator->queue_work(1, [c = client->creator, mcm]() {
@@ -109,7 +109,7 @@ void interaction_create::handle(discord_client* client, json &j, const std::stri
 		} else if (cmd_data.type == ctxm_user && !client->creator->on_user_context_menu.empty()) {
 			if (i.resolved.users.size()) {
 				/* User right-click context menu */
-				user_context_menu_t ucm(client, raw);
+				user_context_menu_t ucm(client->owner, client->shard_id, raw);
 				ucm.command = i;
 				ucm.set_user(i.resolved.users.begin()->second);
 				client->creator->queue_work(1, [c = client->creator, ucm]() {
@@ -117,7 +117,7 @@ void interaction_create::handle(discord_client* client, json &j, const std::stri
 				});
 			}
 		} else if (cmd_data.type == ctxm_chat_input && !client->creator->on_slashcommand.empty()) {
-			dpp::slashcommand_t sc(client, raw);
+			dpp::slashcommand_t sc(client->owner, client->shard_id, raw);
 			sc.command = i;
 			client->creator->queue_work(1, [c = client->creator, sc]() {
 				c->on_slashcommand.call(sc);
@@ -128,7 +128,7 @@ void interaction_create::handle(discord_client* client, json &j, const std::stri
 			 * events still find their way here. At some point in the future, receiving
 			 * ctxm_user and ctxm_message inputs to this event will be depreciated.
 			 */
-			dpp::interaction_create_t ic(client, raw);
+			dpp::interaction_create_t ic(client->owner, client->shard_id, raw);
 			ic.command = i;
 			client->creator->queue_work(1, [c = client->creator, ic]() {
 				c->on_interaction_create.call(ic);
@@ -136,7 +136,7 @@ void interaction_create::handle(discord_client* client, json &j, const std::stri
 		}
 	} else if (i.type == it_modal_submit) {
 		if (!client->creator->on_form_submit.empty()) {
-			dpp::form_submit_t fs(client, raw);
+			dpp::form_submit_t fs(client->owner, client->shard_id, raw);
 			fs.custom_id = string_not_null(&(d["data"]), "custom_id");
 			fs.command = i;
 			for (auto & c : d["data"]["components"]) {
@@ -149,7 +149,7 @@ void interaction_create::handle(discord_client* client, json &j, const std::stri
 	} else if (i.type == it_autocomplete) {
 		// "data":{"id":"903319628816728104","name":"blep","options":[{"focused":true,"name":"animal","type":3,"value":"a"}],"type":1}
 		if (!client->creator->on_autocomplete.empty()) {
-			dpp::autocomplete_t ac(client, raw);
+			dpp::autocomplete_t ac(client->owner, client->shard_id, raw);
 			ac.id = snowflake_not_null(&(d["data"]), "id");
 			ac.name = string_not_null(&(d["data"]), "name");
 			fill_options(d["data"]["options"], ac.options);
@@ -162,7 +162,7 @@ void interaction_create::handle(discord_client* client, json &j, const std::stri
 		dpp::component_interaction bi = std::get<component_interaction>(i.data);
 		if (bi.component_type == cot_button) {
 			if (!client->creator->on_button_click.empty()) {
-				dpp::button_click_t ic(client, raw);
+				dpp::button_click_t ic(client->owner, client->shard_id, raw);
 				ic.command = i;
 				ic.custom_id = bi.custom_id;
 				ic.component_type = bi.component_type;
@@ -174,7 +174,7 @@ void interaction_create::handle(discord_client* client, json &j, const std::stri
 				   bi.component_type == cot_role_selectmenu || bi.component_type == cot_mentionable_selectmenu ||
 				   bi.component_type == cot_channel_selectmenu) {
 			if (!client->creator->on_select_click.empty()) {
-				dpp::select_click_t ic(client, raw);
+				dpp::select_click_t ic(client->owner, client->shard_id, raw);
 				ic.command = i;
 				ic.custom_id = bi.custom_id;
 				ic.component_type = bi.component_type;

@@ -39,7 +39,7 @@ void channel_pins_update::handle(discord_client* client, json &j, const std::str
 
 	if (!client->creator->on_channel_pins_update.empty()) {
 		json& d = j["d"];
-		dpp::channel_pins_update_t cpu(client, raw);
+		dpp::channel_pins_update_t cpu(client->owner, client->shard_id, raw);
 		cpu.pin_channel = dpp::find_channel(snowflake_not_null(&d, "channel_id"));
 		cpu.pin_guild = dpp::find_guild(snowflake_not_null(&d, "guild_id"));
 		cpu.timestamp = ts_not_null(&d, "last_pin_timestamp");

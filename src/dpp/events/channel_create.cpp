@@ -67,7 +67,7 @@ void channel_create::handle(discord_client* client, json &j, const std::string &
 		}
 	}
 	if (!client->creator->on_channel_create.empty()) {
-		dpp::channel_create_t cc(client, raw);
+		dpp::channel_create_t cc(client->owner, client->shard_id, raw);
 		cc.created = c;
 		cc.creating_guild = g;
 		client->creator->queue_work(1, [c = client->creator, cc]() {

@@ -38,12 +38,11 @@ namespace dpp::events {
 void message_create::handle(discord_client* client, json &j, const std::string &raw) {
 
 	if (!client->creator->on_message_create.empty()) {
-		json js = j;
-		client->creator->queue_work(1, [c = client->creator, js, raw]() {
+		client->creator->queue_work(1, [shard_id = client->shard_id, c = client->creator, js = j, raw]() {
 			json d = js["d"];
-			dpp::message_create_t msg(client, raw);
-			msg.msg = message(client->owner).fill_from_json(&d, client->creator->cache_policy);
-			msg.msg.owner = client->creator;
+			dpp::message_create_t msg(c, shard_id, raw);
+			msg.msg = message(c).fill_from_json(&d, c->cache_policy);
+			msg.msg.owner = c;
 			c->on_message_create.call(msg);
 		});
 	}

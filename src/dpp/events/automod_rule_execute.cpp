@@ -37,7 +37,7 @@ namespace dpp::events {
 void automod_rule_execute::handle(discord_client* client, json &j, const std::string &raw) {
 	if (!client->creator->on_automod_rule_execute.empty()) {
 		json& d = j["d"];
-		automod_rule_execute_t are(client, raw);
+		automod_rule_execute_t are(client->owner, client->shard_id, raw);
 		are.guild_id = snowflake_not_null(&d, "guild_id");
 		are.action = dpp::automod_action().fill_from_json(&(d["action"]));
 		are.rule_id = snowflake_not_null(&d, "rule_id");
