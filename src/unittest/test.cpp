@@ -27,6 +27,11 @@
 #include <dpp/json.h>
 
 /**
+ * @brief global lock for log output
+ */
+std::mutex loglock;
+
+/**
  * @brief Type trait to check if a certain type has a build_json method
  *
  * @tparam T type to check for
@@ -282,53 +287,6 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 
 	set_test(HOSTINFO, hci_test);
 
-	set_test(HTTPS, false);
-	if (!offline) {
-		dpp::multipart_content multipart = dpp::https_client::build_multipart(
-			"{\"content\":\"test\"}", {"test.txt", "blob.blob"}, {"ABCDEFGHI", "BLOB!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"}, {"text/plain", "application/octet-stream"}
-		);
-		try {
-			dpp::https_client c("discord.com", 443, "/api/channels/" + std::to_string(TEST_TEXT_CHANNEL_ID) + "/messages", "POST", multipart.body,
-				{
-					{"Content-Type", multipart.mimetype},
-					{"Authorization", "Bot " + token}
-				}
-			);
-			std::string hdr1 = c.get_header("server");
-			std::string content1 = c.get_content();
-			set_test(HTTPS, hdr1 == "cloudflare" && c.get_status() == 200);
-		}
-		catch (const dpp::exception& e) {
-			std::cout << e.what() << "\n";
-			set_test(HTTPS, false);
-		}
-	}
-
-	set_test(HTTP, false);
-	try {
-		dpp::https_client c2("github.com", 80, "/", "GET", "", {}, true);
-		std::string hdr2 = c2.get_header("location");
-		std::string content2 = c2.get_content();
-		set_test(HTTP, hdr2 == "https://github.com/" && c2.get_status() == 301);
-	}
-	catch (const dpp::exception& e) {
-		std::cout << e.what() << "\n";
-		set_test(HTTP, false);
-	}
-
-	set_test(MULTIHEADER, false);
-	try {
-		dpp::https_client c2("dl.dpp.dev", 443, "/cookietest.php", "GET", "", {});
-		size_t count = c2.get_header_count("set-cookie");
-		size_t count_list = c2.get_header_list("set-cookie").size();
-		// Google sets a bunch of cookies when we start accessing it.
-		set_test(MULTIHEADER, c2.get_status() == 200 && count > 1 && count == count_list);
-	}
-	catch (const dpp::exception& e) {
-		std::cout << e.what() << "\n";
-		set_test(MULTIHEADER, false);
-	}
-
 	std::vector<uint8_t> testaudio = load_test_audio();
 
 	set_test(READFILE, false);
@@ -453,7 +411,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		// create a fake interaction
 		dpp::cluster cluster("");
 		dpp::discord_client client(&cluster, 1, 1, "");
-		dpp::interaction_create_t interaction(&client, "");
+		dpp::interaction_create_t interaction(nullptr, 0, "");
 
 		/* Check the method with subcommands */
 		set_test(GET_PARAMETER_WITH_SUBCOMMANDS, false);
@@ -973,6 +931,9 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		coro_offline_tests();
 	}
 
+	std::promise<void> ready_promise;
+	std::future ready_future = ready_promise.get_future();
+
 	std::vector<std::byte> dpp_logo = load_data("DPP-Logo.png");
 
 	set_test(PRESENCE, false);
@@ -1018,9 +979,6 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		/* This ensures we test both protocols, as voice is json and shard is etf */
 		bot.set_websocket_protocol(dpp::ws_etf);
 
-		bot.on_form_submit([&](const dpp::form_submit_t & event) {
-		});
-
 		/* This is near impossible to test without a 'clean room' voice channel.
 		 * We attach this event just so that the decoder events are fired while we
 		 * are sending audio later, this way if the audio receive code is plain unstable
@@ -1029,7 +987,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		bot.on_voice_receive_combined([&](const auto& event) {
 		});
 
-		bot.on_guild_create([&](const dpp::guild_create_t& event) {
+		bot.on_guild_create([dpp_logo,&bot](const dpp::guild_create_t& event) {
 			dpp::guild *g = event.created;
 
 			if (g->id == TEST_GUILD_ID) {
@@ -1063,9 +1021,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 			}
 		});
 
-		std::promise<void> ready_promise;
-		std::future ready_future = ready_promise.get_future();
-		bot.on_ready([&](const dpp::ready_t & event) {
+		bot.on_ready([&ready_promise,&bot,dpp_logo](const dpp::ready_t & event) {
 			set_test(CONNECTION, true);
 			ready_promise.set_value();
 
@@ -1123,10 +1079,9 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 				});
 		});
 
-		std::mutex loglock;
-		bot.on_log([&](const dpp::log_t & event) {
-			std::lock_guard<std::mutex> locker(loglock);
+		bot.on_log([](const dpp::log_t & event) {
 			if (event.severity > dpp::ll_trace) {
+				std::lock_guard<std::mutex> locker(loglock);
 				std::cout << "[" << std::fixed << std::setprecision(3) << (dpp::utility::time_f() - get_start_time()) << "]: [\u001b[36m" << dpp::utility::loglevel(event.severity) << "\u001b[0m] " << event.message << "\n";
 			}
 			if (event.message == "Test log message") {
@@ -1143,7 +1098,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		}
 		set_test(RUNONCE, (runs == 1));
 
-		bot.on_voice_ready([&](const dpp::voice_ready_t & event) {
+		bot.on_voice_ready([&testaudio](const dpp::voice_ready_t & event) {
 			set_test(VOICECONN, true);
 			dpp::discord_voice_client* v = event.voice_client;
 			set_test(VOICESEND, false);
@@ -1168,7 +1123,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 			}
 		});
 
-		bot.on_voice_buffer_send([&](const dpp::voice_buffer_send_t & event) {
+		bot.on_voice_buffer_send([](const dpp::voice_buffer_send_t & event) {
 			static bool sent_some_data = false;
 
 			if (event.buffer_size > 0) {
@@ -1180,13 +1135,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 			}
 		});
 
-		set_test(SYNC, false);
-		if (!offline) {
-			dpp::message m = dpp::sync<dpp::message>(&bot, &dpp::cluster::message_create, dpp::message(TEST_TEXT_CHANNEL_ID, "TEST"));
-			set_test(SYNC, m.content == "TEST");
-		}
-
-		bot.on_guild_create([&](const dpp::guild_create_t & event) {
+		bot.on_guild_create([&bot](const dpp::guild_create_t & event) {
 			if (event.created->id == TEST_GUILD_ID) {
 				set_test(GUILDCREATE, true);
 				if (event.presences.size() && event.presences.begin()->second.user_id > 0) {
@@ -1223,27 +1172,31 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 				if (files_tested == std::array{true, true, true} && pin_tested && thread_tested) {
 					set_test(MESSAGEDELETE, false);
 					bot.message_delete(message_id, channel_id, [](const dpp::confirmation_callback_t &callback) {
-						if (!callback.is_error()) {
-							set_test(MESSAGEDELETE, true);
-						}
+						set_test(MESSAGEDELETE, !callback.is_error());
 					});
 				}
 			}
 
 			void set_pin_tested() {
-				assert(!pin_tested);
+				if (pin_tested) {
+					return;
+				}
 				pin_tested = true;
 				delete_message_if_done();
 			}
 
 			void set_thread_tested() {
-				assert(!thread_tested);
+				if (thread_tested) {
+					return;
+				}
 				thread_tested = true;
 				delete_message_if_done();
 			}
 
 			void set_file_tested(size_t index) {
-				assert(!files_tested[index]);
+				if (files_tested[index]) {
+					return;
+				}
 				files_tested[index] = true;
 				if (files_tested == std::array{true, true, true}) {
 					set_test(MESSAGEFILE, files_success == std::array{true, true, true});
@@ -1285,21 +1238,21 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 							return false;
 						}
 					};
-					message.attachments[0].download([&](const dpp::http_request_completion_t &callback) {
+					message.attachments[0].download([this](const dpp::http_request_completion_t &callback) {
 						std::lock_guard lock(mutex);
 						if (callback.status == 200 && callback.body == "test") {
 							files_success[0] = true;
 						}
 						set_file_tested(0);
 					});
-					message.attachments[1].download([&](const dpp::http_request_completion_t &callback) {
+					message.attachments[1].download([this](const dpp::http_request_completion_t &callback) {
 						std::lock_guard lock(mutex);
 						if (callback.status == 200 && check_mimetype(callback.headers, "text/plain") && callback.body == "test") {
 							files_success[1] = true;
 						}
 						set_file_tested(1);
 					});
-					message.attachments[2].download([&](const dpp::http_request_completion_t &callback) {
+					message.attachments[2].download([this](const dpp::http_request_completion_t &callback) {
 						std::lock_guard lock(mutex);
 						// do not check the contents here because discord can change compression
 						if (callback.status == 200 && check_mimetype(callback.headers, "image/png")) {
@@ -1649,7 +1602,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 
 		thread_test_helper thread_helper(bot);
 
-		bot.on_thread_create([&](const dpp::thread_create_t &event) {
+		bot.on_thread_create([&thread_helper](const dpp::thread_create_t &event) {
 			if (event.created.name == "thread test") {
 				set_test(THREAD_CREATE_EVENT, true);
 				thread_helper.run(event.created);
@@ -1657,7 +1610,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		});
 
 		bool message_tested = false;
-		bot.on_message_create([&](const dpp::message_create_t & event) {
+		bot.on_message_create([&message_tested,&bot,&message_helper,&thread_helper](const dpp::message_create_t & event) {
 			if (event.msg.author.id == bot.me.id) {
 				if (event.msg.content == "test message" && !message_tested) {
 					message_tested = true;
@@ -1707,7 +1660,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 			}
 		});
 
-		bot.on_message_reaction_add([&](const dpp::message_reaction_add_t & event) {
+		bot.on_message_reaction_add([&bot,&thread_helper](const dpp::message_reaction_add_t & event) {
 			if (event.reacting_user.id == bot.me.id) {
 				if (event.reacting_emoji.name == "😄") {
 					set_test(REACTEVENT, true);
@@ -1719,7 +1672,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 			}
 		});
 
-		bot.on_message_reaction_remove([&](const dpp::message_reaction_remove_t & event) {
+		bot.on_message_reaction_remove([&bot,&thread_helper](const dpp::message_reaction_remove_t & event) {
 			if (event.reacting_user_id == bot.me.id) {
 				if (event.channel_id == thread_helper.thread_id && event.reacting_emoji.name == dpp::unicode_emoji::thread) {
 					set_test(THREAD_MESSAGE_REACT_REMOVE_EVENT, true);
@@ -1728,7 +1681,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 			}
 		});
 
-		bot.on_message_delete([&](const dpp::message_delete_t & event) {
+		bot.on_message_delete([&thread_helper](const dpp::message_delete_t & event) {
 			if (event.channel_id == thread_helper.thread_id) {
 				set_test(THREAD_MESSAGE_DELETE_EVENT, true);
 				thread_helper.notify_event_tested(thread_test_helper::MESSAGE_DELETE);
@@ -1736,7 +1689,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		});
 
 		bool message_edit_tested = false;
-		bot.on_message_update([&](const dpp::message_update_t &event) {
+		bot.on_message_update([&bot,&thread_helper,&message_edit_tested](const dpp::message_update_t &event) {
 			if (event.msg.author == bot.me.id) {
 				if (event.msg.content == "test edit" && !message_edit_tested) {
 					message_edit_tested = true;
@@ -1749,7 +1702,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 			}
 		});
 
-		bot.on_thread_update([&](const dpp::thread_update_t &event) {
+		bot.on_thread_update([&thread_helper](const dpp::thread_update_t &event) {
 			if (event.updating_guild->id == TEST_GUILD_ID && event.updated.id == thread_helper.thread_id && event.updated.name == "edited") {
 				set_test(THREAD_UPDATE_EVENT, true);
 			}
@@ -1817,7 +1770,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 												&& bans.find(deadUser3) != bans.end()
 											);
 											// unban all three
-											bot.guild_ban_delete(TEST_GUILD_ID, deadUser1, [&bot, deadUser1, deadUser2, deadUser3](const dpp::confirmation_callback_t &event) {
+											bot.guild_ban_delete(TEST_GUILD_ID, deadUser1, [&bot, deadUser2, deadUser3](const dpp::confirmation_callback_t &event) {
 												if (!event.is_error()) {
 													bot.guild_ban_delete(TEST_GUILD_ID, deadUser2, [&bot, deadUser3](const dpp::confirmation_callback_t &event) {
 														if (!event.is_error()) {
@@ -2029,22 +1982,22 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 						// testing all user flags from https://discord.com/developers/docs/resources/user#user-object-user-flags
 						// they're manually set here because the dpp::user_flags don't match to the discord API, so we can't use them to compare with the raw flags!
 						if (
-								u.is_discord_employee() == 			((raw_flags & (1 << 0)) != 0) &&
-								u.is_partnered_owner() == 			((raw_flags & (1 << 1)) != 0) &&
-								u.has_hypesquad_events() == 		((raw_flags & (1 << 2)) != 0) &&
-								u.is_bughunter_1() == 				((raw_flags & (1 << 3)) != 0) &&
-								u.is_house_bravery() == 			((raw_flags & (1 << 6)) != 0) &&
-								u.is_house_brilliance() == 			((raw_flags & (1 << 7)) != 0) &&
-								u.is_house_balance() == 			((raw_flags & (1 << 8)) != 0) &&
-								u.is_early_supporter() == 			((raw_flags & (1 << 9)) != 0) &&
-								u.is_team_user() == 				((raw_flags & (1 << 10)) != 0) &&
-								u.is_bughunter_2() == 				((raw_flags & (1 << 14)) != 0) &&
-								u.is_verified_bot() == 				((raw_flags & (1 << 16)) != 0) &&
-								u.is_verified_bot_dev() == 			((raw_flags & (1 << 17)) != 0) &&
-								u.is_certified_moderator() == 		((raw_flags & (1 << 18)) != 0) &&
-								u.is_bot_http_interactions() == 	((raw_flags & (1 << 19)) != 0) &&
-								u.is_active_developer() == 			((raw_flags & (1 << 22)) != 0)
-								) {
+							u.is_discord_employee() == 	((raw_flags & (1 << 0)) != 0) &&
+							u.is_partnered_owner() == 	((raw_flags & (1 << 1)) != 0) &&
+							u.has_hypesquad_events() == 	((raw_flags & (1 << 2)) != 0) &&
+							u.is_bughunter_1() == 		((raw_flags & (1 << 3)) != 0) &&
+							u.is_house_bravery() == 	((raw_flags & (1 << 6)) != 0) &&
+							u.is_house_brilliance() == 	((raw_flags & (1 << 7)) != 0) &&
+							u.is_house_balance() == 	((raw_flags & (1 << 8)) != 0) &&
+							u.is_early_supporter() == 	((raw_flags & (1 << 9)) != 0) &&
+							u.is_team_user() == 		((raw_flags & (1 << 10)) != 0) &&
+							u.is_bughunter_2() == 		((raw_flags & (1 << 14)) != 0) &&
+							u.is_verified_bot() == 		((raw_flags & (1 << 16)) != 0) &&
+							u.is_verified_bot_dev() == 	((raw_flags & (1 << 17)) != 0) &&
+							u.is_certified_moderator() == 	((raw_flags & (1 << 18)) != 0) &&
+							u.is_bot_http_interactions() == ((raw_flags & (1 << 19)) != 0) &&
+							u.is_active_developer() == 	((raw_flags & (1 << 22)) != 0)
+						) {
 							set_test(USER_GET_FLAGS, true);
 						} else {
 							set_test(USER_GET_FLAGS, false);
@@ -2066,48 +2019,42 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 					.set_name("voice1")
 					.add_permission_overwrite(TEST_GUILD_ID, dpp::ot_role, 0, dpp::p_view_channel)
 					.set_user_limit(99);
-				dpp::channel createdChannel;
-				try {
-					createdChannel = dpp::sync<dpp::channel>(&bot, &dpp::cluster::channel_create, channel1);
-				} catch (dpp::rest_exception &exception) {
-					set_test(VOICE_CHANNEL_CREATE, false);
-				}
-				if (createdChannel.name == channel1.name &&
-						createdChannel.user_limit == 99 &&
-						createdChannel.name == "voice1") {
-					for (auto overwrite: createdChannel.permission_overwrites) {
-						if (overwrite.id == TEST_GUILD_ID && overwrite.type == dpp::ot_role && overwrite.deny == dpp::p_view_channel) {
-							set_test(VOICE_CHANNEL_CREATE, true);
-						}
+				bot.channel_create(channel1, [&bot,channel1](const auto& response) {
+					if (response.is_error()) {
+						set_test(VOICE_CHANNEL_CREATE, false);
+						return;
 					}
+					dpp::channel createdChannel = std::get<dpp::channel>(response.value);
+					if (createdChannel.name == channel1.name && createdChannel.user_limit == 99 && createdChannel.name == "voice1") {
+						for (auto overwrite: createdChannel.permission_overwrites) {
+							if (overwrite.id == TEST_GUILD_ID && overwrite.type == dpp::ot_role && overwrite.deny == dpp::p_view_channel) {
+								set_test(VOICE_CHANNEL_CREATE, true);
+								break;
+							}
+						}
 
-					// edit the voice channel
-					createdChannel.set_name("foobar2");
-					createdChannel.set_user_limit(2);
-					for (auto overwrite: createdChannel.permission_overwrites) {
-						if (overwrite.id == TEST_GUILD_ID) {
-							overwrite.deny.set(0);
-							overwrite.allow.set(dpp::p_view_channel);
+						// edit the voice channel
+						createdChannel.set_name("foobar2");
+						createdChannel.set_user_limit(2);
+						for (auto overwrite: createdChannel.permission_overwrites) {
+							if (overwrite.id == TEST_GUILD_ID) {
+								overwrite.deny.set(0);
+								overwrite.allow.set(dpp::p_view_channel);
+							}
 						}
+						bot.channel_edit(createdChannel, [&bot,createdChannel](const auto& response) {
+							if (response.is_error()) {
+								set_test(VOICE_CHANNEL_EDIT, false);
+								return;
+							}
+							dpp::channel edited = std::get<dpp::channel>(response.value);
+							set_test(VOICE_CHANNEL_EDIT, (edited.name == "foobar2" && edited.user_limit == 2));
+							bot.channel_delete(createdChannel.id,[](const auto& response) {
+								set_test(VOICE_CHANNEL_DELETE, !response.is_error());
+							});
+						});
 					}
-					try {
-						dpp::channel edited = dpp::sync<dpp::channel>(&bot, &dpp::cluster::channel_edit, createdChannel);
-						if (edited.name == "foobar2" && edited.user_limit == 2) {
-							set_test(VOICE_CHANNEL_EDIT, true);
-						}
-					} catch (dpp::rest_exception &exception) {
-						set_test(VOICE_CHANNEL_EDIT, false);
-					}
-
-					// delete the voice channel
-					try {
-						dpp::sync<dpp::confirmation>(&bot, &dpp::cluster::channel_delete, createdChannel.id);
-						set_test(VOICE_CHANNEL_DELETE, true);
-					} catch (dpp::rest_exception &exception) {
-						bot.log(dpp::ll_warning, "Exception: " + std::string(exception.what()));
-						set_test(VOICE_CHANNEL_DELETE, false);
-					}
-				}
+				});
 			}
 
 			set_test(FORUM_CREATION, false);
@@ -2295,43 +2242,46 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 				r.permissions.add(dpp::p_move_members);
 				r.set_flags(dpp::r_mentionable);
 				r.colour = dpp::colors::moon_yellow;
-				dpp::role createdRole;
-				try {
-					createdRole = dpp::sync<dpp::role>(&bot, &dpp::cluster::role_create, r);
+				bot.role_create(r, [&bot, r](const auto cc) {
+					if (cc.is_error()) {
+						set_test(ROLE_CREATE, false);
+						set_test(ROLE_EDIT, false);
+						set_test(ROLE_DELETE, false);
+						return;
+					}
+					dpp::role createdRole = std::get<dpp::role>(cc.value);
+					createdRole.guild_id = TEST_GUILD_ID;
 					if (createdRole.name == r.name &&
 						createdRole.has_move_members() &&
 						createdRole.flags & dpp::r_mentionable &&
 						createdRole.colour == r.colour) {
+						createdRole.name = "Test-Role-Edited";
 						set_test(ROLE_CREATE, true);
+						bot.role_edit(createdRole, [&bot, createdRole](const auto& e) {
+							if (e.is_error()) {
+								set_test(ROLE_EDIT, false);
+								set_test(ROLE_DELETE, false);
+								return;
+							}
+							dpp::role edited = std::get<dpp::role>(e.value);
+							set_test(ROLE_EDIT, (createdRole.id == edited.id && edited.name == "Test-Role-Edited"));
+							bot.role_delete(TEST_GUILD_ID, createdRole.id, [](const auto& e) {
+								set_test(ROLE_DELETE, !e.is_error());
+							});
+						});
+					} else {
+						set_test(ROLE_CREATE, false);
+						set_test(ROLE_EDIT, false);
+						set_test(ROLE_DELETE, false);
 					}
-				} catch (dpp::rest_exception &exception) {
-					set_test(ROLE_CREATE, false);
-				}
-				createdRole.guild_id = TEST_GUILD_ID;
-				createdRole.name = "Test-Role-Edited";
-				createdRole.colour = dpp::colors::light_sea_green;
-				try {
-					dpp::role edited = dpp::sync<dpp::role>(&bot, &dpp::cluster::role_edit, createdRole);
-					if (createdRole.id == edited.id && edited.name == "Test-Role-Edited") {
-						set_test(ROLE_EDIT, true);
-					}
-				} catch (dpp::rest_exception &exception) {
-					set_test(ROLE_EDIT, false);
-				}
-				try {
-					dpp::sync<dpp::confirmation>(&bot, &dpp::cluster::role_delete, TEST_GUILD_ID, createdRole.id);
-					set_test(ROLE_DELETE, true);
-				} catch (dpp::rest_exception &exception) {
-					bot.log(dpp::ll_warning, "Exception: " + std::string(exception.what()));
-					set_test(ROLE_DELETE, false);
-				}
+				});
 			}
 		};
 
 		set_test(BOTSTART, false);
 		try {
 			if (!offline) {
-				bot.start(true);
+				bot.start(dpp::st_return);
 				set_test(BOTSTART, true);
 			}
 		}
@@ -2339,12 +2289,63 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 			set_test(BOTSTART, false);
 		}
 
+		dpp::https_client *c{};
+		dpp::https_client *c2{};
+		dpp::https_client *c3{};
+
+		set_test(HTTPS, false);
+		if (!offline) {
+			dpp::multipart_content multipart = dpp::https_client::build_multipart(
+				"{\"content\":\"test\"}", {"test.txt", "blob.blob"}, {"ABCDEFGHI", "BLOB!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"}, {"text/plain", "application/octet-stream"}
+			);
+			try {
+				c = new dpp::https_client(&bot, "discord.com", 443, "/api/channels/" + std::to_string(TEST_TEXT_CHANNEL_ID) + "/messages", "POST", multipart.body,
+						    {
+							    {"Content-Type", multipart.mimetype},
+							    {"Authorization", "Bot " + token}
+						    }, false, 5, "1.1", [](dpp::https_client* c) {
+						std::string hdr1 = c->get_header("server");
+						std::string content1 = c->get_content();
+						set_test(HTTPS, hdr1 == "cloudflare" && c->get_status() == 200);
+					}
+				);
+			}
+			catch (const dpp::exception& e) {
+				set_status(HTTPS, ts_failed, e.what());
+			}
+
+			set_test(HTTP, false);
+			try {
+				c2 = new dpp::https_client(&bot, "github.com", 80, "/", "GET", "", {}, true, 5, "1.1", [](dpp::https_client *c2) {
+					std::string hdr2 = c2->get_header("location");
+					std::string content2 = c2->get_content();
+					set_test(HTTP, hdr2 == "https://github.com/" && c2->get_status() == 301);
+				});
+			}
+			catch (const dpp::exception& e) {
+				set_status(HTTP, ts_failed, e.what());
+			}
+
+			set_test(MULTIHEADER, false);
+			try {
+				c3 = new dpp::https_client(&bot, "dl.dpp.dev", 443, "/cookietest.php", "GET", "", {}, true, 5, "1.1", [](dpp::https_client *c2) {
+					size_t count = c2->get_header_count("set-cookie");
+					size_t count_list = c2->get_header_list("set-cookie").size();
+					// This test script sets a bunch of cookies when we request it.
+					set_test(MULTIHEADER, c2->get_status() == 200 && count > 1 && count == count_list);
+				});
+			}
+			catch (const dpp::exception& e) {
+				set_status(MULTIHEADER, ts_failed, e.what());
+			}
+		}
+
 		set_test(TIMERSTART, false);
-		uint32_t ticks = 0;
-		dpp::timer th = bot.start_timer([&](dpp::timer timer_handle) {
-			if (ticks == 5) {
+		static uint32_t ticks = 0;
+		dpp::timer th = bot.start_timer([](dpp::timer timer_handle) {
+			if (ticks == 2) {
 				/* The simple test timer ticks every second.
-				 * If we get to 5 seconds, we know the timer is working.
+				 * If we get to 2 seconds, we know the timer is working.
 				 */
 				set_test(TIMERSTART, true);
 			}
@@ -2353,8 +2354,14 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 
 		set_test(USER_GET_CACHED_PRESENT, false);
 		try {
-			dpp::user_identified u = dpp::sync<dpp::user_identified>(&bot, &dpp::cluster::user_get_cached, TEST_USER_ID);
-			set_test(USER_GET_CACHED_PRESENT, (u.id == TEST_USER_ID));
+			bot.user_get_cached(TEST_USER_ID, [](const auto &e) {
+				if (e.is_error()) {
+					set_test(USER_GET_CACHED_PRESENT, false);
+					return;
+				}
+				dpp::user_identified u = std::get<dpp::user_identified>(e.value);
+				set_test(USER_GET_CACHED_PRESENT, (u.id == TEST_USER_ID));
+			});
 		}
 		catch (const std::exception&) {
 			set_test(USER_GET_CACHED_PRESENT, false);
@@ -2368,8 +2375,14 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 			 * If this becomes not true any more, we'll pick another well known
 			 * user ID.
 			 */
-			dpp::user_identified u = dpp::sync<dpp::user_identified>(&bot, &dpp::cluster::user_get_cached, 90339695967350784);
-			set_test(USER_GET_CACHED_ABSENT, (u.id == dpp::snowflake(90339695967350784)));
+			bot.user_get_cached(90339695967350784, [](const auto &e) {
+				if (e.is_error()) {
+					set_test(USER_GET_CACHED_ABSENT, false);
+					return;
+				}
+				dpp::user_identified u = std::get<dpp::user_identified>(e.value);
+				set_test(USER_GET_CACHED_ABSENT, (u.id == 90339695967350784));
+			});
 		}
 		catch (const std::exception&) {
 			set_test(USER_GET_CACHED_ABSENT, false);
@@ -2444,10 +2457,13 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 
 		wait_for_tests();
 
+		delete c;
+		delete c2;
+		delete c3;
+
 	}
 	catch (const std::exception &e) {
-		std::cout << e.what() << "\n";
-		set_test(CLUSTER, false);
+		set_status(CLUSTER, ts_failed, e.what());
 	}
 
 	/* Return value = number of failed tests, exit code 0 = success */

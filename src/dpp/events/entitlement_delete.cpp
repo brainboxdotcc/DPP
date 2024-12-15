@@ -38,10 +38,12 @@ void entitlement_delete::handle(discord_client* client, json &j, const std::stri
 		json& d = j["d"];
 		ent.fill_from_json(&d);
 
-		dpp::entitlement_delete_t entitlement_event(client, raw);
+		dpp::entitlement_delete_t entitlement_event(client->owner, client->shard_id, raw);
 		entitlement_event.deleted = ent;
 
-		client->creator->on_entitlement_delete.call(entitlement_event);
+		client->creator->queue_work(0, [c = client->creator, entitlement_event]() {
+			c->on_entitlement_delete.call(entitlement_event);
+		});
 	}
 }
 

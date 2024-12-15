@@ -41,10 +41,12 @@ namespace dpp::events {
 void guild_ban_remove::handle(discord_client* client, json &j, const std::string &raw) {
 	if (!client->creator->on_guild_ban_remove.empty()) {
 		json &d = j["d"];
-		dpp::guild_ban_remove_t gbr(client, raw);
+		dpp::guild_ban_remove_t gbr(client->owner, client->shard_id, raw);
 		gbr.unbanning_guild = dpp::find_guild(snowflake_not_null(&d, "guild_id"));
 		gbr.unbanned = dpp::user().fill_from_json(&(d["user"]));
-		client->creator->on_guild_ban_remove.call(gbr);
+		client->creator->queue_work(1, [c = client->creator, gbr]() {
+			c->on_guild_ban_remove.call(gbr);
+		});
 	}
 }
 

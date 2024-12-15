@@ -20,19 +20,70 @@
  *
  ************************************************************************************/
 #include <dpp/export.h>
-#ifdef _WIN32
-/* Central point for forcing inclusion of winsock library for all socket code */
-#include <io.h>
-#pragma comment(lib,"ws2_32")
-#endif
 #include <dpp/queues.h>
 #include <dpp/cluster.h>
 #include <dpp/httpsclient.h>
+#ifdef _WIN32
+	#include <io.h>
+#endif
 
 namespace dpp {
 
+/**
+ * @brief List of possible request verbs.
+ *
+ * This MUST MATCH the size of the dpp::http_method enum!
+ */
+constexpr std::array request_verb {
+	"GET",
+	"POST",
+	"PUT",
+	"PATCH",
+	"DELETE"
+};
+
+namespace
+{
+
+/**
+ * @brief Comparator for sorting a request container
+ */
+struct compare_request {
+	/**
+	 * @brief Less_than comparator for sorting
+	 * @param lhs Left-hand side
+	 * @param rhs Right-hand side
+	 * @return Whether lhs comes before rhs in strict ordering
+	 */
+	bool operator()(const std::unique_ptr<http_request>& lhs, const std::unique_ptr<http_request>& rhs) const noexcept {
+		return std::less{}(lhs->endpoint, rhs->endpoint);
+	};
+
+	/**
+	 * @brief Less_than comparator for sorting
+	 * @param lhs Left-hand side
+	 * @param rhs Right-hand side
+	 * @return Whether lhs comes before rhs in strict ordering
+	 */
+	bool operator()(const std::unique_ptr<http_request>& lhs, std::string_view rhs) const noexcept {
+		return std::less{}(lhs->endpoint, rhs);
+	};
+
+	/**
+	 * @brief Less_than comparator for sorting
+	 * @param lhs Left-hand side
+	 * @param rhs Right-hand side
+	 * @return Whether lhs comes before rhs in strict ordering
+	 */
+	bool operator()(std::string_view lhs, const std::unique_ptr<http_request>& rhs) const noexcept {
+		return std::less{}(lhs, rhs->endpoint);
+	};
+};
+
+}
+
 http_request::http_request(const std::string &_endpoint, const std::string &_parameters, http_completion_event completion, const std::string &_postdata, http_method _method, const std::string &audit_reason, const std::string &filename, const std::string &filecontent, const std::string &filemimetype, const std::string &http_protocol)
- : complete_handler(completion), completed(false), non_discord(false), endpoint(_endpoint), parameters(_parameters), postdata(_postdata),  method(_method), reason(audit_reason), mimetype("application/json"), waiting(false), protocol(http_protocol), request_timeout(5)
+ : complete_handler(completion), completed(false), non_discord(false), endpoint(_endpoint), parameters(_parameters), postdata(_postdata),  method(_method), reason(audit_reason), mimetype("application/json"), waiting(false), protocol(http_protocol)
 {
 	if (!filename.empty()) {
 		file_name.push_back(filename);
@@ -46,21 +97,20 @@ http_request::http_request(const std::string &_endpoint, const std::string &_par
 }
 
 http_request::http_request(const std::string &_endpoint, const std::string &_parameters, http_completion_event completion, const std::string &_postdata, http_method method, const std::string &audit_reason, const std::vector<std::string> &filename, const std::vector<std::string> &filecontent, const std::vector<std::string> &filemimetypes, const std::string &http_protocol)
- : complete_handler(completion), completed(false), non_discord(false), endpoint(_endpoint), parameters(_parameters), postdata(_postdata),  method(method), reason(audit_reason), file_name(filename), file_content(filecontent), file_mimetypes(filemimetypes), mimetype("application/json"), waiting(false), protocol(http_protocol), request_timeout(5)
+ : complete_handler(completion), completed(false), non_discord(false), endpoint(_endpoint), parameters(_parameters), postdata(_postdata),  method(method), reason(audit_reason), file_name(filename), file_content(filecontent), file_mimetypes(filemimetypes), mimetype("application/json"), waiting(false), protocol(http_protocol)
 {
 }
 
 
-http_request::http_request(const std::string &_url, http_completion_event completion, http_method _method, const std::string &_postdata, const std::string &_mimetype, const std::multimap<std::string, std::string> &_headers, const std::string &http_protocol, time_t _request_timeout)
- : complete_handler(completion), completed(false), non_discord(true), endpoint(_url), postdata(_postdata), method(_method), mimetype(_mimetype), req_headers(_headers), waiting(false), protocol(http_protocol), request_timeout(_request_timeout)
+http_request::http_request(const std::string &_url, http_completion_event completion, http_method _method, const std::string &_postdata, const std::string &_mimetype, const std::multimap<std::string, std::string> &_headers, const std::string &http_protocol)
+ : complete_handler(completion), completed(false), non_discord(true), endpoint(_url), postdata(_postdata), method(_method), mimetype(_mimetype), req_headers(_headers), waiting(false), protocol(http_protocol)
 {
 }
 
-http_request::~http_request() = default;
+http_request::~http_request()  = default;
 
 void http_request::complete(const http_request_completion_t &c) {
-	/* Call completion handler only if the request has been completed */
-	if (is_completed() && complete_handler) {
+	if (complete_handler) {
 		complete_handler(c);
 	}
 }
@@ -103,8 +153,13 @@ bool http_request::is_completed()
 	return completed;
 }
 
+https_client* http_request::get_client() const
+{
+	return cli.get();
+}
+
 /* Execute a HTTP request */
-http_request_completion_t http_request::run(cluster* owner) {
+http_request_completion_t http_request::run(request_concurrency_queue* processor, cluster* owner) {
 
 	http_request_completion_t rv;
 	double start = dpp::utility::time_f();
@@ -156,14 +211,6 @@ http_request_completion_t http_request::run(cluster* owner) {
 		}
 	}
 
-	constexpr std::array request_verb {
-		"GET",
-		"POST",
-		"PUT",
-		"PATCH",
-		"DELETE"
-	};
-
 	multipart_content multipart;
 	if (non_discord) {
 		multipart = { postdata, mimetype };
@@ -175,270 +222,203 @@ http_request_completion_t http_request::run(cluster* owner) {
 	}
 	http_connect_info hci = https_client::get_host_info(_host);
 	try {
-		https_client cli(hci.hostname, hci.port, _url, request_verb[method], multipart.body, headers, !hci.is_ssl, owner->request_timeout, protocol);
-		rv.latency = dpp::utility::time_f() - start;
-		if (cli.timed_out) {
-			rv.error = h_connection;			
-			owner->log(ll_error, "HTTP(S) error on " + hci.scheme + " connection to " + hci.hostname + ":" + std::to_string(hci.port) + ": Timed out while waiting for the response");
-		} else if (cli.get_status() < 100) {
-			rv.error = h_connection;
-			owner->log(ll_error, "HTTP(S) error on " + hci.scheme + " connection to " + hci.hostname + ":" + std::to_string(hci.port) + ": Malformed HTTP response");
-		} else {
-			populate_result(_url, owner, rv, cli);
-		}
+		cli = std::make_unique<https_client>(
+			owner,
+			hci.hostname,
+			hci.port,
+			_url,
+			request_verb[method],
+			multipart.body,
+			headers,
+			!hci.is_ssl,
+			owner->request_timeout,
+			protocol,
+			[processor, rv, hci, this, owner, start, _url](https_client* client) {
+				http_request_completion_t result{rv};
+				result.latency = dpp::utility::time_f() - start;
+				if (client->timed_out) {
+					result.error = h_connection;
+					owner->log(ll_error, "HTTP(S) error on " + hci.scheme + " connection to " + request_verb[method] + " "  + hci.hostname + ":" + std::to_string(hci.port) + _url + ": Timed out while waiting for the response");
+				} else if (client->get_status() < 100) {
+					result.error = h_connection;
+					owner->log(ll_error, "HTTP(S) error on " + hci.scheme + " connection to " + request_verb[method] + " "  + hci.hostname + ":" + std::to_string(hci.port) + _url + ": Malformed HTTP response");
+				}
+				populate_result(_url, owner, result, *client);
+				/* Set completion flag */
+
+				bucket_t newbucket;
+				newbucket.limit = result.ratelimit_limit;
+				newbucket.remaining = result.ratelimit_remaining;
+				newbucket.reset_after = result.ratelimit_reset_after;
+				newbucket.retry_after = result.ratelimit_retry_after;
+				newbucket.timestamp = time(nullptr);
+				processor->requests->globally_ratelimited = rv.ratelimit_global;
+				if (processor->requests->globally_ratelimited) {
+					/* We are globally rate limited - user up to shenanigans */
+					processor->requests->globally_limited_until = (newbucket.retry_after ? newbucket.retry_after : newbucket.reset_after) + newbucket.timestamp;
+				}
+				processor->buckets[this->endpoint] = newbucket;
+
+				/* Transfer it to completed requests */
+				owner->queue_work(0, [owner, this, result, hci, _url]() {
+					try {
+						complete(result);
+					}
+					catch (const std::exception& e) {
+						owner->log(ll_error, "Uncaught exception thrown in HTTPS callback for " + std::string(request_verb[method]) + " "  + hci.hostname + ":" + std::to_string(hci.port) + _url + ": " + std::string(e.what()));
+					}
+					catch (...) {
+						owner->log(ll_error, "Uncaught exception thrown in HTTPS callback for " + std::string(request_verb[method]) + " "  + hci.hostname + ":" + std::to_string(hci.port) + _url + ": <non exception value>");
+					}
+					completed = true;
+				});
+			}
+		);
 	}
 	catch (const std::exception& e) {
 		owner->log(ll_error, "HTTP(S) error on " + hci.scheme + " connection to " + hci.hostname + ":" + std::to_string(hci.port) + ": " + std::string(e.what()));
 		rv.error = h_connection;
 	}
-
-	/* Set completion flag */
-	completed = true;
 	return rv;
 }
 
-request_queue::request_queue(class cluster* owner, uint32_t request_threads) : creator(owner), terminating(false), globally_ratelimited(false), globally_limited_for(0), in_thread_pool_size(request_threads)
+request_queue::request_queue(class cluster* owner, uint32_t request_concurrency) : creator(owner), terminating(false), globally_ratelimited(false), globally_limited_until(0), in_queue_pool_size(request_concurrency)
 {
-	for (uint32_t in_alloc = 0; in_alloc < in_thread_pool_size; ++in_alloc) {
-		requests_in.push_back(std::make_unique<in_thread>(owner, this, in_alloc));
+	/* Create request_concurrency timer instances */
+	for (uint32_t in_alloc = 0; in_alloc < in_queue_pool_size; ++in_alloc) {
+		requests_in.push_back(std::make_unique<request_concurrency_queue>(owner, this, in_alloc));
 	}
-	out_thread = new std::thread(&request_queue::out_loop, this);
 }
 
-request_queue& request_queue::add_request_threads(uint32_t request_threads)
+uint32_t request_queue::get_request_queue_count() const
 {
-	for (uint32_t in_alloc_ex = 0; in_alloc_ex < request_threads; ++in_alloc_ex) {
-		requests_in.push_back(std::make_unique<in_thread>(creator, this, in_alloc_ex + in_thread_pool_size));
-	}
-	in_thread_pool_size += request_threads;
-	return *this;
+	return in_queue_pool_size;
 }
 
-uint32_t request_queue::get_request_thread_count() const
+request_concurrency_queue::request_concurrency_queue(class cluster* owner, class request_queue* req_q, uint32_t index) : in_index(index), terminating(false), requests(req_q), creator(owner)
 {
-	return in_thread_pool_size;
+	in_timer = creator->start_timer([this](auto timer_handle) {
+		tick_and_deliver_requests(in_index);
+		/* Clear pending removals in the removals queue */
+		if (time(nullptr) % 90 == 0) {
+			std::scoped_lock lock1{in_mutex};
+			for (auto it = removals.cbegin(); it != removals.cend();) {
+				if ((*it)->is_completed()) {
+					it = removals.erase(it);
+				} else {
+					++it;
+				}
+			}
+		}
+	}, 1);
 }
 
-in_thread::in_thread(class cluster* owner, class request_queue* req_q, uint32_t index) : terminating(false), requests(req_q), creator(owner)
-{
-	this->in_thr = new std::thread(&in_thread::in_loop, this, index);
-}
-
-in_thread::~in_thread()
+request_concurrency_queue::~request_concurrency_queue()
 {
 	terminate();
-	in_thr->join();
-	delete in_thr;
+	creator->stop_timer(in_timer);
 }
 
-void in_thread::terminate()
+void request_concurrency_queue::terminate()
 {
 	terminating.store(true, std::memory_order_relaxed);
-	in_ready.notify_one();
 }
 
 request_queue::~request_queue()
 {
 	terminating.store(true, std::memory_order_relaxed);
-	out_ready.notify_one();
 	for (auto& in_thr : requests_in) {
-		in_thr->terminate(); // signal all of them here, otherwise they will all join 1 by 1 and it will take forever
+		/* Note: We don't need to set the atomic to make timers quit, this is purely
+		 * to prevent additional requests going into the queue while it is being destructed
+		 * from other threads,
+		 */
+		in_thr->terminate();
 	}
-	out_thread->join();
-	delete out_thread;
 }
 
-namespace
+void request_concurrency_queue::tick_and_deliver_requests(uint32_t index)
 {
+	if (terminating) {
+		return;
+	}
 
-/**
- * @brief Comparator for sorting a request container
- */
-struct compare_request {
-	/**
-	 * @brief Less_than comparator for sorting
-	 * @param lhs Left-hand side
-	 * @param rhs Right-hand side
-	 * @return Whether lhs comes before rhs in strict ordering
-	 */
-	bool operator()(const std::unique_ptr<http_request>& lhs, const std::unique_ptr<http_request>& rhs) const noexcept {
-		return std::less{}(lhs->endpoint, rhs->endpoint);
-	};
+	if (!requests->globally_ratelimited) {
 
-	/**
-	 * @brief Less_than comparator for sorting
-	 * @param lhs Left-hand side
-	 * @param rhs Right-hand side
-	 * @return Whether lhs comes before rhs in strict ordering
-	 */
-	bool operator()(const std::unique_ptr<http_request>& lhs, std::string_view rhs) const noexcept {
-		return std::less{}(lhs->endpoint, rhs);
-	};
-
-	/**
-	 * @brief Less_than comparator for sorting
-	 * @param lhs Left-hand side
-	 * @param rhs Right-hand side
-	 * @return Whether lhs comes before rhs in strict ordering
-	 */
-	bool operator()(std::string_view lhs, const std::unique_ptr<http_request>& rhs) const noexcept {
-		return std::less{}(lhs, rhs->endpoint);
-	};
-};
-
-}
-
-void in_thread::in_loop(uint32_t index)
-{
-	utility::set_thread_name(std::string("http_req/") + std::to_string(index));
-	while (!terminating.load(std::memory_order_relaxed)) {
-		std::mutex mtx;
-		std::unique_lock<std::mutex> lock{ mtx };
-		in_ready.wait_for(lock, std::chrono::seconds(1));
-		/* New request to be sent! */
-
-		if (!requests->globally_ratelimited) {
-
-			std::vector<http_request*> requests_view;
-			{
-				/* Gather all the requests first within a mutex */
-				std::shared_lock lock(in_mutex);
-				if (requests_in.empty()) {
-					/* Nothing to copy, wait again */
-					continue;
-				}
-				requests_view.reserve(requests_in.size());
-				std::transform(requests_in.begin(), requests_in.end(), std::back_inserter(requests_view), [](const std::unique_ptr<http_request> &r) {
-					return r.get();
-				});
+		std::vector<http_request*> requests_view;
+		{
+			/* Gather all the requests first within a mutex */
+			std::shared_lock lock(in_mutex);
+			if (requests_in.empty()) {
+				/* Nothing to copy, check again when we call the timer in a second */
+				return;
 			}
+			requests_view.reserve(requests_in.size());
+			std::transform(requests_in.begin(), requests_in.end(), std::back_inserter(requests_view), [](const std::unique_ptr<http_request> &r) {
+				return r.get();
+			});
+		}
 
-			for (auto& request_view : requests_view) {
-				const std::string &key = request_view->endpoint;
-				http_request_completion_t rv;
-				auto                      currbucket = buckets.find(key);
+		for (auto& request_view : requests_view) {
+			const std::string &key = request_view->endpoint;
+			http_request_completion_t rv;
+			auto currbucket = buckets.find(key);
 
-				if (currbucket != buckets.end()) {
-					/* There's a bucket for this request. Check its status. If the bucket says to wait,
-					* skip all requests in this bucket till its ok.
-					*/
-					if (currbucket->second.remaining < 1) {
-						uint64_t wait = (currbucket->second.retry_after ? currbucket->second.retry_after : currbucket->second.reset_after);
-						if ((uint64_t)time(nullptr) > currbucket->second.timestamp + wait) {
-							/* Time has passed, we can process this bucket again. send its request. */
-							rv = request_view->run(creator);
-						} else {
-							if (!request_view->waiting) {
-								request_view->waiting = true;
-							}
-							/* Time not up yet, wait more */
-							break;
-						}
+			if (currbucket != buckets.end()) {
+				/* There's a bucket for this request. Check its status. If the bucket says to wait,
+				 * skip all requests until the timer value indicates the rate limit won't be hit
+				 */
+				if (currbucket->second.remaining < 1) {
+					uint64_t wait = (currbucket->second.retry_after ? currbucket->second.retry_after : currbucket->second.reset_after);
+					if ((uint64_t)time(nullptr) > currbucket->second.timestamp + wait) {
+						/* Time has passed, we can process this bucket again. send its request. */
+						request_view->run(this, creator);
 					} else {
-						/* There's limit remaining, we can just run the request */
-						rv = request_view->run(creator);
+						if (!request_view->waiting) {
+							request_view->waiting = true;
+						}
+						/* Time not up yet, wait more */
+						break;
 					}
 				} else {
-					/* No bucket for this endpoint yet. Just send it, and make one from its reply */
-					rv = request_view->run(creator);
+					/* We aren't at the limit, so we can just run the request */
+					request_view->run(this, creator);
 				}
+			} else {
+				/* No bucket for this endpoint yet. Just send it, and make one from its reply */
+				request_view->run(this, creator);
+			}
 
-				bucket_t newbucket;
-				newbucket.limit = rv.ratelimit_limit;
-				newbucket.remaining = rv.ratelimit_remaining;
-				newbucket.reset_after = rv.ratelimit_reset_after;
-				newbucket.retry_after = rv.ratelimit_retry_after;
-				newbucket.timestamp = time(nullptr);
-				requests->globally_ratelimited = rv.ratelimit_global;
-				if (requests->globally_ratelimited) {
-					requests->globally_limited_for = (newbucket.retry_after ? newbucket.retry_after : newbucket.reset_after);
-				}
-				buckets[request_view->endpoint] = newbucket;
+			/* Remove from inbound requests */
+			std::unique_ptr<http_request> rq;
+			{
+				/* Find the owned pointer in requests_in */
+				std::scoped_lock lock1{in_mutex};
 
-				/* Remove the request from the incoming requests to transfer it to completed requests */
-				std::unique_ptr<http_request> request;
-				{
-					/* Find the owned pointer in requests_in */
-					std::scoped_lock lock1{in_mutex};
-
-					auto [begin, end] = std::equal_range(requests_in.begin(), requests_in.end(), key, compare_request{});
-					for (auto it = begin; it != end; ++it) {
-						if (it->get() == request_view) {
-							/* Grab and remove */
-							request = std::move(*it);
-							requests_in.erase(it);
-							break;
-						}
+				const std::string &key = request_view->endpoint;
+				auto [begin, end] = std::equal_range(requests_in.begin(), requests_in.end(), key, compare_request{});
+				for (auto it = begin; it != end; ++it) {
+					if (it->get() == request_view) {
+						/* Grab and remove */
+						rq = std::move(*it);
+						removals.push_back(std::move(rq));
+						requests_in.erase(it);
+						break;
 					}
 				}
-				/* Make a new entry in the completion list and notify */
-				auto hrc = std::make_unique<http_request_completion_t>();
-				*hrc = rv;
-				{
-					std::scoped_lock lock1(requests->out_mutex);
-					requests->responses_out.push({std::move(request), std::move(hrc)});
-				}
-				requests->out_ready.notify_one();
 			}
+		}
 
-		} else {
-			if (requests->globally_limited_for > 0) {
-				std::this_thread::sleep_for(std::chrono::seconds(requests->globally_limited_for));
-				requests->globally_limited_for = 0;
-			}
+	} else {
+		/* If we are globally rate limited, do nothing until we are not */
+		if (time(nullptr) > requests->globally_limited_until) {
+			requests->globally_limited_until = 0;
 			requests->globally_ratelimited = false;
-			in_ready.notify_one();
-		}
-	}
-}
-
-bool request_queue::queued_deleting_request::operator<(const queued_deleting_request& other) const noexcept {
-	return time_to_delete < other.time_to_delete;
-}
-
-bool request_queue::queued_deleting_request::operator<(time_t time) const noexcept {
-	return time_to_delete < time;
-}
-
-
-void request_queue::out_loop()
-{
-	utility::set_thread_name("req_callback");
-	while (!terminating.load(std::memory_order_relaxed)) {
-
-		std::mutex mtx;
-		std::unique_lock lock{ mtx };
-		out_ready.wait_for(lock, std::chrono::seconds(1));
-		time_t now = time(nullptr);
-
-		/* A request has been completed! */
-		completed_request queue_head = {};
-		{
-			std::scoped_lock lock1(out_mutex);
-			if (responses_out.size()) {
-				queue_head = std::move(responses_out.front());
-				responses_out.pop();
-			}
-		}
-
-		if (queue_head.request && queue_head.response) {
-			queue_head.request->complete(*queue_head.response);
-			/* Queue deletions for 60 seconds from now */
-			auto when = now + 60;
-			auto where = std::lower_bound(responses_to_delete.begin(), responses_to_delete.end(), when);
-			responses_to_delete.insert(where, {when, std::move(queue_head)});
-		}
-
-		/* Check for deletable items every second regardless of select status */
-		auto end = std::lower_bound(responses_to_delete.begin(), responses_to_delete.end(), now);
-		if (end != responses_to_delete.begin()) {
-			responses_to_delete.erase(responses_to_delete.begin(), end);
 		}
 	}
 }
 
 /* Post a http_request into the queue */
-void in_thread::post_request(std::unique_ptr<http_request> req)
+void request_concurrency_queue::post_request(std::unique_ptr<http_request> req)
 {
 	{
 		std::scoped_lock lock(in_mutex);
@@ -446,17 +426,21 @@ void in_thread::post_request(std::unique_ptr<http_request> req)
 		auto where = std::lower_bound(requests_in.begin(), requests_in.end(), req->endpoint, compare_request{});
 		requests_in.emplace(where, std::move(req));
 	}
-	in_ready.notify_one();
+	/* Immediately trigger requests in this queue */
+	tick_and_deliver_requests(in_index);
 }
 
-/* Simple hash function for hashing urls into thread pool values,
- * ensuring that the same url always ends up on the same thread,
+/* @brief Simple hash function for hashing urls into request pool values,
+ * ensuring that the same url always ends up in the same queue,
  * which means that it will be part of the same ratelimit bucket.
  * I did consider std::hash for this, but std::hash returned even
  * numbers for absolutely every string i passed it on g++ 10.0,
  * so this was a no-no. There are also much bigger more complex
  * hash functions that claim to be really fast, but this is
  * readable and small and fits the requirement exactly.
+ *
+ * @param s String to hash
+ * @return Hash value
  */
 inline uint32_t hash(const char *s)
 {
@@ -468,15 +452,24 @@ inline uint32_t hash(const char *s)
 }
 
 /* Post a http_request into a request queue */
-request_queue& request_queue::post_request(std::unique_ptr<http_request> req)
-{
-	requests_in[hash(req->endpoint.c_str()) % in_thread_pool_size]->post_request(std::move(req));
+request_queue& request_queue::post_request(std::unique_ptr<http_request> req) {
+	if (!terminating) {
+		requests_in[hash(req->endpoint.c_str()) % in_queue_pool_size]->post_request(std::move(req));
+	}
 	return *this;
 }
 
-bool request_queue::is_globally_ratelimited() const
-{
+bool request_queue::is_globally_ratelimited() const {
 	return this->globally_ratelimited;
+}
+
+size_t request_queue::get_active_request_count() const {
+	size_t total{};
+	for (auto& pool : requests_in) {
+		std::scoped_lock lock(pool->in_mutex);
+		total += pool->requests_in.size();
+	}
+	return total;
 }
 
 }

@@ -64,10 +64,12 @@ void guild_members_chunk::handle(discord_client* client, json &j, const std::str
 		}
 	}
 	if (!client->creator->on_guild_members_chunk.empty()) {
-		dpp::guild_members_chunk_t gmc(client, raw);
+		dpp::guild_members_chunk_t gmc(client->owner, client->shard_id, raw);
 		gmc.adding = g;
 		gmc.members = &um;
-		client->creator->on_guild_members_chunk.call(gmc);
+		client->creator->queue_work(1, [c = client->creator, gmc]() {
+			c->on_guild_members_chunk.call(gmc);
+		});
 	}
 }
 

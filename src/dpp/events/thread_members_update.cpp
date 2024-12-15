@@ -34,7 +34,7 @@ void thread_members_update::handle(discord_client* client, json& j, const std::s
 
 	dpp::guild* g = dpp::find_guild(snowflake_not_null(&d, "guild_id"));
 	if (!client->creator->on_thread_members_update.empty()) {
-		dpp::thread_members_update_t tms(client, raw);
+		dpp::thread_members_update_t tms(client->owner, client->shard_id, raw);
 		tms.updating_guild = g;
 		set_snowflake_not_null(&d, "id", tms.thread_id);
 		set_int8_not_null(&d, "member_count", tms.member_count);
@@ -52,7 +52,9 @@ void thread_members_update::handle(discord_client* client, json& j, const std::s
 				client->creator->log(dpp::ll_error, std::string("thread_members_update: {}") + e.what());
 			}
 		}
-		client->creator->on_thread_members_update.call(tms);
+		client->creator->queue_work(1, [c = client->creator, tms]() {
+			c->on_thread_members_update.call(tms);
+		});
 	}
 }
 };

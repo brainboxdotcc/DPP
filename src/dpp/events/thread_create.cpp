@@ -39,10 +39,12 @@ void thread_create::handle(discord_client* client, json& j, const std::string& r
 		g->threads.push_back(t.id);
 	}
 	if (!client->creator->on_thread_create.empty()) {
-		dpp::thread_create_t tc(client, raw);
+		dpp::thread_create_t tc(client->owner, client->shard_id, raw);
 		tc.created = t;
 		tc.creating_guild = g;
-		client->creator->on_thread_create.call(tc);
+		client->creator->queue_work(1, [c = client->creator, tc]() {
+			c->on_thread_create.call(tc);
+		});
 	}
 }
 };

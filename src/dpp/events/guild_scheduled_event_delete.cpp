@@ -40,9 +40,11 @@ namespace dpp::events {
 void guild_scheduled_event_delete::handle(discord_client* client, json &j, const std::string &raw) {
 	json& d = j["d"];
 	if (!client->creator->on_guild_scheduled_event_delete.empty()) {
-		dpp::guild_scheduled_event_delete_t ed(client, raw);
+		dpp::guild_scheduled_event_delete_t ed(client->owner, client->shard_id, raw);
 		ed.deleted.fill_from_json(&d);
-		client->creator->on_guild_scheduled_event_delete.call(ed);
+		client->creator->queue_work(1, [c = client->creator, ed]() {
+			c->on_guild_scheduled_event_delete.call(ed);
+		});
 	}
 }
 

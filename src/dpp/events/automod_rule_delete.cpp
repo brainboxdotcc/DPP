@@ -37,9 +37,11 @@ namespace dpp::events {
 void automod_rule_delete::handle(discord_client* client, json &j, const std::string &raw) {
 	if (!client->creator->on_automod_rule_create.empty()) {
 		json& d = j["d"];
-		automod_rule_delete_t ard(client, raw);
+		automod_rule_delete_t ard(client->owner, client->shard_id, raw);
 		ard.deleted = automod_rule().fill_from_json(&d);
-		client->creator->on_automod_rule_delete.call(ard);
+		client->creator->queue_work(0, [c = client->creator, ard]() {
+			c->on_automod_rule_delete.call(ard);
+		});
 	}
 }
 

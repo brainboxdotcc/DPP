@@ -39,7 +39,7 @@ namespace dpp::events {
 void message_reaction_add::handle(discord_client* client, json &j, const std::string &raw) {
 	if (!client->creator->on_message_reaction_add.empty()) {
 		json &d = j["d"];
-		dpp::message_reaction_add_t mra(client, raw);
+		dpp::message_reaction_add_t mra(client->owner, client->shard_id, raw);
 		dpp::snowflake guild_id = snowflake_not_null(&d, "guild_id");
 		mra.reacting_guild = dpp::find_guild(guild_id);
 		mra.reacting_user = dpp::user().fill_from_json(&(d["member"]["user"]));
@@ -50,7 +50,9 @@ void message_reaction_add::handle(discord_client* client, json &j, const std::st
 		mra.message_author_id = snowflake_not_null(&d, "message_author_id");
 		mra.reacting_emoji = dpp::emoji().fill_from_json(&(d["emoji"]));
 		if (mra.channel_id && mra.message_id) {
-			client->creator->on_message_reaction_add.call(mra);
+			client->creator->queue_work(1, [c = client->creator, mra]() {
+				c->on_message_reaction_add.call(mra);
+			});
 		}
 	}
 }

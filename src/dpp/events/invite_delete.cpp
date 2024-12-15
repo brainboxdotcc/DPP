@@ -39,9 +39,11 @@ namespace dpp::events {
 void invite_delete::handle(discord_client* client, json &j, const std::string &raw) {
 	if (!client->creator->on_invite_delete.empty()) {
 		json& d = j["d"];
-		dpp::invite_delete_t cd(client, raw);
+		dpp::invite_delete_t cd(client->owner, client->shard_id, raw);
 		cd.deleted_invite = dpp::invite().fill_from_json(&d);
-		client->creator->on_invite_delete.call(cd);
+		client->creator->queue_work(1, [c = client->creator, cd]() {
+			c->on_invite_delete.call(cd);
+		});
 	}
 }
 

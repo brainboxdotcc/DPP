@@ -146,7 +146,7 @@ void discord_voice_client::voice_courier_loop(discord_voice_client& client, cour
 						 * Since this sample comes from a lost packet,
 						 * we can only pretend there is an event, without any raw payload byte.
 						 */
-						voice_receive_t vr(nullptr, "", &client, d.user_id,
+						voice_receive_t vr(client.creator, 0, "", &client, d.user_id,
 						                   reinterpret_cast<uint8_t *>(flush_data_pcm),
 						                   lost_packet_samples * opus_channel_count * sizeof(opus_int16));
 
@@ -282,7 +282,7 @@ void discord_voice_client::voice_courier_loop(discord_voice_client& client, cour
 				pcm_downsample_ptr += client.mixer->byte_blocks_per_register;
 			}
 
-			voice_receive_t vr(nullptr, "", &client, 0, reinterpret_cast<uint8_t *>(pcm_downsample),
+			voice_receive_t vr(client.owner, 0, "", &client, 0, reinterpret_cast<uint8_t *>(pcm_downsample),
 			                   max_samples * opus_channel_count * sizeof(opus_int16));
 
 			client.creator->on_voice_receive_combined.call(vr);

@@ -38,10 +38,12 @@ namespace dpp::events {
 void webhooks_update::handle(discord_client* client, json &j, const std::string &raw) {
 	if (!client->creator->on_webhooks_update.empty()) {
 		json& d = j["d"];
-		dpp::webhooks_update_t wu(client, raw);
+		dpp::webhooks_update_t wu(client->owner, client->shard_id, raw);
 		wu.webhook_guild = dpp::find_guild(snowflake_not_null(&d, "guild_id"));
 		wu.webhook_channel = dpp::find_channel(snowflake_not_null(&d, "channel_id"));
-		client->creator->on_webhooks_update.call(wu);
+		client->creator->queue_work(1, [c = client->creator, wu]() {
+			c->on_webhooks_update.call(wu);
+		});
 	}
 }
 

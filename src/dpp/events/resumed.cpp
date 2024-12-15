@@ -41,10 +41,12 @@ void resumed::handle(discord_client* client, json &j, const std::string &raw) {
 	client->ready = true;
 
 	if (!client->creator->on_resumed.empty()) {
-		dpp::resumed_t r(client, raw);
+		dpp::resumed_t r(client->owner, client->shard_id, raw);
 		r.session_id = client->sessionid;
 		r.shard_id = client->shard_id;
-		client->creator->on_resumed.call(r);
+		client->creator->queue_work(1, [c = client->creator, r]() {
+			c->on_resumed.call(r);
+		});
 	}
 }
 

@@ -40,14 +40,16 @@ void guild_member_add::handle(discord_client* client, json &j, const std::string
 	json d = j["d"];
 	dpp::snowflake guild_id = snowflake_not_null(&d, "guild_id");
 	dpp::guild* g = dpp::find_guild(guild_id);
-	dpp::guild_member_add_t gmr(client, raw);
+	dpp::guild_member_add_t gmr(client->owner, client->shard_id, raw);
 	if (client->creator->cache_policy.user_policy == dpp::cp_none) {
 		dpp::guild_member gm;
 		gm.fill_from_json(&d, guild_id, snowflake_not_null(&(d["user"]), "id"));
 		gmr.added = gm;
 		if (!client->creator->on_guild_member_add.empty()) {
 			gmr.adding_guild = g;
-			client->creator->on_guild_member_add.call(gmr);
+			client->creator->queue_work(1, [c = client->creator, gmr]() {
+				c->on_guild_member_add.call(gmr);
+			});
 		}
 	} else {
 		dpp::user* u = dpp::find_user(snowflake_not_null(&(d["user"]), "id"));
@@ -69,7 +71,9 @@ void guild_member_add::handle(discord_client* client, json &j, const std::string
 		}
 		if (!client->creator->on_guild_member_add.empty()) {
 			gmr.adding_guild = g;
-			client->creator->on_guild_member_add.call(gmr);
+			client->creator->queue_work(1, [c = client->creator, gmr]() {
+				c->on_guild_member_add.call(gmr);
+			});
 		}
 	}
 }

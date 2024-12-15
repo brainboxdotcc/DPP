@@ -68,14 +68,16 @@ void ready::handle(discord_client* client, json &j, const std::string &raw) {
 	}
 
 	if (!client->creator->on_ready.empty()) {
-		dpp::ready_t r(client, raw);
+		dpp::ready_t r(client->owner, client->shard_id, raw);
 		r.session_id = client->sessionid;
 		r.shard_id = client->shard_id;
 		for (const auto& guild : j["d"]["guilds"]) {
 			r.guilds.emplace_back(snowflake_not_null(&guild, "id"));
 		}
 		r.guild_count = r.guilds.size();
-		client->creator->on_ready.call(r);
+		client->creator->queue_work(1, [c = client->creator, r]() {
+			c->on_ready.call(r);
+		});
 	}
 }
 

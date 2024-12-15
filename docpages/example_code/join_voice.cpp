@@ -18,7 +18,7 @@ int main() {
 			dpp::guild* g = dpp::find_guild(event.command.guild_id);
 
 			/* Get the voice channel that the bot is currently in from this server (will return nullptr if we're not in a voice channel!) */
-			auto current_vc = event.from->get_voice(event.command.guild_id);
+			auto current_vc = event.from()->get_voice(event.command.guild_id);
 
 			bool join_vc = true;
 
@@ -38,7 +38,7 @@ int main() {
 					/* We are on a different voice channel. We should leave it, then join the new one 
 					 * by falling through to the join_vc branch below.
 					 */
-					event.from->disconnect_voice(event.command.guild_id);
+					event.from()->disconnect_voice(event.command.guild_id);
 
 					join_vc = true;
 				}

@@ -39,11 +39,13 @@ namespace dpp::events {
 void message_update::handle(discord_client* client, json &j, const std::string &raw) {
 	if (!client->creator->on_message_update.empty()) {
 		json d = j["d"];
-		dpp::message_update_t msg(client, raw);
+		dpp::message_update_t msg(client->owner, client->shard_id, raw);
 		dpp::message m(client->creator);
 		m.fill_from_json(&d);
 	      	msg.msg = m;
-		client->creator->on_message_update.call(msg);
+		client->creator->queue_work(1, [c = client->creator, msg]() {
+			c->on_message_update.call(msg);
+		});
 	}
 
 }

@@ -40,9 +40,11 @@ namespace dpp::events {
 void guild_scheduled_event_update::handle(discord_client* client, json &j, const std::string &raw) {
 	json& d = j["d"];
 	if (!client->creator->on_guild_scheduled_event_update.empty()) {
-		dpp::guild_scheduled_event_update_t eu(client, raw);
+		dpp::guild_scheduled_event_update_t eu(client->owner, client->shard_id, raw);
 		eu.updated.fill_from_json(&d);
-		client->creator->on_guild_scheduled_event_update.call(eu);
+		client->creator->queue_work(1, [c = client->creator, eu]() {
+			c->on_guild_scheduled_event_update.call(eu);
+		});
 	}
 }
 

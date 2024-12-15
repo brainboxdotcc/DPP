@@ -37,9 +37,11 @@ namespace dpp::events {
 void stage_instance_delete::handle(discord_client* client, json &j, const std::string &raw) {
 	if (!client->creator->on_stage_instance_delete.empty()) {
 		json& d = j["d"];
-		dpp::stage_instance_delete_t sid(client, raw);
+		dpp::stage_instance_delete_t sid(client->owner, client->shard_id, raw);
 		sid.deleted.fill_from_json(&d);
-		client->creator->on_stage_instance_delete.call(sid);
+		client->creator->queue_work(1, [c = client->creator, sid]() {
+			c->on_stage_instance_delete.call(sid);
+		});
 	}
 }
 

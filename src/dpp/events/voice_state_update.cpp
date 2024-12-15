@@ -40,7 +40,7 @@ namespace dpp::events {
 void voice_state_update::handle(discord_client* client, json &j, const std::string &raw) {
 
 	json& d = j["d"];
-	dpp::voice_state_update_t vsu(client, raw);
+	dpp::voice_state_update_t vsu(client->owner, client->shard_id, raw);
 	vsu.state = dpp::voicestate().fill_from_json(&d);
 	vsu.state.shard = client;
 
@@ -84,7 +84,9 @@ void voice_state_update::handle(discord_client* client, json &j, const std::stri
 	}
 
 	if (!client->creator->on_voice_state_update.empty()) {
-		client->creator->on_voice_state_update.call(vsu);
+		client->creator->queue_work(1, [c = client->creator, vsu]() {
+			c->on_voice_state_update.call(vsu);
+		});
 	}
 }
 

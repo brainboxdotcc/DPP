@@ -148,7 +148,11 @@ std::string discord_voice_client::discover_ip() {
 			return "";
 		}
 		address_t bind_port(this->ip, this->port);
+#ifndef _WIN32
 		if (::connect(socket.fd, bind_port.get_socket_address(), bind_port.size()) < 0) {
+#else
+		if (WSAConnect(socket.fd, bind_port.get_socket_address(), bind_port.size(), nullptr, nullptr, nullptr, nullptr) < 0) {
+#endif
 			log(ll_warning, "Could not connect socket for IP discovery");
 			return "";
 		}

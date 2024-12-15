@@ -46,10 +46,12 @@ void guild_role_create::handle(discord_client* client, json &j, const std::strin
 		dpp::role r;
 		r.fill_from_json(guild_id, &role);
 		if (!client->creator->on_guild_role_create.empty()) {
-			dpp::guild_role_create_t grc(client, raw);
+			dpp::guild_role_create_t grc(client->owner, client->shard_id, raw);
 			grc.creating_guild = g;
 			grc.created = &r;
-			client->creator->on_guild_role_create.call(grc);
+			client->creator->queue_work(1, [c = client->creator, grc]() {
+				c->on_guild_role_create.call(grc);
+			});
 		}
 	} else {
 		json &role = d["role"];
@@ -63,10 +65,12 @@ void guild_role_create::handle(discord_client* client, json &j, const std::strin
 			g->roles.push_back(r->id);
 		}
 		if (!client->creator->on_guild_role_create.empty()) {
-			dpp::guild_role_create_t grc(client, raw);
+			dpp::guild_role_create_t grc(client->owner, client->shard_id, raw);
 			grc.creating_guild = g;
 			grc.created = r;
-			client->creator->on_guild_role_create.call(grc);
+			client->creator->queue_work(1, [c = client->creator, grc]() {
+				c->on_guild_role_create.call(grc);
+			});
 		}
 	}
 }

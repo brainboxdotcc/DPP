@@ -39,9 +39,11 @@ namespace dpp::events {
 void invite_create::handle(discord_client* client, json &j, const std::string &raw) {
 	if (!client->creator->on_invite_create.empty()) {
 		json& d = j["d"];
-		dpp::invite_create_t ci(client, raw);
+		dpp::invite_create_t ci(client->owner, client->shard_id, raw);
 		ci.created_invite = dpp::invite().fill_from_json(&d);
-		client->creator->on_invite_create.call(ci);
+		client->creator->queue_work(1, [c = client->creator, ci]() {
+			c->on_invite_create.call(ci);
+		});
 	}
 }
 

@@ -9,7 +9,7 @@ int main() {
 	bot.on_slashcommand([](const dpp::slashcommand_t& event) -> dpp::task<void> {
 		if (event.command.get_command_name() == "file") {
 			/* Request the image from the URL specified and co_await the response */
-			dpp::http_request_completion_t result = co_await event.from->creator->co_request("https://dpp.dev/DPP-Logo.png", dpp::m_get);
+			dpp::http_request_completion_t result = co_await event.owner->co_request("https://dpp.dev/DPP-Logo.png", dpp::m_get);
 
 			/* Create a message and attach the image on success */
 			dpp::message msg(event.command.channel_id, "This is my new attachment:");

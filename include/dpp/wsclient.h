@@ -136,15 +136,6 @@ class DPP_EXPORT websocket_client : public ssl_client {
 	bool parseheader(std::string& buffer);
 
 	/**
-	 * @brief Unpack a frame and pass completed frames up the stack.
-	 * @param buffer The buffer to operate on. Gets modified to remove completed frames on the head of the buffer
-	 * @param offset The offset to start at (reserved for future use)
-	 * @param first True if is the first element (reserved for future use)
-	 * @return true if a complete frame has been received
-	 */
-	bool unpack(std::string& buffer, uint32_t offset, bool first = true);
-
-	/**
 	 * @brief Fill a header for outbound messages
 	 * @param outbuf The raw frame to fill
 	 * @param sendlength The size of the data to encapsulate
@@ -162,9 +153,9 @@ class DPP_EXPORT websocket_client : public ssl_client {
 protected:
 
 	/**
-	 * @brief (Re)connect
+	 * @brief Connect to websocket server
 	 */
-	virtual void connect();
+	virtual void connect() override;
 
 	/**
 	 * @brief Get websocket state
@@ -172,18 +163,33 @@ protected:
 	 */
 	[[nodiscard]] ws_state get_state() const;
 
+	/**
+	 * @brief If true the connection timed out while waiting,
+	 * when waiting for SSL negotiation, TCP connect(), or HTTP.
+	 */
+	bool timed_out;
+
+	/**
+	 * @brief Time at which the connection should be abandoned,
+	 * if we are still connecting or negotiating with a HTTP server
+	 */
+	time_t timeout;
+
 public:
 
 	/**
 	 * @brief Connect to a specific websocket server.
+	 * @param creator Creating cluster
 	 * @param hostname Hostname to connect to
 	 * @param port Port to connect to
 	 * @param urlpath The URL path components of the HTTP request to send
 	 * @param opcode The encoding type to use, either OP_BINARY or OP_TEXT
-	 * @note Voice websockets only support OP_TEXT, and other websockets must be
-	 * OP_BINARY if you are going to send ETF.
+	 * @note This just indicates the default for frames sent. Certain sockets,
+	 * such as voice websockets, may send a combination of OP_TEXT and OP_BINARY
+	 * frames, whereas shard websockets will only ever send OP_BINARY for ETF and
+	 * OP_TEXT for JSON.
 	 */
-	websocket_client(const std::string& hostname, const std::string& port = "443", const std::string& urlpath = "", ws_opcode opcode = OP_BINARY);
+	websocket_client(cluster* creator, const std::string& hostname, const std::string& port = "443", const std::string& urlpath = "", ws_opcode opcode = OP_BINARY);
 
 	/**
 	 * @brief Destroy the websocket client object
@@ -202,12 +208,12 @@ public:
 	 * @brief Processes incoming frames from the SSL socket input buffer.
 	 * @param buffer The buffer contents. Can modify this value removing the head elements when processed.
 	 */
-	virtual bool handle_buffer(std::string& buffer);
+	virtual bool handle_buffer(std::string& buffer) override;
 
 	/**
 	 * @brief Close websocket
 	 */
-	virtual void close();
+	virtual void close() override;
 
 	/**
 	 * @brief Receives raw frame content only without headers
@@ -228,13 +234,19 @@ public:
 	/**
 	 * @brief Fires every second from the underlying socket I/O loop, used for sending websocket pings
 	 */
-	virtual void one_second_timer();
+	virtual void one_second_timer() override;
 
 	/**
 	 * @brief Send OP_CLOSE error code 1000 to the other side of the connection.
 	 * This indicates graceful close.
+	 * @note This informs Discord to invalidate the session, you cannot resume if you send this
 	 */
 	void send_close_packet();
+
+	/**
+	 * @brief Called on HTTP socket closure
+	 */
+	virtual void on_disconnect();
 };
 
 }

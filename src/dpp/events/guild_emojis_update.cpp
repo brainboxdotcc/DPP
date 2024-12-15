@@ -71,10 +71,12 @@ void guild_emojis_update::handle(discord_client* client, json &j, const std::str
 		}
 	}
 	if (!client->creator->on_guild_emojis_update.empty()) {
-		dpp::guild_emojis_update_t geu(client, raw);
+		dpp::guild_emojis_update_t geu(client->owner, client->shard_id, raw);
 		geu.emojis = emojis;
 		geu.updating_guild = g;
-		client->creator->on_guild_emojis_update.call(geu);
+		client->creator->queue_work(1, [c = client->creator, geu]() {
+			c->on_guild_emojis_update.call(geu);
+		});
 	}
 }
 

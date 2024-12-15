@@ -27,6 +27,22 @@ if(NOT WIN32)
 	find_package(Threads REQUIRED)
 endif()
 
+include("${CMAKE_CURRENT_SOURCE_DIR}/../cmake/epoll.cmake")
+include("${CMAKE_CURRENT_SOURCE_DIR}/../cmake/kqueue.cmake")
+check_epoll(HAS_EPOLL)
+check_kqueue(HAS_KQUEUE)
+if (HAS_EPOLL)
+	message("-- Building with ${Green}epoll socket engine${ColourReset} -- ${Green}good!${ColourReset}")
+	target_sources("${LIB_NAME}" PRIVATE "${DPP_ROOT_PATH}/src/dpp/socketengines/epoll.cpp")
+elseif (HAS_KQUEUE)
+	message("-- Building with ${Green}kqueue socket engine${ColourReset} -- ${Green}good!${ColourReset}")
+	target_sources("${LIB_NAME}" PRIVATE "${DPP_ROOT_PATH}/src/dpp/socketengines/kqueue.cpp")
+else()
+	message("-- Building with ${Green}poll socket engine${ColourReset} -- ${Red}meh${ColourReset}!")
+	target_sources("${LIB_NAME}" PRIVATE "${DPP_ROOT_PATH}/src/dpp/socketengines/poll.cpp")
+endif()
+
+
 add_library("${PROJECT_NAME}::${LIB_NAME}" ALIAS "${LIB_NAME}")
 
 if(${AVX_TYPE} STREQUAL "OFF")

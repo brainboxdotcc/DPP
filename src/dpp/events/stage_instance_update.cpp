@@ -39,9 +39,11 @@ namespace dpp::events {
 void stage_instance_update::handle(discord_client* client, json &j, const std::string &raw) {
 	if (!client->creator->on_stage_instance_update.empty()) {
 		json& d = j["d"];
-		dpp::stage_instance_update_t siu(client, raw);
+		dpp::stage_instance_update_t siu(client->owner, client->shard_id, raw);
 		siu.updated.fill_from_json(&d);
-		client->creator->on_stage_instance_update.call(siu);
+		client->creator->queue_work(1, [c = client->creator, siu]() {
+			c->on_stage_instance_update.call(siu);
+		});
 	}
 }
 

@@ -7,7 +7,7 @@ int main() {
 
 	bot.on_slashcommand([](const dpp::slashcommand_t& event) -> dpp::task<void> {
 		if (event.command.get_command_name() == "addemoji") {
-			dpp::cluster *cluster = event.from->creator;
+			dpp::cluster *cluster = event.owner;
 			// Retrieve parameter values
 			dpp::snowflake file_id = std::get<dpp::snowflake>(event.get_parameter("file"));
 			std::string emoji_name = std::get<std::string>(event.get_parameter("name"));

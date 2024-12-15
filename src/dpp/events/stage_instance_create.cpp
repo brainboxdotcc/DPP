@@ -39,9 +39,11 @@ namespace dpp::events {
 void stage_instance_create::handle(discord_client* client, json &j, const std::string &raw) {
 	if (!client->creator->on_stage_instance_create.empty()) {
 		json& d = j["d"];
-		dpp::stage_instance_create_t sic(client, raw);
+		dpp::stage_instance_create_t sic(client->owner, client->shard_id, raw);
 		sic.created.fill_from_json(&d);
-		client->creator->on_stage_instance_create.call(sic);
+		client->creator->queue_work(1, [c = client->creator, sic]() {
+			c->on_stage_instance_create.call(sic);
+		});
 	}
 }
 

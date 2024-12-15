@@ -39,6 +39,7 @@
 #include <dpp/cluster.h>
 #include <dpp/discordevents.h>
 #include <dpp/socket.h>
+#include <dpp/socketengine.h>
 #include <queue>
 #include <thread>
 #include <deque>
@@ -200,7 +201,6 @@ struct dave_binary_header_t {
 	/**
 	 * Get the data package from the packed binary frame, as a vector of uint8_t
 	 * for use in the libdave functions
-
 	 * @return data blob
 	 */
 	[[nodiscard]] std::vector<uint8_t> get_data() const;
@@ -268,19 +268,9 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	std::deque<std::string> message_queue;
 
 	/**
-	 * @brief Thread this connection is executing on
-	 */
-	std::thread* runner;
-
-	/**
-	 * @brief Run shard loop under a thread
-	 */
-	void thread_run();
-
-	/**
 	 * @brief Last connect time of voice session
 	 */
-	time_t connect_time;
+	time_t connect_time{};
 
 	/*
 	* @brief For mixing outgoing voice data.
@@ -295,12 +285,12 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	/**
 	 * @brief Port number of UDP/RTP endpoint
 	 */
-	uint16_t port;
+	uint16_t port{};
 
 	/**
 	 * @brief SSRC value 
 	 */
-	uint64_t ssrc;
+	uint64_t ssrc{};
 
 	/**
 	 * @brief List of supported audio encoding modes
@@ -310,7 +300,7 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	/**
 	 * @brief Timescale in nanoseconds
 	 */
-	uint64_t timescale;
+	uint64_t timescale{};
 
 	/**
 	 * @brief Output buffer
@@ -437,26 +427,36 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	/**
 	 * @brief If true, audio packet sending is paused
 	 */
-	bool paused;
+	bool paused{};
 
 	/**
 	 * @brief Whether has sent 5 frame of silence before stopping on pause.
 	 *
 	 * This is to avoid unintended Opus interpolation with subsequent transmissions.
 	 */
-	bool sent_stop_frames;
+	bool sent_stop_frames{};
+
+	/**
+	 * @brief Number of times we have tried to reconnect in the last few seconds
+	 */
+	size_t times_looped{0};
+
+	/**
+	 * @brief Last time we reconnected
+	 */
+	time_t last_loop_time{0};
 
 #ifdef HAVE_VOICE
 	/**
 	 * @brief libopus encoder
 	 */
-	OpusEncoder* encoder;
+	OpusEncoder* encoder{};
 
 	/**
 	 * @brief libopus repacketizer
 	 * (merges frames into one packet)
 	 */
-	OpusRepacketizer* repacketizer;
+	OpusRepacketizer* repacketizer{};
 
 	/**
 	 * @brief This holds the state information for DAVE E2EE.
@@ -498,14 +498,14 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	/**
 	 * @brief File descriptor for UDP connection
 	 */
-	dpp::socket fd;
+	dpp::socket fd{};
 
 	/**
 	 * @brief Secret key for encrypting voice.
 	 * If it has been sent, this contains a sequence of exactly 32 bytes
 	 * (secret_key_size) and has_secret_key is set to true.
 	 */
-	std::array<uint8_t, secret_key_size> secret_key;
+	std::array<uint8_t, secret_key_size> secret_key{};
 
 	/**
 	 * @brief True if the voice client has a secret key
@@ -516,21 +516,21 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	 * @brief Sequence number of outbound audio. This is incremented
 	 * once per frame sent.
 	 */
-	uint16_t sequence;
+	uint16_t sequence{};
 
 	/**
 	 * @brief Last received sequence from gateway.
 	 *
 	 * Needed for heartbeat and resume payload.
 	 */
-	int32_t receive_sequence;
+	int32_t receive_sequence{};
 
 	/**
 	 * @brief Timestamp value used in outbound audio. Each packet
 	 * has the timestamp value which is incremented to match
 	 * how many frames are sent.
 	 */
-	uint32_t timestamp;
+	uint32_t timestamp{};
 
 	/**
 	 * @brief Each packet should have a nonce, a 32-bit incremental
@@ -541,7 +541,7 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	 *
 	 * Current initial value is hardcoded to 1.
 	 */
-	uint32_t packet_nonce;
+	uint32_t packet_nonce{};
 
 	/**
 	 * @brief Last sent packet high-resolution timestamp
@@ -551,7 +551,7 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	/**
 	 * @brief Fraction of the sleep that was not executed after the last audio packet was sent
 	 */
-	std::chrono::nanoseconds last_sleep_remainder;
+	std::chrono::nanoseconds last_sleep_remainder{};
 
 	/**
 	 * @brief Maps receiving ssrc to user id
@@ -563,7 +563,7 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	 * When this moves from false to true, this causes the
 	 * client to send the 'talking' notification to the websocket.
 	 */
-	bool sending;
+	bool sending{};
 
 	/**
 	 * @brief Number of track markers in the buffer. For example if there
@@ -574,7 +574,7 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	 * If the buffer is empty, there are zero tracks in the
 	 * buffer.
 	 */
-	uint32_t tracks;
+	uint32_t tracks{};
 
 	/**
 	 * @brief Meta data associated with each track.
@@ -586,7 +586,7 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	/** 
 	 * @brief Encoding buffer for opus repacketizer and encode
 	 */
-	uint8_t encode_buffer[65536];
+	uint8_t encode_buffer[65536]{};
 
 	/**
 	 * @brief DAVE - Discord Audio Visual Encryption
@@ -623,25 +623,7 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	int udp_recv(char* data, size_t max_length);
 
 	/**
-	 * @brief This hooks the ssl_client, returning the file
-	 * descriptor if we want to send buffered data, or
-	 * -1 if there is nothing to send
-	 * 
-	 * @return int file descriptor or -1
-	 */
-	dpp::socket want_write();
-
-	/**
-	 * @brief This hooks the ssl_client, returning the file
-	 * descriptor if we want to receive buffered data, or
-	 * -1 if we are not wanting to receive
-	 * 
-	 * @return int file descriptor or -1
-	 */
-	dpp::socket want_read();
-
-	/**
-	 * @brief Called by ssl_client when the socket is ready
+	 * @brief Called by socketengine when the socket is ready
 	 * for writing, at this point we pick the head item off
 	 * the buffer and send it. So long as it doesn't error
 	 * completely, we pop it off the head of the queue.
@@ -649,7 +631,7 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	void write_ready();
 
 	/**
-	 * @brief Called by ssl_client when there is data to be
+	 * @brief Called by socketengine when there is data to be
 	 * read. At this point we insert that data into the
 	 * input queue.
 	 * @throw dpp::voice_exception if voice support is not compiled into D++
@@ -710,47 +692,52 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	 */
 	void update_ratchets(bool force = false);
 
+	/**
+	 * @brief Called in constructor and on reconnection of websocket
+	 */
+	void setup();
+
+	/**
+	 * @brief Events for UDP Socket IO
+	 */
+	dpp::socket_events udp_events;
+
 public:
 
 	/**
 	 * @brief Owning cluster
 	 */
-	class dpp::cluster* creator;
+	class dpp::cluster* creator{};
 
 	/**
 	 * @brief True when the thread is shutting down
 	 */
-	bool terminating;
+	bool terminating{};
 
 	/**
 	 * @brief The gain value for the end of the current voice iteration.
 	 */
-	float end_gain;
+	float end_gain{};
 
 	/**
 	 * @brief The gain value for the current voice iteration.
 	 */
-	float current_gain;
+	float current_gain{};
 
 	/**
 	 * @brief The amount to increment each successive sample for, for the current voice iteration.
 	 */
-	float increment;
+	float increment{};
 
 	/**
 	 * @brief Heartbeat interval for sending heartbeat keepalive
 	 */
-	uint32_t heartbeat_interval;
+	uint32_t heartbeat_interval{};
 
 	/**
 	 * @brief Last voice channel websocket heartbeat
 	 */
-	time_t last_heartbeat;
-
-	/**
-	 * @brief Thread ID
-	 */
-	std::thread::native_handle_type thread_id;
+	time_t last_heartbeat{};
 
 	/**
 	 * @brief Discord voice session token
@@ -846,13 +833,13 @@ public:
 	 * @param severity The log level from dpp::loglevel
 	 * @param msg The log message to output
 	 */
-	virtual void log(dpp::loglevel severity, const std::string &msg) const;
+	virtual void log(dpp::loglevel severity, const std::string &msg) const override;
 
 	/**
 	 * @brief Fires every second from the underlying socket I/O loop, used for sending heartbeats
 	 * @throw dpp::exception if the socket needs to disconnect
 	 */
-	virtual void one_second_timer();
+	virtual void one_second_timer() override;
 
 	/**
 	 * @brief voice client is ready to stream audio.
@@ -899,7 +886,7 @@ public:
 	/**
 	 * @brief Destroy the discord voice client object
 	 */
-	virtual ~discord_voice_client();
+	virtual ~discord_voice_client() override;
 
 	/**
 	 * @brief Handle JSON from the websocket.
@@ -908,16 +895,16 @@ public:
 	 * @return bool True if a frame has been handled
 	 * @throw dpp::exception If there was an error processing the frame, or connection to UDP socket failed
 	 */
-	virtual bool handle_frame(const std::string &buffer, ws_opcode opcode);
+	virtual bool handle_frame(const std::string &buffer, ws_opcode opcode) override;
 
 	/**
 	 * @brief Handle a websocket error.
 	 * @param errorcode The error returned from the websocket
 	 */
-	virtual void error(uint32_t errorcode);
+	virtual void error(uint32_t errorcode) override;
 
 	/**
-	 * @brief Start and monitor I/O loop
+	 * @brief Start and monitor websocket I/O
 	 */
 	void run();
 
@@ -1269,6 +1256,11 @@ public:
 	 * @param rmap Roster map
 	 */
 	void process_mls_group_rosters(const std::map<uint64_t, std::vector<uint8_t>>& rmap);
+
+	/**
+	 * @brief Called on websocket disconnection
+	 */
+	void on_disconnect() override;
 };
 
 }

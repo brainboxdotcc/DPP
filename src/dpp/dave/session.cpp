@@ -247,7 +247,7 @@ bool session::is_recognized_user_id(const ::mlspp::Credential& cred, std::set<dp
 	}
 
 	if (recognised_user_ids.find(uid) == recognised_user_ids.end()) {
-		creator.log(dpp::ll_warning, "Attempted to verify credential for unrecognized user ID: " + uid);
+		creator.log(dpp::ll_warning, "Attempted to verify credential for unrecognized user ID: " + std::to_string(uid));
 		return false;
 	}
 
@@ -640,7 +640,7 @@ try {
 
 	auto it = roster.find(remote_user_id);
 	if (it == roster.end()) {
-		throw std::invalid_argument("Unknown user ID: " + user_id);
+		throw std::invalid_argument("Unknown user ID: " + std::to_string(user_id));
 	}
 
 	::mlspp::tls::ostream toHash1;

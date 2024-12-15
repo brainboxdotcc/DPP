@@ -84,5 +84,5 @@ int main() {
 			s->connect_voice(TEST_GUILD_ID, TEST_VC_ID, muted, deaf, enable_dave);
 		}
 	});
-	dave_test.start(false);
+	dave_test.start(dpp::st_wait);
 }

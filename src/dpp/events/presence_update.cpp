@@ -38,9 +38,11 @@ namespace dpp::events {
 void presence_update::handle(discord_client* client, json &j, const std::string &raw) {
 	if (!client->creator->on_presence_update.empty()) {
 		json& d = j["d"];
-		dpp::presence_update_t pu(client, raw);
+		dpp::presence_update_t pu(client->owner, client->shard_id, raw);
 		pu.rich_presence = dpp::presence().fill_from_json(&d);
-		client->creator->on_presence_update.call(pu);
+		client->creator->queue_work(1, [c = client->creator, pu]() {
+			c->on_presence_update.call(pu);
+		});
 	}
 }
 

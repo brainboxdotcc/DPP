@@ -32,7 +32,7 @@ int main() {
 					}
 				}
 				// Finally if everything else failed, request API
-				dpp::confirmation_callback_t confirmation = co_await event.from->creator->co_guild_get_member(event.command.guild_id, user_id);
+				dpp::confirmation_callback_t confirmation = co_await event.owner->co_guild_get_member(event.command.guild_id, user_id);
 				if (confirmation.is_error()) {
 					co_return std::nullopt; // Member not found, return empty
 				} else {
@@ -53,7 +53,7 @@ int main() {
 
 			std::string avatar_url = member->get_avatar_url(512);
 			if (avatar_url.empty()) { // Member does not have a custom avatar for this server, get their user avatar
-				dpp::confirmation_callback_t confirmation = co_await event.from->creator->co_user_get_cached(member->user_id);
+				dpp::confirmation_callback_t confirmation = co_await event.owner->co_user_get_cached(member->user_id);
 				if (confirmation.is_error()) {
 					// Wait for the thinking response to arrive to make sure we can edit
 					co_await thinking;

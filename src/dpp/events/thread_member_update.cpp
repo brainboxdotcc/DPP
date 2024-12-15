@@ -32,9 +32,11 @@ namespace dpp::events {
 void thread_member_update::handle(discord_client* client, json& j, const std::string& raw) {
 	if (!client->creator->on_thread_member_update.empty()) {
 		json& d = j["d"];
-		dpp::thread_member_update_t tm(client, raw);
+		dpp::thread_member_update_t tm(client->owner, client->shard_id, raw);
 		tm.updated = thread_member().fill_from_json(&d);
-		client->creator->on_thread_member_update.call(tm);
+		client->creator->queue_work(1, [c = client->creator, tm]() {
+			c->on_thread_member_update.call(tm);
+		});
 	}
 }
 };

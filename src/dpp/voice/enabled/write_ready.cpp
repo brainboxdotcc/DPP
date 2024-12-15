@@ -31,6 +31,13 @@
 namespace dpp {
 
 void discord_voice_client::write_ready() {
+	/* 
+	 * WANT_WRITE has been reset everytime this method is being called,
+	 * ALWAYS set it again no matter what we're gonna do.
+	 */
+	udp_events.flags = WANT_READ | WANT_WRITE | WANT_ERROR;
+	owner->socketengine->update_socket(udp_events);
+
 	uint64_t duration = 0;
 	bool track_marker_found = false;
 	uint64_t bufsize = 0;
@@ -54,7 +61,8 @@ void discord_voice_client::write_ready() {
 				}
 			}
 			if (!outbuf.empty()) {
-				if (this->udp_send(outbuf[0].packet.data(), outbuf[0].packet.length()) == (int)outbuf[0].packet.length()) {
+				int sent_siz = this->udp_send(outbuf[0].packet.data(), outbuf[0].packet.length());
+				if (sent_siz == (int)outbuf[0].packet.length()) {
 					duration = outbuf[0].duration * timescale;
 					bufsize = outbuf[0].packet.length();
 					outbuf.erase(outbuf.begin());
@@ -95,16 +103,18 @@ void discord_voice_client::write_ready() {
 
 		last_timestamp = std::chrono::high_resolution_clock::now();
 		if (!creator->on_voice_buffer_send.empty()) {
-			voice_buffer_send_t snd(nullptr, "");
+			voice_buffer_send_t snd(owner, 0, "");
 			snd.buffer_size = bufsize;
 			snd.packets_left = outbuf.size();
 			snd.voice_client = this;
-			creator->on_voice_buffer_send.call(snd);
+			creator->queue_work(-1, [this, snd]() {
+				creator->on_voice_buffer_send.call(snd);
+			});
 		}
 	}
 	if (track_marker_found) {
 		if (!creator->on_voice_track_marker.empty()) {
-			voice_track_marker_t vtm(nullptr, "");
+			voice_track_marker_t vtm(owner, 0, "");
 			vtm.voice_client = this;
 			{
 				std::lock_guard<std::mutex> lock(this->stream_mutex);
@@ -113,10 +123,12 @@ void discord_voice_client::write_ready() {
 					track_meta.erase(track_meta.begin());
 				}
 			}
-			creator->on_voice_track_marker.call(vtm);
+			creator->queue_work(-1, [this, vtm]() {
+				creator->on_voice_track_marker.call(vtm);
+			});
+
 		}
 	}
 }
-
 
 }

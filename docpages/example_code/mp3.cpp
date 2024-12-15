@@ -75,7 +75,7 @@ int main() {
 			event.reply("Joined your channel!");
 		} else if (event.command.get_command_name() == "mp3") {
 			/* Get the voice channel the bot is in, in this current guild. */
-			dpp::voiceconn* v = event.from->get_voice(event.command.guild_id);
+			dpp::voiceconn* v = event.from()->get_voice(event.command.guild_id);
 
 			/* If the voice channel was invalid, or there is an issue with it, then tell the user. */
 			if (!v || !v->voiceclient || !v->voiceclient->is_ready()) {

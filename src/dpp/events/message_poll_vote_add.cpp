@@ -40,13 +40,15 @@ void message_poll_vote_add::handle(discord_client* client, json &j, const std::s
 
 	if (!client->creator->on_message_poll_vote_add.empty()) {
 		json d = j["d"];
-		dpp::message_poll_vote_add_t vote(client, raw);
+		dpp::message_poll_vote_add_t vote(client->owner, client->shard_id, raw);
 		vote.user_id = snowflake_not_null(&j, "user_id");
 		vote.message_id = snowflake_not_null(&j, "message_id");
 		vote.channel_id = snowflake_not_null(&j, "channel_id");
 		vote.guild_id = snowflake_not_null(&j, "guild_id");
 		vote.answer_id = int32_not_null(&j, "answer_id");
-		client->creator->on_message_poll_vote_add.call(vote);
+		client->creator->queue_work(1, [c = client->creator, vote]() {
+			c->on_message_poll_vote_add.call(vote);
+		});
 	}
 }
 

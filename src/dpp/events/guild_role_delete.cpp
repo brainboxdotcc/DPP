@@ -44,20 +44,24 @@ void guild_role_delete::handle(discord_client* client, json &j, const std::strin
 	dpp::guild* g = dpp::find_guild(guild_id);
 	if (client->creator->cache_policy.role_policy == dpp::cp_none) {
 		if (!client->creator->on_guild_role_delete.empty()) {
-			dpp::guild_role_delete_t grd(client, raw);
+			dpp::guild_role_delete_t grd(client->owner, client->shard_id, raw);
 			grd.deleting_guild = g;
 			grd.role_id = role_id;
 			grd.deleted = nullptr;
-			client->creator->on_guild_role_delete.call(grd);
+			client->creator->queue_work(1, [c = client->creator, grd]() {
+				c->on_guild_role_delete.call(grd);
+			});
 		}
 	} else {
 		dpp::role *r = dpp::find_role(role_id);
 		if (!client->creator->on_guild_role_delete.empty()) {
-			dpp::guild_role_delete_t grd(client, raw);
+			dpp::guild_role_delete_t grd(client->owner, client->shard_id, raw);
 			grd.deleting_guild = g;
 			grd.deleted = r;
 			grd.role_id = role_id;
-			client->creator->on_guild_role_delete.call(grd);
+			client->creator->queue_work(1, [c = client->creator, grd]() {
+				c->on_guild_role_delete.call(grd);
+			});
 		}
 		if (r) {
 			if (g) {

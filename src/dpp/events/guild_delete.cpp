@@ -87,10 +87,12 @@ void guild_delete::handle(discord_client* client, json &j, const std::string &ra
 	}
 	
 	if (!client->creator->on_guild_delete.empty()) {
-		dpp::guild_delete_t gd(client, raw);
+		dpp::guild_delete_t gd(client->owner, client->shard_id, raw);
 		gd.deleted = guild_del;
 		gd.guild_id = guild_del.id;
-		client->creator->on_guild_delete.call(gd);
+		client->creator->queue_work(0, [c = client->creator, gd]() {
+			c->on_guild_delete.call(gd);
+		});
 	}
 }
 

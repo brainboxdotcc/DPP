@@ -54,8 +54,7 @@ socket dns_cache_entry::make_connecting_socket() const {
 	return ::socket(addr.ai_family, addr.ai_socktype, addr.ai_protocol);
 }
 
-const dns_cache_entry* resolve_hostname(const std::string& hostname, const std::string& port)
-{
+const dns_cache_entry *resolve_hostname(const std::string &hostname, const std::string &port) {
 	addrinfo hints, *addrs;
 	dns_cache_t::const_iterator iter;
 	time_t now = time(nullptr);
@@ -71,7 +70,7 @@ const dns_cache_entry* resolve_hostname(const std::string& hostname, const std::
 			exists = true;
 			if (now < iter->second->expire_timestamp) {
 				/* there is a cached entry that is still valid, return it */
-				return iter->second;
+				return iter->second.get();
 			}
 		}
 	}
@@ -83,7 +82,6 @@ const dns_cache_entry* resolve_hostname(const std::string& hostname, const std::
 		std::unique_lock dns_cache_lock(dns_cache_mutex);
 		iter = dns_cache.find(hostname);
 		if (iter != dns_cache.end()) { /* re-validate iter */
-			delete iter->second;
 			dns_cache.erase(iter);
 		}
 	}
@@ -109,7 +107,7 @@ const dns_cache_entry* resolve_hostname(const std::string& hostname, const std::
 	{
 		/* Update cache, requires unique lock */
 		std::unique_lock dns_cache_lock(dns_cache_mutex);
-		dns_cache_entry* cache_entry = new dns_cache_entry();
+		auto cache_entry = std::make_unique<dns_cache_entry>();
 
 		for (struct addrinfo* rp = addrs; rp != nullptr; rp = rp->ai_next) {
 			/* Discord only support ipv4, so iterate over any ipv6 results */
@@ -128,11 +126,13 @@ const dns_cache_entry* resolve_hostname(const std::string& hostname, const std::
 		}
 
 		cache_entry->expire_timestamp = now + one_hour;
-		dns_cache[hostname] = cache_entry;
+		auto r = dns_cache.emplace(hostname, std::move(cache_entry));
 
 		/* Now we're done with this horrible struct, free it and return */
 		freeaddrinfo(addrs);
-		return cache_entry;
+
+		/* Return either the existing entry, or the newly inserted entry */
+		return r.first->second.get();
 	}
 }
 
