@@ -454,7 +454,7 @@ public:
 	 * @param frequency How often to tick the timer in seconds
 	 * @return timer A handle to the timer, used to remove that timer later
 	 */
-	template <typename T, typename U = std::function<void(timer)>>
+	template <std::invocable<timer> T, std::invocable<timer> U = std::function<void(timer)>>
 	requires (dpp::awaitable_type<typename std::invoke_result<T, timer>::type>)
 	timer start_timer(T&& on_tick, uint64_t frequency, U&& on_stop = {}) {
 		std::function<void(timer)> ticker = [fun = std::forward<T>(on_tick)](timer t) mutable -> dpp::job {
