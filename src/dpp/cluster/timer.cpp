@@ -32,8 +32,8 @@ timer cluster::start_timer(timer_callback_t on_tick, uint64_t frequency, timer_c
 
 	new_timer.handle = next_handle++;
 	new_timer.next_tick = time(nullptr) + frequency;
-	new_timer.on_tick = on_tick;
-	new_timer.on_stop = on_stop;
+	new_timer.on_tick = std::move(on_tick);
+	new_timer.on_stop = std::move(on_stop);
 	new_timer.frequency = frequency;
 
 	std::lock_guard<std::mutex> l(timer_guard);
@@ -64,16 +64,17 @@ void cluster::tick_timers() {
 		timer_t cur_timer;
 		{
 			std::lock_guard<std::mutex> l(timer_guard);
-			cur_timer = next_timer.top();
-			if (cur_timer.next_tick > now) {
+			if (next_timer.top().next_tick > now) {
 				/* Nothing to do */
 				break;
 			}
+			cur_timer = std::move(next_timer.top());
 			next_timer.pop();
 		}
 		timers_deleted_t::iterator deleted_iter{};
 		bool deleted{};
 		{
+			std::lock_guard<std::mutex> l(timer_guard);
 			deleted_iter = deleted_timers.find(cur_timer.handle);
 			deleted = deleted_iter != deleted_timers.end();
 		}
@@ -83,7 +84,7 @@ void cluster::tick_timers() {
 			cur_timer.next_tick += cur_timer.frequency;
 			{
 				std::lock_guard<std::mutex> l(timer_guard);
-				next_timer.emplace(cur_timer);
+				next_timer.emplace(std::move(cur_timer));
 			}
 		} else {
 			/* Deleted timers are not reinserted into the priority queue and their on_stop is called */

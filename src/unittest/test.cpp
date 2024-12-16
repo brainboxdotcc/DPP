@@ -2342,15 +2342,15 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 
 		set_test(TIMERSTART, false);
 		static uint32_t ticks = 0;
-		dpp::timer th = bot.start_timer([](dpp::timer timer_handle) {
+		dpp::timer th = bot.start_timer([&bot](dpp::timer timer_handle) -> dpp::task<void> {
 			if (ticks == 2) {
 				/* The simple test timer ticks every second.
 				 * If we get to 2 seconds, we know the timer is working.
 				 */
 				set_test(TIMERSTART, true);
 			}
-			std::cout << "foo" << std::endl;
 			ticks++;
+			co_await bot.co_sleep(1);
 		}, 1);
 
 		set_test(USER_GET_CACHED_PRESENT, false);
