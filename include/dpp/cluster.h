@@ -462,8 +462,8 @@ public:
 		};
 		std::function<void(timer)> stopper;
 		if constexpr (dpp::awaitable_type<typename std::invoke_result<U, timer>::type>) {
-			stopper = [fun = std::forward<U>(on_stop)](timer t) mutable {
-				return std::invoke(fun, t);
+			stopper = [fun = std::forward<U>(on_stop)](timer t) mutable -> dpp::job {
+				co_await std::invoke(fun, t);
 			};
 		} else {
 			stopper = std::forward<U>(on_stop);
