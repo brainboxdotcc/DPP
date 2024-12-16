@@ -41,7 +41,8 @@ void thread_delete::handle(discord_client* client, json& j, const std::string& r
 	if (!client->creator->on_thread_delete.empty()) {
 		dpp::thread_delete_t td(client->owner, client->shard_id, raw);
 		td.deleted = t;
-		td.deleting_guild = g;
+		td.deleting_guild = g ? *g : guild{};
+		td.deleting_guild.id = t.guild_id;
 		client->creator->queue_work(1, [c = client->creator, td]() {
 			c->on_thread_delete.call(td);
 		});

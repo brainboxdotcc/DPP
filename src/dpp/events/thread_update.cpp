@@ -36,8 +36,11 @@ void thread_update::handle(discord_client* client, json& j, const std::string& r
 	dpp::guild* g = dpp::find_guild(t.guild_id);
 	if (!client->creator->on_thread_update.empty()) {
 		dpp::thread_update_t tu(client->owner, client->shard_id, raw);
+
 		tu.updated = t;
-		tu.updating_guild = g;
+		tu.updating_guild = g ? *g : guild{};
+		tu.updating_guild.id = t.guild_id;
+
 		client->creator->queue_work(1, [c = client->creator, tu]() {
 			c->on_thread_update.call(tu);
 		});

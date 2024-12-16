@@ -41,7 +41,8 @@ void guild_member_update::handle(discord_client* client, json &j, const std::str
 		dpp::user u;
 		u.fill_from_json(&(d["user"]));
 		dpp::guild_member_update_t gmu(client->owner, client->shard_id, raw);
-		gmu.updating_guild = g;
+		gmu.updating_guild = g ? *g : guild{};
+		gmu.updating_guild.id = guild_id;
 		if (!client->creator->on_guild_member_update.empty()) {
 			guild_member m;
 			auto& user = d; // d contains roles and other member stuff already
@@ -63,7 +64,8 @@ void guild_member_update::handle(discord_client* client, json &j, const std::str
 
 			if (!client->creator->on_guild_member_update.empty()) {
 				dpp::guild_member_update_t gmu(client->owner, client->shard_id, raw);
-				gmu.updating_guild = g;
+				gmu.updating_guild = g ? *g : guild{};
+				gmu.updating_guild.id = guild_id;
 				gmu.updated = m;
 				client->creator->queue_work(0, [c = client->creator, gmu]() {
 					c->on_guild_member_update.call(gmu);

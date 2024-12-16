@@ -39,11 +39,16 @@ void channel_create::handle(discord_client* client, json &j, const std::string &
 	dpp::channel newchannel;
 	dpp::channel* c = nullptr;
 	dpp::guild* g = nullptr;
-	
+	dpp::guild tmp_guild;
+
 	if (client->creator->cache_policy.channel_policy == cp_none) {
 		newchannel.fill_from_json(&d);
 		c = &newchannel;
 		g = dpp::find_guild(c->guild_id);
+		if (g == nullptr) {
+			g = &tmp_guild;
+			tmp_guild.id = c->guild_id;
+		}
 		if (c->recipients.size()) {
 			for (auto & u : c->recipients) {
 				client->creator->set_dm_channel(u, c->id);
@@ -68,8 +73,8 @@ void channel_create::handle(discord_client* client, json &j, const std::string &
 	}
 	if (!client->creator->on_channel_create.empty()) {
 		dpp::channel_create_t cc(client->owner, client->shard_id, raw);
-		cc.created = c;
-		cc.creating_guild = g;
+		cc.created = *c;
+		cc.creating_guild = *g;
 		client->creator->queue_work(1, [c = client->creator, cc]() {
 			c->on_channel_create.call(cc);
 		});
