@@ -42,7 +42,7 @@ constexpr size_t DECOMP_BUFFER_SIZE = 512 * 1024;
  * This wraps the C pointers needed for zlib with unique_ptr and gives us a nice
  * buffer abstraction so we don't need to wrestle with raw pointers.
  */
-class zlibcontext {
+class DPP_EXPORT zlibcontext {
 public:
 	/**
 	 * @brief Zlib stream struct. The actual type is defined in zlib.h

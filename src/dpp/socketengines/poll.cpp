@@ -20,6 +20,7 @@
  ************************************************************************************/
 
 #include <dpp/socketengine.h>
+#include <dpp/exception.h>
 #include <vector>
 #include <shared_mutex>
 #ifdef _WIN32

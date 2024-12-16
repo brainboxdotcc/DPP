@@ -2349,6 +2349,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 				 */
 				set_test(TIMERSTART, true);
 			}
+			std::cout << "foo" << std::endl;
 			ticks++;
 		}, 1);
 
