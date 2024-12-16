@@ -40,15 +40,26 @@ void message_reaction_add::handle(discord_client* client, json &j, const std::st
 	if (!client->creator->on_message_reaction_add.empty()) {
 		json &d = j["d"];
 		dpp::message_reaction_add_t mra(client->owner, client->shard_id, raw);
-		dpp::snowflake guild_id = snowflake_not_null(&d, "guild_id");
-		mra.reacting_guild = dpp::find_guild(guild_id);
+		snowflake guild_id = snowflake_not_null(&d, "guild_id");
+		snowflake channel_id = snowflake_not_null(&d, "channel_id");
+
+		guild* g = find_guild(guild_id);
+		channel* c = find_channel(channel_id);
+
+		mra.reacting_guild = g ? *g : guild{};
+		mra.reacting_guild.id = guild_id;
+
 		mra.reacting_user = dpp::user().fill_from_json(&(d["member"]["user"]));
 		mra.reacting_member = dpp::guild_member().fill_from_json(&(d["member"]), guild_id, mra.reacting_user.id);
-		mra.channel_id = snowflake_not_null(&d, "channel_id");
-		mra.reacting_channel = dpp::find_channel(mra.channel_id);
+
+		mra.channel_id = channel_id;
+		mra.reacting_channel = c ? *c : channel{};
+		mra.reacting_channel.id = channel_id;
+
 		mra.message_id = snowflake_not_null(&d, "message_id");
 		mra.message_author_id = snowflake_not_null(&d, "message_author_id");
 		mra.reacting_emoji = dpp::emoji().fill_from_json(&(d["emoji"]));
+
 		if (mra.channel_id && mra.message_id) {
 			client->creator->queue_work(1, [c = client->creator, mra]() {
 				c->on_message_reaction_add.call(mra);

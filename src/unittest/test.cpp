@@ -988,30 +988,30 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		});
 
 		bot.on_guild_create([dpp_logo,&bot](const dpp::guild_create_t& event) {
-			dpp::guild *g = event.created;
+			dpp::guild g = event.created;
 
-			if (g->id == TEST_GUILD_ID) {
+			if (g.id == TEST_GUILD_ID) {
 				start_test(GUILD_EDIT);
-				g->set_icon(dpp::i_png, dpp_logo.data(), static_cast<uint32_t>(dpp_logo.size()));
-				bot.guild_edit(*g, [&bot](const dpp::confirmation_callback_t &result) {
+				g.set_icon(dpp::i_png, dpp_logo.data(), static_cast<uint32_t>(dpp_logo.size()));
+				bot.guild_edit(g, [&bot](const dpp::confirmation_callback_t &result) {
 					if (result.is_error()) {
 						set_status(GUILD_EDIT, ts_failed, "guild_edit 1 errored:\n" + result.get_error().human_readable);
 						return;
 					}
-					dpp::guild g = result.get<dpp::guild>();
+					dpp::guild g2 = result.get<dpp::guild>();
 
-					if (g.get_icon_url().empty()) {
+					if (g2.get_icon_url().empty()) {
 						set_status(GUILD_EDIT, ts_failed, "icon not set or not retrieved");
 						return;
 					}
-					g.remove_icon();
-					bot.guild_edit(g, [](const dpp::confirmation_callback_t &result) {
+					g2.remove_icon();
+					bot.guild_edit(g2, [](const dpp::confirmation_callback_t &result) {
 						if (result.is_error()) {
 							set_status(GUILD_EDIT, ts_failed, "guild_edit 2 errored:\n" + result.get_error().human_readable);
 							return;
 						}
-						const dpp::guild &g = result.get<dpp::guild>();
-						if (!g.get_icon_url().empty()) {
+						const dpp::guild g3 = result.get<dpp::guild>();
+						if (!g3.get_icon_url().empty()) {
 							set_status(GUILD_EDIT, ts_failed, "icon not removed");
 							return;
 						}
@@ -1136,7 +1136,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		});
 
 		bot.on_guild_create([&bot](const dpp::guild_create_t & event) {
-			if (event.created->id == TEST_GUILD_ID) {
+			if (event.created.id == TEST_GUILD_ID) {
 				set_test(GUILDCREATE, true);
 				if (event.presences.size() && event.presences.begin()->second.user_id > 0) {
 					set_test(PRESENCE, true);
@@ -1703,7 +1703,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		});
 
 		bot.on_thread_update([&thread_helper](const dpp::thread_update_t &event) {
-			if (event.updating_guild->id == TEST_GUILD_ID && event.updated.id == thread_helper.thread_id && event.updated.name == "edited") {
+			if (event.updating_guild.id == TEST_GUILD_ID && event.updated.id == thread_helper.thread_id && event.updated.name == "edited") {
 				set_test(THREAD_UPDATE_EVENT, true);
 			}
 		});
@@ -1720,7 +1720,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		});
 
 		bot.on_thread_delete([&](const dpp::thread_delete_t &event) {
-			if (event.deleting_guild->id == TEST_GUILD_ID && event.deleted.id == message_helper.thread_id) {
+			if (event.deleting_guild.id == TEST_GUILD_ID && event.deleted.id == message_helper.thread_id) {
 				set_test(THREAD_DELETE_EVENT, true);
 			}
 		});

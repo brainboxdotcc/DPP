@@ -11,7 +11,7 @@ public:
 	/* Override the "completed" event and then output the number of collected reactions as a message. */
 	virtual void completed(const std::vector<dpp::collected_reaction>& list) override {
 		if (list.size()) {
-			owner->message_create(dpp::message(list[0].react_channel->id, "I collected " + std::to_string(list.size()) + " reactions!"));
+			owner->message_create(dpp::message(list[0].react_channel.id, "I collected " + std::to_string(list.size()) + " reactions!"));
 		} else {
 			owner->message_create(dpp::message("... I got nothin'."));
 		}

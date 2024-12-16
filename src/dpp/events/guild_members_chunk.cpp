@@ -40,7 +40,8 @@ namespace dpp::events {
 void guild_members_chunk::handle(discord_client* client, json &j, const std::string &raw) {
 	json &d = j["d"];
 	dpp::guild_member_map um;
-	dpp::guild* g = dpp::find_guild(snowflake_not_null(&d, "guild_id"));
+	snowflake guild_id = snowflake_not_null(&d, "guild_id");
+	dpp::guild* g = dpp::find_guild(guild_id);
 	if (g) {
 		/* Store guild members */
 		if (client->creator->cache_policy.user_policy == cp_aggressive) {
@@ -65,8 +66,9 @@ void guild_members_chunk::handle(discord_client* client, json &j, const std::str
 	}
 	if (!client->creator->on_guild_members_chunk.empty()) {
 		dpp::guild_members_chunk_t gmc(client->owner, client->shard_id, raw);
-		gmc.adding = g;
-		gmc.members = &um;
+		gmc.adding = g ? *g : guild{};
+		gmc.adding.id = guild_id;
+		gmc.members = um;
 		client->creator->queue_work(1, [c = client->creator, gmc]() {
 			c->on_guild_members_chunk.call(gmc);
 		});

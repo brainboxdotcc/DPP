@@ -39,12 +39,14 @@ namespace dpp::events {
 void guild_update::handle(discord_client* client, json &j, const std::string &raw) {
 	json& d = j["d"];
 	guild newguild;
-	dpp::guild* g = nullptr;
+	guild* g = nullptr;
+	snowflake guild_id= snowflake_not_null(&d, "id");
+
 	if (client->creator->cache_policy.guild_policy == cp_none) {
 		newguild.fill_from_json(client, &d);
 		g = &newguild;
 	} else {
-		g = dpp::find_guild(snowflake_not_null(&d, "id"));
+		g = dpp::find_guild(guild_id);
 		if (g) {
 			g->fill_from_json(client, &d);
 			if (!g->is_unavailable()) {
@@ -66,7 +68,8 @@ void guild_update::handle(discord_client* client, json &j, const std::string &ra
 	}
 	if (!client->creator->on_guild_update.empty()) {
 		dpp::guild_update_t gu(client->owner, client->shard_id, raw);
-		gu.updated = g;
+		gu.updated = g ? *g : guild{};
+		gu.updated.id = guild_id;
 		client->creator->queue_work(1, [c = client->creator, gu]() {
 			c->on_guild_update.call(gu);
 		});

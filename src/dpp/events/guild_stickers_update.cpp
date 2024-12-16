@@ -48,7 +48,8 @@ void guild_stickers_update::handle(discord_client* client, json &j, const std::s
 			s.fill_from_json(&sticker);
 			gsu.stickers.emplace_back(s);
 		}
-		gsu.updating_guild = g;
+		gsu.updating_guild = g ? *g : guild{};
+		gsu.updating_guild.id = guild_id;
 		client->creator->queue_work(1, [c = client->creator, gsu]() {
 			c->on_guild_stickers_update.call(gsu);
 		});

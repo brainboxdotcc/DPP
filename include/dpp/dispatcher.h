@@ -903,7 +903,7 @@ struct DPP_EXPORT guild_stickers_update_t : public event_dispatch_t {
 	/**
 	 * @brief Updating guild
 	 */
-	guild* updating_guild = nullptr;
+	guild updating_guild;
 
 	/**
 	 * @brief stickers being updated
@@ -939,7 +939,7 @@ struct DPP_EXPORT channel_delete_t : public event_dispatch_t {
 	/**
 	 * @brief guild channel is being deleted from
 	 */
-	guild* deleting_guild = nullptr;
+	guild deleting_guild;
 
 	/**
 	 * @brief channel being deleted
@@ -957,12 +957,12 @@ struct DPP_EXPORT channel_update_t : public event_dispatch_t {
 	/**
 	 * @brief guild channel is being updated on
 	 */
-	guild* updating_guild = nullptr;
+	guild updating_guild;
 
 	/**
 	 * @brief channel being updated
 	 */
-	channel* updated = nullptr;
+	channel updated;
 };
 
 /**
@@ -1028,7 +1028,7 @@ struct DPP_EXPORT guild_member_remove_t : public event_dispatch_t {
 	/**
 	 * @brief guild user is being removed from
 	 */
-	guild* removing_guild = nullptr;
+	guild removing_guild;
 
 	/**
 	 * @brief Guild ID removed from
@@ -1069,12 +1069,12 @@ struct DPP_EXPORT guild_role_create_t : public event_dispatch_t {
 	/**
 	 * @brief guild role is being created on
 	 */
-	guild* creating_guild = nullptr;
+	guild creating_guild;
 
 	/**
 	 * @brief role being created
 	 */
-	role* created = nullptr;
+	role created;
 };
 
 /**
@@ -1087,18 +1087,18 @@ struct DPP_EXPORT typing_start_t : public event_dispatch_t {
 	/**
 	 * @brief guild user is typing on
 	 */
-	guild* typing_guild = nullptr;
+	guild typing_guild;
 
 	/**
 	 * @brief channel user is typing on
 	 */
-	channel* typing_channel = nullptr;
+	channel typing_channel;
 
 	/**
 	 * @brief user who is typing.
 	 * Can be nullptr if user is not cached
 	 */
-	user* typing_user = nullptr;
+	user typing_user;
 
 	/**
 	 * @brief User id of user typing.
@@ -1141,7 +1141,7 @@ struct DPP_EXPORT message_reaction_add_t : public event_dispatch_t {
 	/**
 	 * @brief Guild reaction occurred on
 	 */
-	guild* reacting_guild = nullptr;
+	guild reacting_guild;
 
 	/**
 	 * @brief User who reacted
@@ -1162,7 +1162,7 @@ struct DPP_EXPORT message_reaction_add_t : public event_dispatch_t {
 	 * @brief channel the reaction happened on (Optional)
 	 * @note only filled when the channel is cached
 	 */
-	channel* reacting_channel = nullptr;
+	channel reacting_channel;
 
 	/**
 	 * @brief emoji of reaction
@@ -1190,12 +1190,12 @@ struct DPP_EXPORT guild_members_chunk_t : public event_dispatch_t {
 	/**
 	 * @brief guild the members chunk is for
 	 */
-	guild* adding = nullptr;
+	guild adding;
 
 	/**
 	 * @brief list of members in the chunk
 	 */
-	guild_member_map* members = nullptr;
+	guild_member_map members;
 };
 
 /**
@@ -1208,7 +1208,7 @@ struct DPP_EXPORT message_reaction_remove_t : public event_dispatch_t {
 	/**
 	 * @brief Guild reaction occurred on
 	 */
-	guild* reacting_guild = nullptr;
+	guild reacting_guild;
 
 	/**
 	 * @brief User who reacted
@@ -1224,7 +1224,7 @@ struct DPP_EXPORT message_reaction_remove_t : public event_dispatch_t {
 	 * @brief channel the reaction happened on (optional)
 	 * @note only filled when the channel is cached
 	 */
-	channel* reacting_channel = nullptr;
+	channel reacting_channel;
 
 	/**
 	 * @brief emoji of reaction
@@ -1247,7 +1247,7 @@ struct DPP_EXPORT guild_create_t : public event_dispatch_t {
 	/**
 	 * @brief guild that was created
 	 */
-	guild* created = nullptr;
+	guild created;
 
 	/**
 	 * @brief List of presences of all users on the guild.
@@ -1288,12 +1288,12 @@ struct DPP_EXPORT channel_create_t : public event_dispatch_t {
 	/**
 	 * @brief guild channel was created on
 	 */
-	guild* creating_guild = nullptr;
+	guild creating_guild;
 
 	/**
 	 * @brief channel that was created
 	 */
-	channel* created = nullptr;
+	channel created;
 };
 
 /**
@@ -1306,7 +1306,7 @@ struct DPP_EXPORT message_reaction_remove_emoji_t : public event_dispatch_t {
 	/**
 	 * @brief Guild reaction occurred on
 	 */
-	guild* reacting_guild = nullptr;
+	guild reacting_guild;
 
 	/**
 	 * @brief Channel ID the reactions was removed in
@@ -1317,7 +1317,7 @@ struct DPP_EXPORT message_reaction_remove_emoji_t : public event_dispatch_t {
 	 * @brief channel the reaction happened on (optional)
 	 * @note only filled when the channel is cached
 	 */
-	channel* reacting_channel = nullptr;
+	channel reacting_channel;
 
 	/**
 	 * @brief emoji of reaction
@@ -1340,17 +1340,17 @@ struct DPP_EXPORT message_delete_bulk_t : public event_dispatch_t {
 	/**
 	 * @brief guild messages are being deleted upon
 	 */
-	guild* deleting_guild = nullptr;
+	guild deleting_guild;
 
 	/**
 	 * @brief user who is deleting the messages
 	 */
-	user* deleting_user = nullptr;
+	user deleting_user;
 
 	/**
 	 * @brief channel messages are being deleted from
 	 */
-	channel* deleting_channel = nullptr;
+	channel deleting_channel;
 
 	/**
 	 * @brief list of message ids of deleted messages
@@ -1368,12 +1368,12 @@ struct DPP_EXPORT guild_role_update_t : public event_dispatch_t {
 	/**
 	 * @brief guild where roles are being updated
 	 */
-	guild* updating_guild = nullptr;
+	guild updating_guild;
 
 	/**
 	 * @brief the role being updated
 	 */
-	role* updated = nullptr;
+	role updated;
 };
 
 /**
@@ -1386,12 +1386,12 @@ struct DPP_EXPORT guild_role_delete_t : public event_dispatch_t {
 	/**
 	 * @brief guild where role is being deleted
 	 */
-	guild* deleting_guild = nullptr;
+	guild deleting_guild;
 
 	/**
 	 * @brief role being deleted
 	 */
-	role* deleted = nullptr;
+	role deleted;
 
 	/**
 	 * @brief ID of the deleted role
@@ -1409,12 +1409,12 @@ struct DPP_EXPORT channel_pins_update_t : public event_dispatch_t {
 	/**
 	 * @brief guild where message is being pinned
 	 */
-	guild* pin_guild = nullptr;
+	guild pin_guild;
 
 	/**
 	 * @brief channel where message is being pinned
 	 */
-	channel* pin_channel = nullptr;
+	channel pin_channel;
 
 	/**
 	 * @brief timestamp of pin
@@ -1432,7 +1432,7 @@ struct DPP_EXPORT message_reaction_remove_all_t : public event_dispatch_t {
 	/**
 	 * @brief Guild reaction occurred on
 	 */
-	guild* reacting_guild = nullptr;
+	guild reacting_guild;
 
 	/**
 	 * @brief Channel ID the reactions was removed in
@@ -1443,7 +1443,7 @@ struct DPP_EXPORT message_reaction_remove_all_t : public event_dispatch_t {
 	 * @brief channel the reaction happened on (optional)
 	 * @note only filled when the channel is cached
 	 */
-	channel* reacting_channel = nullptr;
+	channel reacting_channel;
 
 	/**
 	 * @brief message id of the message reacted upon
@@ -1490,7 +1490,7 @@ struct DPP_EXPORT guild_emojis_update_t : public event_dispatch_t {
 	/**
 	 * @brief guild where emojis are being updated
 	 */
-	guild* updating_guild = nullptr;
+	guild updating_guild;
 };
 
 /**
@@ -1517,12 +1517,12 @@ struct DPP_EXPORT webhooks_update_t : public event_dispatch_t {
 	/**
 	 * @brief guild where webhooks are being updated
 	 */
-	guild* webhook_guild = nullptr;
+	guild webhook_guild;
 
 	/**
 	 * @brief channel where webhooks are being updated
 	 */
-	channel* webhook_channel = nullptr;
+	channel webhook_channel;
 };
 
 /**
@@ -1535,7 +1535,7 @@ struct DPP_EXPORT guild_member_add_t : public event_dispatch_t {
 	/**
 	 * @brief guild which gained new member
 	 */
-	guild* adding_guild = nullptr;
+	guild adding_guild;
 
 	/**
 	 * @brief member which was added
@@ -1566,7 +1566,7 @@ struct DPP_EXPORT guild_update_t : public event_dispatch_t {
 	/**
 	 * @brief guild being updated
 	 */
-	guild* updated = nullptr;
+	guild updated;
 };
 
 /**
@@ -1579,7 +1579,7 @@ struct DPP_EXPORT guild_integrations_update_t : public event_dispatch_t {
 	/**
 	 * @brief guild where integrations are being updated
 	 */
-	guild* updating_guild = nullptr;
+	guild updating_guild;
 };
 
 /**
@@ -1592,7 +1592,7 @@ struct DPP_EXPORT guild_member_update_t : public event_dispatch_t {
 	/**
 	 * @brief guild where member is being updated
 	 */
-	guild* updating_guild = nullptr;
+	guild updating_guild;
 
 	/**
 	 * @brief member being updated
@@ -1786,7 +1786,7 @@ struct DPP_EXPORT guild_ban_add_t : public event_dispatch_t {
 	/**
 	 * @brief guild where ban was added
 	 */
-	guild* banning_guild = nullptr;
+	guild banning_guild;
 
 	/**
 	 * @brief user being banned
@@ -1804,7 +1804,7 @@ struct DPP_EXPORT guild_ban_remove_t : public event_dispatch_t {
 	/**
 	 * @brief guild where ban is being removed
 	 */
-	guild* unbanning_guild = nullptr;
+	guild unbanning_guild;
 
 	/**
 	 * @brief user being unbanned
@@ -1861,7 +1861,7 @@ struct DPP_EXPORT thread_create_t : public event_dispatch_t {
 	/**
 	 * @brief guild where thread was created
 	 */
-	guild* creating_guild = nullptr;
+	guild creating_guild;
 
 	/**
 	 * @brief thread created
@@ -1879,7 +1879,7 @@ struct DPP_EXPORT thread_update_t : public event_dispatch_t {
 	/**
 	 * @brief guild where thread was updated
 	 */
-	guild* updating_guild = nullptr;
+	guild updating_guild;
 
 	/**
 	 * @brief thread updated
@@ -1897,7 +1897,7 @@ struct DPP_EXPORT thread_delete_t : public event_dispatch_t {
 	/**
 	 * @brief guild where thread was deleted
 	 */
-	guild* deleting_guild = nullptr;
+	guild deleting_guild;
 
 	/**
 	 * @brief thread deleted
@@ -1915,7 +1915,7 @@ struct DPP_EXPORT thread_list_sync_t : public event_dispatch_t {
 	/**
 	 * @brief guild where thread list was synchronised
 	 */
-	guild* updating_guild = nullptr;
+	guild updating_guild;
 
 	/**
 	 * @brief list of threads (channels) synchronised

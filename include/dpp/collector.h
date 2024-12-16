@@ -166,27 +166,27 @@ public:
 	/**
 	 * @brief Reacting user.
 	 */
-	user react_user;
+	user react_user{};
 
 	/**
 	 * @brief Reacting guild.
 	 */
-	guild* react_guild{};
+	guild react_guild{};
 
 	/**
 	 * @brief Reacting guild member.
 	 */
-	guild_member react_member;
+	guild_member react_member{};
 
 	/**
 	 * @brief Reacting channel.
 	 */
-	channel* react_channel{};
+	channel react_channel{};
 
 	/**
 	 * @brief Reacted emoji.
 	 */
-	emoji react_emoji;
+	emoji react_emoji{};
 
 	/**
 	 * @brief Optional: ID of the user who authored the message which was reacted to.
@@ -351,7 +351,7 @@ public:
 	 * @param element element to filter
 	 * @return Returned item to add to the list, or nullptr to skip adding this element
 	 */
-	virtual const dpp::channel* filter(const dpp::channel_create_t& element) { return element.created; }
+	virtual const dpp::channel* filter(const dpp::channel_create_t& element) { return &element.created; }
 
 	/**
 	 * @brief Destroy the channel collector object
@@ -425,7 +425,7 @@ public:
 	 * @param element element to filter
 	 * @return Returned item to add to the list, or nullptr to skip adding this element
 	 */
-	virtual const dpp::role* filter(const dpp::guild_role_create_t& element) { return element.created; }
+	virtual const dpp::role* filter(const dpp::guild_role_create_t& element) { return &element.created; }
 
 	/**
 	 * @brief Destroy the role collector object

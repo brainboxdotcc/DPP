@@ -50,7 +50,8 @@ void channel_delete::handle(discord_client* client, json &j, const std::string &
 	if (!client->creator->on_channel_delete.empty()) {
 		channel_delete_t cd(client->owner, client->shard_id, raw);
 		cd.deleted = c;
-		cd.deleting_guild = g;
+		cd.deleting_guild = g ? *g : guild{};
+		cd.deleting_guild.id = c.guild_id;
 		client->creator->queue_work(1, [c = client->creator, cd]() {
 			c->on_channel_delete.call(cd);
 		});

@@ -40,7 +40,10 @@ void guild_integrations_update::handle(class discord_client* client, json &j, co
 	if (!client->creator->on_guild_integrations_update.empty()) {
 		json& d = j["d"];
 		dpp::guild_integrations_update_t giu(client->owner, client->shard_id, raw);
-		giu.updating_guild = dpp::find_guild(snowflake_not_null(&d, "guild_id"));
+		snowflake gid = snowflake_not_null(&d, "guild_id");
+		guild* g = dpp::find_guild(gid);
+		giu.updating_guild = g ? *g : guild{};
+		giu.updating_guild.id = gid;
 		client->creator->queue_work(1, [c = client->creator, giu]() {
 			c->on_guild_integrations_update.call(giu);
 		});

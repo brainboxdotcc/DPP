@@ -46,7 +46,8 @@ void guild_member_add::handle(discord_client* client, json &j, const std::string
 		gm.fill_from_json(&d, guild_id, snowflake_not_null(&(d["user"]), "id"));
 		gmr.added = gm;
 		if (!client->creator->on_guild_member_add.empty()) {
-			gmr.adding_guild = g;
+			gmr.adding_guild = g ? *g : guild{};
+			gmr.adding_guild.id = guild_id;
 			client->creator->queue_work(1, [c = client->creator, gmr]() {
 				c->on_guild_member_add.call(gmr);
 			});
@@ -70,7 +71,8 @@ void guild_member_add::handle(discord_client* client, json &j, const std::string
 			gmr.added = g->members.find(u->id)->second;
 		}
 		if (!client->creator->on_guild_member_add.empty()) {
-			gmr.adding_guild = g;
+			gmr.adding_guild = g ? *g : guild{};
+			gmr.adding_guild.id = guild_id;
 			client->creator->queue_work(1, [c = client->creator, gmr]() {
 				c->on_guild_member_add.call(gmr);
 			});

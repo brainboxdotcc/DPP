@@ -148,7 +148,7 @@ void guild_create::handle(discord_client* client, json &j, const std::string &ra
 
 	if (!client->creator->on_guild_create.empty()) {
 		dpp::guild_create_t gc(client->owner, client->shard_id, raw);
-		gc.created = g;
+		gc.created = *g;
 
 		/* Fill presences if there are any */
 		if (d.find("presences") != d.end()) {
