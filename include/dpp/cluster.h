@@ -445,6 +445,33 @@ public:
 	 */
 	timer start_timer(timer_callback_t on_tick, uint64_t frequency, timer_callback_t on_stop = {});
 
+#ifdef DPP_CORO
+	/**
+	 * @brief Start a coroutine timer. Every `frequency` seconds, the callback is called.
+	 * 
+	 * @param on_tick The callback lambda to call for this timer when ticked
+	 * @param on_stop The callback lambda to call for this timer when it is stopped
+	 * @param frequency How often to tick the timer in seconds
+	 * @return timer A handle to the timer, used to remove that timer later
+	 */
+	template <std::invocable<timer> T, std::invocable<timer> U = std::function<void(timer)>>
+	requires (dpp::awaitable_type<typename std::invoke_result<T, timer>::type>)
+	timer start_timer(T&& on_tick, uint64_t frequency, U&& on_stop = {}) {
+		std::function<void(timer)> ticker = [fun = std::forward<T>(on_tick)](timer t) mutable -> dpp::job {
+			co_await std::invoke(fun, t);
+		};
+		std::function<void(timer)> stopper;
+		if constexpr (dpp::awaitable_type<typename std::invoke_result<U, timer>::type>) {
+			stopper = [fun = std::forward<U>(on_stop)](timer t) mutable -> dpp::job {
+				co_await std::invoke(fun, t);
+			};
+		} else {
+			stopper = std::forward<U>(on_stop);
+		}
+		return start_timer(std::move(ticker), frequency, std::move(stopper));
+	}
+#endif
+
 	/**
 	 * @brief Stop a ticking timer
 	 * 
