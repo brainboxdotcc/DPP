@@ -39,6 +39,7 @@ struct awaitable_dummy {
 
 // Do not include <coroutine> as coro.h includes <experimental/coroutine> or <coroutine> depending on clang version
 #include <mutex>
+#include <condition_variable>
 #include <optional>
 #include <utility>
 #include <type_traits>
