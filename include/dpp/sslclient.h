@@ -97,6 +97,11 @@ private:
 	std::mutex ssl_mutex;
 
 	/**
+	 * @brief Mutex for output buffer
+	 */
+	std::mutex out_mutex;
+
+	/**
 	 * @brief Start offset into internal ring buffer for client to server IO
 	 */
 	size_t client_to_server_length = 0;
@@ -217,7 +222,30 @@ protected:
 	 */
 	virtual void connect();
 
+	/**
+	 * @brief Set this to true to log all IO to debug for this connection.
+	 * This is an internal developer facility. Do not enable it unless you
+	 * need to, as it will be very noisy.
+	 */
+	bool raw_trace{false};
+
+	/**
+	 * @brief If raw_trace is set to true, log a debug message for this connection
+	 * @param message debug message
+	 */
+	void do_raw_trace(const std::string& message) const;
+
 public:
+	/**
+	 * @brief For low-level debugging, calling this function will
+	 * enable low level I/O logging for this connection to the logger.
+	 * This can be very loud, and output a lot of data, so only enable it
+	 * selectively where you need it.
+	 *
+	 * Generally, you won't need this, it is a library development utility.
+	 */
+	void enable_raw_tracing();
+
 	/**
 	 * @brief Get the bytes out objectGet total bytes sent
 	 * @return uint64_t bytes sent
