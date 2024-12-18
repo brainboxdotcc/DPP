@@ -53,9 +53,6 @@
 #include <dpp/cluster.h>
 #include <dpp/dns.h>
 
-/* Maximum allowed time in milliseconds for socket read/write timeouts and connect() */
-constexpr uint16_t SOCKET_OP_TIMEOUT{5000};
-
 namespace dpp {
 
 /**
