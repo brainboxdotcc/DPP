@@ -2452,12 +2452,15 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 	}
 	catch (const std::exception& e) {
 		std::cerr << "Unhandled std::exception thrown: " << std::string(e.what()) << "\n";
+		exit(99);
 	}
 	catch (const std::string& e) {
 		/* This is a safety net, none of our stuff throws strings! */
 		std::cerr << "Unhandled std::string thrown: " << e << "\n";
+		exit(99);
 	}
 	catch (...) {
 		std::cerr << "Unhandled '...' thrown\n";
+		exit(99);
 	}
 }
