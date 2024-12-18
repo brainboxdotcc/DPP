@@ -96,7 +96,7 @@ jobs:
 
       - name: Run unit tests
         if: ${{ matrix.cfg.ctest == 'yes' }}
-        run: cd build && ctest -VV
+        run: cd build/library && ./unittest
         env:
           DPP_UNIT_TEST_TOKEN: ${{secrets.DPP_UNIT_TEST_TOKEN}}
           TEST_GUILD_ID: ${{secrets.TEST_GUILD_ID}}
@@ -161,7 +161,7 @@ jobs:
           DONT_RUN_VCPKG: true
 
       - name: Run offline unit tests
-        run: cd build && ctest -VV
+        run: cd build/library && ./unittest
 
   windows: # Windows x64 and x86 build matrix
     permissions:

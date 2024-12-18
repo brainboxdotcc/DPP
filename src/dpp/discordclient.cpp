@@ -602,19 +602,15 @@ voiceconn::~voiceconn() {
 
 voiceconn& voiceconn::connect(snowflake guild_id) {
 	if (this->is_ready() && !this->is_active()) {
-		/* This is wrapped in a thread because instantiating discord_voice_client can initiate a blocking SSL_connect() */
-		auto t = std::thread([guild_id, this]() {
-			try {
-				this->creator->log(ll_debug, "Connecting voice for guild " + std::to_string(guild_id) + " channel " + std::to_string(this->channel_id));
-				this->voiceclient = new discord_voice_client(creator->creator, this->channel_id, guild_id, this->token, this->session_id, this->websocket_hostname, this->dave);
-				/* Note: Spawns thread! */
-				this->voiceclient->run();
-			}
-			catch (std::exception &e) {
-				this->creator->log(ll_debug, "Can't connect to voice websocket (guild_id: " + std::to_string(guild_id) + ", channel_id: " + std::to_string(this->channel_id) + ": " + std::string(e.what()));
-			}
-		});
-		t.detach();
+		try {
+			this->creator->log(ll_debug, "Connecting voice for guild " + std::to_string(guild_id) + " channel " + std::to_string(this->channel_id));
+			this->voiceclient = new discord_voice_client(creator->creator, this->channel_id, guild_id, this->token, this->session_id, this->websocket_hostname, this->dave);
+			/* Note: Spawns thread! */
+			this->voiceclient->run();
+		}
+		catch (std::exception &e) {
+			this->creator->log(ll_debug, "Can't connect to voice websocket (guild_id: " + std::to_string(guild_id) + ", channel_id: " + std::to_string(this->channel_id) + "): " + std::string(e.what()));
+		}
 	}
 	return *this;
 }

@@ -453,27 +453,30 @@ uint32_t hsl(double h, double s, double l) {
 
 void exec(const std::string& cmd, std::vector<std::string> parameters, cmd_result_t callback) {
 	auto t = std::thread([cmd, parameters, callback]() {
-		utility::set_thread_name("async_exec");
-		std::array<char, 128> buffer;
-		std::vector<std::string> my_parameters = parameters;
-		std::string result;
-		std::stringstream cmd_and_parameters;
-		cmd_and_parameters << cmd;
-		for (auto & parameter : my_parameters) {
-			cmd_and_parameters << " " << std::quoted(parameter);
+		try {
+			utility::set_thread_name("async_exec");
+			std::array<char, 128> buffer;
+			std::vector<std::string> my_parameters = parameters;
+			std::string result;
+			std::stringstream cmd_and_parameters;
+			cmd_and_parameters << cmd;
+			for (auto &parameter: my_parameters) {
+				cmd_and_parameters << " " << std::quoted(parameter);
+			}
+			/* Capture stderr */
+			cmd_and_parameters << " 2>&1";
+			std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd_and_parameters.str().c_str(), "r"), pclose);
+			if (!pipe) {
+				return;
+			}
+			while (fgets(buffer.data(), (int) buffer.size(), pipe.get()) != nullptr) {
+				result += buffer.data();
+			}
+			if (callback) {
+				callback(result);
+			}
 		}
-		/* Capture stderr */
-		cmd_and_parameters << " 2>&1";
-		std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd_and_parameters.str().c_str(), "r"), pclose);
-		if (!pipe) {
-			return;
-		}
-		while (fgets(buffer.data(), (int)buffer.size(), pipe.get()) != nullptr) {
-			result += buffer.data();
-		}
-		if (callback) {
-			callback(result);
-		}
+		catch (...) { /* There is nowhere to log this... */ }
 	});
 	t.detach();
 }

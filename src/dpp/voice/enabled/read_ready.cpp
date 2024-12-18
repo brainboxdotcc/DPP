@@ -126,9 +126,7 @@ void discord_voice_client::read_ready()
 
 	if (!voice_courier.joinable()) {
 		/* Courier thread is not running, start it */
-		voice_courier = std::thread(&voice_courier_loop,
-		                            std::ref(*this),
-		                            std::ref(voice_courier_shared_state));
+		voice_courier = std::thread(&voice_courier_loop, std::ref(*this), std::ref(voice_courier_shared_state));
 	}
 }
 

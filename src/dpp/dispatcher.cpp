@@ -271,11 +271,11 @@ command_value interaction_create_t::get_parameter(const std::string& name) const
 	return {};
 }
 
-voice_receive_t::voice_receive_t(dpp::cluster* creator, uint32_t shard_id, const std::string& raw, discord_voice_client* vc, snowflake _user_id, const uint8_t* pcm, size_t length) : event_dispatch_t(owner, shard_id, std::move(raw)), voice_client(vc), user_id(_user_id) {
+voice_receive_t::voice_receive_t(dpp::cluster* creator, uint32_t shard_id, const std::string& raw, discord_voice_client* vc, snowflake _user_id, const uint8_t* pcm, size_t length) : event_dispatch_t(creator, shard_id, std::move(raw)), voice_client(vc), user_id(_user_id) {
 	reassign(vc, _user_id, pcm, length);
 }
 
-voice_receive_t::voice_receive_t(dpp::cluster* creator, uint32_t shard_id, std::string&& raw, discord_voice_client* vc, snowflake _user_id, const uint8_t* pcm, size_t length) : event_dispatch_t(owner, shard_id, std::move(raw)), voice_client(vc), user_id(_user_id) {
+voice_receive_t::voice_receive_t(dpp::cluster* creator, uint32_t shard_id, std::string&& raw, discord_voice_client* vc, snowflake _user_id, const uint8_t* pcm, size_t length) : event_dispatch_t(creator, shard_id, std::move(raw)), voice_client(vc), user_id(_user_id) {
 	reassign(vc, _user_id, pcm, length);
 }
 

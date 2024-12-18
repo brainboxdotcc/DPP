@@ -27,6 +27,7 @@
 #include <climits>
 #include <dpp/httpsclient.h>
 #include <dpp/utility.h>
+#include <dpp/cluster.h>
 
 namespace dpp {
 
@@ -54,6 +55,7 @@ void https_client::connect()
 	for (auto& [k,v] : request_headers) {
 		map_headers += k + ": " + v + "\r\n";
 	}
+
 	if (this->sfd != SOCKET_ERROR) {
 		this->socket_write(
 			this->request_type + " " + this->path + " HTTP/" + http_protocol + "\r\n"
@@ -72,43 +74,44 @@ void https_client::connect()
 }
 
 multipart_content https_client::build_multipart(const std::string &json, const std::vector<std::string>& filenames, const std::vector<std::string>& contents, const std::vector<std::string>& mimetypes) {
+
 	if (filenames.empty() && contents.empty()) {
+		/* If there are no files to upload, there is no need to build a multipart body */
 		if (!json.empty()) {
 			return { json, "application/json" };
-		} else {
-			return {json, ""};
 		}
-	} else {
-		/* Note: loss of upper 32 bits on this value is INTENTIONAL */
-		uint32_t dummy1 = (uint32_t)time(nullptr) + (uint32_t)time(nullptr);
-		time_t dummy2 = time(nullptr) * time(nullptr);
-		const std::string two_cr("\r\n\r\n");
-		const std::string boundary("-------------" + to_hex(dummy1) + to_hex(dummy2));
-		const std::string part_start("--" + boundary + "\r\nContent-Disposition: form-data; ");
-		const std::string mime_type_start("\r\nContent-Type: ");
-		const std::string default_mime_type("application/octet-stream");
-		
-		std::string content("--" + boundary);
-
-		/* Special case, single file */
-		content += "\r\nContent-Type: application/json\r\nContent-Disposition: form-data; name=\"payload_json\"" + two_cr;
-		content += json + "\r\n";
-		if (filenames.size() == 1 && contents.size() == 1) {
-			content += part_start + "name=\"file\"; filename=\"" + filenames[0] + "\"";
-			content += mime_type_start + (mimetypes.empty() || mimetypes[0].empty() ? default_mime_type : mimetypes[0]) + two_cr;
-			content += contents[0];
-		} else {
-			/* Multiple files */
-			for (size_t i = 0; i < filenames.size(); ++i) {
-				content += part_start + "name=\"files[" + std::to_string(i) + "]\"; filename=\"" + filenames[i] + "\"";
-				content += "\r\nContent-Type: " + (mimetypes.size() <= i || mimetypes[i].empty() ? default_mime_type : mimetypes[i]) + two_cr;
-				content += contents[i];
-				content += "\r\n";
-			}
-		}
-		content += "\r\n--" + boundary + "--";
-		return { content, "multipart/form-data; boundary=" + boundary };
+		return {json, ""};
 	}
+
+	/* Note: loss of upper 32 bits on this value is INTENTIONAL */
+	uint32_t dummy1 = (uint32_t)time(nullptr) + (uint32_t)time(nullptr);
+	time_t dummy2 = time(nullptr) * time(nullptr);
+	const std::string two_cr("\r\n\r\n");
+	const std::string boundary("-------------" + to_hex(dummy1) + to_hex(dummy2));
+	const std::string part_start("--" + boundary + "\r\nContent-Disposition: form-data; ");
+	const std::string mime_type_start("\r\nContent-Type: ");
+	const std::string default_mime_type("application/octet-stream");
+
+	std::string content("--" + boundary);
+
+	/* Special case, single file */
+	content += "\r\nContent-Type: application/json\r\nContent-Disposition: form-data; name=\"payload_json\"" + two_cr;
+	content += json + "\r\n";
+	if (filenames.size() == 1 && contents.size() == 1) {
+		content += part_start + "name=\"file\"; filename=\"" + filenames[0] + "\"";
+		content += mime_type_start + (mimetypes.empty() || mimetypes[0].empty() ? default_mime_type : mimetypes[0]) + two_cr;
+		content += contents[0];
+	} else {
+		/* Multiple files */
+		for (size_t i = 0; i < filenames.size(); ++i) {
+			content += part_start + "name=\"files[" + std::to_string(i) + "]\"; filename=\"" + filenames[i] + "\"";
+			content += "\r\nContent-Type: " + (mimetypes.size() <= i || mimetypes[i].empty() ? default_mime_type : mimetypes[i]) + two_cr;
+			content += contents[i];
+			content += "\r\n";
+		}
+	}
+	content += "\r\n--" + boundary + "--";
+	return { content, "multipart/form-data; boundary=" + boundary };
 }
 
 const std::string https_client::get_header(std::string header_name) const {

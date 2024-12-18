@@ -382,12 +382,22 @@ void cluster::start(start_type return_after) {
 	}
 
 	if (return_after == st_return) {
-		engine_thread = std::thread([event_loop]() {
-			dpp::utility::set_thread_name("event_loop");
-			event_loop();
+		engine_thread = std::thread([this, event_loop]() {
+			try {
+				dpp::utility::set_thread_name("event_loop");
+				event_loop();
+			}
+			catch (const std::exception& e) {
+				log(ll_critical, "Event loop unhandled exception: " + std::string(e.what()));
+			}
 		});
 	} else {
-		event_loop();
+		try {
+			event_loop();
+		}
+		catch (const std::exception& e) {
+			log(ll_critical, "Event loop unhandled exception: " + std::string(e.what()));
+		}
 	}
 }
 
