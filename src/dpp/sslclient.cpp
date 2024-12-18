@@ -257,7 +257,6 @@ std::string ssl_client::get_cipher() {
 }
 
 void ssl_client::log(dpp::loglevel severity, const std::string &msg) const {
-	owner->log(severity, msg);
 }
 
 void ssl_client::complete_handshake(const socket_events* ev)
