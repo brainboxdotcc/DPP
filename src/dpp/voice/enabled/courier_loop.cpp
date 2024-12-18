@@ -292,7 +292,7 @@ void discord_voice_client::voice_courier_loop(discord_voice_client& client, cour
 		}
 	}
 	catch (const std::exception& e) {
-		log(ll_critical, "Voice courier unhandled exception: " + std::string(e.what()));
+		client.creator->log(ll_critical, "Voice courier unhandled exception: " + std::string(e.what()));
 	}
 }
 

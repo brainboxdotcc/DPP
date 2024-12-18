@@ -382,7 +382,7 @@ void cluster::start(start_type return_after) {
 	}
 
 	if (return_after == st_return) {
-		engine_thread = std::thread([event_loop]() {
+		engine_thread = std::thread([this, event_loop]() {
 			try {
 				dpp::utility::set_thread_name("event_loop");
 				event_loop();
