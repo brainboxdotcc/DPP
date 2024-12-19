@@ -24,6 +24,7 @@
 #include <cstdint>
 #include <unordered_map>
 #include <memory>
+#include <string_view>
 #include <functional>
 #include <shared_mutex>
 #include <dpp/thread_pool.h>
@@ -73,6 +74,51 @@ using socket_write_event = std::function<void(dpp::socket fd, const struct socke
  * @brief Error event
  */
 using socket_error_event = std::function<void(dpp::socket fd, const struct socket_events&, int error_code)>;
+
+/**
+ * @brief Contains statistics about the IO loop
+ */
+struct DPP_EXPORT socket_stats {
+	/**
+	 * @brief Number of reads since startup
+	 */
+	uint64_t reads{0};
+
+	/**
+	 * @brief Number of writes since startup
+	 */
+	uint64_t writes{0};
+
+	/**
+	 * @brief Number of errors since startup
+	 */
+	uint64_t errors{0};
+
+	/**
+	 * @brief Number of updates to file descriptors
+	 */
+	uint64_t updates{0};
+
+	/**
+	 * @brief Number of deletions of file descriptors
+	 */
+	 uint64_t deletions{0};
+
+	/**
+	 * @brief Number of loop iterations since startup
+	 */
+	uint64_t iterations{0};
+
+	/**
+	 * @brief Number of currently active file descriptors
+	 */
+	uint64_t active_fds{0};
+
+	/**
+	 * @brief Socket engine type
+	 */
+	std::string_view engine_type;
+};
 
 /**
  * @brief Represents an active socket event set in the socket engine.
@@ -151,21 +197,6 @@ using socket_container = std::unordered_map<dpp::socket, std::unique_ptr<socket_
 struct DPP_EXPORT socket_engine_base {
 
 	/**
-	 * @brief Mutex for fds
-	 */
-	std::shared_mutex fds_mutex;
-
-	/**
-	 * @brief File descriptors, and their states
-	 */
-	socket_container fds;
-
-	/**
-	 * @brief Number of file descriptors we are waiting to delete
-	 */
-	size_t to_delete_count{0};
-
-	/**
 	 * @brief Owning cluster
 	 */
 	class cluster* owner{nullptr};
@@ -238,14 +269,35 @@ struct DPP_EXPORT socket_engine_base {
 	 */
 	void prune();
 
+	/**
+	 * @brief Merge new flags in with the given file descriptor
+	 * @param fd file descriptor
+	 * @param extra_flags extra flags to add
+	 */
+	void inplace_modify_fd(dpp::socket fd, uint8_t extra_flags);
+
+	/**
+	 * @brief Get statistics for socket engine
+	 * @return socket stats
+	 */
+	const socket_stats& get_stats() const;
+
 protected:
 
 	/**
-	 * @brief Called by the prune() function to remove sockets when safe to do so.
-	 * This is normally at the end or before an iteration of the event loop.
-	 * @param fd File descriptor to remove
+	 * @brief Mutex for fds
 	 */
-	virtual bool remove_socket(dpp::socket fd);
+	std::shared_mutex fds_mutex;
+
+	/**
+	 * @brief File descriptors, and their states
+	 */
+	socket_container fds;
+
+	/**
+	 * @brief Socket engine statistics
+	 */
+	socket_stats stats{};
 
 	/**
 	 * @brief Find a file descriptors socket events
@@ -253,6 +305,13 @@ protected:
 	 * @return file descriptor or nullptr if doesn't exist
 	 */
 	socket_events* get_fd(dpp::socket fd);
+
+	/**
+	 * @brief Called by the prune() function to remove sockets when safe to do so.
+	 * This is normally at the end or before an iteration of the event loop.
+	 * @param fd File descriptor to remove
+	 */
+	virtual bool remove_socket(dpp::socket fd);
 };
 
 /**
