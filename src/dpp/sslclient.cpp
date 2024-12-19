@@ -247,6 +247,7 @@ void ssl_client::socket_write(const std::string_view data) {
 	 */
 	std::lock_guard<std::mutex> lock(out_mutex);
 	obuffer += data;
+	owner->socketengine->inplace_modify_fd(sfd, WANT_WRITE);
 }
 
 void ssl_client::one_second_timer() {

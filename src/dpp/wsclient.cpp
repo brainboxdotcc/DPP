@@ -131,8 +131,6 @@ void websocket_client::write(const std::string_view data, ws_opcode _opcode)
 		ssl_client::socket_write(header);
 		ssl_client::socket_write(data);
 	}
-
-	owner->socketengine->inplace_modify_fd(sfd, WANT_WRITE);
 }
 
 bool websocket_client::handle_buffer(std::string& buffer)
