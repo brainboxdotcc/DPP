@@ -35,12 +35,14 @@ bool socket_engine_base::register_socket(const socket_events &e) {
 	auto i = fds.find(e.fd);
 	if (e.fd != INVALID_SOCKET && i == fds.end()) {
 		fds.emplace(e.fd, std::make_unique<socket_events>(e));
+		stats.active_fds++;
 		return true;
 	}
 	if (e.fd != INVALID_SOCKET && i != fds.end()) {
 		remove_socket(e.fd);
 		fds.erase(i);
 		fds.emplace(e.fd, std::make_unique<socket_events>(e));
+		stats.updates++;
 		return true;
 	}
 	return false;
@@ -51,6 +53,7 @@ bool socket_engine_base::update_socket(const socket_events &e) {
 	if (e.fd != INVALID_SOCKET && fds.find(e.fd) != fds.end()) {
 		auto iter = fds.find(e.fd);
 		*(iter->second) = e;
+		stats.updates++;
 		return true;
 	}
 	return false;
@@ -83,6 +86,23 @@ socket_events* socket_engine_base::get_fd(dpp::socket fd) {
 	return iter->second.get();
 }
 
+void socket_engine_base::inplace_modify_fd(dpp::socket fd, uint8_t extra_flags) {
+	bool should_modify;
+	socket_events s{};
+	{
+		std::lock_guard lk(fds_mutex);
+		auto i = fds.find(fd);
+		should_modify = i != fds.end() && (i->second->flags & extra_flags) != extra_flags;
+		if (should_modify) {
+			i->second->flags |= extra_flags;
+			s = *(i->second);
+		}
+	}
+	if (should_modify) {
+		update_socket(s);
+	}
+}
+
 void socket_engine_base::prune() {
 	if (time(nullptr) != last_time) {
 		try {
@@ -101,6 +121,7 @@ void socket_engine_base::prune() {
 
 		last_time = time(nullptr);
 	}
+	stats.iterations++;
 }
 
 bool socket_engine_base::delete_socket(dpp::socket fd) {
@@ -110,11 +131,17 @@ bool socket_engine_base::delete_socket(dpp::socket fd) {
 		return false;
 	}
 	iter->second->flags |= WANT_DELETION;
+	stats.deletions++;
+	stats.active_fds--;
 	return true;
 }
 
 bool socket_engine_base::remove_socket(dpp::socket fd) {
 	return true;
+}
+
+const socket_stats& socket_engine_base::get_stats() const {
+	return stats;
 }
 
 }

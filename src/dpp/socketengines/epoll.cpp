@@ -54,7 +54,7 @@ struct DPP_EXPORT socket_engine_epoll : public socket_engine_base {
 
 	int epoll_handle{INVALID_SOCKET};
 	static constexpr size_t MAX_EVENTS = 65536;
-	std::array<struct epoll_event, MAX_EVENTS> events;
+	std::array<struct epoll_event, MAX_EVENTS> events{};
 
 	socket_engine_epoll(const socket_engine_epoll&) = delete;
 	socket_engine_epoll(socket_engine_epoll&&) = delete;
@@ -65,6 +65,7 @@ struct DPP_EXPORT socket_engine_epoll : public socket_engine_base {
 		if (epoll_handle == -1) {
 			throw dpp::connection_exception("Failed to initialise epoll()");
 		}
+		stats.engine_type = "epoll";
 	}
 
 	~socket_engine_epoll() override {
@@ -89,6 +90,7 @@ struct DPP_EXPORT socket_engine_epoll : public socket_engine_base {
 			if ((eh->flags & WANT_DELETION) == 0L) try {
 
 				if ((ev.events & EPOLLHUP) != 0U) {
+					stats.errors++;
 					if (eh->on_error) {
 						eh->on_error(fd, *eh, EPIPE);
 					}
@@ -96,6 +98,7 @@ struct DPP_EXPORT socket_engine_epoll : public socket_engine_base {
 				}
 
 				if ((ev.events & EPOLLERR) != 0U) {
+					stats.errors++;
 					socklen_t codesize = sizeof(int);
 					int errcode{};
 					if (getsockopt(fd, SOL_SOCKET, SO_ERROR, &errcode, &codesize) < 0) {
@@ -111,18 +114,21 @@ struct DPP_EXPORT socket_engine_epoll : public socket_engine_base {
 					/* Should we have a flag to allow keeping WANT_WRITE? Maybe like WANT_WRITE_ONCE or GREEDY_WANT_WRITE, eh */
 					eh->flags = modify_event(epoll_handle, eh, eh->flags & ~WANT_WRITE);
 					if (eh->on_write) {
+						stats.writes++;
 						eh->on_write(fd, *eh);
 					}
 				}
 
 				if ((ev.events & EPOLLIN) != 0U) {
 					if (eh->on_read) {
+						stats.reads++;
 						eh->on_read(fd, *eh);
 					}
 				}
 
 			} catch (const std::exception& e) {
 				owner->log(ll_trace, "Socket loop exception: " + std::string(e.what()));
+				stats.errors++;
 				eh->on_error(fd, *eh, 0);
 			}
 

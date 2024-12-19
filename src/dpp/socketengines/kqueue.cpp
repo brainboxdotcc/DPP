@@ -48,6 +48,7 @@ struct DPP_EXPORT socket_engine_kqueue : public socket_engine_base {
 		if (kqueue_handle == -1) {
 			throw dpp::connection_exception("Failed to initialise kqueue()");
 		}
+		stats.engine_type = "kqueue";
 	}
 
 	~socket_engine_kqueue() override {
@@ -78,6 +79,7 @@ struct DPP_EXPORT socket_engine_kqueue : public socket_engine_base {
 				if (kev.flags & EV_EOF || kev.flags & EV_ERROR) {
 					if (eh->on_error) {
 						eh->on_error(kev.ident, *eh, kev.fflags);
+						stats.errors++;
 					}
 					continue;
 				}
@@ -86,15 +88,18 @@ struct DPP_EXPORT socket_engine_kqueue : public socket_engine_base {
 					eh->flags &= ~bits_to_clr;
 					if (eh->on_write) {
 						eh->on_write(kev.ident, *eh);
+						stats.writes++;
 					}
 				}
 				else if (filter == EVFILT_READ) {
 					if (eh->on_read) {
 						eh->on_read(kev.ident, *eh);
+						stats.reads++;
 					}
 				}
 
 			} catch (const std::exception& e) {
+				stats.errors++;
 				owner->log(ll_trace, "Socket loop exception: " + std::string(e.what()));
 				eh->on_error(kev.ident, *eh, 0);
 			}

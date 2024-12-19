@@ -100,6 +100,7 @@ struct DPP_EXPORT socket_engine_poll : public socket_engine_base {
 
 				if ((revents & POLLHUP) != 0) {
 					eh->on_error(fd, *eh, 0);
+					stats.errors++;
 					continue;
 				}
 
@@ -109,21 +110,25 @@ struct DPP_EXPORT socket_engine_poll : public socket_engine_base {
 					if (getsockopt(fd, SOL_SOCKET, SO_ERROR, (char *) &errcode, &codesize) < 0) {
 						errcode = errno;
 					}
+					stats.errors++;
 					eh->on_error(fd, *eh, errcode);
 					continue;
 				}
 
 				if ((revents & POLLIN) != 0) {
+					stats.reads++;
 					eh->on_read(fd, *eh);
 				}
 
 				if ((revents & POLLOUT) != 0) {
+					stats.writes++;
 					eh->flags &= ~WANT_WRITE;
 					update_socket(*eh);
 					eh->on_write(fd, *eh);
 				}
 
 			} catch (const std::exception &e) {
+				stats.errors++;
 				eh->on_error(fd, *eh, 0);
 			}
 
@@ -181,7 +186,9 @@ struct DPP_EXPORT socket_engine_poll : public socket_engine_base {
 		return r;
 	}
 
-	explicit socket_engine_poll(cluster* creator) : socket_engine_base(creator) { };
+	explicit socket_engine_poll(cluster* creator) : socket_engine_base(creator) {
+		stats.engine_type = "poll";
+	};
 
 protected:
 
