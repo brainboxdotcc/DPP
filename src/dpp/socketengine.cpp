@@ -87,17 +87,15 @@ socket_events* socket_engine_base::get_fd(dpp::socket fd) {
 }
 
 void socket_engine_base::inplace_modify_fd(dpp::socket fd, uint8_t extra_flags) {
-	bool should_modify{false};
+	bool should_modify;
 	socket_events s{};
 	{
-		socket_events *new_se = nullptr;
 		std::lock_guard lk(fds_mutex);
 		auto i = fds.find(fd);
 		should_modify = i != fds.end() && (i->second->flags & extra_flags) != extra_flags;
 		if (should_modify) {
-			new_se = i->second.get();
-			new_se->flags |= extra_flags;
-			s = *new_se;
+			i->second->flags |= extra_flags;
+			s = *(i->second);
 		}
 	}
 	if (should_modify) {
