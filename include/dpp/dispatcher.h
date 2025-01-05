@@ -1695,6 +1695,59 @@ struct DPP_EXPORT message_create_t : public event_dispatch_t {
 	 * @note confirmation_callback_t::value contains a message object on success. On failure, value is undefined and confirmation_callback_t::is_error() is true.
 	 */
 	void reply(message&& msg, bool mention_replied_user = false, command_completion_event_t callback = utility::log_error()) const;
+
+#ifdef DPP_CORO
+	/**
+	 * @brief Send a text to the same channel as the channel_id in received event.
+	 * 
+	 * @param m Text to send
+	 * On success the result will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	dpp::async<dpp::confirmation_callback_t> co_send(const std::string& m) const;
+
+	/**
+	 * @brief Send a message to the same channel as the channel_id in received event.
+	 * 
+	 * @param msg Message to send
+	 * On success the result will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	dpp::async<dpp::confirmation_callback_t> co_send(const message& msg) const;
+
+	/**
+	 * @brief Send a message to the same channel as the channel_id in received event.
+	 * 
+	 * @param msg Message to send
+	 * On success the result will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	dpp::async<dpp::confirmation_callback_t> co_send(message&& msg) const;
+
+	/**
+	 * @brief Reply to the message received in the event.
+	 *
+	 * @param m Text to send as a reply.
+	 * @param mention_replied_user mentions (pings) the author of message replied to, if true
+	 * On success the result will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	dpp::async<dpp::confirmation_callback_t> co_reply(const std::string& m, bool mention_replied_user = false) const;
+
+	/**
+	 * @brief Reply to the message received in the event.
+	 *
+	 * @param msg Message to send as a reply.
+	 * @param mention_replied_user mentions (pings) the author of message replied to, if true
+	 * On success the result will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	dpp::async<dpp::confirmation_callback_t> co_reply(const message& msg, bool mention_replied_user = false) const;
+
+	/**
+	 * @brief Reply to the message received in the event.
+	 * 
+	 * @param msg Message to send as a reply.
+	 * @param mention_replied_user mentions (pings) the author of message replied to, if true
+	 * On success the result will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	dpp::async<dpp::confirmation_callback_t> co_reply(message&& msg, bool mention_replied_user = false) const;
+#endif /* DPP_CORO */
 };
 
 /**
