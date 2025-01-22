@@ -128,6 +128,13 @@ if (UNIX)
 			COMMAND php buildtools/emojis.php
 		)
 		set_source_files_properties( "${CMAKE_CURRENT_SOURCE_DIR}/../include/dpp/unicode_emojis.h" PROPERTIES GENERATED TRUE )
+
+  		if (DPP_CORO)
+			execute_process(
+				WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/.."
+				COMMAND php buildtools/make_struct.php "\\Dpp\\Generator\\CoroGenerator"
+			)
+		endif()
 	else()
 		message("-- Autogeneration is not available")
  	endif()
@@ -410,8 +417,6 @@ if(DPP_CORO)
 		endif()
 	endif()
 	target_compile_definitions(dpp PUBLIC DPP_CORO)
-	execute_process(WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/.."
-					COMMAND php buildtools/make_struct.php "\\Dpp\\Generator\\CoroGenerator")
 endif()
 
 if(DPP_FORMATTERS)
