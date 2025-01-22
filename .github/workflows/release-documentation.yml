@@ -1,4 +1,4 @@
-name: Docs Build (dpp.dev)
+name: Docs Full Rebuild (dpp.dev)
 on:
   release:
     types: [published]
@@ -11,7 +11,7 @@ jobs:
   docs:
     permissions:
       contents: write # Needs to be able to write to the repo.
-    name: Build Documentation
+    name: Rebuild all Documentation
     runs-on: ubuntu-24.04
 
     concurrency: 
