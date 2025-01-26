@@ -4,9 +4,10 @@
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 10.0.x  | ✅                 |
-| 9.0.x   | ⛔                 |
-| 1.0.x   | ⛔                 |
+| 10.1.x  | ✅ Feature release |
+| 10.0.x  | ✅ Fixes only      |
+| 9.0.x   | ⛔ Deprecated      |
+| 1.0.x   | ⛔ Deprecated      |
 
 ## Reporting a Vulnerability
 
