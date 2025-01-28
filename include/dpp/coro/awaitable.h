@@ -45,6 +45,7 @@ struct awaitable_dummy {
 #include <exception>
 #include <atomic>
 #include <condition_variable>
+#include <cstdint>
 
 namespace dpp {
 
@@ -210,7 +211,7 @@ protected:
 
 	using shared_state = detail::promise::promise_base<T>;
 	using state_flags = detail::promise::state_flags;
-	
+
 	/**
 	 * @brief The type of the result produced by this task.
 	 */
@@ -683,7 +684,7 @@ template <typename Derived>
 T awaitable<T>::awaiter<Derived>::await_resume() {
 	auto &promise = *awaitable_obj.state_ptr;
 
-	promise.state.fetch_and(~detail::promise::sf_awaited, std::memory_order::acq_rel);
+	promise.state.fetch_and(static_cast<uint8_t>(~detail::promise::sf_awaited), std::memory_order::acq_rel);
 	if (std::holds_alternative<std::exception_ptr>(promise.value)) {
 		std::rethrow_exception(std::get<2>(promise.value));
 	}
