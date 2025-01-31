@@ -42,7 +42,7 @@ int64_t rss() {
 	return proc_self_value("VmRSS:") * 1024;
 }
 
-#ifdef DPP_CORO
+#ifndef DPP_NO_CORO
 dpp::task<void> test(dpp::cluster& cluster) {
 	[[maybe_unused]] int test[102400]{};
 	test[60] = 5;
@@ -51,7 +51,7 @@ dpp::task<void> test(dpp::cluster& cluster) {
 #endif
 
 int main() {
-#ifdef DPP_CORO
+#ifndef DPP_NO_CORO
 	char* t = getenv("DPP_UNIT_TEST_TOKEN");
 	if (t) {
 		dpp::cluster coro_cluster(t, dpp::i_guilds, 1, 0, 1, true, dpp::cache_policy::cpol_none);

@@ -19,7 +19,7 @@
  *
  ************************************************************************************/
 
-#ifdef DPP_CORO
+#ifndef DPP_NO_CORO
 #pragma once
 
 #include "coro.h"

@@ -294,7 +294,7 @@ extern dpp::snowflake TEST_EVENT_ID;
 extern bool offline;
 /* True if we skip tt_extended tests */
 extern bool extended;
-#ifdef DPP_CORO
+#ifndef DPP_NO_CORO
 inline constexpr bool coro = true;
 #else
 inline constexpr bool coro = false;

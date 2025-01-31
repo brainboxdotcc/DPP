@@ -4,7 +4,7 @@
 
 #include "test.h"
 
-#ifdef DPP_CORO
+#ifndef DPP_NO_CORO
 
 namespace {
 

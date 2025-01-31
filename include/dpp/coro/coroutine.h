@@ -30,7 +30,7 @@ struct coroutine_dummy {
 
 }
 
-#ifdef DPP_CORO
+#ifndef DPP_NO_CORO
 
 #include <dpp/coro/coro.h>
 #include <dpp/coro/awaitable.h>
@@ -403,4 +403,4 @@ struct dpp::detail::std_coroutine::coroutine_traits<dpp::coroutine<R>, Args...> 
 	using promise_type = dpp::detail::coroutine::promise_t<R>;
 };
 
-#endif /* DPP_CORO */
+#endif /* DPP_NO_CORO */

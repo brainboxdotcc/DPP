@@ -119,7 +119,7 @@ avx_type_t voice_avx() {
 }
 
 bool is_coro_enabled() {
-#ifdef DPP_CORO
+#ifndef DPP_NO_CORO
 	return true;
 #else
 	return false;

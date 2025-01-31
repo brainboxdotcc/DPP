@@ -20,7 +20,7 @@
  ************************************************************************************/
 
 #pragma once
-#ifdef DPP_CORO
+#ifndef DPP_NO_CORO
 
 #if (defined(_LIBCPP_VERSION) and !defined(__cpp_impl_coroutine)) // if libc++ experimental implementation (LLVM < 14)
 #  define STDCORO_EXPERIMENTAL_HEADER
@@ -198,5 +198,5 @@ inline int coro_alloc_count = 0;
 
 } // namespace dpp
 
-#endif /* DPP_CORO */
+#endif /* DPP_NO_CORO */
 

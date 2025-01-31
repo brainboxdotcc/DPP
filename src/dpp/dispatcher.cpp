@@ -111,7 +111,7 @@ void message_create_t::reply(message&& msg, bool mention_replied_user, command_c
 	owner->message_create(std::move(msg), std::move(callback));
 }
 
-#ifdef DPP_CORO
+#ifndef DPP_NO_CORO
 async<confirmation_callback_t> message_create_t::co_send(const std::string& m) const {
 	return dpp::async{[&, this] <typename T> (T&& cb) { this->send(m, std::forward<T>(cb)); }};
 }
@@ -135,7 +135,7 @@ async<confirmation_callback_t> message_create_t::co_reply(const message& msg, bo
 async<confirmation_callback_t> message_create_t::co_reply(message&& msg, bool mention_replied_user) const {
 	return dpp::async{[&, this] <typename T> (T&& cb) { this->reply(std::move(msg), mention_replied_user, std::forward<T>(cb)); }};
 }
-#endif /* DPP_CORO */
+#endif /* DPP_NO_CORO */
 
 void interaction_create_t::reply(interaction_response_type t, const message& m, command_completion_event_t callback) const {
 	owner->interaction_response_create(this->command.id, this->command.token, dpp::interaction_response(t, m), std::move(callback));
@@ -218,7 +218,7 @@ void interaction_create_t::delete_original_response(command_completion_event_t c
 }
 
 
-#ifdef DPP_CORO
+#ifndef DPP_NO_CORO
 async<confirmation_callback_t> interaction_create_t::co_reply() const {
 	return dpp::async{[this] <typename T> (T&& cb) { this->reply(std::forward<T>(cb)); }};
 }
@@ -266,7 +266,7 @@ async<confirmation_callback_t> interaction_create_t::co_edit_original_response(c
 async<confirmation_callback_t> interaction_create_t::co_delete_original_response() const {
 	return dpp::async{[&, this] <typename T> (T&& cb) { this->delete_original_response(std::forward<T>(cb)); }};
 }
-#endif /* DPP_CORO */
+#endif /* DPP_NO_CORO */
 
 command_value interaction_create_t::get_parameter(const std::string& name) const {
 	const command_interaction ci = command.get_command_interaction();

@@ -32,7 +32,7 @@ struct async_dummy : awaitable_dummy {
 
 }
 
-#ifdef DPP_CORO
+#ifndef DPP_NO_CORO
 
 #include "coro.h"
 
@@ -186,4 +186,4 @@ DPP_CHECK_ABI_COMPAT(async<>, async_dummy);
 
 }
 
-#endif /* DPP_CORO */
+#endif /* DPP_NO_CORO */

@@ -157,7 +157,7 @@ class DPP_EXPORT cluster {
 	 */
 	using slashcommand_handler_t = std::function<void(const slashcommand_t &)>;
 
-#ifdef DPP_CORO
+#ifndef DPP_NO_CORO
 	/**
 	 * @brief Typedef for coroutines based slashcommand handler type
 	 */
@@ -445,7 +445,7 @@ public:
 	 */
 	timer start_timer(timer_callback_t on_tick, uint64_t frequency, timer_callback_t on_stop = {});
 
-#ifdef DPP_CORO
+#ifndef DPP_NO_CORO
 	/**
 	 * @brief Start a coroutine timer. Every `frequency` seconds, the callback is called.
 	 * 
@@ -481,7 +481,7 @@ public:
 	 */
 	bool stop_timer(timer t);
 
-#ifdef DPP_CORO
+#ifndef DPP_NO_CORO
 	/**
 	 * @brief Get an awaitable to wait a certain amount of seconds. Use the co_await keyword on its return value to suspend the coroutine until the timer ends
 	 *
@@ -576,7 +576,7 @@ public:
 	 */
 	size_t active_requests();
 
-#ifdef DPP_CORO
+#ifndef DPP_NO_CORO
 	/**
 	 * @brief Register a coroutine-based slash command handler.
 	 *
@@ -4071,7 +4071,7 @@ public:
 	 */
 	void channel_set_voice_status(snowflake channel_id, const std::string& status, command_completion_event_t callback = utility::log_error());
 
-#ifdef DPP_CORO
+#ifndef DPP_NO_CORO
 	#include <dpp/cluster_coro_calls.h>
 #endif
 

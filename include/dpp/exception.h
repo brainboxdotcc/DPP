@@ -579,13 +579,13 @@ public:
 	 * @note This is a stub for documentation purposes. For full information on supported methods please see dpp::exception.
 	 */
 	class invalid_token_exception : public dpp::rest_exception { };
-#ifdef DPP_CORO
+#ifndef DPP_NO_CORO
 	/**
 	 * @brief Represents the cancellation of a task. Will be thrown to the awaiter of a cancelled task.
 	 * @note This is a stub for documentation purposes. For full information on supported methods please see dpp::exception.
 	 */
 	class task_cancelled_exception : public dpp::exception { };
-#endif /* DPP_CORO */
+#endif /* DPP_NO_CORO */
 #else
 	derived_exception(logic_exception, exception);
 	derived_exception(file_exception, exception);
@@ -598,9 +598,9 @@ public:
 	derived_exception(length_exception, exception);
 	derived_exception(parse_exception, exception);
 	derived_exception(cache_exception, exception);
-#  ifdef DPP_CORO
+#  ifndef DPP_NO_CORO
 	derived_exception(task_cancelled_exception, exception);
-#  endif /* DPP_CORO */
+#  endif /* DPP_NO_CORO */
 #endif
 
 }
