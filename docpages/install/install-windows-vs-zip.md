@@ -33,7 +33,7 @@ To add D++ to a Visual Studio project, using **Visual Studio 2019** or **Visual 
 10. Double check at this point that all the directories are filled in correctly. They should look generally like the ones in the screenshot below:
 \image html zip_vsproj_9.png
 
-11. Go to the general section in the same window now, and look for the drop down list labelled "C++ Language Standard". Make sure the selected option is **C++17 Standard (/std:c++17)** or later.
+11. Go to the general section in the same window now, and look for the drop down list labelled "C++ Language Standard". If you're on VS2022, make sure the selected option is **C++20 Standard (/std:c++20)** or later. If you're on VS2019, make sure the selected option is **C++17 Standard (/std:c++17)** or later.
 \image html zip_vsproj_10.png
 
 12. Again within the same window, go to the input section, under the linker category, and add '**dpp.lib;**' to the start of the libraries to include, as shown below:

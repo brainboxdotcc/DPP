@@ -91,7 +91,7 @@ Do not introduce platform specific (e.g. Windows only) code or libc functions. I
 
 ## C++ Version
 
-The code must work with the C++17 standard, unless, for an optional feature that can be enabled and that uses a more recent standard (e.g. Coroutines).
+The code must work with the C++17 standard, however, you can use C++20 as long as it's wrapped in a DPP_NO_CORO (but you should NOT make non-coro code wrapped in this just for C++20 functionality!), or, for an optional feature that can be enabled. This may be subject to change as we move closer to the C++20 standard.
 
 ## Select the Right Size Type for Numeric Types
 

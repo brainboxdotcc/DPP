@@ -89,7 +89,7 @@ int main() {
 			 */
 			double compile_start = dpp::utility::time_f();
 			dpp::utility::exec("g++", {
-				"-std=c++17",
+				"-std=c++20",
 				"-shared",	/* Build the output as a .so file */
 				"-fPIC",
 				std::string("-o") + std::to_string(event.msg.author.id) + "_" + std::to_string(event.msg.id) + ".so",

@@ -14,7 +14,7 @@ For a very small bot, you can get the memory usage as low as **6 megabytes** on 
 
 ## How do I use this library in Windows?
 
-The easiest way is to use our [template project](https://github.com/brainboxdotcc/windows-bot-template). If you are unable to do this, download the precompiled latest release from our GitHub releases, and take the DLLs, `.lib` file, and header files (`bin`, `lib` and `include` directories), placing them in a easily accessible place on your computer. Go into Visual Studio project settings in a new project, and point the project directories (notably the library directories and and include directories) at the correct locations. Add the `include` folder you extracted to your include directories, and add `dpp.lib` to your library directories. Ensure the project is set to C++17 standard or later in the settings. You should then be able to compile example programs within that project. When you run the program you have compiled you must ensure that all the dll files from the `bin` directory exist in the same directory as your executable.
+The easiest way is to use our [template project](https://github.com/brainboxdotcc/windows-bot-template). If you are unable to do this, download the precompiled latest release from our GitHub releases, and take the DLLs, `.lib` file, and header files (`bin`, `lib` and `include` directories), placing them in a easily accessible place on your computer. Go into Visual Studio project settings in a new project, and point the project directories (notably the library directories and and include directories) at the correct locations. Add the `include` folder you extracted to your include directories, and add `dpp.lib` to your library directories. Ensure the project is set to C++20 standard or later in the settings (If you're using VS2019, you need to use C++17). You should then be able to compile example programs within that project. When you run the program you have compiled you must ensure that all the dll files from the `bin` directory exist in the same directory as your executable.
 
 ## Does this library support Visual Studio 2022?
 
@@ -44,7 +44,7 @@ If you don't understand something then feel free to ask in the [Discord server](
 
 ## Do I need to be an expert in C++ to use this library?
 
-NO! Definitely not! We have tried to keep things as simple as possible. We only use language features where they make sense, not just because they exist. Take a look at the example program (`test.cpp` and you'll see just how simple it is to get up and running quickly). We use a small subset of C++17 and C++14 features.
+NO! Definitely not! We have tried to keep things as simple as possible. We only use language features where they make sense, not just because they exist. Take a look at the example program (`test.cpp` and you'll see just how simple it is to get up and running quickly). We use a small subset of C++20, C++17, and C++14 features.
 
 ## Why is D++ also called DPP
 
@@ -88,7 +88,7 @@ Yes! D++ supports Discord threads. You can create, edit and delete threads and a
 
 ## Does D++ require C++20 support?
 
-No, the library only requires C++17. We have some optional features such as \ref using-coroutines "coroutines" that do require C++20, but they are disabled by default.
+By default, Yes. However, you can specify `-DDPP_NO_CORO` to make the library use C++17 features. You can read more about it at \ref using-coroutines "coroutines".
 
 ## When I start my bot I get an error: "error while loading shared libraries: libdpp.so: cannot open shared object file: No such file or directory"
 

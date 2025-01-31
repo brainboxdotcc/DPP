@@ -33,14 +33,14 @@ Add the following line in the executable section of your `meson.build` file.
 dependencies: [dpp]
 ```
 
-Change the `cpp_std` value in the `project()` to `c++17`. Your `meson.build` should look like this:
+Change the `cpp_std` value in the `project()` to `c++20`. Your `meson.build` should look like this:
 
 your meson.build should look like this.
 ~~~~~~~~~~~~~~yml
 project('discord-bot', 'cpp',
   version : '0.1',
   default_options : ['warning_level=3',
-                     'cpp_std=c++17'])
+                     'cpp_std=c++20'])
 
 dpp = dependency('dpp')
 

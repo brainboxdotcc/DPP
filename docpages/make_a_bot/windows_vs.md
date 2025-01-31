@@ -14,6 +14,8 @@ If you prefer a video tutorial, you can watch the video below! Otherwise, scroll
 
 ## Text Tutorial
 
+\note If you wish to use Coroutines, you must use VS 2022. If wish to use VS 2019, you must compile DPP with `DPP_NO_CORO.
+
 1. Make sure you have Visual Studio 2019 or 2022. Community, Professional or Enterprise work fine. These instructions are not for Visual Studio Code. You can [download the correct version here](https://visualstudio.microsoft.com/downloads/). Note that older versions of Visual Studio will not work as they do not support enough of the C++17 standard.
 2. Clone the [template project](https://github.com/brainboxdotcc/windows-bot-template/). Be sure to clone the entire project and not just copy and paste the `.cpp` file.
 3. Double click on the `MyBot.sln` file in the folder you just cloned:

@@ -14,7 +14,7 @@ If it can't detect libdpp, please do `brew update` and repeat the steps above.
 You will now be able to use D++ by including its library on the command line:
 
 ```bash
-clang++ -std=c++17 -L/opt/homebrew/lib -I/opt/homebrew/include -ldpp mybot.cpp -o mybot
+clang++ -std=c++20 -L/opt/homebrew/lib -I/opt/homebrew/include -ldpp mybot.cpp -o mybot
 ```
 
 \include{doc} install_prebuilt_footer.dox

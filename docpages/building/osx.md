@@ -52,12 +52,12 @@ Then once the build is complete, run `sudo make install` to install to the locat
 Once installed, you can make use of the library in standalone programs simply by including it and linking to it:
 
 ```bash
-clang++ -std=c++17 -ldpp mydppbot.cpp -o dppbot
+clang++ -std=c++20 -ldpp mydppbot.cpp -o dppbot
 ```
 
 The important flags in this command-line are:
 
-* `-std=c++17` - Required to compile the headers
+* `-std=c++20` - Required to compile the headers
 * `-ldpp` - Link to libdpp.dylib
 * `mydppbot.cpp` - Your source code
 * `dppbot` - The name of the executable to make

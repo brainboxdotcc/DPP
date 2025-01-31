@@ -7,7 +7,7 @@ To stream MP3 files via D++ you need to link an additional dependency to your bo
 To compile this program you must remember to specify `libmpg123` alongside `libdpp` in the build command, for example:
 
 ```bash
-g++ -std=c++17 -o musictest musictest.cpp -lmpg123 -ldpp
+g++ -std=c++20 -o musictest musictest.cpp -lmpg123 -ldpp
 ```
 
 \include{doc} install_prebuilt_footer.dox
