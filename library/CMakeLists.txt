@@ -375,8 +375,8 @@ if(NOT DPP_NO_CORO)
 	if(WIN32 AND NOT MINGW AND NOT DPP_CLANG_CL)
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /await:strict") # https://learn.microsoft.com/en-us/cpp/build/reference/await-enable-coroutine-support?view=msvc-170
 		if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
-			if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 19.12.25835) # Taken from CMake's MSVC-CXX.cmake file
-				message("${BoldRed}Coroutines with MSVC (Visual Studio) require  VS 2022 (Compiler Ver: 19.12.25835) or above. Forcing coroutines off.${ColourReset}")
+			if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS_EQUAL 19.29.30158) # Taken from 2019 actions, as they seemingly fail to compile.
+				message("${BoldRed}Coroutines with MSVC (Visual Studio) require VS 2022 (Compiler Ver: 19.29.30158) or above. Forcing coroutines off.${ColourReset}")
 				set(DPP_NO_CORO ON)
 			endif()
 		endif()
