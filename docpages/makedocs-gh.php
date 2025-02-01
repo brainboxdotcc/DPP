@@ -71,7 +71,7 @@ if ($nodeploy) {
 	exit(0);
 }
 
-if (count($ARGV) > 1 && $ARGV[1] === 'rebuild-old') {
+if (count($argv) > 1 && $argv[1] === 'rebuild-old') {
     /* Create old version docs */
     chdir("/home/runner/work/DPP/DPP");
     system("rm -rf " . sys_get_temp_dir() . "/dpp-old");
