@@ -42,6 +42,7 @@ void message_reaction_add::handle(discord_client* client, json &j, const std::st
 		dpp::message_reaction_add_t mra(client->owner, client->shard_id, raw);
 		snowflake guild_id = snowflake_not_null(&d, "guild_id");
 		snowflake channel_id = snowflake_not_null(&d, "channel_id");
+		snowflake user_id = snowflake_not_null(&d, "user_id");
 
 		guild* g = find_guild(guild_id);
 		channel* c = find_channel(channel_id);
@@ -50,6 +51,7 @@ void message_reaction_add::handle(discord_client* client, json &j, const std::st
 		mra.reacting_guild.id = guild_id;
 
 		mra.reacting_user = dpp::user().fill_from_json(&(d["member"]["user"]));
+		mra.reacting_user.id = user_id;
 		mra.reacting_member = dpp::guild_member().fill_from_json(&(d["member"]), guild_id, mra.reacting_user.id);
 
 		mra.channel_id = channel_id;
