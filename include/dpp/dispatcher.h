@@ -1149,6 +1149,12 @@ struct DPP_EXPORT message_reaction_add_t : public event_dispatch_t {
 	user reacting_user = {};
 
 	/**
+	 * @brief User id of user who reacted.
+	 * Always set regardless of caching
+	 */
+	snowflake user_id = {};
+
+	/**
 	 * @brief member data of user who reacted
 	 */
 	guild_member reacting_member = {};
