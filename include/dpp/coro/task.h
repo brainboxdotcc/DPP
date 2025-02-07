@@ -31,7 +31,7 @@ struct task_dummy : awaitable_dummy {
 
 }
 
-#ifdef DPP_CORO
+#ifndef DPP_NO_CORO
 
 #include <dpp/coro/coro.h>
 
@@ -443,4 +443,4 @@ struct dpp::detail::std_coroutine::coroutine_traits<dpp::task<T>, Args...> {
 	using promise_type = dpp::detail::task::promise_t<T>;
 };
 
-#endif /* DPP_CORO */
+#endif /* DPP_NO_CORO */

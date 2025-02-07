@@ -50,9 +50,9 @@
 #include <algorithm>
 #include <string>
 
-#ifdef DPP_CORO
+#ifndef DPP_NO_CORO
 #include <dpp/coro.h>
-#endif /* DPP_CORO */
+#endif /* DPP_NO_CORO */
 
 namespace dpp {
 
@@ -582,7 +582,7 @@ struct DPP_EXPORT interaction_create_t : public event_dispatch_t {
 	 */
 	void delete_original_response(command_completion_event_t callback = utility::log_error()) const;
 
-#ifdef DPP_CORO
+#ifndef DPP_NO_CORO
 	/**
 	 * @brief Acknowledge interaction without displaying a message to the user,
 	 * for use with button and select menu components.
@@ -680,7 +680,7 @@ struct DPP_EXPORT interaction_create_t : public event_dispatch_t {
 	 * On success the result will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	dpp::async<dpp::confirmation_callback_t> co_delete_original_response() const;
-#endif /* DPP_CORO */
+#endif /* DPP_NO_CORO */
 
 	/**
 	 * @brief command interaction
@@ -1696,7 +1696,7 @@ struct DPP_EXPORT message_create_t : public event_dispatch_t {
 	 */
 	void reply(message&& msg, bool mention_replied_user = false, command_completion_event_t callback = utility::log_error()) const;
 
-#ifdef DPP_CORO
+#ifndef DPP_NO_CORO
 	/**
 	 * @brief Send a text to the same channel as the channel_id in received event.
 	 * 
@@ -1747,7 +1747,7 @@ struct DPP_EXPORT message_create_t : public event_dispatch_t {
 	 * On success the result will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	dpp::async<dpp::confirmation_callback_t> co_reply(message&& msg, bool mention_replied_user = false) const;
-#endif /* DPP_CORO */
+#endif /* DPP_NO_CORO */
 };
 
 /**

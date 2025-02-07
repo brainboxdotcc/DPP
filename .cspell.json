@@ -153,7 +153,8 @@
 		"chrono",
 		"ciphersuite",
 		"rmap",
-		"WSAPOLLFD"
+		"WSAPOLLFD",
+		"DDPP"
 	],
 	"flagWords": [
 		"hte"

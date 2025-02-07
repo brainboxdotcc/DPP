@@ -50,12 +50,12 @@ Then once the build is complete, run `sudo make install` to install to the locat
 Once installed, you can make use of the library in standalone programs simply by including it and linking to it:
 
 ```bash
-clang++ -std=c++17 -L/usr/local/lib -I/usr/local/include -ldpp bot.cpp -o dppbot
+clang++ -std=c++20 -L/usr/local/lib -I/usr/local/include -ldpp bot.cpp -o dppbot
 ```
 
 The important flags in this command-line are:
 
-* `-std=c++17` - Required to compile the headers
+* `-std=c++20` - Required to compile the headers
 * `-L/usr/local/lib` - Required to tell the linker where libdpp is located.
 * `-I/usr/local/include` - Required to tell the linker where dpp headers are located.
 * `-ldpp` - Link to `libdpp.so`.

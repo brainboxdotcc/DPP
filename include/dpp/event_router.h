@@ -39,7 +39,7 @@
 
 namespace dpp {
 
-#ifdef DPP_CORO
+#ifndef DPP_NO_CORO
 
 template <typename T>
 class event_router_t;
@@ -212,7 +212,7 @@ private:
 	 */
 	using event_handler_abi_t = std::variant<regular_handler_t, std::function<task_dummy(T)>>;
 
-#ifdef DPP_CORO
+#ifndef DPP_NO_CORO
 	friend class detail::event_router::awaitable<T>;
 
 	/** @brief dpp::task coro event handler */
@@ -247,7 +247,7 @@ private:
 	 */
 	std::map<event_handle, event_handler_t> dispatch_container;
 
-#ifdef DPP_CORO
+#ifndef DPP_NO_CORO
 	/**
 	 * @brief Mutex for messing with coro_awaiters.
 	 */
@@ -311,7 +311,7 @@ protected:
 		};
 	}
 
-#ifdef DPP_CORO
+#ifndef DPP_NO_CORO
 	/**
 	 * @brief Handle an event as a coroutine, ensuring the lifetime of the event object.
 	 */
@@ -425,7 +425,7 @@ public:
 	 * This will be caught in this destructor, however, make sure no other exceptions are thrown in the coroutine after that or it will terminate.
 	 */
 	~event_router_t() {
-#ifdef DPP_CORO
+#ifndef DPP_NO_CORO
 		while (!coro_awaiters.empty()) {
 			// cancel all awaiters. here we cannot do the usual loop as we'd need to lock coro_mutex, and cancel() locks and modifies coro_awaiters
 			try {
@@ -449,7 +449,7 @@ public:
 	 * @param event Class to pass as parameter to all listeners.
 	 */
 	void call(const T& event) const {
-#ifdef DPP_CORO
+#ifndef DPP_NO_CORO
 		handle_coro(event);
 #else
 		handle(event);
@@ -463,14 +463,14 @@ public:
 	 * @param event Class to pass as parameter to all listeners.
 	 */
 	void call(T&& event) const {
-#ifdef DPP_CORO
+#ifndef DPP_NO_CORO
 		handle_coro(std::move(event));
 #else
 		handle(std::move(event));
 #endif
 	};
 
-#ifdef DPP_CORO
+#ifndef DPP_NO_CORO
 	/**
 	 * @brief Obtain an awaitable object that refers to an event with a certain condition.
 	 * It can be co_await-ed to wait for the next event that satisfies this condition.
@@ -542,7 +542,7 @@ public:
 	 * @retval false if there are some listeners
 	 */
 	[[nodiscard]] bool empty() const {
-#ifdef DPP_CORO
+#ifndef DPP_NO_CORO
 		std::shared_lock lock{mutex};
 		std::shared_lock coro_lock{coro_mutex};
 
@@ -569,7 +569,7 @@ public:
 	/**
 	 * @brief Attach a callable to the event, adding a listener.
 	 * The callable should either be of the form `void(const T&)` or
-	 * `dpp::task<void>(const T&)` (the latter requires DPP_CORO to be defined),
+	 * `dpp::task<void>(const T&)`,
 	 * where T is the event type for this event router.
 	 *
 	 * This has the exact same behavior as using \ref attach(F&&) "attach".
@@ -585,7 +585,7 @@ public:
 	/**
 	 * @brief Attach a callable to the event, adding a listener.
 	 * The callable should either be of the form `void(const T&)` or
-	 * `dpp::task<void>(const T&)` (the latter requires DPP_CORO to be defined),
+	 * `dpp::task<void>(const T&)`,
 	 * where T is the event type for this event router.
 	 *
 	 * @param fun Callable to attach to event
@@ -595,7 +595,7 @@ public:
 	template <typename F>
 	[[maybe_unused]] event_handle attach(F&& fun);
 #else /* not _DOXYGEN_ */
-#  ifdef DPP_CORO
+#  ifndef DPP_NO_CORO
 	/**
 	 * @brief Attach a callable to the event, adding a listener.
 	 * The callable should either be of the form `void(const T&)` or
@@ -681,7 +681,7 @@ public:
 		dispatch_container.emplace(h, std::forward<F>(fun));
 		return h;
 	}
-#  endif /* DPP_CORO */
+#  endif /* DPP_NO_CORO */
 #endif /* _DOXYGEN_ */
 	/**
 	 * @brief Detach a listener from the event using a previously obtained ID.
@@ -698,7 +698,7 @@ public:
 	}
 };
 
-#ifdef DPP_CORO
+#ifndef DPP_NO_CORO
 
 namespace detail::event_router {
 

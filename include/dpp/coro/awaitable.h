@@ -33,7 +33,7 @@ struct awaitable_dummy {
 
 }
 
-#ifdef DPP_CORO
+#ifndef DPP_NO_CORO
 
 #include <dpp/coro/coro.h>
 
@@ -732,4 +732,4 @@ void spawn_sync_wait_job(auto* awaitable, std::condition_variable &cv, auto&& re
 
 }
 
-#endif /* DPP_CORO */
+#endif /* DPP_NO_CORO */

@@ -33,12 +33,12 @@ Then once the build is complete, run `make install` to install to the location y
 Once installed to the `/usr/local` directory, you can make use of the library in standalone programs simply by including it and linking to it:
 
 ```bash
-g++ -std=c++17 mydppbot.cpp -o dppbot -ldpp
+g++ -std=c++20 mydppbot.cpp -o dppbot -ldpp
 ```
 
 The important flags in this command-line are:
 
-* `-std=c++17` - Required to compile the headers
+* `-std=c++20` - Required to compile the headers
 * `-ldpp` - Link to libdpp.so
 * `mydppbot.cpp` - Your source code
 * `dppbot` - The name of the executable to make

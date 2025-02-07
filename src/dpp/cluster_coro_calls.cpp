@@ -26,7 +26,7 @@
  *
  * To re-generate this header file re-run the script!
  */
-#ifdef DPP_CORO
+#ifndef DPP_NO_CORO
 
 #include <dpp/export.h>
 #include <dpp/snowflake.h>

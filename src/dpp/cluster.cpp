@@ -121,7 +121,7 @@ cluster::cluster(const std::string &_token, uint32_t _intents, uint32_t _shards,
 	);
 
 	/* Add slashcommand callback for named commands. */
-#ifdef DPP_CORO
+#ifndef DPP_NO_CORO
 	on_slashcommand([this](const slashcommand_t& event) -> task<void> {
 		slashcommand_handler_variant copy;
 		{

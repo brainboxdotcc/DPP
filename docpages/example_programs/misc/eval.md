@@ -41,7 +41,7 @@ This is the main body of the example program.
 To compile this program you must link against `libdl`. It is also critically important to include the `-rdynamic` flag. For example:
 
 ```
-g++ -std=c++17 -rdynamic -oeval eval.cpp -ldpp -ldl
+g++ -std=c++20 -rdynamic -oeval eval.cpp -ldpp -ldl
 ```
 
 ## Example usage

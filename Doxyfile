@@ -1936,8 +1936,7 @@ INCLUDE_FILE_PATTERNS  =
 
 #SHOW_HEADERFILE = NO
 
-PREDEFINED = _DOXYGEN_ \
-             DPP_CORO
+PREDEFINED = _DOXYGEN_
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then this
 # tag can be used to specify a list of macro names that should be expanded. The

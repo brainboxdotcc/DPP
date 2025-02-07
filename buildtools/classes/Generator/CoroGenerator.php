@@ -54,7 +54,7 @@ EOT;
     public function generateCppStart(): string
     {
         return $this->generateHeaderStart() . <<<EOT
-#ifdef DPP_CORO
+#ifndef DPP_NO_CORO
 
 #include <dpp/export.h>
 #include <dpp/snowflake.h>
