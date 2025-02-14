@@ -12,6 +12,7 @@ buildtools/composer.phar
 src/build
 cmake-build-*
 docpages/example_code/build
+mlspp/include/namespace.h
 
 # tests
 test
