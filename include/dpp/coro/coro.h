@@ -20,6 +20,9 @@
  ************************************************************************************/
 
 #pragma once
+
+#include <dpp/export.h>
+
 #ifndef DPP_NO_CORO
 
 #if (defined(_LIBCPP_VERSION) and !defined(__cpp_impl_coroutine)) // if libc++ experimental implementation (LLVM < 14)
