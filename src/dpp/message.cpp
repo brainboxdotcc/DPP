@@ -50,12 +50,35 @@ component::component() :
 }
 
 
+component& component::set_content(const std::string& text) {
+	content = text;
+	return *this;
+}
+
+component& component::set_description(const std::string& text) {
+	description = text;
+	return *this;
+}
+
+component& component::set_accessory(const component& accessory_component) {
+	if (accessory_component.type != cot_thumbnail && accessory_component.type != cot_button) {
+		throw logic_exception("Accessories can only be buttons or thumbnails");
+	}
+	accessory = std::make_shared<component>(accessory_component);
+	return *this;
+}
+
 component& component::fill_from_json_impl(nlohmann::json* j) {
 	type = static_cast<component_type>(int8_not_null(j, "type"));
 	label = string_not_null(j, "label");
 	custom_id = string_not_null(j, "custom_id");
 	disabled = bool_not_null(j, "disabled");
 	placeholder = string_not_null(j, "placeholder");
+	description = string_not_null(j, "description");
+	content = string_not_null(j, "content");
+	if (j->contains("accessory")) {
+		set_accessory(fill_from_json_impl(&(j->at("accessory"))));
+	}
 	if (j->contains("min_values") && j->at("min_values").is_number_integer()) {
 		min_values = j->at("min_values").get<int32_t>();
 	}
@@ -269,6 +292,15 @@ void to_json(json& j, const attachment& a) {
 
 void to_json(json& j, const component& cp) {
 	j["type"] = cp.type;
+	if (cp.accessory) {
+		j["accessory"] = *cp.accessory;
+	}
+	if (!cp.content.empty() && cp.type == cot_text_display) {
+		j["content"] = cp.content;
+	}
+	if (!cp.description.empty() && cp.type == cot_thumbnail) {
+		j["description"] = cp.description;
+	}
 	if (cp.type == cot_text) {
 		j["label"] = cp.label;
 		j["required"] = cp.required;

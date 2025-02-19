@@ -518,6 +518,22 @@ public:
 	partial_emoji emoji;
 
 	/**
+	 * @brief Text content for section and text display types
+	 */
+	std::string content;
+
+	/**
+	 * @brief accessory component for components which support it.
+	 * Can be a button or a thumbnail.
+	 */
+	std::shared_ptr<component> accessory;
+
+	/**
+	 * @brief Description for media items
+	 */
+	std::string description;
+
+	/**
 	 * @brief Constructor
 	 */
 	component();
@@ -534,6 +550,30 @@ public:
 	 * @return component& reference to self
 	 */
 	component& add_channel_type(uint8_t ct);
+
+	/**
+	 * @brief For text content types, set content
+	 * @note Ignored for other types
+	 * @param text text to set
+	 * @return
+	 */
+	component& set_content(const std::string& text);
+
+	/**
+	 * @brief For media types, set description
+	 * @note Ignored for other types
+	 * @param text text to set
+	 * @return
+	 */
+	component& set_description(const std::string& text);
+
+	/**
+	 * @brief Set accessory component for components which support it.
+	 * Can be a button or a thumbnail image.
+	 * @param accessory_component accessory component
+	 * @return
+	 */
+	component& set_accessory(const component& accessory_component);
 
 	/**
 	 * @brief Set the type of the component. Button components
@@ -2605,7 +2645,7 @@ public:
 	bool is_voice_message() const;
 
 	/**
-	 * @brief Add a component (button) to message
+	 * @brief Add a component to a message
 	 *
 	 * @note If the component type you add is only available in
 	 * components v2, this method will automatically add the
