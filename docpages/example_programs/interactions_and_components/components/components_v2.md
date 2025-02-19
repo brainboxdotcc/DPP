@@ -6,18 +6,18 @@ any changes in D++. If you want to use the new style of components you may do so
 Components are attached to any message or interaction reply, via the dpp::message::add_component() or dpp::message::add_component_v2() function. You must also be sure to set the flag
 dpp::m_using_components_v2 on the message to allow the new features.
 
-You can have a maximum of 10 top level components per message. The maximum number of nested components is 30.
-
-The total length of the entire message, including all components within and the content of those components, is 4000 UTF-8 characters.
-
 When using components v2, the following limits apply which do not apply with components v1 or traditional embeds:
 
-* Setting the message content or embeds will not be allowed (components v2 replaces the functionality)
+* Setting the message `content` or `embeds` will not be allowed (components v2 replaces the functionality)
+* You can have a maximum of 10 top level components per message. The maximum number of nested components is 30.
 * Audio files are not supported at present
 * Text preview for text/plain files is not supported
 * URLs will not have embeds generated for them
+* The total length of the entire message, including all components within and the content of those components, is 4000 UTF-8 characters.
 
-Here is a detailed example of how to create components v2 replies:
+Here is a detailed example of how to create components v2 replies.
+
+\warning Please note that where you would use add_component() previously, you **should** use add_component_v2() (on component or message objects). This is because the v2 version will not automatically add action rows, which is a limitation which has been removed in version 2 but is still required for version 1.
 
 \include{cpp} components_v2.cpp
 
