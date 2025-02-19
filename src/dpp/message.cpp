@@ -104,9 +104,6 @@ component& component::set_accent(uint32_t accent_colour) {
 }
 
 component& component::add_media_gallery_item(const component& media_gallery_item) {
-	if (this->type != cot_media_gallery) {
-		throw logic_exception("Can't add media gallery items to a component that is not a media gallery");
-	}
 	media_gallery_items.emplace_back(std::make_shared<component>(media_gallery_item));
 	return *this;
 }
@@ -881,6 +878,11 @@ message& message::add_component(const component& c) {
 	}
 	components.emplace_back(c);
 	return *this;
+}
+
+message& message::add_component_v2(const component& c) {
+	/* This is just an alias for readability in apps */
+	return add_component(c);
 }
 
 message& message::add_embed(const embed& e) {

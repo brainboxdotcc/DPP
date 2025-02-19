@@ -2828,6 +2828,22 @@ public:
 	message& add_component(const component& c);
 
 	/**
+	 * @brief Add a component to a message
+	 *
+	 * @note If the component type you add is only available in
+	 * components v2, this method will automatically add the
+	 * m_using_components_v2 flag to your message.
+	 *
+	 * This is an alias of add_component() for readability when
+	 * using components v2, so you can use add_component_v2()
+	 * everywhere. It does exactly the same as add_component().
+	 *
+	 * @param c component to add
+	 * @return message& reference to self
+	 */
+	message& add_component_v2(const component& c);
+
+	/**
 	 * @brief Add an embed to message
 	 * 
 	 * @param e embed to add
