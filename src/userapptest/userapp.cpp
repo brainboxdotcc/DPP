@@ -41,20 +41,32 @@ int main() {
 			 * This is a user-app command which can be executed anywhere and is added to the user's profile.
 			 */
 			bot.global_bulk_command_create({
-				dpp::slashcommand("userapp", "Test user app command", bot.me.id)
+				dpp::slashcommand("userapp", "Test command", bot.me.id)
 				.set_interaction_contexts({dpp::itc_guild, dpp::itc_bot_dm, dpp::itc_private_channel})
 			});
 		}
 	});
 
 	bot.register_command("userapp", [](const dpp::slashcommand_t& e) {
-		/**
-		 * Simple test output that shows the context of the command
-		 */
-		e.reply("This is the `/userapp` command." + std::string(
-			e.command.is_user_app_interaction() ?
-			" Executing as a user interaction owned by user: <@" + e.command.get_authorizing_integration_owner(dpp::ait_user_install).str() + ">" :
-			" Executing as a guild interaction on guild id " + e.command.guild_id.str()
+		e.reply(dpp::message().set_flags(dpp::m_using_components_v2).add_component(
+			dpp::component()
+				.set_type(dpp::cot_container)
+				.set_accent(dpp::utility::rgb(255, 0, 0))
+				.set_spoiler(true)
+				.add_component_v2(
+					dpp::component().set_type(dpp::cot_section).add_component_v2(
+						dpp::component()
+							.set_type(dpp::cot_text_display)
+							.set_content("This is text to display")
+					)
+					.set_accessory(
+						dpp::component()
+							.set_type(dpp::cot_button)
+							.set_label("Click me")
+							.set_style(dpp::cos_danger)
+							.set_id("button")
+					)
+				)
 		));
 	});
 

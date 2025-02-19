@@ -42,7 +42,8 @@ std::set<component_type> components_v2_only_types = {
 
 component::component() :
 	type(cot_action_row), label(""), style(cos_primary), custom_id(""),
-	min_values(-1), max_values(-1), min_length(0), max_length(0), disabled(false), required(false), spoiler(false)
+	min_values(-1), max_values(-1), min_length(0), max_length(0), disabled(false),
+	required(false), spoiler(false), is_divider(false), spacing(sep_small)
 {
 	emoji.animated = false;
 	emoji.id = 0;
@@ -57,6 +58,16 @@ component& component::set_content(const std::string& text) {
 
 component& component::set_description(const std::string& text) {
 	description = text;
+	return *this;
+}
+
+component& component::set_divider(bool divider) {
+	is_divider = divider;
+	return *this;
+}
+
+component& component::set_spacing(separator_spacing sep_spacing) {
+	spacing = sep_spacing;
 	return *this;
 }
 
@@ -80,6 +91,17 @@ component& component::set_thumbnail(std::string_view url) {
 	return *this;
 }
 
+component& component::set_file(std::string_view attachment_url) {
+	dpp::embed_image t;
+	t.url = attachment_url;
+	file = t;
+	return *this;
+}
+
+component& component::set_accent(uint32_t accent_colour) {
+	accent = accent_colour;
+}
+
 component& component::add_media_gallery_item(const component& media_gallery_item) {
 	if (this->type != cot_media_gallery) {
 		throw logic_exception("Can't add media gallery items to a component that is not a media gallery");
@@ -97,6 +119,11 @@ component& component::fill_from_json_impl(nlohmann::json* j) {
 	placeholder = string_not_null(j, "placeholder");
 	description = string_not_null(j, "description");
 	spoiler = bool_not_null(j, "spoiler");
+	is_divider = bool_not_null(j, "divider");
+	spacing = static_cast<separator_spacing>(int8_not_null(j, "spacing"));
+	if (j->contains("accent_color")) {
+		accent = static_cast<unsigned int>(int32_not_null(j, "accent_color"));
+	}
 	content = string_not_null(j, "content");
 	if (j->contains("items") && type == cot_media_gallery) {
 		for (auto& item : j->at("items")) {
@@ -107,10 +134,29 @@ component& component::fill_from_json_impl(nlohmann::json* j) {
 		dpp::embed_image t;
 		json& fi = (*j)["thumbnail"];
 		t.url = string_not_null(&fi, "url");
-		t.height = string_not_null(&fi, "height");
-		t.width = string_not_null(&fi, "width");
+		t.height = int32_not_null(&fi, "height");
+		t.width = int32_not_null(&fi, "width");
 		t.proxy_url = string_not_null(&fi, "proxy_url");
+		t.loading_state = static_cast<media_loading_state>(int8_not_null(&fi, "loading_state"));
+		t.content_type = string_not_null(&fi, "content_type");
+		t.placeholder = string_not_null(&fi, "placeholder");
+		t.placeholder_version = int8_not_null(&fi, "placeholder_version");
+		t.flags = int32_not_null(&fi, "flags");
 		thumbnail = t;
+	}
+	if (j->contains("file")) {
+		dpp::embed_image t;
+		json& fi = (*j)["file"];
+		t.url = string_not_null(&fi, "url");
+		t.height = int32_not_null(&fi, "height");
+		t.width = int32_not_null(&fi, "width");
+		t.proxy_url = string_not_null(&fi, "proxy_url");
+		t.loading_state = static_cast<media_loading_state>(int8_not_null(&fi, "loading_state"));
+		t.content_type = string_not_null(&fi, "content_type");
+		t.placeholder = string_not_null(&fi, "placeholder");
+		t.placeholder_version = int8_not_null(&fi, "placeholder_version");
+		t.flags = int32_not_null(&fi, "flags");
+		file = t;
 	}
 
 	if (j->contains("accessory")) {
@@ -130,7 +176,7 @@ component& component::fill_from_json_impl(nlohmann::json* j) {
 			default_values.push_back(d);
 		}
 	}
-	if (type == cot_action_row) {
+	if (j->contains("components") && j->at("components").is_array()) {
 		set_object_array_not_null<component>(j, "components", components);
 	} else if (type == cot_button) { // button specific fields
 		style = static_cast<component_style>(int8_not_null(j, "style"));
@@ -345,6 +391,24 @@ void to_json(json& j, const component& cp) {
 				{"url", cp.thumbnail->url}
 			};
 		}
+	}
+	if (cp.type == cot_container) {
+		j["spoiler"] = cp.spoiler;
+		if (cp.accent.has_value()) {
+			j["accent_color"] = cp.accent.value();
+		}
+	}
+	if (cp.type == cot_separator) {
+		j["divider"] = cp.is_divider;
+		j["spacing"] = static_cast<unsigned int>(cp.spacing);
+	}
+	if (cp.type == cot_file) {
+		if (cp.file.has_value()) {
+			j["media"] = {
+				{"url", cp.file->url}
+			};
+		}
+		j["spoiler"] = cp.spoiler;
 	}
 	if (cp.type == cot_media_gallery) {
 		j["items"] = json::array();
@@ -948,9 +1012,14 @@ embed::embed(json* j) : embed() {
 			embed_image curr;
 			json& fi = (*j)[s];
 			curr.url = string_not_null(&fi, "url");
-			curr.height = string_not_null(&fi, "height");
-			curr.width = string_not_null(&fi, "width");
+			curr.height = int32_not_null(&fi, "height");
+			curr.width = int32_not_null(&fi, "width");
 			curr.proxy_url = string_not_null(&fi, "proxy_url");
+			curr.loading_state = static_cast<media_loading_state>(int8_not_null(&fi, "loading_state"));
+			curr.content_type = string_not_null(&fi, "content_type");
+			curr.placeholder = string_not_null(&fi, "placeholder");
+			curr.placeholder_version = int8_not_null(&fi, "placeholder_version");
+			curr.flags = int32_not_null(&fi, "flags");
 			if (s == "image") {
 				image = curr;
 			} else if (s == "video") {

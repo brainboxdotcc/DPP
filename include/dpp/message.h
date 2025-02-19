@@ -381,6 +381,32 @@ public:
 };
 
 /**
+ * @brief Loading state for "unfurled" media, e.g. thumbnails and images in a message or component
+ */
+enum media_loading_state : uint8_t {
+
+	/**
+	 * @brief Loading state is unknown
+	 */
+	ls_unknown = 0,
+
+	/**
+	 * @brief Discord is loading the media
+	 */
+	ls_loading = 1,
+
+	/**
+	 * @brief The image was processed and loaded successfully
+	 */
+	ls_loaded_success = 2,
+
+	/**
+	 * @brief The media was not found
+	 */
+	ls_not_found = 3,
+};
+
+/**
  * @brief An video, image or thumbnail in a dpp::embed or dpp::component (v2)
  */
 struct DPP_EXPORT embed_image {
@@ -397,12 +423,53 @@ struct DPP_EXPORT embed_image {
 	/**
 	 * @brief Height (calculated by discord).
 	 */
-	std::string height;
+	uint32_t height{0};
 
 	/**
 	 * @brief Width (calculated by discord).
 	 */
-	std::string width;
+	uint32_t width{0};
+
+	/**
+	 * @brief Media loading state
+	 */
+	media_loading_state loading_state{ls_unknown};
+
+	/**
+	 * @brief placeholder
+	 */
+	std::string placeholder;
+
+	/**
+	 * @brief Placeholder version
+	 */
+	uint8_t placeholder_version{1};
+
+	/**
+	 * @brief Content type
+	 */
+	std::string content_type;
+
+	/**
+	 * @brief Flags (documented as present, but contents not documented)
+	 */
+	uint32_t flags{0};
+};
+
+/**
+ * @brief Spacing types for components v2 separator
+ */
+enum separator_spacing : uint8_t {
+
+	/**
+	 * @brief Small separator
+	 */
+	sep_small = 1,
+
+	/**
+	 * @brief Large separator
+	 */
+	sep_large = 2,
 };
 
 /**
@@ -517,7 +584,8 @@ public:
 	 *
 	 * @note The amount of default values must be in the range defined by dpp::component::min_values and dpp::component::max_values.
 	 *
-	 * @warning Only available for auto-populated select menu components, which include dpp::cot_user_selectmenu, dpp::cot_role_selectmenu, dpp::cot_mentionable_selectmenu, and dpp::cot_channel_selectmenu components.
+	 * @warning Only available for auto-populated select menu components, which include dpp::cot_user_selectmenu, dpp::cot_role_selectmenu,
+	 * * dpp::cot_mentionable_selectmenu, and dpp::cot_channel_selectmenu components.
 	 */
 	std::vector<component_default_value> default_values;
 
@@ -543,35 +611,56 @@ public:
 	partial_emoji emoji;
 
 	/**
-	 * @brief Text content for section and text display types
+	 * @brief Text content for section and text display types (v2)
 	 */
 	std::string content;
 
 	/**
-	 * @brief accessory component for components which support it.
+	 * @brief accessory component for components which support it (v2)
 	 * Can be a button or a thumbnail.
 	 */
 	std::shared_ptr<component> accessory;
 
 	/**
-	 * @brief Description for media items
+	 * @brief Description for media items (v2)
 	 */
 	std::string description;
 
 	/**
-	 * @brief Spoiler state for media items
+	 * @brief Spoiler state for media and file items
 	 */
 	bool spoiler;
 
 	/**
-	 * @brief Unfurled media for thumbnail objects
+	 * @brief can be set for separator types (v2)
+	 */
+	bool is_divider;
+
+	/**
+	 * @brief Valid for separator types (v2)
+	 */
+	separator_spacing spacing;
+
+	/**
+	 * @brief Unfurled media for thumbnail objects (v2)
 	 */
 	std::optional<embed_image> thumbnail;
 
 	/**
-	 * @brief Media gallery items for media galleries
+	 * @brief Unfurled file URL for file objects (v2)
+	 * Should be in the format "attachment://..."
+	 */
+	std::optional<embed_image> file;
+
+	/**
+	 * @brief Media gallery items for media galleries (v2)
 	 */
 	std::vector<std::shared_ptr<component>> media_gallery_items;
+
+	/**
+	 * @brief Accent colour for container types (v2)
+	 */
+	std::optional<uint32_t> accent;
 
 	/**
 	 * @brief Constructor
@@ -600,6 +689,37 @@ public:
 	component& set_content(const std::string& text);
 
 	/**
+	 * @brief Set divider visibility for separator type (v2)
+	 * @param divider true to show a visible divider
+	 * @return self
+	 */
+	component& set_divider(bool divider);
+
+	/**
+	 * @brief Set accent colour for container type (v2)
+	 * @param accent_colour Accent colour for container
+	 * @return self
+	 */
+	component& set_accent(uint32_t accent_colour);
+
+	/**
+	 * @brief Set separator spacing for separator type (v2)
+	 * @param sep_spacing separator spacing, small or large
+	 * @return self
+	 */
+	component& set_spacing(separator_spacing sep_spacing);
+
+	/**
+	 * @brief Set the attachment url for file type components.
+	 * The format of the attachment url should be of the type
+	 * "attachment://...".
+	 * @param attachment_url url to attachment. Should have been
+	 * attached via add_file().
+	 * @return self
+	 */
+	component& set_file(std::string_view attachment_url);
+
+	/**
 	 * @brief Add a media gallery item to a media gallery type (v2)
 	 * @param media_gallery_item item to add
 	 * @return
@@ -615,7 +735,7 @@ public:
 	component& set_description(const std::string& text);
 
 	/**
-	 * @brief For media types, set spoiler status
+	 * @brief For media and file component types, set spoiler status
 	 * @note Ignored for other types
 	 * @param spoiler_enable True to enable spoiler masking
 	 * @return
