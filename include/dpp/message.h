@@ -116,13 +116,13 @@ enum component_type : uint8_t {
 	/**
 	 * @brief Content inventory entry
 	 */
-	cot_content_inventory_entry = 15,
+	cot_content_inventory_entry = 16,
 
 	/**
 	 * @brief Container for other components
 	 * @note Available in components v2 only
 	 */
-	cot_container = 16,
+	cot_container = 17,
 };
 
 /**

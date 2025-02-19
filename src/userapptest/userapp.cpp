@@ -48,26 +48,31 @@ int main() {
 	});
 
 	bot.register_command("userapp", [](const dpp::slashcommand_t& e) {
-		e.reply(dpp::message().set_flags(dpp::m_using_components_v2).add_component(
+		dpp::message m;
+		m.set_flags(dpp::m_using_components_v2).add_component(
 			dpp::component()
 				.set_type(dpp::cot_container)
 				.set_accent(dpp::utility::rgb(255, 0, 0))
 				.set_spoiler(true)
 				.add_component_v2(
-					dpp::component().set_type(dpp::cot_section).add_component_v2(
-						dpp::component()
-							.set_type(dpp::cot_text_display)
-							.set_content("This is text to display")
-					)
-					.set_accessory(
-						dpp::component()
-							.set_type(dpp::cot_button)
-							.set_label("Click me")
-							.set_style(dpp::cos_danger)
-							.set_id("button")
-					)
+					dpp::component()
+						.set_type(dpp::cot_section)
+						.add_component_v2(
+							dpp::component()
+								.set_type(dpp::cot_text_display)
+								.set_content("This is text to display")
+						)
+						.set_accessory(
+							dpp::component()
+								.set_type(dpp::cot_button)
+								.set_label("Click me")
+								.set_style(dpp::cos_danger)
+								.set_id("button")
+						)
 				)
-		));
+		);
+		std::cout << m.to_json() << "\n";
+		e.reply(m);
 	});
 
 	bot.start(dpp::st_wait);

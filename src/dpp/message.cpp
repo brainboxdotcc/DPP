@@ -100,6 +100,7 @@ component& component::set_file(std::string_view attachment_url) {
 
 component& component::set_accent(uint32_t accent_colour) {
 	accent = accent_colour;
+	return *this;
 }
 
 component& component::add_media_gallery_item(const component& media_gallery_item) {
@@ -1284,12 +1285,15 @@ time_t attachment::get_issued_time() const {
 }
 
 static void recurse_components(json& j, const std::vector<component>& components) {
+	if (components.empty()) {
+		return;
+	}
 	j["components"] = json::array();
 	for (auto & component : components) {
 		json n;
-		n["components"] = {};
+		to_json(n, component);
 		if (!component.components.empty()) {
-			recurse_components(n["components"], component.components);
+			recurse_components(n, component.components);
 		}
 		j["components"].push_back(n);
 	}
