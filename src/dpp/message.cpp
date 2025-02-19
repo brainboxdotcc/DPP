@@ -42,7 +42,7 @@ std::set<component_type> components_v2_only_types = {
 
 component::component() :
 	type(cot_action_row), label(""), style(cos_primary), custom_id(""),
-	min_values(-1), max_values(-1), min_length(0), max_length(0), disabled(false), required(false)
+	min_values(-1), max_values(-1), min_length(0), max_length(0), disabled(false), required(false), spoiler(false)
 {
 	emoji.animated = false;
 	emoji.id = 0;
@@ -60,6 +60,11 @@ component& component::set_description(const std::string& text) {
 	return *this;
 }
 
+component& component::set_spoiler(bool spoiler_enable) {
+	spoiler = spoiler_enable;
+	return *this;
+}
+
 component& component::set_accessory(const component& accessory_component) {
 	if (accessory_component.type != cot_thumbnail && accessory_component.type != cot_button) {
 		throw logic_exception("Accessories can only be buttons or thumbnails");
@@ -68,6 +73,22 @@ component& component::set_accessory(const component& accessory_component) {
 	return *this;
 }
 
+component& component::set_thumbnail(std::string_view url) {
+	dpp::embed_image t;
+	t.url = url;
+	thumbnail = t;
+	return *this;
+}
+
+component& component::add_media_gallery_item(const component& media_gallery_item) {
+	if (this->type != cot_media_gallery) {
+		throw logic_exception("Can't add media gallery items to a component that is not a media gallery");
+	}
+	media_gallery_items.emplace_back(std::make_shared<component>(media_gallery_item));
+	return *this;
+}
+
+
 component& component::fill_from_json_impl(nlohmann::json* j) {
 	type = static_cast<component_type>(int8_not_null(j, "type"));
 	label = string_not_null(j, "label");
@@ -75,7 +96,23 @@ component& component::fill_from_json_impl(nlohmann::json* j) {
 	disabled = bool_not_null(j, "disabled");
 	placeholder = string_not_null(j, "placeholder");
 	description = string_not_null(j, "description");
+	spoiler = bool_not_null(j, "spoiler");
 	content = string_not_null(j, "content");
+	if (j->contains("items") && type == cot_media_gallery) {
+		for (auto& item : j->at("items")) {
+			add_media_gallery_item(fill_from_json_impl(&item));
+		}
+	}
+	if (j->contains("thumbnail")) {
+		dpp::embed_image t;
+		json& fi = (*j)["thumbnail"];
+		t.url = string_not_null(&fi, "url");
+		t.height = string_not_null(&fi, "height");
+		t.width = string_not_null(&fi, "width");
+		t.proxy_url = string_not_null(&fi, "proxy_url");
+		thumbnail = t;
+	}
+
 	if (j->contains("accessory")) {
 		set_accessory(fill_from_json_impl(&(j->at("accessory"))));
 	}
@@ -298,8 +335,23 @@ void to_json(json& j, const component& cp) {
 	if (!cp.content.empty() && cp.type == cot_text_display) {
 		j["content"] = cp.content;
 	}
-	if (!cp.description.empty() && cp.type == cot_thumbnail) {
-		j["description"] = cp.description;
+	if (cp.type == cot_thumbnail) {
+		if (!cp.description.empty()) {
+			j["description"] = cp.description;
+		}
+		j["spoiler"] = cp.spoiler;
+		if (cp.thumbnail.has_value()) {
+			j["media"] = {
+				{"url", cp.thumbnail->url}
+			};
+		}
+	}
+	if (cp.type == cot_media_gallery) {
+		j["items"] = json::array();
+		auto& item_array = j["items"];
+		for (auto& item : cp.media_gallery_items) {
+			item_array.push_back(*item);
+		}
 	}
 	if (cp.type == cot_text) {
 		j["label"] = cp.label;
@@ -1172,7 +1224,6 @@ static void recurse_components(json& j, const std::vector<component>& components
 		}
 		j["components"].push_back(n);
 	}
-
 }
 
 json message::to_json(bool with_id, bool is_interaction_response) const {

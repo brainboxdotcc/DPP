@@ -381,6 +381,31 @@ public:
 };
 
 /**
+ * @brief An video, image or thumbnail in a dpp::embed or dpp::component (v2)
+ */
+struct DPP_EXPORT embed_image {
+	/**
+	 * @brief URL to image or video.
+	 */
+	std::string url;
+
+	/**
+	 * @brief Proxied image url.
+	 */
+	std::string proxy_url;
+
+	/**
+	 * @brief Height (calculated by discord).
+	 */
+	std::string height;
+
+	/**
+	 * @brief Width (calculated by discord).
+	 */
+	std::string width;
+};
+
+/**
  * @brief Represents the component object.
  * A component is a clickable button or drop down list
  * within a discord message, where the buttons emit
@@ -534,6 +559,21 @@ public:
 	std::string description;
 
 	/**
+	 * @brief Spoiler state for media items
+	 */
+	bool spoiler;
+
+	/**
+	 * @brief Unfurled media for thumbnail objects
+	 */
+	std::optional<embed_image> thumbnail;
+
+	/**
+	 * @brief Media gallery items for media galleries
+	 */
+	std::vector<std::shared_ptr<component>> media_gallery_items;
+
+	/**
 	 * @brief Constructor
 	 */
 	component();
@@ -560,12 +600,34 @@ public:
 	component& set_content(const std::string& text);
 
 	/**
+	 * @brief Add a media gallery item to a media gallery type (v2)
+	 * @param media_gallery_item item to add
+	 * @return
+	 */
+	component& add_media_gallery_item(const component& media_gallery_item);
+
+	/**
 	 * @brief For media types, set description
 	 * @note Ignored for other types
 	 * @param text text to set
 	 * @return
 	 */
 	component& set_description(const std::string& text);
+
+	/**
+	 * @brief For media types, set spoiler status
+	 * @note Ignored for other types
+	 * @param spoiler_enable True to enable spoiler masking
+	 * @return
+	 */
+	component& set_spoiler(bool spoiler_enable);
+
+	/**
+	 * @brief Set component thumbnail for thumbnail type (v2.
+	 * @param url The embed thumbnail url (only supports http(s) and attachments)
+	 * @return A reference to self so this method may be "chained".
+	 */
+	component& set_thumbnail(std::string_view url);
 
 	/**
 	 * @brief Set accessory component for components which support it.
@@ -826,31 +888,6 @@ struct DPP_EXPORT embed_footer {
 	 * @return A reference to self so this method may be "chained".
 	 */
 	embed_footer& set_proxy(std::string_view p);
-};
-
-/**
- * @brief An video, image or thumbnail in a dpp::embed
- */
-struct DPP_EXPORT embed_image {
-	/**
-	 * @brief URL to image or video.
-	 */
-	std::string url;
-
-	/**
-	 * @brief Proxied image url.
-	 */
-	std::string proxy_url;
-
-	/**
-	 * @brief Height (calculated by discord).
-	 */
-	std::string height;
-
-	/**
-	 * @brief Width (calculated by discord).
-	 */
-	std::string width;
 };
 
 /**
