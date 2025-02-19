@@ -1435,6 +1435,13 @@ bool message::is_voice_message() const {
 	return flags & m_is_voice_message;
 }
 
+bool message::has_snapshot() const {
+	return flags & m_has_snapshot;
+}
+
+bool message::is_using_components_v2() const {
+	return flags & m_using_components_v2;
+}
 
 message& message::fill_from_json(json* d, cache_policy_t cp) {
 	this->id = snowflake_not_null(d, "id");

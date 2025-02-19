@@ -2682,6 +2682,20 @@ public:
 	bool is_voice_message() const;
 
 	/**
+	 * @brief True if the message has a snapshot
+	 *
+	 * @return True if voice message
+	 */
+	bool has_snapshot() const;
+
+	/**
+	 * @brief True if the message is using components v2
+	 *
+	 * @return True if voice message
+	 */
+	bool is_using_components_v2() const;
+
+	/**
 	 * @brief Add a component to a message
 	 *
 	 * @note If the component type you add is only available in
