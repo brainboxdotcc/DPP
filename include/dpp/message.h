@@ -76,6 +76,53 @@ enum component_type : uint8_t {
 	 * @brief Select menu for channels.
 	 */
 	cot_channel_selectmenu = 8,
+
+	/**
+	 * @brief Section
+	 * @note Available in components v2 only
+	 */
+	cot_section = 9,
+
+	/**
+	 * @brief Simple text
+	 * @note Available in components v2 only
+	 */
+	cot_text_display = 10,
+
+	/**
+	 * @brief Image thumbnail, clickable to expand
+	 * @note Available in components v2 only
+	 */
+	cot_thumbnail = 11,
+
+	/**
+	 * @brief Collection of media (images, videos)
+	 * @note Available in components v2 only
+	 */
+	cot_media_gallery = 12,
+
+	/**
+	 * @brief File attachment from the uploads of the message
+	 * @note Available in components v2 only
+	 */
+	cot_file = 13,
+
+	/**
+	 * @brief Separator between sections or other components
+	 * @note Available in components v2 only
+	 */
+	cot_separator = 14,
+
+	/**
+	 * @brief Content inventory entry
+	 */
+	cot_content_inventory_entry = 16,
+
+	/**
+	 * @brief Container for other components
+	 * @note Available in components v2 only
+	 */
+	cot_container = 17,
 };
 
 /**
@@ -334,6 +381,98 @@ public:
 };
 
 /**
+ * @brief Loading state for "unfurled" media, e.g. thumbnails and images in a message or component
+ */
+enum media_loading_state : uint8_t {
+
+	/**
+	 * @brief Loading state is unknown
+	 */
+	ls_unknown = 0,
+
+	/**
+	 * @brief Discord is loading the media
+	 */
+	ls_loading = 1,
+
+	/**
+	 * @brief The image was processed and loaded successfully
+	 */
+	ls_loaded_success = 2,
+
+	/**
+	 * @brief The media was not found
+	 */
+	ls_not_found = 3,
+};
+
+/**
+ * @brief An video, image or thumbnail in a dpp::embed or dpp::component (v2)
+ */
+struct DPP_EXPORT embed_image {
+	/**
+	 * @brief URL to image or video.
+	 */
+	std::string url;
+
+	/**
+	 * @brief Proxied image url.
+	 */
+	std::string proxy_url;
+
+	/**
+	 * @brief Height (calculated by discord).
+	 */
+	uint32_t height{0};
+
+	/**
+	 * @brief Width (calculated by discord).
+	 */
+	uint32_t width{0};
+
+	/**
+	 * @brief Media loading state
+	 */
+	media_loading_state loading_state{ls_unknown};
+
+	/**
+	 * @brief placeholder
+	 */
+	std::string placeholder;
+
+	/**
+	 * @brief Placeholder version
+	 */
+	uint8_t placeholder_version{1};
+
+	/**
+	 * @brief Content type
+	 */
+	std::string content_type;
+
+	/**
+	 * @brief Flags (documented as present, but contents not documented)
+	 */
+	uint32_t flags{0};
+};
+
+/**
+ * @brief Spacing types for components v2 separator
+ */
+enum separator_spacing : uint8_t {
+
+	/**
+	 * @brief Small separator
+	 */
+	sep_small = 1,
+
+	/**
+	 * @brief Large separator
+	 */
+	sep_large = 2,
+};
+
+/**
  * @brief Represents the component object.
  * A component is a clickable button or drop down list
  * within a discord message, where the buttons emit
@@ -445,7 +584,8 @@ public:
 	 *
 	 * @note The amount of default values must be in the range defined by dpp::component::min_values and dpp::component::max_values.
 	 *
-	 * @warning Only available for auto-populated select menu components, which include dpp::cot_user_selectmenu, dpp::cot_role_selectmenu, dpp::cot_mentionable_selectmenu, and dpp::cot_channel_selectmenu components.
+	 * @warning Only available for auto-populated select menu components, which include dpp::cot_user_selectmenu, dpp::cot_role_selectmenu,
+	 * * dpp::cot_mentionable_selectmenu, and dpp::cot_channel_selectmenu components.
 	 */
 	std::vector<component_default_value> default_values;
 
@@ -471,6 +611,58 @@ public:
 	partial_emoji emoji;
 
 	/**
+	 * @brief Text content for section and text display types (v2)
+	 */
+	std::string content;
+
+	/**
+	 * @brief accessory component for components which support it (v2)
+	 * Can be a button or a thumbnail.
+	 */
+	std::shared_ptr<component> accessory;
+
+	/**
+	 * @brief Description for media items (v2)
+	 */
+	std::string description;
+
+	/**
+	 * @brief Spoiler state for media and file items
+	 */
+	bool spoiler;
+
+	/**
+	 * @brief can be set for separator types (v2)
+	 */
+	bool is_divider;
+
+	/**
+	 * @brief Valid for separator types (v2)
+	 */
+	separator_spacing spacing;
+
+	/**
+	 * @brief Unfurled media for thumbnail objects (v2)
+	 */
+	std::optional<embed_image> thumbnail;
+
+	/**
+	 * @brief Unfurled file URL for file objects (v2)
+	 * Should be in the format "attachment://..."
+	 */
+	std::optional<embed_image> file;
+
+	/**
+	 * @brief Media gallery items for media galleries (v2)
+	 */
+	std::vector<std::shared_ptr<component>> media_gallery_items;
+
+	/**
+	 * @brief Accent colour for container types (v2)
+	 */
+	std::optional<uint32_t> accent;
+
+	/**
 	 * @brief Constructor
 	 */
 	component();
@@ -487,6 +679,83 @@ public:
 	 * @return component& reference to self
 	 */
 	component& add_channel_type(uint8_t ct);
+
+	/**
+	 * @brief For text content types, set content
+	 * @note Ignored for other types
+	 * @param text text to set
+	 * @return
+	 */
+	component& set_content(const std::string& text);
+
+	/**
+	 * @brief Set divider visibility for separator type (v2)
+	 * @param divider true to show a visible divider
+	 * @return self
+	 */
+	component& set_divider(bool divider);
+
+	/**
+	 * @brief Set accent colour for container type (v2)
+	 * @param accent_colour Accent colour for container
+	 * @return self
+	 */
+	component& set_accent(uint32_t accent_colour);
+
+	/**
+	 * @brief Set separator spacing for separator type (v2)
+	 * @param sep_spacing separator spacing, small or large
+	 * @return self
+	 */
+	component& set_spacing(separator_spacing sep_spacing);
+
+	/**
+	 * @brief Set the attachment url for file type components.
+	 * The format of the attachment url should be of the type
+	 * "attachment://...".
+	 * @param attachment_url url to attachment. Should have been
+	 * attached via add_file().
+	 * @return self
+	 */
+	component& set_file(std::string_view attachment_url);
+
+	/**
+	 * @brief Add a media gallery item to a media gallery type (v2)
+	 * @param media_gallery_item item to add
+	 * @return
+	 */
+	component& add_media_gallery_item(const component& media_gallery_item);
+
+	/**
+	 * @brief For media types, set description
+	 * @note Ignored for other types
+	 * @param text text to set
+	 * @return
+	 */
+	component& set_description(const std::string& text);
+
+	/**
+	 * @brief For media and file component types, set spoiler status
+	 * @note Ignored for other types
+	 * @param spoiler_enable True to enable spoiler masking
+	 * @return
+	 */
+	component& set_spoiler(bool spoiler_enable);
+
+	/**
+	 * @brief Set component thumbnail for thumbnail type (v2.
+	 * @param url The embed thumbnail url (only supports http(s) and attachments)
+	 * @return A reference to self so this method may be "chained".
+	 */
+	component& set_thumbnail(std::string_view url);
+
+	/**
+	 * @brief Set accessory component for components which support it.
+	 * Can be a button or a thumbnail image.
+	 * @param accessory_component accessory component
+	 * @return
+	 */
+	component& set_accessory(const component& accessory_component);
 
 	/**
 	 * @brief Set the type of the component. Button components
@@ -647,10 +916,25 @@ public:
 	 * Adding subcomponents to a component will automatically
 	 * set this component's type to dpp::cot_action_row.
 	 *
+	 * @note Automatic creation of action rows is retained for backwards
+	 * compatibility with components v1. If you want to add components v2,
+	 * and do not want automatic creation of action rows, use
+	 * dpp::component::add_component_v2() instead.
+	 *
 	 * @param c The sub-component to add
 	 * @return component& reference to self
 	 */
 	component& add_component(const component& c);
+
+	/**
+	 * @brief Add a sub-component, does not automatically create
+	 * action rows. This should be used for components v2 where
+	 * you do not want to add action rows automatically.
+	 *
+	 * @param c The sub-component to add
+	 * @return component& reference to self
+	 */
+	component& add_component_v2(const component& c);
 
 	/**
 	 * @brief Add a default value.
@@ -724,31 +1008,6 @@ struct DPP_EXPORT embed_footer {
 	 * @return A reference to self so this method may be "chained".
 	 */
 	embed_footer& set_proxy(std::string_view p);
-};
-
-/**
- * @brief An video, image or thumbnail in a dpp::embed
- */
-struct DPP_EXPORT embed_image {
-	/**
-	 * @brief URL to image or video.
-	 */
-	std::string url;
-
-	/**
-	 * @brief Proxied image url.
-	 */
-	std::string proxy_url;
-
-	/**
-	 * @brief Height (calculated by discord).
-	 */
-	std::string height;
-
-	/**
-	 * @brief Width (calculated by discord).
-	 */
-	std::string width;
 };
 
 /**
@@ -1719,6 +1978,16 @@ enum message_flags : uint16_t {
 	 * @brief This message is a voice message.
 	 */
 	m_is_voice_message = 1 << 13,
+
+	/**
+	 * @brief Contains forwarded snapshot
+	 */
+	m_has_snapshot = 1 << 14,
+
+	/**
+	 * @brief Message components vector contains v2 components
+	 */
+	m_using_components_v2 = 1 << 15,
 };
 
 /**
@@ -1767,7 +2036,7 @@ namespace embed_type {
 /**
  * @brief Message types for dpp::message::type
  */
-enum message_type {
+enum message_type : uint8_t {
 	/**
 	 * @brief Default
 	 */
@@ -2533,12 +2802,46 @@ public:
 	bool is_voice_message() const;
 
 	/**
-	 * @brief Add a component (button) to message
+	 * @brief True if the message has a snapshot
+	 *
+	 * @return True if voice message
+	 */
+	bool has_snapshot() const;
+
+	/**
+	 * @brief True if the message is using components v2
+	 *
+	 * @return True if voice message
+	 */
+	bool is_using_components_v2() const;
+
+	/**
+	 * @brief Add a component to a message
+	 *
+	 * @note If the component type you add is only available in
+	 * components v2, this method will automatically add the
+	 * m_using_components_v2 flag to your message.
 	 * 
 	 * @param c component to add
 	 * @return message& reference to self
 	 */
 	message& add_component(const component& c);
+
+	/**
+	 * @brief Add a component to a message
+	 *
+	 * @note If the component type you add is only available in
+	 * components v2, this method will automatically add the
+	 * m_using_components_v2 flag to your message.
+	 *
+	 * This is an alias of add_component() for readability when
+	 * using components v2, so you can use add_component_v2()
+	 * everywhere. It does exactly the same as add_component().
+	 *
+	 * @param c component to add
+	 * @return message& reference to self
+	 */
+	message& add_component_v2(const component& c);
 
 	/**
 	 * @brief Add an embed to message

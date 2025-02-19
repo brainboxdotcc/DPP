@@ -41,20 +41,59 @@ int main() {
 			 * This is a user-app command which can be executed anywhere and is added to the user's profile.
 			 */
 			bot.global_bulk_command_create({
-				dpp::slashcommand("userapp", "Test user app command", bot.me.id)
+				dpp::slashcommand("userapp", "Test command", bot.me.id)
 				.set_interaction_contexts({dpp::itc_guild, dpp::itc_bot_dm, dpp::itc_private_channel})
 			});
 		}
 	});
 
+	bot.on_button_click([](const dpp::button_click_t& event) {
+		event.reply("You declared your love for cats by clicking button id: " + event.custom_id);
+	});
+
 	bot.register_command("userapp", [](const dpp::slashcommand_t& e) {
-		/**
-		 * Simple test output that shows the context of the command
-		 */
-		e.reply("This is the `/userapp` command." + std::string(
-			e.command.is_user_app_interaction() ?
-			" Executing as a user interaction owned by user: <@" + e.command.get_authorizing_integration_owner(dpp::ait_user_install).str() + ">" :
-			" Executing as a guild interaction on guild id " + e.command.guild_id.str()
+		e.reply(dpp::message().set_flags(dpp::m_using_components_v2).add_component_v2(
+			/* A container... */
+			dpp::component()
+				.set_type(dpp::cot_container)
+				.set_accent(dpp::utility::rgb(255, 0, 0))
+				.set_spoiler(true)
+				.add_component_v2(
+					/* ...which contains a section... */
+					dpp::component()
+						.set_type(dpp::cot_section)
+						.add_component_v2(
+							/* ...with text... */
+							dpp::component()
+								.set_type(dpp::cot_text_display)
+								.set_content("Click if you love cats")
+						)
+						.set_accessory(
+							/* ...and an accessory button to the right */
+							dpp::component()
+								.set_type(dpp::cot_button)
+								.set_label("Click me")
+								.set_style(dpp::cos_danger)
+								.set_id("button")
+						)
+				)
+		).add_component_v2(
+			/* ... with a large visible divider between... */
+			dpp::component()
+				.set_type(dpp::cot_separator)
+				.set_spacing(dpp::sep_large)
+				.set_divider(true)
+		).add_component_v2(
+			/* ... followed by a media gallery... */
+			dpp::component()
+				.set_type(dpp::cot_media_gallery)
+				.add_media_gallery_item(
+					/* ...containing one cat pic (obviously) */
+					dpp::component()
+						.set_type(dpp::cot_thumbnail)
+						.set_description("A cat")
+						.set_thumbnail("https://www.catster.com/wp-content/uploads/2023/11/Beluga-Cat-e1714190563227.webp")
+				)
 		));
 	});
 

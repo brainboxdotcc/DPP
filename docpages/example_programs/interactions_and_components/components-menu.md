@@ -7,3 +7,4 @@ Components are anything that can be attached to a message or a \ref modal-dialog
 * \subpage components3
 * \subpage default_select_value
 * \subpage editing_message_after_click
+* \subpage components_v2

@@ -19,6 +19,7 @@
  *
  ************************************************************************************/
 #include <algorithm>
+#include <set>
 #include <dpp/message.h>
 #include <dpp/cache.h>
 #include <dpp/json.h>
@@ -29,13 +30,82 @@ namespace dpp {
 
 using json = nlohmann::json;
 
+std::set<component_type> components_v2_only_types = {
+	cot_section,
+	cot_text_display,
+	cot_thumbnail,
+	cot_media_gallery,
+	cot_file,
+	cot_separator,
+	cot_container
+};
+
 component::component() :
 	type(cot_action_row), label(""), style(cos_primary), custom_id(""),
-	min_values(-1), max_values(-1), min_length(0), max_length(0), disabled(false), required(false)
+	min_values(-1), max_values(-1), min_length(0), max_length(0), disabled(false),
+	required(false), spoiler(false), is_divider(false), spacing(sep_small)
 {
 	emoji.animated = false;
 	emoji.id = 0;
 	emoji.name = "";
+}
+
+
+component& component::set_content(const std::string& text) {
+	content = text;
+	return *this;
+}
+
+component& component::set_description(const std::string& text) {
+	description = text;
+	return *this;
+}
+
+component& component::set_divider(bool divider) {
+	is_divider = divider;
+	return *this;
+}
+
+component& component::set_spacing(separator_spacing sep_spacing) {
+	spacing = sep_spacing;
+	return *this;
+}
+
+component& component::set_spoiler(bool spoiler_enable) {
+	spoiler = spoiler_enable;
+	return *this;
+}
+
+component& component::set_accessory(const component& accessory_component) {
+	if (accessory_component.type != cot_thumbnail && accessory_component.type != cot_button) {
+		throw logic_exception("Accessories can only be buttons or thumbnails");
+	}
+	accessory = std::make_shared<component>(accessory_component);
+	return *this;
+}
+
+component& component::set_thumbnail(std::string_view url) {
+	dpp::embed_image t;
+	t.url = url;
+	thumbnail = t;
+	return *this;
+}
+
+component& component::set_file(std::string_view attachment_url) {
+	dpp::embed_image t;
+	t.url = attachment_url;
+	file = t;
+	return *this;
+}
+
+component& component::set_accent(uint32_t accent_colour) {
+	accent = accent_colour;
+	return *this;
+}
+
+component& component::add_media_gallery_item(const component& media_gallery_item) {
+	media_gallery_items.emplace_back(std::make_shared<component>(media_gallery_item));
+	return *this;
 }
 
 
@@ -45,6 +115,51 @@ component& component::fill_from_json_impl(nlohmann::json* j) {
 	custom_id = string_not_null(j, "custom_id");
 	disabled = bool_not_null(j, "disabled");
 	placeholder = string_not_null(j, "placeholder");
+	description = string_not_null(j, "description");
+	spoiler = bool_not_null(j, "spoiler");
+	is_divider = bool_not_null(j, "divider");
+	spacing = static_cast<separator_spacing>(int8_not_null(j, "spacing"));
+	if (j->contains("accent_color")) {
+		accent = static_cast<unsigned int>(int32_not_null(j, "accent_color"));
+	}
+	content = string_not_null(j, "content");
+	if (j->contains("items") && type == cot_media_gallery) {
+		for (auto& item : j->at("items")) {
+			add_media_gallery_item(fill_from_json_impl(&item));
+		}
+	}
+	if (j->contains("thumbnail")) {
+		dpp::embed_image t;
+		json& fi = (*j)["thumbnail"];
+		t.url = string_not_null(&fi, "url");
+		t.height = int32_not_null(&fi, "height");
+		t.width = int32_not_null(&fi, "width");
+		t.proxy_url = string_not_null(&fi, "proxy_url");
+		t.loading_state = static_cast<media_loading_state>(int8_not_null(&fi, "loading_state"));
+		t.content_type = string_not_null(&fi, "content_type");
+		t.placeholder = string_not_null(&fi, "placeholder");
+		t.placeholder_version = int8_not_null(&fi, "placeholder_version");
+		t.flags = int32_not_null(&fi, "flags");
+		thumbnail = t;
+	}
+	if (j->contains("file")) {
+		dpp::embed_image t;
+		json& fi = (*j)["file"];
+		t.url = string_not_null(&fi, "url");
+		t.height = int32_not_null(&fi, "height");
+		t.width = int32_not_null(&fi, "width");
+		t.proxy_url = string_not_null(&fi, "proxy_url");
+		t.loading_state = static_cast<media_loading_state>(int8_not_null(&fi, "loading_state"));
+		t.content_type = string_not_null(&fi, "content_type");
+		t.placeholder = string_not_null(&fi, "placeholder");
+		t.placeholder_version = int8_not_null(&fi, "placeholder_version");
+		t.flags = int32_not_null(&fi, "flags");
+		file = t;
+	}
+
+	if (j->contains("accessory")) {
+		set_accessory(fill_from_json_impl(&(j->at("accessory"))));
+	}
 	if (j->contains("min_values") && j->at("min_values").is_number_integer()) {
 		min_values = j->at("min_values").get<int32_t>();
 	}
@@ -59,7 +174,7 @@ component& component::fill_from_json_impl(nlohmann::json* j) {
 			default_values.push_back(d);
 		}
 	}
-	if (type == cot_action_row) {
+	if (j->contains("components") && j->at("components").is_array()) {
 		set_object_array_not_null<component>(j, "components", components);
 	} else if (type == cot_button) { // button specific fields
 		style = static_cast<component_style>(int8_not_null(j, "style"));
@@ -104,6 +219,12 @@ component& component::fill_from_json_impl(nlohmann::json* j) {
 component& component::add_component(const component& c)
 {
 	set_type(cot_action_row);
+	components.emplace_back(c);
+	return *this;
+}
+
+component& component::add_component_v2(const component& c)
+{
 	components.emplace_back(c);
 	return *this;
 }
@@ -252,6 +373,48 @@ void to_json(json& j, const attachment& a) {
 
 void to_json(json& j, const component& cp) {
 	j["type"] = cp.type;
+	if (cp.accessory) {
+		j["accessory"] = *cp.accessory;
+	}
+	if (!cp.content.empty() && cp.type == cot_text_display) {
+		j["content"] = cp.content;
+	}
+	if (cp.type == cot_thumbnail) {
+		if (!cp.description.empty()) {
+			j["description"] = cp.description;
+		}
+		j["spoiler"] = cp.spoiler;
+		if (cp.thumbnail.has_value()) {
+			j["media"] = {
+				{"url", cp.thumbnail->url}
+			};
+		}
+	}
+	if (cp.type == cot_container) {
+		j["spoiler"] = cp.spoiler;
+		if (cp.accent.has_value()) {
+			j["accent_color"] = cp.accent.value();
+		}
+	}
+	if (cp.type == cot_separator) {
+		j["divider"] = cp.is_divider;
+		j["spacing"] = static_cast<unsigned int>(cp.spacing);
+	}
+	if (cp.type == cot_file) {
+		if (cp.file.has_value()) {
+			j["media"] = {
+				{"url", cp.file->url}
+			};
+		}
+		j["spoiler"] = cp.spoiler;
+	}
+	if (cp.type == cot_media_gallery) {
+		j["items"] = json::array();
+		auto& item_array = j["items"];
+		for (auto& item : cp.media_gallery_items) {
+			item_array.push_back(*item);
+		}
+	}
 	if (cp.type == cot_text) {
 		j["label"] = cp.label;
 		j["required"] = cp.required;
@@ -710,12 +873,22 @@ message::message(snowflake _channel_id, std::string_view _content, message_type 
 }
 
 message& message::add_component(const component& c) {
+	if (components_v2_only_types.find(c.type) != components_v2_only_types.end()) {
+		set_flags(flags | m_using_components_v2);
+	}
 	components.emplace_back(c);
 	return *this;
 }
 
+message& message::add_component_v2(const component& c) {
+	/* This is just an alias for readability in apps */
+	return add_component(c);
+}
+
 message& message::add_embed(const embed& e) {
-	embeds.emplace_back(e);
+	if ((flags & m_using_components_v2) == 0) {
+		embeds.emplace_back(e);
+	}
 	return *this;
 }
 
@@ -810,7 +983,9 @@ message::message(std::string_view _content, message_type t) : message() {
 }
 
 message::message(const embed& _embed) : message() {
-	embeds.emplace_back(_embed);
+	if ((flags & m_using_components_v2) == 0) {
+		embeds.emplace_back(_embed);
+	}
 }
 
 message::message(snowflake _channel_id, const embed& _embed) : message(_embed) {
@@ -840,9 +1015,14 @@ embed::embed(json* j) : embed() {
 			embed_image curr;
 			json& fi = (*j)[s];
 			curr.url = string_not_null(&fi, "url");
-			curr.height = string_not_null(&fi, "height");
-			curr.width = string_not_null(&fi, "width");
+			curr.height = int32_not_null(&fi, "height");
+			curr.width = int32_not_null(&fi, "width");
 			curr.proxy_url = string_not_null(&fi, "proxy_url");
+			curr.loading_state = static_cast<media_loading_state>(int8_not_null(&fi, "loading_state"));
+			curr.content_type = string_not_null(&fi, "content_type");
+			curr.placeholder = string_not_null(&fi, "placeholder");
+			curr.placeholder_version = int8_not_null(&fi, "placeholder_version");
+			curr.flags = int32_not_null(&fi, "flags");
 			if (s == "image") {
 				image = curr;
 			} else if (s == "video") {
@@ -1106,6 +1286,21 @@ time_t attachment::get_issued_time() const {
 	return std::stol(is_attr->substr(3), nullptr, 16);
 }
 
+static void recurse_components(json& j, const std::vector<component>& components) {
+	if (components.empty()) {
+		return;
+	}
+	j["components"] = json::array();
+	for (auto & component : components) {
+		json n;
+		to_json(n, component);
+		if (!component.components.empty()) {
+			recurse_components(n, component.components);
+		}
+		j["components"].push_back(n);
+	}
+}
+
 json message::to_json(bool with_id, bool is_interaction_response) const {
 	/* This is the basics. once it works, expand on it. */
 	json j({
@@ -1114,8 +1309,11 @@ json message::to_json(bool with_id, bool is_interaction_response) const {
 		{"nonce", nonce},
 		{"flags", flags},
 		{"type", type},
-		{"content", content}
 	});
+
+	if ((flags & m_using_components_v2) == 0) {
+		j["content"] = content;
+	}
 
 	if (with_id) {
 		j["id"] = std::to_string(id);
@@ -1180,16 +1378,20 @@ json message::to_json(bool with_id, bool is_interaction_response) const {
 		}
 	}
 
-	j["components"] = json::array();
-	for (auto & component : components) {
-		json n;
-		n["type"] = cot_action_row;
-		n["components"] = {};
-		for (auto & subcomponent  : component.components) {
-			json sn = subcomponent;
-			n["components"].push_back(sn);
+	if ((flags & m_using_components_v2) == 0) {
+		j["components"] = json::array();
+		for (auto & component : components) {
+			json n;
+			n["type"] = cot_action_row;
+			n["components"] = {};
+			for (auto & subcomponent  : component.components) {
+				json sn = subcomponent;
+				n["components"].push_back(sn);
+			}
+			j["components"].push_back(n);
 		}
-		j["components"].push_back(n);
+	} else {
+		recurse_components(j, components);
 	}
 
 	j["attachments"] = json::array();
@@ -1198,48 +1400,50 @@ json message::to_json(bool with_id, bool is_interaction_response) const {
 		j["attachments"].push_back(a);
 	}
 
-	j["embeds"] = json::array();
-	for (auto& embed : embeds) {
-		json e;
-		if (!embed.description.empty()) {
-			e["description"] = embed.description;
-		}
-		if (!embed.title.empty()) {
-			e["title"] = embed.title;
-		}
-		if (!embed.url.empty()) {
-			e["url"] = embed.url;
-		}
-		if (embed.color.has_value()) {
-			e["color"] = embed.color.value();
-		}
-		if (embed.footer.has_value()) {
-			e["footer"]["text"] = embed.footer->text;
-			e["footer"]["icon_url"] = embed.footer->icon_url;
-		}
-		if (embed.image.has_value()) {
-			e["image"]["url"] = embed.image->url;
-		}
-		if (embed.thumbnail.has_value()) {
-			e["thumbnail"]["url"] = embed.thumbnail->url;
-		}
-		if (embed.author.has_value()) {
-			e["author"]["name"] = embed.author->name;
-			e["author"]["url"] = embed.author->url;
-			e["author"]["icon_url"] = embed.author->icon_url;
-		}
-		if (embed.fields.size()) {
-			e["fields"] = json();
-			for (auto& field : embed.fields) {
-				json f({ {"name", field.name}, {"value", field.value}, {"inline", field.is_inline} });
-				e["fields"].push_back(f);
+	if ((flags & m_using_components_v2) == 0) {
+		j["embeds"] = json::array();
+		for (auto& embed : embeds) {
+			json e;
+			if (!embed.description.empty()) {
+				e["description"] = embed.description;
 			}
-		}
-		if (embed.timestamp) {
-			e["timestamp"] = ts_to_string(embed.timestamp);
-		}
+			if (!embed.title.empty()) {
+				e["title"] = embed.title;
+			}
+			if (!embed.url.empty()) {
+				e["url"] = embed.url;
+			}
+			if (embed.color.has_value()) {
+				e["color"] = embed.color.value();
+			}
+			if (embed.footer.has_value()) {
+				e["footer"]["text"] = embed.footer->text;
+				e["footer"]["icon_url"] = embed.footer->icon_url;
+			}
+			if (embed.image.has_value()) {
+				e["image"]["url"] = embed.image->url;
+			}
+			if (embed.thumbnail.has_value()) {
+				e["thumbnail"]["url"] = embed.thumbnail->url;
+			}
+			if (embed.author.has_value()) {
+				e["author"]["name"] = embed.author->name;
+				e["author"]["url"] = embed.author->url;
+				e["author"]["icon_url"] = embed.author->icon_url;
+			}
+			if (embed.fields.size()) {
+				e["fields"] = json();
+				for (auto& field : embed.fields) {
+					json f({ {"name", field.name}, {"value", field.value}, {"inline", field.is_inline} });
+					e["fields"].push_back(f);
+				}
+			}
+			if (embed.timestamp) {
+				e["timestamp"] = ts_to_string(embed.timestamp);
+			}
 
-		j["embeds"].push_back(e);
+			j["embeds"].push_back(e);
+		}
 	}
 
 	if (attached_poll.has_value()) {
@@ -1306,6 +1510,13 @@ bool message::is_voice_message() const {
 	return flags & m_is_voice_message;
 }
 
+bool message::has_snapshot() const {
+	return flags & m_has_snapshot;
+}
+
+bool message::is_using_components_v2() const {
+	return flags & m_using_components_v2;
+}
 
 message& message::fill_from_json(json* d, cache_policy_t cp) {
 	this->id = snowflake_not_null(d, "id");
