@@ -32,13 +32,19 @@ void from_json(const json &j, application_integration_types& out) {
 }
 
 void from_json(const json &j, application_install_params& out) {
-	out.permissions = j.at("permissions").get<uint64_t>();
-	j.at("scopes").get_to(out.scopes);
+	auto permissions = j.find("permissions");
+	auto scopes = j.find("scopes");
+	if (permissions != j.end() && permissions->is_array()) {
+		out.permissions = permissions->get<uint64_t>();
+	}
+	if (scopes != j.end()) {
+		scopes->get_to(out.scopes);
+	}
 }
 
 void from_json(const json &j, integration_configuration& out) {
 	if (auto it = j.find("oauth2_install_params"); it != j.end()) {
-		it->get_to(out.oauth2_install_params.value());
+		it->get_to(out.oauth2_install_params);
 	}
 }
 
@@ -131,8 +137,16 @@ application& application::fill_from_json_impl(nlohmann::json* j) {
 		}
 	}
 
-	if (auto it = j->find("integration_types_config"); it != j->end()) {
-		it->get_to(this->integration_types_config);
+	auto types_config = j->find("integration_types_config");
+	if (types_config != j->end()) {
+		auto guild_config = types_config->find(std::to_string(static_cast<uint8_t>(ait_guild_install)));
+		auto user_config = types_config->find(std::to_string(static_cast<uint8_t>(ait_user_install)));
+		if (guild_config != types_config->end() && guild_config->contains("oauth2_install_params")) {
+			integration_types_config[ait_guild_install] = *guild_config;
+		}
+		if (user_config != types_config->end() && user_config->contains("oauth2_install_params")) {
+			integration_types_config[ait_user_install] = *user_config;
+		}
 	}
 
 	set_string_not_null(j, "custom_install_url", custom_install_url);
