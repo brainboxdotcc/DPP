@@ -1024,8 +1024,14 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 			});
 
 			bot.on_ready([&ready_promise, &bot, dpp_logo](const dpp::ready_t &event) {
+
 				set_test(CONNECTION, true);
 				ready_promise.set_value();
+
+				set_test(GETAPP, false);
+				bot.current_application_get([&bot](const auto& res) {
+					set_test(GETAPP, !res.is_error() && (std::get<dpp::application>(res.value)).id == bot.me.id);
+				});
 
 				set_test(APPCOMMAND, false);
 				set_test(LOGGER, false);
@@ -1084,7 +1090,15 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 			bot.on_log([](const dpp::log_t &event) {
 				if (event.severity > dpp::ll_trace) {
 					std::lock_guard<std::mutex> locker(loglock);
-					std::cout << "[" << std::fixed << std::setprecision(3) << (dpp::utility::time_f() - get_start_time()) << "]: [\u001b[36m" << dpp::utility::loglevel(event.severity) << "\u001b[0m] " << event.message << "\n";
+					std::cout << "[" << std::fixed << std::setprecision(3) << (dpp::utility::time_f() - get_start_time()) << "]: ";
+					if (event.severity == dpp::ll_error) {
+						/* Errors are red */
+						std::cout << "[\u001b[31m" << dpp::utility::loglevel(event.severity);
+					} else {
+						/* All other generic logger are cyan */
+						std::cout << "[\u001b[36m" << dpp::utility::loglevel(event.severity);
+					}
+					std::cout << "\u001b[0m] " << event.message << "\n";
 				}
 				if (event.message == "Test log message") {
 					set_test(LOGGER, true);

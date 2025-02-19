@@ -94,6 +94,7 @@ DPP_TEST(BOTSTART, "cluster::start method", tf_online);
 DPP_TEST(CONNECTION, "Connection to client websocket", tf_online);
 DPP_TEST(APPCOMMAND, "Creation of application command", tf_online);
 DPP_TEST(DELCOMMAND, "Deletion of application command", tf_online);
+DPP_TEST(GETAPP, "cluster::current_application_get()", tf_online);
 DPP_TEST(LOGGER, "Log events", tf_online);
 DPP_TEST(MESSAGECREATE, "Creation of a channel message", tf_online);
 DPP_TEST(MESSAGEEDIT, "Editing a channel message", tf_online);

@@ -33,7 +33,7 @@ namespace dpp {
 /**
  * @brief Where an app can be installed, also called its supported installation contexts.
  */
-enum application_integration_types {
+enum application_integration_types : uint8_t {
 	/**
 	* @brief Installable to servers
 	*/
@@ -47,7 +47,7 @@ enum application_integration_types {
 /**
  * @brief Integration types
  */
-enum integration_type {
+enum integration_type : uint8_t {
 	/**
 	 * @brief Twitch integration
 	 */
@@ -72,7 +72,7 @@ enum integration_type {
 /**
  * @brief Integration flags
  */
-enum integration_flags {
+enum integration_flags : uint8_t {
 	/**
 	 * @brief Is this integration enabled?
 	 */
