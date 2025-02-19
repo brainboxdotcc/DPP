@@ -19,6 +19,7 @@
  *
  ************************************************************************************/
 #include <algorithm>
+#include <set>
 #include <dpp/message.h>
 #include <dpp/cache.h>
 #include <dpp/json.h>
@@ -28,6 +29,16 @@
 namespace dpp {
 
 using json = nlohmann::json;
+
+std::set<component_type> components_v2_only_types = {
+	cot_section,
+	cot_text_display,
+	cot_thumbnail,
+	cot_media_gallery,
+	cot_file,
+	cot_separator,
+	cot_container
+};
 
 component::component() :
 	type(cot_action_row), label(""), style(cos_primary), custom_id(""),
@@ -104,6 +115,12 @@ component& component::fill_from_json_impl(nlohmann::json* j) {
 component& component::add_component(const component& c)
 {
 	set_type(cot_action_row);
+	components.emplace_back(c);
+	return *this;
+}
+
+component& component::add_component_v2(const component& c)
+{
 	components.emplace_back(c);
 	return *this;
 }
@@ -710,12 +727,17 @@ message::message(snowflake _channel_id, std::string_view _content, message_type 
 }
 
 message& message::add_component(const component& c) {
+	if (components_v2_only_types.find(c.type) != components_v2_only_types.end()) {
+		set_flags(flags | m_using_components_v2);
+	}
 	components.emplace_back(c);
 	return *this;
 }
 
 message& message::add_embed(const embed& e) {
-	embeds.emplace_back(e);
+	if ((flags & m_using_components_v2) == 0) {
+		embeds.emplace_back(e);
+	}
 	return *this;
 }
 
@@ -810,7 +832,9 @@ message::message(std::string_view _content, message_type t) : message() {
 }
 
 message::message(const embed& _embed) : message() {
-	embeds.emplace_back(_embed);
+	if ((flags & m_using_components_v2) == 0) {
+		embeds.emplace_back(_embed);
+	}
 }
 
 message::message(snowflake _channel_id, const embed& _embed) : message(_embed) {
@@ -1106,6 +1130,19 @@ time_t attachment::get_issued_time() const {
 	return std::stol(is_attr->substr(3), nullptr, 16);
 }
 
+static void recurse_components(json& j, const std::vector<component>& components) {
+	j["components"] = json::array();
+	for (auto & component : components) {
+		json n;
+		n["components"] = {};
+		if (!component.components.empty()) {
+			recurse_components(n["components"], component.components);
+		}
+		j["components"].push_back(n);
+	}
+
+}
+
 json message::to_json(bool with_id, bool is_interaction_response) const {
 	/* This is the basics. once it works, expand on it. */
 	json j({
@@ -1114,8 +1151,11 @@ json message::to_json(bool with_id, bool is_interaction_response) const {
 		{"nonce", nonce},
 		{"flags", flags},
 		{"type", type},
-		{"content", content}
 	});
+
+	if ((flags & m_using_components_v2) == 0) {
+		j["content"] = content;
+	}
 
 	if (with_id) {
 		j["id"] = std::to_string(id);
@@ -1180,16 +1220,20 @@ json message::to_json(bool with_id, bool is_interaction_response) const {
 		}
 	}
 
-	j["components"] = json::array();
-	for (auto & component : components) {
-		json n;
-		n["type"] = cot_action_row;
-		n["components"] = {};
-		for (auto & subcomponent  : component.components) {
-			json sn = subcomponent;
-			n["components"].push_back(sn);
+	if ((flags & m_using_components_v2) == 0) {
+		j["components"] = json::array();
+		for (auto & component : components) {
+			json n;
+			n["type"] = cot_action_row;
+			n["components"] = {};
+			for (auto & subcomponent  : component.components) {
+				json sn = subcomponent;
+				n["components"].push_back(sn);
+			}
+			j["components"].push_back(n);
 		}
-		j["components"].push_back(n);
+	} else {
+		recurse_components(j, components);
 	}
 
 	j["attachments"] = json::array();
@@ -1198,48 +1242,50 @@ json message::to_json(bool with_id, bool is_interaction_response) const {
 		j["attachments"].push_back(a);
 	}
 
-	j["embeds"] = json::array();
-	for (auto& embed : embeds) {
-		json e;
-		if (!embed.description.empty()) {
-			e["description"] = embed.description;
-		}
-		if (!embed.title.empty()) {
-			e["title"] = embed.title;
-		}
-		if (!embed.url.empty()) {
-			e["url"] = embed.url;
-		}
-		if (embed.color.has_value()) {
-			e["color"] = embed.color.value();
-		}
-		if (embed.footer.has_value()) {
-			e["footer"]["text"] = embed.footer->text;
-			e["footer"]["icon_url"] = embed.footer->icon_url;
-		}
-		if (embed.image.has_value()) {
-			e["image"]["url"] = embed.image->url;
-		}
-		if (embed.thumbnail.has_value()) {
-			e["thumbnail"]["url"] = embed.thumbnail->url;
-		}
-		if (embed.author.has_value()) {
-			e["author"]["name"] = embed.author->name;
-			e["author"]["url"] = embed.author->url;
-			e["author"]["icon_url"] = embed.author->icon_url;
-		}
-		if (embed.fields.size()) {
-			e["fields"] = json();
-			for (auto& field : embed.fields) {
-				json f({ {"name", field.name}, {"value", field.value}, {"inline", field.is_inline} });
-				e["fields"].push_back(f);
+	if ((flags & m_using_components_v2) == 0) {
+		j["embeds"] = json::array();
+		for (auto& embed : embeds) {
+			json e;
+			if (!embed.description.empty()) {
+				e["description"] = embed.description;
 			}
-		}
-		if (embed.timestamp) {
-			e["timestamp"] = ts_to_string(embed.timestamp);
-		}
+			if (!embed.title.empty()) {
+				e["title"] = embed.title;
+			}
+			if (!embed.url.empty()) {
+				e["url"] = embed.url;
+			}
+			if (embed.color.has_value()) {
+				e["color"] = embed.color.value();
+			}
+			if (embed.footer.has_value()) {
+				e["footer"]["text"] = embed.footer->text;
+				e["footer"]["icon_url"] = embed.footer->icon_url;
+			}
+			if (embed.image.has_value()) {
+				e["image"]["url"] = embed.image->url;
+			}
+			if (embed.thumbnail.has_value()) {
+				e["thumbnail"]["url"] = embed.thumbnail->url;
+			}
+			if (embed.author.has_value()) {
+				e["author"]["name"] = embed.author->name;
+				e["author"]["url"] = embed.author->url;
+				e["author"]["icon_url"] = embed.author->icon_url;
+			}
+			if (embed.fields.size()) {
+				e["fields"] = json();
+				for (auto& field : embed.fields) {
+					json f({ {"name", field.name}, {"value", field.value}, {"inline", field.is_inline} });
+					e["fields"].push_back(f);
+				}
+			}
+			if (embed.timestamp) {
+				e["timestamp"] = ts_to_string(embed.timestamp);
+			}
 
-		j["embeds"].push_back(e);
+			j["embeds"].push_back(e);
+		}
 	}
 
 	if (attached_poll.has_value()) {

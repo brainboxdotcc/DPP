@@ -76,6 +76,53 @@ enum component_type : uint8_t {
 	 * @brief Select menu for channels.
 	 */
 	cot_channel_selectmenu = 8,
+
+	/**
+	 * @brief Section
+	 * @note Available in components v2 only
+	 */
+	cot_section = 9,
+
+	/**
+	 * @brief Simple text
+	 * @note Available in components v2 only
+	 */
+	cot_text_display = 10,
+
+	/**
+	 * @brief Image thumbnail, clickable to expand
+	 * @note Available in components v2 only
+	 */
+	cot_thumbnail = 11,
+
+	/**
+	 * @brief Collection of media (images, videos)
+	 * @note Available in components v2 only
+	 */
+	cot_media_gallery = 12,
+
+	/**
+	 * @brief File attachment from the uploads of the message
+	 * @note Available in components v2 only
+	 */
+	cot_file = 13,
+
+	/**
+	 * @brief Separator between sections or other components
+	 * @note Available in components v2 only
+	 */
+	cot_separator = 14,
+
+	/**
+	 * @brief Content inventory entry
+	 */
+	cot_content_inventory_entry = 15,
+
+	/**
+	 * @brief Container for other components
+	 * @note Available in components v2 only
+	 */
+	cot_container = 16,
 };
 
 /**
@@ -647,10 +694,25 @@ public:
 	 * Adding subcomponents to a component will automatically
 	 * set this component's type to dpp::cot_action_row.
 	 *
+	 * @note Automatic creation of action rows is retained for backwards
+	 * compatibility with components v1. If you want to add components v2,
+	 * and do not want automatic creation of action rows, use
+	 * dpp::component::add_component_v2() instead.
+	 *
 	 * @param c The sub-component to add
 	 * @return component& reference to self
 	 */
 	component& add_component(const component& c);
+
+	/**
+	 * @brief Add a sub-component, does not automatically create
+	 * action rows. This should be used for components v2 where
+	 * you do not want to add action rows automatically.
+	 *
+	 * @param c The sub-component to add
+	 * @return component& reference to self
+	 */
+	component& add_component_v2(const component& c);
 
 	/**
 	 * @brief Add a default value.
@@ -1719,6 +1781,16 @@ enum message_flags : uint16_t {
 	 * @brief This message is a voice message.
 	 */
 	m_is_voice_message = 1 << 13,
+
+	/**
+	 * @brief Contains forwarded snapshot
+	 */
+	m_has_snapshot = 1 << 14,
+
+	/**
+	 * @brief Message components vector contains v2 components
+	 */
+	m_using_components_v2 = 1 << 15,
 };
 
 /**
@@ -1767,7 +1839,7 @@ namespace embed_type {
 /**
  * @brief Message types for dpp::message::type
  */
-enum message_type {
+enum message_type : uint8_t {
 	/**
 	 * @brief Default
 	 */
@@ -2534,6 +2606,10 @@ public:
 
 	/**
 	 * @brief Add a component (button) to message
+	 *
+	 * @note If the component type you add is only available in
+	 * components v2, this method will automatically add the
+	 * m_using_components_v2 flag to your message.
 	 * 
 	 * @param c component to add
 	 * @return message& reference to self
