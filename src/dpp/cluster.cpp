@@ -210,7 +210,7 @@ void cluster::add_reconnect(uint32_t shard_id) {
 void cluster::start(start_type return_after) {
 
 	if (start_time != 0) {
-		throw dpp::logic_error("Cluster already started");
+		throw dpp::logic_exception("Cluster already started");
 	}
 
 	auto event_loop = [this]() -> void {
