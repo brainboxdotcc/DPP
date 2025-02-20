@@ -92,7 +92,7 @@ struct DPP_EXPORT socket_engine_poll : public socket_engine_base {
 			}
 
 			socket_events *eh = get_fd(fd);
-			if (eh == nullptr || eh->flags & WANT_DELETION) {
+			if (eh == nullptr) {
 				continue;
 			}
 
