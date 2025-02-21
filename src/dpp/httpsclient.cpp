@@ -56,6 +56,7 @@ void https_client::connect()
 		std::string lower_header = dpp::lowercase(k);
 		if (lower_header == "connection" || lower_header == "content-length" || lower_header == "host") {
 			owner->log(ll_warning, "Detected unnecessary duplicate header '" + k + "' in HTTP request to '" + hostname + "', which has been discarded.");
+			continue;
 		}
 		map_headers += k + ": " + v + "\r\n";
 	}
