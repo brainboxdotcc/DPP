@@ -53,7 +53,10 @@ void https_client::connect()
 	state = HTTPS_HEADERS;
 	std::string map_headers;
 	for (auto& [k,v] : request_headers) {
-		map_headers += k + ": " + v + "\r\n";
+		std::string lower_header = dpp::lowercase(k);
+		if (lower_header != "connection" && lower_header != "content-length" && lower_header != "host") {
+			map_headers += k + ": " + v + "\r\n";
+		}
 	}
 
 	if (this->sfd != SOCKET_ERROR) {
