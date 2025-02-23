@@ -53,13 +53,11 @@ jobs:
           - { arch: 'amd64', concurrency: 4, os: ubuntu-24.04, package: clang-18, cpp: clang++, version: 18, cmake-flags: '-DDPP_CORO=ON', cpack: 'no', ctest: 'no', mold: 'yes' }
           - { arch: 'amd64', concurrency: 4, os: ubuntu-24.04, package: 'clang-19 libc++-19-dev libc++abi-19-dev', cpp: clang++, version: 19, cmake-flags: '-DDPP_CORO=ON -DCMAKE_CXX_FLAGS="-stdlib=libc++" -DCMAKE_EXE_LINKER_FLAGS="-stdlib=libc++"', cpack: 'no', ctest: 'no', mold: 'yes', name-extra: ' libc++', llvm-apt: 'yes' }
           # g++
-          - { arch: 'amd64', concurrency: 4, os: ubuntu-24.04, package: g++-13, cpp: g++, version: 13, cmake-flags: '-DDPP_CORO=ON', cpack: 'no', ctest: 'no', mold: 'yes' }
+          - { arch: 'amd64', concurrency: 4, os: ubuntu-24.04, package: g++-13, cpp: g++, version: 13, cmake-flags: '-DDPP_CORO=ON', cpack: 'no', ctest: 'yes', mold: 'yes' }
           - { arch: 'amd64', concurrency: 4, os: ubuntu-24.04, package: g++-14, cpp: g++, version: 14, cmake-flags: '-DDPP_CORO=ON', cpack: 'no', ctest: 'no', mold: 'yes' }
           - { arch: 'amd64', concurrency: 4, os: ubuntu-22.04, package: g++-12, cpp: g++, version: 12, cmake-flags: '-DDPP_CORO=ON', cpack: 'no', ctest: 'no', mold: 'yes' }
           - { arch: 'amd64', concurrency: 4, os: ubuntu-22.04, package: g++-11, cpp: g++, version: 11, cmake-flags: '-DDPP_CORO=ON', cpack: 'no', ctest: 'no', mold: 'yes' }
           - { arch: 'amd64', concurrency: 4, os: ubuntu-22.04, package: g++-10, cpp: g++, version: 10, cmake-flags: '', cpack: 'yes', ctest: 'no', mold: 'yes' }
-          - { arch: 'amd64', concurrency: 4, os: ubuntu-20.04, package: g++-9, cpp: g++, version: 9, cmake-flags: '', cpack: 'no', ctest: 'no', mold: 'yes' }
-          - { arch: 'amd64', concurrency: 4, os: ubuntu-20.04, package: g++-8, cpp: g++, version: 8, cmake-flags: '', cpack: 'no', ctest: 'yes', mold: 'yes' }
           # Self hosted
           - { arch: 'arm7hf', concurrency: 4, os: [self-hosted, linux, ARM], package: g++-12, cpp: g++, version: 12, cmake-flags: '', cpack: 'yes', ctest: 'no', mold: 'no' }
           - { arch: 'arm64', concurrency: 4, os: [self-hosted, linux, ARM64], package: g++-12, cpp: g++, version: 12, cmake-flags: '', cpack: 'yes', ctest: 'no', mold: 'yes' }
@@ -247,7 +245,7 @@ jobs:
           # Replaced with self-hosted runner
           # - {name: "ARM64", os: ubuntu-20.04, cmake-options: -DCMAKE_TOOLCHAIN_FILE=cmake/ARM64ToolChain.cmake}
           # - {name: "ARMv7 HF", os: ubuntu-20.04, cmake-options: -DCMAKE_TOOLCHAIN_FILE=cmake/ARMv7ToolChain.cmake}
-          - {name: "Linux x86", os: ubuntu-20.04, cmake-options: -DCMAKE_TOOLCHAIN_FILE=cmake/LINUXx86ToolChain.cmake -DBUILD_VOICE_SUPPORT=OFF}
+          - {name: "Linux x86", os: ubuntu-24.04, cmake-options: -DCMAKE_TOOLCHAIN_FILE=cmake/LINUXx86ToolChain.cmake -DBUILD_VOICE_SUPPORT=OFF}
           - {name: "ARMv6", os: ubuntu-20.04, cmake-options: -DCMAKE_TOOLCHAIN_FILE=cmake/ARMv6ToolChain.cmake}
 
     name: ${{matrix.cfg.name}}
