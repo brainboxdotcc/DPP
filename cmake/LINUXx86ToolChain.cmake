@@ -15,7 +15,7 @@ SET(COMPILER_ROOT /usr/bin)
 
 INCLUDE_DIRECTORIES(/usr/include/i386-linux-gnu)
 
-SET(ZLIB_LIBRARY /lib/i386-linux-gnu/libz.so.1.2.11)
+SET(ZLIB_LIBRARY /lib/i386-linux-gnu/libz.so)
 SET(OPENSSL_CRYPTO_LIBRARY /usr/lib/i386-linux-gnu/libcrypto.so)
 SET(OPENSSL_SSL_LIBRARY /usr/lib/i386-linux-gnu/libssl.so)
 
