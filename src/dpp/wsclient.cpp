@@ -39,12 +39,12 @@ constexpr size_t WS_MAX_PAYLOAD_LENGTH_LARGE = 65535;
 constexpr size_t MAXHEADERSIZE = sizeof(uint64_t) + 2;
 
 websocket_client::websocket_client(cluster* creator, const std::string& hostname, const std::string& port, const std::string& urlpath, ws_opcode opcode)
-	: ssl_client(creator, hostname, port),
-	state(HTTP_HEADERS),
-	path(urlpath),
-	data_opcode(opcode),
-	timed_out(false),
-	timeout(time(nullptr) + 5)
+	: ssl_connection(creator, hostname, port),
+	  state(HTTP_HEADERS),
+	  path(urlpath),
+	  data_opcode(opcode),
+	  timed_out(false),
+	  timeout(time(nullptr) + 5)
 {
 	uint64_t k = (time(nullptr) * time(nullptr));
 	/* A 64 bit value as hex with leading zeroes is always 16 chars.
@@ -123,13 +123,13 @@ void websocket_client::write(const std::string_view data, ws_opcode _opcode)
 	}
 	if (state == HTTP_HEADERS) {
 		/* Simple write */
-		ssl_client::socket_write(data);
+		ssl_connection::socket_write(data);
 	} else {
 		unsigned char out[MAXHEADERSIZE];
 		size_t s = this->fill_header(out, data.length(), _opcode == OP_AUTO ? this->data_opcode : _opcode);
 		std::string header((const char*)out, s);
-		ssl_client::socket_write(header);
-		ssl_client::socket_write(data);
+		ssl_connection::socket_write(header);
+		ssl_connection::socket_write(data);
 	}
 }
 
@@ -304,8 +304,8 @@ void websocket_client::one_second_timer()
 		std::string payload = "keepalive";
 		size_t s = this->fill_header(out, payload.length(), OP_PING);
 		std::string header((const char*)out, s);
-		ssl_client::socket_write(header);
-		ssl_client::socket_write(payload);
+		ssl_connection::socket_write(header);
+		ssl_connection::socket_write(payload);
 	}
 
 	/* Handle timeouts for connect(), SSL negotiation and HTTP negotiation */
@@ -332,8 +332,8 @@ void websocket_client::handle_ping(const std::string &payload)
 	unsigned char out[MAXHEADERSIZE];
 	size_t s = this->fill_header(out, payload.length(), OP_PONG);
 	std::string header((const char*)out, s);
-	ssl_client::socket_write(header);
-	ssl_client::socket_write(payload);
+	ssl_connection::socket_write(header);
+	ssl_connection::socket_write(payload);
 }
 
 void websocket_client::send_close_packet()
@@ -347,8 +347,8 @@ void websocket_client::send_close_packet()
 
 	size_t s = this->fill_header(out, payload.length(), OP_CLOSE);
 	std::string header((const char*)out, s);
-	ssl_client::socket_write(header);
-	ssl_client::socket_write(payload);
+	ssl_connection::socket_write(header);
+	ssl_connection::socket_write(payload);
 }
 
 void websocket_client::error(uint32_t errorcode)
@@ -364,7 +364,7 @@ void websocket_client::close()
 	log(ll_trace, "websocket_client::close()");
 	this->on_disconnect();
 	this->state = HTTP_HEADERS;
-	ssl_client::close();
+	ssl_connection::close();
 }
 
 }

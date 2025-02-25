@@ -122,7 +122,7 @@ void discord_client::on_disconnect()
 	if (sfd != INVALID_SOCKET) {
 		log(dpp::ll_debug, "Lost connection to websocket on shard " + std::to_string(shard_id) + ", reconnecting...");
 	}
-	ssl_client::close();
+	ssl_connection::close();
 	owner->add_reconnect(this->shard_id);
 }
 
@@ -140,7 +140,7 @@ void discord_client::run()
 {
 	ready = false;
 	message_queue.clear();
-	ssl_client::read_loop();
+	ssl_connection::read_loop();
 }
 
 bool discord_client::handle_frame(const std::string &buffer, ws_opcode opcode)

@@ -32,18 +32,18 @@
 namespace dpp {
 
 https_client::https_client(cluster* creator, const std::string &hostname, uint16_t port,  const std::string &urlpath, const std::string &verb, const std::string &req_body, const http_headers& extra_headers, bool plaintext_connection, uint16_t request_timeout, const std::string &protocol, https_client_completion_event done)
-	: ssl_client(creator, hostname, std::to_string(port), plaintext_connection, false),
-	request_type(verb),
-	path(urlpath),
-	request_body(req_body),
-	content_length(0),
-	request_headers(extra_headers),
-	status(0),
-	http_protocol(protocol),
-	timeout(time(nullptr) + request_timeout),
-	timed_out(false),
-	completed(done),
-	state(HTTPS_HEADERS)
+	: ssl_connection(creator, hostname, std::to_string(port), plaintext_connection, false),
+	  request_type(verb),
+	  path(urlpath),
+	  request_body(req_body),
+	  content_length(0),
+	  request_headers(extra_headers),
+	  status(0),
+	  http_protocol(protocol),
+	  timeout(time(nullptr) + request_timeout),
+	  timed_out(false),
+	  completed(done),
+	  state(HTTPS_HEADERS)
 {
 	https_client::connect();
 }
@@ -352,12 +352,12 @@ void https_client::close() {
 		}
 	}
 	state = HTTPS_DONE;
-	ssl_client::close();
+	ssl_connection::close();
 }
 
 https_client::~https_client() {
 	if (sfd != INVALID_SOCKET) {
-		ssl_client::close();
+		ssl_connection::close();
 	}
 }
 

@@ -102,7 +102,7 @@ enum ws_opcode : uint8_t {
 /**
  * @brief Implements a websocket client based on the SSL client
  */
-class DPP_EXPORT websocket_client : public ssl_client {
+class DPP_EXPORT websocket_client : public ssl_connection {
 	/**
 	 * @brief Connection key used in the HTTP headers
 	 */

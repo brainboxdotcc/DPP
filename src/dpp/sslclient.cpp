@@ -137,7 +137,7 @@ bool set_nonblocking(dpp::socket sockfd, bool non_blocking)
 /**
  * @brief Start connecting to a TCP socket.
  * This simply calls connect() and checks for error return, as the timeout is now handled in the main
- * IO events for the ssl_client class.
+ * IO events for the ssl_connection class.
  * 
  * @param sockfd socket descriptor
  * @param addr address to connect to
@@ -190,11 +190,11 @@ void set_signal_handler(int signal)
 }
 #endif
 
-uint64_t ssl_client::get_unique_id() const {
+uint64_t ssl_connection::get_unique_id() const {
 	return unique_id;
 }
 
-ssl_client::ssl_client(cluster* creator, const std::string &_hostname, const std::string &_port, bool plaintext_downgrade, bool reuse) :
+ssl_connection::ssl_connection(cluster* creator, const std::string &_hostname, const std::string &_port, bool plaintext_downgrade, bool reuse) :
 	is_server(false),
 	sfd(INVALID_SOCKET),
 	ssl(nullptr),
@@ -216,7 +216,7 @@ ssl_client::ssl_client(cluster* creator, const std::string &_hostname, const std
 		ssl = new openssl_connection();
 	}
 	try {
-		ssl_client::connect();
+		ssl_connection::connect();
 	}
 	catch (std::exception&) {
 		cleanup();
@@ -224,7 +224,7 @@ ssl_client::ssl_client(cluster* creator, const std::string &_hostname, const std
 	}
 }
 
-ssl_client::ssl_client(cluster* creator, socket fd, bool plaintext_downgrade, const std::string& private_key, const std::string& public_key) :
+ssl_connection::ssl_connection(cluster* creator, socket fd, bool plaintext_downgrade, const std::string& private_key, const std::string& public_key) :
 	is_server(true),
 	sfd(fd),
 	ssl(nullptr),
@@ -248,7 +248,7 @@ ssl_client::ssl_client(cluster* creator, socket fd, bool plaintext_downgrade, co
 		ssl = new openssl_connection();
 	}
 	try {
-		ssl_client::connect();
+		ssl_connection::connect();
 	}
 	catch (std::exception&) {
 		cleanup();
@@ -257,7 +257,7 @@ ssl_client::ssl_client(cluster* creator, socket fd, bool plaintext_downgrade, co
 }
 
 /* SSL Client constructor throws std::runtime_error if it can't allocate a socket or call connect() */
-void ssl_client::connect() {
+void ssl_connection::connect() {
 	/* Resolve hostname to IP */
 	int err = 0;
 	const dns_cache_entry* addr = resolve_hostname(hostname, port);
@@ -274,7 +274,7 @@ void ssl_client::connect() {
 	}
 }
 
-void ssl_client::socket_write(const std::string_view data) {
+void ssl_connection::socket_write(const std::string_view data) {
 	/* Because this is a non-blocking system we never write immediately. We append to the buffer,
 	 * which writes later.
 	 */
@@ -283,17 +283,17 @@ void ssl_client::socket_write(const std::string_view data) {
 	owner->socketengine->inplace_modify_fd(sfd, WANT_WRITE);
 }
 
-void ssl_client::one_second_timer() {
+void ssl_connection::one_second_timer() {
 }
 
-std::string ssl_client::get_cipher() {
+std::string ssl_connection::get_cipher() {
 	return cipher;
 }
 
-void ssl_client::log(dpp::loglevel severity, const std::string &msg) const {
+void ssl_connection::log(dpp::loglevel severity, const std::string &msg) const {
 }
 
-void ssl_client::complete_handshake(const socket_events* ev)
+void ssl_connection::complete_handshake(const socket_events* ev)
 {
 	if (!ssl || !ssl->ssl) {
 		return;
@@ -336,13 +336,13 @@ void ssl_client::complete_handshake(const socket_events* ev)
 
 }
 
-void ssl_client::do_raw_trace(const std::string& message) const {
+void ssl_connection::do_raw_trace(const std::string& message) const {
 	if (raw_trace) {
 		log(ll_trace, "RAWTRACE" + message);
 	}
 }
 
-void ssl_client::on_read(socket fd, const struct socket_events& ev) {
+void ssl_connection::on_read(socket fd, const struct socket_events& ev) {
 
 	if (sfd == INVALID_SOCKET) {
 		return;
@@ -428,7 +428,7 @@ void ssl_client::on_read(socket fd, const struct socket_events& ev) {
 	}
 }
 
-void ssl_client::on_write(socket fd, const struct socket_events& e) {
+void ssl_connection::on_write(socket fd, const struct socket_events& e) {
 
 	if (sfd == INVALID_SOCKET) {
 		return;
@@ -612,11 +612,11 @@ void ssl_client::on_write(socket fd, const struct socket_events& e) {
 	}
 }
 
-void ssl_client::on_error(socket fd, const struct socket_events&, int error_code) {
+void ssl_connection::on_error(socket fd, const struct socket_events&, int error_code) {
 	this->close();
 }
 
-void ssl_client::read_loop() {
+void ssl_connection::read_loop() {
 	auto setup_events = [this]() {
 		dpp::socket_events events(
 			sfd,
@@ -660,7 +660,7 @@ void ssl_client::read_loop() {
 				close_socket(sfd);
 				owner->socketengine->delete_socket(sfd);
 				try {
-					ssl_client::connect();
+					ssl_connection::connect();
 				}
 				catch (const std::exception& e) {
 					do_raw_trace("(OUT): connect() exception: " + std::string(e.what()));
@@ -673,19 +673,19 @@ void ssl_client::read_loop() {
 	}
 }
 
-uint64_t ssl_client::get_bytes_out() {
+uint64_t ssl_connection::get_bytes_out() {
 	return bytes_out;
 }
 
-uint64_t ssl_client::get_bytes_in() {
+uint64_t ssl_connection::get_bytes_in() {
 	return bytes_in;
 }
 
-bool ssl_client::handle_buffer(std::string &buffer) {
+bool ssl_connection::handle_buffer(std::string &buffer) {
 	return true;
 }
 
-void ssl_client::close() {
+void ssl_connection::close() {
 	/**
 	 * Many of the values here are reset to initial values in the case
 	 * we want to reconnect the socket after closing it. This is not something
@@ -704,7 +704,7 @@ void ssl_client::close() {
 	last_tick = time(nullptr);
 	bytes_in = bytes_out = 0;
 	if (sfd != INVALID_SOCKET) {
-		log(ll_trace, "ssl_client::close() with sfd");
+		log(ll_trace, "ssl_connection::close() with sfd");
 		owner->socketengine->delete_socket(sfd);
 		close_socket(sfd);
 		sfd = INVALID_SOCKET;
@@ -713,11 +713,11 @@ void ssl_client::close() {
 	buffer.clear();
 }
 
-void ssl_client::cleanup() {
+void ssl_connection::cleanup() {
 	this->close();
 }
 
-ssl_client::~ssl_client() {
+ssl_connection::~ssl_connection() {
 	cleanup();
 	if (timer_handle) {
 		owner->stop_timer(timer_handle);

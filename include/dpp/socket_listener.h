@@ -41,9 +41,9 @@ enum socket_listener_type : uint8_t {
 /**
  * @brief Listens on a TCP socket for new connections, and whenever a new connection is
  * received, accept it and spawn a new connection of type T.
- * @tparam T type for socket connection, must be derived from ssl_client
+ * @tparam T type for socket connection, must be derived from ssl_connection
  */
-template<typename T, typename = std::enable_if_t<std::is_base_of_v<ssl_client, T>>>
+template<typename T, typename = std::enable_if_t<std::is_base_of_v<ssl_connection, T>>>
 struct socket_listener {
 	socket fd{INVALID_SOCKET};
 	std::unordered_map<socket, std::unique_ptr<T>> connections;

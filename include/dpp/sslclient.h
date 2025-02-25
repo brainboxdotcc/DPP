@@ -83,7 +83,7 @@ constexpr int MAX_RETRIES{4};
  * execute in an infinite loop until the socket disconnects. This is intended
  * to be run within a std::thread.
  */
-class DPP_EXPORT ssl_client
+class DPP_EXPORT ssl_connection
 {
 private:
 	/**
@@ -308,7 +308,7 @@ public:
 	 * connection to non-Discord addresses such as within dpp::cluster::request().
 	 * @throw dpp::exception Failed to initialise connection
 	 */
-	ssl_client(cluster* creator, const std::string &_hostname, const std::string &_port = "443", bool plaintext_downgrade = false, bool reuse = false);
+	ssl_connection(cluster* creator, const std::string &_hostname, const std::string &_port = "443", bool plaintext_downgrade = false, bool reuse = false);
 
 	/**
 	 * @brief Accept a new connection from listen()/accept() socket
@@ -318,7 +318,7 @@ public:
 	 * @param private_key if plaintext_downgrade is set to false, a private key PEM file for SSL connections
 	 * @param public_key if plaintext_downgrade is set to false, a public key PEM file for SSL connections
 	 */
-	ssl_client(cluster* creator, socket fd, bool plaintext_downgrade = false, const std::string& private_key = "", const std::string& public_key = "");
+	ssl_connection(cluster* creator, socket fd, bool plaintext_downgrade = false, const std::string& private_key = "", const std::string& public_key = "");
 
 	/**
 	 * @brief Set up non blocking I/O and configure on_read, on_write and on_error.
@@ -327,9 +327,9 @@ public:
 	void read_loop();
 
 	/**
-	 * @brief Destroy the ssl_client object
+	 * @brief Destroy the ssl_connection object
 	 */
-	virtual ~ssl_client();
+	virtual ~ssl_connection();
 
 	/**
 	 * @brief Handle input from the input buffer. This function will be called until
