@@ -76,3 +76,4 @@
 #include <dpp/collector.h>
 #include <dpp/bignum.h>
 #include <dpp/thread_pool.h>
+#include <dpp/signature_verifier.h>

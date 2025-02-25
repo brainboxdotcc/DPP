@@ -205,6 +205,19 @@ struct DPP_EXPORT log_t : public event_dispatch_t {
 	std::string message = {};
 };
 
+/**
+ * @brief Closure of socket (removal from socket engine)
+ */
+struct DPP_EXPORT socket_close_t : public event_dispatch_t {
+        using event_dispatch_t::event_dispatch_t;
+        using event_dispatch_t::operator=;
+
+	/**
+	 * @brief Socket file descriptor
+	 */
+	socket fd{INVALID_SOCKET};
+};
+
 namespace utility {
 	/**
 	 * @brief Get a default logger that outputs to std::cout.

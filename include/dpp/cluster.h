@@ -657,6 +657,14 @@ public:
 	event_router_t<log_t> on_log;
 
 	/**
+	 * @brief Called when a file descriptor is removed from the socket engine
+	 *
+	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
+	 * The function signature for this event takes a single `const` reference of type socket_close_t&, and returns void.
+	 */
+	event_router_t<socket_close_t> on_socket_close;
+
+	/**
 	 * @brief on guild join request delete.
 	 * Triggered when a user declines the membership screening questionnaire for a guild.
 	 *

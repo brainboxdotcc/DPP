@@ -185,6 +185,11 @@ protected:
 	bool remove_socket(dpp::socket fd) final {
 		struct epoll_event ev{};
 		epoll_ctl(epoll_handle, EPOLL_CTL_DEL, fd, &ev);
+		if (!owner->on_socket_close.empty()) {
+			socket_close_t event(owner, 0, "");
+			event.fd = fd;
+			owner->on_socket_close.call(event);
+		}
 		return true;
 	}
 };

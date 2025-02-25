@@ -197,6 +197,11 @@ protected:
 		for (auto i = poll_set.begin(); i != poll_set.end(); ++i) {
 			if (i->fd == fd) {
 				poll_set.erase(i);
+				if (!owner->on_socket_close.empty()) {
+					socket_close_t event(owner, 0, "");
+					event.fd = fd;
+					owner->on_socket_close.call(event);
+				}
 				return true;
 			}
 		}

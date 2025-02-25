@@ -195,6 +195,7 @@ uint64_t ssl_client::get_unique_id() const {
 }
 
 ssl_client::ssl_client(cluster* creator, const std::string &_hostname, const std::string &_port, bool plaintext_downgrade, bool reuse) :
+	is_server(false),
 	sfd(INVALID_SOCKET),
 	ssl(nullptr),
 	last_tick(time(nullptr)),
@@ -208,6 +209,38 @@ ssl_client::ssl_client(cluster* creator, const std::string &_hostname, const std
 	unique_id(last_unique_id++),
 	keepalive(reuse),
 	owner(creator)
+{
+	if (plaintext) {
+		ssl = nullptr;
+	} else {
+		ssl = new openssl_connection();
+	}
+	try {
+		ssl_client::connect();
+	}
+	catch (std::exception&) {
+		cleanup();
+		throw;
+	}
+}
+
+ssl_client::ssl_client(cluster* creator, socket fd, bool plaintext_downgrade, const std::string& private_key, const std::string& public_key) :
+	is_server(true),
+	sfd(fd),
+	ssl(nullptr),
+	last_tick(time(nullptr)),
+	start(time(nullptr)),
+	hostname(""),
+	port(0),
+	bytes_out(0),
+	bytes_in(0),
+	plaintext(plaintext_downgrade),
+	timer_handle(0),
+	unique_id(last_unique_id++),
+	keepalive(false),
+	owner(creator),
+	private_key_file(private_key),
+	public_key_file(public_key)
 {
 	if (plaintext) {
 		ssl = nullptr;
@@ -419,12 +452,21 @@ void ssl_client::on_write(socket fd, const struct socket_events& e) {
 		/* Each thread needs a context, but we don't need to make a new one for each connection */
 		if (!openssl_context) {
 			/* Create new client-method instance */
-			const SSL_METHOD *method = TLS_client_method();
+			const SSL_METHOD *method = this->is_server ? TLS_server_method() : TLS_client_method();
 
 			/* Create SSL context */
 			openssl_context.reset(SSL_CTX_new(method));
 			if (!openssl_context) {
 				throw dpp::connection_exception(err_ssl_context, "Failed to create SSL client context!");
+			}
+
+			if (is_server) {
+				if (SSL_CTX_use_certificate_file(openssl_context.get(), public_key_file.c_str(), SSL_FILETYPE_PEM) <= 0) {
+					throw dpp::connection_exception(err_ssl_context, "Failed to set public key certificate");
+				}
+				if (SSL_CTX_use_PrivateKey_file(openssl_context.get(), private_key_file.c_str(), SSL_FILETYPE_PEM) <= 0 ) {
+					throw dpp::connection_exception(err_ssl_context, "Failed to set private key certificate");
+				}
 			}
 
 			/* This sets the allowed SSL/TLS versions for the connection.
@@ -447,13 +489,16 @@ void ssl_client::on_write(socket fd, const struct socket_events& e) {
 
 			/* Associate the SSL session with the file descriptor, and set it as connecting */
 			SSL_set_fd(ssl->ssl, (int) sfd);
-			SSL_set_connect_state(ssl->ssl);
-
-			/* Server name identification (SNI)
-			 * This is needed for modern HTTPS and tells SSL which virtual host to connect a
-			 * socket to: https://www.cloudflare.com/en-gb/learning/ssl/what-is-sni/
-			 */
-			SSL_set_tlsext_host_name(ssl->ssl, hostname.c_str());
+			if (this->is_server) {
+				SSL_set_accept_state(ssl->ssl);
+			} else {
+				SSL_set_connect_state(ssl->ssl);
+				/* Server name identification (SNI)
+				 * This is needed for modern HTTPS and tells SSL which virtual host to connect a
+				 * socket to: https://www.cloudflare.com/en-gb/learning/ssl/what-is-sni/
+				 */
+				SSL_set_tlsext_host_name(ssl->ssl, hostname.c_str());
+			}
 		}
 
 		/* If this completes, we fall straight through into if (connected) */

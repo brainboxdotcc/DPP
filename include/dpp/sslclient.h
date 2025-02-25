@@ -121,6 +121,11 @@ private:
 	 */
 	char server_to_client_buffer[DPP_BUFSIZE];
 
+	/**
+	 * @brief True if this connection is a server inbound connection from accept()
+	 */
+	bool is_server = false;
+
 protected:
 	/**
 	 * @brief Input buffer received from socket
@@ -283,6 +288,16 @@ public:
 	class cluster* owner;
 
 	/**
+	 * @brief Private key PEM file path for inbound SSL connections
+	 */
+	std::string private_key_file;
+
+	/**
+	 * @brief Public key PEM file path for inbound SSL connections
+	 */
+	std::string public_key_file;
+
+	/**
 	 * @brief Connect to a specified host and port. Throws std::runtime_error on fatal error.
 	 * @param creator Creating cluster
 	 * @param _hostname The hostname to connect to
@@ -294,6 +309,16 @@ public:
 	 * @throw dpp::exception Failed to initialise connection
 	 */
 	ssl_client(cluster* creator, const std::string &_hostname, const std::string &_port = "443", bool plaintext_downgrade = false, bool reuse = false);
+
+	/**
+	 * @brief Accept a new connection from listen()/accept() socket
+	 * @param creator Creating cluster
+	 * @param fd Socket file descriptor assigned by accept()
+	 * @param plaintext_downgrade Set to true to connect using plaintext only, without initialising SSL.
+	 * @param private_key if plaintext_downgrade is set to false, a private key PEM file for SSL connections
+	 * @param public_key if plaintext_downgrade is set to false, a public key PEM file for SSL connections
+	 */
+	ssl_client(cluster* creator, socket fd, bool plaintext_downgrade = false, const std::string& private_key = "", const std::string& public_key = "");
 
 	/**
 	 * @brief Set up non blocking I/O and configure on_read, on_write and on_error.
