@@ -68,9 +68,19 @@ uint64_t last_unique_id{1};
 class openssl_connection {
 public:
 	/**
+	 * @brief OpenSSL context
+	 */
+	SSL_CTX* ctx{nullptr};
+	/**
 	 * @brief OpenSSL session
 	 */
 	SSL* ssl{nullptr};
+
+	~openssl_connection() {
+		if (ctx) {
+			SSL_CTX_free(ctx);
+		}
+	}
 };
 
 /**
@@ -81,22 +91,6 @@ struct keepalive_cache_t {
 	openssl_connection* ssl;
 	dpp::socket sfd;
 };
-
-/**
- * @brief Custom deleter for SSL_CTX
- */
-class openssl_context_deleter {
-public:
-	void operator()(SSL_CTX* context) const noexcept {
-		SSL_CTX_free(context);
-	}
-};
-
-/**
- * @brief OpenSSL context.
- * Each thread has one of these so it is thread_local.
- */
-thread_local std::unique_ptr<SSL_CTX, openssl_context_deleter> openssl_context;
 
 bool close_socket(dpp::socket sfd)
 {
@@ -132,13 +126,6 @@ bool set_nonblocking(dpp::socket sockfd, bool non_blocking)
 	}
 #endif
 	return true;
-}
-
-bool set_reuse_addr(dpp::socket fd, bool reuse)
-{
-	const int enable = reuse;
-	return (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) >= 0 &&
-		setsockopt(fd, SOL_SOCKET, SO_REUSEPORT, &enable, sizeof(int)) >= 0);
 }
 
 /**
@@ -257,9 +244,11 @@ ssl_connection::ssl_connection(cluster* creator, socket fd, bool plaintext_downg
 	if (!set_nonblocking(sfd, true)) {
 		throw dpp::connection_exception(err_nonblocking_failure, "Can't switch socket to non-blocking mode!");
 	}
-	set_reuse_addr(sfd, true);
 
 	std::cout << "ssl_connection server conn done\n";
+}
+
+void ssl_connection::on_buffer_drained() {
 }
 
 /* SSL Client constructor throws std::runtime_error if it can't allocate a socket or call connect() */
@@ -456,21 +445,21 @@ void ssl_connection::on_write(socket fd, const struct socket_events& e) {
 		 */
 
 		/* Each thread needs a context, but we don't need to make a new one for each connection */
-		if (!openssl_context) {
+		if (ssl != nullptr && ssl->ctx == nullptr) {
 			/* Create new client-method instance */
 			const SSL_METHOD *method = this->is_server ? TLS_server_method() : TLS_client_method();
 
 			/* Create SSL context */
-			openssl_context.reset(SSL_CTX_new(method));
-			if (!openssl_context) {
+			ssl->ctx = SSL_CTX_new(method);
+			if (!ssl->ctx) {
 				throw dpp::connection_exception(err_ssl_context, "Failed to create SSL client context!");
 			}
 
 			if (is_server) {
-				if (SSL_CTX_use_certificate_file(openssl_context.get(), public_key_file.c_str(), SSL_FILETYPE_PEM) <= 0) {
+				if (SSL_CTX_use_certificate_file(ssl->ctx, public_key_file.c_str(), SSL_FILETYPE_PEM) <= 0) {
 					throw dpp::connection_exception(err_ssl_context, "Failed to set public key certificate");
 				}
-				if (SSL_CTX_use_PrivateKey_file(openssl_context.get(), private_key_file.c_str(), SSL_FILETYPE_PEM) <= 0 ) {
+				if (SSL_CTX_use_PrivateKey_file(ssl->ctx, private_key_file.c_str(), SSL_FILETYPE_PEM) <= 0 ) {
 					throw dpp::connection_exception(err_ssl_context, "Failed to set private key certificate");
 				}
 			}
@@ -479,7 +468,7 @@ void ssl_connection::on_write(socket fd, const struct socket_events& e) {
 			 * Do not allow SSL 3.0, TLS 1.0 or 1.1
 			 * https://www.packetlabs.net/posts/tls-1-1-no-longer-secure/
 			 */
-			if (!SSL_CTX_set_min_proto_version(openssl_context.get(), TLS1_2_VERSION)) {
+			if (!SSL_CTX_set_min_proto_version(ssl->ctx, TLS1_2_VERSION)) {
 				throw dpp::connection_exception(err_ssl_version, "Failed to set minimum SSL version!");
 			}
 		}
@@ -487,8 +476,7 @@ void ssl_connection::on_write(socket fd, const struct socket_events& e) {
 			/* Now we can create SSL session.
 			 * These are unique to each connection, using the context.
 			 */
-			std::lock_guard<std::mutex> lock(ssl_mutex);
-			ssl->ssl = SSL_new(openssl_context.get());
+			ssl->ssl = SSL_new(ssl->ctx);
 			if (ssl->ssl == nullptr) {
 				throw dpp::connection_exception(err_ssl_new, "SSL_new failed!");
 			}
@@ -539,6 +527,9 @@ void ssl_connection::on_write(socket fd, const struct socket_events& e) {
 				client_to_server_length -= r;
 				client_to_server_offset += r;
 				bytes_out += r;
+				if (obuffer.empty()) {
+					on_buffer_drained();
+				}
 			} else {
 				/* Spurious write event for empty buffer */
 				do_raw_trace("(OUT,PLAIN): <NOT WRITING EMPTY BUFFER>");
@@ -580,6 +571,8 @@ void ssl_connection::on_write(socket fd, const struct socket_events& e) {
 						se.flags = WANT_READ | WANT_WRITE | WANT_ERROR;
 						owner->socketengine->update_socket(se);
 						do_raw_trace("(OUT,SSL): <MORE BUFFER REMAINS>");
+					} else {
+						on_buffer_drained();
 					}
 					do_raw_trace("(OUT,SSL): <OK>");
 					break;
@@ -697,9 +690,7 @@ void ssl_connection::close() {
 	 * we want to reconnect the socket after closing it. This is not something
 	 * that is done often.
 	 */
-	std::lock_guard<std::mutex> out_lock(out_mutex);
 	if (!plaintext) {
-		std::lock_guard<std::mutex> lock(ssl_mutex);
 		if (ssl != nullptr && ssl->ssl != nullptr) {
 			SSL_free(ssl->ssl);
 			ssl->ssl = nullptr;

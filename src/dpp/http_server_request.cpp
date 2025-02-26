@@ -99,6 +99,7 @@ const std::multimap<std::string, std::string> http_server_request::get_headers()
 
 bool http_server_request::handle_buffer(std::string &buffer)
 {
+	std::cout << "Buffer: " << buffer << "\n";
 	bool state_changed = false;
 	do {
 		state_changed = false;
@@ -110,8 +111,6 @@ bool http_server_request::handle_buffer(std::string &buffer)
 					timeout += 10;
 
 					/* Got all headers, proceed to new state */
-
-					std::string unparsed = buffer;
 
 					/* Get headers string */
 					std::string headers = buffer.substr(0, buffer.find("\r\n\r\n"));
@@ -137,7 +136,7 @@ bool http_server_request::handle_buffer(std::string &buffer)
 
 					h.erase(h.begin());
 
-					if (!protocol.starts_with("HTTP/")) {
+					if (protocol.substr(0, 5) != "HTTP/") {
 						return false;
 					}
 
@@ -153,6 +152,7 @@ bool http_server_request::handle_buffer(std::string &buffer)
 							std::transform(key.begin(), key.end(), key.begin(), [](unsigned char c){
 								return std::tolower(c);
 							});
+							std::cout << "Add header " << key << ": " << value << "\n";
 							request_headers.emplace(key, value);
 						}
 					}
@@ -176,11 +176,10 @@ bool http_server_request::handle_buffer(std::string &buffer)
 			case HTTPS_DONE:
 				if (handler) {
 					handler(this);
+					socket_write(get_response());
 					handler = {};
 				}
-				this->close();
-				return false;
-			break;
+				return true;
 			default:
 				return false;
 		}
@@ -188,18 +187,39 @@ bool http_server_request::handle_buffer(std::string &buffer)
 	return true;
 }
 
-
-void http_server_request::set_status(uint16_t new_status) {
+void http_server_request::on_buffer_drained() {
+	if (state == HTTPS_DONE && status > 0) {
+		this->close();
+	}
 }
 
-void http_server_request::set_content(const std::string& new_content) {
+
+void http_server_request::set_status(uint16_t new_status) {
+	status = new_status;
+}
+
+void http_server_request::set_response_body(const std::string& new_content) {
+	response_body = new_content;
+}
+
+std::string http_server_request::get_response_body() const {
+	return response_body;
+}
+
+std::string http_server_request::get_request_body() const {
+	return request_body;
 }
 
 void http_server_request::set_response_header(const std::string& header, const std::string& value) {
+	response_headers.emplace(header, value);
 }
 
-http_state http_server_request::get_state() {
+http_state http_server_request::get_state() const {
 	return this->state;
+}
+
+uint16_t http_server_request::get_status() const {
+	return this->status;
 }
 
 void http_server_request::one_second_timer() {
@@ -215,13 +235,18 @@ void http_server_request::one_second_timer() {
 	}
 }
 
-void http_server_request::close() {
-	if (state != HTTPS_DONE) {
-		if (handler) {
-			handler(this);
-			handler = {};
-		}
+std::string http_server_request::get_response() {
+	std::string response = "HTTP/1.0 " + std::to_string(status) + " OK\r\n";
+	set_response_header("Content-Length", std::to_string(response_body.length()));
+	for (const auto& header : response_headers) {
+		response += header.first + ": " + header.second + "\r\n";
 	}
+	response += "\r\n";
+	response += response_body;
+	return response;
+}
+
+void http_server_request::close() {
 	state = HTTPS_DONE;
 	ssl_connection::close();
 }

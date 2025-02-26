@@ -77,6 +77,11 @@ class DPP_EXPORT http_server_request : public ssl_connection {
 	 */
 	http_server_request_event handler{};
 
+	/**
+	 * @brief Response body
+	 */
+	std::string response_body;
+
 protected:
 
 	/**
@@ -85,9 +90,16 @@ protected:
 	http_state state;
 
 	/**
+	 * @brief HTTP status code for response
+	 */
+	uint16_t status{0};
+
+	/**
 	 * @brief Start the connection
 	 */
 	virtual void connect() override;
+
+	void on_buffer_drained() override;
 
 public:
 	/**
@@ -99,13 +111,42 @@ public:
 	 * @brief Get request state
 	 * @return request state
 	 */
-	http_state get_state();
+	http_state get_state() const;
+
+	/**
+	 * @brief Get current response body
+	 * @return response body
+	 */
+	std::string get_response_body() const;
+
+	/**
+	 * @brief Get current request body
+	 * @return request body
+	 */
+	std::string get_request_body() const;
+
+	/**
+	 * @brief Get current status code
+	 * @return status code
+	 */
+	uint16_t get_status() const;
 
 	/**
 	 * @brief Content length sent by client
 	 */
-	unsigned long content_length{ULLONG_MAX};
+	uint64_t content_length{ULLONG_MAX};
 
+	/**
+	 * @brief Construct a new server request object.
+	 * Server request objects are instantiated for an incoming server connection, as such they already
+	 * have a file descriptor.
+	 * @param creator creating owner
+	 * @param fd file descriptor
+	 * @param plaintext_downgrade true if plaintext, false if SSL
+	 * @param private_key if SSL, the path to the private key PEM
+	 * @param public_key if SSL, the path to the public key PEM
+	 * @param handle_request request handler callback
+	 */
         http_server_request(cluster* creator, socket fd, bool plaintext_downgrade, const std::string& private_key, const std::string& public_key, http_server_request_event handle_request);
 
 	/**
@@ -176,7 +217,7 @@ public:
 	 * 
 	 * @param new_content response content
 	 */
-	void set_content(const std::string& new_content);
+	void set_response_body(const std::string& new_content);
 
 	/**
 	 * @brief Set the response HTTP status, e.g.
@@ -185,6 +226,11 @@ public:
 	 * @param new_status HTTP status
 	 */
 	void set_status(uint16_t new_status);
+
+	/**
+	 * @brief Get whole response as a string
+	 */
+	std::string get_response();
 };
 
 }

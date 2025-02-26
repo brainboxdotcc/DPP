@@ -75,7 +75,6 @@ constexpr int ERROR_STATUS{-1};
  */
 constexpr int MAX_RETRIES{4};
 
-
 /**
  * @brief Implements a simple non-blocking SSL stream connection.
  */
@@ -235,6 +234,8 @@ protected:
 	 * @param message debug message
 	 */
 	void do_raw_trace(const std::string& message) const;
+
+	virtual void on_buffer_drained();
 
 public:
 	/**

@@ -45,7 +45,7 @@ enum socket_listener_type : uint8_t {
  */
 template<typename T, typename = std::enable_if_t<std::is_base_of_v<ssl_connection, T>>>
 struct socket_listener {
-	socket fd{INVALID_SOCKET};
+	raii_socket fd;
 	std::unordered_map<socket, std::unique_ptr<T>> connections;
 	cluster* creator{nullptr};
 	bool plaintext{true};
@@ -55,54 +55,43 @@ struct socket_listener {
 	socket_events events;
 
 	socket_listener(cluster* owner, const std::string_view address, uint16_t port, socket_listener_type type = li_plaintext, const std::string& private_key = "", const std::string& public_key = "")
-	: creator(owner), plaintext(type == li_plaintext), private_key_file(private_key), public_key_file(public_key)
+	: fd(rst_tcp), creator(owner), plaintext(type == li_plaintext), private_key_file(private_key), public_key_file(public_key)
 	{
-		std::cout << "Here\n";
-		if ((fd = ::socket(AF_INET, SOCK_STREAM, 0)) >= 0) {
-			std::cout << "here2\n";
-			address_t bind_addr(address, port);
-			if (bind(fd, bind_addr.get_socket_address(), bind_addr.size()) < 0) {
-				// error
-				std::cout << "error 1\n";
-			}
-			if (::listen(fd, SOMAXCONN) < 0) {
-				// error
-				std::cout << "error " << errno << "\n";
-			}
-			events = dpp::socket_events(
-				fd,
-				WANT_READ | WANT_ERROR,
-				[this](socket fd, const struct socket_events &e) {
-					handle_accept(fd, e);
-				},
-				[this](socket, const struct socket_events) { },
-				[this](socket, const struct socket_events, int) {
-					std::cout << "error 3\n";
-				}
-			);
-			owner->socketengine->register_socket(events);
-
-			close_event = creator->on_socket_close([this](const socket_close_t& event) {
-				connections.erase(event.fd);
-			});
+		fd.set_option<int>(SOL_SOCKET, SO_REUSEADDR, 1);
+		if (!fd.bind(address_t(address, port))) {
+			// error
+			throw dpp::connection_exception("Could not bind to " + std::string(address) + ":" + std::to_string(port));
 		}
+		if (!fd.listen()) {
+			// error
+			throw dpp::connection_exception("Could not listen for connections on " + std::string(address) + ":" + std::to_string(port));
+		}
+		events = dpp::socket_events(
+			fd.fd,
+			WANT_READ | WANT_ERROR,
+			[this](socket sfd, const struct socket_events &e) {
+				handle_accept(sfd, e);
+			},
+			[this](socket, const struct socket_events&) { },
+			[this](socket, const struct socket_events&, int) { }
+		);
+		owner->socketengine->register_socket(events);
+
+		close_event = creator->on_socket_close([this](const socket_close_t& event) {
+			connections.erase(event.fd);
+		});
 	}
 
 
 	~socket_listener() {
-		creator->socketengine->delete_socket(fd);
-		close_socket(fd);
 		creator->on_socket_close.detach(close_event);
 	}
 
-	virtual void handle_accept(socket fd, const struct socket_events &e) {
-		socket new_fd{INVALID_SOCKET};
-		sockaddr_in addr;
-		socklen_t addr_len{sizeof(sockaddr_in)};
-		if ((new_fd = ::accept(fd, (struct sockaddr*)&addr, &addr_len)) < 0) {
-			// error ?
+	virtual void handle_accept(socket sfd, const struct socket_events &e) {
+		socket new_fd{fd.accept()};
+		if (new_fd >= 0) {
+			emplace(new_fd);
 		}
-		emplace(new_fd);
 	}
 
 	virtual void emplace(socket newfd) = 0;

@@ -25,20 +25,29 @@
 #include <iostream>
 #include <chrono>
 
+void respond(dpp::http_server_request* request) {
+	request->set_status(200);
+	request->set_response_header("Content-Type", "text/html");
+	request->set_response_body("<h1>It lives!</h1>");
+}
+
 int main() {
 	using namespace std::chrono_literals;
 	char* t = getenv("DPP_UNIT_TEST_TOKEN");
 	if (t) {
 		dpp::cluster bot(t, 0);
-		dpp::http_server* server{nullptr};
+		dpp::http_server *server1{nullptr}, *server2{nullptr};
 
 		bot.on_log([&](const dpp::log_t& log) {
 			std::cout << "[" << dpp::utility::current_date_time() << "] " << dpp::utility::loglevel(log.severity) << ": " << log.message << std::endl;
 		});
 		bot.on_ready([&](const dpp::ready_t& ready) {
-			server = new dpp::http_server(&bot, "0.0.0.0", 3011, [&bot](dpp::http_server_request* request) {
-				std::cout << "request in " << (request->get_header_count("host") ? request->get_header("host") : "no host") << "\n";
-			});
+			server1 = new dpp::http_server(&bot, "0.0.0.0", 3010, [&bot](dpp::http_server_request* request) {
+				respond(request);
+			}, dpp::li_plaintext);
+			server2 = new dpp::http_server(&bot, "0.0.0.0", 3042, [&bot](dpp::http_server_request* request) {
+				respond(request);
+			}, dpp::li_ssl, "../../testdata/localhost.key", "../../testdata/localhost.pem");
 		});
 
 		bot.start(dpp::st_wait);
