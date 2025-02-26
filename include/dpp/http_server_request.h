@@ -30,7 +30,7 @@
 #include <dpp/version.h>
 #include <dpp/stringops.h>
 #include <dpp/httpsclient.h>
-#include <limits.h>
+#include <climits>
 
 namespace dpp {
 
