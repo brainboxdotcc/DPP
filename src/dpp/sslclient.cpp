@@ -234,7 +234,6 @@ ssl_connection::ssl_connection(cluster* creator, socket fd, bool plaintext_downg
 	private_key_file(private_key),
 	public_key_file(public_key)
 {
-	std::cout << "ssl_connection server conn\n";
 	if (plaintext) {
 		ssl = nullptr;
 	} else {
@@ -244,8 +243,6 @@ ssl_connection::ssl_connection(cluster* creator, socket fd, bool plaintext_downg
 	if (!set_nonblocking(sfd, true)) {
 		throw dpp::connection_exception(err_nonblocking_failure, "Can't switch socket to non-blocking mode!");
 	}
-
-	std::cout << "ssl_connection server conn done\n";
 }
 
 void ssl_connection::on_buffer_drained() {

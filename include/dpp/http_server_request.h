@@ -209,15 +209,16 @@ public:
 	 * @brief Set a response header
 	 * @param header header name
 	 * @param value header value
+	 * @return ref to self
 	 */
-	void set_response_header(const std::string& header, const std::string& value);
+	http_server_request& set_response_header(const std::string& header, const std::string& value);
  
 	/**
 	 * @brief Set the response content
 	 * 
 	 * @param new_content response content
 	 */
-	void set_response_body(const std::string& new_content);
+	http_server_request& set_response_body(const std::string& new_content);
 
 	/**
 	 * @brief Set the response HTTP status, e.g.
@@ -225,7 +226,7 @@ public:
 	 *
 	 * @param new_status HTTP status
 	 */
-	void set_status(uint16_t new_status);
+	http_server_request& set_status(uint16_t new_status);
 
 	/**
 	 * @brief Get whole response as a string

@@ -72,8 +72,8 @@ struct socket_listener {
 			[this](socket sfd, const struct socket_events &e) {
 				handle_accept(sfd, e);
 			},
-			[this](socket, const struct socket_events&) { },
-			[this](socket, const struct socket_events&, int) { }
+			[](socket, const struct socket_events&) { },
+			[](socket, const struct socket_events&, int) { }
 		);
 		owner->socketengine->register_socket(events);
 

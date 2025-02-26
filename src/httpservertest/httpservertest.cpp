@@ -25,10 +25,12 @@
 #include <iostream>
 #include <chrono>
 
-void respond(dpp::http_server_request* request) {
-	request->set_status(200);
-	request->set_response_header("Content-Type", "text/html");
-	request->set_response_body("<h1>It lives!</h1>");
+/**
+ * @brief Generate a simple html response
+ * @param request request to respond to
+ */
+void respond(dpp::http_server_request& request) {
+	request.set_status(200).set_response_header("Content-Type", "text/html").set_response_body("<h1>It lives!</h1>");
 }
 
 int main() {
@@ -42,12 +44,16 @@ int main() {
 			std::cout << "[" << dpp::utility::current_date_time() << "] " << dpp::utility::loglevel(log.severity) << ": " << log.message << std::endl;
 		});
 		bot.on_ready([&](const dpp::ready_t& ready) {
+
+			/* A plaintext HTTP server on port 3010 */
 			server1 = new dpp::http_server(&bot, "0.0.0.0", 3010, [&bot](dpp::http_server_request* request) {
-				respond(request);
-			}, dpp::li_plaintext);
+				respond(*request);
+			});
+
+			/* An SSL enabled HTTPS server on port 3042 */
 			server2 = new dpp::http_server(&bot, "0.0.0.0", 3042, [&bot](dpp::http_server_request* request) {
-				respond(request);
-			}, dpp::li_ssl, "../../testdata/localhost.key", "../../testdata/localhost.pem");
+				respond(*request);
+			}, "../../testdata/localhost.key", "../../testdata/localhost.pem");
 		});
 
 		bot.start(dpp::st_wait);

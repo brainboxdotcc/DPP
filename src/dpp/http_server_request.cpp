@@ -50,7 +50,6 @@ http_server_request::http_server_request(cluster* creator, socket fd, bool plain
 	  state(HTTPS_HEADERS),
 	  timed_out(false)
 {
-	std::cout << "http_server_request ctor\n";
 	http_server_request::connect();
 }
 
@@ -99,7 +98,6 @@ const std::multimap<std::string, std::string> http_server_request::get_headers()
 
 bool http_server_request::handle_buffer(std::string &buffer)
 {
-	std::cout << "Buffer: " << buffer << "\n";
 	bool state_changed = false;
 	do {
 		state_changed = false;
@@ -152,7 +150,6 @@ bool http_server_request::handle_buffer(std::string &buffer)
 							std::transform(key.begin(), key.end(), key.begin(), [](unsigned char c){
 								return std::tolower(c);
 							});
-							std::cout << "Add header " << key << ": " << value << "\n";
 							request_headers.emplace(key, value);
 						}
 					}
@@ -175,9 +172,11 @@ bool http_server_request::handle_buffer(std::string &buffer)
 			break;
 			case HTTPS_DONE:
 				if (handler) {
-					handler(this);
-					socket_write(get_response());
-					handler = {};
+					owner->queue_work(1, [this]() {
+						handler(this);
+						socket_write(get_response());
+						handler = {};
+					});
 				}
 				return true;
 			default:
@@ -188,18 +187,20 @@ bool http_server_request::handle_buffer(std::string &buffer)
 }
 
 void http_server_request::on_buffer_drained() {
-	if (state == HTTPS_DONE && status > 0) {
+	if (state == HTTPS_DONE && status > 0 && !handler) {
 		this->close();
 	}
 }
 
 
-void http_server_request::set_status(uint16_t new_status) {
+http_server_request& http_server_request::set_status(uint16_t new_status) {
 	status = new_status;
+	return *this;
 }
 
-void http_server_request::set_response_body(const std::string& new_content) {
+http_server_request& http_server_request::set_response_body(const std::string& new_content) {
 	response_body = new_content;
+	return *this;
 }
 
 std::string http_server_request::get_response_body() const {
@@ -210,8 +211,9 @@ std::string http_server_request::get_request_body() const {
 	return request_body;
 }
 
-void http_server_request::set_response_header(const std::string& header, const std::string& value) {
+http_server_request& http_server_request::set_response_header(const std::string& header, const std::string& value) {
 	response_headers.emplace(header, value);
+	return *this;
 }
 
 http_state http_server_request::get_state() const {

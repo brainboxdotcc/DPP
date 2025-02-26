@@ -28,15 +28,32 @@
 namespace dpp {
 
 /**
- * @brief Listens on a TCP socket for new connections, and whenever a new connection is
- * received, accept it and spawn a new connection of type T.
- * @tparam T type for socket connection, must be derived from ssl_connection
+ * @brief Creates a simple HTTP server which listens on a TCP port for a
+ * plaintext or SSL incoming request, and passes that request to a callback
+ * to generate the response.
  */
 struct http_server : public socket_listener<http_server_request> {
-	http_server_request_event request_handler;
-	
-	http_server(cluster* creator, const std::string_view address, uint16_t port, http_server_request_event handle_request, socket_listener_type type = li_plaintext, const std::string& private_key = "", const std::string& public_key = "");
 
+	/**
+	 * @brief Request handler callback to use for all incoming HTTP(S) requests
+	 */
+	http_server_request_event request_handler;
+
+	/**
+	 * @brief Constructor for creation of a HTTP(S) server
+	 * @param creator Cluster creator
+	 * @param address address to bind to, use "0.0.0.0" to bind to all local addresses
+	 * @param port port to bind to. You should generally use a port > 1024.
+	 * @param handle_request Callback to call for each pending request
+	 * @param private_key Private key PEM file for HTTPS/SSL. If empty, a plaintext server is created
+	 * @param public_key Public key PEM file for HTTPS/SSL. If empty, a plaintext server is created
+	 */
+	http_server(cluster* creator, const std::string_view address, uint16_t port, http_server_request_event handle_request, const std::string& private_key = "", const std::string& public_key = "");
+
+	/**
+	 * @brief Emplace a new request into the connection pool
+	 * @param newfd file descriptor of new request
+	 */
 	void emplace(socket newfd) override;
 };
 
