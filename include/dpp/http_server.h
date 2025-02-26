@@ -19,8 +19,25 @@
  * limitations under the License.
  *
  ************************************************************************************/
+#pragma once
+
+#include <dpp/export.h>
 #include <dpp/socket_listener.h>
+#include <dpp/http_server_request.h>
 
 namespace dpp {
+
+/**
+ * @brief Listens on a TCP socket for new connections, and whenever a new connection is
+ * received, accept it and spawn a new connection of type T.
+ * @tparam T type for socket connection, must be derived from ssl_connection
+ */
+struct http_server : public socket_listener<http_server_request> {
+	http_server_request_event request_handler;
+	
+	http_server(cluster* creator, const std::string_view address, uint16_t port, http_server_request_event handle_request, socket_listener_type type = li_plaintext, const std::string& private_key = "", const std::string& public_key = "");
+
+	void emplace(socket newfd) override;
+};
 
 }

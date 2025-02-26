@@ -77,11 +77,7 @@ constexpr int MAX_RETRIES{4};
 
 
 /**
- * @brief Implements a simple non-blocking SSL stream client.
- * 
- * @note although the design is non-blocking the run() method will
- * execute in an infinite loop until the socket disconnects. This is intended
- * to be run within a std::thread.
+ * @brief Implements a simple non-blocking SSL stream connection.
  */
 class DPP_EXPORT ssl_connection
 {

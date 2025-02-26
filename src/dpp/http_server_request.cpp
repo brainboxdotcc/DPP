@@ -1,0 +1,235 @@
+/************************************************************************************
+ *
+ * D++, A Lightweight C++ library for Discord
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ * Copyright 2021 Craig Edwards and D++ contributors 
+ * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ ************************************************************************************/
+#include <string>
+#include <iostream>
+#include <fstream>
+#include <algorithm>
+#include <stdlib.h>
+#include <climits>
+#include <dpp/http_server_request.h>
+#include <dpp/utility.h>
+#include <dpp/cluster.h>
+
+namespace dpp {
+
+constexpr std::array verb {
+	"GET",
+	"POST",
+	"PUT",
+	"PATCH",
+	"DELETE",
+	"HEAD",
+	"CONNECT",
+	"OPTIONS",
+	"TRACE",
+};
+
+http_server_request::http_server_request(cluster* creator, socket fd, bool plaintext_downgrade, const std::string& private_key, const std::string& public_key, http_server_request_event handle_request)
+	: ssl_connection(creator, fd, plaintext_downgrade, private_key, public_key),
+	  timeout(time(nullptr) + 10),
+	  handler(handle_request),
+	  state(HTTPS_HEADERS),
+	  timed_out(false)
+{
+	std::cout << "http_server_request ctor\n";
+	http_server_request::connect();
+}
+
+void http_server_request::connect()
+{
+	state = HTTPS_HEADERS;
+	read_loop();
+}
+
+const std::string http_server_request::get_header(std::string header_name) const {
+	std::transform(header_name.begin(), header_name.end(), header_name.begin(), [](unsigned char c){
+		return std::tolower(c);
+	});
+	auto hdrs = request_headers.find(header_name);
+	if (hdrs != request_headers.end()) {
+		return hdrs->second;
+	}
+	return std::string();
+}
+
+size_t http_server_request::get_header_count(std::string header_name) const {
+	std::transform(header_name.begin(), header_name.end(), header_name.begin(), [](unsigned char c){
+		return std::tolower(c);
+	});
+	return request_headers.count(header_name);
+}
+
+const std::list<std::string> http_server_request::get_header_list(std::string header_name) const {
+	std::transform(header_name.begin(), header_name.end(), header_name.begin(), [](unsigned char c){
+		return std::tolower(c);
+	});
+	auto hdrs = request_headers.equal_range(header_name);
+	if (hdrs.first != request_headers.end()) {
+		std::list<std::string> data;
+		for ( auto i = hdrs.first; i != hdrs.second; ++i ) {
+			data.emplace_back(i->second);
+		}
+		return data;
+	}
+	return std::list<std::string>();
+}
+
+const std::multimap<std::string, std::string> http_server_request::get_headers() const {
+	return request_headers;
+}
+
+bool http_server_request::handle_buffer(std::string &buffer)
+{
+	bool state_changed = false;
+	do {
+		state_changed = false;
+		switch (state) {
+			case HTTPS_HEADERS:
+				if (buffer.find("\r\n\r\n") != std::string::npos) {
+
+					/* Add 10 seconds to retrieve body */
+					timeout += 10;
+
+					/* Got all headers, proceed to new state */
+
+					std::string unparsed = buffer;
+
+					/* Get headers string */
+					std::string headers = buffer.substr(0, buffer.find("\r\n\r\n"));
+
+					/* Modify buffer, remove headers section */
+					buffer.erase(0, buffer.find("\r\n\r\n") + 4);
+
+					/* Process headers into map */
+					std::vector<std::string> h = utility::tokenize(headers);
+
+					if (h.empty()) {
+						return false;
+					}
+
+					/* First line is special */
+					std::vector<std::string> verb_path_protocol = utility::tokenize(h[0], " ");
+					if (verb_path_protocol.size() < 3) {
+						return false;
+					}
+					std::string req_verb = uppercase(verb_path_protocol[0]);
+					std::string req_path = verb_path_protocol[1];
+					std::string protocol = uppercase(verb_path_protocol[2]);
+
+					h.erase(h.begin());
+
+					if (!protocol.starts_with("HTTP/")) {
+						return false;
+					}
+
+					if (std::find(verb.begin(), verb.end(), req_verb) == verb.end()) {
+						return false;
+					}
+
+					for(auto &hd : h) {
+						std::string::size_type sep = hd.find(": ");
+						if (sep != std::string::npos) {
+							std::string key = hd.substr(0, sep);
+							std::string value = hd.substr(sep + 2, hd.length());
+							std::transform(key.begin(), key.end(), key.begin(), [](unsigned char c){
+								return std::tolower(c);
+							});
+							request_headers.emplace(key, value);
+						}
+					}
+					auto it_cl = request_headers.find("content-length");
+					if ( it_cl != request_headers.end()) {
+						content_length = std::stoull(it_cl->second);
+					}
+					state = HTTPS_CONTENT;
+					state_changed = true;
+					continue;
+				}
+			break;
+			case HTTPS_CONTENT:
+				request_body += buffer;
+				buffer.clear();
+				if (content_length == ULLONG_MAX || request_body.length() >= content_length) {
+					state = HTTPS_DONE;
+					state_changed = true;
+				}
+			break;
+			case HTTPS_DONE:
+				if (handler) {
+					handler(this);
+					handler = {};
+				}
+				this->close();
+				return false;
+			break;
+			default:
+				return false;
+		}
+	} while (state_changed);
+	return true;
+}
+
+
+void http_server_request::set_status(uint16_t new_status) {
+}
+
+void http_server_request::set_content(const std::string& new_content) {
+}
+
+void http_server_request::set_response_header(const std::string& header, const std::string& value) {
+}
+
+http_state http_server_request::get_state() {
+	return this->state;
+}
+
+void http_server_request::one_second_timer() {
+	if (!tcp_connect_done && time(nullptr) >= timeout) {
+		timed_out = true;
+		this->close();
+	} else if (tcp_connect_done && !connected && time(nullptr) >= timeout && this->state != HTTPS_DONE) {
+		this->close();
+		timed_out = true;
+	} else if (time(nullptr) >= timeout && this->state != HTTPS_DONE) {
+		this->close();
+		timed_out = true;
+	}
+}
+
+void http_server_request::close() {
+	if (state != HTTPS_DONE) {
+		if (handler) {
+			handler(this);
+			handler = {};
+		}
+	}
+	state = HTTPS_DONE;
+	ssl_connection::close();
+}
+
+http_server_request::~http_server_request() {
+	if (sfd != INVALID_SOCKET) {
+		ssl_connection::close();
+	}
+}
+
+}

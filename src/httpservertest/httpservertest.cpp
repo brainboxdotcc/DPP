@@ -3,7 +3,7 @@
  * D++, A Lightweight C++ library for Discord
  *
  * SPDX-License-Identifier: Apache-2.0
- * Copyright 2021 Craig Edwards and D++ contributors
+ * Copyright 2021 Craig Edwards and D++ contributors 
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,8 +19,28 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#include <dpp/socket_listener.h>
 
-namespace dpp {
+#include <dpp/dpp.h>
+#include <dpp/http_server.h>
+#include <iostream>
+#include <chrono>
 
+int main() {
+	using namespace std::chrono_literals;
+	char* t = getenv("DPP_UNIT_TEST_TOKEN");
+	if (t) {
+		dpp::cluster bot(t, 0);
+		dpp::http_server* server{nullptr};
+
+		bot.on_log([&](const dpp::log_t& log) {
+			std::cout << "[" << dpp::utility::current_date_time() << "] " << dpp::utility::loglevel(log.severity) << ": " << log.message << std::endl;
+		});
+		bot.on_ready([&](const dpp::ready_t& ready) {
+			server = new dpp::http_server(&bot, "0.0.0.0", 3011, [&bot](dpp::http_server_request* request) {
+				std::cout << "request in " << (request->get_header_count("host") ? request->get_header("host") : "no host") << "\n";
+			});
+		});
+
+		bot.start(dpp::st_wait);
+	}
 }

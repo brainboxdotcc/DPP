@@ -19,8 +19,19 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#include <dpp/socket_listener.h>
+#include <dpp/http_server.h>
+#include <memory>
 
 namespace dpp {
+
+http_server::http_server(cluster* owner, const std::string_view address, uint16_t port, http_server_request_event handle_request, socket_listener_type type, const std::string& private_key, const std::string& public_key)
+ : socket_listener<http_server_request>(owner, address, port, type, private_key, public_key), request_handler(handle_request)
+{
+}
+
+void http_server::emplace(socket newfd) {
+	std::cout << "http_server::emplace(" << newfd << ")\n";
+	connections.emplace(newfd, std::make_unique<http_server_request>(creator, newfd, plaintext, private_key_file, public_key_file, request_handler));
+}
 
 }

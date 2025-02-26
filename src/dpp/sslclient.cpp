@@ -134,6 +134,13 @@ bool set_nonblocking(dpp::socket sockfd, bool non_blocking)
 	return true;
 }
 
+bool set_reuse_addr(dpp::socket fd, bool reuse)
+{
+	const int enable = reuse;
+	return (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) >= 0 &&
+		setsockopt(fd, SOL_SOCKET, SO_REUSEPORT, &enable, sizeof(int)) >= 0);
+}
+
 /**
  * @brief Start connecting to a TCP socket.
  * This simply calls connect() and checks for error return, as the timeout is now handled in the main
@@ -230,8 +237,6 @@ ssl_connection::ssl_connection(cluster* creator, socket fd, bool plaintext_downg
 	ssl(nullptr),
 	last_tick(time(nullptr)),
 	start(time(nullptr)),
-	hostname(""),
-	port(0),
 	bytes_out(0),
 	bytes_in(0),
 	plaintext(plaintext_downgrade),
@@ -242,18 +247,19 @@ ssl_connection::ssl_connection(cluster* creator, socket fd, bool plaintext_downg
 	private_key_file(private_key),
 	public_key_file(public_key)
 {
+	std::cout << "ssl_connection server conn\n";
 	if (plaintext) {
 		ssl = nullptr;
 	} else {
 		ssl = new openssl_connection();
 	}
-	try {
-		ssl_connection::connect();
+
+	if (!set_nonblocking(sfd, true)) {
+		throw dpp::connection_exception(err_nonblocking_failure, "Can't switch socket to non-blocking mode!");
 	}
-	catch (std::exception&) {
-		cleanup();
-		throw;
-	}
+	set_reuse_addr(sfd, true);
+
+	std::cout << "ssl_connection server conn done\n";
 }
 
 /* SSL Client constructor throws std::runtime_error if it can't allocate a socket or call connect() */
