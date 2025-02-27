@@ -78,6 +78,11 @@ struct DPP_EXPORT socket_engine_epoll : public socket_engine_base {
 	void process_events() final {
 		const int sleep_length = 1000;
 		if (sockets == 0) {
+			/* epoll_wait() on empty set waits forever (or until another thread inserts a socket into the set.
+			 * We can't trust that this is going to happen, and it may deadlock the cluster, so in the event the
+			 * set is empty, we wait a millisecond (so it isn't a busy-wait) and return.
+			 */
+			std::this_thread::sleep_for(std::chrono::milliseconds(1));
 			return;
 		}
 		int i = epoll_wait(epoll_handle, events.data(), MAX_EVENTS, sleep_length);
