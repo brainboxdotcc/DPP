@@ -383,6 +383,12 @@ void cluster::start(start_type return_after) {
 			log(ll_debug, "Shards started.");
 		});
 
+	} else {
+		log(ll_debug, "Starting shardless cluster...");
+		ready_t r(this, 0, "");
+		if (!on_ready.empty()) {
+			on_ready.call(r);
+		}
 	}
 
 	if (return_after == st_return) {

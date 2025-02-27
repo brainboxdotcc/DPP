@@ -35,7 +35,7 @@ int main() {
 	using namespace std::chrono_literals;
 	char* t = getenv("DPP_UNIT_TEST_TOKEN");
 	if (t) {
-		dpp::cluster bot(t, 0);
+		dpp::cluster bot(t, 0, dpp::NO_SHARDS, 1, 1, false, dpp::cache_policy::cpol_none);
 		dpp::http_server *server1{nullptr}, *server2{nullptr};
 
 		bot.on_log([&](const dpp::log_t& log) {
