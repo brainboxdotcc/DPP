@@ -366,29 +366,45 @@ void cluster::start(start_type return_after) {
 				}
 			}
 
-			/* Get all active DM channels and map them to user id -> dm id */
-			current_user_get_dms([this](const dpp::confirmation_callback_t &completion) {
-				if (completion.is_error()) {
-					log(dpp::ll_debug, "Failed to get bot DM list");
-					return;
-				}
-				dpp::channel_map dmchannels = std::get<channel_map>(completion.value);
-				for (auto &c: dmchannels) {
-					for (auto &u: c.second.recipients) {
-						set_dm_channel(u, c.second.id);
-					}
-				}
-			});
-
 			log(ll_debug, "Shards started.");
 		});
 
 	} else {
 		log(ll_debug, "Starting shardless cluster...");
-		ready_t r(this, 0, "");
-		if (!on_ready.empty()) {
-			on_ready.call(r);
+		/* Without the ready event, we have no user information. This is needed
+		 * to register commands etc., so we request it via the API.
+		 */
+		if (!token.empty()) {
+			current_user_get([this](const auto &reply) {
+				if (reply.is_error()) {
+					throw dpp::connection_exception("Could not fetch user information");
+				}
+				/* We can implicitly upcast here from user_identified to its parent class, user */
+				this->me = std::get<user_identified>(reply.value);
+				ready_t r(this, 0, "");
+				log(ll_debug, "Shardless cluster started.");
+				/* Without shards, on_ready must be manually fired here if it has consumers */
+				if (!on_ready.empty()) {
+					on_ready.call(r);
+				}
+			});
 		}
+	}
+
+	if (!token.empty()) {
+		/* Get all active DM channels and map them to user id -> dm id */
+		current_user_get_dms([this](const dpp::confirmation_callback_t &completion) {
+			if (completion.is_error()) {
+				log(dpp::ll_debug, "Failed to get bot DM list");
+				return;
+			}
+			dpp::channel_map dmchannels = std::get<channel_map>(completion.value);
+			for (auto &c: dmchannels) {
+				for (auto &u: c.second.recipients) {
+					set_dm_channel(u, c.second.id);
+				}
+			}
+		});
 	}
 
 	if (return_after == st_return) {
