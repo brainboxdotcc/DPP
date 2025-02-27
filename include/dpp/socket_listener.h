@@ -45,15 +45,56 @@ enum socket_listener_type : uint8_t {
  */
 template<typename T, typename = std::enable_if_t<std::is_base_of_v<ssl_connection, T>>>
 struct socket_listener {
+	/**
+	 * @brief The listening socket for incoming connections
+	 */
 	raii_socket fd;
+
+	/**
+	 * @brief Active connections for the server of type T
+	 */
 	std::unordered_map<socket, std::unique_ptr<T>> connections;
+
+	/**
+	 * @brief Cluster creator
+	 */
 	cluster* creator{nullptr};
+
+	/**
+	 * @brief True if plain text connections to the server are allowed
+	 */
 	bool plaintext{true};
+
+	/**
+	 * @brief Private key PEM file path, if running an SSL server
+	 */
 	std::string private_key_file;
+
+	/**
+	 * @brief Public key PEM file path, if running an SSL server
+	 */
 	std::string public_key_file;
+	
+	/**
+	 * @brief Event to handle socket removal from the connection map
+	 */
 	event_handle close_event;
+
+	/**
+	 * @brief Socket events for listen socket in the socket engine
+	 */
 	socket_events events;
 
+	/**
+	 * @brief Create a new socket listener (TCP server)
+	 * @param owner Owning cluster
+	 * @param address IP address to bind the listening socket to, use 0.0.0.0 to bind all interfaces
+	 * @param port Port number to bind the listening socket to
+	 * @param type Type of server, plaintext or SSL
+	 * @param private_key For SSL servers, a path to the PEM private key file
+	 * @param public_key For SSL servers, a path to the PEM public key file
+	 * @throws connection_exception on failure to bind or listen to the port/interface
+	 */
 	socket_listener(cluster* owner, const std::string_view address, uint16_t port, socket_listener_type type = li_plaintext, const std::string& private_key = "", const std::string& public_key = "")
 	: fd(rst_tcp), creator(owner), plaintext(type == li_plaintext), private_key_file(private_key), public_key_file(public_key)
 	{
@@ -82,11 +123,19 @@ struct socket_listener {
 		});
 	}
 
-
+	/**
+	 * @brief Destructor, detaches on_socket_close event
+	 */
 	~socket_listener() {
 		creator->on_socket_close.detach(close_event);
 	}
 
+	/**
+	 * @brief Handle a new incoming socket with accept()
+	 * Accepts a new connection, and calls emplace() if valid
+	 * @param sfd File descriptor for listening socket
+	 * @param e socket events for the listening socket
+	 */
 	virtual void handle_accept(socket sfd, const struct socket_events &e) {
 		socket new_fd{fd.accept()};
 		if (new_fd >= 0) {
@@ -94,6 +143,11 @@ struct socket_listener {
 		}
 	}
 
+	/**
+	 * @brief Emplace a new connection into the connection map for the server.
+	 * This is a factory function which must be implemented by the deriving class
+	 * @param newfd File descriptor for new connection
+	 */
 	virtual void emplace(socket newfd) = 0;
 };
 

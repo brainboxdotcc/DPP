@@ -34,6 +34,9 @@
 
 namespace dpp {
 
+/**
+ * @brief Callback type for HTTP server request callbacks
+ */
 using http_server_request_event = std::function<void(class http_server_request*)>;
 
 /*
@@ -99,6 +102,9 @@ protected:
 	 */
 	virtual void connect() override;
 
+	/**
+	 * @brief Called when the output buffer is drained to empty
+	 */
 	void on_buffer_drained() override;
 
 public:

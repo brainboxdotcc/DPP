@@ -21,9 +21,7 @@
  ************************************************************************************/
 
 #include <dpp/dpp.h>
-#include <dpp/http_server.h>
 #include <iostream>
-#include <chrono>
 
 /**
  * @brief Generate a simple html response
