@@ -36,6 +36,7 @@ void discord_webhook_server::handle_request(http_server_request* request) {
 	std::string signature = request->get_header("X-Signature-Ed25519");
 	std::string timestamp = request->get_header("X-Signature-Timestamp");
 	if (signature.empty() || timestamp.empty()) {
+		request->set_status(401).set_response_header("Content-Type", "text/plain").set_response_body("Unsigned requests are not allowed");
 		return;
 	}
 	if (!verifier.verify_signature(timestamp, request->get_request_body(), signature, public_key_hex)) {

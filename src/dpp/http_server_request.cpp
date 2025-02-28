@@ -131,13 +131,23 @@ bool http_server_request::handle_buffer(std::string &buffer)
 					std::vector<std::string> h = utility::tokenize(headers);
 
 					if (h.empty()) {
-						return false;
+						status = HTTPS_DONE;
+						handler = {};
+						status = 400;
+						response_body = "Malformed request";
+						socket_write(get_response());
+						return true;
 					}
 
 					/* First line is special */
 					std::vector<std::string> verb_path_protocol = utility::tokenize(h[0], " ");
 					if (verb_path_protocol.size() < 3) {
-						return false;
+						status = HTTPS_DONE;
+						handler = {};
+						status = 400;
+						response_body = "Malformed request";
+						socket_write(get_response());
+						return true;
 					}
 					std::string req_verb = uppercase(verb_path_protocol[0]);
 					std::string req_path = verb_path_protocol[1];
@@ -146,10 +156,20 @@ bool http_server_request::handle_buffer(std::string &buffer)
 					h.erase(h.begin());
 
 					if (protocol.substr(0, 5) != "HTTP/") {
-						return false;
+						status = HTTPS_DONE;
+						handler = {};
+						status = 400;
+						response_body = "Malformed request";
+						socket_write(get_response());
+						return true;
 					}
 
 					if (std::find(verb.begin(), verb.end(), req_verb) == verb.end()) {
+						status = HTTPS_DONE;
+						handler = {};
+						status = 401;
+						response_body = "Unsupported method";
+						socket_write(get_response());
 						return false;
 					}
 
