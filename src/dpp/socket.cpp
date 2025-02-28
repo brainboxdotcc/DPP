@@ -21,7 +21,7 @@
  ************************************************************************************/
 
 #include <dpp/socket.h>
-#include <dpp/sslclient.h>
+#include <dpp/sslconnection.h>
 #include <cstring>
 
 namespace dpp {

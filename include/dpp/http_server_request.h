@@ -26,7 +26,7 @@
 #include <list>
 #include <vector>
 #include <variant>
-#include <dpp/sslclient.h>
+#include <dpp/sslconnection.h>
 #include <dpp/version.h>
 #include <dpp/stringops.h>
 #include <dpp/httpsclient.h>
@@ -110,12 +110,19 @@ protected:
 	/**
 	 * @brief Maximum size of POST body
 	 */
-	uint64_t get_max_post_size() const;
+	[[nodiscard]] uint64_t get_max_post_size() const;
 
 	/**
 	 * @brief Maximum size of headers
 	 */
-	uint64_t get_max_header_size() const;
+	[[nodiscard]] uint64_t get_max_header_size() const;
+
+	/**
+	 * @brief Reply with an error message
+	 * @param error_code error code
+	 * @param message message
+	 */
+	void generate_error(uint16_t error_code, const std::string& message);
 
 public:
 	/**
@@ -196,7 +203,7 @@ public:
 	 * @see get_header_count to determine if multiple are present
 	 * @see get_header_list to retrieve all entries of the same header_name
 	 */
-	const std::string get_header(std::string header_name) const;
+	[[nodiscard]] const std::string get_header(const std::string& header_name) const;
 
 	/**
 	 * @brief Get the number of headers with the same header name
@@ -204,7 +211,7 @@ public:
 	 * @param header_name
 	 * @return the number of headers with this count
 	 */
-	size_t get_header_count(std::string header_name) const;
+	[[nodiscard]] size_t get_header_count(const std::string& header_name) const;
 
 	/**
 	 * @brief Get a set of HTTP request headers with a common name
@@ -212,14 +219,14 @@ public:
 	 * @param header_name
 	 * @return A list of headers with the same name, or an empty list if not found
 	 */
-	const std::list<std::string> get_header_list(std::string header_name) const;
+	[[nodiscard]] std::list<std::string> get_header_list(const std::string& header_name) const;
 
 	/**
 	 * @brief Get all HTTP request headers
 	 * 
 	 * @return headers as a map
 	 */
-	const std::multimap<std::string, std::string> get_headers() const;
+	[[nodiscard]] std::multimap<std::string, std::string> get_headers() const;
 
 	/**
 	 * @brief Set a response header
@@ -247,7 +254,7 @@ public:
 	/**
 	 * @brief Get whole response as a string
 	 */
-	std::string get_response();
+	[[nodiscard]] std::string get_response();
 };
 
 }

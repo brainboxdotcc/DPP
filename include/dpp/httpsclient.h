@@ -26,7 +26,7 @@
 #include <list>
 #include <vector>
 #include <variant>
-#include <dpp/sslclient.h>
+#include <dpp/sslconnection.h>
 #include <dpp/version.h>
 #include <dpp/stringops.h>
 

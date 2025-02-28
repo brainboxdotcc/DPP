@@ -23,7 +23,7 @@
 #include <iostream>
 #include <fstream>
 #include <algorithm>
-#include <stdlib.h>
+#include <cstdlib>
 #include <climits>
 #include <dpp/http_server_request.h>
 #include <dpp/utility.h>
@@ -59,29 +59,20 @@ void http_server_request::connect()
 	read_loop();
 }
 
-const std::string http_server_request::get_header(std::string header_name) const {
-	std::transform(header_name.begin(), header_name.end(), header_name.begin(), [](unsigned char c){
-		return std::tolower(c);
-	});
-	auto hdrs = request_headers.find(header_name);
+const std::string http_server_request::get_header(const std::string& header_name) const {
+	auto hdrs = request_headers.find(lowercase(header_name));
 	if (hdrs != request_headers.end()) {
 		return hdrs->second;
 	}
 	return std::string();
 }
 
-size_t http_server_request::get_header_count(std::string header_name) const {
-	std::transform(header_name.begin(), header_name.end(), header_name.begin(), [](unsigned char c){
-		return std::tolower(c);
-	});
-	return request_headers.count(header_name);
+size_t http_server_request::get_header_count(const std::string& header_name) const {
+	return request_headers.count(lowercase(header_name));
 }
 
-const std::list<std::string> http_server_request::get_header_list(std::string header_name) const {
-	std::transform(header_name.begin(), header_name.end(), header_name.begin(), [](unsigned char c){
-		return std::tolower(c);
-	});
-	auto hdrs = request_headers.equal_range(header_name);
+std::list<std::string> http_server_request::get_header_list(const std::string& header_name) const {
+	auto hdrs = request_headers.equal_range(lowercase(header_name));
 	if (hdrs.first != request_headers.end()) {
 		std::list<std::string> data;
 		for ( auto i = hdrs.first; i != hdrs.second; ++i ) {
@@ -92,7 +83,7 @@ const std::list<std::string> http_server_request::get_header_list(std::string he
 	return std::list<std::string>();
 }
 
-const std::multimap<std::string, std::string> http_server_request::get_headers() const {
+std::multimap<std::string, std::string> http_server_request::get_headers() const {
 	return request_headers;
 }
 
@@ -102,6 +93,17 @@ uint64_t http_server_request::get_max_post_size() const {
 
 uint64_t http_server_request::get_max_header_size() const {
 	return 8192;
+}
+
+void http_server_request::generate_error(uint16_t error_code, const std::string& message) {
+	status = HTTPS_DONE;
+	owner->queue_work(1, [this, error_code, message]() {
+		status = error_code;
+		response_body = message;
+		handler(this);
+		socket_write(get_response());
+		handler = {};
+	});
 }
 
 bool http_server_request::handle_buffer(std::string &buffer)
@@ -131,22 +133,14 @@ bool http_server_request::handle_buffer(std::string &buffer)
 					std::vector<std::string> h = utility::tokenize(headers);
 
 					if (h.empty()) {
-						status = HTTPS_DONE;
-						handler = {};
-						status = 400;
-						response_body = "Malformed request";
-						socket_write(get_response());
+						generate_error(400, "Malformed request");
 						return true;
 					}
 
 					/* First line is special */
 					std::vector<std::string> verb_path_protocol = utility::tokenize(h[0], " ");
 					if (verb_path_protocol.size() < 3) {
-						status = HTTPS_DONE;
-						handler = {};
-						status = 400;
-						response_body = "Malformed request";
-						socket_write(get_response());
+						generate_error(400, "Malformed request");
 						return true;
 					}
 					std::string req_verb = uppercase(verb_path_protocol[0]);
@@ -156,21 +150,13 @@ bool http_server_request::handle_buffer(std::string &buffer)
 					h.erase(h.begin());
 
 					if (protocol.substr(0, 5) != "HTTP/") {
-						status = HTTPS_DONE;
-						handler = {};
-						status = 400;
-						response_body = "Malformed request";
-						socket_write(get_response());
+						generate_error(400, "Malformed request");
 						return true;
 					}
 
 					if (std::find(verb.begin(), verb.end(), req_verb) == verb.end()) {
-						status = HTTPS_DONE;
-						handler = {};
-						status = 401;
-						response_body = "Unsupported method";
-						socket_write(get_response());
-						return false;
+						generate_error(401, "Unsupported method");
+						return true;
 					}
 
 					for(auto &hd : h) {
@@ -178,10 +164,7 @@ bool http_server_request::handle_buffer(std::string &buffer)
 						if (sep != std::string::npos) {
 							std::string key = hd.substr(0, sep);
 							std::string value = hd.substr(sep + 2, hd.length());
-							std::transform(key.begin(), key.end(), key.begin(), [](unsigned char c){
-								return std::tolower(c);
-							});
-							request_headers.emplace(key, value);
+							request_headers.emplace(lowercase(key), value);
 						}
 					}
 					auto it_cl = request_headers.find("content-length");

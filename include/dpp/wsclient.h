@@ -23,7 +23,7 @@
 #include <dpp/export.h>
 #include <string>
 #include <map>
-#include <dpp/sslclient.h>
+#include <dpp/sslconnection.h>
 
 namespace dpp {
 

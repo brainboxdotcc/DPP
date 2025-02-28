@@ -24,7 +24,7 @@
 #include <dpp/export.h>
 #include <dpp/cluster.h>
 #include <dpp/socket.h>
-#include <dpp/sslclient.h>
+#include <dpp/sslconnection.h>
 #include <type_traits>
 #include <memory>
 #include <unordered_map>
