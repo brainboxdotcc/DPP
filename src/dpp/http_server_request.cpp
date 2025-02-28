@@ -96,18 +96,22 @@ const std::multimap<std::string, std::string> http_server_request::get_headers()
 	return request_headers;
 }
 
+uint64_t http_server_request::get_max_post_size() const {
+	return 16384;
+}
+
+uint64_t http_server_request::get_max_header_size() const {
+	return 8192;
+}
+
 bool http_server_request::handle_buffer(std::string &buffer)
 {
-	/* Bigger than any discord webhook input ever could be... */
-	const uint64_t MAX_POST_SIZE = 1024 * 128;
-	const uint64_t MAX_HEADER_SIZE = 8192;
 	bool state_changed = false;
-
 	do {
 		state_changed = false;
 		switch (state) {
 			case HTTPS_HEADERS:
-				if (buffer.length() > MAX_HEADER_SIZE) {
+				if (buffer.length() > get_max_header_size()) {
 					owner->log(ll_warning, "HTTTP request exceeds max header size, dropped");
 					return false;
 				} else if (buffer.find("\r\n\r\n") != std::string::npos) {
@@ -163,8 +167,8 @@ bool http_server_request::handle_buffer(std::string &buffer)
 					auto it_cl = request_headers.find("content-length");
 					if ( it_cl != request_headers.end()) {
 						content_length = std::stoull(it_cl->second);
-						if (content_length > MAX_POST_SIZE) {
-							content_length = MAX_POST_SIZE;
+						if (content_length > get_max_post_size()) {
+							content_length = get_max_post_size();
 						}
 					}
 					state = HTTPS_CONTENT;
@@ -175,7 +179,7 @@ bool http_server_request::handle_buffer(std::string &buffer)
 			case HTTPS_CONTENT:
 				request_body += buffer;
 				buffer.clear();
-				if (request_body.length() > MAX_POST_SIZE || content_length == ULLONG_MAX || request_body.length() >= content_length) {
+				if (request_body.length() > get_max_post_size() || content_length == ULLONG_MAX || request_body.length() >= content_length) {
 					state = HTTPS_DONE;
 					state_changed = true;
 				}

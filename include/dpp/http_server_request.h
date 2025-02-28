@@ -107,6 +107,16 @@ protected:
 	 */
 	void on_buffer_drained() override;
 
+	/**
+	 * @brief Maximum size of POST body
+	 */
+	uint64_t get_max_post_size() const;
+
+	/**
+	 * @brief Maximum size of headers
+	 */
+	uint64_t get_max_header_size() const;
+
 public:
 	/**
 	 * @brief If true the response timed out while waiting
