@@ -98,7 +98,10 @@ const std::multimap<std::string, std::string> http_server_request::get_headers()
 
 bool http_server_request::handle_buffer(std::string &buffer)
 {
+	/* Bigger than any discord webhook input ever could be... */
+	const uint64_t MAX_POST_SIZE = 1024 * 128;
 	bool state_changed = false;
+
 	do {
 		state_changed = false;
 		switch (state) {
@@ -156,6 +159,9 @@ bool http_server_request::handle_buffer(std::string &buffer)
 					auto it_cl = request_headers.find("content-length");
 					if ( it_cl != request_headers.end()) {
 						content_length = std::stoull(it_cl->second);
+						if (content_length > MAX_POST_SIZE) {
+							content_length = MAX_POST_SIZE;
+						}
 					}
 					state = HTTPS_CONTENT;
 					state_changed = true;
@@ -165,7 +171,7 @@ bool http_server_request::handle_buffer(std::string &buffer)
 			case HTTPS_CONTENT:
 				request_body += buffer;
 				buffer.clear();
-				if (content_length == ULLONG_MAX || request_body.length() >= content_length) {
+				if (request_body.length() > MAX_POST_SIZE || content_length == ULLONG_MAX || request_body.length() >= content_length) {
 					state = HTTPS_DONE;
 					state_changed = true;
 				}
