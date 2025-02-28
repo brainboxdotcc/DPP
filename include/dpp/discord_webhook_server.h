@@ -28,9 +28,13 @@
 namespace dpp {
 
 /**
- * @brief Creates a simple HTTP server which listens on a TCP port for a
- * plaintext or SSL incoming request, and passes that request to a callback
- * to generate the response.
+ * @brief Creates a HTTP server which listens for incoming
+ * Discord interactions, and if verified as valid, raises them
+ * as cluster events, returning the response back.
+ * Note that Discord requires all interaction endpoints to
+ * have a valid SSL certificate (not self signed) so in most
+ * cases you should put this port behind a reverse proxy, e.g.
+ * nginx, apache, etc.
  */
 struct discord_webhook_server : public http_server {
 
