@@ -138,16 +138,24 @@ async<confirmation_callback_t> message_create_t::co_reply(message&& msg, bool me
 #endif /* DPP_NO_CORO */
 
 void interaction_create_t::reply(interaction_response_type t, const message& m, command_completion_event_t callback) const {
-	owner->interaction_response_create(this->command.id, this->command.token, dpp::interaction_response(t, m), std::move(callback));
+	if (from_webhook) {
+		queued_response = dpp::interaction_response(t, m).build_json();
+	} else {
+		owner->interaction_response_create(this->command.id, this->command.token, dpp::interaction_response(t, m), std::move(callback));
+	}
 }
 
 void interaction_create_t::reply(const message& m, command_completion_event_t callback) const {
-	owner->interaction_response_create(
-		this->command.id,
-		this->command.token,
-		dpp::interaction_response(ir_channel_message_with_source, m),
-		std::move(callback)
-	);
+	if (from_webhook) {
+                queued_response = dpp::interaction_response(ir_channel_message_with_source, m).build_json();
+        } else {
+		owner->interaction_response_create(
+			this->command.id,
+			this->command.token,
+			dpp::interaction_response(ir_channel_message_with_source, m),
+			std::move(callback)
+		);
+	}
 }
 
 void interaction_create_t::thinking(bool ephemeral, command_completion_event_t callback) const {
@@ -164,7 +172,11 @@ void interaction_create_t::reply(command_completion_event_t callback) const {
 }
 
 void interaction_create_t::dialog(const interaction_modal_response& mr, command_completion_event_t callback) const {
-	owner->interaction_response_create(this->command.id, this->command.token, mr, std::move(callback));
+	if (from_webhook) {
+                queued_response = mr.build_json();
+        } else {
+		owner->interaction_response_create(this->command.id, this->command.token, mr, std::move(callback));
+	}
 }
 
 void interaction_create_t::reply(interaction_response_type t, const std::string& mt, command_completion_event_t callback) const {

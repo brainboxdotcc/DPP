@@ -55,7 +55,7 @@ int main() {
 			}, "../../testdata/localhost.key", "../../testdata/localhost.pem");
 
 			/* A discord interactions endpoint on port 3010 */
-			server3 = new dpp::discord_webhook_server(&bot, getenv("DISCORD_PUBLIC_KEY"), "0.0.0.0", 3010);
+			server3 = new dpp::discord_webhook_server(&bot, getenv("DPP_PUBLIC_KEY"), "0.0.0.0", 3010);
 		});
 
 		bot.start(dpp::st_wait);

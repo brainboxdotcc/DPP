@@ -21,6 +21,8 @@
  ************************************************************************************/
 #include <dpp/discord_webhook_server.h>
 #include <dpp/signature_verifier.h>
+#include <dpp/discordevents.h>
+#include <dpp/dispatcher.h>
 #include <memory>
 
 namespace dpp {
@@ -35,11 +37,19 @@ void discord_webhook_server::handle_request(http_server_request* request) {
 	std::string timestamp = request->get_header("X-Signature-Timestamp");
 	creator->log(ll_debug, "Inbound interaction: Signature=" + signature + " timestamp=" + timestamp);
 	if (signature.empty() || timestamp.empty()) {
-		creator->log(ll_debug, "Interaction without ED22519 signature discarded: " + request->get_request_body());
+		creator->log(ll_debug, "Interaction without ED22519 signature discarded: " + signature);
 	}
-	bool verified = verifier.verify_signature(timestamp, request->get_request_body(), signature, public_key_hex);
-	creator->log(ll_debug, std::string("verified: ") + (verified ? "true" : "false"));
-	request->set_status(200).set_response_header("Content-Type", "application/json").set_response_body("{\"type\":1}");	
+	if (!verifier.verify_signature(timestamp, request->get_request_body(), signature, public_key_hex)) {
+		creator->log(ll_debug, "Interaction with invalid ED22519 signature discarded: " + signature);
+		request->set_status(401).set_response_header("Content-Type", "text/plain").set_response_body("Access denied");
+		return;
+	}
+
+	json j = json::parse(request->get_response_body());
+	std::string reply_body = events::internal_handle_interaction(creator, 0, j, request->get_response_body(), true);
+
+	request->set_status(200).set_response_header("Content-Type", "application/json")
+		.set_response_body(reply_body);
 }
 
 }

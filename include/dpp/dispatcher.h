@@ -66,6 +66,20 @@ class discord_voice_client;
  */
 using command_completion_event_t = std::function<void(const confirmation_callback_t&)>;
 
+/**
+ * @brief Route interaction event
+ *
+ * @param creator Creating cluster
+ * @param shard_id Shard ID or 0
+ * @param d JSON data for the event
+ * @param raw Raw JSON string
+ * @param from_webhook True if the interaction comes from a webhook
+ * @return JSON interaction response, only valid when from_webhook is true
+ */
+namespace events {
+	std::string DPP_EXPORT internal_handle_interaction(cluster* creator, uint16_t shard_id, json &d, const std::string &raw, bool from_webhook);
+}
+
 /** @brief Base event parameter struct.
  * Each event you receive from the library will have its parameter derived from this class.
  * The class contains the raw event data, and a pointer to the current shard's dpp::discord_client object.
@@ -484,6 +498,17 @@ struct DPP_EXPORT voice_state_update_t : public event_dispatch_t {
 struct DPP_EXPORT interaction_create_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
+
+	/**
+	 * @brief True if from a HTTP interaction webhook, false if from websocket
+	 */
+	bool from_webhook{false};
+
+	/**
+	 * @brief If this interaction is created from a webhook server,
+	 * it fills this value with a JSON string which is sent as the HTTP response.
+	 */
+	mutable std::string queued_response;
 
 	/**
 	 * @brief Acknowledge interaction without displaying a message to the user,
