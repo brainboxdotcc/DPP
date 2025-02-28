@@ -109,7 +109,7 @@ std::string internal_handle_interaction(cluster* creator, uint16_t shard_id, jso
 				if (from_webhook) {
 					mcm.from_webhook = true;
 					creator->on_message_context_menu.call(mcm);
-					return mcm.queued_response;
+					return interaction_create_t::queued_response;
 				} else {
 					creator->queue_work(1, [creator, mcm]() {
 						creator->on_message_context_menu.call(mcm);
@@ -125,7 +125,7 @@ std::string internal_handle_interaction(cluster* creator, uint16_t shard_id, jso
 				if (from_webhook) {
 					ucm.from_webhook = true;
 					creator->on_user_context_menu.call(ucm);
-					return ucm.queued_response;
+					return interaction_create_t::queued_response;
 				} else {
 					creator->queue_work(1, [creator, ucm]() {
 						creator->on_user_context_menu.call(ucm);
@@ -138,7 +138,7 @@ std::string internal_handle_interaction(cluster* creator, uint16_t shard_id, jso
 			if (from_webhook) {
 				sc.from_webhook = true;
 				creator->on_slashcommand.call(sc);
-				return sc.queued_response;
+				return slashcommand_t::queued_response;
 			} else {
 				creator->queue_work(1, [creator, sc]() {
 					creator->on_slashcommand.call(sc);
@@ -156,7 +156,7 @@ std::string internal_handle_interaction(cluster* creator, uint16_t shard_id, jso
 			if (from_webhook) {
 				ic.from_webhook = true;
 				creator->on_interaction_create.call(ic);
-				return ic.queued_response;
+				return interaction_create_t::queued_response;
 			} else {
 				creator->queue_work(1, [creator, ic]() {
 					creator->on_interaction_create.call(ic);
@@ -174,7 +174,7 @@ std::string internal_handle_interaction(cluster* creator, uint16_t shard_id, jso
 			if (from_webhook) {
 				fs.from_webhook = true;
 				creator->on_form_submit.call(fs);
-				return fs.queued_response;
+				return interaction_create_t::queued_response;
 			} else {
 				creator->queue_work(1, [creator, fs]() {
 					creator->on_form_submit.call(fs);
@@ -192,7 +192,7 @@ std::string internal_handle_interaction(cluster* creator, uint16_t shard_id, jso
 			if (from_webhook) {
 				ac.from_webhook = true;
 				creator->on_autocomplete.call(ac);
-				return ac.queued_response;
+				return interaction_create_t::queued_response;
 			} else {
 				creator->queue_work(1, [creator, ac]() {
 					creator->on_autocomplete.call(ac);
@@ -210,7 +210,7 @@ std::string internal_handle_interaction(cluster* creator, uint16_t shard_id, jso
 				if (from_webhook) {
 					ic.from_webhook = true;
 					creator->on_button_click.call(ic);
-					return ic.queued_response;
+					return interaction_create_t::queued_response;
 				} else {
 					creator->queue_work(1, [creator, ic]() {
 						creator->on_button_click.call(ic);
@@ -229,7 +229,7 @@ std::string internal_handle_interaction(cluster* creator, uint16_t shard_id, jso
 				if (from_webhook) {
 					ic.from_webhook = true;
 					creator->on_select_click.call(ic);
-					return ic.queued_response;
+					return interaction_create_t::queued_response;
 				} else {
 					creator->queue_work(1, [creator, ic]() {
 						creator->on_select_click.call(ic);

@@ -31,6 +31,8 @@
 
 namespace dpp {
 
+thread_local std::string interaction_create_t::queued_response;
+
 event_dispatch_t::event_dispatch_t(dpp::cluster* creator, uint32_t shard_id, const std::string& raw) : raw_event(raw), shard(shard_id), owner(creator) {}
 
 event_dispatch_t::event_dispatch_t(dpp::cluster* creator, uint32_t shard_id, std::string&& raw) : raw_event(std::move(raw)), shard(shard_id), owner(creator) {}

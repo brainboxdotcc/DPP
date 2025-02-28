@@ -507,8 +507,11 @@ struct DPP_EXPORT interaction_create_t : public event_dispatch_t {
 	/**
 	 * @brief If this interaction is created from a webhook server,
 	 * it fills this value with a JSON string which is sent as the HTTP response.
+	 * This is thread local so that it is preserved when the event is copied, we
+	 * guarantee that the request/response is in the same thread so this will always
+	 * be valid.
 	 */
-	mutable std::string queued_response;
+	static thread_local std::string queued_response;
 
 	/**
 	 * @brief Acknowledge interaction without displaying a message to the user,

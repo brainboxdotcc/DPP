@@ -57,6 +57,11 @@ int main() {
 			/* A discord interactions endpoint on port 3010 */
 			server3 = new dpp::discord_webhook_server(&bot, getenv("DPP_PUBLIC_KEY"), "0.0.0.0", 3010);
 		});
+		bot.on_slashcommand([&](const dpp::slashcommand_t& event) {
+			bot.log(dpp::ll_debug, "Slash command with from_webhook: " + std::to_string(event.from_webhook));
+			event.reply("hello");
+			bot.log(dpp::ll_debug, "data: " + event.queued_response);
+		});
 
 		bot.start(dpp::st_wait);
 	}
