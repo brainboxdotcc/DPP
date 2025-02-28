@@ -22,6 +22,7 @@
 #pragma once
 
 #include <dpp/export.h>
+#include <dpp/cluster.h>
 #include <dpp/socket_listener.h>
 #include <dpp/http_server_request.h>
 

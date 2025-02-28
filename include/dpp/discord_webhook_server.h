@@ -54,7 +54,6 @@ struct discord_webhook_server : public http_server {
 	 * @param discord_public_key Public key for the application from the application dashboard page
 	 * @param address address to bind to, use "0.0.0.0" to bind to all local addresses
 	 * @param port port to bind to. You should generally use a port > 1024.
-	 * @param handle_request Callback to call for each pending request
 	 * @param ssl_private_key Private key PEM file for HTTPS/SSL. If empty, a plaintext server is created
 	 * @param ssl_public_key Public key PEM file for HTTPS/SSL. If empty, a plaintext server is created
 	 */
@@ -65,6 +64,11 @@ struct discord_webhook_server : public http_server {
 	 * @param request Request from discord
 	 */
 	void handle_request(http_server_request* request);
+
+	/**
+	 * @brief Virtual dtor
+	 */
+	virtual ~discord_webhook_server() = default;
 };
 
 }

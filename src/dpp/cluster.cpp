@@ -24,6 +24,7 @@
 #include <chrono>
 #include <iostream>
 #include <dpp/json.h>
+#include <dpp/discord_webhook_server.h>
 
 namespace dpp {
 
@@ -157,6 +158,7 @@ cluster::cluster(const std::string &_token, uint32_t _intents, uint32_t _shards,
 
 cluster::~cluster()
 {
+	delete webhook_server;
 	delete rest;
 	delete raw_rest;
 	this->shutdown();
@@ -164,6 +166,11 @@ cluster::~cluster()
 
 request_queue* cluster::get_rest() {
 	return rest;
+}
+
+cluster& cluster::enable_webhook_server(const std::string& discord_public_key, const std::string_view address, uint16_t port,  const std::string& ssl_private_key, const std::string& ssl_public_key) {
+	webhook_server = new discord_webhook_server(this, discord_public_key, address, port, ssl_private_key, ssl_public_key);
+	return *this;
 }
 
 request_queue* cluster::get_raw_rest() {

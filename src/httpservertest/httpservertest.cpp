@@ -37,7 +37,6 @@ int main() {
 	if (t) {
 		dpp::cluster bot(t, 0, dpp::NO_SHARDS, 1, 1, false, dpp::cache_policy::cpol_none);
 		dpp::http_server *server1{nullptr}, *server2{nullptr};
-		dpp::discord_webhook_server* server3{nullptr};
 
 		bot.on_log([&](const dpp::log_t& log) {
 			std::cout << "[" << dpp::utility::current_date_time() << "] " << dpp::utility::loglevel(log.severity) << ": " << log.message << std::endl;
@@ -55,12 +54,10 @@ int main() {
 			}, "../../testdata/localhost.key", "../../testdata/localhost.pem");
 
 			/* A discord interactions endpoint on port 3010 */
-			server3 = new dpp::discord_webhook_server(&bot, getenv("DPP_PUBLIC_KEY"), "0.0.0.0", 3010);
+			bot.enable_webhook_server(getenv("DPP_PUBLIC_KEY"), "0.0.0.0", 3010);
 		});
 		bot.on_slashcommand([&](const dpp::slashcommand_t& event) {
-			bot.log(dpp::ll_debug, "Slash command with from_webhook: " + std::to_string(event.from_webhook));
 			event.reply("hello");
-			bot.log(dpp::ll_debug, "data: " + event.queued_response);
 		});
 
 		bot.start(dpp::st_wait);

@@ -195,6 +195,11 @@ class DPP_EXPORT cluster {
 	std::mutex timer_guard;
 
 	/**
+	 * @brief Webhook server if enabled
+	 */
+	struct discord_webhook_server* webhook_server{nullptr};
+
+	/**
 	 * @brief Mark a shard as requiring reconnection.
 	 * Destructs the old shard in 5 seconds and creates a new one attempting to resume.
 	 *
@@ -299,6 +304,17 @@ public:
 	 * @throw dpp::exception Thrown on windows, if WinSock fails to initialise, or on any other system if a dpp::request_queue fails to construct
 	 */
 	cluster(const std::string& token, uint32_t intents = i_default_intents, uint32_t shards = 0, uint32_t cluster_id = 0, uint32_t maxclusters = 1, bool compressed = true, cache_policy_t policy = cache_policy::cpol_default, uint32_t pool_threads = std::thread::hardware_concurrency() / 2);
+
+	/**
+	 * @brief Create a webhook server for receiving interactions
+	 * @note This should be considered mutually exclusive with delivery of interaction events via shards.
+	 * @param discord_public_key Public key for the application from the application dashboard page
+	 * @param address address to bind to, use "0.0.0.0" to bind to all local addresses
+	 * @param port port to bind to. You should generally use a port > 1024.
+	 * @param ssl_private_key Private key PEM file for HTTPS/SSL. If empty, a plaintext server is created
+	 * @param ssl_public_key Public key PEM file for HTTPS/SSL. If empty, a plaintext server is created
+	 */
+	cluster& enable_webhook_server(const std::string& discord_public_key, const std::string_view address, uint16_t port,  const std::string& ssl_private_key = "", const std::string& ssl_public_key = "");
 
 	/**
 	 * @brief Place some arbitrary work into the thread pool for execution when time permits.
