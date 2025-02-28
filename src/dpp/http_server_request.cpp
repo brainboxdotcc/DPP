@@ -108,6 +108,7 @@ bool http_server_request::handle_buffer(std::string &buffer)
 		switch (state) {
 			case HTTPS_HEADERS:
 				if (buffer.length() > MAX_HEADER_SIZE) {
+					owner->log(ll_warning, "HTTTP request exceeds max header size, dropped");
 					return false;
 				} else if (buffer.find("\r\n\r\n") != std::string::npos) {
 
