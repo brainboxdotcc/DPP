@@ -79,3 +79,4 @@
 #include <dpp/signature_verifier.h>
 #include <dpp/socket_listener.h>
 #include <dpp/http_server.h>
+#include <dpp/discord_webhook_server.h>

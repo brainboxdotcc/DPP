@@ -37,14 +37,15 @@ int main() {
 	if (t) {
 		dpp::cluster bot(t, 0, dpp::NO_SHARDS, 1, 1, false, dpp::cache_policy::cpol_none);
 		dpp::http_server *server1{nullptr}, *server2{nullptr};
+		dpp::discord_webhook_server* server3{nullptr};
 
 		bot.on_log([&](const dpp::log_t& log) {
 			std::cout << "[" << dpp::utility::current_date_time() << "] " << dpp::utility::loglevel(log.severity) << ": " << log.message << std::endl;
 		});
 		bot.on_ready([&](const dpp::ready_t& ready) {
 
-			/* A plaintext HTTP server on port 3010 */
-			server1 = new dpp::http_server(&bot, "0.0.0.0", 3010, [&bot](dpp::http_server_request* request) {
+			/* A plaintext HTTP server on port 3011 */
+			server1 = new dpp::http_server(&bot, "0.0.0.0", 3011, [&bot](dpp::http_server_request* request) {
 				respond(*request);
 			});
 
@@ -52,6 +53,9 @@ int main() {
 			server2 = new dpp::http_server(&bot, "0.0.0.0", 3042, [&bot](dpp::http_server_request* request) {
 				respond(*request);
 			}, "../../testdata/localhost.key", "../../testdata/localhost.pem");
+
+			/* A discord interactions endpoint on port 3010 */
+			server3 = new dpp::discord_webhook_server(&bot, getenv("DISCORD_PUBLIC_KEY"), "0.0.0.0", 3010);
 		});
 
 		bot.start(dpp::st_wait);
