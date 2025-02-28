@@ -510,8 +510,9 @@ struct DPP_EXPORT interaction_create_t : public event_dispatch_t {
 	 * This is thread local so that it is preserved when the event is copied, we
 	 * guarantee that the request/response is in the same thread so this will always
 	 * be valid.
+	 * @param response response to set
 	 */
-	static thread_local std::string queued_response;
+	void set_queued_response(const std::string& response) const;
 
 	/**
 	 * @brief Acknowledge interaction without displaying a message to the user,
@@ -622,6 +623,12 @@ struct DPP_EXPORT interaction_create_t : public event_dispatch_t {
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void delete_original_response(command_completion_event_t callback = utility::log_error()) const;
+
+	/**
+	 * @brief Get queued response when responding to a HTTP request
+	 * @return response JSON
+	 */
+	std::string get_queued_response() const;
 
 #ifndef DPP_NO_CORO
 	/**
