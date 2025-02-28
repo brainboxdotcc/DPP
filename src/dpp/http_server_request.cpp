@@ -100,13 +100,16 @@ bool http_server_request::handle_buffer(std::string &buffer)
 {
 	/* Bigger than any discord webhook input ever could be... */
 	const uint64_t MAX_POST_SIZE = 1024 * 128;
+	const uint64_t MAX_HEADER_SIZE = 8192;
 	bool state_changed = false;
 
 	do {
 		state_changed = false;
 		switch (state) {
 			case HTTPS_HEADERS:
-				if (buffer.find("\r\n\r\n") != std::string::npos) {
+				if (buffer.length() > MAX_HEADER_SIZE) {
+					return false;
+				} else if (buffer.find("\r\n\r\n") != std::string::npos) {
 
 					/* Add 10 seconds to retrieve body */
 					timeout += 10;
