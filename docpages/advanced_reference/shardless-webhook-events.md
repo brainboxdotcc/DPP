@@ -1,5 +1,7 @@
 \page shardless Shardless Cluster: Events via Webhooks
 
+[TOC]
+
 ## What are shardless clusters?
 
 D++ gives you two ways to handle Discord events: sharding via websockets (the default) and webhooks. Websocket shards connect to Discord, handle up to 2,500 servers each, and process events asynchronously via a REST API call. Webhooks, on the other hand, let Discord push events straight to your bot, skipping the extra API call and making responses instant. WebSockets are great for most bots, but webhooks are super efficient for massive bots, using fewer resources while handling tons of traffic. The recommended setup is to run Nginx or Apache as a reverse proxy in front of your D++ bot, ensuring security and scalability. Enabling webhooks is simple—just call a method in your bot to activate them. We’ll guide you through setting it up step by step.
@@ -77,7 +79,7 @@ Please see the example below:
 
 Note that you can get the public key from your application settings in the Discord Developer Portal. It is **not** your bot token!
 
-\warning It is important that if your bot works via webhook events, you do not delay in responding. You must respond as fast as possible to the request, with an `event.reply()`. You can always acknowledge the response with `event.thinking()` and edit the interation later, but this must be done in a separate flow, NOT within the slashcommand event. This is because when you are in the event handler you are directly building a HTTP response that is directly sent back to Discord in an established HTTP request. You can follow up with other API calls if you wish later on. Each request is placed into D++'s thread pool, so you don't have to worry too much about blocking for a little while but remember users expect snappy responses and Discord have a 3 second hard limit on replies!
+\warning It is important that if your bot works via webhook events, you do not delay in responding. You must respond as fast as possible to the request, with an `event.reply()`. You can always acknowledge the response with `event.thinking()` and edit the interaction later, but this must be done in a separate flow, NOT within the slashcommand event. This is because when you are in the event handler you are directly building a HTTP response that is directly sent back to Discord in an established HTTP request. You can follow up with other API calls if you wish later on. Each request is placed into D++'s thread pool, so you don't have to worry too much about blocking for a little while but remember users expect snappy responses and Discord have a 3 second hard limit on replies!
 
 ## Setting Up a reverse proxy to route to your bot
 
@@ -207,16 +209,16 @@ This involves configuring the **Interactions Endpoint URL** in your Discord appl
    - In the **Applications** section, click on your bot's application to open its settings.
 
 3. **Navigate to the "General Information" Tab**:
-   - On the left sidebar, select **"General Information"**.
+   - On the left sidebar, select **General Information**.
 
 4. **Set the Interactions Endpoint URL**:
-   - Locate the **"Interactions Endpoint URL"** field.
-   - Enter your public URL (e.g., `https://example.com/discord-interactions`).
+   - Locate the **Interactions Endpoint URL** field.
+   - Enter your public URL (e.g., `https://example.com/interactions`).
    - Ensure this URL points to the endpoint you've set up to handle Discord's interaction payloads.
    - Take note of the **public key** for use in your bot
 
 5. **Save Changes**:
-   - Scroll to the bottom of the page and click **"Save Changes"**.
+   - Scroll to the bottom of the page and click **Save Changes**.
 
 \image html webhook-app.png
 
@@ -230,4 +232,11 @@ This involves configuring the **Interactions Endpoint URL** in your Discord appl
 
 You can find even more information on Discord's official documentation on [Setting Up an Interaction Endpoint](https://discord.com/developers/docs/getting-started#setting-up-an-interaction-endpoint).
 
+## Further reading/Related pages
+
+* dpp::cluster::enable_webhook_server
+* dpp::discord_webhook_server
+* dpp::http_server
+* dpp::http_server_request
+* dpp::socket_listener
 

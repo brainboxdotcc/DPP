@@ -8,7 +8,7 @@ int main() {
 
 	bot.on_ready([&](const dpp::ready_t& ready) {
 		/* Enable discord interactions endpoint on port 3000
-		 * NOTE: PUT YOUR OWN PUBLIC HERE FOR THE FIRST PARAMETER.
+		 * NOTE: PUT YOUR OWN PUBLIC KEY HERE FOR THE FIRST PARAMETER.
 		 * You can find this on the same page where you entered the Discord Interaction URL.
 		 * Do not use your Discord bot token in this field!
 		 */
