@@ -500,6 +500,12 @@ struct DPP_EXPORT interaction_create_t : public event_dispatch_t {
 	using event_dispatch_t::operator=;
 
 	/**
+	 * @brief Returns a generic http success confirmation
+	 * @return success
+	 */
+	confirmation_callback_t success() const;
+
+	/**
 	 * @brief True if from a HTTP interaction webhook, false if from websocket
 	 */
 	bool from_webhook{false};
