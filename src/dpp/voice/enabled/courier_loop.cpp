@@ -159,7 +159,7 @@ void discord_voice_client::voice_courier_loop(discord_voice_client& client, cour
 						voice_receive_t &vr = *d.parked_payloads.top().vr;
 
 						/*
-						 * We do decryption here to avoid blocking ssl_client and saving cpu time by doing it when needed only.
+						 * We do decryption here to avoid blocking ssl_connection and saving cpu time by doing it when needed only.
 						 *
 						 * NOTE: You do not want to send audio while also listening for on_voice_receive/on_voice_receive_combined.
 						 * It will cause gaps in your recording, I have no idea why exactly.

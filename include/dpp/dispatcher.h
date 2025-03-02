@@ -66,6 +66,20 @@ class discord_voice_client;
  */
 using command_completion_event_t = std::function<void(const confirmation_callback_t&)>;
 
+/**
+ * @brief Route interaction event
+ *
+ * @param creator Creating cluster
+ * @param shard_id Shard ID or 0
+ * @param d JSON data for the event
+ * @param raw Raw JSON string
+ * @param from_webhook True if the interaction comes from a webhook
+ * @return JSON interaction response, only valid when from_webhook is true
+ */
+namespace events {
+	std::string DPP_EXPORT internal_handle_interaction(cluster* creator, uint16_t shard_id, json &d, const std::string &raw, bool from_webhook);
+}
+
 /** @brief Base event parameter struct.
  * Each event you receive from the library will have its parameter derived from this class.
  * The class contains the raw event data, and a pointer to the current shard's dpp::discord_client object.
@@ -203,6 +217,19 @@ struct DPP_EXPORT log_t : public event_dispatch_t {
 	 * @brief Log Message
 	 */
 	std::string message = {};
+};
+
+/**
+ * @brief Closure of socket (removal from socket engine)
+ */
+struct DPP_EXPORT socket_close_t : public event_dispatch_t {
+        using event_dispatch_t::event_dispatch_t;
+        using event_dispatch_t::operator=;
+
+	/**
+	 * @brief Socket file descriptor
+	 */
+	socket fd{INVALID_SOCKET};
 };
 
 namespace utility {
@@ -473,6 +500,27 @@ struct DPP_EXPORT interaction_create_t : public event_dispatch_t {
 	using event_dispatch_t::operator=;
 
 	/**
+	 * @brief Returns a generic http success confirmation
+	 * @return success
+	 */
+	confirmation_callback_t success() const;
+
+	/**
+	 * @brief True if from a HTTP interaction webhook, false if from websocket
+	 */
+	bool from_webhook{false};
+
+	/**
+	 * @brief If this interaction is created from a webhook server,
+	 * it fills this value with a JSON string which is sent as the HTTP response.
+	 * This is thread local so that it is preserved when the event is copied, we
+	 * guarantee that the request/response is in the same thread so this will always
+	 * be valid.
+	 * @param response response to set
+	 */
+	void set_queued_response(const std::string& response) const;
+
+	/**
 	 * @brief Acknowledge interaction without displaying a message to the user,
 	 * for use with button and select menu components.
 	 * 
@@ -581,6 +629,12 @@ struct DPP_EXPORT interaction_create_t : public event_dispatch_t {
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void delete_original_response(command_completion_event_t callback = utility::log_error()) const;
+
+	/**
+	 * @brief Get queued response when responding to a HTTP request
+	 * @return response JSON
+	 */
+	std::string get_queued_response() const;
 
 #ifndef DPP_NO_CORO
 	/**

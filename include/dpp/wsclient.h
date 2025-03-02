@@ -23,7 +23,7 @@
 #include <dpp/export.h>
 #include <string>
 #include <map>
-#include <dpp/sslclient.h>
+#include <dpp/sslconnection.h>
 
 namespace dpp {
 
@@ -102,7 +102,7 @@ enum ws_opcode : uint8_t {
 /**
  * @brief Implements a websocket client based on the SSL client
  */
-class DPP_EXPORT websocket_client : public ssl_client {
+class DPP_EXPORT websocket_client : public ssl_connection {
 	/**
 	 * @brief Connection key used in the HTTP headers
 	 */

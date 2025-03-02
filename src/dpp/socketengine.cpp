@@ -23,7 +23,7 @@
 #include <dpp/exception.h>
 #include <csignal>
 #include <memory>
-#include <dpp/sslclient.h>
+#include <dpp/sslconnection.h>
 #include <iostream>
 #include <dpp/cache.h>
 #include <dpp/cluster.h>

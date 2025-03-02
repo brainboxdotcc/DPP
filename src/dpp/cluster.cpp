@@ -24,6 +24,7 @@
 #include <chrono>
 #include <iostream>
 #include <dpp/json.h>
+#include <dpp/discord_webhook_server.h>
 
 namespace dpp {
 
@@ -157,6 +158,7 @@ cluster::cluster(const std::string &_token, uint32_t _intents, uint32_t _shards,
 
 cluster::~cluster()
 {
+	delete webhook_server;
 	delete rest;
 	delete raw_rest;
 	this->shutdown();
@@ -164,6 +166,11 @@ cluster::~cluster()
 
 request_queue* cluster::get_rest() {
 	return rest;
+}
+
+cluster& cluster::enable_webhook_server(const std::string& discord_public_key, const std::string_view address, uint16_t port,  const std::string& ssl_private_key, const std::string& ssl_public_key) {
+	webhook_server = new discord_webhook_server(this, discord_public_key, address, port, ssl_private_key, ssl_public_key);
+	return *this;
 }
 
 request_queue* cluster::get_raw_rest() {
@@ -366,23 +373,45 @@ void cluster::start(start_type return_after) {
 				}
 			}
 
-			/* Get all active DM channels and map them to user id -> dm id */
-			current_user_get_dms([this](const dpp::confirmation_callback_t &completion) {
-				if (completion.is_error()) {
-					log(dpp::ll_debug, "Failed to get bot DM list");
-					return;
-				}
-				dpp::channel_map dmchannels = std::get<channel_map>(completion.value);
-				for (auto &c: dmchannels) {
-					for (auto &u: c.second.recipients) {
-						set_dm_channel(u, c.second.id);
-					}
-				}
-			});
-
 			log(ll_debug, "Shards started.");
 		});
 
+	} else {
+		log(ll_debug, "Starting shardless cluster...");
+		/* Without the ready event, we have no user information. This is needed
+		 * to register commands etc., so we request it via the API.
+		 */
+		if (!token.empty()) {
+			current_user_get([this](const auto &reply) {
+				if (reply.is_error()) {
+					throw dpp::connection_exception("Could not fetch user information");
+				}
+				/* We can implicitly upcast here from user_identified to its parent class, user */
+				this->me = std::get<user_identified>(reply.value);
+				ready_t r(this, 0, "");
+				log(ll_debug, "Shardless cluster started.");
+				/* Without shards, on_ready must be manually fired here if it has consumers */
+				if (!on_ready.empty()) {
+					on_ready.call(r);
+				}
+			});
+		}
+	}
+
+	if (!token.empty()) {
+		/* Get all active DM channels and map them to user id -> dm id */
+		current_user_get_dms([this](const dpp::confirmation_callback_t &completion) {
+			if (completion.is_error()) {
+				log(dpp::ll_debug, "Failed to get bot DM list");
+				return;
+			}
+			dpp::channel_map dmchannels = std::get<channel_map>(completion.value);
+			for (auto &c: dmchannels) {
+				for (auto &u: c.second.recipients) {
+					set_dm_channel(u, c.second.id);
+				}
+			}
+		});
 	}
 
 	if (return_after == st_return) {

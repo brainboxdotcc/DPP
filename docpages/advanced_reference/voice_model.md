@@ -72,11 +72,11 @@ digraph "Example Directory" {
 		node [style=filled, color=3, shape=rect]
 		"discord_client::one_second_timer";
 		"websocket_client::write";
-		"ssl_client::write";
+		"ssl_connection::write";
 		
 		"discord_client::one_second_timer" -> "websocket_client::write";
-		"websocket_client::write" -> "ssl_client::write";
-		"ssl_client::write" -> "Discord";
+		"websocket_client::write" -> "ssl_connection::write";
+		"ssl_connection::write" -> "Discord";
 		
 		label = "This is where we start sending\nwebsocket connections to Discord.";
 	}
@@ -85,17 +85,17 @@ digraph "Example Directory" {
 		style=filled;
 		color=lightgrey;
 		node [style=filled, color=3, shape=rect]
-		"ssl_client::read_loop";
+		"ssl_connection::read_loop";
 		"Response from Discord?";
 		"No";
 		"HTTP/1.1 204 No Content...";
 		"HTTP/1.1 101 Switching Protocols";
 		
-		"ssl_client::read_loop" -> "Response from Discord?";
+		"ssl_connection::read_loop" -> "Response from Discord?";
 		"Response from Discord?" -> "No";
 		"Response from Discord?" -> "HTTP/1.1 204 No Content...";
 		"Response from Discord?" -> "HTTP/1.1 101 Switching Protocols";
-		"No" -> "ssl_client::read_loop";
+		"No" -> "ssl_connection::read_loop";
 		
 		"Discord" -> "HTTP/1.1 204 No Content...";
 		"Discord" -> "HTTP/1.1 101 Switching Protocols";
@@ -132,7 +132,7 @@ digraph "Example Directory" {
 
 		"voiceconn::connect" -> "discord_voice_client::run" [label="Once websocket_client has finished"];
 		"discord_voice_client::run" -> "discord_voice_client::thread_run";
-		"discord_voice_client::thread_run" -> "ssl_client::read_loop";
+		"discord_voice_client::thread_run" -> "ssl_connection::read_loop";
 		
 		label = "Voice initalisation.\nThis will only fire when 'voice_server_update' AND 'voice_state_update' has fired.\nIf everything goes well, Discord should send back '101 Switching Protocals'.";
 	}

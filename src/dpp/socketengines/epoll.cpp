@@ -55,6 +55,7 @@ struct DPP_EXPORT socket_engine_epoll : public socket_engine_base {
 	int epoll_handle{INVALID_SOCKET};
 	static constexpr size_t MAX_EVENTS = 65536;
 	std::array<struct epoll_event, MAX_EVENTS> events{};
+	int sockets{0};
 
 	socket_engine_epoll(const socket_engine_epoll&) = delete;
 	socket_engine_epoll(socket_engine_epoll&&) = delete;
@@ -76,6 +77,14 @@ struct DPP_EXPORT socket_engine_epoll : public socket_engine_base {
 
 	void process_events() final {
 		const int sleep_length = 1000;
+		if (sockets == 0) {
+			/* epoll_wait() on empty set waits forever (or until another thread inserts a socket into the set.
+			 * We can't trust that this is going to happen, and it may deadlock the cluster, so in the event the
+			 * set is empty, we wait a millisecond (so it isn't a busy-wait) and return.
+			 */
+			std::this_thread::sleep_for(std::chrono::milliseconds(1));
+			return;
+		}
 		int i = epoll_wait(epoll_handle, events.data(), MAX_EVENTS, sleep_length);
 
 		for (int j = 0; j < i; j++) {
@@ -142,6 +151,7 @@ struct DPP_EXPORT socket_engine_epoll : public socket_engine_base {
 
 	bool register_socket(const socket_events& e) final {
 		bool r = socket_engine_base::register_socket(e);
+		sockets++;
 		if (r) {
 			struct epoll_event ev{};
 			ev.events = EPOLLET;
@@ -184,7 +194,13 @@ protected:
 
 	bool remove_socket(dpp::socket fd) final {
 		struct epoll_event ev{};
+		sockets--;
 		epoll_ctl(epoll_handle, EPOLL_CTL_DEL, fd, &ev);
+		if (!owner->on_socket_close.empty()) {
+			socket_close_t event(owner, 0, "");
+			event.fd = fd;
+			owner->on_socket_close.call(event);
+		}
 		return true;
 	}
 };

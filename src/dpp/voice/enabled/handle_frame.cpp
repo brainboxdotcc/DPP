@@ -459,7 +459,7 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 						throw dpp::connection_exception(err_nonblocking_failure, "Can't switch voice UDP socket to non-blocking mode!");
 					}
 
-					/* Hook poll() in the ssl_client to add a new file descriptor */
+					/* Attach new file descriptor to the socket engine */
 					this->fd = newfd;
 
 					udp_events = dpp::socket_events(

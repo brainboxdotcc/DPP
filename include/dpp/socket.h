@@ -107,6 +107,12 @@ public:
 	[[nodiscard]] uint16_t get_port(socket fd);
 };
 
+enum raii_socket_type {
+	rst_udp,
+	rst_tcp,
+
+};
+
 /**
  * @brief Allocates a dpp::socket, closing it on destruction
  */
@@ -120,7 +126,13 @@ struct DPP_EXPORT raii_socket {
 	 * @brief Construct a socket.
 	 * Calls socket() and returns a new file descriptor
 	 */
-	raii_socket();
+	raii_socket(raii_socket_type type = rst_udp);
+
+	/**
+	 * @brief Convert an established fd to an raii_socket
+	 * @param plain_fd
+	 */
+	raii_socket(socket plain_fd);
 
 	/**
 	 * @brief Non-copyable
@@ -131,6 +143,35 @@ struct DPP_EXPORT raii_socket {
 	 * @brief Non-movable
 	 */
 	raii_socket(raii_socket&&) = delete;
+
+	/**
+	 * @brief Sets the value of a socket option.
+	 * @tparam T type to set option for
+	 * @param level The level at which to change the socket options
+	 * @param name The option to change the value of
+	 * @param value The value to set
+	 * @return True if set successfully
+	 */
+	template <typename T> bool set_option(int level, int name, T value);
+
+	/**
+	 * @brief Bind socket to IP/port
+	 * @param address address to bind to
+	 * @return true on success
+	 */
+	bool bind(address_t address);
+
+	/**
+	 * @brief Listen on previously bound port
+	 * @return true on success
+	 */
+	bool listen();
+
+	/**
+	 * @brief Accept a pending connection on listening socket
+	 * @return new connection file descriptor
+	 */
+	socket accept();
 
 	/**
 	 * @brief Non-copyable

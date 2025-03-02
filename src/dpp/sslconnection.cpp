@@ -68,9 +68,19 @@ uint64_t last_unique_id{1};
 class openssl_connection {
 public:
 	/**
+	 * @brief OpenSSL context
+	 */
+	SSL_CTX* ctx{nullptr};
+	/**
 	 * @brief OpenSSL session
 	 */
 	SSL* ssl{nullptr};
+
+	~openssl_connection() {
+		if (ctx) {
+			SSL_CTX_free(ctx);
+		}
+	}
 };
 
 /**
@@ -81,22 +91,6 @@ struct keepalive_cache_t {
 	openssl_connection* ssl;
 	dpp::socket sfd;
 };
-
-/**
- * @brief Custom deleter for SSL_CTX
- */
-class openssl_context_deleter {
-public:
-	void operator()(SSL_CTX* context) const noexcept {
-		SSL_CTX_free(context);
-	}
-};
-
-/**
- * @brief OpenSSL context.
- * Each thread has one of these so it is thread_local.
- */
-thread_local std::unique_ptr<SSL_CTX, openssl_context_deleter> openssl_context;
 
 bool close_socket(dpp::socket sfd)
 {
@@ -137,7 +131,7 @@ bool set_nonblocking(dpp::socket sockfd, bool non_blocking)
 /**
  * @brief Start connecting to a TCP socket.
  * This simply calls connect() and checks for error return, as the timeout is now handled in the main
- * IO events for the ssl_client class.
+ * IO events for the ssl_connection class.
  * 
  * @param sockfd socket descriptor
  * @param addr address to connect to
@@ -190,11 +184,12 @@ void set_signal_handler(int signal)
 }
 #endif
 
-uint64_t ssl_client::get_unique_id() const {
+uint64_t ssl_connection::get_unique_id() const {
 	return unique_id;
 }
 
-ssl_client::ssl_client(cluster* creator, const std::string &_hostname, const std::string &_port, bool plaintext_downgrade, bool reuse) :
+ssl_connection::ssl_connection(cluster* creator, const std::string &_hostname, const std::string &_port, bool plaintext_downgrade, bool reuse) :
+	is_server(false),
 	sfd(INVALID_SOCKET),
 	ssl(nullptr),
 	last_tick(time(nullptr)),
@@ -215,7 +210,7 @@ ssl_client::ssl_client(cluster* creator, const std::string &_hostname, const std
 		ssl = new openssl_connection();
 	}
 	try {
-		ssl_client::connect();
+		ssl_connection::connect();
 	}
 	catch (std::exception&) {
 		cleanup();
@@ -223,8 +218,38 @@ ssl_client::ssl_client(cluster* creator, const std::string &_hostname, const std
 	}
 }
 
+ssl_connection::ssl_connection(cluster* creator, socket fd, bool plaintext_downgrade, const std::string& private_key, const std::string& public_key) :
+	is_server(true),
+	sfd(fd),
+	ssl(nullptr),
+	last_tick(time(nullptr)),
+	start(time(nullptr)),
+	bytes_out(0),
+	bytes_in(0),
+	plaintext(plaintext_downgrade),
+	timer_handle(0),
+	unique_id(last_unique_id++),
+	keepalive(false),
+	owner(creator),
+	private_key_file(private_key),
+	public_key_file(public_key)
+{
+	if (plaintext) {
+		ssl = nullptr;
+	} else {
+		ssl = new openssl_connection();
+	}
+
+	if (!set_nonblocking(sfd, true)) {
+		throw dpp::connection_exception(err_nonblocking_failure, "Can't switch socket to non-blocking mode!");
+	}
+}
+
+void ssl_connection::on_buffer_drained() {
+}
+
 /* SSL Client constructor throws std::runtime_error if it can't allocate a socket or call connect() */
-void ssl_client::connect() {
+void ssl_connection::connect() {
 	/* Resolve hostname to IP */
 	int err = 0;
 	const dns_cache_entry* addr = resolve_hostname(hostname, port);
@@ -241,7 +266,7 @@ void ssl_client::connect() {
 	}
 }
 
-void ssl_client::socket_write(const std::string_view data) {
+void ssl_connection::socket_write(const std::string_view data) {
 	/* Because this is a non-blocking system we never write immediately. We append to the buffer,
 	 * which writes later.
 	 */
@@ -250,17 +275,17 @@ void ssl_client::socket_write(const std::string_view data) {
 	owner->socketengine->inplace_modify_fd(sfd, WANT_WRITE);
 }
 
-void ssl_client::one_second_timer() {
+void ssl_connection::one_second_timer() {
 }
 
-std::string ssl_client::get_cipher() {
+std::string ssl_connection::get_cipher() {
 	return cipher;
 }
 
-void ssl_client::log(dpp::loglevel severity, const std::string &msg) const {
+void ssl_connection::log(dpp::loglevel severity, const std::string &msg) const {
 }
 
-void ssl_client::complete_handshake(const socket_events* ev)
+void ssl_connection::complete_handshake(const socket_events* ev)
 {
 	if (!ssl || !ssl->ssl) {
 		return;
@@ -303,13 +328,13 @@ void ssl_client::complete_handshake(const socket_events* ev)
 
 }
 
-void ssl_client::do_raw_trace(const std::string& message) const {
+void ssl_connection::do_raw_trace(const std::string& message) const {
 	if (raw_trace) {
 		log(ll_trace, "RAWTRACE" + message);
 	}
 }
 
-void ssl_client::on_read(socket fd, const struct socket_events& ev) {
+void ssl_connection::on_read(socket fd, const struct socket_events& ev) {
 
 	if (sfd == INVALID_SOCKET) {
 		return;
@@ -395,7 +420,7 @@ void ssl_client::on_read(socket fd, const struct socket_events& ev) {
 	}
 }
 
-void ssl_client::on_write(socket fd, const struct socket_events& e) {
+void ssl_connection::on_write(socket fd, const struct socket_events& e) {
 
 	if (sfd == INVALID_SOCKET) {
 		return;
@@ -417,21 +442,30 @@ void ssl_client::on_write(socket fd, const struct socket_events& e) {
 		 */
 
 		/* Each thread needs a context, but we don't need to make a new one for each connection */
-		if (!openssl_context) {
+		if (ssl != nullptr && ssl->ctx == nullptr) {
 			/* Create new client-method instance */
-			const SSL_METHOD *method = TLS_client_method();
+			const SSL_METHOD *method = this->is_server ? TLS_server_method() : TLS_client_method();
 
 			/* Create SSL context */
-			openssl_context.reset(SSL_CTX_new(method));
-			if (!openssl_context) {
+			ssl->ctx = SSL_CTX_new(method);
+			if (!ssl->ctx) {
 				throw dpp::connection_exception(err_ssl_context, "Failed to create SSL client context!");
+			}
+
+			if (is_server) {
+				if (SSL_CTX_use_certificate_file(ssl->ctx, public_key_file.c_str(), SSL_FILETYPE_PEM) <= 0) {
+					throw dpp::connection_exception(err_ssl_context, "Failed to set public key certificate");
+				}
+				if (SSL_CTX_use_PrivateKey_file(ssl->ctx, private_key_file.c_str(), SSL_FILETYPE_PEM) <= 0 ) {
+					throw dpp::connection_exception(err_ssl_context, "Failed to set private key certificate");
+				}
 			}
 
 			/* This sets the allowed SSL/TLS versions for the connection.
 			 * Do not allow SSL 3.0, TLS 1.0 or 1.1
 			 * https://www.packetlabs.net/posts/tls-1-1-no-longer-secure/
 			 */
-			if (!SSL_CTX_set_min_proto_version(openssl_context.get(), TLS1_2_VERSION)) {
+			if (!SSL_CTX_set_min_proto_version(ssl->ctx, TLS1_2_VERSION)) {
 				throw dpp::connection_exception(err_ssl_version, "Failed to set minimum SSL version!");
 			}
 		}
@@ -439,21 +473,23 @@ void ssl_client::on_write(socket fd, const struct socket_events& e) {
 			/* Now we can create SSL session.
 			 * These are unique to each connection, using the context.
 			 */
-			std::lock_guard<std::mutex> lock(ssl_mutex);
-			ssl->ssl = SSL_new(openssl_context.get());
+			ssl->ssl = SSL_new(ssl->ctx);
 			if (ssl->ssl == nullptr) {
 				throw dpp::connection_exception(err_ssl_new, "SSL_new failed!");
 			}
 
 			/* Associate the SSL session with the file descriptor, and set it as connecting */
 			SSL_set_fd(ssl->ssl, (int) sfd);
-			SSL_set_connect_state(ssl->ssl);
-
-			/* Server name identification (SNI)
-			 * This is needed for modern HTTPS and tells SSL which virtual host to connect a
-			 * socket to: https://www.cloudflare.com/en-gb/learning/ssl/what-is-sni/
-			 */
-			SSL_set_tlsext_host_name(ssl->ssl, hostname.c_str());
+			if (this->is_server) {
+				SSL_set_accept_state(ssl->ssl);
+			} else {
+				SSL_set_connect_state(ssl->ssl);
+				/* Server name identification (SNI)
+				 * This is needed for modern HTTPS and tells SSL which virtual host to connect a
+				 * socket to: https://www.cloudflare.com/en-gb/learning/ssl/what-is-sni/
+				 */
+				SSL_set_tlsext_host_name(ssl->ssl, hostname.c_str());
+			}
 		}
 
 		/* If this completes, we fall straight through into if (connected) */
@@ -488,6 +524,9 @@ void ssl_client::on_write(socket fd, const struct socket_events& e) {
 				client_to_server_length -= r;
 				client_to_server_offset += r;
 				bytes_out += r;
+				if (obuffer.empty()) {
+					on_buffer_drained();
+				}
 			} else {
 				/* Spurious write event for empty buffer */
 				do_raw_trace("(OUT,PLAIN): <NOT WRITING EMPTY BUFFER>");
@@ -529,6 +568,8 @@ void ssl_client::on_write(socket fd, const struct socket_events& e) {
 						se.flags = WANT_READ | WANT_WRITE | WANT_ERROR;
 						owner->socketengine->update_socket(se);
 						do_raw_trace("(OUT,SSL): <MORE BUFFER REMAINS>");
+					} else {
+						on_buffer_drained();
 					}
 					do_raw_trace("(OUT,SSL): <OK>");
 					break;
@@ -567,11 +608,11 @@ void ssl_client::on_write(socket fd, const struct socket_events& e) {
 	}
 }
 
-void ssl_client::on_error(socket fd, const struct socket_events&, int error_code) {
+void ssl_connection::on_error(socket fd, const struct socket_events&, int error_code) {
 	this->close();
 }
 
-void ssl_client::read_loop() {
+void ssl_connection::read_loop() {
 	auto setup_events = [this]() {
 		dpp::socket_events events(
 			sfd,
@@ -615,7 +656,7 @@ void ssl_client::read_loop() {
 				close_socket(sfd);
 				owner->socketengine->delete_socket(sfd);
 				try {
-					ssl_client::connect();
+					ssl_connection::connect();
 				}
 				catch (const std::exception& e) {
 					do_raw_trace("(OUT): connect() exception: " + std::string(e.what()));
@@ -628,27 +669,25 @@ void ssl_client::read_loop() {
 	}
 }
 
-uint64_t ssl_client::get_bytes_out() {
+uint64_t ssl_connection::get_bytes_out() {
 	return bytes_out;
 }
 
-uint64_t ssl_client::get_bytes_in() {
+uint64_t ssl_connection::get_bytes_in() {
 	return bytes_in;
 }
 
-bool ssl_client::handle_buffer(std::string &buffer) {
+bool ssl_connection::handle_buffer(std::string &buffer) {
 	return true;
 }
 
-void ssl_client::close() {
+void ssl_connection::close() {
 	/**
 	 * Many of the values here are reset to initial values in the case
 	 * we want to reconnect the socket after closing it. This is not something
 	 * that is done often.
 	 */
-	std::lock_guard<std::mutex> out_lock(out_mutex);
 	if (!plaintext) {
-		std::lock_guard<std::mutex> lock(ssl_mutex);
 		if (ssl != nullptr && ssl->ssl != nullptr) {
 			SSL_free(ssl->ssl);
 			ssl->ssl = nullptr;
@@ -659,7 +698,7 @@ void ssl_client::close() {
 	last_tick = time(nullptr);
 	bytes_in = bytes_out = 0;
 	if (sfd != INVALID_SOCKET) {
-		log(ll_trace, "ssl_client::close() with sfd");
+		log(ll_trace, "ssl_connection::close() with sfd");
 		owner->socketengine->delete_socket(sfd);
 		close_socket(sfd);
 		sfd = INVALID_SOCKET;
@@ -668,11 +707,11 @@ void ssl_client::close() {
 	buffer.clear();
 }
 
-void ssl_client::cleanup() {
+void ssl_connection::cleanup() {
 	this->close();
 }
 
-ssl_client::~ssl_client() {
+ssl_connection::~ssl_connection() {
 	cleanup();
 	if (timer_handle) {
 		owner->stop_timer(timer_handle);

@@ -39,7 +39,7 @@ namespace dpp {
 
 	/**
 	 * @brief Represents a cached DNS result.
-	 * Used by the ssl_client class to store cached copies of dns lookups.
+	 * Used by the ssl_connection class to store cached copies of dns lookups.
 	 */
 	struct DPP_EXPORT dns_cache_entry {
 		/**

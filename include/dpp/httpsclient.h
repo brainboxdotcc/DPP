@@ -26,7 +26,7 @@
 #include <list>
 #include <vector>
 #include <variant>
-#include <dpp/sslclient.h>
+#include <dpp/sslconnection.h>
 #include <dpp/version.h>
 #include <dpp/stringops.h>
 
@@ -134,7 +134,7 @@ using https_client_completion_event = std::function<void(class https_client*)>;
  * @brief Implements a HTTPS socket client based on the SSL client.
  * @note plaintext HTTP without SSL is also supported via a "downgrade" setting
  */
-class DPP_EXPORT https_client : public ssl_client {
+class DPP_EXPORT https_client : public ssl_connection {
 
 	/**
 	 * @brief The type of the request, e.g. GET, POST

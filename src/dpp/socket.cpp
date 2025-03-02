@@ -21,7 +21,7 @@
  ************************************************************************************/
 
 #include <dpp/socket.h>
-#include <dpp/sslclient.h>
+#include <dpp/sslconnection.h>
 #include <cstring>
 
 namespace dpp {
@@ -52,12 +52,38 @@ uint16_t address_t::get_port(socket fd) {
 	return 0;
 }
 
-raii_socket::raii_socket() : fd(::socket(AF_INET, SOCK_DGRAM, 0)) {
+raii_socket::raii_socket(raii_socket_type type) : fd(::socket(AF_INET, type == rst_udp ? SOCK_DGRAM : SOCK_STREAM, 0)) {
+}
+
+raii_socket::raii_socket(socket plain_fd) {
+	fd = plain_fd;
 }
 
 raii_socket::~raii_socket() {
 	close_socket(fd);
 }
 
+bool raii_socket::bind(address_t address) {
+	return ::bind(fd, address.get_socket_address(), address.size()) >= 0;
+
+}
+
+template <typename T> bool raii_socket::set_option(int level, int name, T value) {
+	return ::setsockopt(fd, level, name, reinterpret_cast<char*>(&value), sizeof(value)) == 0;
+}
+
+template bool raii_socket::set_option<int>(int, int, int);
+template bool raii_socket::set_option<bool>(int, int, bool);
+template bool raii_socket::set_option<socklen_t>(int, int, socklen_t);
+
+bool raii_socket::listen() {
+	return ::listen(fd, SOMAXCONN) >= 0;
+}
+
+socket raii_socket::accept() {
+	sockaddr_in addr;
+	socklen_t addr_len{sizeof(sockaddr_in)};
+	return ::accept(fd, (struct sockaddr*)&addr, &addr_len);
+}
 
 }

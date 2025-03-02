@@ -148,6 +148,11 @@ protected:
 		kevent(kqueue_handle, &ke, 1, nullptr, 0, nullptr);
 		EV_SET(&ke, fd, EVFILT_READ, EV_DELETE, 0, 0, nullptr);
 		kevent(kqueue_handle, &ke, 1, nullptr, 0, nullptr);
+		if (!owner->on_socket_close.empty()) {
+			socket_close_t event(owner, 0, "");
+			event.fd = fd;
+			owner->on_socket_close.call(event);
+		}
 		return true;
 	}
 };
