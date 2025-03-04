@@ -52,6 +52,8 @@
 #include <chrono>
 #include <dpp/cluster.h>
 #include <dpp/dns.h>
+#include <dpp/ssl_context.h>
+#include <dpp/wrapped_ssl_ctx.h>
 
 namespace dpp {
 
@@ -76,11 +78,7 @@ public:
 	 */
 	SSL* ssl{nullptr};
 
-	~openssl_connection() {
-		if (ctx) {
-			SSL_CTX_free(ctx);
-		}
-	}
+	~openssl_connection() = default;
 };
 
 /**
@@ -208,6 +206,8 @@ ssl_connection::ssl_connection(cluster* creator, const std::string &_hostname, c
 		ssl = nullptr;
 	} else {
 		ssl = new openssl_connection();
+		detail::wrapped_ssl_ctx* context = detail::generate_ssl_context();
+		ssl->ctx = context->context;
 	}
 	try {
 		ssl_connection::connect();
@@ -218,7 +218,7 @@ ssl_connection::ssl_connection(cluster* creator, const std::string &_hostname, c
 	}
 }
 
-ssl_connection::ssl_connection(cluster* creator, socket fd, bool plaintext_downgrade, const std::string& private_key, const std::string& public_key) :
+ssl_connection::ssl_connection(cluster* creator, socket fd, uint16_t port, bool plaintext_downgrade, const std::string& private_key, const std::string& public_key) :
 	is_server(true),
 	sfd(fd),
 	ssl(nullptr),
@@ -238,6 +238,8 @@ ssl_connection::ssl_connection(cluster* creator, socket fd, bool plaintext_downg
 		ssl = nullptr;
 	} else {
 		ssl = new openssl_connection();
+		detail::wrapped_ssl_ctx* context = detail::generate_ssl_context(port, private_key, public_key);
+		ssl->ctx = context->context;
 	}
 
 	if (!set_nonblocking(sfd, true)) {
@@ -440,36 +442,7 @@ void ssl_connection::on_write(socket fd, const struct socket_events& e) {
 		/* SSL handshake and session setup. SSL sessions require more legwork
 		 * to get them initialised after connect() completes. We do that here.
 		 */
-
-		/* Each thread needs a context, but we don't need to make a new one for each connection */
-		if (ssl != nullptr && ssl->ctx == nullptr) {
-			/* Create new client-method instance */
-			const SSL_METHOD *method = this->is_server ? TLS_server_method() : TLS_client_method();
-
-			/* Create SSL context */
-			ssl->ctx = SSL_CTX_new(method);
-			if (!ssl->ctx) {
-				throw dpp::connection_exception(err_ssl_context, "Failed to create SSL client context!");
-			}
-
-			if (is_server) {
-				if (SSL_CTX_use_certificate_file(ssl->ctx, public_key_file.c_str(), SSL_FILETYPE_PEM) <= 0) {
-					throw dpp::connection_exception(err_ssl_context, "Failed to set public key certificate");
-				}
-				if (SSL_CTX_use_PrivateKey_file(ssl->ctx, private_key_file.c_str(), SSL_FILETYPE_PEM) <= 0 ) {
-					throw dpp::connection_exception(err_ssl_context, "Failed to set private key certificate");
-				}
-			}
-
-			/* This sets the allowed SSL/TLS versions for the connection.
-			 * Do not allow SSL 3.0, TLS 1.0 or 1.1
-			 * https://www.packetlabs.net/posts/tls-1-1-no-longer-secure/
-			 */
-			if (!SSL_CTX_set_min_proto_version(ssl->ctx, TLS1_2_VERSION)) {
-				throw dpp::connection_exception(err_ssl_version, "Failed to set minimum SSL version!");
-			}
-		}
-		if (ssl != nullptr && ssl->ssl == nullptr) {
+		if (ssl != nullptr && ssl->ctx != nullptr && ssl->ssl == nullptr) {
 			/* Now we can create SSL session.
 			 * These are unique to each connection, using the context.
 			 */
