@@ -942,7 +942,7 @@ protected:
 	 * @brief Get a resolved object from the resolved set
 	 * 
 	 * @tparam T type of object to retrieve
-	 * @tparam C container defintion for resolved container
+	 * @tparam C container definition for resolved container
 	 * @param id Snowflake ID
 	 * @param resolved_set container for the type
 	 * @return const T& retrieved type
