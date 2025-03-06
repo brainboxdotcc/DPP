@@ -43,8 +43,8 @@ constexpr std::array verb {
 	"TRACE",
 };
 
-http_server_request::http_server_request(cluster* creator, socket fd, bool plaintext_downgrade, const std::string& private_key, const std::string& public_key, http_server_request_event handle_request)
-	: ssl_connection(creator, fd, plaintext_downgrade, private_key, public_key),
+http_server_request::http_server_request(cluster* creator, socket fd, uint16_t port, bool plaintext_downgrade, const std::string& private_key, const std::string& public_key, http_server_request_event handle_request)
+	: ssl_connection(creator, fd, port, plaintext_downgrade, private_key, public_key),
 	  timeout(time(nullptr) + 10),
 	  handler(handle_request),
 	  state(HTTPS_HEADERS),

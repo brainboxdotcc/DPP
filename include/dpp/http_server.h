@@ -25,6 +25,7 @@
 #include <dpp/cluster.h>
 #include <dpp/socket_listener.h>
 #include <dpp/http_server_request.h>
+#include <dpp/ssl_context.h>
 
 namespace dpp {
 
@@ -39,6 +40,11 @@ struct http_server : public socket_listener<http_server_request> {
 	 * @brief Request handler callback to use for all incoming HTTP(S) requests
 	 */
 	http_server_request_event request_handler;
+
+	/**
+	 * @brief Port we are listening on
+	 */
+	uint16_t bound_port;
 
 	/**
 	 * @brief Constructor for creation of a HTTP(S) server
@@ -56,6 +62,13 @@ struct http_server : public socket_listener<http_server_request> {
 	 * @param newfd file descriptor of new request
 	 */
 	void emplace(socket newfd) override;
+
+	/**
+	 * @brief Destructor
+	 */
+	virtual ~http_server() {
+		detail::release_ssl_context(bound_port);
+	}
 };
 
 }

@@ -165,12 +165,13 @@ public:
 	 * have a file descriptor.
 	 * @param creator creating owner
 	 * @param fd file descriptor
+	 * @param port Port the connection came in on
 	 * @param plaintext_downgrade true if plaintext, false if SSL
 	 * @param private_key if SSL, the path to the private key PEM
 	 * @param public_key if SSL, the path to the public key PEM
 	 * @param handle_request request handler callback
 	 */
-        http_server_request(cluster* creator, socket fd, bool plaintext_downgrade, const std::string& private_key, const std::string& public_key, http_server_request_event handle_request);
+        http_server_request(cluster* creator, socket fd, uint16_t port, bool plaintext_downgrade, const std::string& private_key, const std::string& public_key, http_server_request_event handle_request);
 
 	/**
 	 * @brief Destroy the https client object

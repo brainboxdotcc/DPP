@@ -311,11 +311,12 @@ public:
 	 * @brief Accept a new connection from listen()/accept() socket
 	 * @param creator Creating cluster
 	 * @param fd Socket file descriptor assigned by accept()
+	 * @param port Port the new fd came from
 	 * @param plaintext_downgrade Set to true to connect using plaintext only, without initialising SSL.
 	 * @param private_key if plaintext_downgrade is set to false, a private key PEM file for SSL connections
 	 * @param public_key if plaintext_downgrade is set to false, a public key PEM file for SSL connections
 	 */
-	ssl_connection(cluster* creator, socket fd, bool plaintext_downgrade = false, const std::string& private_key = "", const std::string& public_key = "");
+	ssl_connection(cluster* creator, socket fd, uint16_t port, bool plaintext_downgrade = false, const std::string& private_key = "", const std::string& public_key = "");
 
 	/**
 	 * @brief Set up non blocking I/O and configure on_read, on_write and on_error.
