@@ -85,12 +85,84 @@ target_compile_options(
 
 target_compile_features(
 	"${LIB_NAME}" PUBLIC
-	"cxx_std_17" "cxx_constexpr" "cxx_auto_type"
+	"cxx_std_20" "cxx_constexpr" "cxx_auto_type"
 	"cxx_defaulted_functions" "cxx_deleted_functions"
 	"cxx_final" "cxx_lambdas" "cxx_override" "cxx_thread_local"
 	"cxx_variadic_templates" "cxx_attribute_deprecated"
 	"cxx_enum_forward_declarations"
 )
+
+if(NOT DPP_NO_CORO)
+	message("-- Attempting to enable coroutines feature")
+	set(CMAKE_CXX_STANDARD 20)
+	target_compile_features(${LIB_NAME} PUBLIC cxx_std_20)
+	if(WIN32 AND NOT MINGW AND NOT DPP_CLANG_CL)
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /await:strict") # https://learn.microsoft.com/en-us/cpp/build/reference/await-enable-coroutine-support?view=msvc-170
+		if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+			if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS_EQUAL 19.29.30158) # Taken from 2019 actions, as they seemingly fail to compile.
+				message("${BoldRed}Coroutines with MSVC (Visual Studio) require VS 2022 (Compiler Ver: 19.29.30158) or above. Forcing coroutines off.${ColourReset}")
+				set(DPP_NO_CORO ON)
+			endif()
+		endif()
+	else()
+		if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+			if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 14.0.0) # clang >= 14 has native support
+				message("-- ${Yellow}Clang < 14 - attempting to detect if using libc++ or stdc++${ColourReset}")
+				check_cxx_source_compiles("
+					#include <iostream>
+
+					int a =
+					#ifdef __GLIBCXX__
+						1;
+					#else
+						fgsfds;
+					#endif
+
+					int main(int argc, char* argv[])
+					{
+						return 0;
+					}
+					" IS_GLIBCXX)
+				if(IS_GLIBCXX)
+					if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 12.0.0)
+						message("${BoldRed}Clang with stdc++ and coroutines requires version 12.0.0 or above. Forcing coroutines off.${ColourReset}")
+						set(DPP_NO_CORO ON)
+					else()
+						message("-- ${Yellow}Detected stdc++ - enabling mock std::experimental namespace${ColourReset}")
+						target_compile_definitions(${LIB_NAME} PUBLIC "STDCORO_GLIBCXX_COMPAT" "DPP_CORO")
+					endif()
+				else()
+					message("-- ${Yellow}Detected libc++ - using <experimental/coroutine>${ColourReset}")
+					if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.0.0)
+						set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fcoroutines-ts")
+					endif()
+					target_compile_definitions(${LIB_NAME} PUBLIC "STDCORO_GLIBCXX_COMPAT" "DPP_CORO")
+				endif()
+				message("-- ${Yellow}Note - coroutines in clang < 14 are experimental, upgrading is recommended${ColourReset}")
+			endif()
+		elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+			if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 10.0)
+				message("${BoldRed}Coroutines with g++ require version 10 or above. Forcing coroutines off.${ColourReset}")
+				set(DPP_NO_CORO ON)
+			elseif(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 11.0)
+				message("-- ${Yellow}Note - coroutines in g++10 are experimental, upgrading to g++11 or above is recommended${ColourReset}")
+				set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fcoroutines")
+				target_compile_definitions(${LIB_NAME} PUBLIC "STDCORO_GLIBCXX_COMPAT" "DPP_CORO")
+			endif()
+		endif()
+	endif()
+endif()
+
+if(DPP_NO_CORO)
+	message("-- ${Yellow}Coroutines are disabled.${ColourReset}")
+	target_compile_definitions(${LIB_NAME} PUBLIC DPP_NO_CORO)
+else()
+	message("-- ${Green}Coroutines are enabled!${ColourReset}")
+endif()
+
+if(DPP_FORMATTERS)
+	target_compile_definitions(${LIB_NAME} PUBLIC DPP_FORMATTERS)
+endif()
 
 target_include_directories(
 	"${LIB_NAME}" PUBLIC
