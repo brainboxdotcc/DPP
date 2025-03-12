@@ -276,7 +276,7 @@ using role_permissions = permissions;
 /**
  * @brief Represents a permission bitmask (refer to enum dpp::permissions) which are held in an uint64_t
  */
-class DPP_EXPORT permission {
+class DPP_API permission {
 protected:
 	/**
 	 * @brief The permission bitmask value

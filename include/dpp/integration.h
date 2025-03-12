@@ -106,7 +106,7 @@ enum integration_flags {
 /**
  * @brief An application that has been integrated
  */
-struct DPP_EXPORT integration_app {
+struct DPP_API integration_app {
 	/**
 	 * @brief The id of the app.
 	 */
@@ -136,7 +136,7 @@ struct DPP_EXPORT integration_app {
 /**
  * @brief The account information for an integration.
  */
-struct DPP_EXPORT integration_account {
+struct DPP_API integration_account {
 	/**
 	 * @brief ID of the account
 	 */
@@ -151,7 +151,7 @@ struct DPP_EXPORT integration_account {
 /**
  * @brief Represents an integration on a guild, e.g. a connection to twitch.
  */
-class DPP_EXPORT integration : public managed, public json_interface<integration> {
+class DPP_API integration : public managed, public json_interface<integration> {
 protected:
 	friend struct json_interface<integration>;
 
@@ -272,7 +272,7 @@ public:
 /**
  * @brief The connection object that the user has attached.
  */
-class DPP_EXPORT connection : public json_interface<connection> {
+class DPP_API connection : public json_interface<connection> {
 protected:
 	friend struct json_interface<connection>;
 

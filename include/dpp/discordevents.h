@@ -35,7 +35,7 @@ namespace dpp {
  * @param keyname key name to check for a value
  * @return found value
  */
-uint64_t DPP_EXPORT snowflake_not_null(const nlohmann::json* j, const char *keyname);
+uint64_t DPP_API snowflake_not_null(const nlohmann::json* j, const char *keyname);
 
 /**
  * @brief Sets a snowflake id from a json field value, if defined, else does nothing
@@ -43,7 +43,7 @@ uint64_t DPP_EXPORT snowflake_not_null(const nlohmann::json* j, const char *keyn
  * @param keyname key name to check for a value
  * @param v Value to change
  */
-void DPP_EXPORT set_snowflake_not_null(const nlohmann::json* j, const char *keyname, uint64_t &v);
+void DPP_API set_snowflake_not_null(const nlohmann::json* j, const char *keyname, uint64_t &v);
 
 /**
  * @brief Sets an array of snowflakes from a json field value, if defined, else does nothing
@@ -51,7 +51,7 @@ void DPP_EXPORT set_snowflake_not_null(const nlohmann::json* j, const char *keyn
  * @param keyname key name to check for the values
  * @param v Value to change
  */
-void DPP_EXPORT set_snowflake_array_not_null(const nlohmann::json* j, const char *keyname, std::vector<class snowflake> &v);
+void DPP_API set_snowflake_array_not_null(const nlohmann::json* j, const char *keyname, std::vector<class snowflake> &v);
 
 /**
  * @brief Applies a function to each element of a json array.
@@ -59,7 +59,7 @@ void DPP_EXPORT set_snowflake_array_not_null(const nlohmann::json* j, const char
  * @param key key name to check for the values
  * @param fn function to apply to each element
  */
-void DPP_EXPORT for_each_json(nlohmann::json* parent, std::string_view key, const std::function<void(nlohmann::json*)> &fn);
+void DPP_API for_each_json(nlohmann::json* parent, std::string_view key, const std::function<void(nlohmann::json*)> &fn);
 
 /**
  * @brief Sets an array of objects from a json field value, if defined, else does nothing
@@ -81,7 +81,7 @@ template<class T> void set_object_array_not_null(nlohmann::json* j, std::string_
  * @param keyname key name to check for a value
  * @return found value
  */
-std::string DPP_EXPORT string_not_null(const nlohmann::json* j, const char *keyname);
+std::string DPP_API string_not_null(const nlohmann::json* j, const char *keyname);
 
 /**
  * @brief Sets a string from a json field value, if defined, else does nothing
@@ -89,7 +89,7 @@ std::string DPP_EXPORT string_not_null(const nlohmann::json* j, const char *keyn
  * @param keyname key name to check for a value
  * @param v Value to change
  */
-void DPP_EXPORT set_string_not_null(const nlohmann::json* j, const char *keyname, std::string &v);
+void DPP_API set_string_not_null(const nlohmann::json* j, const char *keyname, std::string &v);
 
 /**
  * @brief This is a repeat of set_string_not_null, but takes in a iconhash.
@@ -97,7 +97,7 @@ void DPP_EXPORT set_string_not_null(const nlohmann::json* j, const char *keyname
  * @param keyname key name to check for a value
  * @param v Value to change
  */
-void DPP_EXPORT set_iconhash_not_null(const nlohmann::json* j, const char *keyname, utility::iconhash &v);
+void DPP_API set_iconhash_not_null(const nlohmann::json* j, const char *keyname, utility::iconhash &v);
 
 /**
  * @brief Returns a double from a json field value, if defined, else returns 0.
@@ -105,7 +105,7 @@ void DPP_EXPORT set_iconhash_not_null(const nlohmann::json* j, const char *keyna
  * @param keyname key name to check for a value
  * @return found value
  */
-double DPP_EXPORT double_not_null(const nlohmann::json* j, const char *keyname);
+double DPP_API double_not_null(const nlohmann::json* j, const char *keyname);
 
 /**
  * @brief Sets a double from a json field value, if defined, else does nothing
@@ -113,7 +113,7 @@ double DPP_EXPORT double_not_null(const nlohmann::json* j, const char *keyname);
  * @param keyname key name to check for a value
  * @param v Value to change
  */
-void DPP_EXPORT set_double_not_null(const nlohmann::json* j, const char *keyname, double &v);
+void DPP_API set_double_not_null(const nlohmann::json* j, const char *keyname, double &v);
 
 /**
  * @brief Returns a 64 bit unsigned integer from a json field value, if defined, else returns 0.
@@ -122,7 +122,7 @@ void DPP_EXPORT set_double_not_null(const nlohmann::json* j, const char *keyname
  * @param keyname key name to check for a value
  * @return found value
  */
-uint64_t DPP_EXPORT int64_not_null(const nlohmann::json* j, const char *keyname);
+uint64_t DPP_API int64_not_null(const nlohmann::json* j, const char *keyname);
 
 /**
  * @brief Sets an unsigned 64 bit integer from a json field value, if defined, else does nothing
@@ -130,7 +130,7 @@ uint64_t DPP_EXPORT int64_not_null(const nlohmann::json* j, const char *keyname)
  * @param keyname key name to check for a value
  * @param v Value to change
  */
-void DPP_EXPORT set_int64_not_null(const nlohmann::json* j, const char *keyname, uint64_t &v);
+void DPP_API set_int64_not_null(const nlohmann::json* j, const char *keyname, uint64_t &v);
 
 /**
  * @brief Returns a 32 bit unsigned integer from a json field value, if defined, else returns 0
@@ -138,7 +138,7 @@ void DPP_EXPORT set_int64_not_null(const nlohmann::json* j, const char *keyname,
  * @param keyname key name to check for a value
  * @return found value
  */
-uint32_t DPP_EXPORT int32_not_null(const nlohmann::json* j, const char *keyname);
+uint32_t DPP_API int32_not_null(const nlohmann::json* j, const char *keyname);
 
 /**
  * @brief Sets an unsigned 32 bit integer from a json field value, if defined, else does nothing
@@ -146,7 +146,7 @@ uint32_t DPP_EXPORT int32_not_null(const nlohmann::json* j, const char *keyname)
  * @param keyname key name to check for a value
  * @param v Value to change
  */
-void DPP_EXPORT set_int32_not_null(const nlohmann::json* j, const char *keyname, uint32_t &v);
+void DPP_API set_int32_not_null(const nlohmann::json* j, const char *keyname, uint32_t &v);
 
 /**
  * @brief Returns a 16 bit unsigned integer from a json field value, if defined, else returns 0
@@ -154,7 +154,7 @@ void DPP_EXPORT set_int32_not_null(const nlohmann::json* j, const char *keyname,
  * @param keyname key name to check for a value
  * @return found value
  */
-uint16_t DPP_EXPORT int16_not_null(const nlohmann::json* j, const char *keyname);
+uint16_t DPP_API int16_not_null(const nlohmann::json* j, const char *keyname);
 
 /**
  * @brief Sets an unsigned 16 bit integer from a json field value, if defined, else does nothing
@@ -162,7 +162,7 @@ uint16_t DPP_EXPORT int16_not_null(const nlohmann::json* j, const char *keyname)
  * @param keyname key name to check for a value
  * @param v Value to change
  */
-void DPP_EXPORT set_int16_not_null(const nlohmann::json* j, const char *keyname, uint16_t &v);
+void DPP_API set_int16_not_null(const nlohmann::json* j, const char *keyname, uint16_t &v);
 
 /**
  * @brief Returns an 8 bit unsigned integer from a json field value, if defined, else returns 0
@@ -170,7 +170,7 @@ void DPP_EXPORT set_int16_not_null(const nlohmann::json* j, const char *keyname,
  * @param keyname key name to check for a value
  * @return found value
  */
-uint8_t DPP_EXPORT int8_not_null(const nlohmann::json* j, const char *keyname);
+uint8_t DPP_API int8_not_null(const nlohmann::json* j, const char *keyname);
 
 /**
  * @brief Sets an unsigned 8 bit integer from a json field value, if defined, else does nothing
@@ -178,7 +178,7 @@ uint8_t DPP_EXPORT int8_not_null(const nlohmann::json* j, const char *keyname);
  * @param keyname key name to check for a value
  * @param v Value to change
  */
-void DPP_EXPORT set_int8_not_null(const nlohmann::json* j, const char *keyname, uint8_t &v);
+void DPP_API set_int8_not_null(const nlohmann::json* j, const char *keyname, uint8_t &v);
 
 /**
  * @brief Returns a boolean value from a json field value, if defined, else returns false
@@ -186,7 +186,7 @@ void DPP_EXPORT set_int8_not_null(const nlohmann::json* j, const char *keyname, 
  * @param keyname key name to check for a value
  * @return found value
  */
-bool DPP_EXPORT bool_not_null(const nlohmann::json* j, const char *keyname);
+bool DPP_API bool_not_null(const nlohmann::json* j, const char *keyname);
 
 /**
  * @brief Sets a boolean from a json field value, if defined, else does nothing
@@ -194,7 +194,7 @@ bool DPP_EXPORT bool_not_null(const nlohmann::json* j, const char *keyname);
  * @param keyname key name to check for a value
  * @param v Value to change
  */
-void DPP_EXPORT set_bool_not_null(const nlohmann::json* j, const char *keyname, bool &v);
+void DPP_API set_bool_not_null(const nlohmann::json* j, const char *keyname, bool &v);
 
 /**
  * @brief Returns a time_t from an ISO8601 timestamp field in a json value, if defined, else returns
@@ -203,7 +203,7 @@ void DPP_EXPORT set_bool_not_null(const nlohmann::json* j, const char *keyname, 
  * @param keyname key name to check for a value
  * @return found value
  */
-time_t DPP_EXPORT ts_not_null(const nlohmann::json* j, const char *keyname);
+time_t DPP_API ts_not_null(const nlohmann::json* j, const char *keyname);
 
 /**
  * @brief Sets an timestamp from a json field value containing an ISO8601 string, if defined, else does nothing
@@ -211,7 +211,7 @@ time_t DPP_EXPORT ts_not_null(const nlohmann::json* j, const char *keyname);
  * @param keyname key name to check for a value
  * @param v Value to change
  */
-void DPP_EXPORT set_ts_not_null(const nlohmann::json* j, const char *keyname, time_t &v);
+void DPP_API set_ts_not_null(const nlohmann::json* j, const char *keyname, time_t &v);
 
 /**
  * @brief Base64 encode data into a string.
@@ -219,7 +219,7 @@ void DPP_EXPORT set_ts_not_null(const nlohmann::json* j, const char *keyname, ti
  * @param buffer_length Buffer length to encode
  * @return The base64 encoded string
  */
-std::string DPP_EXPORT base64_encode(unsigned char const* buf, unsigned int buffer_length);
+std::string DPP_API base64_encode(unsigned char const* buf, unsigned int buffer_length);
 
 /**
  * @brief Convert time_t unix epoch to std::string ISO date/time
@@ -227,6 +227,6 @@ std::string DPP_EXPORT base64_encode(unsigned char const* buf, unsigned int buff
  * @param ts Timestamp to convert
  * @return std::string Converted time/date string
  */
-std::string DPP_EXPORT ts_to_string(time_t ts);
+std::string DPP_API ts_to_string(time_t ts);
 
 }

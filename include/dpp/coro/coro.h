@@ -22,6 +22,11 @@
 #pragma once
 #ifndef DPP_NO_CORO
 
+#include <dpp/export.h>
+#include <dpp/dpp_fwd.h>
+
+#if !DPP_BUILD_MODULES
+
 #if (defined(_LIBCPP_VERSION) and !defined(__cpp_impl_coroutine)) // if libc++ experimental implementation (LLVM < 14)
 #  define STDCORO_EXPERIMENTAL_HEADER
 #  define STDCORO_EXPERIMENTAL_NAMESPACE
@@ -40,6 +45,8 @@ namespace std {
 #  include <experimental/coroutine>
 #else
 #  include <coroutine>
+#endif
+
 #endif
 
 namespace dpp {
@@ -69,25 +76,25 @@ namespace std_coroutine = std;
 /**
  * @brief Concept to check if a type has a useable `operator co_await()` member
  */
-template <typename T>
+DPP_EXPORT template <typename T>
 concept has_co_await_member = requires (T expr) { expr.operator co_await(); };
 
 /**
  * @brief Concept to check if a type has a useable overload of the free function `operator co_await(expr)`
  */
-template <typename T>
+DPP_EXPORT template <typename T>
 concept has_free_co_await = requires (T expr) { operator co_await(expr); };
 
 /**
  * @brief Concept to check if a type has useable `await_ready()`, `await_suspend()` and `await_resume()` member functions.
  */
-template <typename T>
+DPP_EXPORT template <typename T>
 concept has_await_members = requires (T expr) { expr.await_ready(); expr.await_suspend(); expr.await_resume(); };
 
 /**
  * @brief Mimics the compiler's behavior of using co_await. That is, it returns whichever works first, in order : `expr.operator co_await();` > `operator co_await(expr)` > `expr`
  */
-template <typename T>
+DPP_EXPORT template <typename T>
 requires (has_co_await_member<T>)
 decltype(auto) co_await_resolve(T&& expr) noexcept(noexcept(expr.operator co_await())) {
 	decltype(auto) awaiter = expr.operator co_await();
@@ -97,7 +104,7 @@ decltype(auto) co_await_resolve(T&& expr) noexcept(noexcept(expr.operator co_awa
 /**
  * @brief Mimics the compiler's behavior of using co_await. That is, it returns whichever works first, in order : `expr.operator co_await();` > `operator co_await(expr)` > `expr`
  */
-template <typename T>
+DPP_EXPORT template <typename T>
 requires (!has_co_await_member<T> && has_free_co_await<T>)
 decltype(auto) co_await_resolve(T&& expr) noexcept(noexcept(operator co_await(expr))) {
 	decltype(auto) awaiter = operator co_await(static_cast<T&&>(expr));
@@ -107,7 +114,7 @@ decltype(auto) co_await_resolve(T&& expr) noexcept(noexcept(operator co_await(ex
 /**
  * @brief Mimics the compiler's behavior of using co_await. That is, it returns whichever works first, in order : `expr.operator co_await();` > `operator co_await(expr)` > `expr`
  */
-template <typename T>
+DPP_EXPORT template <typename T>
 requires (!has_co_await_member<T> && !has_free_co_await<T>)
 decltype(auto) co_await_resolve(T&& expr) noexcept {
 	return static_cast<T&&>(expr);
@@ -159,7 +166,7 @@ decltype(auto) co_await_resolve(auto&& expr) {}
 /**
  * @brief Convenience alias for the result of a certain awaitable's await_resume.
  */
-template <typename T>
+DPP_EXPORT template <typename T>
 using awaitable_result = decltype(co_await_resolve(std::declval<T>()).await_resume());
 
 } // namespace detail
@@ -167,24 +174,22 @@ using awaitable_result = decltype(co_await_resolve(std::declval<T>()).await_resu
 /**
  * @brief Concept to check if a type can be used with co_await
  */
-template <typename T>
+DPP_EXPORT template <typename T>
 concept awaitable_type = requires (T expr) { detail::co_await_resolve(expr).await_ready(); };
 
-struct confirmation_callback_t;
-
-template <typename R = confirmation_callback_t>
+DPP_EXPORT template <typename R = confirmation_callback_t>
 class async;
 
-template <typename R = void>
+DPP_EXPORT template <typename R = void>
 #ifndef _DOXYGEN_
 requires (!std::is_reference_v<R>)
 #endif
 class task;
 
-template <typename R = void>
+DPP_EXPORT template <typename R = void>
 class coroutine;
 
-struct job;
+DPP_EXPORT struct job;
 
 #ifdef DPP_CORO_TEST
 /**

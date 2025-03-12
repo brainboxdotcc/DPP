@@ -86,7 +86,7 @@ enum start_type : bool {
  * receiving commands from discord via HTTP. You should usually instantiate a cluster object
  * at the very least to make use of the library.
  */
-class DPP_EXPORT cluster {
+class DPP_API cluster {
 
 	friend class discord_client;
 	friend class discord_voice_client;

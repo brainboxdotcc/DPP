@@ -72,7 +72,7 @@ using command_completion_event_t = std::function<void(const confirmation_callbac
  * You can also use this object to cancel the current event, meaning that any listeners after yours do
  * not get notified of the current event if you call it.
  */
-struct DPP_EXPORT event_dispatch_t {
+struct DPP_API event_dispatch_t {
 protected:
 
 public:
@@ -190,7 +190,7 @@ public:
 /**
  * @brief Log messages
  */
-struct DPP_EXPORT log_t : public event_dispatch_t {
+struct DPP_API log_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
@@ -215,7 +215,7 @@ namespace utility {
 	 * 
 	 * @return A logger for attaching to on_log
 	 */
-	std::function<void(const dpp::log_t&)> DPP_EXPORT cout_logger();
+	std::function<void(const dpp::log_t&)> DPP_API cout_logger();
 
 	/**
 	 * @brief The default callback handler for API calls.
@@ -223,13 +223,13 @@ namespace utility {
 	 * 
 	 * @return A lambda for attaching to an API callback
 	 */
-	command_completion_event_t DPP_EXPORT log_error();
+	command_completion_event_t DPP_API log_error();
 } // namespace utility
 
 /**
  * @brief Add user to scheduled event
  */
-struct DPP_EXPORT guild_scheduled_event_user_add_t : public event_dispatch_t {
+struct DPP_API guild_scheduled_event_user_add_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
@@ -252,7 +252,7 @@ struct DPP_EXPORT guild_scheduled_event_user_add_t : public event_dispatch_t {
 /**
  * @brief Delete user from scheduled event
  */
-struct DPP_EXPORT guild_scheduled_event_user_remove_t : public event_dispatch_t {
+struct DPP_API guild_scheduled_event_user_remove_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
@@ -275,7 +275,7 @@ struct DPP_EXPORT guild_scheduled_event_user_remove_t : public event_dispatch_t 
 /**
  * @brief Create scheduled event
  */
-struct DPP_EXPORT guild_scheduled_event_create_t : public event_dispatch_t {
+struct DPP_API guild_scheduled_event_create_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
@@ -288,7 +288,7 @@ struct DPP_EXPORT guild_scheduled_event_create_t : public event_dispatch_t {
 /**
  * @brief Create scheduled event
  */
-struct DPP_EXPORT guild_scheduled_event_update_t : public event_dispatch_t {
+struct DPP_API guild_scheduled_event_update_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
@@ -301,7 +301,7 @@ struct DPP_EXPORT guild_scheduled_event_update_t : public event_dispatch_t {
 /**
  * @brief Delete scheduled event
  */
-struct DPP_EXPORT guild_scheduled_event_delete_t : public event_dispatch_t {
+struct DPP_API guild_scheduled_event_delete_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
@@ -314,7 +314,7 @@ struct DPP_EXPORT guild_scheduled_event_delete_t : public event_dispatch_t {
 /**
  * @brief Create automod rule
  */
-struct DPP_EXPORT automod_rule_create_t : public event_dispatch_t {
+struct DPP_API automod_rule_create_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
@@ -327,7 +327,7 @@ struct DPP_EXPORT automod_rule_create_t : public event_dispatch_t {
 /**
  * @brief Update automod rule
  */
-struct DPP_EXPORT automod_rule_update_t : public event_dispatch_t {
+struct DPP_API automod_rule_update_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
@@ -340,7 +340,7 @@ struct DPP_EXPORT automod_rule_update_t : public event_dispatch_t {
 /**
  * @brief Delete automod rule
  */
-struct DPP_EXPORT automod_rule_delete_t : public event_dispatch_t {
+struct DPP_API automod_rule_delete_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
@@ -353,7 +353,7 @@ struct DPP_EXPORT automod_rule_delete_t : public event_dispatch_t {
 /**
  * @brief Execute/trigger automod rule
  */
-struct DPP_EXPORT automod_rule_execute_t : public event_dispatch_t {
+struct DPP_API automod_rule_execute_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
@@ -416,7 +416,7 @@ struct DPP_EXPORT automod_rule_execute_t : public event_dispatch_t {
 /**
  * @brief Create stage instance
  */
-struct DPP_EXPORT stage_instance_create_t : public event_dispatch_t {
+struct DPP_API stage_instance_create_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
@@ -429,7 +429,7 @@ struct DPP_EXPORT stage_instance_create_t : public event_dispatch_t {
 /**
  * @brief Update stage instance
  */
-struct DPP_EXPORT stage_instance_update_t : public event_dispatch_t {
+struct DPP_API stage_instance_update_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
@@ -442,7 +442,7 @@ struct DPP_EXPORT stage_instance_update_t : public event_dispatch_t {
 /**
  * @brief Delete stage instance
  */
-struct DPP_EXPORT stage_instance_delete_t : public event_dispatch_t {
+struct DPP_API stage_instance_delete_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
@@ -455,7 +455,7 @@ struct DPP_EXPORT stage_instance_delete_t : public event_dispatch_t {
 /**
  * @brief Voice state update
  */
-struct DPP_EXPORT voice_state_update_t : public event_dispatch_t {
+struct DPP_API voice_state_update_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
@@ -468,7 +468,7 @@ struct DPP_EXPORT voice_state_update_t : public event_dispatch_t {
 /**
  * @brief Create interaction
  */
-struct DPP_EXPORT interaction_create_t : public event_dispatch_t {
+struct DPP_API interaction_create_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
@@ -702,7 +702,7 @@ struct DPP_EXPORT interaction_create_t : public event_dispatch_t {
 /**
  * @brief User has issued a slash command
  */
-struct DPP_EXPORT slashcommand_t : public interaction_create_t {
+struct DPP_API slashcommand_t : public interaction_create_t {
 	using interaction_create_t::interaction_create_t;
 	using interaction_create_t::operator=;
 };
@@ -710,7 +710,7 @@ struct DPP_EXPORT slashcommand_t : public interaction_create_t {
 /**
  * @brief Click on button
  */
-struct DPP_EXPORT button_click_t : public interaction_create_t {
+struct DPP_API button_click_t : public interaction_create_t {
 private:
 	using interaction_create_t::get_parameter;
 public:
@@ -731,7 +731,7 @@ public:
 /**
  * @brief On form submitted.
  */
-struct DPP_EXPORT form_submit_t : public interaction_create_t {
+struct DPP_API form_submit_t : public interaction_create_t {
 private:
 	using interaction_create_t::get_parameter;
 public:
@@ -752,7 +752,7 @@ public:
 /**
  * @brief Discord requests that we fill a list of auto completion choices for a command option
  */
-struct DPP_EXPORT autocomplete_t : public interaction_create_t {
+struct DPP_API autocomplete_t : public interaction_create_t {
 private:
 	using interaction_create_t::get_parameter;
 public:
@@ -779,7 +779,7 @@ public:
  * @brief Base class for context menu interactions, e.g. right click on
  * user or message.
  */
-struct DPP_EXPORT context_menu_t : public interaction_create_t {
+struct DPP_API context_menu_t : public interaction_create_t {
 private:
 	using interaction_create_t::get_parameter;
 public:
@@ -790,7 +790,7 @@ public:
 /**
  * @brief Event parameter for context menu interactions for messages
  */
-struct DPP_EXPORT message_context_menu_t : public context_menu_t {
+struct DPP_API message_context_menu_t : public context_menu_t {
 public:
 	using context_menu_t::context_menu_t;
 	using context_menu_t::operator=;
@@ -819,7 +819,7 @@ public:
 /**
  * @brief Event parameter for context menu interactions for users
  */
-struct DPP_EXPORT user_context_menu_t : public context_menu_t {
+struct DPP_API user_context_menu_t : public context_menu_t {
 public:
 	using context_menu_t::context_menu_t;
 	using context_menu_t::operator=;
@@ -849,7 +849,7 @@ public:
 /**
  * @brief Click on select
  */
-struct DPP_EXPORT select_click_t : public interaction_create_t {
+struct DPP_API select_click_t : public interaction_create_t {
 private:
 	using interaction_create_t::get_parameter;
 public:
@@ -876,7 +876,7 @@ public:
 /**
  * @brief Delete guild
  */
-struct DPP_EXPORT guild_delete_t : public event_dispatch_t {
+struct DPP_API guild_delete_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
@@ -896,7 +896,7 @@ struct DPP_EXPORT guild_delete_t : public event_dispatch_t {
 /**
  * @brief Update guild stickers
  */
-struct DPP_EXPORT guild_stickers_update_t : public event_dispatch_t {
+struct DPP_API guild_stickers_update_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
@@ -914,7 +914,7 @@ struct DPP_EXPORT guild_stickers_update_t : public event_dispatch_t {
 /**
  * @brief Guild join request delete (user declined membership screening)
  */
-struct DPP_EXPORT guild_join_request_delete_t : public event_dispatch_t {
+struct DPP_API guild_join_request_delete_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
@@ -932,7 +932,7 @@ struct DPP_EXPORT guild_join_request_delete_t : public event_dispatch_t {
 /**
  * @brief Delete channel
  */
-struct DPP_EXPORT channel_delete_t : public event_dispatch_t {
+struct DPP_API channel_delete_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
@@ -950,7 +950,7 @@ struct DPP_EXPORT channel_delete_t : public event_dispatch_t {
 /**
  * @brief Update channel
  */
-struct DPP_EXPORT channel_update_t : public event_dispatch_t {
+struct DPP_API channel_update_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
@@ -968,7 +968,7 @@ struct DPP_EXPORT channel_update_t : public event_dispatch_t {
 /**
  * @brief Session ready
  */
-struct DPP_EXPORT ready_t : public event_dispatch_t {
+struct DPP_API ready_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
@@ -996,7 +996,7 @@ struct DPP_EXPORT ready_t : public event_dispatch_t {
 /**
  * @brief Message Deleted
  */
-struct DPP_EXPORT message_delete_t : public event_dispatch_t {
+struct DPP_API message_delete_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
@@ -1021,7 +1021,7 @@ struct DPP_EXPORT message_delete_t : public event_dispatch_t {
 /**
  * @brief Guild member remove
  */
-struct DPP_EXPORT guild_member_remove_t : public event_dispatch_t {
+struct DPP_API guild_member_remove_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
@@ -1044,7 +1044,7 @@ struct DPP_EXPORT guild_member_remove_t : public event_dispatch_t {
 /**
  * @brief Session resumed
  */
-struct DPP_EXPORT resumed_t : public event_dispatch_t {
+struct DPP_API resumed_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
@@ -1062,7 +1062,7 @@ struct DPP_EXPORT resumed_t : public event_dispatch_t {
 /**
  * @brief Guild role create
  */
-struct DPP_EXPORT guild_role_create_t : public event_dispatch_t {
+struct DPP_API guild_role_create_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
@@ -1080,7 +1080,7 @@ struct DPP_EXPORT guild_role_create_t : public event_dispatch_t {
 /**
  * @brief Typing start
  */
-struct DPP_EXPORT typing_start_t : public event_dispatch_t {
+struct DPP_API typing_start_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
@@ -1115,7 +1115,7 @@ struct DPP_EXPORT typing_start_t : public event_dispatch_t {
 /**
  * @brief Voice state update
  */
-struct DPP_EXPORT voice_track_marker_t : public event_dispatch_t {
+struct DPP_API voice_track_marker_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
@@ -1134,7 +1134,7 @@ struct DPP_EXPORT voice_track_marker_t : public event_dispatch_t {
 /**
  * @brief Message reaction add
  */
-struct DPP_EXPORT message_reaction_add_t : public event_dispatch_t {
+struct DPP_API message_reaction_add_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
@@ -1183,7 +1183,7 @@ struct DPP_EXPORT message_reaction_add_t : public event_dispatch_t {
 /**
  * @brief Guild members chunk
  */
-struct DPP_EXPORT guild_members_chunk_t : public event_dispatch_t {
+struct DPP_API guild_members_chunk_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
@@ -1201,7 +1201,7 @@ struct DPP_EXPORT guild_members_chunk_t : public event_dispatch_t {
 /**
  * @brief Message reaction remove
  */
-struct DPP_EXPORT message_reaction_remove_t : public event_dispatch_t {
+struct DPP_API message_reaction_remove_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
@@ -1240,7 +1240,7 @@ struct DPP_EXPORT message_reaction_remove_t : public event_dispatch_t {
 /**
  * @brief Create guild
  */
-struct DPP_EXPORT guild_create_t : public event_dispatch_t {
+struct DPP_API guild_create_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
@@ -1281,7 +1281,7 @@ struct DPP_EXPORT guild_create_t : public event_dispatch_t {
 /**
  * @brief Create channel
  */
-struct DPP_EXPORT channel_create_t : public event_dispatch_t {
+struct DPP_API channel_create_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
@@ -1299,7 +1299,7 @@ struct DPP_EXPORT channel_create_t : public event_dispatch_t {
 /**
  * @brief Message remove emoji
  */
-struct DPP_EXPORT message_reaction_remove_emoji_t : public event_dispatch_t {
+struct DPP_API message_reaction_remove_emoji_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
@@ -1333,7 +1333,7 @@ struct DPP_EXPORT message_reaction_remove_emoji_t : public event_dispatch_t {
 /**
  * @brief Message delete bulk
  */
-struct DPP_EXPORT message_delete_bulk_t : public event_dispatch_t {
+struct DPP_API message_delete_bulk_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
@@ -1361,7 +1361,7 @@ struct DPP_EXPORT message_delete_bulk_t : public event_dispatch_t {
 /**
  * @brief Guild role update
  */
-struct DPP_EXPORT guild_role_update_t : public event_dispatch_t {
+struct DPP_API guild_role_update_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
@@ -1379,7 +1379,7 @@ struct DPP_EXPORT guild_role_update_t : public event_dispatch_t {
 /**
  * @brief Guild role delete
  */
-struct DPP_EXPORT guild_role_delete_t : public event_dispatch_t {
+struct DPP_API guild_role_delete_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
@@ -1402,7 +1402,7 @@ struct DPP_EXPORT guild_role_delete_t : public event_dispatch_t {
 /**
  * @brief Channel pins update
  */
-struct DPP_EXPORT channel_pins_update_t : public event_dispatch_t {
+struct DPP_API channel_pins_update_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
@@ -1425,7 +1425,7 @@ struct DPP_EXPORT channel_pins_update_t : public event_dispatch_t {
 /**
  * @brief Message remove all reactions
  */
-struct DPP_EXPORT message_reaction_remove_all_t : public event_dispatch_t {
+struct DPP_API message_reaction_remove_all_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
@@ -1455,7 +1455,7 @@ struct DPP_EXPORT message_reaction_remove_all_t : public event_dispatch_t {
 /**
  * @brief Voice server update
  */
-struct DPP_EXPORT voice_server_update_t : public event_dispatch_t {
+struct DPP_API voice_server_update_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
@@ -1478,7 +1478,7 @@ struct DPP_EXPORT voice_server_update_t : public event_dispatch_t {
 /**
  * @brief Guild emojis update
  */
-struct DPP_EXPORT guild_emojis_update_t : public event_dispatch_t {
+struct DPP_API guild_emojis_update_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
@@ -1497,7 +1497,7 @@ struct DPP_EXPORT guild_emojis_update_t : public event_dispatch_t {
  * @brief Presence update
  * 
  */
-struct DPP_EXPORT presence_update_t : public event_dispatch_t {
+struct DPP_API presence_update_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
@@ -1510,7 +1510,7 @@ struct DPP_EXPORT presence_update_t : public event_dispatch_t {
 /**
  * @brief Webhooks update
  */
-struct DPP_EXPORT webhooks_update_t : public event_dispatch_t {
+struct DPP_API webhooks_update_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
@@ -1528,7 +1528,7 @@ struct DPP_EXPORT webhooks_update_t : public event_dispatch_t {
 /**
  * @brief Guild member add
  */
-struct DPP_EXPORT guild_member_add_t : public event_dispatch_t {
+struct DPP_API guild_member_add_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
@@ -1546,7 +1546,7 @@ struct DPP_EXPORT guild_member_add_t : public event_dispatch_t {
 /**
  * @brief Invite delete
  */
-struct DPP_EXPORT invite_delete_t : public event_dispatch_t {
+struct DPP_API invite_delete_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
@@ -1559,7 +1559,7 @@ struct DPP_EXPORT invite_delete_t : public event_dispatch_t {
 /**
  * @brief Guild update
  */
-struct DPP_EXPORT guild_update_t : public event_dispatch_t {
+struct DPP_API guild_update_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
@@ -1572,7 +1572,7 @@ struct DPP_EXPORT guild_update_t : public event_dispatch_t {
 /**
  * @brief Guild integrations update
  */
-struct DPP_EXPORT guild_integrations_update_t : public event_dispatch_t {
+struct DPP_API guild_integrations_update_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
@@ -1585,7 +1585,7 @@ struct DPP_EXPORT guild_integrations_update_t : public event_dispatch_t {
 /**
  * @brief Guild member update
  */
-struct DPP_EXPORT guild_member_update_t : public event_dispatch_t {
+struct DPP_API guild_member_update_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
@@ -1603,7 +1603,7 @@ struct DPP_EXPORT guild_member_update_t : public event_dispatch_t {
 /**
  * @brief Invite create
  */
-struct DPP_EXPORT invite_create_t : public event_dispatch_t {
+struct DPP_API invite_create_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
@@ -1616,7 +1616,7 @@ struct DPP_EXPORT invite_create_t : public event_dispatch_t {
 /**
  * @brief Message update
  */
-struct DPP_EXPORT message_update_t : public event_dispatch_t {
+struct DPP_API message_update_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
@@ -1629,7 +1629,7 @@ struct DPP_EXPORT message_update_t : public event_dispatch_t {
 /**
  * @brief User update
  */
-struct DPP_EXPORT user_update_t : public event_dispatch_t {
+struct DPP_API user_update_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
@@ -1642,7 +1642,7 @@ struct DPP_EXPORT user_update_t : public event_dispatch_t {
 /**
  * @brief Create message
  */
-struct DPP_EXPORT message_create_t : public event_dispatch_t {
+struct DPP_API message_create_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
@@ -1753,7 +1753,7 @@ struct DPP_EXPORT message_create_t : public event_dispatch_t {
 /**
  * @brief Message poll vote add
  */
-struct DPP_EXPORT message_poll_vote_add_t : public event_dispatch_t {
+struct DPP_API message_poll_vote_add_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
@@ -1786,7 +1786,7 @@ struct DPP_EXPORT message_poll_vote_add_t : public event_dispatch_t {
 /**
  * @brief Message poll vote remove
  */
-struct DPP_EXPORT message_poll_vote_remove_t : public event_dispatch_t {
+struct DPP_API message_poll_vote_remove_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
@@ -1819,7 +1819,7 @@ struct DPP_EXPORT message_poll_vote_remove_t : public event_dispatch_t {
 /**
  * @brief Guild audit log entry create
  */
-struct DPP_EXPORT guild_audit_log_entry_create_t : public event_dispatch_t {
+struct DPP_API guild_audit_log_entry_create_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
@@ -1832,7 +1832,7 @@ struct DPP_EXPORT guild_audit_log_entry_create_t : public event_dispatch_t {
 /**
  * @brief Guild ban add
  */
-struct DPP_EXPORT guild_ban_add_t : public event_dispatch_t {
+struct DPP_API guild_ban_add_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
@@ -1850,7 +1850,7 @@ struct DPP_EXPORT guild_ban_add_t : public event_dispatch_t {
 /**
  * @brief Guild ban remove
  */
-struct DPP_EXPORT guild_ban_remove_t : public event_dispatch_t {
+struct DPP_API guild_ban_remove_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
@@ -1868,7 +1868,7 @@ struct DPP_EXPORT guild_ban_remove_t : public event_dispatch_t {
 /**
  * @brief Integration create
  */
-struct DPP_EXPORT integration_create_t : public event_dispatch_t {
+struct DPP_API integration_create_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
@@ -1881,7 +1881,7 @@ struct DPP_EXPORT integration_create_t : public event_dispatch_t {
 /**
  * @brief Integration update
  */
-struct DPP_EXPORT integration_update_t : public event_dispatch_t {
+struct DPP_API integration_update_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
@@ -1894,7 +1894,7 @@ struct DPP_EXPORT integration_update_t : public event_dispatch_t {
 /**
  * @brief Integration delete
  */
-struct DPP_EXPORT integration_delete_t : public event_dispatch_t {
+struct DPP_API integration_delete_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
@@ -1907,7 +1907,7 @@ struct DPP_EXPORT integration_delete_t : public event_dispatch_t {
 /**
  * @brief Thread Create
  */
-struct DPP_EXPORT thread_create_t : public event_dispatch_t {
+struct DPP_API thread_create_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
@@ -1925,7 +1925,7 @@ struct DPP_EXPORT thread_create_t : public event_dispatch_t {
 /**
  * @brief Thread Update
  */
-struct DPP_EXPORT thread_update_t : public event_dispatch_t {
+struct DPP_API thread_update_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
@@ -1943,7 +1943,7 @@ struct DPP_EXPORT thread_update_t : public event_dispatch_t {
 /**
  * @brief Thread Delete
  */
-struct DPP_EXPORT thread_delete_t : public event_dispatch_t {
+struct DPP_API thread_delete_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
@@ -1961,7 +1961,7 @@ struct DPP_EXPORT thread_delete_t : public event_dispatch_t {
 /**
  * @brief Thread List Sync
  */
-struct DPP_EXPORT thread_list_sync_t : public event_dispatch_t {
+struct DPP_API thread_list_sync_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
@@ -1984,7 +1984,7 @@ struct DPP_EXPORT thread_list_sync_t : public event_dispatch_t {
 /**
  * @brief Thread Member Update
  */
-struct DPP_EXPORT thread_member_update_t : public event_dispatch_t {
+struct DPP_API thread_member_update_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
@@ -1997,7 +1997,7 @@ struct DPP_EXPORT thread_member_update_t : public event_dispatch_t {
 /**
  * @brief Thread Members Update
  */
-struct DPP_EXPORT thread_members_update_t : public event_dispatch_t {
+struct DPP_API thread_members_update_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
@@ -2031,7 +2031,7 @@ struct DPP_EXPORT thread_members_update_t : public event_dispatch_t {
  * @brief voice buffer send
  * @warning The shard in `from` will ALWAYS be null.
  */
-struct DPP_EXPORT voice_buffer_send_t : public event_dispatch_t {
+struct DPP_API voice_buffer_send_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
@@ -2054,7 +2054,7 @@ struct DPP_EXPORT voice_buffer_send_t : public event_dispatch_t {
 /**
  * @brief voice ready
  */
-struct DPP_EXPORT voice_ready_t : public event_dispatch_t {
+struct DPP_API voice_ready_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
@@ -2072,7 +2072,7 @@ struct DPP_EXPORT voice_ready_t : public event_dispatch_t {
 /**
  * @brief voice receive packet
  */
-struct DPP_EXPORT voice_receive_t : public event_dispatch_t {
+struct DPP_API voice_receive_t : public event_dispatch_t {
 	friend class discord_voice_client;
 
 	using event_dispatch_t::event_dispatch_t;
@@ -2146,7 +2146,7 @@ protected:
 /**
  * @brief voice client speaking event
  */
-struct DPP_EXPORT voice_client_speaking_t : public event_dispatch_t {
+struct DPP_API voice_client_speaking_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
@@ -2169,7 +2169,7 @@ struct DPP_EXPORT voice_client_speaking_t : public event_dispatch_t {
 /**
  * @brief voice client disconnect event
  */
-struct DPP_EXPORT voice_client_disconnect_t : public event_dispatch_t {
+struct DPP_API voice_client_disconnect_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
@@ -2201,7 +2201,7 @@ enum client_platform_t : uint8_t {
 /**
  * @brief voice client platform type notification event
  */
-struct DPP_EXPORT voice_client_platform_t : public event_dispatch_t {
+struct DPP_API voice_client_platform_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
@@ -2225,7 +2225,7 @@ struct DPP_EXPORT voice_client_platform_t : public event_dispatch_t {
 /**
  * @brief Delete stage instance
  */
-struct DPP_EXPORT entitlement_create_t : public event_dispatch_t {
+struct DPP_API entitlement_create_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
@@ -2238,7 +2238,7 @@ struct DPP_EXPORT entitlement_create_t : public event_dispatch_t {
 /**
  * @brief Delete stage instance
  */
-struct DPP_EXPORT entitlement_update_t : public event_dispatch_t {
+struct DPP_API entitlement_update_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
@@ -2251,7 +2251,7 @@ struct DPP_EXPORT entitlement_update_t : public event_dispatch_t {
 /**
  * @brief Delete stage instance
  */
-struct DPP_EXPORT entitlement_delete_t : public event_dispatch_t {
+struct DPP_API entitlement_delete_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 

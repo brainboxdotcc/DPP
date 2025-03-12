@@ -20,12 +20,19 @@
  *
  ************************************************************************************/
 #pragma once
+
+#if !DPP_BUILD_MODULES
+
 #include <dpp/export.h>
 #include <string>
 #include <exception>
 #include <algorithm>
 
+#endif
+
 namespace dpp {
+
+DPP_EXPORT_START
 
 /**
  * @brief Exception error codes possible for dpp::exception::code()
@@ -602,6 +609,8 @@ public:
 	derived_exception(task_cancelled_exception, exception);
 #  endif /* DPP_NO_CORO */
 #endif
+
+DPP_EXPORT_END
 
 }
 

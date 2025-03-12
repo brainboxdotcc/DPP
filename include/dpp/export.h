@@ -39,16 +39,16 @@
 		/* Building the library */
 		#ifdef _WIN32
 			#include <dpp/win32_safe_warnings.h>
-			#define DPP_EXPORT __declspec(dllexport)
+			#define DPP_SYMBOL __declspec(dllexport)
 		#else
-			#define DPP_EXPORT
+			#define DPP_SYMBOL
 		#endif
 	#else
 		/* Including the library */
 		#ifdef _WIN32
-			#define DPP_EXPORT __declspec(dllimport)
+			#define DPP_SYMBOL __declspec(dllimport)
 		#else
-			#define DPP_EXPORT
+			#define DPP_SYMBOL
 		#endif
 	#endif
 #else
@@ -56,8 +56,22 @@
 	#if defined(_WIN32) && defined(DPP_BUILD)
 		#include <dpp/win32_safe_warnings.h>
 	#endif
-	#define DPP_EXPORT
+	#define DPP_SYMBOL
 #endif
+
+#if !defined(DPP_BUILD_MODULES)
+#  define DPP_BUILD_MODULES 0
+#endif
+
+#if !defined(DPP_IMPORT_STD)
+#  define DPP_IMPORT_STD 0
+#endif
+
+#define DPP_EXPORT
+#define DPP_EXPORT_START
+#define DPP_EXPORT_END
+
+#define DPP_API DPP_SYMBOL
 
 namespace dpp {
 
@@ -82,7 +96,7 @@ enum class build_type {
 };
 
 template <build_type>
-extern bool DPP_EXPORT validate_configuration();
+extern bool DPP_SYMBOL validate_configuration();
 
 #if defined(UE_BUILD_DEBUG) || defined(UE_BUILD_DEVELOPMENT) || defined(UE_BUILD_TEST) || defined(UE_BUILD_SHIPPING) || defined(UE_GAME) || defined(UE_EDITOR) || defined(UE_BUILD_SHIPPING_WITH_EDITOR) || defined(UE_BUILD_DOCS)
 	/*

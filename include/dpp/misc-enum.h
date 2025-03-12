@@ -20,16 +20,22 @@
  *
  ************************************************************************************/
 #pragma once
+
 #include <dpp/export.h>
+
+#if !DPP_BUILD_MODULES
+
 #include <cstddef>
 #include <cstdint>
+
+#endif
 
 namespace dpp {
 
 /**
  * @brief Supported image types for profile pictures and CDN endpoints
  */
-enum image_type : uint8_t {
+DPP_EXPORT enum image_type : uint8_t {
 	/**
 	 * @brief image/png
 	 */
@@ -54,7 +60,7 @@ enum image_type : uint8_t {
 /**
  * @brief Log levels
  */
-enum loglevel {
+DPP_EXPORT enum loglevel {
 	/**
 	 * @brief Trace
 	 */

@@ -19,14 +19,23 @@
  * limitations under the License.
  *
  ************************************************************************************/
+
+#pragma once
+
+#if !DPP_BUILD_MODULES
+
+#include <dpp/export.h>
+
 #ifdef DPP_USE_EXTERNAL_JSON
 	#include <nlohmann/json.hpp>
 #else
 	#include <dpp/nlohmann/json.hpp>
 #endif
 
+#endif
+
 namespace dpp {
 
-using json = nlohmann::json;
+DPP_EXPORT using json = nlohmann::json;
 
 }

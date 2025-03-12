@@ -50,7 +50,7 @@ int modify_event(int epoll_handle, socket_events* eh, int new_events) {
 	return new_events;
 }
 
-struct DPP_EXPORT socket_engine_epoll : public socket_engine_base {
+struct DPP_API socket_engine_epoll : public socket_engine_base {
 
 	int epoll_handle{INVALID_SOCKET};
 	static constexpr size_t MAX_EVENTS = 65536;
@@ -189,7 +189,7 @@ protected:
 	}
 };
 
-DPP_EXPORT std::unique_ptr<socket_engine_base> create_socket_engine(cluster *creator) {
+DPP_API std::unique_ptr<socket_engine_base> create_socket_engine(cluster *creator) {
 	return std::make_unique<socket_engine_epoll>(creator);
 }
 

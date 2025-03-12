@@ -88,7 +88,7 @@ enum event_status : uint8_t {
 /**
  * @brief Entities for the event.
  */
-struct DPP_EXPORT event_entities {
+struct DPP_API event_entities {
 	/**
 	 * @brief Location of the event.
 	 */
@@ -99,7 +99,7 @@ struct DPP_EXPORT event_entities {
  * @brief Represents a guild member/user who has registered interest in an event.
  * 
  */
-struct DPP_EXPORT event_member {
+struct DPP_API event_member {
 	/**
 	 * @brief Event ID associated with.
 	 */
@@ -120,7 +120,7 @@ struct DPP_EXPORT event_member {
 /**
  * @brief A scheduled event.
  */
-struct DPP_EXPORT scheduled_event : public managed, public json_interface<scheduled_event> {
+struct DPP_API scheduled_event : public managed, public json_interface<scheduled_event> {
 protected:
 	friend struct json_interface<scheduled_event>;
 

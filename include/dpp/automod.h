@@ -116,7 +116,7 @@ enum automod_trigger_type : uint8_t {
 /**
  * @brief Metadata associated with an automod action. Different fields are relevant based on the value of dpp::automod_rule::trigger_type.
  */
-struct DPP_EXPORT automod_metadata : public json_interface<automod_metadata> {
+struct DPP_API automod_metadata : public json_interface<automod_metadata> {
 protected:
 	friend struct json_interface<automod_metadata>;
 
@@ -256,7 +256,7 @@ public:
 /**
  * @brief Represents an automod action
  */
-struct DPP_EXPORT automod_action : public json_interface<automod_action> {
+struct DPP_API automod_action : public json_interface<automod_action> {
 protected:
 	friend struct json_interface<automod_action>;
 
@@ -310,7 +310,7 @@ public:
 /**
  * @brief Represents an automod rule
  */
-class DPP_EXPORT automod_rule : public managed, public json_interface<automod_rule> {
+class DPP_API automod_rule : public managed, public json_interface<automod_rule> {
 protected:
 	friend struct json_interface<automod_rule>;
 

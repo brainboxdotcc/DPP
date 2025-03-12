@@ -30,8 +30,8 @@
 
 namespace dpp {
 
-extern DPP_EXPORT std::unordered_map<managed*, time_t> deletion_queue;
-extern DPP_EXPORT std::mutex deletion_mutex;
+extern DPP_API std::unordered_map<managed*, time_t> deletion_queue;
+extern DPP_API std::mutex deletion_mutex;
 
 /** forward declaration */
 class guild_member;
@@ -259,9 +259,9 @@ public:
  * Run garbage collection across all caches removing deleted items
  * that have been deleted over 60 seconds ago.
  */
-void DPP_EXPORT garbage_collection();
+void DPP_API garbage_collection();
 
-#define cache_decl(type, setter, getter, counter) /** Find an object in the cache by id. @return type* Pointer to the object or nullptr when it's not found */ DPP_EXPORT class type * setter (snowflake id); DPP_EXPORT cache<class type> * getter (); /** Get the amount of cached type objects. */ DPP_EXPORT uint64_t counter ();
+#define cache_decl(type, setter, getter, counter) /** Find an object in the cache by id. @return type* Pointer to the object or nullptr when it's not found */ DPP_API class type * setter (snowflake id); DPP_API cache<class type> * getter (); /** Get the amount of cached type objects. */ DPP_API uint64_t counter ();
 
 /* Declare major caches */
 cache_decl(user, find_user, get_user_cache, get_user_count);

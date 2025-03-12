@@ -403,7 +403,7 @@ enum guild_member_flags : uint16_t {
  * @brief Represents dpp::user membership upon a dpp::guild.
  * This contains the user's nickname, guild roles, and any other guild-specific flags.
  */
-class DPP_EXPORT guild_member : public json_interface<guild_member> {
+class DPP_API guild_member : public json_interface<guild_member> {
 protected:
 	friend struct json_interface<guild_member>;
 
@@ -693,7 +693,7 @@ public:
 /**
  * @brief Defines a channel on a server's welcome screen
  */
-struct DPP_EXPORT welcome_channel : public json_interface<welcome_channel> {
+struct DPP_API welcome_channel : public json_interface<welcome_channel> {
 protected:
 	friend struct json_interface<welcome_channel>;
 
@@ -767,7 +767,7 @@ public:
 /**
  * @brief Defines a server's welcome screen
  */
-struct DPP_EXPORT welcome_screen : public json_interface<welcome_screen> {
+struct DPP_API welcome_screen : public json_interface<welcome_screen> {
 protected:
 	friend struct json_interface<welcome_screen>;
 
@@ -995,7 +995,7 @@ typedef std::unordered_map<snowflake, guild_member> members_container;
 /**
  * @brief Represents a guild on Discord (AKA a server)
  */
-class DPP_EXPORT guild : public managed, public json_interface<guild> {
+class DPP_API guild : public managed, public json_interface<guild> {
 protected:
 	friend struct json_interface<guild>;
 
@@ -1677,7 +1677,7 @@ typedef std::unordered_map<snowflake, guild> guild_map;
 /**
  * @brief Represents a guild widget, simple web widget of member list
  */
-class DPP_EXPORT guild_widget : public json_interface<guild_widget> {
+class DPP_API guild_widget : public json_interface<guild_widget> {
 protected:
 	friend struct json_interface<guild_widget>;
 
@@ -1768,7 +1768,7 @@ enum onboarding_prompt_flags : uint8_t {
 /**
  * @brief Represents an onboarding prompt option
  */
-struct DPP_EXPORT onboarding_prompt_option : public managed, public json_interface<onboarding_prompt_option> {
+struct DPP_API onboarding_prompt_option : public managed, public json_interface<onboarding_prompt_option> {
 protected:
 	friend struct json_interface<onboarding_prompt_option>;
 
@@ -1852,7 +1852,7 @@ public:
 /**
  * @brief Represents an onboarding prompt
  */
-struct DPP_EXPORT onboarding_prompt : public managed, public json_interface<onboarding_prompt> {
+struct DPP_API onboarding_prompt : public managed, public json_interface<onboarding_prompt> {
 protected:
 	friend struct json_interface<onboarding_prompt>;
 
@@ -1941,7 +1941,7 @@ public:
 /**
  * @brief Represents a guild's onboarding flow
  */
-struct DPP_EXPORT onboarding : public json_interface<onboarding> {
+struct DPP_API onboarding : public json_interface<onboarding> {
 protected:
 	friend struct json_interface<onboarding>;
 
@@ -2046,6 +2046,6 @@ typedef std::unordered_map<snowflake, guild_member> guild_member_map;
  * @throw dpp::cache_exception if the guild or guild_member is not found in the cache
  * @return guild_member the cached object, if found
  */
-guild_member DPP_EXPORT find_guild_member(const snowflake guild_id, const snowflake user_id);
+guild_member DPP_API find_guild_member(const snowflake guild_id, const snowflake user_id);
 
 }

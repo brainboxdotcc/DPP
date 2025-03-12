@@ -78,11 +78,11 @@ bool validate_configuration() {
 #endif
 }
 
-template bool DPP_EXPORT validate_configuration<build_type::debug>();
+template bool DPP_API validate_configuration<build_type::debug>();
 
-template bool DPP_EXPORT validate_configuration<build_type::release>();
+template bool DPP_API validate_configuration<build_type::release>();
 
-template bool DPP_EXPORT validate_configuration<build_type::universal>();
+template bool DPP_API validate_configuration<build_type::universal>();
 
 cluster::cluster(uint32_t pool_threads) : cluster("", 0, NO_SHARDS, 1, 1, false, cache_policy::cpol_none, pool_threads)
 {

@@ -212,7 +212,7 @@ enum component_default_value_type: uint8_t {
 /**
  * @brief A Default value structure for components
  */
-struct DPP_EXPORT component_default_value {
+struct DPP_API component_default_value {
 	/**
 	 * @brief The type this default value represents
 	 */
@@ -227,7 +227,7 @@ struct DPP_EXPORT component_default_value {
 /**
  * @brief An option for a select component
  */
-struct DPP_EXPORT select_option : public json_interface<select_option> {
+struct DPP_API select_option : public json_interface<select_option> {
 protected:
 	friend struct json_interface<select_option>;
 
@@ -345,7 +345,7 @@ public:
  * using component::add_component(), so that the parent
  * object is an action row and the child objects are buttons.
  */
-class DPP_EXPORT component : public json_interface<component> {
+class DPP_API component : public json_interface<component> {
 protected:
 	friend struct json_interface<component>;
 
@@ -686,7 +686,7 @@ public:
 /**
  * @brief A footer in a dpp::embed
  */
-struct DPP_EXPORT embed_footer {
+struct DPP_API embed_footer {
 	/**
 	 * @brief Footer text
 	 */
@@ -729,7 +729,7 @@ struct DPP_EXPORT embed_footer {
 /**
  * @brief An video, image or thumbnail in a dpp::embed
  */
-struct DPP_EXPORT embed_image {
+struct DPP_API embed_image {
 	/**
 	 * @brief URL to image or video.
 	 */
@@ -754,7 +754,7 @@ struct DPP_EXPORT embed_image {
 /**
  * @brief Embed provider in a dpp::embed. Received from discord but cannot be sent
  */
-struct DPP_EXPORT embed_provider {
+struct DPP_API embed_provider {
 	/**
 	 * @brief Provider name.
 	 */
@@ -769,7 +769,7 @@ struct DPP_EXPORT embed_provider {
 /**
  * @brief Author within a dpp::embed object
  */
-struct DPP_EXPORT embed_author {
+struct DPP_API embed_author {
 	/**
 	 * @brief Author name.
 	 */
@@ -798,7 +798,7 @@ struct DPP_EXPORT embed_author {
 /**
  * @brief A dpp::embed may contain zero or more fields.
  */
-struct DPP_EXPORT embed_field {
+struct DPP_API embed_field {
 	/**
 	 * @brief Name of field (max length 256).
 	 */
@@ -818,7 +818,7 @@ struct DPP_EXPORT embed_field {
 /**
  * @brief A rich embed for display within a dpp::message.
  */
-struct DPP_EXPORT embed {
+struct DPP_API embed {
 	/**
 	 * @brief Optional: Title of embed.
 	 */
@@ -1021,7 +1021,7 @@ struct DPP_EXPORT embed {
 /**
  * @brief Represents a reaction to a dpp::message.
  */
-struct DPP_EXPORT reaction {
+struct DPP_API reaction {
 	/**
 	 * @brief Total number of times this emoji has been used to react (including super reacts)
 	 */
@@ -1094,7 +1094,7 @@ enum attachment_flags : uint8_t {
 /**
  * @brief Represents an attachment in a dpp::message
  */
-struct DPP_EXPORT attachment {
+struct DPP_API attachment {
 	/**
 	 * @brief ID of attachment.
 	 */
@@ -1249,7 +1249,7 @@ enum sticker_format : uint8_t {
 /**
  * @brief Represents stickers received in messages
  */
-struct DPP_EXPORT sticker : public managed, public json_interface<sticker> {
+struct DPP_API sticker : public managed, public json_interface<sticker> {
 protected:
 	friend struct json_interface<sticker>;
 
@@ -1378,7 +1378,7 @@ public:
 /**
  * @brief Represents a sticker pack (the built in groups of stickers that all nitro users get to use)
  */
-struct DPP_EXPORT sticker_pack : public managed, public json_interface<sticker_pack> {
+struct DPP_API sticker_pack : public managed, public json_interface<sticker_pack> {
 protected:
 	friend struct json_interface<sticker_pack>;
 
@@ -1527,7 +1527,7 @@ struct poll_results {
  *
  * @see https://discord.com/developers/docs/resources/poll
  */
-struct DPP_EXPORT poll {
+struct DPP_API poll {
 	/**
 	 * @brief Poll question. At the time of writing only the text field is supported by Discord
 	 *
@@ -1961,7 +1961,7 @@ enum cache_policy_setting_t {
  * going out of the way to fill the caches completely. On large bots this
  * can take a LOT of RAM.
  */
-struct DPP_EXPORT cache_policy_t {
+struct DPP_API cache_policy_t {
 	/**
 	 * @brief Caching policy for users and guild members
 	 */
@@ -2013,7 +2013,7 @@ namespace cache_policy {
 /**
  * @brief Metadata about the interaction, including the source of the interaction and relevant server and user IDs.
  */
-struct DPP_EXPORT interaction_metadata_type {
+struct DPP_API interaction_metadata_type {
 
 	/**
 	 * @brief ID of the interaction
@@ -2050,7 +2050,7 @@ struct DPP_EXPORT interaction_metadata_type {
 /**
  * @brief Message Reference type
  */
-enum DPP_EXPORT message_ref_type : uint8_t {
+enum DPP_API message_ref_type : uint8_t {
 	/**
 	 * A reply or crosspost
 	 */
@@ -2068,7 +2068,7 @@ template <typename T> struct message_snapshot {
 	/**
  * @brief Represents messages sent and received on Discord
  */
-struct DPP_EXPORT message : public managed, json_interface<message> {
+struct DPP_API message : public managed, json_interface<message> {
 protected:
 	friend struct json_interface<message>;
 

@@ -21,7 +21,11 @@
  ************************************************************************************/
 
 #pragma once
+
 #include <dpp/export.h>
+
+#if !DPP_BUILD_MODULES
+
 #include <cstdint>
 #include <map>
 #include <unordered_map>
@@ -30,6 +34,8 @@
 #include <set>
 #include <queue>
 #include <functional>
+
+#endif
 
 namespace dpp {
 
@@ -48,7 +54,7 @@ typedef std::function<void(timer)> timer_callback_t;
 /**
  * @brief Used internally to store state of active timers
  */
-struct DPP_EXPORT timer_t {
+struct DPP_API timer_t {
 	/**
 	 * @brief Timer handle
 	 */
@@ -78,7 +84,7 @@ struct DPP_EXPORT timer_t {
 /**
  * @brief Used to compare two timers next tick times in a priority queue
  */
-struct DPP_EXPORT timer_comparator {
+struct DPP_API timer_comparator {
 	/**
 	 * @brief Compare two timers
 	 * @param a first timer
@@ -106,7 +112,7 @@ typedef std::set<timer> timers_deleted_t;
  * @brief Trigger a timed event once.
  * The provided callback is called only once.
  */
-class DPP_EXPORT oneshot_timer
+class DPP_API oneshot_timer
 {
 private:
 	/**

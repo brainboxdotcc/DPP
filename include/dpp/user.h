@@ -160,7 +160,7 @@ enum user_flags : uint32_t {
 /**
  * @brief Represents a user on discord. May or may not be a member of a dpp::guild.
  */
-class DPP_EXPORT user : public managed, public json_interface<user> {
+class DPP_API user : public managed, public json_interface<user> {
 protected:
 	friend struct json_interface<user>;
 
@@ -462,7 +462,7 @@ public:
  * These are not included in dpp::user as additional scopes are needed to fetch them
  * which bots do not normally have.
  */
-class DPP_EXPORT user_identified : public user, public json_interface<user_identified> {
+class DPP_API user_identified : public user, public json_interface<user_identified> {
 protected:
 	friend struct json_interface<user_identified>;
 

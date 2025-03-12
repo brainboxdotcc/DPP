@@ -23,6 +23,11 @@
  ************************************************************************************/
 
 #pragma once
+
+#include <dpp/export.h>
+
+#if !DPP_BUILD_MODULES
+
 #include <string>
 #include <iomanip>
 #include <locale>
@@ -31,7 +36,12 @@
 #include <iostream>
 #include <charconv>
 
+#endif
+
 namespace dpp {
+
+DPP_EXPORT_START
+
 /**
  * @brief Convert a string to lowercase using tolower()
  * 
@@ -219,5 +229,7 @@ template <typename T> std::string leading_zeroes(T i, size_t width)
 	stream << std::setfill('0') << std::setw((int)width) << std::dec << i;
 	return stream.str();
 }
+
+DPP_EXPORT_END
 
 }

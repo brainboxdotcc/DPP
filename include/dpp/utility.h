@@ -20,9 +20,13 @@
  *
  ************************************************************************************/
 #pragma once
+
+#if !DPP_BUILD_MODULES
+
 #include <dpp/export.h>
 #include <dpp/snowflake.h>
 #include <dpp/misc-enum.h>
+#include <dpp/json.h>
 #include <string>
 #include <vector>
 #include <unordered_map>
@@ -33,12 +37,14 @@
 #include <memory>
 #include <string_view>
 
+#endif
+
 /**
  * @brief The main namespace for D++ functions, classes and types
  */
 namespace dpp {
 
-enum sticker_format : uint8_t;
+DPP_EXPORT enum sticker_format : uint8_t;
 
 /**
  * @brief Macro that expands to static_asserts checking sizeof and alignof are equal between two types.
@@ -50,7 +56,7 @@ static_assert(alignof(a) == alignof(b), #a " and " #b " must be the same alignme
 /**
  * @brief Utility helper functions, generally for logging, running programs, time/date manipulation, etc
  */
-namespace utility {
+DPP_EXPORT namespace utility {
 
 /**
  * @brief Helper function to easily create discord's cdn endpoint urls.
@@ -67,7 +73,7 @@ namespace utility {
  * @param is_animated Whether the image is actually animated or not
  * @return std::string endpoint url or empty string
  */
-std::string DPP_EXPORT cdn_endpoint_url(const std::vector<image_type> &allowed_formats, const std::string &path_without_extension, const dpp::image_type format, uint16_t size, bool prefer_animated = false, bool is_animated = false);
+std::string DPP_API cdn_endpoint_url(const std::vector<image_type> &allowed_formats, const std::string &path_without_extension, const dpp::image_type format, uint16_t size, bool prefer_animated = false, bool is_animated = false);
 
 /**
  * @brief Helper function to easily create discord's cdn endpoint urls.
@@ -85,7 +91,7 @@ std::string DPP_EXPORT cdn_endpoint_url(const std::vector<image_type> &allowed_f
  * @param is_animated Whether the image is actually animated or not
  * @return std::string endpoint url or empty string
  */
-std::string DPP_EXPORT cdn_endpoint_url_hash(const std::vector<image_type> &allowed_formats, const std::string &path_without_extension, const std::string &hash, const dpp::image_type format, uint16_t size, bool prefer_animated = false, bool is_animated = false);
+std::string DPP_API cdn_endpoint_url_hash(const std::vector<image_type> &allowed_formats, const std::string &path_without_extension, const std::string &hash, const dpp::image_type format, uint16_t size, bool prefer_animated = false, bool is_animated = false);
 
 /**
  * @brief Helper function to easily create discord's cdn endpoint urls (specialised for stickers)
@@ -96,7 +102,7 @@ std::string DPP_EXPORT cdn_endpoint_url_hash(const std::vector<image_type> &allo
  * @param format The format type
  * @return std::string endpoint url or empty string
  */
-std::string DPP_EXPORT cdn_endpoint_url_sticker(snowflake sticker_id, sticker_format format);
+std::string DPP_API cdn_endpoint_url_sticker(snowflake sticker_id, sticker_format format);
 
 /**
  * @brief Supported AVX instruction set type for audio mixing
@@ -216,7 +222,7 @@ typedef std::function<void(const std::string& output)> cmd_result_t;
  * @param parameters Command line parameters. Each will be escaped using `std::quoted`.
  * @param callback The callback to call on completion.
  */
-void DPP_EXPORT exec(const std::string& cmd, std::vector<std::string> parameters = {}, cmd_result_t callback = {});
+void DPP_API exec(const std::string& cmd, std::vector<std::string> parameters = {}, cmd_result_t callback = {});
 
 /**
  * @brief Return a mentionable timestamp (used in a message). These timestamps will display the given timestamp in the user's timezone and locale.
@@ -225,7 +231,7 @@ void DPP_EXPORT exec(const std::string& cmd, std::vector<std::string> parameters
  * @param tf Format of timestamp using dpp::utility::time_format
  * @return std::string The formatted timestamp
  */
-std::string DPP_EXPORT timestamp(time_t ts, time_format tf = tf_short_datetime);
+std::string DPP_API timestamp(time_t ts, time_format tf = tf_short_datetime);
 
 /**
  * @brief Create a mentionable guild navigation (used in a message).
@@ -234,21 +240,21 @@ std::string DPP_EXPORT timestamp(time_t ts, time_format tf = tf_short_datetime);
  * @param gnt Guild navigation type using dpp::utility::guild_navigation_type
  * @return std::string The formatted timestamp
  */
-std::string DPP_EXPORT guild_navigation(const snowflake guild_id, guild_navigation_type gnt);
+std::string DPP_API guild_navigation(const snowflake guild_id, guild_navigation_type gnt);
 
 /**
  * @brief Returns current date and time
  * 
  * @return std::string Current date and time in "Y-m-d H:M:S" format
  */
-std::string DPP_EXPORT current_date_time();
+std::string DPP_API current_date_time();
 /**
  * @brief Convert a dpp::loglevel enum value to a string
  * 
  * @param in log level to convert
  * @return std::string string form of log level
  */
-std::string DPP_EXPORT loglevel(dpp::loglevel in);
+std::string DPP_API loglevel(dpp::loglevel in);
 
 /**
  * @brief Store a 128 bit icon hash (profile picture, server icon etc)
@@ -256,7 +262,7 @@ std::string DPP_EXPORT loglevel(dpp::loglevel in);
  * Has a constructor to build one from a string, and a method to fetch
  * the value back in string form.
  */
-struct DPP_EXPORT iconhash {
+struct DPP_API iconhash {
 	/**
 	 * @brief High 64 bits.
 	 */
@@ -330,7 +336,7 @@ struct DPP_EXPORT iconhash {
  * this is why we use a ptr + 4 byte size instead of a vector.
  * We want this class to be substitutable with iconhash in data structures.
  */
-struct DPP_EXPORT image_data {
+struct DPP_API image_data {
 	/**
 	 * @brief Data in bytes of the image.
 	 */
@@ -569,14 +575,14 @@ struct icon {
  * 
  * @return double time with fractional seconds
  */
-double DPP_EXPORT time_f();
+double DPP_API time_f();
 
 /**
  * @brief Returns true if D++ was built with voice support
  * 
  * @return bool True if voice support is compiled in (libopus)
  */
-bool DPP_EXPORT has_voice();
+bool DPP_API has_voice();
 
 /**
  * @brief Returns an enum value indicating which AVX instruction
@@ -584,14 +590,14 @@ bool DPP_EXPORT has_voice();
  * 
  * @return avx_type_t AVX type
  */
-avx_type_t DPP_EXPORT voice_avx();
+avx_type_t DPP_API voice_avx();
 
 /**
  * @brief Returns true if D++ was built with coroutine support
  * 
  * @return bool True if coroutines are supported 
  */
-bool DPP_EXPORT is_coro_enabled();
+bool DPP_API is_coro_enabled();
 
 /**
  * @brief Convert a byte count to display value
@@ -599,14 +605,14 @@ bool DPP_EXPORT is_coro_enabled();
  * @param c number of bytes
  * @return std::string display value suffixed with M, G, T where necessary
  */
-std::string DPP_EXPORT bytes(uint64_t c);
+std::string DPP_API bytes(uint64_t c);
 
 /**
  * @brief A class used to represent an uptime in hours, minutes,
  * seconds and days, with helper functions to convert from time_t
  * and display as a string.
  */
-struct DPP_EXPORT uptime {
+struct DPP_API uptime {
 	/**
 	 * @brief Number of days.
 	 */
@@ -676,7 +682,7 @@ struct DPP_EXPORT uptime {
  * @param blue blue value, between 0 and 1 inclusive
  * @return uint32_t returned integer colour value
  */
-uint32_t DPP_EXPORT rgb(double red, double green, double blue);
+uint32_t DPP_API rgb(double red, double green, double blue);
 
 /**
  * @brief Convert ints to RGB for sending in embeds
@@ -686,7 +692,7 @@ uint32_t DPP_EXPORT rgb(double red, double green, double blue);
  * @param blue blue value, between 0 and 255 inclusive
  * @return uint32_t returned integer colour value
  */
-uint32_t DPP_EXPORT rgb(int red, int green, int blue);
+uint32_t DPP_API rgb(int red, int green, int blue);
 
 /**
  * @brief Convert doubles to CMYK for sending in embeds
@@ -697,7 +703,7 @@ uint32_t DPP_EXPORT rgb(int red, int green, int blue);
  * @param k key (black) value, between 0 and 1 inclusive
  * @return uint32_t returned integer colour value
  */
-uint32_t DPP_EXPORT cmyk(double c, double m, double y, double k);
+uint32_t DPP_API cmyk(double c, double m, double y, double k);
 
 /**
  * @brief Convert ints to CMYK for sending in embeds
@@ -708,7 +714,7 @@ uint32_t DPP_EXPORT cmyk(double c, double m, double y, double k);
  * @param k key (black) value, between 0 and 255 inclusive
  * @return uint32_t returned integer colour value
  */
-uint32_t DPP_EXPORT cmyk(int c, int m, int y, int k);
+uint32_t DPP_API cmyk(int c, int m, int y, int k);
 
 /**
  * @brief Convert doubles to HSL for sending in embeds
@@ -718,7 +724,7 @@ uint32_t DPP_EXPORT cmyk(int c, int m, int y, int k);
  * @param l lightness value in percentage, between 0 and 1 inclusive
  * @return uint32_t returned integer colour value
  */
-uint32_t DPP_EXPORT hsl(double h, double s, double l);
+uint32_t DPP_API hsl(double h, double s, double l);
 
 /**
  * @brief Convert ints to HSL for sending in embeds
@@ -728,7 +734,7 @@ uint32_t DPP_EXPORT hsl(double h, double s, double l);
  * @param l lightness value in percentage, between 0 and 100 inclusive
  * @return uint32_t returned integer colour value
  */
-uint32_t DPP_EXPORT hsl(int h, int s, int l);
+uint32_t DPP_API hsl(int h, int s, int l);
 
 /**
  * @brief Output hex values of a section of memory for debugging
@@ -736,7 +742,7 @@ uint32_t DPP_EXPORT hsl(int h, int s, int l);
  * @param data The start of the data to display
  * @param length The length of data to display
  */
-std::string DPP_EXPORT debug_dump(const uint8_t* data, size_t length);
+std::string DPP_API debug_dump(const uint8_t* data, size_t length);
 
 /**
  * @brief Returns the length of a UTF-8 string in codepoints.
@@ -745,7 +751,7 @@ std::string DPP_EXPORT debug_dump(const uint8_t* data, size_t length);
  * @param str string to count length of
  * @return size_t Length of string
  */
-size_t DPP_EXPORT utf8len(std::string_view str);
+size_t DPP_API utf8len(std::string_view str);
 
 /**
  * @brief Return subview of a UTF-8 encoded string in codepoints.
@@ -757,7 +763,7 @@ size_t DPP_EXPORT utf8len(std::string_view str);
  * @param length length in codepoints
  * @return std::string_view The requested subview
  */
-std::string_view DPP_EXPORT utf8subview(std::string_view str, size_t start, size_t length);
+std::string_view DPP_API utf8subview(std::string_view str, size_t start, size_t length);
 
 /**
  * @brief Return substring of a UTF-8 encoded string in codepoints.
@@ -768,7 +774,7 @@ std::string_view DPP_EXPORT utf8subview(std::string_view str, size_t start, size
  * @param length length in codepoints
  * @return std::string The requested substring
  */
-std::string DPP_EXPORT utf8substr(std::string_view str, size_t start, size_t length);
+std::string DPP_API utf8substr(std::string_view str, size_t start, size_t length);
 
 /**
  * @brief Read a whole file into a std::string.
@@ -778,7 +784,7 @@ std::string DPP_EXPORT utf8substr(std::string_view str, size_t start, size_t len
  * @return std::string The file contents
  * @throw dpp::file_exception on failure to read the entire file
  */
-std::string DPP_EXPORT read_file(const std::string& filename);
+std::string DPP_API read_file(const std::string& filename);
 
 /**
  * @brief Validate a string value
@@ -792,7 +798,7 @@ std::string DPP_EXPORT read_file(const std::string& filename);
  * @return std::string Validated string, truncated if necessary.
  * @throw dpp::length_exception if value UTF8 length < _min
  */
-std::string DPP_EXPORT validate(const std::string& value, size_t _min, size_t _max, const std::string& exception_message);
+std::string DPP_API validate(const std::string& value, size_t _min, size_t _max, const std::string& exception_message);
 
 /**
  * @brief Get the url query parameter for the cdn endpoint. Internally used to build url getters.
@@ -800,7 +806,7 @@ std::string DPP_EXPORT validate(const std::string& value, size_t _min, size_t _m
  * @param size size to generate url parameter for. Must be any power of two between 16 and 4096 (inclusive) or it'll return an empty string.
  * @return std::string url query parameter e.g. `?size=128`, or an empty string
  */
-std::string DPP_EXPORT avatar_size(uint32_t size);
+std::string DPP_API avatar_size(uint32_t size);
 
 /**
  * @brief Split (tokenize) a string into a vector, using the given separators
@@ -809,7 +815,7 @@ std::string DPP_EXPORT avatar_size(uint32_t size);
  * @param sep Separator characters
  * @return std::vector<std::string> Tokenized strings 
  */
-std::vector<std::string> DPP_EXPORT tokenize(std::string const &in, const char* sep = "\r\n");
+std::vector<std::string> DPP_API tokenize(std::string const &in, const char* sep = "\r\n");
 
 /**
  * @brief Create a bot invite
@@ -819,7 +825,7 @@ std::vector<std::string> DPP_EXPORT tokenize(std::string const &in, const char* 
  * @param scopes Scopes to use
  * @return Invite URL
  */
-std::string DPP_EXPORT bot_invite_url(const snowflake bot_id, const uint64_t permissions = 0, const std::vector<std::string>& scopes = {"bot", "applications.commands"});
+std::string DPP_API bot_invite_url(const snowflake bot_id, const uint64_t permissions = 0, const std::vector<std::string>& scopes = {"bot", "applications.commands"});
 
 /**
  * @brief Escapes Discord's markdown sequences in a string
@@ -831,7 +837,7 @@ std::string DPP_EXPORT bot_invite_url(const snowflake bot_id, const uint64_t per
  * character.
  * @return std::string The text with the markdown special characters escaped with a backslash
  */
-std::string DPP_EXPORT markdown_escape(const std::string& text, bool escape_code_blocks = false);
+std::string DPP_API markdown_escape(const std::string& text, bool escape_code_blocks = false);
 
 /**
  * @brief Encodes a url parameter similar to [php urlencode()](https://www.php.net/manual/en/function.urlencode.php)
@@ -839,7 +845,7 @@ std::string DPP_EXPORT markdown_escape(const std::string& text, bool escape_code
  * @param value String to encode
  * @return std::string URL encoded string
  */
-std::string DPP_EXPORT url_encode(const std::string &value);
+std::string DPP_API url_encode(const std::string &value);
 
 /**
  * @brief Create a mentionable slashcommand (used in a message).
@@ -848,7 +854,7 @@ std::string DPP_EXPORT url_encode(const std::string &value);
  * @param subcommand Optional: The subcommand name (for mentioning a subcommand)
  * @return std::string The formatted mention
  */
-std::string DPP_EXPORT slashcommand_mention(snowflake command_id, const std::string &command_name, const std::string &subcommand = "");
+std::string DPP_API slashcommand_mention(snowflake command_id, const std::string &command_name, const std::string &subcommand = "");
 
 /**
  * @brief Create a mentionable slashcommand (used in a message).
@@ -858,21 +864,21 @@ std::string DPP_EXPORT slashcommand_mention(snowflake command_id, const std::str
  * @param subcommand The subcommand name
  * @return std::string The formatted mention of the slashcommand with its subcommand
  */
-std::string DPP_EXPORT slashcommand_mention(snowflake command_id, const std::string &command_name, const std::string &subcommand_group, const std::string &subcommand);
+std::string DPP_API slashcommand_mention(snowflake command_id, const std::string &command_name, const std::string &subcommand_group, const std::string &subcommand);
 
 /**
  * @brief Create a mentionable user.
  * @param id The ID of the user.
  * @return std::string The formatted mention of the user.
  */
-std::string DPP_EXPORT user_mention(const snowflake& id);
+std::string DPP_API user_mention(const snowflake& id);
 
 /**
 * @brief Create a mentionable channel.
 * @param id The ID of the channel.
 * @return std::string The formatted mention of the channel.
 */
-std::string DPP_EXPORT channel_mention(const snowflake& id);
+std::string DPP_API channel_mention(const snowflake& id);
 
 /**
 * @brief Create a mentionable emoji
@@ -881,14 +887,14 @@ std::string DPP_EXPORT channel_mention(const snowflake& id);
 * @param is_animated is emoji animated.
 * @return std::string The formatted mention of the emoji.
 */
-std::string DPP_EXPORT emoji_mention(std::string_view name, snowflake id, bool is_animated = false);
+std::string DPP_API emoji_mention(std::string_view name, snowflake id, bool is_animated = false);
 
 /**
 * @brief Create a mentionable role.
 * @param id The ID of the role.
 * @return std::string The formatted mention of the role.
 */
-std::string DPP_EXPORT role_mention(const snowflake& id);
+std::string DPP_API role_mention(const snowflake& id);
 
 /**
 * @brief Create a URL for message.
@@ -897,7 +903,7 @@ std::string DPP_EXPORT role_mention(const snowflake& id);
 * @param message_id The ID of the message.
 * @return std::string The URL to message or empty string if any of ids is 0.
 */
-std::string DPP_EXPORT message_url(const snowflake& guild_id, const snowflake& channel_id, const snowflake& message_id);
+std::string DPP_API message_url(const snowflake& guild_id, const snowflake& channel_id, const snowflake& message_id);
 
 /**
 * @brief Create a URL for message.
@@ -905,7 +911,7 @@ std::string DPP_EXPORT message_url(const snowflake& guild_id, const snowflake& c
 * @param channel_id The ID of the channel.
 * @return std::string The URL to message or empty string if any of ids is 0.
 */
-std::string DPP_EXPORT channel_url(const snowflake& guild_id, const snowflake& channel_id);
+std::string DPP_API channel_url(const snowflake& guild_id, const snowflake& channel_id);
 
 /**
 * @brief Create a URL for message.
@@ -913,14 +919,14 @@ std::string DPP_EXPORT channel_url(const snowflake& guild_id, const snowflake& c
 * @param thread_id The ID of the thread.
 * @return std::string The URL to message or empty string if any of ids is 0.
 */
-std::string DPP_EXPORT thread_url(const snowflake& guild_id, const snowflake& thread_id);
+std::string DPP_API thread_url(const snowflake& guild_id, const snowflake& thread_id);
 
 /**
 * @brief Create a URL for message.
 * @param user_id The ID of the guild where thread is located.
 * @return std::string The URL to message or empty string if id is 0.
 */
-std::string DPP_EXPORT user_url(const snowflake& user_id);
+std::string DPP_API user_url(const snowflake& user_id);
 
 
 
@@ -930,28 +936,28 @@ std::string DPP_EXPORT user_url(const snowflake& user_id);
  * @param type Image type
  * @return std::string The mime type for this image type
  */
-std::string DPP_EXPORT mime_type(image_type type);
+std::string DPP_API mime_type(image_type type);
 
 /**
  * @brief Get the mime type for a sticker format.
  * @param format Sticker format
  * @return std::string The mime type for this sticker format
  */
-std::string DPP_EXPORT mime_type(sticker_format format);
+std::string DPP_API mime_type(sticker_format format);
 
 /**
  * @brief Get the file extension for an image type.
  * @param type Image type
  * @return std::string The file extension (e.g. ".png") for this image type
  */
-std::string DPP_EXPORT file_extension(image_type type);
+std::string DPP_API file_extension(image_type type);
 
 /**
  * @brief Get the file extension for a sticker format.
  * @param format Sticker format
  * @return std::string The file extension (e.g. ".png") for this sticker format
  */
-std::string DPP_EXPORT file_extension(sticker_format format);
+std::string DPP_API file_extension(sticker_format format);
 #else
 /**
  * @brief Get the mime type for an image type.
@@ -959,7 +965,7 @@ std::string DPP_EXPORT file_extension(sticker_format format);
  * @return std::string The mime type for this image type
  */
 template <typename T>
-extern std::enable_if_t<std::is_same_v<T, image_type>, std::string> DPP_EXPORT mime_type(T type);
+extern std::enable_if_t<std::is_same_v<T, image_type>, std::string> DPP_API mime_type(T type);
 
 /**
  * @brief Get the mime type for a sticker format.
@@ -967,7 +973,7 @@ extern std::enable_if_t<std::is_same_v<T, image_type>, std::string> DPP_EXPORT m
  * @return std::string The mime type for this sticker format
  */
 template <typename T>
-extern std::enable_if_t<std::is_same_v<T, sticker_format>, std::string> DPP_EXPORT mime_type(T format);
+extern std::enable_if_t<std::is_same_v<T, sticker_format>, std::string> DPP_API mime_type(T format);
 
 /**
  * @brief Get the file extension for an image type.
@@ -975,7 +981,7 @@ extern std::enable_if_t<std::is_same_v<T, sticker_format>, std::string> DPP_EXPO
  * @return std::string The file extension (e.g. ".png") for this image type
  */
 template <typename T>
-extern std::enable_if_t<std::is_same_v<T, image_type>, std::string> DPP_EXPORT file_extension(T type);
+extern std::enable_if_t<std::is_same_v<T, image_type>, std::string> DPP_API file_extension(T type);
 
 /**
  * @brief Get the file extension for a sticker format.
@@ -983,7 +989,7 @@ extern std::enable_if_t<std::is_same_v<T, image_type>, std::string> DPP_EXPORT f
  * @return std::string The file extension (e.g. ".png") for this sticker format
  */
 template <typename T>
-extern std::enable_if_t<std::is_same_v<T, sticker_format>, std::string> DPP_EXPORT file_extension(T format);
+extern std::enable_if_t<std::is_same_v<T, sticker_format>, std::string> DPP_API file_extension(T format);
 #endif
 
 /**
@@ -991,7 +997,7 @@ extern std::enable_if_t<std::is_same_v<T, sticker_format>, std::string> DPP_EXPO
  * 
  * @return std::string version
  */
-std::string DPP_EXPORT version();
+std::string DPP_API version();
 
 /**
  * @brief Build a URL parameter string e.g. "?a=b&c=d&e=f" from a map of key/value pairs.
@@ -1000,7 +1006,7 @@ std::string DPP_EXPORT version();
  * @param parameters parameters to create a url query string for
  * @return std::string A correctly encoded url query string
  */
-std::string DPP_EXPORT make_url_parameters(const std::map<std::string, std::string>& parameters);
+std::string DPP_API make_url_parameters(const std::map<std::string, std::string>& parameters);
 
 /**
  * @brief Build a URL parameter string e.g. "?a=b&c=d&e=f" from a map of key/value pairs.
@@ -1009,14 +1015,14 @@ std::string DPP_EXPORT make_url_parameters(const std::map<std::string, std::stri
  * @param parameters parameters to create a url query string for
  * @return std::string A correctly encoded url query string
  */
-std::string DPP_EXPORT make_url_parameters(const std::map<std::string, uint64_t>& parameters);
+std::string DPP_API make_url_parameters(const std::map<std::string, uint64_t>& parameters);
 
 /**
  * @brief Set the name of the current thread for debugging and statistical reporting
  * 
  * @param name New name to set
  */
-void DPP_EXPORT set_thread_name(const std::string& name);
+void DPP_API set_thread_name(const std::string& name);
 
 #ifdef __cpp_concepts // if c++20
 /**

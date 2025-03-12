@@ -102,7 +102,7 @@ enum entitlement_flags : uint8_t {
  * An entitlement is a user's connection to an SKU, basically a subscription
  * or a one-off purchase.
  */
-class DPP_EXPORT entitlement : public managed, public json_interface<entitlement> {
+class DPP_API entitlement : public managed, public json_interface<entitlement> {
 protected:
 	friend struct json_interface<entitlement>;
 

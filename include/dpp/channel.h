@@ -206,7 +206,7 @@ enum overwrite_type : uint8_t {
 /**
  * @brief Channel permission overwrites
  */
-struct DPP_EXPORT permission_overwrite {
+struct DPP_API permission_overwrite {
 	/**
 	 * @brief ID of the role or the member
 	 */
@@ -271,7 +271,7 @@ enum auto_archive_duration_t : uint8_t {
 /**
  * @brief Represents a tag that is able to be applied to a thread in a forum or media channel
  */
-struct DPP_EXPORT forum_tag : public managed, public json_interface<forum_tag> {
+struct DPP_API forum_tag : public managed, public json_interface<forum_tag> {
 protected:
 	friend struct json_interface<forum_tag>;
 
@@ -337,7 +337,7 @@ public:
  * There are one of these for every channel type except threads. Threads are
  * special snowflakes. Get it? A Discord pun. Hahaha. .... I'll get my coat.
  */ 
-class DPP_EXPORT channel : public managed, public json_interface<channel> {
+class DPP_API channel : public managed, public json_interface<channel> {
 protected:
 	friend struct json_interface<channel>;
 

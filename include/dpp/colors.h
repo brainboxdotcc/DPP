@@ -20,7 +20,13 @@
  ************************************************************************************/
 #pragma once
 
+#include <dpp/export.h>
+
+#if !DPP_BUILD_MODULES
+
 #include <cstdint>
+
+#endif
 
 /**
  * @brief The main namespace for D++ functions. classes and types
@@ -30,7 +36,7 @@ namespace dpp {
 /**
  * @brief predefined color constants.
  */
-namespace colors {
+DPP_EXPORT namespace colors {
 	const uint32_t
 		white = 0xFFFFFF,
 		discord_white = 0xFFFFFE,
@@ -741,5 +747,11 @@ namespace colors {
 /**
  * @brief Predefined colour constants, same as colors but for the british.
  */
-namespace colours = colors;
+DPP_EXPORT namespace colours = colors;
+
+/**
+ * @brief Predefined colour constants, same as colors but for the french. (Nobody will notice this in the PR!)
+ */
+DPP_EXPORT namespace couleurs = colors;
+
 } // namespace dpp

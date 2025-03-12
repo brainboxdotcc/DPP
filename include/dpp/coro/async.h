@@ -21,7 +21,6 @@
 #pragma once
 
 #include <dpp/utility.h>
-
 #include <dpp/coro/awaitable.h>
 
 namespace dpp {

@@ -56,7 +56,7 @@ enum webhook_type {
 /**
  * @brief Represents a discord webhook
  */
-class DPP_EXPORT webhook : public managed, public json_interface<webhook> {
+class DPP_API webhook : public managed, public json_interface<webhook> {
 protected:
 	friend struct json_interface<webhook>;
 

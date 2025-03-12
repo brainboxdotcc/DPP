@@ -1,5 +1,7 @@
 #pragma once
 
+#include <dpp/export.h>
+
 namespace dpp {
 
 /**
@@ -13,7 +15,7 @@ namespace dpp {
  * #include <dpp/unicode_emoji.h>
  * ```
  */
-namespace unicode_emoji {
+DPP_EXPORT namespace unicode_emoji {
 	inline constexpr const char _100[] = "💯";
 	inline constexpr const char _1234[] = "🔢";
 	inline constexpr const char soccer[] = "⚽";

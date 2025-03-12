@@ -257,7 +257,7 @@ enum activity_flags {
 /**
  * @brief An activity button is a custom button shown in the rich presence. Can be to join a game or whatever
  */
-struct DPP_EXPORT activity_button {
+struct DPP_API activity_button {
 public:
 	/**
 	 * @brief The text shown on the button (1-32 characters).
@@ -278,7 +278,7 @@ public:
 /**
  * @brief An activity asset are the images and the hover text displayed in the rich presence
  */
-struct DPP_EXPORT activity_assets {
+struct DPP_API activity_assets {
 public:
 	/**
 	 * @brief The large asset image which usually contain snowflake ID or prefixed image ID.
@@ -307,7 +307,7 @@ public:
 /**
  * @brief Secrets for Rich Presence joining and spectating.
  */
-struct DPP_EXPORT activity_secrets {
+struct DPP_API activity_secrets {
 public:
 	/**
 	 * @brief The secret for joining a party.
@@ -331,7 +331,7 @@ public:
 /**
  * @brief Information for the current party of the player
  */
-struct DPP_EXPORT activity_party {
+struct DPP_API activity_party {
 public:
 	/**
 	 * @brief The ID of the party.
@@ -357,7 +357,7 @@ public:
 /**
  * @brief An activity is a representation of what a user is doing. It might be a game, or a website, or a movie. Whatever.
  */
-class DPP_EXPORT activity {
+class DPP_API activity {
 public:
 	/**
 	 * @brief Name of activity.
@@ -486,7 +486,7 @@ public:
 /**
  * @brief Represents user presence, e.g. what game they are playing and if they are online
  */
-class DPP_EXPORT presence : public json_interface<presence> {
+class DPP_API presence : public json_interface<presence> {
 protected:
 	friend struct json_interface<presence>;
 

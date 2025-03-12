@@ -317,7 +317,7 @@ enum audit_type {
 /**
  * @brief Defines audit log changes
  */
-struct DPP_EXPORT audit_change {
+struct DPP_API audit_change {
 	/**
 	 * @brief Optional: Serialised new value of the change, e.g. for nicknames, the new nickname.
 	 */
@@ -338,7 +338,7 @@ struct DPP_EXPORT audit_change {
 /**
  * @brief Extra information for an audit log entry
  */
-struct DPP_EXPORT audit_extra {
+struct DPP_API audit_extra {
 	/**
 	 * @brief Name of the Auto Moderation rule that was triggered.
 	 */
@@ -398,7 +398,7 @@ struct DPP_EXPORT audit_extra {
 /**
  * @brief An individual audit log entry
  */
-struct DPP_EXPORT audit_entry : public json_interface<audit_entry> {
+struct DPP_API audit_entry : public json_interface<audit_entry> {
 protected:
 	friend struct json_interface<audit_entry>;
 
@@ -455,7 +455,7 @@ public:
 /**
  * @brief The auditlog class represents the audit log entries of a guild.
  */
-class DPP_EXPORT auditlog : public json_interface<auditlog> {
+class DPP_API auditlog : public json_interface<auditlog> {
 protected:
 	friend struct json_interface<auditlog>;
 

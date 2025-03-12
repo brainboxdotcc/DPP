@@ -50,7 +50,7 @@ enum voiceregion_flags {
 /**
  * @brief Represents a voice region on discord
  */
-class DPP_EXPORT voiceregion : public json_interface<voiceregion> {
+class DPP_API voiceregion : public json_interface<voiceregion> {
 protected:
 	friend struct json_interface<voiceregion>;
 

@@ -19,8 +19,14 @@
  *
  ************************************************************************************/
 #pragma once
+
 #include <dpp/export.h>
+
+#if !DPP_BUILD_MODULES
+
 #include <utility>
+
+#endif
 
 namespace dpp {
 
@@ -38,7 +44,7 @@ namespace dpp {
  * @tparam T any unique 'tag' identifier name
  * @return auto a true/false return to say if we should execute or not
  */
-template <typename T> auto run_once() {
+DPP_EXPORT template <typename T> auto run_once() {
 	static auto called = false;
 	return !std::exchange(called, true);
 };

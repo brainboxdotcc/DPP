@@ -46,7 +46,7 @@
 
 namespace dpp {
 
-struct DPP_EXPORT socket_engine_poll : public socket_engine_base {
+struct DPP_API socket_engine_poll : public socket_engine_base {
 
 	/* We store the pollfds as a vector. This means that insertion, deletion and updating
 	 * are comparatively slow O(n), but these operations don't happen too often. Obtaining the
@@ -204,7 +204,7 @@ protected:
 	}
 };
 
-DPP_EXPORT std::unique_ptr<socket_engine_base> create_socket_engine(cluster* creator) {
+DPP_API std::unique_ptr<socket_engine_base> create_socket_engine(cluster* creator) {
 	return std::make_unique<socket_engine_poll>(creator);
 }
 

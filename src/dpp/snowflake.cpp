@@ -18,12 +18,19 @@
  * limitations under the License.
  *
  ************************************************************************************/
+
+#if !DPP_BUILD_MODULES
+
 #include <dpp/snowflake.h>
 #include <dpp/json.h>
 #include <charconv>
 #include <string>
 
+#endif
+
 namespace dpp {
+
+DPP_EXPORT_START
 
 snowflake::snowflake(std::string_view string_value) noexcept {
 	auto [_, err] = std::from_chars(string_value.data(), string_value.data() + string_value.size(), value);
@@ -43,5 +50,7 @@ snowflake::operator json() const {
 	/* Discord transfers snowflakes as strings for compatibility with javascript */
 	return std::to_string(value);
 }
+
+DPP_EXPORT_END
 
 }

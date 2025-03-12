@@ -43,7 +43,7 @@ struct openssl_bignum;
  * @note dpp::bignumber uses OpenSSL BN_* under the hood, as we include openssl anyway
  * for HTTPS.
 */
-class DPP_EXPORT bignumber {
+class DPP_API bignumber {
 	/**
 	 * @brief Internal opaque struct to contain OpenSSL things
 	 */

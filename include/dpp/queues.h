@@ -108,7 +108,7 @@ enum http_error : uint8_t {
  * @brief The result of any HTTP request. Contains the headers, vital
  * rate limit figures, and returned request body.
  */
-struct DPP_EXPORT http_request_completion_t {
+struct DPP_API http_request_completion_t {
 	/**
 	 * @brief HTTP headers of response.
 	 */
@@ -219,7 +219,7 @@ enum http_method {
  * will not respect rate limits, as both of these functions are managed by the
  * request_queue class.
  */
-class DPP_EXPORT http_request {
+class DPP_API http_request {
 	/**
 	 * @brief Completion callback.
 	 */
@@ -380,7 +380,7 @@ public:
  * @brief A rate limit bucket. The library builds one of these for
  * each endpoint.
  */
-struct DPP_EXPORT bucket_t {
+struct DPP_API bucket_t {
 	/**
 	 * @brief Request limit.
 	 */
@@ -416,7 +416,7 @@ struct DPP_EXPORT bucket_t {
  * Each of these also has its own mutex, making it thread safe to call and use these
  * from anywhere in the code.
  */
-class DPP_EXPORT request_concurrency_queue {
+class DPP_API request_concurrency_queue {
 public:
 	/**
 	 * @brief Queue index
@@ -520,7 +520,7 @@ public:
  * one for user requests can be specifically configured to never ever send the Discord token
  * unless it is explicitly placed into the request, for security reasons.
  */
-class DPP_EXPORT request_queue {
+class DPP_API request_queue {
 public:
 	/**
 	 * @brief Required so request_concurrency_queue can access these member variables

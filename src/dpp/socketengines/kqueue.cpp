@@ -32,7 +32,7 @@
 
 namespace dpp {
 
-struct DPP_EXPORT socket_engine_kqueue : public socket_engine_base {
+struct DPP_API socket_engine_kqueue : public socket_engine_base {
 
 	static constexpr size_t MAX_SOCKET_VALUE = 65536;
 
@@ -152,7 +152,7 @@ protected:
 	}
 };
 
-DPP_EXPORT std::unique_ptr<socket_engine_base> create_socket_engine(cluster *creator) {
+DPP_API std::unique_ptr<socket_engine_base> create_socket_engine(cluster *creator) {
 	return std::make_unique<socket_engine_kqueue>(creator);
 }
 

@@ -38,7 +38,7 @@ using work_unit = std::function<void()>;
 /**
  * @brief A task within a thread pool. A simple lambda that accepts no parameters and returns void.
  */
-struct DPP_EXPORT thread_pool_task {
+struct DPP_API thread_pool_task {
 	/**
 	 * @brief Task priority, lower value is higher priority
 	 */
@@ -52,7 +52,7 @@ struct DPP_EXPORT thread_pool_task {
 /**
  * @brief Compares two thread pool tasks by priority
  */
-struct DPP_EXPORT thread_pool_task_comparator {
+struct DPP_API thread_pool_task_comparator {
 	/**
 	 * @brief Compare two tasks
 	 * @param a first task
@@ -68,7 +68,7 @@ struct DPP_EXPORT thread_pool_task_comparator {
  * @brief A thread pool contains 1 or more worker threads which accept thread_pool_task lambadas
  * into a queue, which is processed in-order by whichever thread is free.
  */
-struct DPP_EXPORT thread_pool {
+struct DPP_API thread_pool {
 
 	/**
 	 * @brief Threads that comprise the thread pool

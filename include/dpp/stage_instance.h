@@ -48,7 +48,7 @@ enum stage_privacy_level : uint8_t {
  * @brief A stage instance.
  * Stage instances are like a conference facility, with moderators/speakers and listeners.
  */
-struct DPP_EXPORT stage_instance : public managed, public json_interface<stage_instance> {
+struct DPP_API stage_instance : public managed, public json_interface<stage_instance> {
 protected:
 	friend struct json_interface<stage_instance>;
 

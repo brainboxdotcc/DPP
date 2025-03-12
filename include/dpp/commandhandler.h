@@ -45,7 +45,7 @@ namespace dpp {
  * The Discord API provides both if a parameter is a user ping,
  * so we offer both in a combined structure.
  */
-struct DPP_EXPORT resolved_user {
+struct DPP_API resolved_user {
 	/**
 	 * @brief Holds user information
 	 */
@@ -111,7 +111,7 @@ enum parameter_type {
  * Note that for non-slash commands optional parameters can only be at the end of
  * the list of parameters.
  */
-struct DPP_EXPORT param_info {
+struct DPP_API param_info {
 	/**
 	 * @brief Type of parameter
 	 */
@@ -169,7 +169,7 @@ typedef std::vector<std::pair<std::string, command_parameter>> parameter_list_t;
  * handler class.
  * @deprecated commandhandler and message commands are deprecated and dpp::slashcommand is encouraged as a replacement.
  */
-struct DPP_EXPORT command_source {
+struct DPP_API command_source {
 	/**
 	 * @brief Sending guild id
 	 */
@@ -227,7 +227,7 @@ typedef std::function<void(const std::string&, const parameter_list_t&, command_
  * @brief Represents the details of a command added to the command handler class.
  * @deprecated commandhandler and message commands are deprecated and dpp::slashcommand is encouraged as a replacement.
  */
-struct DPP_EXPORT command_info_t {
+struct DPP_API command_info_t {
 	/**
 	 * @brief Function reference for the handler. This is std::function so it can represent
 	 * a class member, a lambda or a raw C function pointer.
@@ -253,7 +253,7 @@ struct DPP_EXPORT command_info_t {
  * functions.
  * @deprecated commandhandler and message commands are deprecated and dpp::slashcommand is encouraged as a replacement.
  */
-class DPP_EXPORT DPP_DEPRECATED("commandhandler should not be used. Please consider using dpp::cluster::register_command instead.") commandhandler {
+class DPP_API DPP_DEPRECATED("commandhandler should not be used. Please consider using dpp::cluster::register_command instead.") commandhandler {
 private:
 	/**
 	 * @brief List of guild commands to bulk register

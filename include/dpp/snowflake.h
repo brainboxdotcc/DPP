@@ -20,6 +20,9 @@
  *
  ************************************************************************************/
 #pragma once
+
+#if !DPP_BUILD_MODULES
+
 #include <dpp/export.h>
 #include <dpp/json_fwd.h>
 #include <dpp/exception.h>
@@ -28,6 +31,8 @@
 
 #ifdef DPP_FORMATTERS
 #include <format>
+#endif
+
 #endif
 
 /**
@@ -51,7 +56,7 @@ namespace dpp {
  * @see https://en.wikipedia.org/wiki/Snowflake_ID
  * @see https://github.com/twitter-archive/snowflake/tree/b3f6a3c6ca8e1b6847baa6ff42bf72201e2c2231
  */
-class DPP_EXPORT snowflake final {
+DPP_EXPORT class DPP_SYMBOL snowflake final {
 	friend struct std::hash<dpp::snowflake>;
 protected:
 	/**
@@ -215,7 +220,7 @@ public:
 	 * @brief For building json
 	 * @return The snowflake value as a string
 	 */
-	operator json() const;
+	operator dpp::json() const;
 
 	/**
 	 * @brief Get the creation time of this snowflake according to Discord.
@@ -271,7 +276,7 @@ public:
 
 }
 
-template<>
+DPP_EXPORT template<>
 struct std::hash<dpp::snowflake>
 {
 	/**
@@ -291,7 +296,7 @@ struct std::hash<dpp::snowflake>
  * @brief implementation of formater for dpp::snowflake for std::format support
  * https://en.cppreference.com/w/cpp/utility/format/formatter
  */
-template <>
+DPP_EXPORT template <>
 struct std::formatter<dpp::snowflake>
 {
         template<class TP>

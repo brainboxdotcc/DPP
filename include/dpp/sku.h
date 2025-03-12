@@ -77,7 +77,7 @@ enum sku_flags : uint16_t {
 /**
  * @brief A definition of a discord SKU.
  */
-class DPP_EXPORT sku : public managed, public json_interface<sku> {
+class DPP_API sku : public managed, public json_interface<sku> {
 protected:
 	friend struct json_interface<sku>;
 

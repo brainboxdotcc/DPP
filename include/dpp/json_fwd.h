@@ -19,10 +19,15 @@
  * limitations under the License.
  *
  ************************************************************************************/
+
+#if !DPP_BUILD_MODULES
+
 #ifdef DPP_USE_EXTERNAL_JSON
 	#include <nlohmann/json_fwd.hpp>
 #else
 	#include <dpp/nlohmann/json_fwd.hpp>
+#endif
+
 #endif
 
 namespace dpp {

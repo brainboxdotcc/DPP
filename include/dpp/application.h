@@ -108,7 +108,7 @@ enum application_flags : uint32_t {
 /**
  * @brief Represents the settings for the bot/application's in-app authorization link
  */
-struct DPP_EXPORT application_install_params {
+struct DPP_API application_install_params {
 	/**
 	 * @brief A bitmask of dpp::permissions to request for the bot role.
 	 */
@@ -153,7 +153,7 @@ enum team_member_role_t : uint8_t {
 /**
  * @brief Represents a team member on a team who maintain a bot/application
  */
-class DPP_EXPORT team_member {
+class DPP_API team_member {
 public:
 	/**
 	 * @brief The user's membership state on the team.
@@ -184,7 +184,7 @@ public:
 /**
  * @brief Represents a team of users who maintain a bot/application
  */
-class DPP_EXPORT app_team {
+class DPP_API app_team {
 public:
 	/**
 	 * @brief A hash of the image of the team's icon (may be empty).
@@ -215,14 +215,14 @@ public:
 /**
  * @brief Configuration object for an app installation
  */
-struct DPP_EXPORT integration_configuration {
+struct DPP_API integration_configuration {
 		std::optional<application_install_params> oauth2_install_params;
 };
 
 /**
  * @brief The application class represents details of a bot application
  */
-class DPP_EXPORT application : public managed, public json_interface<application> {
+class DPP_API application : public managed, public json_interface<application> {
 protected:
 	friend struct json_interface<application>;
 

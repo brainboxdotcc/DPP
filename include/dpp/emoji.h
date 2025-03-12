@@ -61,7 +61,7 @@ enum emoji_flags : uint8_t {
 /**
  * @brief Represents an emoji for a dpp::guild
  */
-class DPP_EXPORT emoji : public managed, public json_interface<emoji> {
+class DPP_API emoji : public managed, public json_interface<emoji> {
 protected:
 	friend struct json_interface<emoji>;
 

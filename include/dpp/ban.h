@@ -33,7 +33,7 @@ namespace dpp {
  * @brief The ban class represents a ban on a guild.
  * 
  */
-class DPP_EXPORT ban : public json_interface<ban> {
+class DPP_API ban : public json_interface<ban> {
 protected:
 	friend struct json_interface<ban>;
 

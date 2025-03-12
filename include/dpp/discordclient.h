@@ -144,7 +144,7 @@ enum shard_frame_type : int {
  * A client can only connect to one voice channel per guild at a time, so these are stored in a map
  * in the dpp::discord_client keyed by guild_id.
  */
-class DPP_EXPORT voiceconn {
+class DPP_API voiceconn {
 	/**
 	 * @brief Owning dpp::discord_client instance
 	 */
@@ -235,7 +235,7 @@ public:
 };
 
 /** @brief Implements a discord client. Each discord_client connects to one shard and derives from a websocket client. */
-class DPP_EXPORT discord_client : public websocket_client
+class DPP_API discord_client : public websocket_client
 {
 protected:
 	/**

@@ -36,7 +36,7 @@ namespace dpp::events {
 /**
  * @brief An event object represents an event handled internally, passed from the websocket e.g. MESSAGE_CREATE.
  */
-class DPP_EXPORT event {
+class DPP_API event {
 public:
 	/**
 	 * @brief Pure virtual method for event handler code

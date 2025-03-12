@@ -30,7 +30,7 @@ namespace dpp {
 /**
  * @brief Defines a request to count prunable users, or start a prune operation
  */
-struct DPP_EXPORT prune : public json_interface<prune> {
+struct DPP_API prune : public json_interface<prune> {
 protected:
 	friend struct json_interface<prune>;
 

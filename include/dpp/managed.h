@@ -29,7 +29,7 @@ namespace dpp {
 /** @brief The managed class is the base class for various types that can
  * be stored in a cache that are identified by a dpp::snowflake id.
  */
-class DPP_EXPORT managed {
+class DPP_API managed {
 public:
 	/**
 	 * @brief Unique ID of object set by Discord.

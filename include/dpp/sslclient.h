@@ -45,7 +45,7 @@ class openssl_connection;
  * @param sfd Socket to close
  * @return false on error, true on success
  */
-DPP_EXPORT bool close_socket(dpp::socket sfd);
+DPP_API bool close_socket(dpp::socket sfd);
 
 /**
  * @brief Set a socket to blocking or non-blocking IO
@@ -54,7 +54,7 @@ DPP_EXPORT bool close_socket(dpp::socket sfd);
  * @param non_blocking should socket be non-blocking?
  * @return false on error, true on success
  */
-DPP_EXPORT bool set_nonblocking(dpp::socket sockfd, bool non_blocking);
+DPP_API bool set_nonblocking(dpp::socket sockfd, bool non_blocking);
 
 /**
  * @brief SSL_read buffer size
@@ -83,7 +83,7 @@ constexpr int MAX_RETRIES{4};
  * execute in an infinite loop until the socket disconnects. This is intended
  * to be run within a std::thread.
  */
-class DPP_EXPORT ssl_client
+class DPP_API ssl_client
 {
 private:
 	/**

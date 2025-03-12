@@ -93,7 +93,7 @@ struct dave_state;
 /*
 * @brief For holding a moving average of the number of current voice users, for applying a smooth gain ramp.
 */
-struct DPP_EXPORT moving_averager {
+struct DPP_API moving_averager {
 	moving_averager() = default;
 
 	moving_averager(uint64_t collection_count_new);
@@ -113,7 +113,7 @@ class cluster;
 /**
  * @brief An opus-encoded RTP packet to be sent out to a voice channel
  */
-struct DPP_EXPORT voice_out_packet {
+struct DPP_API voice_out_packet {
 	/** 
 	 * @brief Each string is a UDP packet.
 	 * Generally these will be RTP.
@@ -233,7 +233,7 @@ using privacy_code_callback_t = std::function<void(const std::string&)>;
 /** @brief Implements a discord voice connection.
  * Each discord_voice_client connects to one voice channel and derives from a websocket client.
  */
-class DPP_EXPORT discord_voice_client : public websocket_client
+class DPP_API discord_voice_client : public websocket_client
 {
 	/**
 	 * @brief Clean up resources

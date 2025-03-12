@@ -40,7 +40,7 @@ endif()
 add_compile_definitions(DPP_OS=${CMAKE_SYSTEM_NAME})
 
 if(${AVX_TYPE} STREQUAL "OFF")
-	include("${CMAKE_CURRENT_SOURCE_DIR}/../cmake/DetectArchitecture.cmake")
+	include("${CMAKE_CURRENT_LIST_DIR}/../cmake/DetectArchitecture.cmake")
 else()
 	message("-- AVX type overridden by configuration: ${AVX_TYPE}")
 endif()
@@ -246,6 +246,16 @@ if (HAVE_VOICE)
 	include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../mlspp/lib/hpke/include")
 endif()
 
+if (DPP_IMPORT_STD)
+	if (MSVC AND NOT CLANG_CL)
+		set(DPP_MSVC_STD_MODULE_LOCATION "" CACHE STRING "Location for the std module, or build it if empty")
+
+		include("${CMAKE_CURRENT_LIST_DIR}/../cmake/MSVCStdModule.cmake")
+	elseif (NOT CMAKE_EXPERIMENTAL_CXX_IMPORT_STD)
+		message(FATAL_ERROR "CMake requires CMAKE_EXPERIMENTAL_CXX_IMPORT_STD set to a specific value for `import std;`. Please refer to https://www.kitware.com/import-std-in-cmake-3-30/")
+	endif ()
+endif ()
+
 foreach (fullmodname ${subdirlist})
     get_filename_component(modname ${fullmodname} NAME)
     set (modsrc "")
@@ -255,6 +265,11 @@ foreach (fullmodname ${subdirlist})
 	else()
 		file(GLOB modsrc "${modules_dir}/dpp/*.cpp" "${modules_dir}/dpp/voice/stub/*.cpp" "${modules_dir}/dpp/events/*.cpp" "${modules_dir}/dpp/cluster/*.cpp" "${modules_dir}/dpp/*.rc")
 	endif()
+
+	include_directories(${modname} PUBLIC 
+		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
+		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include/dpp>
+	)
 
 	if(BUILD_SHARED_LIBS)
 		add_library(${modname} SHARED ${modsrc})
@@ -266,10 +281,6 @@ foreach (fullmodname ${subdirlist})
 		VERSION ${CMAKE_PROJECT_VERSION}
 		SOVERSION ${CMAKE_PROJECT_VERSION}
 		POSITION_INDEPENDENT_CODE true
-	)
-	target_include_directories(${modname} PUBLIC 
-		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
-		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include/dpp>
 	)
 
 	if (DPP_USE_PCH)
@@ -432,6 +443,19 @@ if(DPP_NO_CORO)
 else()
 	message("-- ${Green}Coroutines are enabled!${ColourReset}")
 endif()
+
+if (DPP_MODULES)
+	add_library(dppmodule)
+	target_compile_features(dppmodule PRIVATE cxx_std_20)
+	target_compile_definitions(dppmodule PRIVATE DPP_BUILD_MODULES)
+	file (GLOB_RECURSE DPP_MODULES_SRC "${modules_dir}/dpp/modules/*.ixx")
+	target_sources(dppmodule
+		PRIVATE
+			FILE_SET CXX_MODULES BASE_DIRS ${modules_dir} FILES "${DPP_MODULES_SRC}"
+	)
+
+	target_link_libraries(dpp PUBLIC dppmodule)
+endif ()
 
 if(DPP_FORMATTERS)
 	target_compile_definitions(dpp PUBLIC DPP_FORMATTERS)

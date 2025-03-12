@@ -190,7 +190,7 @@ enum etf_token_type : uint8_t {
 /**
  * @brief Represents a buffer of bytes being encoded into ETF
  */
-struct DPP_EXPORT etf_buffer {
+struct DPP_API etf_buffer {
 	/**
 	 * @brief Raw buffer
 	 */
@@ -221,7 +221,7 @@ struct DPP_EXPORT etf_buffer {
  * into and out of an nlohmann::json object, so that layers above the websocket don't
  * have to be any different for handling ETF.
  */
-class DPP_EXPORT etf_parser {
+class DPP_API etf_parser {
 	/**
 	 * @brief Current size of binary data
 	 */

@@ -31,7 +31,7 @@ namespace dpp {
 /**
  * @brief Represents a guild template
  */
-class DPP_EXPORT dtemplate : public json_interface<dtemplate> {
+class DPP_API dtemplate : public json_interface<dtemplate> {
 protected:
 	friend struct json_interface<dtemplate>;
 

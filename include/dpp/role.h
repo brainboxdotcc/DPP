@@ -79,7 +79,7 @@ enum role_flags : uint8_t {
  * ID as the guild's ID. This is the base permission set applied to all users where no other role or override
  * applies, and is the starting value of the bit mask looped through to calculate channel permissions.
  */
-class DPP_EXPORT role : public managed, public json_interface<role> {
+class DPP_API role : public managed, public json_interface<role> {
 protected:
 	friend struct json_interface<role>;
 
@@ -890,7 +890,7 @@ enum application_role_connection_metadata_type : uint8_t {
 /**
  * @brief Application Role Connection Metadata. Represents a role connection metadata for an dpp::application
  */
-class DPP_EXPORT application_role_connection_metadata : public json_interface<application_role_connection_metadata> {
+class DPP_API application_role_connection_metadata : public json_interface<application_role_connection_metadata> {
 protected:
 	friend struct json_interface<application_role_connection_metadata>;
 
@@ -950,7 +950,7 @@ public:
 /**
  * @brief The application role connection that an application has attached to a user.
  */
-class DPP_EXPORT application_role_connection : public json_interface<application_role_connection> {
+class DPP_API application_role_connection : public json_interface<application_role_connection> {
 protected:
 	friend struct json_interface<application_role_connection>;
 

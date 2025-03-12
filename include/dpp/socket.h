@@ -69,7 +69,7 @@ namespace dpp
  *
  * Avoids type punning with C style casts from sockaddr_in to sockaddr pointers.
  */
-class DPP_EXPORT address_t {
+class DPP_API address_t {
 	/**
 	 * @brief Internal sockaddr struct
 	 */
@@ -110,7 +110,7 @@ public:
 /**
  * @brief Allocates a dpp::socket, closing it on destruction
  */
-struct DPP_EXPORT raii_socket {
+struct DPP_API raii_socket {
 	/**
 	 * @brief File descriptor
 	 */

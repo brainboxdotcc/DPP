@@ -73,7 +73,7 @@ enum voicestate_flags {
  * These are stored in the dpp::guild object, and accessible there,
  * or via dpp::channel::get_voice_members
  */
-class DPP_EXPORT voicestate : public json_interface<voicestate> {
+class DPP_API voicestate : public json_interface<voicestate> {
 protected:
 	friend struct json_interface<voicestate>;
 

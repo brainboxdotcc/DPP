@@ -60,7 +60,7 @@ typedef std::map<uint32_t, time_t> reconnect_list;
 /**
  * @brief Represents the various information from the 'get gateway bot' api call
  */
-struct DPP_EXPORT gateway : public json_interface<gateway> {
+struct DPP_API gateway : public json_interface<gateway> {
 protected:
 	friend struct json_interface<gateway>;
 
@@ -120,7 +120,7 @@ public:
  * @brief Confirmation object represents any true or false simple REST request
  *
  */
-struct DPP_EXPORT confirmation {
+struct DPP_API confirmation {
 	bool success;
 };
 
@@ -201,7 +201,7 @@ typedef std::variant<
 /**
  * @brief The details of a field in an error response
  */
-struct DPP_EXPORT error_detail {
+struct DPP_API error_detail {
 	/**
 	 * @brief Object name which is in error
 	 */
@@ -231,7 +231,7 @@ struct DPP_EXPORT error_detail {
 /**
  * @brief The full details of an error from a REST response
  */
-struct DPP_EXPORT error_info {
+struct DPP_API error_info {
 	/**
 	 * @brief Error code
 	 */
@@ -257,7 +257,7 @@ struct DPP_EXPORT error_info {
 /**
  * @brief The results of a REST call wrapped in a convenient struct
  */
-struct DPP_EXPORT confirmation_callback_t {
+struct DPP_API confirmation_callback_t {
 	/**
 	 * @brief Information about the HTTP call used to make the request.
 	 */

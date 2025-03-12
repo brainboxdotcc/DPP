@@ -124,7 +124,7 @@ typedef std::variant<std::monostate, std::string, int64_t, bool, snowflake, doub
  * meaning it can hold different potential types (see dpp::command_value)
  * that you can retrieve with std::get().
  */
-struct DPP_EXPORT command_option_choice : public json_interface<command_option_choice> {
+struct DPP_API command_option_choice : public json_interface<command_option_choice> {
 protected:
 	friend struct json_interface<command_option_choice>;
 
@@ -201,7 +201,7 @@ typedef std::variant<std::monostate, int64_t, double> command_option_range;
  * Adding options acts like sub-commands and can contain more
  * options.
  */
-struct DPP_EXPORT command_option : public json_interface<command_option> {
+struct DPP_API command_option : public json_interface<command_option> {
 protected:
 	friend struct json_interface<command_option>;
 
@@ -461,7 +461,7 @@ enum interaction_response_type {
  *
  * `mymessage.flags |= dpp::m_ephemeral;`
  */
-struct DPP_EXPORT interaction_response : public json_interface<interaction_response> {
+struct DPP_API interaction_response : public json_interface<interaction_response> {
 protected:
 	friend struct json_interface<interaction_response>;
 
@@ -548,7 +548,7 @@ public:
  * components are displayed on a form (the same component structure as within a dpp::message).
  * When the user submits the form an on_form_submit event is dispatched to any listeners.
  */
-struct DPP_EXPORT interaction_modal_response : public interaction_response, public json_interface<interaction_modal_response> {
+struct DPP_API interaction_modal_response : public interaction_response, public json_interface<interaction_modal_response> {
 protected:
 	friend struct json_interface<interaction_modal_response>;
 
@@ -646,7 +646,7 @@ public:
 /**
  * @brief Resolved snowflake ids to users, guild members, roles and channels. You can use the `interaction::get_resolved_*` methods to easily get a resolved set
  */
-struct DPP_EXPORT command_resolved {
+struct DPP_API command_resolved {
 	/**
 	 * @brief Resolved users
 	 * @see interaction::get_resolved_user
@@ -689,7 +689,7 @@ struct DPP_EXPORT command_resolved {
  * These are the values specified by the user when actually issuing
  * the command on a channel or in DM.
  */
-struct DPP_EXPORT command_data_option {
+struct DPP_API command_data_option {
 	/**
 	 * @brief The name of the parameter.
 	 */
@@ -824,7 +824,7 @@ enum slashcommand_contextmenu_type {
  * This subobject represents the application command associated
  * with the interaction.
  */
-struct DPP_EXPORT command_interaction {
+struct DPP_API command_interaction {
 	/**
 	 * @brief The ID of the invoked command.
 	 */
@@ -885,7 +885,7 @@ void from_json(const nlohmann::json& j, command_interaction& ci);
 /**
  * @brief A button click for a button component
  */
-struct DPP_EXPORT component_interaction {
+struct DPP_API component_interaction {
 	/**
 	 * @brief Component type (dpp::component_type)
 	 */
@@ -905,7 +905,7 @@ struct DPP_EXPORT component_interaction {
 /**
  * @brief An auto complete interaction
  */
-struct DPP_EXPORT autocomplete_interaction : public command_interaction {
+struct DPP_API autocomplete_interaction : public command_interaction {
 };
 
 /**
@@ -934,7 +934,7 @@ void from_json(const nlohmann::json& j, autocomplete_interaction& ai);
  * into the events on_form_submit, on_slashcommand, on_user_context_menu,
  * on_button_click, on_select_menu, etc.
  */
-class DPP_EXPORT interaction : public managed, public json_interface<interaction> {
+class DPP_API interaction : public managed, public json_interface<interaction> {
 protected:
 	friend struct json_interface<interaction>;
 
@@ -1280,7 +1280,7 @@ enum command_permission_type {
  * @brief Application command permissions allow you to enable or
  * disable commands for specific users or roles within a guild
  */
-class DPP_EXPORT command_permission : public json_interface<command_permission> {
+class DPP_API command_permission : public json_interface<command_permission> {
 protected:
 	friend struct json_interface<command_permission>;
 
@@ -1338,7 +1338,7 @@ void to_json(nlohmann::json& j, const command_permission& cp);
 /**
  * @brief Returned when fetching the permissions for a command in a guild.
  */
-class DPP_EXPORT guild_command_permissions : public json_interface<guild_command_permissions> {
+class DPP_API guild_command_permissions : public json_interface<guild_command_permissions> {
 protected:
 	friend struct json_interface<guild_command_permissions>;
 
@@ -1394,7 +1394,7 @@ void to_json(nlohmann::json& j, const guild_command_permissions& gcp);
  * @brief Represents an application command, created by your bot
  * either globally, or on a guild.
  */
-class DPP_EXPORT slashcommand : public managed, public json_interface<slashcommand> {
+class DPP_API slashcommand : public managed, public json_interface<slashcommand> {
 protected:
 	friend struct json_interface<slashcommand>;
 

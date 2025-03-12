@@ -55,7 +55,7 @@ enum invite_target_t : uint8_t {
 /**
  * @brief Represents an invite to a discord guild or channel
  */
-class DPP_EXPORT invite : public json_interface<invite> {
+class DPP_API invite : public json_interface<invite> {
 protected:
 	friend struct json_interface<invite>;
 

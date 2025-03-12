@@ -32,7 +32,7 @@ namespace dpp {
 /**
  * @brief represents membership of a user with a thread
  */
-struct DPP_EXPORT thread_member : public json_interface<thread_member> {
+struct DPP_API thread_member : public json_interface<thread_member> {
 protected:
 	friend struct json_interface<thread_member>;
 
@@ -73,7 +73,7 @@ typedef std::unordered_map<snowflake, thread_member> thread_member_map;
 /**
  * @brief metadata for threads
  */
-struct DPP_EXPORT thread_metadata {
+struct DPP_API thread_metadata {
 	/**
 	 * @brief Timestamp when the thread's archive status was last changed, used for calculating recent activity.
 	 */
@@ -104,7 +104,7 @@ struct DPP_EXPORT thread_metadata {
 /** @brief A definition of a discord thread.
  * A thread is a superset of a channel. Not to be confused with `std::thread`!
  */
-class DPP_EXPORT thread : public channel, public json_interface<thread> {
+class DPP_API thread : public channel, public json_interface<thread> {
 protected:
 	friend struct json_interface<thread>;
 
