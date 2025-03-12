@@ -47,13 +47,6 @@ namespace dpp {
 DPP_EXPORT enum sticker_format : uint8_t;
 
 /**
- * @brief Macro that expands to static_asserts checking sizeof and alignof are equal between two types.
- */
-#define DPP_CHECK_ABI_COMPAT(a, b) \
-static_assert(sizeof(a) == sizeof(b), #a " and " #b " must be the same size for ABI compatibility"); \
-static_assert(alignof(a) == alignof(b), #a " and " #b " must be the same alignment for ABI compatibility"); \
-
-/**
  * @brief Utility helper functions, generally for logging, running programs, time/date manipulation, etc
  */
 DPP_EXPORT namespace utility {

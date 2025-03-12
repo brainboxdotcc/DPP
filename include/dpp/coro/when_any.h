@@ -22,6 +22,13 @@
 #ifndef DPP_NO_CORO
 #pragma once
 
+#include <dpp/export.h>
+
+#if !DPP_BUILD_MODULES
+
+
+#include <dpp/dpp_fwd.h>
+
 #include "coro.h"
 #include "job.h"
 
@@ -31,10 +38,9 @@
 #include <limits>
 #include <optional>
 
-namespace dpp {
+#endif
 
-template <typename T>
-class event_router_t;
+namespace dpp {
 
 namespace detail {
 
@@ -144,7 +150,7 @@ concept void_result = std::same_as<T, empty>;
  * @see when_any::result
  * @tparam Args... Type of each awaitable to await on
  */
-template <typename... Args>
+DPP_EXPORT template <typename... Args>
 #ifndef _DOXYGEN_
 requires (sizeof...(Args) >= 1)
 #endif
@@ -521,7 +527,7 @@ public:
 	}
 };
 
-template <typename... Args>
+DPP_EXPORT template <typename... Args>
 #ifndef _DOXYGEN_
 requires (sizeof...(Args) >= 1)
 #endif /* _DOXYGEN_ */

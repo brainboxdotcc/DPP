@@ -20,17 +20,19 @@
  ************************************************************************************/
 #pragma once
 
-#include <dpp/utility.h>
+#include <dpp/export.h>
 
 namespace dpp {
 
-struct coroutine_dummy {
+DPP_EXPORT struct coroutine_dummy {
 	int *handle_dummy = nullptr;
 };
 
 }
 
 #ifndef DPP_NO_CORO
+
+#if !DPP_BUILD_MODULES
 
 #include <dpp/coro/coro.h>
 #include <dpp/coro/awaitable.h>
@@ -40,6 +42,8 @@ struct coroutine_dummy {
 #include <exception>
 #include <utility>
 #include <type_traits>
+
+#endif
 
 namespace dpp {
 
@@ -69,7 +73,7 @@ using handle_t = std_coroutine::coroutine_handle<promise_t<R>>;
  * @warning - Using co_await on this object more than once is undefined behavior.
  * @tparam R Return type of the coroutine. Can be void, or a complete object that supports move construction and move assignment.
  */
-template <typename R>
+DPP_EXPORT template <typename R>
 class [[nodiscard("dpp::coroutine only starts when it is awaited, it will do nothing if discarded")]] coroutine : public basic_awaitable<coroutine<R>> {
 	/**
 	 * @brief Promise has friend access for the constructor
@@ -398,7 +402,7 @@ DPP_CHECK_ABI_COMPAT(coroutine<uint64_t>, coroutine_dummy)
 /**
  * @brief Specialization of std::coroutine_traits, helps the standard library figure out a promise type from a coroutine function.
  */
-template<typename R, typename... Args>
+DPP_EXPORT template<typename R, typename... Args>
 struct dpp::detail::std_coroutine::coroutine_traits<dpp::coroutine<R>, Args...> {
 	using promise_type = dpp::detail::coroutine::promise_t<R>;
 };

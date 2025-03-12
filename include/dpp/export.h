@@ -149,3 +149,10 @@ extern bool DPP_SYMBOL validate_configuration();
 		#define DPP_DEPRECATED(reason) [[deprecated(reason)]]
 	#endif
 #endif /* _DOXYGEN_ */
+
+/**
+ * @brief Macro that expands to static_asserts checking sizeof and alignof are equal between two types.
+ */
+#define DPP_CHECK_ABI_COMPAT(a, b) \
+static_assert(sizeof(a) == sizeof(b), #a " and " #b " must be the same size for ABI compatibility"); \
+static_assert(alignof(a) == alignof(b), #a " and " #b " must be the same alignment for ABI compatibility"); \

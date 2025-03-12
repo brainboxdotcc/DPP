@@ -20,21 +20,31 @@
  ************************************************************************************/
 #pragma once
 
+#include <dpp/export.h>
+
+#if !DPP_BUILD_MODULES
+
 #include <dpp/utility.h>
+
+#endif
 
 namespace dpp {
 
-struct job_dummy {
+DPP_EXPORT struct job_dummy {
 };
 
 }
 
 #ifndef DPP_NO_CORO
 
+#if !DPP_BUILD_MODULES
+
 #include "coro.h"
 
 #include <type_traits>
 #include <utility>
+
+#endif
 
 namespace dpp {
 
@@ -53,7 +63,7 @@ namespace dpp {
  * If you must pass a reference, pass it as a pointer or with std::ref, but you must fully understand the reason behind this warning, and what to avoid.
  * If you prefer a safer type, use `coroutine` for synchronous execution, or `task` for parallel tasks, and co_await them.
  */
-struct job {};
+DPP_EXPORT struct job {};
 
 namespace detail {
 
@@ -66,7 +76,7 @@ namespace job {
 /**
  * @brief Coroutine promise type for a job
  */
-template <typename... Args>
+DPP_EXPORT template <typename... Args>
 struct promise {
 
 #ifdef DPP_CORO_TEST
@@ -126,12 +136,13 @@ struct promise {
 } // namespace detail
 
 DPP_CHECK_ABI_COMPAT(job, job_dummy)
+
 } // namespace dpp
 
 /**
  * @brief Specialization of std::coroutine_traits, helps the standard library figure out a promise type from a coroutine function.
  */
-template<typename... Args>
+DPP_EXPORT template<typename... Args>
 struct dpp::detail::std_coroutine::coroutine_traits<dpp::job, Args...> {
 	/**
 	 * @brief Promise type for this coroutine signature.
@@ -141,5 +152,30 @@ struct dpp::detail::std_coroutine::coroutine_traits<dpp::job, Args...> {
 	 */
 	using promise_type = dpp::detail::job::promise<Args...>;
 };
+
+namespace dpp {
+
+namespace detail::promise {
+
+template <typename T>
+void spawn_sync_wait_job(auto* awaitable, std::condition_variable &cv, auto&& result) {
+	[](auto* awaitable_, std::condition_variable &cv_, auto&& result_) -> dpp::job {
+		try {
+			if constexpr (std::is_void_v<T>) {
+				co_await *awaitable_;
+				result_.template emplace<1>();
+			} else {
+				result_.template emplace<1>(co_await *awaitable_);
+			}
+		} catch (...) {
+			result_.template emplace<2>(std::current_exception());
+		}
+		cv_.notify_all();
+	}(awaitable, cv, std::forward<decltype(result)>(result));
+}
+
+}
+
+}
 
 #endif /* DPP_NO_CORO */

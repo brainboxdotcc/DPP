@@ -20,12 +20,19 @@
  ************************************************************************************/
 #pragma once
 
+#include <dpp/export.h>
+
+#if !DPP_BUILD_MODULES
+
+#include <memory>
 #include <dpp/utility.h>
 #include <dpp/coro/awaitable.h>
 
+#endif
+
 namespace dpp {
 
-struct async_dummy : awaitable_dummy {
+DPP_EXPORT struct async_dummy : awaitable_dummy {
 	std::shared_ptr<int> dummy_shared_state = nullptr;
 };
 
@@ -33,13 +40,19 @@ struct async_dummy : awaitable_dummy {
 
 #ifndef DPP_NO_CORO
 
+#if !DPP_BUILD_MODULES
+
 #include "coro.h"
+
+#include <dpp/dpp_fwd.h>
 
 #include <utility>
 #include <type_traits>
 #include <functional>
 #include <atomic>
 #include <cstddef>
+
+#endif
 
 namespace dpp {
 
@@ -90,8 +103,6 @@ struct callback {
 
 } // namespace detail
 
-struct confirmation_callback_t;
-
 /**
  * @class async async.h coro/async.h
  * @brief A co_await-able object handling an API call in parallel with the caller.
@@ -102,7 +113,7 @@ struct confirmation_callback_t;
  * @warning - This feature is EXPERIMENTAL. The API may change at any time and there may be bugs. Please report any to <a href="https://github.com/brainboxdotcc/DPP/issues">GitHub issues</a> or to the <a href="https://discord.gg/dpp">D++ Discord server</a>.
  * @tparam R The return type of the API call. Defaults to confirmation_callback_t
  */
-template <typename R>
+DPP_EXPORT template <typename R>
 class async : public awaitable<R> {
 	/**
 	 * @brief Callable object to pass to API calls

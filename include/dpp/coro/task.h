@@ -20,18 +20,25 @@
  ************************************************************************************/
 #pragma once
 
-#include <dpp/utility.h>
+#include <dpp/export.h>
+
+#if !DPP_BUILD_MODULES
+
 #include <dpp/coro/awaitable.h>
+
+#endif
 
 namespace dpp {
 
-struct task_dummy : awaitable_dummy {
+DPP_EXPORT struct task_dummy : awaitable_dummy {
 	int* handle_dummy = nullptr;
 };
 
 }
 
 #ifndef DPP_NO_CORO
+
+#if !DPP_BUILD_MODULES
 
 #include <dpp/coro/coro.h>
 
@@ -44,6 +51,8 @@ struct task_dummy : awaitable_dummy {
 #include <atomic>
 
 #include <iostream> // std::cerr in final_suspend
+
+#endif
 
 namespace dpp {
 
@@ -88,7 +97,7 @@ using handle_t = std_coroutine::coroutine_handle<promise_t<R>>;
  * Please report any to <a href="https://github.com/brainboxdotcc/DPP/issues">GitHub Issues</a> or to our <a href="https://discord.gg/dpp">Discord Server</a>.
  * @tparam R Return type of the task. Cannot be a reference but can be void.
  */
-template <typename R>
+DPP_EXPORT template <typename R>
 #ifndef _DOXYGEN_
 requires (!std::is_reference_v<R>)
 #endif
@@ -438,7 +447,7 @@ DPP_CHECK_ABI_COMPAT(task<uint64_t>, task_dummy)
 /**
  * @brief Specialization of std::coroutine_traits, helps the standard library figure out a promise_t type from a coroutine function.
  */
-template<typename T, typename... Args>
+DPP_EXPORT template<typename T, typename... Args>
 struct dpp::detail::std_coroutine::coroutine_traits<dpp::task<T>, Args...> {
 	using promise_type = dpp::detail::task::promise_t<T>;
 };
