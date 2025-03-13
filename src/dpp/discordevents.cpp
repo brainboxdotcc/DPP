@@ -28,7 +28,6 @@
 	#endif
 #endif
 
-#if !DPP_BUILD_MODULES
 #include <string>
 #include <iostream>
 #include <fstream>
@@ -39,7 +38,6 @@
 #include <dpp/json.h>
 #include <iomanip>
 #include <sstream>
-#endif
 
 char* crossplatform_strptime(const char* s, const char* f, tm* tm) {
 	std::istringstream input(s);

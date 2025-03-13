@@ -36,6 +36,12 @@ module;
 #include <fstream>
 #include <streambuf>
 #include <array>
+#include <thread>
+#include <queue>
+#include <vector>
+#include <condition_variable>
+#include <mutex>
+#include <functional>
 
 #endif
 

@@ -20,12 +20,12 @@
  ************************************************************************************/
 
 #if !DPP_BUILD_MODULES
-
 #include <dpp/snowflake.h>
 #include <dpp/json.h>
 #include <charconv>
 #include <string>
-
+#else
+import dpp;
 #endif
 
 namespace dpp {

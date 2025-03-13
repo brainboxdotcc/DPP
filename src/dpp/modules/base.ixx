@@ -33,6 +33,8 @@ module;
 
 #endif
 
+#include "dpp/json.h"
+
 export module dpp:base;
 
 #if DPP_IMPORT_STD
@@ -41,12 +43,7 @@ import std;
 
 #endif
 
-export extern "C++" {
-
-#include "dpp/json_fwd.h"
-
-}
-
 #include "dpp/dpp_fwd.h"
+#include "dpp/json_fwd.h"
 #include "dpp/exception.h"
 #include "dpp/snowflake.h"

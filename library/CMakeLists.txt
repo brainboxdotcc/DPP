@@ -507,9 +507,9 @@ endif()
 
 if (DPP_MODULES)
 	target_compile_features(dpp PRIVATE cxx_std_20)
-	target_compile_features(unittest PRIVATE cxx_std_20)
+	# target_compile_features(unittest PRIVATE cxx_std_20)
 	target_compile_definitions(dpp PRIVATE DPP_USE_MODULES)
-	target_compile_definitions(unittest PRIVATE DPP_USE_MODULES)
+	# target_compile_definitions(unittest PRIVATE DPP_USE_MODULES)
 	set(DPP_CXXMODULES_DIR "${modules_dir}/dpp/modules")
 	file(GLOB_RECURSE DPP_CXXMODULES_SRC "${DPP_CXXMODULES_DIR}/*.ixx")
 	target_sources(dpp

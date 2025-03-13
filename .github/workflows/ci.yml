@@ -52,6 +52,7 @@ jobs:
           - { arch: 'amd64', concurrency: 4, os: ubuntu-24.04, package: clang-17, cpp: clang++, version: 17, cmake-flags: '-DDPP_CORO=ON', cpack: 'no', ctest: 'no', mold: 'yes' }
           - { arch: 'amd64', concurrency: 4, os: ubuntu-24.04, package: clang-18, cpp: clang++, version: 18, cmake-flags: '-DDPP_CORO=ON', cpack: 'no', ctest: 'no', mold: 'yes' }
           - { arch: 'amd64', concurrency: 4, os: ubuntu-24.04, package: 'clang-19 libc++-19-dev libc++abi-19-dev', cpp: clang++, version: 19, cmake-flags: '-DDPP_CORO=ON -DCMAKE_CXX_FLAGS="-stdlib=libc++" -DCMAKE_EXE_LINKER_FLAGS="-stdlib=libc++"', cpack: 'no', ctest: 'no', mold: 'yes', name-extra: ' libc++', llvm-apt: 'yes' }
+          - { arch: 'amd64', concurrency: 4, os: ubuntu-24.04, package: 'clang-19 libc++-19-dev libc++abi-19-dev', cpp: clang++, version: 19, cmake-flags: '-DDPP_MODULES=ON -DCMAKE_CXX_FLAGS="-stdlib=libc++" -DCMAKE_EXE_LINKER_FLAGS="-stdlib=libc++"', cpack: 'no', ctest: 'no', mold: 'yes', name-extra: ' modules libc++', llvm-apt: 'yes' }
           # g++
           - { arch: 'amd64', concurrency: 4, os: ubuntu-24.04, package: g++-13, cpp: g++, version: 13, cmake-flags: '-DDPP_CORO=ON', cpack: 'no', ctest: 'no', mold: 'yes' }
           - { arch: 'amd64', concurrency: 4, os: ubuntu-24.04, package: g++-14, cpp: g++, version: 14, cmake-flags: '-DDPP_CORO=ON', cpack: 'no', ctest: 'no', mold: 'yes' }
@@ -170,20 +171,21 @@ jobs:
       fail-fast: false # Don't cancel other matrix jobs if one fails
       matrix:
         cfg:
-        - { name: 'x64',            arch: x64, config: Release, vs: '2019', os: 'windows-2019', vsv: '16', upload: true,  options: '' }
-        - { name: 'x64',            arch: x64, config: Debug,   vs: '2019', os: 'windows-2019', vsv: '16', upload: true,  options: '' }
-        - { name: 'x86',            arch: x86, config: Release, vs: '2019', os: 'windows-2019', vsv: '16', upload: true,  options: '-T host=x86 ' }
-        - { name: 'x86',            arch: x86, config: Debug,   vs: '2019', os: 'windows-2019', vsv: '16', upload: true,  options: '-T host=x86 ' }
-        - { name: 'x64',            arch: x64, config: Release, vs: '2022', os: 'windows-2022', vsv: '17', upload: true,  options: '' }
-        - { name: 'x64',            arch: x64, config: Debug,   vs: '2022', os: 'windows-2022', vsv: '17', upload: true,  options: '' }
-        - { name: 'x86',            arch: x86, config: Release, vs: '2022', os: 'windows-2022', vsv: '17', upload: true,  options: '-T host=x86' }
-        - { name: 'x86',            arch: x86, config: Debug,   vs: '2022', os: 'windows-2022', vsv: '17', upload: true,  options: '-T host=x86' }
-        - { name: 'x64-Coro',       arch: x64, config: Release, vs: '2022', os: 'windows-2022', vsv: '17', upload: true,  options: '-DDPP_CORO=on' }
-        - { name: 'x64-Coro',       arch: x64, config: Debug,   vs: '2022', os: 'windows-2022', vsv: '17', upload: true,  options: '-DDPP_CORO=on' }
-        - { name: 'x86-Coro',       arch: x86, config: Release, vs: '2022', os: 'windows-2022', vsv: '17', upload: true,  options: '-T host=x86 -DDPP_CORO=on' }
-        - { name: 'x86-Coro',       arch: x86, config: Debug,   vs: '2022', os: 'windows-2022', vsv: '17', upload: true,  options: '-T host=x86 -DDPP_CORO=on' }
-        - { name: 'x64-Clang',      arch: x64, config: Debug,   vs: '2022', os: 'windows-2022', vsv: '17', upload: false, options: '-T ClangCL' }
-        - { name: 'x64-Clang-Coro', arch: x64, config: Debug,   vs: '2022', os: 'windows-2022', vsv: '17', upload: false, options: '-T ClangCL -DDPP_CORO=on' }
+        - { name: 'x64',              arch: x64, config: Release, vs: '2019', os: 'windows-2019', vsv: '16', upload: true,  options: '' }
+        - { name: 'x64',              arch: x64, config: Debug,   vs: '2019', os: 'windows-2019', vsv: '16', upload: true,  options: '' }
+        - { name: 'x86',              arch: x86, config: Release, vs: '2019', os: 'windows-2019', vsv: '16', upload: true,  options: '-T host=x86 ' }
+        - { name: 'x86',              arch: x86, config: Debug,   vs: '2019', os: 'windows-2019', vsv: '16', upload: true,  options: '-T host=x86 ' }
+        - { name: 'x64',              arch: x64, config: Release, vs: '2022', os: 'windows-2022', vsv: '17', upload: true,  options: '' }
+        - { name: 'x64',              arch: x64, config: Debug,   vs: '2022', os: 'windows-2022', vsv: '17', upload: true,  options: '' }
+        - { name: 'x86',              arch: x86, config: Release, vs: '2022', os: 'windows-2022', vsv: '17', upload: true,  options: '-T host=x86' }
+        - { name: 'x86',              arch: x86, config: Debug,   vs: '2022', os: 'windows-2022', vsv: '17', upload: true,  options: '-T host=x86' }
+        - { name: 'x64-Coro',         arch: x64, config: Release, vs: '2022', os: 'windows-2022', vsv: '17', upload: true,  options: '-DDPP_CORO=on' }
+        - { name: 'x64-Coro',         arch: x64, config: Debug,   vs: '2022', os: 'windows-2022', vsv: '17', upload: true,  options: '-DDPP_CORO=on' }
+        - { name: 'x64-Coro-Modules', arch: x64, config: Debug,   vs: '2022', os: 'windows-2022', vsv: '17', upload: true,  options: '-DDPP_CORO=on -DDPP_MODULES=on' }
+        - { name: 'x86-Coro',         arch: x86, config: Release, vs: '2022', os: 'windows-2022', vsv: '17', upload: true,  options: '-T host=x86 -DDPP_CORO=on' }
+        - { name: 'x86-Coro',         arch: x86, config: Debug,   vs: '2022', os: 'windows-2022', vsv: '17', upload: true,  options: '-T host=x86 -DDPP_CORO=on' }
+        - { name: 'x64-Clang',        arch: x64, config: Debug,   vs: '2022', os: 'windows-2022', vsv: '17', upload: false, options: '-T ClangCL' }
+        - { name: 'x64-Clang-Coro',   arch: x64, config: Debug,   vs: '2022', os: 'windows-2022', vsv: '17', upload: false, options: '-T ClangCL -DDPP_CORO=on' }
 
     name: "Windows ${{matrix.cfg.name}}-${{matrix.cfg.config}}-vs${{matrix.cfg.vs}}"
     runs-on: ${{matrix.cfg.os}}

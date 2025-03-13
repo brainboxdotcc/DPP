@@ -31,7 +31,9 @@
 #endif
 
 #if !DPP_BUILD_MODULES
+namespace dpp {
 
-#include <dpp/json_fwd.h> // dpp::json alias
+using json = nlohmann::json;
 
+}
 #endif

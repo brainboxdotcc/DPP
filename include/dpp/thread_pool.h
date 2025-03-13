@@ -36,7 +36,7 @@
 
 #endif
 
-DPP_EXPORT_INL namespace dpp {
+DPP_EXPORT namespace dpp {
 
 /**
  * @brief A work unit is a lambda executed in the thread pool

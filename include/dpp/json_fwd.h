@@ -30,6 +30,6 @@
 
 namespace dpp {
 
-using json = nlohmann::json;
+DPP_EXPORT using json = nlohmann::json;
 
 }

@@ -20,7 +20,6 @@
  *
  ************************************************************************************/
 
-#if !DPP_BUILD_MODULES
 #include <dpp/utility.h>
 #include <dpp/stringops.h>
 #include <dpp/version.h>
@@ -45,7 +44,6 @@
 
 #ifdef HAVE_PRCTL
 	#include <sys/prctl.h>
-#endif
 #endif
 
 using namespace std::literals;
