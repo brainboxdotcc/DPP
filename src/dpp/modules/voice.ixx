@@ -37,6 +37,8 @@ module;
 
 #endif
 
+#include "dpp/json.h"
+
 export module dpp:voice;
 
 #if DPP_IMPORT_STD

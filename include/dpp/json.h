@@ -22,8 +22,6 @@
 
 #pragma once
 
-#if !DPP_BUILD_MODULES
-
 #include <dpp/export.h>
 
 #ifdef DPP_USE_EXTERNAL_JSON
@@ -32,10 +30,8 @@
 	#include <dpp/nlohmann/json.hpp>
 #endif
 
+#if !DPP_BUILD_MODULES
+
+#include <dpp/json_fwd.h> // dpp::json alias
+
 #endif
-
-namespace dpp {
-
-DPP_EXPORT using json = nlohmann::json;
-
-}

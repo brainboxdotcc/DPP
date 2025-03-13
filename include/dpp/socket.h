@@ -42,10 +42,8 @@
 #endif
 
 
-namespace dpp
+DPP_EXPORT namespace dpp
 {
-
-DPP_EXPORT_START
 
 /**
  * @brief Represents a socket file descriptor.
@@ -156,7 +154,5 @@ struct DPP_API raii_socket {
 	 */
 	~raii_socket();
 };
-
-DPP_EXPORT_END
 
 }

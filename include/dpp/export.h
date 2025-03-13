@@ -71,10 +71,12 @@
 #  define DPP_IMPORT_STD 0
 #endif
 
+/* `extern "C++"` - needed to split definitions into a non-module, like a traditional .cpp file */
 #define DPP_EXTERN_CPP
+/* `export extern "C++` - see above */
 #define DPP_EXPORT
-#define DPP_EXPORT_START
-#define DPP_EXPORT_END
+/* `export` - needed for inline definitions, as extern won't work */
+#define DPP_EXPORT_INL
 
 #define DPP_API DPP_SYMBOL
 

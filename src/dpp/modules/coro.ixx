@@ -40,6 +40,8 @@ module;
 
 #endif
 
+#include "dpp/json.h"
+
 export module dpp:coro;
 
 #if DPP_IMPORT_STD

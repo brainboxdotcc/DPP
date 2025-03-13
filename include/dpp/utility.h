@@ -188,16 +188,6 @@ enum guild_navigation_type {
 };
 
 /**
- * @brief The base URL for CDN content such as profile pictures and guild icons.
- */
-inline const std::string cdn_host = "https://cdn.discordapp.com"; 
-
-/**
- * @brief The base URL for message/user/channel links.
- */
-inline const std::string url_host = "https://discord.com"; 
-
-/**
  * @brief Callback for the results of a command executed via dpp::utility::exec
  */
 typedef std::function<void(const std::string& output)> cmd_result_t;
@@ -1066,4 +1056,19 @@ struct alignas(T) dummy {
 };
 
 } // namespace utility
+
+namespace utility { // Re-opening without `extern "C++`
+
+/**
+ * @brief The base URL for CDN content such as profile pictures and guild icons.
+ */
+DPP_EXPORT_INL inline const std::string cdn_host = "https://cdn.discordapp.com"; 
+
+/**
+ * @brief The base URL for message/user/channel links.
+ */
+DPP_EXPORT_INL inline const std::string url_host = "https://discord.com"; 
+
+}
+
 }

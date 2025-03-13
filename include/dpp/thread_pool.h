@@ -36,9 +36,7 @@
 
 #endif
 
-namespace dpp {
-
-DPP_EXPORT_START
+DPP_EXPORT_INL namespace dpp {
 
 /**
  * @brief A work unit is a lambda executed in the thread pool
@@ -123,7 +121,5 @@ struct DPP_API thread_pool {
 	 */
 	void enqueue(thread_pool_task task);
 };
-
-DPP_EXPORT_END
 
 }

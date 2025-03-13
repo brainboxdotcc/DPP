@@ -39,6 +39,8 @@ module;
 
 #endif
 
+#include "dpp/json.h"
+
 /**
  * @brief This is where we put the mostly standalone, mostly-not-discord-related stuff
  */

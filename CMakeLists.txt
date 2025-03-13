@@ -33,7 +33,7 @@ option(DPP_USE_PCH "Use precompiled headers to speed up compilation" OFF)
 option(AVX_TYPE "Force AVX type for speeding up audio mixing" OFF)
 option(DPP_TEST_VCPKG "Force VCPKG build without VCPKG installed (for development use only!)" OFF)
 option(DPP_MODULES "Support for C++20 modules" ON)
-option(DPP_IMPORT_STD "(EXPERIMENTAL) Support for C++23's import std feature" OFF)
+# option(DPP_IMPORT_STD "(EXPERIMENTAL) Support for C++23's import std feature" OFF)
 
 include(CheckCXXSymbolExists)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)

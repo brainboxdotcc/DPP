@@ -3,8 +3,16 @@
 #include <atomic>
 #include <algorithm>
 #include <coroutine>
+#include <mutex>
+#include <array>
+#include <algorithm>
+#include <ranges>
+#include <chrono>
+#include <variant>
+#include <functional>
 
 #include <dpp/export.h>
+#include <dpp/json.h>
 
 #if DPP_USE_MODULES
 import dpp;

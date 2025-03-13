@@ -246,7 +246,15 @@ protected:
 	 *
 	 * @return uint8_t Flags previously held before setting them to broken
 	 */
-	uint8_t abandon();
+	uint8_t abandon() {
+		uint8_t previous_state = state_flags::sf_broken;
+		if (state_ptr) {
+			previous_state = state_ptr->state.fetch_or(state_flags::sf_broken, std::memory_order::acq_rel);
+			state_ptr = nullptr;
+		}
+		return previous_state;
+	}
+
 	/**
 	 * @brief Awaiter returned by co_await.
 	 *
@@ -265,7 +273,9 @@ protected:
 		 * @throws dpp::logic_exception If the awaitable's valid() would return false.
 		 * @return bool Whether the result is ready, in which case we don't need to suspend
 		 */
-		bool await_ready() const;
+		bool await_ready() const {
+			return static_cast<Derived>(awaitable_obj).await_ready();
+		}
 
 		/**
 		 * @brief Second function called by the standard library when co_await-ing this object.
@@ -275,7 +285,16 @@ protected:
 		 *
 		 * @return bool Whether we do need to suspend or not
 		 */
-		bool await_suspend(detail::std_coroutine::coroutine_handle<> handle);
+		bool await_suspend(detail::std_coroutine::coroutine_handle<> handle) {
+			auto &promise = *awaitable_obj.state_ptr;
+
+			promise.awaiter = handle;
+			auto previous_flags = promise.state.fetch_or(detail::promise::sf_awaited, std::memory_order::relaxed);
+			if (previous_flags & detail::promise::sf_awaited) {
+				throw dpp::logic_exception("awaitable is already being awaited");
+			}
+			return !(previous_flags & detail::promise::sf_ready);
+		}
 
 		/**
 		 * @brief Third and final function called by the standard library when co_await-ing this object, after resuming.
@@ -283,7 +302,19 @@ protected:
 		 * @throw ? Any exception that occured during the retrieval of the value will be thrown
 		 * @return T The result.
 		 */
-		T await_resume();
+		T await_resume() {
+			auto &promise = *awaitable_obj.state_ptr;
+
+			promise.state.fetch_and(static_cast<uint8_t>(~detail::promise::sf_awaited), std::memory_order::acq_rel);
+			if (std::holds_alternative<std::exception_ptr>(promise.value)) {
+				std::rethrow_exception(std::get<2>(promise.value));
+			}
+			if constexpr (!std::is_void_v<T>) {
+				return std::get<1>(std::move(promise.value));
+			} else {
+				return;
+			}
+		}
 	};
 
 public:
@@ -321,7 +352,8 @@ public:
 	 *
 	 * May signal to the promise that it was destroyed.
 	 */
-	~awaitable();
+	~awaitable() {	if_this_causes_an_invalid_read_your_promise_was_destroyed_before_your_awaitable____check_your_promise_lifetime();
+	}
 
 	/**
 	 * @brief Copy assignment is disabled.
@@ -345,14 +377,22 @@ public:
 	 *
 	 * @return bool Whether this awaitable refers to a valid promise or not
 	 */
-	bool valid() const noexcept;
+	bool valid() const noexcept {
+		return state_ptr != nullptr;
+	}
 
 	/**
 	 * @brief Check whether or not co_await-ing this would suspend the caller, i.e. if we have the result or not
 	 *
 	 * @return bool Whether we already have the result or not
 	 */
-	bool await_ready() const;
+	bool await_ready() const {
+		if (!this->valid()) {
+			throw dpp::logic_exception("cannot co_await an empty awaitable");
+		}
+		uint8_t state = this->state_ptr->state.load(std::memory_order::relaxed);
+		return state & detail::promise::sf_ready;
+	}
 
 	/**
 	 * @brief Overload of the co_await operator.
@@ -646,70 +686,6 @@ public:
 
 DPP_EXPORT template <typename T>
 using promise = moveable_promise<T>;
-
-DPP_EXTERN_CPP template <typename T>
-auto awaitable<T>::abandon() -> uint8_t {
-	uint8_t previous_state = state_flags::sf_broken;
-	if (state_ptr) {
-		previous_state = state_ptr->state.fetch_or(state_flags::sf_broken, std::memory_order::acq_rel);
-		state_ptr = nullptr;
-	}
-	return previous_state;
-}
-
-DPP_EXTERN_CPP template <typename T>
-awaitable<T>::~awaitable() {
-	if_this_causes_an_invalid_read_your_promise_was_destroyed_before_your_awaitable____check_your_promise_lifetime();
-}
-
-DPP_EXTERN_CPP template <typename T>
-bool awaitable<T>::valid() const noexcept {
-	return state_ptr != nullptr;
-}
-
-DPP_EXTERN_CPP template <typename T>
-bool awaitable<T>::await_ready() const {
-	if (!this->valid()) {
-		throw dpp::logic_exception("cannot co_await an empty awaitable");
-	}
-	uint8_t state = this->state_ptr->state.load(std::memory_order::relaxed);
-	return state & detail::promise::sf_ready;
-}
-
-DPP_EXTERN_CPP template <typename T>
-template <typename Derived>
-bool awaitable<T>::awaiter<Derived>::await_suspend(detail::std_coroutine::coroutine_handle<> handle) {
-	auto &promise = *awaitable_obj.state_ptr;
-
-	promise.awaiter = handle;
-	auto previous_flags = promise.state.fetch_or(detail::promise::sf_awaited, std::memory_order::relaxed);
-	if (previous_flags & detail::promise::sf_awaited) {
-		throw dpp::logic_exception("awaitable is already being awaited");
-	}
-	return !(previous_flags & detail::promise::sf_ready);
-}
-
-DPP_EXTERN_CPP template <typename T>
-template <typename Derived>
-T awaitable<T>::awaiter<Derived>::await_resume() {
-	auto &promise = *awaitable_obj.state_ptr;
-
-	promise.state.fetch_and(static_cast<uint8_t>(~detail::promise::sf_awaited), std::memory_order::acq_rel);
-	if (std::holds_alternative<std::exception_ptr>(promise.value)) {
-		std::rethrow_exception(std::get<2>(promise.value));
-	}
-	if constexpr (!std::is_void_v<T>) {
-		return std::get<1>(std::move(promise.value));
-	} else {
-		return;
-	}
-}
-
-DPP_EXTERN_CPP template <typename T>
-template <typename Derived>
-bool awaitable<T>::awaiter<Derived>::await_ready() const {
-	return static_cast<Derived>(awaitable_obj).await_ready();
-}
 
 }
 

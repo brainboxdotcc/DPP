@@ -20,6 +20,7 @@
  *
  ************************************************************************************/
 #include <dpp/export.h>
+#include <dpp/json.h>
 
 #include <utility>
 #include <mutex>
@@ -31,6 +32,8 @@
 #include <iostream>
 #include <thread>
 #include <future>
+#include <variant>
+#include <functional>
 
 #if DPP_USE_MODULES
 import dpp;

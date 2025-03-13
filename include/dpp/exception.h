@@ -31,9 +31,7 @@
 
 #endif
 
-namespace dpp {
-
-DPP_EXPORT_START
+DPP_EXPORT_INL namespace dpp {
 
 /**
  * @brief Exception error codes possible for dpp::exception::code()
@@ -610,8 +608,6 @@ public:
 	derived_exception(task_cancelled_exception, exception);
 #  endif /* DPP_NO_CORO */
 #endif
-
-DPP_EXPORT_END
 
 }
 

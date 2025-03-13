@@ -27,6 +27,8 @@ module;
 
 #endif
 
+#include "dpp/json.h"
+
 export module dpp:https;
 
 #if DPP_IMPORT_STD

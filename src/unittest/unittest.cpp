@@ -20,12 +20,17 @@
  *
  ************************************************************************************/
 #include <dpp/export.h>
+#include <dpp/json.h>
 #include <string>
 #include <mutex>
 #include <condition_variable>
 #include <iostream>
 #include <iomanip>
 #include <thread>
+#include <fstream>
+#include <algorithm>
+#include <chrono>
+#include <string_view>
 
 #if DPP_USE_MODULES
 import dpp;

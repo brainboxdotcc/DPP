@@ -18,7 +18,7 @@ module;
 
 #endif
 
-#include <nlohmann/json.hpp>
+#include "dpp/json.h"
 
 export module dpp:discord;
 
