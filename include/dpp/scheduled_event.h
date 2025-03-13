@@ -20,7 +20,11 @@
  *
  ************************************************************************************/
 #pragma once
+
 #include <dpp/export.h>
+
+#if !DPP_BUILD_MODULES
+
 #include <dpp/snowflake.h>
 #include <dpp/managed.h>
 #include <dpp/user.h>
@@ -28,12 +32,14 @@
 #include <dpp/json_fwd.h>
 #include <dpp/json_interface.h>
 
+#endif
+
 namespace dpp {
 
 /**
  * @brief Represents the privacy of an event.
  */
-enum event_privacy_level : uint8_t {
+DPP_EXPORT enum event_privacy_level : uint8_t {
 	/**
 	 * @brief The event is visible to only guild members.
 	 */
@@ -43,7 +49,7 @@ enum event_privacy_level : uint8_t {
 /**
  * @brief Event entity types.
  */
-enum event_entity_type : uint8_t {
+DPP_EXPORT enum event_entity_type : uint8_t {
 	/**
 	 * @brief A stage instance.
 	 */
@@ -63,7 +69,7 @@ enum event_entity_type : uint8_t {
 /**
  * @brief Event status types.
  */
-enum event_status : uint8_t {
+DPP_EXPORT enum event_status : uint8_t {
 	/**
 	 * @brief Scheduled.
 	 */
@@ -88,7 +94,7 @@ enum event_status : uint8_t {
 /**
  * @brief Entities for the event.
  */
-struct DPP_API event_entities {
+DPP_EXPORT struct DPP_API event_entities {
 	/**
 	 * @brief Location of the event.
 	 */
@@ -99,7 +105,7 @@ struct DPP_API event_entities {
  * @brief Represents a guild member/user who has registered interest in an event.
  * 
  */
-struct DPP_API event_member {
+DPP_EXPORT struct DPP_API event_member {
 	/**
 	 * @brief Event ID associated with.
 	 */
@@ -120,7 +126,7 @@ struct DPP_API event_member {
 /**
  * @brief A scheduled event.
  */
-struct DPP_API scheduled_event : public managed, public json_interface<scheduled_event> {
+DPP_EXPORT struct DPP_API scheduled_event : public managed, public json_interface<scheduled_event> {
 protected:
 	friend struct json_interface<scheduled_event>;
 
@@ -328,12 +334,12 @@ public:
 /**
  * @brief A group of scheduled events.
  */
-typedef std::unordered_map<snowflake, scheduled_event> scheduled_event_map;
+DPP_EXPORT typedef std::unordered_map<snowflake, scheduled_event> scheduled_event_map;
 
 /**
  * @brief A group of scheduled event members.
  */
-typedef std::unordered_map<snowflake, event_member> event_member_map;
+DPP_EXPORT typedef std::unordered_map<snowflake, event_member> event_member_map;
 
 
 } // namespace dpp

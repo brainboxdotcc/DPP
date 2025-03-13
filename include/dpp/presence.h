@@ -20,19 +20,25 @@
  *
  ************************************************************************************/
 #pragma once
+
 #include <dpp/export.h>
+
+#if !DPP_BUILD_MODULES
+
 #include <dpp/snowflake.h>
 #include <dpp/emoji.h>
 #include <dpp/json_fwd.h>
 #include <unordered_map>
 #include <dpp/json_interface.h>
 
+#endif
+
 namespace dpp {
 
 /**
  * @brief Presence flags bitmask
  */
-enum presence_flags {
+DPP_EXPORT enum presence_flags {
 	/**
 	 * @brief Desktop: Online.
 	 */
@@ -97,7 +103,7 @@ enum presence_flags {
 /**
  * @brief Online presence status values
  */
-enum presence_status : uint8_t {
+DPP_EXPORT enum presence_status : uint8_t {
 	/**
 	 * @brief Offline.
 	 */
@@ -172,7 +178,7 @@ enum presence_status : uint8_t {
 /**
  * @brief Game types
  */
-enum activity_type : uint8_t {
+DPP_EXPORT enum activity_type : uint8_t {
 	/**
 	 * @brief "Playing ..."
 	 */
@@ -207,7 +213,7 @@ enum activity_type : uint8_t {
 /**
  * @brief Activity types for rich presence
  */
-enum activity_flags {
+DPP_EXPORT enum activity_flags {
 	/**
 	 * @brief In an instance.
 	 */
@@ -257,7 +263,7 @@ enum activity_flags {
 /**
  * @brief An activity button is a custom button shown in the rich presence. Can be to join a game or whatever
  */
-struct DPP_API activity_button {
+DPP_EXPORT struct DPP_API activity_button {
 public:
 	/**
 	 * @brief The text shown on the button (1-32 characters).
@@ -278,7 +284,7 @@ public:
 /**
  * @brief An activity asset are the images and the hover text displayed in the rich presence
  */
-struct DPP_API activity_assets {
+DPP_EXPORT struct DPP_API activity_assets {
 public:
 	/**
 	 * @brief The large asset image which usually contain snowflake ID or prefixed image ID.
@@ -307,7 +313,7 @@ public:
 /**
  * @brief Secrets for Rich Presence joining and spectating.
  */
-struct DPP_API activity_secrets {
+DPP_EXPORT struct DPP_API activity_secrets {
 public:
 	/**
 	 * @brief The secret for joining a party.
@@ -331,7 +337,7 @@ public:
 /**
  * @brief Information for the current party of the player
  */
-struct DPP_API activity_party {
+DPP_EXPORT struct DPP_API activity_party {
 public:
 	/**
 	 * @brief The ID of the party.
@@ -357,7 +363,7 @@ public:
 /**
  * @brief An activity is a representation of what a user is doing. It might be a game, or a website, or a movie. Whatever.
  */
-class DPP_API activity {
+DPP_EXPORT class DPP_API activity {
 public:
 	/**
 	 * @brief Name of activity.
@@ -486,7 +492,7 @@ public:
 /**
  * @brief Represents user presence, e.g. what game they are playing and if they are online
  */
-class DPP_API presence : public json_interface<presence> {
+DPP_EXPORT class DPP_API presence : public json_interface<presence> {
 protected:
 	friend struct json_interface<presence>;
 
@@ -593,6 +599,6 @@ public:
 /**
  * @brief A container of presences
  */
-typedef std::unordered_map<snowflake, presence> presence_map;
+DPP_EXPORT typedef std::unordered_map<snowflake, presence> presence_map;
 
 }

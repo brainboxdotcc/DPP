@@ -21,19 +21,26 @@
  ************************************************************************************/
 
 #pragma once
+
 #include <dpp/export.h>
+
+#if !DPP_BUILD_MODULES
+
 #include <dpp/snowflake.h>
 #include <dpp/managed.h>
 #include <dpp/utility.h>
 #include <dpp/json_fwd.h>
 #include <dpp/json_interface.h>
+#include <cstdint>
+
+#endif
 
 namespace dpp {
 
 /**
  * @brief Possible types of preset filter lists
  */
-enum automod_preset_type : uint8_t {
+DPP_EXPORT enum automod_preset_type : uint8_t {
 	/**
 	 * @brief Strong swearing
 	 */
@@ -53,7 +60,7 @@ enum automod_preset_type : uint8_t {
 /**
  * @brief Action types to perform on filtering
  */
-enum automod_action_type : uint8_t {
+DPP_EXPORT enum automod_action_type : uint8_t {
 	/**
 	 * @brief Blocks the message and prevents it from being posted.
 	 * A custom explanation can be specified and shown to members whenever their message is blocked
@@ -75,7 +82,7 @@ enum automod_action_type : uint8_t {
 /**
  * @brief Event types, only message send is currently supported
  */
-enum automod_event_type : uint8_t {
+DPP_EXPORT enum automod_event_type : uint8_t {
 	/**
 	 * @brief Trigger on message send or edit
 	 */
@@ -85,7 +92,7 @@ enum automod_event_type : uint8_t {
 /**
  * @brief Types of moderation to trigger
  */
-enum automod_trigger_type : uint8_t {
+DPP_EXPORT enum automod_trigger_type : uint8_t {
 	/**
 	 * @brief Check if content contains words from a user defined list of keywords (max 6 of this type per guild)
 	 */
@@ -116,7 +123,7 @@ enum automod_trigger_type : uint8_t {
 /**
  * @brief Metadata associated with an automod action. Different fields are relevant based on the value of dpp::automod_rule::trigger_type.
  */
-struct DPP_API automod_metadata : public json_interface<automod_metadata> {
+DPP_EXPORT struct DPP_API automod_metadata : public json_interface<automod_metadata> {
 protected:
 	friend struct json_interface<automod_metadata>;
 
@@ -256,7 +263,7 @@ public:
 /**
  * @brief Represents an automod action
  */
-struct DPP_API automod_action : public json_interface<automod_action> {
+DPP_EXPORT struct DPP_API automod_action : public json_interface<automod_action> {
 protected:
 	friend struct json_interface<automod_action>;
 
@@ -310,7 +317,7 @@ public:
 /**
  * @brief Represents an automod rule
  */
-class DPP_API automod_rule : public managed, public json_interface<automod_rule> {
+DPP_EXPORT class DPP_API automod_rule : public managed, public json_interface<automod_rule> {
 protected:
 	friend struct json_interface<automod_rule>;
 
@@ -398,6 +405,6 @@ public:
 
 /** A group of automod rules.
  */
-typedef std::unordered_map<snowflake, automod_rule> automod_rule_map;
+DPP_EXPORT typedef std::unordered_map<snowflake, automod_rule> automod_rule_map;
 
 }

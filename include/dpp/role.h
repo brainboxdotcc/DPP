@@ -20,6 +20,9 @@
  *
  ************************************************************************************/
 #pragma once
+
+#if !DPP_BUILD_MODULES
+
 #include <variant>
 #include <dpp/export.h>
 #include <dpp/managed.h>
@@ -28,12 +31,14 @@
 #include <dpp/guild.h>
 #include <dpp/json_interface.h>
 
+#endif
+
 namespace dpp {
 
 /**
  * @brief Various flags related to dpp::role
  */
-enum role_flags : uint8_t {
+DPP_EXPORT enum role_flags : uint8_t {
 	/**
 	 * @brief Hoisted role (if the role is pinned in the user listing).
 	 */
@@ -79,7 +84,7 @@ enum role_flags : uint8_t {
  * ID as the guild's ID. This is the base permission set applied to all users where no other role or override
  * applies, and is the starting value of the bit mask looped through to calculate channel permissions.
  */
-class DPP_API role : public managed, public json_interface<role> {
+DPP_EXPORT class DPP_API role : public managed, public json_interface<role> {
 protected:
 	friend struct json_interface<role>;
 
@@ -845,7 +850,7 @@ public:
  * Bots specify a `metadata value` for each user and guilds specify the
  * required `guild's configured value` within the guild role settings.
  */
-enum application_role_connection_metadata_type : uint8_t {
+DPP_EXPORT enum application_role_connection_metadata_type : uint8_t {
 	/**
 	 * @brief The metadata value (integer) is less than or equal to the guild's configured value (integer).
 	 */
@@ -890,7 +895,7 @@ enum application_role_connection_metadata_type : uint8_t {
 /**
  * @brief Application Role Connection Metadata. Represents a role connection metadata for an dpp::application
  */
-class DPP_API application_role_connection_metadata : public json_interface<application_role_connection_metadata> {
+DPP_EXPORT class DPP_API application_role_connection_metadata : public json_interface<application_role_connection_metadata> {
 protected:
 	friend struct json_interface<application_role_connection_metadata>;
 
@@ -950,7 +955,7 @@ public:
 /**
  * @brief The application role connection that an application has attached to a user.
  */
-class DPP_API application_role_connection : public json_interface<application_role_connection> {
+DPP_EXPORT class DPP_API application_role_connection : public json_interface<application_role_connection> {
 protected:
 	friend struct json_interface<application_role_connection>;
 
@@ -996,12 +1001,12 @@ public:
 /**
  * @brief A group of roles.
  */
-typedef std::unordered_map<snowflake, role> role_map;
+DPP_EXPORT typedef std::unordered_map<snowflake, role> role_map;
 
 /**
  * @brief A group of dpp::application_role_connection_metadata objects.
  */
-typedef std::vector<application_role_connection_metadata> application_role_connection_metadata_list;
+DPP_EXPORT typedef std::vector<application_role_connection_metadata> application_role_connection_metadata_list;
 
 }
 

@@ -20,6 +20,9 @@
  *
  ************************************************************************************/
 #pragma once
+
+#if !DPP_BUILD_MODULES
+
 #include <dpp/export.h>
 #include <dpp/snowflake.h>
 #include <dpp/managed.h>
@@ -28,12 +31,14 @@
 #include <dpp/json_interface.h>
 #include <dpp/user.h>
 
+#endif
+
 namespace dpp {
 
 /**
  * @brief Where an app can be installed, also called its supported installation contexts.
  */
-enum application_integration_types {
+DPP_EXPORT enum application_integration_types {
 	/**
 	* @brief Installable to servers
 	*/
@@ -47,7 +52,7 @@ enum application_integration_types {
 /**
  * @brief Integration types
  */
-enum integration_type {
+DPP_EXPORT enum integration_type {
 	/**
 	 * @brief Twitch integration
 	 */
@@ -72,7 +77,7 @@ enum integration_type {
 /**
  * @brief Integration flags
  */
-enum integration_flags {
+DPP_EXPORT enum integration_flags {
 	/**
 	 * @brief Is this integration enabled?
 	 */
@@ -106,7 +111,7 @@ enum integration_flags {
 /**
  * @brief An application that has been integrated
  */
-struct DPP_API integration_app {
+DPP_EXPORT struct DPP_API integration_app {
 	/**
 	 * @brief The id of the app.
 	 */
@@ -136,7 +141,7 @@ struct DPP_API integration_app {
 /**
  * @brief The account information for an integration.
  */
-struct DPP_API integration_account {
+DPP_EXPORT struct DPP_API integration_account {
 	/**
 	 * @brief ID of the account
 	 */
@@ -151,7 +156,7 @@ struct DPP_API integration_account {
 /**
  * @brief Represents an integration on a guild, e.g. a connection to twitch.
  */
-class DPP_API integration : public managed, public json_interface<integration> {
+DPP_EXPORT class DPP_API integration : public managed, public json_interface<integration> {
 protected:
 	friend struct json_interface<integration>;
 
@@ -272,7 +277,7 @@ public:
 /**
  * @brief The connection object that the user has attached.
  */
-class DPP_API connection : public json_interface<connection> {
+DPP_EXPORT class DPP_API connection : public json_interface<connection> {
 protected:
 	friend struct json_interface<connection>;
 
@@ -342,12 +347,12 @@ public:
 /**
  * @brief A group of integrations
  */
-typedef std::unordered_map<snowflake, integration> integration_map;
+DPP_EXPORT typedef std::unordered_map<snowflake, integration> integration_map;
 
 /**
  * @brief A group of connections
  */
-typedef std::unordered_map<snowflake, connection> connection_map;
+DPP_EXPORT typedef std::unordered_map<snowflake, connection> connection_map;
 
 }
 

@@ -22,6 +22,9 @@
 #pragma once
 
 #include <dpp/export.h>
+
+#if !DPP_BUILD_MODULES
+
 #ifdef _WIN32
 	#include <WinSock2.h>
 	#include <WS2tcpip.h>
@@ -36,9 +39,14 @@
 #include <string_view>
 #include <cstdint>
 
+#endif
+
 
 namespace dpp
 {
+
+DPP_EXPORT_START
+
 /**
  * @brief Represents a socket file descriptor.
  * This is used to ensure parity between windows and unix-like systems.
@@ -149,5 +157,6 @@ struct DPP_API raii_socket {
 	~raii_socket();
 };
 
+DPP_EXPORT_END
 
 }

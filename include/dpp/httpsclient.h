@@ -20,6 +20,9 @@
  *
  ************************************************************************************/
 #pragma once
+
+#if !DPP_BUILD_MODULES
+
 #include <dpp/export.h>
 #include <string>
 #include <map>
@@ -30,17 +33,19 @@
 #include <dpp/version.h>
 #include <dpp/stringops.h>
 
+#endif
+
 namespace dpp {
 
-static inline const std::string http_version = "DiscordBot (https://github.com/brainboxdotcc/DPP, "
+DPP_EXPORT inline const std::string http_version = "DiscordBot (https://github.com/brainboxdotcc/DPP, "
 	+ to_hex(DPP_VERSION_MAJOR, false) + "." + to_hex(DPP_VERSION_MINOR, false) + "." + to_hex(DPP_VERSION_PATCH, false) + ")";
 
-static inline constexpr const char* DISCORD_HOST = "https://discord.com";
+DPP_EXPORT inline constexpr const char* DISCORD_HOST = "https://discord.com";
 
 /**
  * @brief HTTP connection status
  */
-enum http_state : uint8_t {
+DPP_EXPORT enum http_state : uint8_t {
 	/**
 	 * @brief Sending/receiving HTTP headers and request body
 	 */
@@ -82,14 +87,14 @@ enum http_state : uint8_t {
 /**
  * @brief Request headers
  */
-typedef std::multimap<std::string, std::string> http_headers;
+DPP_EXPORT typedef std::multimap<std::string, std::string> http_headers;
 
 /**
  * @brief Represents a multipart mime body and the correct top-level mime type
  * If a non-multipart request is passed in, this is represented as a plain body
  * and the application/json mime type.
  */
-struct multipart_content {
+DPP_EXPORT struct multipart_content {
 	/**
 	 * @brief Multipart body
 	 */
@@ -105,7 +110,7 @@ struct multipart_content {
  * @brief Represents a HTTP scheme, hostname and port
  * split into parts for easy use in https_client.
  */
-struct http_connect_info {
+DPP_EXPORT struct http_connect_info {
 	/**
 	 * @brief True if the connection should be SSL
 	 */
@@ -128,13 +133,13 @@ struct http_connect_info {
 	uint16_t port{};
 };
 
-using https_client_completion_event = std::function<void(class https_client*)>;
+DPP_EXPORT using https_client_completion_event = std::function<void(class https_client*)>;
 
 /**
  * @brief Implements a HTTPS socket client based on the SSL client.
  * @note plaintext HTTP without SSL is also supported via a "downgrade" setting
  */
-class DPP_API https_client : public ssl_client {
+DPP_EXPORT class DPP_API https_client : public ssl_client {
 
 	/**
 	 * @brief The type of the request, e.g. GET, POST

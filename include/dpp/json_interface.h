@@ -20,8 +20,14 @@
  ************************************************************************************/
 
 #pragma once
+
 #include <dpp/export.h>
+
+#if !DPP_BUILD_MODULES
+
 #include <dpp/json.h>
+
+#endif
 
 namespace dpp {
 
@@ -32,7 +38,7 @@ namespace dpp {
  *
  * @tparam T Type of class that implements the interface
  */
-template<typename T>
+DPP_EXPORT template<typename T>
 struct json_interface {
 	/**
 	 * @brief Convert object from nlohmann::json

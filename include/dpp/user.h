@@ -19,21 +19,27 @@
  *
  ************************************************************************************/
 #pragma once
+
 #include <dpp/export.h>
+
+#if !DPP_BUILD_MODULES
+
 #include <dpp/json_fwd.h>
 #include <dpp/snowflake.h>
 #include <dpp/managed.h>
 #include <dpp/utility.h>
 #include <dpp/json_interface.h>
 
+#endif
+
 namespace dpp {
 
-constexpr uint32_t MAX_AVATAR_SIZE = 10240 * 1000; // 10240KB.
+DPP_EXPORT constexpr uint32_t MAX_AVATAR_SIZE = 10240 * 1000; // 10240KB.
 
 /**
  * @brief Various bitmask flags used to represent information about a dpp::user
  */
-enum user_flags : uint32_t {
+DPP_EXPORT enum user_flags : uint32_t {
 	/**
 	 * @brief User is a bot.
 	 */
@@ -160,7 +166,7 @@ enum user_flags : uint32_t {
 /**
  * @brief Represents a user on discord. May or may not be a member of a dpp::guild.
  */
-class DPP_API user : public managed, public json_interface<user> {
+DPP_EXPORT class DPP_API user : public managed, public json_interface<user> {
 protected:
 	friend struct json_interface<user>;
 
@@ -462,7 +468,7 @@ public:
  * These are not included in dpp::user as additional scopes are needed to fetch them
  * which bots do not normally have.
  */
-class DPP_API user_identified : public user, public json_interface<user_identified> {
+DPP_EXPORT class DPP_API user_identified : public user, public json_interface<user_identified> {
 protected:
 	friend struct json_interface<user_identified>;
 
@@ -564,7 +570,7 @@ public:
  * @param j output json object
  * @param u user to be deserialized
  */
-void from_json(const nlohmann::json& j, user& u);
+DPP_EXPORT void from_json(const nlohmann::json& j, user& u);
 
 /**
  * @brief helper function to deserialize a user_identified from json
@@ -574,11 +580,11 @@ void from_json(const nlohmann::json& j, user& u);
  * @param j output json object
  * @param u user to be deserialized
  */
-void from_json(const nlohmann::json& j, user_identified& u);
+DPP_EXPORT void from_json(const nlohmann::json& j, user_identified& u);
 
 /**
  * @brief A group of users.
  */
-typedef std::unordered_map<snowflake, user> user_map;
+DPP_EXPORT typedef std::unordered_map<snowflake, user> user_map;
 
 }

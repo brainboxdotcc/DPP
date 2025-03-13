@@ -35,13 +35,6 @@ option(DPP_TEST_VCPKG "Force VCPKG build without VCPKG installed (for developmen
 option(DPP_MODULES "Support for C++20 modules" ON)
 option(DPP_IMPORT_STD "(EXPERIMENTAL) Support for C++23's import std feature" OFF)
 
-if (DPP_MODULES)
-	cmake_minimum_required(VERSION 3.30 FATAL_ERROR)
-
-	add_compile_definitions(DPP_BUILD_MODULES)
-	set(CMAKE_CXX_SCAN_FOR_MODULES on)
-endif ()
-
 include(CheckCXXSymbolExists)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 add_compile_definitions(DPP_BUILD)

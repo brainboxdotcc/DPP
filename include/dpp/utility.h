@@ -21,9 +21,10 @@
  ************************************************************************************/
 #pragma once
 
+#include <dpp/export.h>
+
 #if !DPP_BUILD_MODULES
 
-#include <dpp/export.h>
 #include <dpp/snowflake.h>
 #include <dpp/misc-enum.h>
 #include <dpp/json.h>

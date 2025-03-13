@@ -21,9 +21,10 @@
  ************************************************************************************/
 #pragma once
 
+#include <dpp/export.h>
+
 #if !DPP_BUILD_MODULES
 
-#include <dpp/export.h>
 #include <dpp/json_fwd.h>
 #include <dpp/exception.h>
 #include <cstdint>
@@ -220,7 +221,7 @@ public:
 	 * @brief For building json
 	 * @return The snowflake value as a string
 	 */
-	operator dpp::json() const;
+	operator json() const;
 
 	/**
 	 * @brief Get the creation time of this snowflake according to Discord.

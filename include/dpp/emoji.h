@@ -20,7 +20,11 @@
  *
  ************************************************************************************/
 #pragma once
+
 #include <dpp/export.h>
+
+#if !DPP_BUILD_MODULES
+
 #include <dpp/snowflake.h>
 #include <dpp/misc-enum.h>
 #include <dpp/managed.h>
@@ -29,14 +33,16 @@
 #include <unordered_map>
 #include <dpp/json_interface.h>
 
+#endif
+
 namespace dpp {
 
-#define MAX_EMOJI_SIZE 256 * 1024
+DPP_EXPORT inline constexpr auto MAX_EMOJI_SIZE = 256 * 1024;
 
 /**
  * @brief Flags for dpp::emoji
  */
-enum emoji_flags : uint8_t {
+DPP_EXPORT enum emoji_flags : uint8_t {
 	/**
 	 * @brief Emoji requires colons.
 	 */
@@ -61,7 +67,7 @@ enum emoji_flags : uint8_t {
 /**
  * @brief Represents an emoji for a dpp::guild
  */
-class DPP_API emoji : public managed, public json_interface<emoji> {
+DPP_EXPORT class DPP_API emoji : public managed, public json_interface<emoji> {
 protected:
 	friend struct json_interface<emoji>;
 
@@ -247,6 +253,6 @@ public:
 /**
  * @brief Group of emojis
  */
-typedef std::unordered_map<snowflake, emoji> emoji_map;
+DPP_EXPORT typedef std::unordered_map<snowflake, emoji> emoji_map;
 
 }

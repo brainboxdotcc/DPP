@@ -1,6 +1,7 @@
 module;
 
 #include "modules.h"
+#include <dpp/version.h>
 
 #if !DPP_IMPORT_STD
 
@@ -20,13 +21,28 @@ module;
 #include <sstream>
 #include <iostream>
 #include <charconv>
+#include <set>
+#include <thread>
+#include <queue>
+#include <mutex>
+#include <shared_mutex>
+#include <ctime>
+#include <iomanip>
+#include <sstream>
+#include <thread>
+#include <functional>
+#include <chrono>
+#include <algorithm>
+#include <fstream>
+#include <streambuf>
+#include <array>
 
 #endif
 
 /**
  * @brief This is where we put the mostly standalone, mostly-not-discord-related stuff
  */
-export module dpp.utility;
+export module dpp:utility;
 
 #if DPP_IMPORT_STD
 
@@ -34,7 +50,7 @@ import std;
 
 #endif
 
-import dpp.base;
+import :base;
 
 #include "dpp/misc-enum.h"
 #include "dpp/utility.h"
@@ -42,3 +58,5 @@ import dpp.base;
 #include "dpp/stringops.h"
 #include "dpp/once.h"
 #include "dpp/colors.h"
+#include "dpp/thread_pool.h"
+#include "dpp/timer.h"

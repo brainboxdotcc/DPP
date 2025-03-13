@@ -22,6 +22,7 @@
 
 #pragma once
 #include <dpp/export.h>
+#include <dpp/dpp_fwd.h>
 #include <string>
 #include <map>
 #include <vector>
@@ -49,9 +50,6 @@ namespace dpp {
  * @brief HTTPS Request base path for API calls
  */
 #define API_PATH "/api/v" DISCORD_API_VERSION
-
-/* Forward declarations */
-class cluster;
 
 /**
  * @brief How many seconds to wait between (re)connections. DO NOT change this.

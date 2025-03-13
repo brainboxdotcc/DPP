@@ -20,18 +20,24 @@
  *
  ************************************************************************************/
 #pragma once
+
 #include <dpp/export.h>
+
+#if !DPP_BUILD_MODULES
+
 #include <dpp/snowflake.h>
 #include <dpp/json_fwd.h>
 #include <unordered_map>
 #include <dpp/json_interface.h>
+
+#endif
 
 namespace dpp {
 
 /**
  * @brief Bit mask flags relating to voice states
  */
-enum voicestate_flags {
+DPP_EXPORT enum voicestate_flags {
 	/**
 	 * @brief Deafened by the server.
 	 */
@@ -73,7 +79,7 @@ enum voicestate_flags {
  * These are stored in the dpp::guild object, and accessible there,
  * or via dpp::channel::get_voice_members
  */
-class DPP_API voicestate : public json_interface<voicestate> {
+DPP_EXPORT class DPP_API voicestate : public json_interface<voicestate> {
 protected:
 	friend struct json_interface<voicestate>;
 
@@ -174,6 +180,6 @@ public:
 };
 
 /** A container of voicestates */
-typedef std::unordered_map<std::string, voicestate> voicestate_map;
+DPP_EXPORT typedef std::unordered_map<std::string, voicestate> voicestate_map;
 
 }

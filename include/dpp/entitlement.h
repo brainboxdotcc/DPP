@@ -21,6 +21,9 @@
  ************************************************************************************/
 
 #pragma once
+
+#if !DPP_BUILD_MODULES
+
 #include <dpp/export.h>
 #include <dpp/snowflake.h>
 #include <dpp/managed.h>
@@ -28,12 +31,14 @@
 #include <dpp/json_interface.h>
 #include <unordered_map>
 
+#endif
+
 namespace dpp {
 
 /**
  * @brief The type of entitlement.
  * */
-enum entitlement_type : uint8_t {
+DPP_EXPORT enum entitlement_type : uint8_t {
 	/**
 	 * @brief Entitlement was purchased by user
 	 */
@@ -78,7 +83,7 @@ enum entitlement_type : uint8_t {
 /**
  * @brief Entitlement flags.
  */
-enum entitlement_flags : uint8_t {
+DPP_EXPORT enum entitlement_flags : uint8_t {
 	/**
 	 * @brief Entitlement was deleted
 	 *
@@ -102,7 +107,7 @@ enum entitlement_flags : uint8_t {
  * An entitlement is a user's connection to an SKU, basically a subscription
  * or a one-off purchase.
  */
-class DPP_API entitlement : public managed, public json_interface<entitlement> {
+DPP_EXPORT class DPP_API entitlement : public managed, public json_interface<entitlement> {
 protected:
 	friend struct json_interface<entitlement>;
 
@@ -241,6 +246,6 @@ public:
 /**
  * @brief Group of entitlements.
  */
-typedef std::unordered_map<snowflake, entitlement> entitlement_map;
+DPP_EXPORT typedef std::unordered_map<snowflake, entitlement> entitlement_map;
 
 }

@@ -21,6 +21,12 @@
  ************************************************************************************/
 
 #pragma once
+
+#include <dpp/export.h>
+
+#if !DPP_BUILD_MODULES
+
+#include <dpp/dpp_fwd.h>
 #include <thread>
 #include <queue>
 #include <vector>
@@ -28,7 +34,11 @@
 #include <mutex>
 #include <functional>
 
+#endif
+
 namespace dpp {
+
+DPP_EXPORT_START
 
 /**
  * @brief A work unit is a lambda executed in the thread pool
@@ -100,7 +110,7 @@ struct DPP_API thread_pool {
 	 * @param creator creating cluster (for logging)
 	 * @param num_threads number of threads in the pool
 	 */
-	explicit thread_pool(class cluster* creator, size_t num_threads = std::thread::hardware_concurrency());
+	explicit thread_pool(cluster* creator, size_t num_threads = std::thread::hardware_concurrency());
 
 	/**
 	 * @brief Destroy the thread pool
@@ -113,5 +123,7 @@ struct DPP_API thread_pool {
 	 */
 	void enqueue(thread_pool_task task);
 };
+
+DPP_EXPORT_END
 
 }

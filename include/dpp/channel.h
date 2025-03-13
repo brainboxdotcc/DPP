@@ -21,7 +21,11 @@
  ************************************************************************************/
 
 #pragma once
+
 #include <dpp/export.h>
+
+#if !DPP_BUILD_MODULES
+
 #include <dpp/snowflake.h>
 #include <dpp/managed.h>
 #include <dpp/utility.h>
@@ -32,10 +36,12 @@
 #include <unordered_map>
 #include <variant>
 
+#endif
+
 namespace dpp {
 
 /** @brief Flag integers as received from and sent to discord */
-enum channel_type : uint8_t {
+DPP_EXPORT enum channel_type : uint8_t {
 	/**
 	 * @brief A text channel within a server.
 	 */
@@ -118,7 +124,7 @@ enum channel_type : uint8_t {
  * listed above as provided by Discord. If discord add another value > 15, we will have to
  * shuffle these values upwards by one bit.
  */
-enum channel_flags : uint16_t {
+DPP_EXPORT enum channel_flags : uint16_t {
 	/* Note that bits 1 to 4 are used for the channel type mask */
 	/**
 	 * @brief NSFW Gated Channel
@@ -156,7 +162,7 @@ enum channel_flags : uint16_t {
 /**
  * @brief Types for sort posts in a forum channel
  */
-enum default_forum_sort_order_t : uint8_t {
+DPP_EXPORT enum default_forum_sort_order_t : uint8_t {
 	/**
 	 * @brief Sort forum posts by activity (default)
 	 */
@@ -171,7 +177,7 @@ enum default_forum_sort_order_t : uint8_t {
 /**
  * @brief Types of forum layout views that indicates how the threads in a forum channel will be displayed for users by default
  */
-enum forum_layout_type : uint8_t {
+DPP_EXPORT enum forum_layout_type : uint8_t {
 	/**
 	 * @brief No default has been set for the forum channel
 	 */
@@ -191,7 +197,7 @@ enum forum_layout_type : uint8_t {
 /**
  * @brief channel permission overwrite types
  */
-enum overwrite_type : uint8_t {
+DPP_EXPORT enum overwrite_type : uint8_t {
 	/**
 	 * @brief Role
 	 */
@@ -206,7 +212,7 @@ enum overwrite_type : uint8_t {
 /**
  * @brief Channel permission overwrites
  */
-struct DPP_API permission_overwrite {
+DPP_EXPORT struct DPP_API permission_overwrite {
 	/**
 	 * @brief ID of the role or the member
 	 */
@@ -246,7 +252,7 @@ struct DPP_API permission_overwrite {
  * @brief Auto archive duration of threads which will stop showing in the channel list after the specified period of inactivity.
  * Defined as an enum to fit into 1 byte. Internally it'll be translated to minutes to match the API
  */
-enum auto_archive_duration_t : uint8_t {
+DPP_EXPORT enum auto_archive_duration_t : uint8_t {
 	/**
 	 * @brief Auto archive duration of 1 hour (60 minutes).
 	 */
@@ -271,7 +277,7 @@ enum auto_archive_duration_t : uint8_t {
 /**
  * @brief Represents a tag that is able to be applied to a thread in a forum or media channel
  */
-struct DPP_API forum_tag : public managed, public json_interface<forum_tag> {
+DPP_EXPORT struct DPP_API forum_tag : public managed, public json_interface<forum_tag> {
 protected:
 	friend struct json_interface<forum_tag>;
 
@@ -337,7 +343,7 @@ public:
  * There are one of these for every channel type except threads. Threads are
  * special snowflakes. Get it? A Discord pun. Hahaha. .... I'll get my coat.
  */ 
-class DPP_API channel : public managed, public json_interface<channel> {
+DPP_EXPORT class DPP_API channel : public managed, public json_interface<channel> {
 protected:
 	friend struct json_interface<channel>;
 
@@ -885,12 +891,12 @@ public:
  * @param j JSON object to serialize to
  * @param po object to serialize
  */
-void to_json(nlohmann::json& j, const permission_overwrite& po);
+DPP_EXPORT void to_json(nlohmann::json& j, const permission_overwrite& po);
 
 /**
  * @brief A group of channels
  */
-typedef std::unordered_map<snowflake, channel> channel_map;
+DPP_EXPORT typedef std::unordered_map<snowflake, channel> channel_map;
 
 }
 

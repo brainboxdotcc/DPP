@@ -29,8 +29,8 @@
 #ifndef DPP_NO_CORO
 
 #include <dpp/export.h>
-#include <dpp/snowflake.h>
 #include <dpp/cluster.h>
+#include <dpp/snowflake.h>
 #include <dpp/coro.h>
 
 namespace dpp {

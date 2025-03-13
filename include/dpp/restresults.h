@@ -271,7 +271,7 @@ struct DPP_API confirmation_callback_t {
 	/**
 	 * @brief Owner/creator of the callback object.
 	 */
-	const class cluster* bot;
+	const cluster* bot;
 
 	/**
 	 * @brief Construct a new confirmation callback t object.

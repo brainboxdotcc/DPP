@@ -20,17 +20,22 @@
  *
  ************************************************************************************/
 #pragma once
+
+#if !DPP_BUILD_MODULES
+
 #include <dpp/export.h>
 #include <string>
 #include <map>
 #include <dpp/sslclient.h>
+
+#endif
 
 namespace dpp {
 
 /**
  * @brief Websocket protocol types available on Discord
  */
-enum websocket_protocol_t : uint8_t {
+DPP_EXPORT enum websocket_protocol_t : uint8_t {
 	/**
 	 * @brief JSON data, text, UTF-8 character set
 	 */
@@ -45,7 +50,7 @@ enum websocket_protocol_t : uint8_t {
 /**
  * @brief Websocket connection status
  */
-enum ws_state : uint8_t {
+DPP_EXPORT enum ws_state : uint8_t {
 	/**
 	 * @brief Sending/receiving HTTP headers, acting as a standard HTTP connection.
 	 * This is the state prior to receiving "HTTP/1.1 101 Switching Protocols" from the
@@ -62,7 +67,7 @@ enum ws_state : uint8_t {
 /**
  * @brief Low-level websocket opcodes for frames
  */
-enum ws_opcode : uint8_t {
+DPP_EXPORT enum ws_opcode : uint8_t {
 	/**
 	 * @brief Continuation.
 	 */
@@ -102,7 +107,7 @@ enum ws_opcode : uint8_t {
 /**
  * @brief Implements a websocket client based on the SSL client
  */
-class DPP_API websocket_client : public ssl_client {
+DPP_EXPORT class DPP_API websocket_client : public ssl_client {
 	/**
 	 * @brief Connection key used in the HTTP headers
 	 */

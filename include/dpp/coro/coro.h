@@ -23,9 +23,10 @@
 #ifndef DPP_NO_CORO
 
 #include <dpp/export.h>
-#include <dpp/dpp_fwd.h>
 
 #if !DPP_BUILD_MODULES
+
+#include <dpp/dpp_fwd.h>
 
 #if (defined(_LIBCPP_VERSION) and !defined(__cpp_impl_coroutine)) // if libc++ experimental implementation (LLVM < 14)
 #  define STDCORO_EXPERIMENTAL_HEADER

@@ -21,8 +21,12 @@
  ************************************************************************************/
 
 #pragma once
-#include <dpp/integration.h>
+
 #include <dpp/export.h>
+
+#if !DPP_BUILD_MODULES
+
+#include <dpp/integration.h>
 #include <dpp/snowflake.h>
 #include <dpp/managed.h>
 #include <dpp/utility.h>
@@ -34,12 +38,14 @@
 #include <map>
 #include <optional>
 
+#endif
+
 namespace dpp {
 
 /**
  * @brief status of a member of a team who maintain a bot/application
  */
-enum team_member_status : uint8_t {
+DPP_EXPORT enum team_member_status : uint8_t {
 	/**
 	 * @brief User was invited to the team.
 	 */
@@ -53,7 +59,7 @@ enum team_member_status : uint8_t {
 /**
  * @brief Flags for a bot or application
  */
-enum application_flags : uint32_t {
+DPP_EXPORT enum application_flags : uint32_t {
 	/**
 	 * @brief Indicates if an app uses the Auto Moderation API
 	 */
@@ -108,7 +114,7 @@ enum application_flags : uint32_t {
 /**
  * @brief Represents the settings for the bot/application's in-app authorization link
  */
-struct DPP_API application_install_params {
+DPP_EXPORT struct DPP_API application_install_params {
 	/**
 	 * @brief A bitmask of dpp::permissions to request for the bot role.
 	 */
@@ -128,7 +134,7 @@ struct DPP_API application_install_params {
  * These are hard coded to string forms by discord. If further types are added,
  * this enum will be extended to support them.
  */
-enum team_member_role_t : uint8_t {
+DPP_EXPORT enum team_member_role_t : uint8_t {
 	/**
 	 * @brief Team owner.
 	 */
@@ -153,7 +159,7 @@ enum team_member_role_t : uint8_t {
 /**
  * @brief Represents a team member on a team who maintain a bot/application
  */
-class DPP_API team_member {
+DPP_EXPORT class DPP_API team_member {
 public:
 	/**
 	 * @brief The user's membership state on the team.
@@ -184,7 +190,7 @@ public:
 /**
  * @brief Represents a team of users who maintain a bot/application
  */
-class DPP_API app_team {
+DPP_EXPORT class DPP_API app_team {
 public:
 	/**
 	 * @brief A hash of the image of the team's icon (may be empty).
@@ -215,14 +221,14 @@ public:
 /**
  * @brief Configuration object for an app installation
  */
-struct DPP_API integration_configuration {
+DPP_EXPORT struct DPP_API integration_configuration {
 		std::optional<application_install_params> oauth2_install_params;
 };
 
 /**
  * @brief The application class represents details of a bot application
  */
-class DPP_API application : public managed, public json_interface<application> {
+DPP_EXPORT class DPP_API application : public managed, public json_interface<application> {
 protected:
 	friend struct json_interface<application>;
 
@@ -485,6 +491,6 @@ public:
  * objects that can be received by REST has the possibility for this, so this exists.
  * Don't ever expect to see one at present.
  */
-typedef std::unordered_map<snowflake, application> application_map;
+DPP_EXPORT typedef std::unordered_map<snowflake, application> application_map;
 
 }

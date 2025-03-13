@@ -20,6 +20,9 @@
  *
  ************************************************************************************/
 #pragma once
+
+#if !DPP_BUILD_MODULES
+
 #include <dpp/export.h>
 #include <dpp/snowflake.h>
 #include <dpp/json_fwd.h>
@@ -30,12 +33,14 @@
 #include <dpp/user.h>
 #include <dpp/guild.h>
 
+#endif
+
 namespace dpp {
 
 /**
  * @brief Invite target types for dpp::invite
  */
-enum invite_target_t : uint8_t {
+DPP_EXPORT enum invite_target_t : uint8_t {
 	/**
 	 * @brief Undefined invite target type.
 	 */
@@ -55,7 +60,7 @@ enum invite_target_t : uint8_t {
 /**
  * @brief Represents an invite to a discord guild or channel
  */
-class DPP_API invite : public json_interface<invite> {
+DPP_EXPORT class DPP_API invite : public json_interface<invite> {
 protected:
 	friend struct json_interface<invite>;
 
@@ -240,6 +245,6 @@ public:
 /**
  * @brief A container of invites
  */
-typedef std::unordered_map<std::string, invite> invite_map;
+DPP_EXPORT typedef std::unordered_map<std::string, invite> invite_map;
 
 }

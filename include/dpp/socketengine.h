@@ -19,7 +19,11 @@
  *
  ************************************************************************************/
 #pragma once
+
 #include <dpp/export.h>
+
+#if !DPP_BUILD_MODULES
+
 #include <dpp/socket.h>
 #include <cstdint>
 #include <unordered_map>
@@ -29,12 +33,14 @@
 #include <shared_mutex>
 #include <dpp/thread_pool.h>
 
+#endif
+
 namespace dpp {
 
 /**
  * @brief Types of IO events a socket may subscribe to.
  */
-enum socket_event_flags : uint8_t {
+DPP_EXPORT enum socket_event_flags : uint8_t {
 	/**
 	 * @brief Socket wants to receive events when it can be read from.
 	 * This is provided by the underlying implementation.
@@ -63,22 +69,22 @@ enum socket_event_flags : uint8_t {
 /**
  * @brief Read ready event
  */
-using socket_read_event = std::function<void(dpp::socket fd, const struct socket_events&)>;
+DPP_EXPORT using socket_read_event = std::function<void(dpp::socket fd, const socket_events&)>;
 
 /**
  * @brief Write ready event
  */
-using socket_write_event = std::function<void(dpp::socket fd, const struct socket_events&)>;
+DPP_EXPORT using socket_write_event = std::function<void(dpp::socket fd, const socket_events&)>;
 
 /**
  * @brief Error event
  */
-using socket_error_event = std::function<void(dpp::socket fd, const struct socket_events&, int error_code)>;
+DPP_EXPORT using socket_error_event = std::function<void(dpp::socket fd, const socket_events&, int error_code)>;
 
 /**
  * @brief Contains statistics about the IO loop
  */
-struct DPP_API socket_stats {
+DPP_EXPORT struct DPP_API socket_stats {
 	/**
 	 * @brief Number of reads since startup
 	 */
@@ -130,7 +136,7 @@ struct DPP_API socket_stats {
  * storm which will consume 100% CPU (e.g. if you request to receive write events all
  * the time).
  */
-struct DPP_API socket_events {
+DPP_EXPORT struct DPP_API socket_events {
 	/**
 	 * @brief File descriptor
 	 *
@@ -184,7 +190,7 @@ struct DPP_API socket_events {
 /**
  * @brief Container of event sets keyed by socket file descriptor
  */
-using socket_container = std::unordered_map<dpp::socket, std::unique_ptr<socket_events>>;
+DPP_EXPORT using socket_container = std::unordered_map<dpp::socket, std::unique_ptr<socket_events>>;
 
 /**
  * @brief This is the base class for socket engines.
@@ -194,18 +200,18 @@ using socket_container = std::unordered_map<dpp::socket, std::unique_ptr<socket_
  * out implementation-specific behaviours (e.g. difference between edge and level triggered
  * event mechanisms etc).
  */
-struct DPP_API socket_engine_base {
+DPP_EXPORT struct DPP_API socket_engine_base {
 
 	/**
 	 * @brief Owning cluster
 	 */
-	class cluster* owner{nullptr};
+	cluster* owner{nullptr};
 
 	/**
 	 * @brief Default constructor
 	 * @param creator Owning cluster
 	 */
-	socket_engine_base(class cluster* creator);
+	socket_engine_base(cluster* creator);
 
 	/**
 	 * @brief Non-copyable
@@ -318,7 +324,7 @@ protected:
  * @brief This is implemented by whatever derived form socket_engine takes
  * @param creator Creating cluster
  */
-DPP_API std::unique_ptr<socket_engine_base> create_socket_engine(class cluster *creator);
+DPP_EXPORT DPP_API std::unique_ptr<socket_engine_base> create_socket_engine(cluster *creator);
 
 #ifndef _WIN32
 	/**
@@ -326,7 +332,7 @@ DPP_API std::unique_ptr<socket_engine_base> create_socket_engine(class cluster *
 	 * @param signal Signal to set. If the signal is already set up with a handler,
 	 * this will do nothing.
 	 */
-	void set_signal_handler(int signal);
+	DPP_EXPORT void set_signal_handler(int signal);
 #endif
 
 };

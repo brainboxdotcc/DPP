@@ -19,7 +19,12 @@
  *
  ************************************************************************************/
 #pragma once
+
 #include <dpp/export.h>
+
+#if !DPP_BUILD_MODULES
+
+#include <dpp/dpp_fwd.h>
 #include <dpp/user.h>
 #include <dpp/emoji.h>
 #include <dpp/snowflake.h>
@@ -31,9 +36,9 @@
 #include <unordered_map>
 #include <dpp/json_interface.h>
 
-namespace dpp {
+#endif
 
-class channel;
+namespace dpp {
 
 /* Note from Archie: I'd like to move this soon (dpp::guild::region) and allow users to use a region enum.
  * This would make it easier for people to be able to alter a channel region without having to get the text right.
@@ -44,7 +49,7 @@ class channel;
  * @deprecated Deprecated in favour of per-channel regions.
  * Please use dpp::channel::rtc_region instead.
  */
-enum region : uint8_t {
+DPP_EXPORT enum region : uint8_t {
 	/**
 	 * @brief Brazil
 	 */
@@ -119,7 +124,7 @@ enum region : uint8_t {
 /**
  * @brief The various flags that represent the status of a dpp::guild object
  */
-enum guild_flags : uint32_t {
+DPP_EXPORT enum guild_flags : uint32_t {
 	/**
 	 * @brief Large guild
 	 */
@@ -287,7 +292,7 @@ enum guild_flags : uint32_t {
 /**
  * @brief Additional boolean flag values for guild, as guild_flags is full
  */
-enum guild_flags_extra : uint16_t {
+DPP_EXPORT enum guild_flags_extra : uint16_t {
 	/**
 	 * @brief Guild has premium progress bar enabled
 	 */
@@ -338,7 +343,7 @@ enum guild_flags_extra : uint16_t {
  * @brief Various flags that can be used to indicate the status of a guild member.
  * @note Use the setter functions in dpp::guild_member and do not toggle the bits yourself.
  */
-enum guild_member_flags : uint16_t {
+DPP_EXPORT enum guild_member_flags : uint16_t {
 	/**
 	 * @brief Member deafened in voice channel
 	 */
@@ -403,7 +408,7 @@ enum guild_member_flags : uint16_t {
  * @brief Represents dpp::user membership upon a dpp::guild.
  * This contains the user's nickname, guild roles, and any other guild-specific flags.
  */
-class DPP_API guild_member : public json_interface<guild_member> {
+DPP_EXPORT class DPP_API guild_member : public json_interface<guild_member> {
 protected:
 	friend struct json_interface<guild_member>;
 
@@ -693,7 +698,7 @@ public:
 /**
  * @brief Defines a channel on a server's welcome screen
  */
-struct DPP_API welcome_channel : public json_interface<welcome_channel> {
+DPP_EXPORT struct DPP_API welcome_channel : public json_interface<welcome_channel> {
 protected:
 	friend struct json_interface<welcome_channel>;
 
@@ -767,7 +772,7 @@ public:
 /**
  * @brief Defines a server's welcome screen
  */
-struct DPP_API welcome_screen : public json_interface<welcome_screen> {
+DPP_EXPORT struct DPP_API welcome_screen : public json_interface<welcome_screen> {
 protected:
 	friend struct json_interface<welcome_screen>;
 
@@ -822,7 +827,7 @@ public:
  * Used to represent just how naughty this guild is. Naughty  guild, go sit in the corner.
  * @note This is set by Discord, and cannot be set by any bot or user on the guild.
  */
-enum guild_nsfw_level_t : uint8_t {
+DPP_EXPORT enum guild_nsfw_level_t : uint8_t {
 	/**
 	 * @brief Default setting, not configured
 	 */
@@ -849,7 +854,7 @@ enum guild_nsfw_level_t : uint8_t {
  * This is set by a guild admin, but can be forced to a setting if the server is verified,
  * partnered, official etc.
  */
-enum guild_explicit_content_t : uint8_t {
+DPP_EXPORT enum guild_explicit_content_t : uint8_t {
 	/**
 	 * @brief Media content will not be scanned.
 	 */
@@ -870,7 +875,7 @@ enum guild_explicit_content_t : uint8_t {
  * @brief MFA level for server.
  * If set to elevated all moderators need MFA to perform specific actions such as kick or ban.
  */
-enum mfa_level_t : uint8_t {
+DPP_EXPORT enum mfa_level_t : uint8_t {
 	/**
 	 * @brief MFA not elevated
 	 */
@@ -885,7 +890,7 @@ enum mfa_level_t : uint8_t {
 /**
  * @brief Guild verification level
  */
-enum verification_level_t : uint8_t {
+DPP_EXPORT enum verification_level_t : uint8_t {
 	/**
 	 * @brief Unrestricted.
 	 */
@@ -915,7 +920,7 @@ enum verification_level_t : uint8_t {
 /**
  * @brief Default message notification level
  */
-enum default_message_notification_t : uint8_t {
+DPP_EXPORT enum default_message_notification_t : uint8_t {
 	/**
 	 * @brief Members will receive notifications for all messages by default.
 	 */
@@ -930,7 +935,7 @@ enum default_message_notification_t : uint8_t {
 /**
  * @brief The guild's premium tier.
  */
-enum guild_premium_tier_t : uint8_t {
+DPP_EXPORT enum guild_premium_tier_t : uint8_t {
 	/**
 	 * @brief Guild has not unlocked any Server Boost perks.
 	 */
@@ -955,7 +960,7 @@ enum guild_premium_tier_t : uint8_t {
 /**
  * @brief Voice AFK timeout values for guild::afk_timeout
  */
-enum guild_afk_timeout_t : uint8_t {
+DPP_EXPORT enum guild_afk_timeout_t : uint8_t {
 	/**
 	 * @brief AFK timeout disabled
 	 */
@@ -990,12 +995,12 @@ enum guild_afk_timeout_t : uint8_t {
 /**
  * @brief Guild members container
  */
-typedef std::unordered_map<snowflake, guild_member> members_container;
+DPP_EXPORT typedef std::unordered_map<snowflake, guild_member> members_container;
 
 /**
  * @brief Represents a guild on Discord (AKA a server)
  */
-class DPP_API guild : public managed, public json_interface<guild> {
+DPP_EXPORT class DPP_API guild : public managed, public json_interface<guild> {
 protected:
 	friend struct json_interface<guild>;
 
@@ -1672,12 +1677,12 @@ public:
 /**
  * @brief A container of guilds
  */
-typedef std::unordered_map<snowflake, guild> guild_map;
+DPP_EXPORT typedef std::unordered_map<snowflake, guild> guild_map;
 
 /**
  * @brief Represents a guild widget, simple web widget of member list
  */
-class DPP_API guild_widget : public json_interface<guild_widget> {
+DPP_EXPORT class DPP_API guild_widget : public json_interface<guild_widget> {
 protected:
 	friend struct json_interface<guild_widget>;
 
@@ -1717,7 +1722,7 @@ public:
 /**
  * @brief The onboarding mode for the dpp::onboarding object. Defines the criteria used to satisfy Onboarding constraints that are required for enabling.
  */
-enum onboarding_mode : uint8_t {
+DPP_EXPORT enum onboarding_mode : uint8_t {
 	/**
 	 * @brief Counts only Default Channels towards constraints.
 	 */
@@ -1732,7 +1737,7 @@ enum onboarding_mode : uint8_t {
 /**
  * @brief The various types of dpp::onboarding_prompt
  */
-enum onboarding_prompt_type : uint8_t {
+DPP_EXPORT enum onboarding_prompt_type : uint8_t {
 	/**
 	 * @brief Multiple choice.
 	 */
@@ -1747,7 +1752,7 @@ enum onboarding_prompt_type : uint8_t {
 /**
  * @brief Various flags for dpp::onboarding_prompt
  */
-enum onboarding_prompt_flags : uint8_t {
+DPP_EXPORT enum onboarding_prompt_flags : uint8_t {
 	/**
 	 * @brief Indicates whether users are limited to selecting one option for the prompt.
 	 */
@@ -1768,7 +1773,7 @@ enum onboarding_prompt_flags : uint8_t {
 /**
  * @brief Represents an onboarding prompt option
  */
-struct DPP_API onboarding_prompt_option : public managed, public json_interface<onboarding_prompt_option> {
+DPP_EXPORT struct DPP_API onboarding_prompt_option : public managed, public json_interface<onboarding_prompt_option> {
 protected:
 	friend struct json_interface<onboarding_prompt_option>;
 
@@ -1852,7 +1857,7 @@ public:
 /**
  * @brief Represents an onboarding prompt
  */
-struct DPP_API onboarding_prompt : public managed, public json_interface<onboarding_prompt> {
+DPP_EXPORT struct DPP_API onboarding_prompt : public managed, public json_interface<onboarding_prompt> {
 protected:
 	friend struct json_interface<onboarding_prompt>;
 
@@ -1941,7 +1946,7 @@ public:
 /**
  * @brief Represents a guild's onboarding flow
  */
-struct DPP_API onboarding : public json_interface<onboarding> {
+DPP_EXPORT struct DPP_API onboarding : public json_interface<onboarding> {
 protected:
 	friend struct json_interface<onboarding>;
 
@@ -2030,12 +2035,12 @@ public:
  * @param j output json object
  * @param gm guild_member to be deserialized
  */
-void from_json(const nlohmann::json& j, guild_member& gm);
+DPP_EXPORT void from_json(const nlohmann::json& j, guild_member& gm);
 
 /**
  * @brief A container of guild members
  */
-typedef std::unordered_map<snowflake, guild_member> guild_member_map;
+DPP_EXPORT typedef std::unordered_map<snowflake, guild_member> guild_member_map;
 
 /**
  * @brief Get the guild_member from cache of given IDs
@@ -2046,6 +2051,6 @@ typedef std::unordered_map<snowflake, guild_member> guild_member_map;
  * @throw dpp::cache_exception if the guild or guild_member is not found in the cache
  * @return guild_member the cached object, if found
  */
-guild_member DPP_API find_guild_member(const snowflake guild_id, const snowflake user_id);
+DPP_EXPORT guild_member DPP_API find_guild_member(const snowflake guild_id, const snowflake user_id);
 
 }

@@ -20,6 +20,9 @@
  *
  ************************************************************************************/
 #pragma once
+
+#if !DPP_BUILD_MODULES
+
 #include <dpp/export.h>
 #include <dpp/misc-enum.h>
 #include <string>
@@ -30,6 +33,8 @@
 #include <cstdint>
 #include <dpp/timer.h>
 
+#endif
+
 namespace dpp {
 
 /**
@@ -37,7 +42,7 @@ namespace dpp {
  * We define it this way so that the public facing D++ library doesn't require
  * the openssl headers be available to build against it.
  */
-class openssl_connection;
+DPP_EXPORT class openssl_connection;
 
 /**
  * @brief Close a socket 
@@ -45,7 +50,7 @@ class openssl_connection;
  * @param sfd Socket to close
  * @return false on error, true on success
  */
-DPP_API bool close_socket(dpp::socket sfd);
+DPP_EXPORT DPP_API bool close_socket(dpp::socket sfd);
 
 /**
  * @brief Set a socket to blocking or non-blocking IO
@@ -54,7 +59,7 @@ DPP_API bool close_socket(dpp::socket sfd);
  * @param non_blocking should socket be non-blocking?
  * @return false on error, true on success
  */
-DPP_API bool set_nonblocking(dpp::socket sockfd, bool non_blocking);
+DPP_EXPORT DPP_API bool set_nonblocking(dpp::socket sockfd, bool non_blocking);
 
 /**
  * @brief SSL_read buffer size
@@ -63,17 +68,17 @@ DPP_API bool set_nonblocking(dpp::socket sockfd, bool non_blocking);
  * SSL_read in non-blocking mode will only read 16k at a time. There's no point in a bigger buffer as
  * it'd go unused.
  */
-constexpr uint16_t DPP_BUFSIZE{16 * 1024};
+DPP_EXPORT constexpr uint16_t DPP_BUFSIZE{16 * 1024};
 
 /**
  * @brief Represents a failed socket system call, e.g. connect() failure
  */
-constexpr int ERROR_STATUS{-1};
+DPP_EXPORT constexpr int ERROR_STATUS{-1};
 
 /**
  * @brief Maximum number of internal connect() retries on TCP connections
  */
-constexpr int MAX_RETRIES{4};
+DPP_EXPORT constexpr int MAX_RETRIES{4};
 
 
 /**
@@ -83,7 +88,7 @@ constexpr int MAX_RETRIES{4};
  * execute in an infinite loop until the socket disconnects. This is intended
  * to be run within a std::thread.
  */
-class DPP_API ssl_client
+DPP_EXPORT class DPP_API ssl_client
 {
 private:
 	/**
@@ -280,7 +285,7 @@ public:
 	/**
 	 * @brief Owning cluster
 	 */
-	class cluster* owner;
+	cluster* owner;
 
 	/**
 	 * @brief Connect to a specified host and port. Throws std::runtime_error on fatal error.
@@ -339,28 +344,28 @@ public:
 	 * an established state.
 	 * @param ev Socket events for the socket
 	 */
-	void complete_handshake(const struct socket_events* ev);
+	void complete_handshake(const socket_events* ev);
 
 	/**
 	 * @brief Called when the TCP socket has data to read
 	 * @param fd File descriptor
 	 * @param ev Socket events
 	 */
-	void on_read(dpp::socket fd, const struct dpp::socket_events& ev);
+	void on_read(dpp::socket fd, const dpp::socket_events& ev);
 
 	/**
 	 * @brief Called when the TCP socket can be written to without blocking
 	 * @param fd File descriptor
 	 * @param e Socket events
 	 */
-	void on_write(dpp::socket fd, const struct dpp::socket_events& e);
+	void on_write(dpp::socket fd, const dpp::socket_events& e);
 
 	/**
 	 * @brief Called when there is an error on the TCP socket
 	 * @param fd File descriptor
 	 * @param error_code Error code
 	 */
-	void on_error(dpp::socket fd, const struct dpp::socket_events&, int error_code);
+	void on_error(dpp::socket fd, const dpp::socket_events&, int error_code);
 };
 
 }

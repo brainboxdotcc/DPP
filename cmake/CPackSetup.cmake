@@ -1,9 +1,6 @@
 include(GNUInstallDirs)
 set(DPP_EXPORT_NAME dpp)
 set(DPP_EXPORTING dpp)
-if (DPP_MODULES)
-	set(DPP_EXPORTING ${DPP_EXPORTING} dppmodule mlspp mls_vectors bytes tls_syntax hpke)
-endif ()
 set(DPP_CMAKE_DIR ${CMAKE_INSTALL_LIBDIR}/cmake/${DPP_EXPORT_NAME})
 set(DPP_VERSION_FILE ${PROJECT_BINARY_DIR}/${DPP_EXPORT_NAME}-config-version.cmake)
 

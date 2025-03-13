@@ -240,11 +240,18 @@ set(modules_dir "../src")
 file(GLOB subdirlist ${modules_dir}/dpp)
 
 if (HAVE_VOICE)
-	add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/../mlspp" "mlspp")
+	add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/../mlspp" "mlspp" EXCLUDE_FROM_ALL)
 	include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../mlspp/include")
 	include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../mlspp/lib/bytes/include")
 	include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../mlspp/lib/hpke/include")
 endif()
+
+if (DPP_MODULES)
+	cmake_minimum_required(VERSION 3.30 FATAL_ERROR)
+
+	add_compile_definitions(DPP_USE_MODULES)
+	set(CMAKE_CXX_SCAN_FOR_MODULES on)
+endif ()
 
 if (DPP_IMPORT_STD)
 	if (MSVC AND NOT CLANG_CL)
@@ -341,20 +348,20 @@ if (HAVE_VOICE)
 	# Private statically linked dependencies
 	if(NOT BUILD_SHARED_LIBS AND NOT APPLE)
 		target_link_libraries(dpp PRIVATE
-				mlspp.a
-				mls_vectors.a
-				bytes.a
-				tls_syntax.a
-				hpke.a
+				$<BUILD_INTERFACE:mlspp.a>
+				$<BUILD_INTERFACE:mls_vectors.a>
+				$<BUILD_INTERFACE:bytes.a>
+				$<BUILD_INTERFACE:tls_syntax.a>
+				$<BUILD_INTERFACE:hpke.a>
 		)
 		message("-- INFO: Linking static dependencies")
 	else()
 		target_link_libraries(dpp PRIVATE
-				mlspp
-				mls_vectors
-				bytes
-				tls_syntax
-				hpke
+				$<BUILD_INTERFACE:mlspp>
+				$<BUILD_INTERFACE:mls_vectors>
+				$<BUILD_INTERFACE:bytes>
+				$<BUILD_INTERFACE:tls_syntax>
+				$<BUILD_INTERFACE:hpke>
 		)
 		message("-- INFO: Linking dynamic dependencies")
 	endif()
@@ -445,16 +452,13 @@ else()
 endif()
 
 if (DPP_MODULES)
-	add_library(dppmodule)
-	target_compile_features(dppmodule PRIVATE cxx_std_20)
-	target_compile_definitions(dppmodule PRIVATE DPP_BUILD_MODULES)
+	target_compile_features(dpp PRIVATE cxx_std_20)
+	target_compile_definitions(dpp PRIVATE DPP_USE_MODULES)
 	file (GLOB_RECURSE DPP_MODULES_SRC "${modules_dir}/dpp/modules/*.ixx")
-	target_sources(dppmodule
+	target_sources(dpp
 		PRIVATE
 			FILE_SET CXX_MODULES BASE_DIRS ${modules_dir} FILES "${DPP_MODULES_SRC}"
 	)
-
-	target_link_libraries(dpp PUBLIC dppmodule)
 endif ()
 
 if(DPP_FORMATTERS)
@@ -464,12 +468,12 @@ endif()
 if (NOT BUILD_SHARED_LIBS)
 	if (HAVE_VOICE)
 		add_library(dppstatic STATIC
-			$<TARGET_OBJECTS:dpp>
-			$<TARGET_OBJECTS:hpke>
-			$<TARGET_OBJECTS:tls_syntax>
-			$<TARGET_OBJECTS:mls_vectors>
-			$<TARGET_OBJECTS:mlspp>
-			$<TARGET_OBJECTS:bytes>
+			$<BUILD_INTERFACE:$<TARGET_OBJECTS:dpp>>
+			$<BUILD_INTERFACE:$<TARGET_OBJECTS:hpke>>
+			$<BUILD_INTERFACE:$<TARGET_OBJECTS:tls_syntax>>
+			$<BUILD_INTERFACE:$<TARGET_OBJECTS:mls_vectors>>
+			$<BUILD_INTERFACE:$<TARGET_OBJECTS:mlspp>>
+			$<BUILD_INTERFACE:$<TARGET_OBJECTS:bytes>>
 	        )
 		target_link_libraries(dppstatic ${ZLIB_LIBRARIES} ${OPENSSL_LIBRARIES} ${OPUS_LIBRARIES} -static-libgcc -static-libstdc++)
 	else()

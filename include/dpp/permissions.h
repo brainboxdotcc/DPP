@@ -19,17 +19,23 @@
  *
  ************************************************************************************/
 #pragma once
+
 #include <dpp/export.h>
+
+#if !DPP_BUILD_MODULES
+
 #include <dpp/json.h>
 #include <cstdint>
 #include <type_traits>
+
+#endif
 
 namespace dpp {
 
 /**
  * @brief Represents the various discord permissions
  */
-enum permissions : uint64_t {
+DPP_EXPORT enum permissions : uint64_t {
 	/**
 	 * @brief Allows creation of instant invites.
 	 */
@@ -271,12 +277,12 @@ enum permissions : uint64_t {
  * @brief Represents the various discord permissions
  * @deprecated Use dpp::permissions instead.
  */
-using role_permissions = permissions;
+DPP_EXPORT using role_permissions = permissions;
 
 /**
  * @brief Represents a permission bitmask (refer to enum dpp::permissions) which are held in an uint64_t
  */
-class DPP_API permission {
+DPP_EXPORT class DPP_API permission {
 protected:
 	/**
 	 * @brief The permission bitmask value

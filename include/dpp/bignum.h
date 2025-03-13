@@ -21,9 +21,15 @@
  ************************************************************************************/
 
 #pragma once
+
 #include <dpp/export.h>
+
+#if !DPP_BUILD_MODULES
+
 #include <dpp/snowflake.h>
 #include <memory>
+
+#endif
 
 namespace dpp {
 
@@ -31,7 +37,7 @@ namespace dpp {
  * @brief This contains the OpenSSL structs. It is not public,
  * so that the public interface doesn't depend on OpenSSL directly.
  */
-struct openssl_bignum;
+DPP_EXPORT struct openssl_bignum;
 
 /**
 * @brief An arbitrary length integer number.
@@ -43,7 +49,7 @@ struct openssl_bignum;
  * @note dpp::bignumber uses OpenSSL BN_* under the hood, as we include openssl anyway
  * for HTTPS.
 */
-class DPP_API bignumber {
+DPP_EXPORT class DPP_API bignumber {
 	/**
 	 * @brief Internal opaque struct to contain OpenSSL things
 	 */

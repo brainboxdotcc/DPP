@@ -20,6 +20,9 @@
  *
  ************************************************************************************/
 #pragma once
+
+#if !DPP_BUILD_MODULES
+
 #include <dpp/export.h>
 #include <dpp/snowflake.h>
 #include <dpp/misc-enum.h>
@@ -31,12 +34,14 @@
 #include <unordered_map>
 #include <dpp/json_interface.h>
 
+#endif
+
 namespace dpp {
 
 /**
  * @brief Defines types of webhook
  */
-enum webhook_type {
+DPP_EXPORT enum webhook_type {
 	/**
 	 * @brief Incoming webhook.
 	 */
@@ -56,7 +61,7 @@ enum webhook_type {
 /**
  * @brief Represents a discord webhook
  */
-class DPP_API webhook : public managed, public json_interface<webhook> {
+DPP_EXPORT class DPP_API webhook : public managed, public json_interface<webhook> {
 protected:
 	friend struct json_interface<webhook>;
 
@@ -194,6 +199,6 @@ public:
 /**
  * @brief A group of webhooks
  */
-typedef std::unordered_map<snowflake, webhook> webhook_map;
+DPP_EXPORT typedef std::unordered_map<snowflake, webhook> webhook_map;
 
 }

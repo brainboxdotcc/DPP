@@ -20,19 +20,25 @@
  *
  ************************************************************************************/
 #pragma once
+
 #include <dpp/export.h>
+
+#if !DPP_BUILD_MODULES
+
 #include <dpp/snowflake.h>
 #include <dpp/managed.h>
 #include <dpp/json_fwd.h>
 #include <unordered_map>
 #include <dpp/json_interface.h>
 
+#endif
+
 namespace dpp {
 
 /**
  * @brief Represents the privacy of a stage instance
  */
-enum stage_privacy_level : uint8_t {
+DPP_EXPORT enum stage_privacy_level : uint8_t {
 	/**
 	 * @brief The Stage instance is visible publicly, such as on Stage Discovery.
 	 */
@@ -48,7 +54,7 @@ enum stage_privacy_level : uint8_t {
  * @brief A stage instance.
  * Stage instances are like a conference facility, with moderators/speakers and listeners.
  */
-struct DPP_API stage_instance : public managed, public json_interface<stage_instance> {
+DPP_EXPORT struct DPP_API stage_instance : public managed, public json_interface<stage_instance> {
 protected:
 	friend struct json_interface<stage_instance>;
 
@@ -107,6 +113,6 @@ public:
 /**
  * @brief A group of stage instances
  */
-typedef std::unordered_map<snowflake, stage_instance> stage_instance_map;
+DPP_EXPORT typedef std::unordered_map<snowflake, stage_instance> stage_instance_map;
 
 }

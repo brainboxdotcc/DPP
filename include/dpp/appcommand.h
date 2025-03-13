@@ -19,8 +19,12 @@
  *
  ************************************************************************************/
 #pragma once
-#include <dpp/integration.h>
+
 #include <dpp/export.h>
+
+#if !DPP_BUILD_MODULES
+
+#include <dpp/integration.h>
 #include <dpp/snowflake.h>
 #include <dpp/managed.h>
 #include <dpp/message.h>
@@ -32,6 +36,8 @@
 #include <map>
 #include <dpp/json_fwd.h>
 #include <dpp/json_interface.h>
+
+#endif
 
 namespace dpp {
 
@@ -48,7 +54,7 @@ namespace dpp {
  * @brief Represents command option types.
  * These are the possible parameter value types.
  */
-enum command_option_type : uint8_t {
+DPP_EXPORT enum command_option_type : uint8_t {
 	/**
 	 * @brief A sub-command.
 	 */
@@ -115,7 +121,7 @@ enum command_option_type : uint8_t {
  *
  * You can retrieve them with std::get().
  */
-typedef std::variant<std::monostate, std::string, int64_t, bool, snowflake, double> command_value;
+DPP_EXPORT typedef std::variant<std::monostate, std::string, int64_t, bool, snowflake, double> command_value;
 
 /**
  * @brief This struct represents choices in a multiple choice option
@@ -124,7 +130,7 @@ typedef std::variant<std::monostate, std::string, int64_t, bool, snowflake, doub
  * meaning it can hold different potential types (see dpp::command_value)
  * that you can retrieve with std::get().
  */
-struct DPP_API command_option_choice : public json_interface<command_option_choice> {
+DPP_EXPORT struct DPP_API command_option_choice : public json_interface<command_option_choice> {
 protected:
 	friend struct json_interface<command_option_choice>;
 
@@ -185,13 +191,13 @@ public:
  * @param j output json object
  * @param choice command_option_choice to be serialized
  */
-void to_json(nlohmann::json& j, const command_option_choice& choice);
+DPP_EXPORT void to_json(nlohmann::json& j, const command_option_choice& choice);
 
 /**
  * @brief A minimum or maximum value/length for dpp::co_number, dpp::co_integer and dpp::co_string types of a dpp::command_option.
  * The `int64_t` is for the integer range or string length that can be entered. The `double` is for the decimal range that can be entered
  */
-typedef std::variant<std::monostate, int64_t, double> command_option_range;
+DPP_EXPORT typedef std::variant<std::monostate, int64_t, double> command_option_range;
 
 /**
  * @brief Each command option is a command line parameter.
@@ -201,7 +207,7 @@ typedef std::variant<std::monostate, int64_t, double> command_option_range;
  * Adding options acts like sub-commands and can contain more
  * options.
  */
-struct DPP_API command_option : public json_interface<command_option> {
+DPP_EXPORT struct DPP_API command_option : public json_interface<command_option> {
 protected:
 	friend struct json_interface<command_option>;
 
@@ -393,12 +399,12 @@ public:
  * @param j output json object
  * @param opt command_option to be serialized
  */
-void to_json(nlohmann::json& j, const command_option& opt);
+DPP_EXPORT void to_json(nlohmann::json& j, const command_option& opt);
 
 /**
  * @brief Response types when responding to an interaction within on_interaction_create.
  */
-enum interaction_response_type {
+DPP_EXPORT enum interaction_response_type {
 	/**
 	 * @brief Acknowledge a Ping
 	 */
@@ -461,7 +467,7 @@ enum interaction_response_type {
  *
  * `mymessage.flags |= dpp::m_ephemeral;`
  */
-struct DPP_API interaction_response : public json_interface<interaction_response> {
+DPP_EXPORT struct DPP_API interaction_response : public json_interface<interaction_response> {
 protected:
 	friend struct json_interface<interaction_response>;
 
@@ -548,7 +554,7 @@ public:
  * components are displayed on a form (the same component structure as within a dpp::message).
  * When the user submits the form an on_form_submit event is dispatched to any listeners.
  */
-struct DPP_API interaction_modal_response : public interaction_response, public json_interface<interaction_modal_response> {
+DPP_EXPORT struct DPP_API interaction_modal_response : public interaction_response, public json_interface<interaction_modal_response> {
 protected:
 	friend struct json_interface<interaction_modal_response>;
 
@@ -646,7 +652,7 @@ public:
 /**
  * @brief Resolved snowflake ids to users, guild members, roles and channels. You can use the `interaction::get_resolved_*` methods to easily get a resolved set
  */
-struct DPP_API command_resolved {
+DPP_EXPORT struct DPP_API command_resolved {
 	/**
 	 * @brief Resolved users
 	 * @see interaction::get_resolved_user
@@ -689,7 +695,7 @@ struct DPP_API command_resolved {
  * These are the values specified by the user when actually issuing
  * the command on a channel or in DM.
  */
-struct DPP_API command_data_option {
+DPP_EXPORT struct DPP_API command_data_option {
 	/**
 	 * @brief The name of the parameter.
 	 */
@@ -743,11 +749,11 @@ struct DPP_API command_data_option {
  * @param j output json object
  * @param cdo command_data_option to be deserialized
  */
-void from_json(const nlohmann::json& j, command_data_option& cdo);
+DPP_EXPORT void from_json(const nlohmann::json& j, command_data_option& cdo);
 
 /** Types of interaction in the dpp::interaction class
  */
-enum interaction_type {
+DPP_EXPORT enum interaction_type {
 	/**
 	 * @brief A ping interaction.
 	 */
@@ -777,7 +783,7 @@ enum interaction_type {
 /*
 * @brief Context type where the interaction can be used or triggered from, e.g. guild, user etc
 */
-enum interaction_context_type {
+DPP_EXPORT enum interaction_context_type {
 	/**
 	 * @brief Interaction can be used within servers
 	 */
@@ -797,7 +803,7 @@ enum interaction_context_type {
 /**
  * @brief Right-click context menu types
  */
-enum slashcommand_contextmenu_type {
+DPP_EXPORT enum slashcommand_contextmenu_type {
 	/**
 	 * @brief Undefined context menu type
 	 */
@@ -824,7 +830,7 @@ enum slashcommand_contextmenu_type {
  * This subobject represents the application command associated
  * with the interaction.
  */
-struct DPP_API command_interaction {
+DPP_EXPORT struct DPP_API command_interaction {
 	/**
 	 * @brief The ID of the invoked command.
 	 */
@@ -880,12 +886,12 @@ struct DPP_API command_interaction {
  * @param j output json object
  * @param ci command_interaction to be deserialized
  */
-void from_json(const nlohmann::json& j, command_interaction& ci);
+DPP_EXPORT void from_json(const nlohmann::json& j, command_interaction& ci);
 
 /**
  * @brief A button click for a button component
  */
-struct DPP_API component_interaction {
+DPP_EXPORT struct DPP_API component_interaction {
 	/**
 	 * @brief Component type (dpp::component_type)
 	 */
@@ -905,7 +911,7 @@ struct DPP_API component_interaction {
 /**
  * @brief An auto complete interaction
  */
-struct DPP_API autocomplete_interaction : public command_interaction {
+DPP_EXPORT struct DPP_API autocomplete_interaction : public command_interaction {
 };
 
 /**
@@ -916,7 +922,7 @@ struct DPP_API autocomplete_interaction : public command_interaction {
  * @param j output json object
  * @param bi button_interaction to be deserialized
  */
-void from_json(const nlohmann::json& j, component_interaction& bi);
+DPP_EXPORT void from_json(const nlohmann::json& j, component_interaction& bi);
 
 /**
  * @brief helper function to deserialize an autocomplete_interaction from json
@@ -926,7 +932,7 @@ void from_json(const nlohmann::json& j, component_interaction& bi);
  * @param j output json object
  * @param ai autocomplete_interaction to be deserialized
  */
-void from_json(const nlohmann::json& j, autocomplete_interaction& ai);
+DPP_EXPORT void from_json(const nlohmann::json& j, autocomplete_interaction& ai);
 
 /**
  * @brief An interaction represents a user running a command and arrives
@@ -934,7 +940,7 @@ void from_json(const nlohmann::json& j, autocomplete_interaction& ai);
  * into the events on_form_submit, on_slashcommand, on_user_context_menu,
  * on_button_click, on_select_menu, etc.
  */
-class DPP_API interaction : public managed, public json_interface<interaction> {
+DPP_EXPORT class DPP_API interaction : public managed, public json_interface<interaction> {
 protected:
 	friend struct json_interface<interaction>;
 
@@ -1259,12 +1265,12 @@ public:
  * @param j output json object
  * @param i interaction to be deserialized
  */
-void from_json(const nlohmann::json& j, interaction& i);
+DPP_EXPORT void from_json(const nlohmann::json& j, interaction& i);
 
 /**
  * @brief type of permission in the dpp::command_permission class
  */
-enum command_permission_type {
+DPP_EXPORT enum command_permission_type {
 	/**
 	 * @brief Role permission
 	 */
@@ -1280,7 +1286,7 @@ enum command_permission_type {
  * @brief Application command permissions allow you to enable or
  * disable commands for specific users or roles within a guild
  */
-class DPP_API command_permission : public json_interface<command_permission> {
+DPP_EXPORT class DPP_API command_permission : public json_interface<command_permission> {
 protected:
 	friend struct json_interface<command_permission>;
 
@@ -1333,12 +1339,12 @@ public:
  * @param j output json object
  * @param cp command_permission to be serialized
  */
-void to_json(nlohmann::json& j, const command_permission& cp);
+DPP_EXPORT void to_json(nlohmann::json& j, const command_permission& cp);
 
 /**
  * @brief Returned when fetching the permissions for a command in a guild.
  */
-class DPP_API guild_command_permissions : public json_interface<guild_command_permissions> {
+DPP_EXPORT class DPP_API guild_command_permissions : public json_interface<guild_command_permissions> {
 protected:
 	friend struct json_interface<guild_command_permissions>;
 
@@ -1388,13 +1394,13 @@ public:
  * @param j output json object
  * @param gcp guild_command_permissions to be serialized
  */
-void to_json(nlohmann::json& j, const guild_command_permissions& gcp);
+DPP_EXPORT void to_json(nlohmann::json& j, const guild_command_permissions& gcp);
 
 /**
  * @brief Represents an application command, created by your bot
  * either globally, or on a guild.
  */
-class DPP_API slashcommand : public managed, public json_interface<slashcommand> {
+DPP_EXPORT class DPP_API slashcommand : public managed, public json_interface<slashcommand> {
 protected:
 	friend struct json_interface<slashcommand>;
 
@@ -1654,16 +1660,16 @@ public:
  * @param j output json object
  * @param cmd slashcommand to be serialized
  */
-void to_json(nlohmann::json& j, const slashcommand& cmd);
+DPP_EXPORT void to_json(nlohmann::json& j, const slashcommand& cmd);
 
 /**
  * @brief A group of application slash commands
  */
-typedef std::unordered_map<snowflake, slashcommand> slashcommand_map;
+DPP_EXPORT typedef std::unordered_map<snowflake, slashcommand> slashcommand_map;
 
 /**
  * @brief A group of guild command permissions
  */
-typedef std::unordered_map<snowflake, guild_command_permissions> guild_command_permissions_map;
+DPP_EXPORT typedef std::unordered_map<snowflake, guild_command_permissions> guild_command_permissions_map;
 
 }

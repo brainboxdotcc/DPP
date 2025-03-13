@@ -21,18 +21,23 @@
  ************************************************************************************/
 
 #pragma once
+
+#if !DPP_BUILD_MODULES
+
 #include <dpp/export.h>
 #include <dpp/snowflake.h>
 #include <dpp/managed.h>
 #include <dpp/channel.h>
 #include <dpp/message.h>
 
+#endif
+
 namespace dpp {
 
 /**
  * @brief represents membership of a user with a thread
  */
-struct DPP_API thread_member : public json_interface<thread_member> {
+DPP_EXPORT struct DPP_API thread_member : public json_interface<thread_member> {
 protected:
 	friend struct json_interface<thread_member>;
 
@@ -68,12 +73,12 @@ public:
 /**
  * @brief A group of thread member objects. the key is the user_id of the dpp::thread_member
  */
-typedef std::unordered_map<snowflake, thread_member> thread_member_map;
+DPP_EXPORT typedef std::unordered_map<snowflake, thread_member> thread_member_map;
 
 /**
  * @brief metadata for threads
  */
-struct DPP_API thread_metadata {
+DPP_EXPORT struct DPP_API thread_metadata {
 	/**
 	 * @brief Timestamp when the thread's archive status was last changed, used for calculating recent activity.
 	 */
@@ -104,7 +109,7 @@ struct DPP_API thread_metadata {
 /** @brief A definition of a discord thread.
  * A thread is a superset of a channel. Not to be confused with `std::thread`!
  */
-class DPP_API thread : public channel, public json_interface<thread> {
+DPP_EXPORT class DPP_API thread : public channel, public json_interface<thread> {
 protected:
 	friend struct json_interface<thread>;
 
@@ -206,17 +211,17 @@ public:
  * @param j JSON object to serialize to
  * @param tmdata object to serialize
  */
-void to_json(nlohmann::json& j, const thread_metadata& tmdata);
+DPP_EXPORT void to_json(nlohmann::json& j, const thread_metadata& tmdata);
 
 /**
  * @brief A group of threads
  */
-typedef std::unordered_map<snowflake, thread> thread_map;
+DPP_EXPORT typedef std::unordered_map<snowflake, thread> thread_map;
 
 /**
  * @brief A thread alongside the bot's optional thread_member object tied to it
  */
-struct active_thread_info {
+DPP_EXPORT struct active_thread_info {
 	/**
 	 * @brief The thread object
 	 */
@@ -231,6 +236,6 @@ struct active_thread_info {
 /**
  * @brief A map of threads alongside optionally the thread_member tied to the bot if it is in the thread. The map's key is the thread id. Returned from the cluster::threads_get_active method
  */
-using active_threads = std::map<snowflake, active_thread_info>;
+DPP_EXPORT using active_threads = std::map<snowflake, active_thread_info>;
 
 }

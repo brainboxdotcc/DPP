@@ -21,11 +21,17 @@
  ************************************************************************************/
 
 #pragma once
+
 #include <dpp/export.h>
+
+#if !DPP_BUILD_MODULES
+
 #include <dpp/snowflake.h>
 #include <dpp/json_fwd.h>
 #include <dpp/json_interface.h>
 #include <unordered_map>
+
+#endif
 
 namespace dpp {
 
@@ -33,7 +39,7 @@ namespace dpp {
  * @brief The ban class represents a ban on a guild.
  * 
  */
-class DPP_API ban : public json_interface<ban> {
+DPP_EXPORT class DPP_API ban : public json_interface<ban> {
 protected:
 	friend struct json_interface<ban>;
 
@@ -64,6 +70,6 @@ public:
 /**
  * @brief A group of bans. The key is the user ID.
  */
-typedef std::unordered_map<snowflake, ban> ban_map;
+DPP_EXPORT typedef std::unordered_map<snowflake, ban> ban_map;
 
 }

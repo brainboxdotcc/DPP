@@ -283,7 +283,7 @@ public:
 	/**
 	 * @brief Cluster we are attached to for issuing REST calls
 	 */
-	class cluster* owner;
+	cluster* owner;
 
 	/**
 	 * @brief Application ID
@@ -323,7 +323,7 @@ public:
 	 * @param application_id The application id of the bot. If not specified, the class will
 	 * look within the cluster object and use cluster::me::id instead.
 	 */
-	commandhandler(class cluster* o, bool auto_hook_events = true, snowflake application_id = 0);
+	commandhandler(cluster* o, bool auto_hook_events = true, snowflake application_id = 0);
 
 	/**
 	 * @brief Destroy the commandhandler object
@@ -335,7 +335,7 @@ public:
 	 * 
 	 * @param o Owning cluster to attach to
 	 */
-	commandhandler& set_owner(class cluster* o);
+	commandhandler& set_owner(cluster* o);
 
 	/**
 	 * @brief Add a prefix to the command handler

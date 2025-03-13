@@ -58,7 +58,8 @@ protected:
 	/**
 	 * @brief Owning cluster.
 	 */
-	class cluster* owner;
+	cluster* owner;
+
 private:
 	/**
 	 * @brief Timed listener.
@@ -84,7 +85,7 @@ public:
 	 * @param duration Duration in seconds to run the collector for
 	 * @param event Event to attach to, e.g. cluster::on_message_create
 	 */
-	collector(class cluster* cl, uint64_t duration, event_router_t<T> & event) : owner(cl), triggered(false) {
+	collector(cluster* cl, uint64_t duration, event_router_t<T> & event) : owner(cl), triggered(false) {
 		std::function<void(const T&)> f = [this](const T& event) {
 			const C* v = filter(event);
 			if (v) {

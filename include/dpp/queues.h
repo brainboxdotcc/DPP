@@ -20,7 +20,11 @@
  *
  ************************************************************************************/
 #pragma once
+
 #include <dpp/export.h>
+
+#if !DPP_BUILD_MODULES
+
 #include <unordered_map>
 #include <string>
 #include <queue>
@@ -32,12 +36,14 @@
 #include <atomic>
 #include <dpp/httpsclient.h>
 
+#endif
+
 namespace dpp {
 
 /**
  * @brief Error values. Most of these are currently unused in https_client.
  */
-enum http_error : uint8_t {
+DPP_EXPORT enum http_error : uint8_t {
 	/**
 	 * @brief Request successful.
 	 */
@@ -108,7 +114,7 @@ enum http_error : uint8_t {
  * @brief The result of any HTTP request. Contains the headers, vital
  * rate limit figures, and returned request body.
  */
-struct DPP_API http_request_completion_t {
+DPP_EXPORT struct DPP_API http_request_completion_t {
 	/**
 	 * @brief HTTP headers of response.
 	 */
@@ -177,12 +183,12 @@ struct DPP_API http_request_completion_t {
  * correctly ensures that the order they arrive in the queue does not negatively affect
  * your code.
  */
-typedef std::function<void(const http_request_completion_t&)> http_completion_event;
+DPP_EXPORT typedef std::function<void(const http_request_completion_t&)> http_completion_event;
 
 /** 
  * @brief Various types of http method supported by the Discord API
  */
-enum http_method {
+DPP_EXPORT enum http_method {
 	/**
 	 * @brief GET.
 	 */
@@ -219,7 +225,7 @@ enum http_method {
  * will not respect rate limits, as both of these functions are managed by the
  * request_queue class.
  */
-class DPP_API http_request {
+DPP_EXPORT class DPP_API http_request {
 	/**
 	 * @brief Completion callback.
 	 */
@@ -380,7 +386,7 @@ public:
  * @brief A rate limit bucket. The library builds one of these for
  * each endpoint.
  */
-struct DPP_API bucket_t {
+DPP_EXPORT struct DPP_API bucket_t {
 	/**
 	 * @brief Request limit.
 	 */
@@ -416,7 +422,7 @@ struct DPP_API bucket_t {
  * Each of these also has its own mutex, making it thread safe to call and use these
  * from anywhere in the code.
  */
-class DPP_API request_concurrency_queue {
+DPP_EXPORT class DPP_API request_concurrency_queue {
 public:
 	/**
 	 * @brief Queue index
@@ -436,7 +442,7 @@ public:
 	/**
 	 * @brief The cluster that owns this request_concurrency_queue.
 	 */
-	class cluster* creator;
+	cluster* creator;
 
 	/**
 	 * @brief Inbound queue mutex thread safety.
@@ -479,7 +485,7 @@ public:
 	 * @param req_q Owning request queue
 	 * @param index Queue index number, uniquely identifies this queue for hashing
 	 */
-	request_concurrency_queue(class cluster* owner, class request_queue* req_q, uint32_t index);
+	request_concurrency_queue(cluster* owner, class request_queue* req_q, uint32_t index);
 
 	/**
 	 * @brief Destroy the concurrency queue object
@@ -520,7 +526,7 @@ public:
  * one for user requests can be specifically configured to never ever send the Discord token
  * unless it is explicitly placed into the request, for security reasons.
  */
-class DPP_API request_queue {
+DPP_EXPORT class DPP_API request_queue {
 public:
 	/**
 	 * @brief Required so request_concurrency_queue can access these member variables
@@ -530,7 +536,7 @@ public:
 	/**
 	 * @brief The cluster that owns this request_queue
 	 */
-	class cluster* creator;
+	cluster* creator;
 
 	/**
 	 * @brief A completed request. Contains both the request and the response
@@ -600,7 +606,7 @@ public:
 	 * By default eight concurrency queues are allocated.
 	 * Side effects: Creates timers for the queue
 	 */
-	request_queue(class cluster* owner, uint32_t request_concurrency = 8);
+	request_queue(cluster* owner, uint32_t request_concurrency = 8);
 
 	/**
 	 * @brief Get the request queue concurrency count

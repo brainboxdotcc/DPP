@@ -19,7 +19,12 @@
  *
  ************************************************************************************/
 #pragma once
+
 #include <dpp/export.h>
+
+#if !DPP_BUILD_MODULES
+
+#include <dpp/dpp_fwd.h>
 #include <dpp/queues.h>
 #include <dpp/snowflake.h>
 #include <dpp/managed.h>
@@ -31,12 +36,14 @@
 #include <dpp/json_fwd.h>
 #include <dpp/json_interface.h>
 
+#endif
+
 namespace dpp {
 
 /**
  * @brief Represents the type of a component
  */
-enum component_type : uint8_t {
+DPP_EXPORT enum component_type : uint8_t {
 	/**
 	 * @brief Action row, a container for other components.
 	 */
@@ -86,7 +93,7 @@ enum component_type : uint8_t {
  *
  * @note This is a **very** scaled down version of dpp::emoji, we advise that you refrain from using this.
  */
-struct partial_emoji {
+DPP_EXPORT struct partial_emoji {
 	/**
 	 * @brief The name of the emoji.
 	 *
@@ -120,14 +127,14 @@ struct partial_emoji {
  *
  * @see partial_emoji
  */
-using component_emoji = partial_emoji;
+DPP_EXPORT using component_emoji = partial_emoji;
 
 /**
  * @brief The data for a file attached to a message.
  *
  * @todo Change the naming of this and make stickers (and potentially anything else that has data like this) use this.
  */
-struct message_file_data {
+DPP_EXPORT struct message_file_data {
 	/**
 	 * @brief Name of file to upload (for use server-side in discord's url).
 	 */
@@ -149,7 +156,7 @@ struct message_file_data {
 /**
  * @brief Types of text input
  */
-enum text_style_type : uint8_t {
+DPP_EXPORT enum text_style_type : uint8_t {
 	/**
 	 * @brief Intended for short single-line text.
 	 */
@@ -164,7 +171,7 @@ enum text_style_type : uint8_t {
 /**
  * @brief Represents the style of a button
  */
-enum component_style : uint8_t {
+DPP_EXPORT enum component_style : uint8_t {
 	/**
 	 * @brief Blurple; Primary
 	 */
@@ -203,7 +210,7 @@ enum component_style : uint8_t {
  *
  * @note They're different to discord's value types
  */
-enum component_default_value_type: uint8_t {
+DPP_EXPORT enum component_default_value_type: uint8_t {
 	cdt_user = 0,
 	cdt_role = 1,
 	cdt_channel = 2,
@@ -212,7 +219,7 @@ enum component_default_value_type: uint8_t {
 /**
  * @brief A Default value structure for components
  */
-struct DPP_API component_default_value {
+DPP_EXPORT struct DPP_API component_default_value {
 	/**
 	 * @brief The type this default value represents
 	 */
@@ -227,7 +234,7 @@ struct DPP_API component_default_value {
 /**
  * @brief An option for a select component
  */
-struct DPP_API select_option : public json_interface<select_option> {
+DPP_EXPORT struct DPP_API select_option : public json_interface<select_option> {
 protected:
 	friend struct json_interface<select_option>;
 
@@ -345,7 +352,7 @@ public:
  * using component::add_component(), so that the parent
  * object is an action row and the child objects are buttons.
  */
-class DPP_API component : public json_interface<component> {
+DPP_EXPORT class DPP_API component : public json_interface<component> {
 protected:
 	friend struct json_interface<component>;
 
@@ -686,7 +693,7 @@ public:
 /**
  * @brief A footer in a dpp::embed
  */
-struct DPP_API embed_footer {
+DPP_EXPORT struct DPP_API embed_footer {
 	/**
 	 * @brief Footer text
 	 */
@@ -727,9 +734,9 @@ struct DPP_API embed_footer {
 };
 
 /**
- * @brief An video, image or thumbnail in a dpp::embed
+ * @brief A video, image or thumbnail in a dpp::embed
  */
-struct DPP_API embed_image {
+DPP_EXPORT struct DPP_API embed_image {
 	/**
 	 * @brief URL to image or video.
 	 */
@@ -754,7 +761,7 @@ struct DPP_API embed_image {
 /**
  * @brief Embed provider in a dpp::embed. Received from discord but cannot be sent
  */
-struct DPP_API embed_provider {
+DPP_EXPORT struct DPP_API embed_provider {
 	/**
 	 * @brief Provider name.
 	 */
@@ -769,7 +776,7 @@ struct DPP_API embed_provider {
 /**
  * @brief Author within a dpp::embed object
  */
-struct DPP_API embed_author {
+DPP_EXPORT struct DPP_API embed_author {
 	/**
 	 * @brief Author name.
 	 */
@@ -798,7 +805,7 @@ struct DPP_API embed_author {
 /**
  * @brief A dpp::embed may contain zero or more fields.
  */
-struct DPP_API embed_field {
+DPP_EXPORT struct DPP_API embed_field {
 	/**
 	 * @brief Name of field (max length 256).
 	 */
@@ -818,7 +825,7 @@ struct DPP_API embed_field {
 /**
  * @brief A rich embed for display within a dpp::message.
  */
-struct DPP_API embed {
+DPP_EXPORT struct DPP_API embed {
 	/**
 	 * @brief Optional: Title of embed.
 	 */
@@ -1021,7 +1028,7 @@ struct DPP_API embed {
 /**
  * @brief Represents a reaction to a dpp::message.
  */
-struct DPP_API reaction {
+DPP_EXPORT struct DPP_API reaction {
 	/**
 	 * @brief Total number of times this emoji has been used to react (including super reacts)
 	 */
@@ -1084,7 +1091,7 @@ struct DPP_API reaction {
 /**
  * @brief Bitmask flags for a dpp::attachment
  */
-enum attachment_flags : uint8_t {
+DPP_EXPORT enum attachment_flags : uint8_t {
 	/**
 	 * @brief This attachment has been edited using the remix feature on mobile.
 	 */
@@ -1094,7 +1101,7 @@ enum attachment_flags : uint8_t {
 /**
  * @brief Represents an attachment in a dpp::message
  */
-struct DPP_API attachment {
+DPP_EXPORT struct DPP_API attachment {
 	/**
 	 * @brief ID of attachment.
 	 */
@@ -1224,7 +1231,7 @@ struct DPP_API attachment {
 /**
  * @brief Represents the type of a sticker
  */
-enum sticker_type : uint8_t {
+DPP_EXPORT enum sticker_type : uint8_t {
 	/**
 	 * @brief An official sticker in a pack.
 	 */
@@ -1239,7 +1246,7 @@ enum sticker_type : uint8_t {
 /**
  * @brief The file format (png, apng, lottie) of a sticker
  */
-enum sticker_format : uint8_t {
+DPP_EXPORT enum sticker_format : uint8_t {
 	sf_png = 1,
 	sf_apng = 2,
 	sf_lottie = 3,
@@ -1249,7 +1256,7 @@ enum sticker_format : uint8_t {
 /**
  * @brief Represents stickers received in messages
  */
-struct DPP_API sticker : public managed, public json_interface<sticker> {
+DPP_EXPORT struct DPP_API sticker : public managed, public json_interface<sticker> {
 protected:
 	friend struct json_interface<sticker>;
 
@@ -1378,7 +1385,7 @@ public:
 /**
  * @brief Represents a sticker pack (the built in groups of stickers that all nitro users get to use)
  */
-struct DPP_API sticker_pack : public managed, public json_interface<sticker_pack> {
+DPP_EXPORT struct DPP_API sticker_pack : public managed, public json_interface<sticker_pack> {
 protected:
 	friend struct json_interface<sticker_pack>;
 
@@ -1432,7 +1439,7 @@ public:
  * @note At the time of writing Discord only has 1, "The, uhm, default layout type."
  * @see https://discord.com/developers/docs/resources/poll#layout-type
  */
-enum poll_layout_type {
+DPP_EXPORT enum poll_layout_type {
 	/**
 	 * @brief According to Discord, quote, "The, uhm, default layout type."
 	 */
@@ -1444,7 +1451,7 @@ enum poll_layout_type {
  *
  * @see https://discord.com/developers/docs/resources/poll#poll-media-object-poll-media-object-structure
  */
-struct poll_media {
+DPP_EXPORT struct poll_media {
 	/**
 	 * @brief Text of the media
 	 */
@@ -1461,7 +1468,7 @@ struct poll_media {
  *
  * @see https://discord.com/developers/docs/resources/poll#poll-answer-object-poll-answer-object-structure
  */
-struct poll_answer {
+DPP_EXPORT struct poll_answer {
 	/**
 	 * @brief ID of the answer. Only sent by the Discord API, this is a dead field when creating a poll.
 	 *
@@ -1482,7 +1489,7 @@ struct poll_answer {
  *
  * @see https://discord.com/developers/docs/resources/poll#poll-results-object-poll-results-object-structure
  */
-struct poll_results {
+DPP_EXPORT struct poll_results {
 	/**
 	 * @brief Represents a reference to an answer and its count of votes
 	 *
@@ -1527,7 +1534,7 @@ struct poll_results {
  *
  * @see https://discord.com/developers/docs/resources/poll
  */
-struct DPP_API poll {
+DPP_EXPORT struct DPP_API poll {
 	/**
 	 * @brief Poll question. At the time of writing only the text field is supported by Discord
 	 *
@@ -1664,7 +1671,7 @@ struct DPP_API poll {
 /**
  * @brief Bitmask flags for a dpp::message
  */
-enum message_flags : uint16_t {
+DPP_EXPORT enum message_flags : uint16_t {
 	/**
 	 * @brief This message has been published to subscribed channels (via Channel Following).
 	 */
@@ -1727,7 +1734,7 @@ enum message_flags : uint16_t {
  *
  * @note The only type a bot can send is dpp::embed_type::emt_rich.
  */
-namespace embed_type {
+DPP_EXPORT namespace embed_type {
 	/**
 	 * @brief Rich text
 	 */
@@ -1767,7 +1774,7 @@ namespace embed_type {
 /**
  * @brief Message types for dpp::message::type
  */
-enum message_type {
+DPP_EXPORT enum message_type {
 	/**
 	 * @brief Default
 	 */
@@ -1929,7 +1936,7 @@ enum message_type {
 /**
  * @brief Represents the caching policy of a cache in the library.
  */
-enum cache_policy_setting_t {
+DPP_EXPORT enum cache_policy_setting_t {
 	/**
 	 * @brief request aggressively on seeing new guilds, and also store missing data from messages.
 	 * This is the default behaviour and the least memory-efficient option. Memory usage will increase
@@ -1961,7 +1968,7 @@ enum cache_policy_setting_t {
  * going out of the way to fill the caches completely. On large bots this
  * can take a LOT of RAM.
  */
-struct DPP_API cache_policy_t {
+DPP_EXPORT struct DPP_API cache_policy_t {
 	/**
 	 * @brief Caching policy for users and guild members
 	 */
@@ -1991,7 +1998,7 @@ struct DPP_API cache_policy_t {
 /**
  * @brief Contains a set of predefined cache policies for use when constructing a dpp::cluster
  */
-namespace cache_policy {
+DPP_EXPORT namespace cache_policy {
 
 	/**
 	 * @brief A shortcut constant for all caching enabled for use in dpp::cluster constructor
@@ -2013,7 +2020,7 @@ namespace cache_policy {
 /**
  * @brief Metadata about the interaction, including the source of the interaction and relevant server and user IDs.
  */
-struct DPP_API interaction_metadata_type {
+DPP_EXPORT struct DPP_API interaction_metadata_type {
 
 	/**
 	 * @brief ID of the interaction
@@ -2050,7 +2057,7 @@ struct DPP_API interaction_metadata_type {
 /**
  * @brief Message Reference type
  */
-enum DPP_API message_ref_type : uint8_t {
+DPP_EXPORT enum DPP_API message_ref_type : uint8_t {
 	/**
 	 * A reply or crosspost
 	 */
@@ -2061,14 +2068,14 @@ enum DPP_API message_ref_type : uint8_t {
 	mrt_forward = 1,
 };
 
-template <typename T> struct message_snapshot {
+DPP_EXPORT template <typename T> struct message_snapshot {
 	std::vector<T> messages;
 };
 
 	/**
  * @brief Represents messages sent and received on Discord
  */
-struct DPP_API message : public managed, json_interface<message> {
+DPP_EXPORT struct DPP_API message : public managed, json_interface<message> {
 protected:
 	friend struct json_interface<message>;
 
@@ -2294,7 +2301,7 @@ public:
 	/**
 	 * @brief The cluster which created this message object.
 	 */
-	class cluster* owner;
+	cluster* owner;
 
 	/**
 	 * @brief Message type.
@@ -2349,7 +2356,7 @@ public:
 	 * Owning cluster is optional (can be nullptr) and if nulled, will prevent some functions
 	 * such as attachment::download from functioning (they will throw, if used)
 	 */
-	message(class cluster* o);
+	message(cluster* o);
 
 	/**
 	 * @brief Construct a new message object with a channel and content
@@ -2681,16 +2688,16 @@ public:
 /**
  * @brief A group of messages
  */
-typedef std::unordered_map<snowflake, message> message_map;
+DPP_EXPORT typedef std::unordered_map<snowflake, message> message_map;
 
 /**
  * @brief A group of stickers
  */
-typedef std::unordered_map<snowflake, sticker> sticker_map;
+DPP_EXPORT typedef std::unordered_map<snowflake, sticker> sticker_map;
 
 /**
  * @brief A group of sticker packs
  */
-typedef std::unordered_map<snowflake, sticker_pack> sticker_pack_map;
+DPP_EXPORT typedef std::unordered_map<snowflake, sticker_pack> sticker_pack_map;
 
 }

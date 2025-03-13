@@ -21,9 +21,10 @@
  ************************************************************************************/
 #pragma once
 
+#include <dpp/export.h>
+
 #if !DPP_BUILD_MODULES
 
-#include <dpp/export.h>
 #include <string>
 #include <exception>
 #include <algorithm>

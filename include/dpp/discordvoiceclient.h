@@ -22,6 +22,7 @@
 #pragma once
 
 #include <dpp/export.h>
+#include <dpp/dpp_fwd.h>
 
 #include <cerrno>
 #include <cstdio>
@@ -106,9 +107,6 @@ protected:
 	std::deque<int64_t> values{};
 	uint64_t collectionCount{};
 };
-
-// Forward declaration
-class cluster;
 
 /**
  * @brief An opus-encoded RTP packet to be sent out to a voice channel

@@ -63,6 +63,10 @@
 #  define DPP_BUILD_MODULES 0
 #endif
 
+#if !defined(DPP_USE_MODULES)
+#  define DPP_USE_MODULES 0
+#endif
+
 #if !defined(DPP_IMPORT_STD)
 #  define DPP_IMPORT_STD 0
 #endif

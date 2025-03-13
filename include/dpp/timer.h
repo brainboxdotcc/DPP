@@ -26,6 +26,7 @@
 
 #if !DPP_BUILD_MODULES
 
+#include <dpp/dpp_fwd.h>
 #include <cstdint>
 #include <map>
 #include <unordered_map>
@@ -44,17 +45,17 @@ namespace dpp {
  * Returned from cluster::start_timer and used by cluster::stop_timer.
  * This is obtained from a simple incrementing value, internally.
  */
-typedef size_t timer;
+DPP_EXPORT typedef size_t timer;
 
 /**
  * @brief The type for a timer callback
  */
-typedef std::function<void(timer)> timer_callback_t;
+DPP_EXPORT typedef std::function<void(timer)> timer_callback_t;
 
 /**
  * @brief Used internally to store state of active timers
  */
-struct DPP_API timer_t {
+DPP_EXPORT struct DPP_API timer_t {
 	/**
 	 * @brief Timer handle
 	 */
@@ -84,7 +85,7 @@ struct DPP_API timer_t {
 /**
  * @brief Used to compare two timers next tick times in a priority queue
  */
-struct DPP_API timer_comparator {
+DPP_EXPORT struct DPP_API timer_comparator {
 	/**
 	 * @brief Compare two timers
 	 * @param a first timer
@@ -101,24 +102,24 @@ struct DPP_API timer_comparator {
  * @brief A priority timers, ordered by earliest first so that the head is always the
  * soonest to be due.
  */
-typedef std::priority_queue<timer_t, std::vector<timer_t>, timer_comparator> timer_next_t;
+DPP_EXPORT typedef std::priority_queue<timer_t, std::vector<timer_t>, timer_comparator> timer_next_t;
 
 /**
  * @brief A set of deleted timer handles
  */
-typedef std::set<timer> timers_deleted_t;
+DPP_EXPORT typedef std::set<timer> timers_deleted_t;
 
 /**
  * @brief Trigger a timed event once.
  * The provided callback is called only once.
  */
-class DPP_API oneshot_timer
+DPP_EXPORT class DPP_API oneshot_timer
 {
 private:
 	/**
 	 * @brief Owning cluster.
 	 */
-	class cluster* owner;
+	cluster* owner;
 
 	/**
 	 * @brief Timer handle.
@@ -132,7 +133,7 @@ public:
 	 * @param duration duration before firing
 	 * @param callback callback to call on firing
 	 */
-	oneshot_timer(class cluster* cl, uint64_t duration, timer_callback_t callback);
+	oneshot_timer(cluster* cl, uint64_t duration, timer_callback_t callback);
 
 	/**
 	 * @brief Get the handle for the created one-shot timer

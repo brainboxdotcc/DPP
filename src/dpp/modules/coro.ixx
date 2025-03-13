@@ -1,7 +1,6 @@
 module;
 
 #include "modules.h"
-#include "dpp/dpp_fwd.h"
 
 #if !DPP_IMPORT_STD
 
@@ -41,7 +40,7 @@ module;
 
 #endif
 
-export module dpp.coro;
+export module dpp:coro;
 
 #if DPP_IMPORT_STD
 
@@ -49,8 +48,8 @@ import std;
 
 #endif
 
-import dpp.base;
-import dpp.utility;
+import :base;
+import :utility;
 
 #include "dpp/coro/coro.h"
 #include "dpp/coro/job.h"

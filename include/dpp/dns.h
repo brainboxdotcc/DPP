@@ -20,6 +20,9 @@
  ************************************************************************************/
 #pragma once
 #include <dpp/export.h>
+
+#if !DPP_BUILD_MODULES
+
 #ifdef _WIN32
 #include <WinSock2.h>
 #include <WS2tcpip.h>
@@ -35,13 +38,15 @@
 #include <memory>
 #include <dpp/socket.h>
 
+#endif
+
 namespace dpp {
 
 	/**
 	 * @brief Represents a cached DNS result.
 	 * Used by the ssl_client class to store cached copies of dns lookups.
 	 */
-	struct DPP_API dns_cache_entry {
+	DPP_EXPORT struct DPP_API dns_cache_entry {
 		/**
 		 * @brief Resolved address metadata
 		 */
@@ -84,7 +89,7 @@ namespace dpp {
 	/**
 	 * @brief Cache container type
 	 */
-	using dns_cache_t = std::unordered_map<std::string, std::unique_ptr<dns_cache_entry>>;
+	DPP_EXPORT using dns_cache_t = std::unordered_map<std::string, std::unique_ptr<dns_cache_entry>>;
 
 	/**
 	 * @brief Resolve a hostname to an addrinfo
@@ -94,5 +99,5 @@ namespace dpp {
 	 * @return dns_cache_entry* First IP address associated with the hostname DNS record
 	 * @throw dpp::connection_exception On failure to resolve hostname
 	 */
-	DPP_API const dns_cache_entry *resolve_hostname(const std::string &hostname, const std::string &port);
+	DPP_EXPORT DPP_API const dns_cache_entry *resolve_hostname(const std::string &hostname, const std::string &port);
 	}

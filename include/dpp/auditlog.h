@@ -21,18 +21,23 @@
  ************************************************************************************/
 
 #pragma once
+
+#if !DPP_BUILD_MODULES
+
 #include <dpp/export.h>
 #include <dpp/snowflake.h>
 #include <dpp/json_fwd.h>
 #include <optional>
 #include <dpp/json_interface.h>
 
+#endif
+
 namespace dpp {
 
 /**
  * @brief Defines types of audit log entry
  */
-enum audit_type {
+DPP_EXPORT enum audit_type {
 	/**
 	 * @brief Guild update
 	 */
@@ -317,7 +322,7 @@ enum audit_type {
 /**
  * @brief Defines audit log changes
  */
-struct DPP_API audit_change {
+DPP_EXPORT struct DPP_API audit_change {
 	/**
 	 * @brief Optional: Serialised new value of the change, e.g. for nicknames, the new nickname.
 	 */
@@ -338,7 +343,7 @@ struct DPP_API audit_change {
 /**
  * @brief Extra information for an audit log entry
  */
-struct DPP_API audit_extra {
+DPP_EXPORT struct DPP_API audit_extra {
 	/**
 	 * @brief Name of the Auto Moderation rule that was triggered.
 	 */
@@ -398,7 +403,7 @@ struct DPP_API audit_extra {
 /**
  * @brief An individual audit log entry
  */
-struct DPP_API audit_entry : public json_interface<audit_entry> {
+DPP_EXPORT struct DPP_API audit_entry : public json_interface<audit_entry> {
 protected:
 	friend struct json_interface<audit_entry>;
 
@@ -455,7 +460,7 @@ public:
 /**
  * @brief The auditlog class represents the audit log entries of a guild.
  */
-class DPP_API auditlog : public json_interface<auditlog> {
+DPP_EXPORT class DPP_API auditlog : public json_interface<auditlog> {
 protected:
 	friend struct json_interface<auditlog>;
 
