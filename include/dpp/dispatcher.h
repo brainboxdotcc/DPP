@@ -20,7 +20,11 @@
  *
  ************************************************************************************/
 #pragma once
+
 #include <dpp/export.h>
+
+#if !DPP_BUILD_MODULES
+#include <dpp/dpp_fwd.h>
 #include <dpp/snowflake.h>
 #include <dpp/misc-enum.h>
 #include <dpp/managed.h>
@@ -54,12 +58,9 @@
 #include <dpp/coro.h>
 #endif /* DPP_NO_CORO */
 
-namespace dpp {
+#endif
 
-/* Forward declaration */
-struct confirmation_callback_t;
-class discord_client;
-class discord_voice_client;
+DPP_EXPORT namespace dpp {
 
 /**
  * @brief A function used as a callback for any REST based command

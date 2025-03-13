@@ -20,17 +20,21 @@
  *
  ************************************************************************************/
 #pragma once
+
 #include <dpp/export.h>
+
+#if !DPP_BUILD_MODULES
 #include <dpp/snowflake.h>
 #include <dpp/json_fwd.h>
 #include <dpp/json_interface.h>
+#endif
 
 namespace dpp {
 
 /**
  * @brief Defines a request to count prunable users, or start a prune operation
  */
-struct DPP_API prune : public json_interface<prune> {
+DPP_EXPORT struct DPP_API prune : public json_interface<prune> {
 protected:
 	friend struct json_interface<prune>;
 

@@ -22,8 +22,8 @@
 #pragma once
 
 #include <dpp/export.h>
-#include <dpp/dpp_fwd.h>
 
+#if !DPP_BUILD_MODULES
 #include <cerrno>
 #include <cstdio>
 #include <cstdlib>
@@ -34,13 +34,6 @@
 #include <string>
 #include <map>
 #include <vector>
-#include <dpp/json_fwd.h>
-#include <dpp/wsclient.h>
-#include <dpp/dispatcher.h>
-#include <dpp/cluster.h>
-#include <dpp/discordevents.h>
-#include <dpp/socket.h>
-#include <dpp/socketengine.h>
 #include <queue>
 #include <thread>
 #include <deque>
@@ -51,12 +44,21 @@
 #include <functional>
 #include <chrono>
 #include <set>
+#include <dpp/dpp_fwd.h>
+#include <dpp/json_fwd.h>
+#include <dpp/wsclient.h>
+#include <dpp/dispatcher.h>
+#include <dpp/cluster.h>
+#include <dpp/discordevents.h>
+#include <dpp/socket.h>
+#include <dpp/socketengine.h>
+#endif
 
-struct OpusDecoder;
-struct OpusEncoder;
-struct OpusRepacketizer;
+DPP_EXPORT struct OpusDecoder;
+DPP_EXPORT struct OpusEncoder;
+DPP_EXPORT struct OpusRepacketizer;
 
-namespace dpp {
+DPP_EXPORT namespace dpp {
 
 /**
  * @brief Sample rate for OPUS (48khz)
@@ -73,7 +75,6 @@ namespace dpp {
  */
 [[maybe_unused]] inline constexpr uint8_t voice_protocol_version = 8;
 
-
 class audio_mixer;
 
 namespace dave::mls {
@@ -81,9 +82,9 @@ namespace dave::mls {
 }
 
 // !TODO: change these to constexpr and rename every occurrence across the codebase
-#define AUDIO_TRACK_MARKER (uint16_t)0xFFFF
+inline constexpr auto AUDIO_TRACK_MARKER = uint16_t{ 0xFFFF };
 
-#define AUDIO_OVERLAP_SLEEP_SAMPLES 30
+inline constexpr auto AUDIO_OVERLAP_SLEEP_SAMPLES = 30;
 
 inline constexpr size_t send_audio_raw_max_length = 11520;
 

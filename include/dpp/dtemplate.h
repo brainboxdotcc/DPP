@@ -21,17 +21,20 @@
  ************************************************************************************/
 #pragma once
 #include <dpp/export.h>
+
+#if !DPP_BUILD_MODULES
 #include <dpp/snowflake.h>
 #include <dpp/json_fwd.h>
 #include <unordered_map>
 #include <dpp/json_interface.h>
+#endif
 
 namespace dpp {
 
 /**
  * @brief Represents a guild template
  */
-class DPP_API dtemplate : public json_interface<dtemplate> {
+DPP_EXPORT class DPP_API dtemplate : public json_interface<dtemplate> {
 protected:
 	friend struct json_interface<dtemplate>;
 
@@ -110,6 +113,6 @@ public:
 /**
  * @brief A container of invites
  */
-typedef std::unordered_map<snowflake, dtemplate> dtemplate_map;
+DPP_EXPORT typedef std::unordered_map<snowflake, dtemplate> dtemplate_map;
 
 }

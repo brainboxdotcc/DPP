@@ -21,6 +21,8 @@
  ************************************************************************************/
 #pragma once
 
+#include <dpp/export.h>
+
 namespace dpp {
 
 /**
@@ -30,7 +32,7 @@ namespace dpp {
  * and require verification of a bot over 100 servers by discord via submission of
  * your real life ID.
  */
-enum intents {
+DPP_EXPORT enum intents {
 	/**
 	 * @brief Intent for receipt of guild information.
 	 */

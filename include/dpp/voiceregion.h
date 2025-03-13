@@ -20,17 +20,21 @@
  *
  ************************************************************************************/
 #pragma once
+
 #include <dpp/export.h>
+
+#if !DPP_BUILD_MODULES
 #include <unordered_map>
 #include <dpp/json_fwd.h>
 #include <dpp/json_interface.h>
+#endif
 
 namespace dpp {
 
 /**
  * @brief Flags related to a voice region
  */
-enum voiceregion_flags {
+DPP_EXPORT enum voiceregion_flags {
     	/**
 	 * @brief The closest (optimal) voice region.
 	 */
@@ -50,7 +54,7 @@ enum voiceregion_flags {
 /**
  * @brief Represents a voice region on discord
  */
-class DPP_API voiceregion : public json_interface<voiceregion> {
+DPP_EXPORT class DPP_API voiceregion : public json_interface<voiceregion> {
 protected:
 	friend struct json_interface<voiceregion>;
 
@@ -121,6 +125,6 @@ public:
 /**
  * @brief A group of voice regions
  */
-typedef std::unordered_map<std::string, voiceregion> voiceregion_map;
+DPP_EXPORT typedef std::unordered_map<std::string, voiceregion> voiceregion_map;
 
 }

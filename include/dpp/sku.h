@@ -22,18 +22,21 @@
 
 #pragma once
 #include <dpp/export.h>
+
+#if !DPP_BUILD_MODULES
 #include <dpp/snowflake.h>
 #include <dpp/managed.h>
 #include <dpp/json_fwd.h>
 #include <dpp/json_interface.h>
 #include <unordered_map>
+#endif
 
 namespace dpp {
 
 /**
  * @brief The type of SKU.
  * */
-enum sku_type : uint8_t {
+DPP_EXPORT enum sku_type : uint8_t {
 	/**
 	 * @brief Represents a durable one-time purchase
 	 */

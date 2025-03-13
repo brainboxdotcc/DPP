@@ -29,6 +29,9 @@ import :https;
 // /!\ There is a delicate order here. Proceed with caution especially further down the list
 #include "dpp/managed.h"
 #include "dpp/json_interface.h"
+#include "dpp/intents.h"
+#include "dpp/sku.h"
+#include "dpp/voiceregion.h"
 #include "dpp/emoji.h"
 #include "dpp/ban.h"
 #include "dpp/permissions.h"
@@ -38,6 +41,8 @@ import :https;
 #include "dpp/voicestate.h"
 #include "dpp/entitlement.h"
 #include "dpp/stage_instance.h"
+#include "dpp/dtemplate.h"
+#include "dpp/prune.h"
 // Past this point, headers need at least one of the above
 #include "dpp/presence.h"
 #include "dpp/channel.h"

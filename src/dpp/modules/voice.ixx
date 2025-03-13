@@ -1,7 +1,14 @@
 module;
 
 #include "modules.h"
-#include "dpp/version.h"
+
+#include <cerrno>
+#include <cstdio>
+#include <cstdlib>
+#include <sys/types.h>
+#include <fcntl.h>
+#include <csignal>
+#include <cstring>
 
 #if !DPP_IMPORT_STD
 
@@ -10,16 +17,19 @@ module;
 #include <algorithm>
 #include <charconv>
 #include <type_traits>
-#include <unordered_map>
 #include <string>
-#include <queue>
 #include <map>
+#include <vector>
+#include <queue>
+#include <thread>
+#include <deque>
+#include <mutex>
 #include <shared_mutex>
 #include <memory>
-#include <vector>
+#include <future>
 #include <functional>
-#include <atomic>
-#include <list>
+#include <chrono>
+#include <set>
 
 #ifdef DPP_FORMATTERS
 #include <format>
@@ -27,7 +37,7 @@ module;
 
 #endif
 
-export module dpp:https;
+export module dpp:voice;
 
 #if DPP_IMPORT_STD
 
@@ -38,9 +48,8 @@ import std;
 import :base;
 import :utility;
 import :socketengine;
+import :discord;
+import :rest;
 
-#include "dpp/zlibcontext.h"
-#include "dpp/sslclient.h"
-#include "dpp/wsclient.h"
-#include "dpp/httpsclient.h"
-#include "dpp/queues.h"
+#include "dpp/discordvoiceclient.h"
+

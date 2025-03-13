@@ -30,7 +30,7 @@ import std;
 
 #endif
 
-extern "C++" {
+export extern "C++" {
 
 #ifdef DPP_USE_EXTERNAL_JSON
 	#include <nlohmann/json_fwd.hpp>

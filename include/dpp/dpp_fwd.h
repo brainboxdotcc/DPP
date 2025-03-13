@@ -13,8 +13,12 @@ class cluster;
 struct confirmation_callback_t;
 template <typename T> class event_router_t;
 
-class channel;
-
 struct socket_events;
+
+class discord_client;
+class discord_voice_client;
+
+class channel;
+class guild_member;
 
 }

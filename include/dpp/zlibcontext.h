@@ -20,29 +20,32 @@
  ************************************************************************************/
 #pragma once
 #include <dpp/export.h>
+
+#if !DPP_BUILD_MODULES
 #include <dpp/exception.h>
 #include <cstdint>
 #include <vector>
 #include <memory>
+#endif
 
 /**
  * @brief Forward declaration for zlib stream type
  */
-typedef struct z_stream_s z_stream;
+DPP_EXPORT typedef struct z_stream_s z_stream;
 
 namespace dpp {
 
 /**
  * @brief Size of decompression buffer for zlib compressed traffic
  */
-constexpr size_t DECOMP_BUFFER_SIZE = 512 * 1024;
+DPP_EXPORT constexpr size_t DECOMP_BUFFER_SIZE = 512 * 1024;
 
 /**
  * @brief This is an opaque class containing zlib library specific structures.
  * This wraps the C pointers needed for zlib with unique_ptr and gives us a nice
  * buffer abstraction so we don't need to wrestle with raw pointers.
  */
-class DPP_API zlibcontext {
+DPP_EXPORT class DPP_API zlibcontext {
 public:
 	/**
 	 * @brief Zlib stream struct. The actual type is defined in zlib.h

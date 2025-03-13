@@ -22,22 +22,25 @@
 
 #pragma once
 #include <dpp/export.h>
-#include <dpp/dpp_fwd.h>
+
+#if !DPP_BUILD_MODULES
 #include <string>
 #include <map>
 #include <vector>
-#include <dpp/json_fwd.h>
-#include <dpp/wsclient.h>
-#include <dpp/dispatcher.h>
-#include <dpp/event.h>
 #include <queue>
 #include <thread>
 #include <memory>
 #include <deque>
-#include <dpp/etf.h>
 #include <mutex>
 #include <shared_mutex>
+#include <dpp/dpp_fwd.h>
+#include <dpp/json_fwd.h>
+#include <dpp/wsclient.h>
+#include <dpp/dispatcher.h>
+#include <dpp/event.h>
+#include <dpp/etf.h>
 #include <dpp/zlibcontext.h>
+#endif
 
 namespace dpp {
 
@@ -55,14 +58,14 @@ namespace dpp {
  * @brief How many seconds to wait between (re)connections. DO NOT change this.
  * It is mandated by the Discord API spec!
  */
-constexpr time_t RECONNECT_INTERVAL = 5;
+DPP_EXPORT inline constexpr time_t RECONNECT_INTERVAL = 5;
 
 /**
  * @brief Represents different event opcodes sent and received on a shard websocket
  *
  * These are used internally to route frames.
  */
-enum shard_frame_type : int {
+DPP_EXPORT enum shard_frame_type : int {
 
 	/**
 	 * @brief An event was dispatched.
@@ -142,7 +145,7 @@ enum shard_frame_type : int {
  * A client can only connect to one voice channel per guild at a time, so these are stored in a map
  * in the dpp::discord_client keyed by guild_id.
  */
-class DPP_API voiceconn {
+DPP_EXPORT class DPP_API voiceconn {
 	/**
 	 * @brief Owning dpp::discord_client instance
 	 */
@@ -233,7 +236,7 @@ public:
 };
 
 /** @brief Implements a discord client. Each discord_client connects to one shard and derives from a websocket client. */
-class DPP_API discord_client : public websocket_client
+DPP_EXPORT class DPP_API discord_client : public websocket_client
 {
 protected:
 	/**

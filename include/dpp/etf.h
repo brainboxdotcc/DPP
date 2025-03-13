@@ -34,21 +34,24 @@
 
 #pragma once
 #include <dpp/export.h>
+
+#if !DPP_BUILD_MODULES
 #include <dpp/snowflake.h>
 #include <dpp/json_fwd.h>
+#endif
 
 namespace dpp {
 
 /**
  * @brief Current ETF format version in use
  */
-const uint8_t FORMAT_VERSION = 131;
+DPP_EXPORT inline constexpr uint8_t FORMAT_VERSION = 131;
 
 /**
  * @brief Represents a token which identifies the type of value which follows it
  * in the ETF binary structure.
  */
-enum etf_token_type : uint8_t {
+DPP_EXPORT enum etf_token_type : uint8_t {
 	/**
 	 * @brief 68 [Distribution header]
 	 */
@@ -190,7 +193,7 @@ enum etf_token_type : uint8_t {
 /**
  * @brief Represents a buffer of bytes being encoded into ETF
  */
-struct DPP_API etf_buffer {
+DPP_EXPORT struct DPP_API etf_buffer {
 	/**
 	 * @brief Raw buffer
 	 */
@@ -221,7 +224,7 @@ struct DPP_API etf_buffer {
  * into and out of an nlohmann::json object, so that layers above the websocket don't
  * have to be any different for handling ETF.
  */
-class DPP_API etf_parser {
+DPP_EXPORT class DPP_API etf_parser {
 	/**
 	 * @brief Current size of binary data
 	 */

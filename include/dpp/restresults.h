@@ -22,6 +22,8 @@
 #pragma once
 
 #include <dpp/export.h>
+
+#if !DPP_BUILD_MODULES
 #include <string>
 #include <map>
 #include <variant>
@@ -44,8 +46,9 @@
 #include <cstring>
 #include <dpp/entitlement.h>
 #include <dpp/sku.h>
+#endif
 
-namespace dpp {
+DPP_EXPORT namespace dpp {
 
 /**
  * @brief A list of shards

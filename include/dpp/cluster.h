@@ -22,10 +22,16 @@
 #pragma once
 
 #include <dpp/export.h>
+
+#if !DPP_BUILD_MODULES
 #include <string>
 #include <map>
 #include <variant>
 #include <thread>
+#include <algorithm>
+#include <iostream>
+#include <shared_mutex>
+#include <cstring>
 #include <dpp/snowflake.h>
 #include <dpp/dispatcher.h>
 #include <dpp/misc-enum.h>
@@ -41,14 +47,11 @@
 #include <dpp/cache.h>
 #include <dpp/intents.h>
 #include <dpp/discordevents.h>
-#include <algorithm>
-#include <iostream>
-#include <shared_mutex>
-#include <cstring>
 #include <dpp/restresults.h>
 #include <dpp/event_router.h>
 #include <dpp/coro/async.h>
 #include <dpp/socketengine.h>
+#endif
 
 namespace dpp {
 
@@ -58,12 +61,12 @@ namespace dpp {
  * requests to Discord. This is useful for bots that do not need to receive websocket events as it will save a lot of
  * resources.
  */
-constexpr uint32_t NO_SHARDS = ~0U;
+DPP_EXPORT constexpr uint32_t NO_SHARDS = ~0U;
 
 /**
  * @brief Types of startup for cluster::start()
  */
-enum start_type : bool {
+DPP_EXPORT enum start_type : bool {
 	/**
 	 * @brief Wait forever on a condition variable.
 	 * The cluster will spawn threads for each shard
@@ -86,7 +89,7 @@ enum start_type : bool {
  * receiving commands from discord via HTTP. You should usually instantiate a cluster object
  * at the very least to make use of the library.
  */
-class DPP_API cluster {
+DPP_EXPORT class DPP_API cluster {
 
 	friend class discord_client;
 	friend class discord_voice_client;

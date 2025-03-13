@@ -54,6 +54,7 @@ import :base;
 
 #include "dpp/misc-enum.h"
 #include "dpp/utility.h"
+#include "dpp/discordevents.h"
 #include "dpp/unicode_emoji.h"
 #include "dpp/stringops.h"
 #include "dpp/once.h"

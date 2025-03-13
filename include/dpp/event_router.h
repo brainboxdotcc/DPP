@@ -22,26 +22,29 @@
 #pragma once
 
 #include <dpp/export.h>
+
+#if !DPP_BUILD_MODULES
 #include <string>
 #include <map>
 #include <variant>
-#include <dpp/snowflake.h>
-#include <dpp/misc-enum.h>
-#include <dpp/json_fwd.h>
 #include <algorithm>
 #include <mutex>
 #include <shared_mutex>
 #include <cstring>
 #include <atomic>
+#include <dpp/snowflake.h>
+#include <dpp/misc-enum.h>
+#include <dpp/json_fwd.h>
 #include <dpp/exception.h>
 #include <dpp/coro/job.h>
 #include <dpp/coro/task.h>
+#endif
 
 namespace dpp {
 
 #ifndef DPP_NO_CORO
 
-template <typename T>
+DPP_EXPORT template <typename T>
 class event_router_t;
 
 namespace detail {
@@ -156,7 +159,7 @@ public:
 /**
  * @brief A returned event handle for an event which was attached
  */
-typedef size_t event_handle;
+DPP_EXPORT typedef size_t event_handle;
 
 /**
  * @brief Handles routing of an event to multiple listeners.
@@ -197,7 +200,7 @@ typedef size_t event_handle;
  * 
  * @tparam T type of single parameter passed to event lambda derived from event_dispatch_t
  */
-template<class T> class event_router_t {
+DPP_EXPORT template<class T> class event_router_t {
 private:
 	friend class cluster;
 
