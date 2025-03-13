@@ -20,10 +20,13 @@
  *
  ************************************************************************************/
 
+
+#if !DPP_BUILD_MODULES
 #include <dpp/utility.h>
 #include <dpp/thread_pool.h>
 #include <shared_mutex>
 #include <dpp/cluster.h>
+#endif
 
 namespace dpp {
 

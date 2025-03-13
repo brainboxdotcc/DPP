@@ -21,14 +21,17 @@
 #pragma once
 
 #include <dpp/export.h>
+
+#if !DPP_BUILD_MODULES
 #include <dpp/cluster.h>
 #include <dpp/timed_listener.h>
 #include <time.h>
 #include <vector>
 #include <functional>
 #include <string>
+#endif
 
-namespace dpp {
+DPP_EXPORT namespace dpp {
 
 /**
  * @brief Collects objects from events during a specified time period.

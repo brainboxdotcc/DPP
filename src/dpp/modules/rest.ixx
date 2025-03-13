@@ -60,3 +60,6 @@ import :coro;
 #include "dpp/cache.h"
 #include "dpp/restresults.h"
 #include "dpp/cluster.h"
+#include "dpp/restrequest.h"
+#include "dpp/timed_listener.h"
+#include "dpp/collector.h"

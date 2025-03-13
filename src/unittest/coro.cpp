@@ -1,8 +1,17 @@
-﻿#include <thread>
+﻿
+#include <thread>
 #include <atomic>
 #include <algorithm>
+#include <coroutine>
+
+#include <dpp/export.h>
+
+#if DPP_USE_MODULES
+import dpp;
+#endif
 
 #include "test.h"
+
 
 #ifndef DPP_NO_CORO
 

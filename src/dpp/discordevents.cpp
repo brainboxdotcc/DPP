@@ -28,6 +28,7 @@
 	#endif
 #endif
 
+#if !DPP_BUILD_MODULES
 #include <string>
 #include <iostream>
 #include <fstream>
@@ -38,8 +39,9 @@
 #include <dpp/json.h>
 #include <iomanip>
 #include <sstream>
+#endif
 
-char* crossplatform_strptime(const char* s, const char* f, struct tm* tm) {
+char* crossplatform_strptime(const char* s, const char* f, tm* tm) {
 	std::istringstream input(s);
 	input.imbue(std::locale(setlocale(LC_ALL, nullptr)));
 	input >> std::get_time(tm, f);
@@ -96,12 +98,12 @@ void set_snowflake_array_not_null(const json* j, const char *keyname, std::vecto
 	}
 }
 
-void for_each_json(nlohmann::json* parent, std::string_view key, const std::function<void(nlohmann::json*)> &fn) {
+void for_each_json(json* parent, std::string_view key, const std::function<void(json*)> &fn) {
 	auto it = parent->find(key);
 	if (it == parent->end() || it->is_null()) {
 		return;
 	}
-	for (nlohmann::json &elem : *it) {
+	for (json &elem : *it) {
 		fn(&elem);
 	}
 }

@@ -19,9 +19,22 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#include "test.h"
+#include <dpp/export.h>
+#include <string>
+#include <mutex>
+#include <condition_variable>
+#include <iostream>
+#include <iomanip>
+#include <thread>
+
+#if DPP_USE_MODULES
+import dpp;
+#else
 #include <dpp/dpp.h>
 #include <dpp/json.h>
+#endif
+
+#include "test.h"
 
 double start = dpp::utility::time_f();
 bool offline = false;

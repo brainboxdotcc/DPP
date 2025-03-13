@@ -31,12 +31,12 @@
 #include <unordered_map>
 #endif
 
-namespace dpp {
+DPP_EXPORT namespace dpp {
 
 /**
  * @brief The type of SKU.
  * */
-DPP_EXPORT enum sku_type : uint8_t {
+enum sku_type : uint8_t {
 	/**
 	 * @brief Represents a durable one-time purchase
 	 */

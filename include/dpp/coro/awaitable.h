@@ -647,7 +647,7 @@ public:
 DPP_EXPORT template <typename T>
 using promise = moveable_promise<T>;
 
-template <typename T>
+DPP_EXTERN_CPP template <typename T>
 auto awaitable<T>::abandon() -> uint8_t {
 	uint8_t previous_state = state_flags::sf_broken;
 	if (state_ptr) {
@@ -657,17 +657,17 @@ auto awaitable<T>::abandon() -> uint8_t {
 	return previous_state;
 }
 
-template <typename T>
+DPP_EXTERN_CPP template <typename T>
 awaitable<T>::~awaitable() {
 	if_this_causes_an_invalid_read_your_promise_was_destroyed_before_your_awaitable____check_your_promise_lifetime();
 }
 
-template <typename T>
+DPP_EXTERN_CPP template <typename T>
 bool awaitable<T>::valid() const noexcept {
 	return state_ptr != nullptr;
 }
 
-template <typename T>
+DPP_EXTERN_CPP template <typename T>
 bool awaitable<T>::await_ready() const {
 	if (!this->valid()) {
 		throw dpp::logic_exception("cannot co_await an empty awaitable");
@@ -676,7 +676,7 @@ bool awaitable<T>::await_ready() const {
 	return state & detail::promise::sf_ready;
 }
 
-template <typename T>
+DPP_EXTERN_CPP template <typename T>
 template <typename Derived>
 bool awaitable<T>::awaiter<Derived>::await_suspend(detail::std_coroutine::coroutine_handle<> handle) {
 	auto &promise = *awaitable_obj.state_ptr;
@@ -689,7 +689,7 @@ bool awaitable<T>::awaiter<Derived>::await_suspend(detail::std_coroutine::corout
 	return !(previous_flags & detail::promise::sf_ready);
 }
 
-template <typename T>
+DPP_EXTERN_CPP template <typename T>
 template <typename Derived>
 T awaitable<T>::awaiter<Derived>::await_resume() {
 	auto &promise = *awaitable_obj.state_ptr;
@@ -705,9 +705,7 @@ T awaitable<T>::awaiter<Derived>::await_resume() {
 	}
 }
 
-
-
-template <typename T>
+DPP_EXTERN_CPP template <typename T>
 template <typename Derived>
 bool awaitable<T>::awaiter<Derived>::await_ready() const {
 	return static_cast<Derived>(awaitable_obj).await_ready();

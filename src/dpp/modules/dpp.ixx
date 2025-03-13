@@ -41,6 +41,3 @@ export import :https;
 export import :discord;
 export import :rest;
 export import :voice;
-
-// Here be lions
-#include "../utility.cpp"

@@ -71,6 +71,7 @@
 #  define DPP_IMPORT_STD 0
 #endif
 
+#define DPP_EXTERN_CPP
 #define DPP_EXPORT
 #define DPP_EXPORT_START
 #define DPP_EXPORT_END

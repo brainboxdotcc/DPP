@@ -67,9 +67,9 @@ namespace detail {
 namespace std_coroutine {}
 #else
 #  ifdef STDCORO_EXPERIMENTAL_NAMESPACE
-namespace std_coroutine = std::experimental;
+DPP_EXPORT namespace std_coroutine = std::experimental;
 #  else
-namespace std_coroutine = std;
+DPP_EXPORT namespace std_coroutine = std;
 #  endif
 #endif
 

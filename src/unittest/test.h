@@ -24,10 +24,14 @@
 _Pragma("warning( disable : 4251 )"); // 4251 warns when we export classes or structures with stl member variables
 _Pragma("warning( disable : 5105 )"); // 4251 warns when we export classes or structures with stl member variables
 #endif
-#include <dpp/dpp.h>
+
+#ifndef DPP_USE_MODULES
+#include <dpp/export.h>
 #include <dpp/json_fwd.h>
+#include <dpp/dpp.h>
 #include <iomanip>
 #include <type_traits>
+#endif
 
 #ifdef _WIN32
 #define SHARED_OBJECT "dpp.dll"
@@ -37,7 +41,7 @@ _Pragma("warning( disable : 5105 )"); // 4251 warns when we export classes or st
 #define SHARED_OBJECT "libdpp.so"
 #endif
 
-using json = nlohmann::json;
+using json = dpp::json;
 
 extern std::mutex loglock;
 

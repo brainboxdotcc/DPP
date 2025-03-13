@@ -30,8 +30,6 @@
 
 namespace dpp {
 
-DPP_EXPORT_START
-
 snowflake::snowflake(std::string_view string_value) noexcept {
 	auto [_, err] = std::from_chars(string_value.data(), string_value.data() + string_value.size(), value);
 	if (err != std::errc{})
@@ -50,7 +48,5 @@ snowflake::operator json() const {
 	/* Discord transfers snowflakes as strings for compatibility with javascript */
 	return std::to_string(value);
 }
-
-DPP_EXPORT_END
 
 }

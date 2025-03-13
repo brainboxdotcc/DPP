@@ -21,13 +21,16 @@
 #pragma once
 
 #include <dpp/export.h>
+
+#if !DPP_BUILD_MODULES
 #include <dpp/cluster.h>
 #include <time.h>
 #include <map>
 #include <functional>
 #include <string>
+#endif
 
-namespace dpp {
+DPP_EXPORT namespace dpp {
 
 /**
  * @brief A timed_listener is a way to temporarily attach to an event for a specific timeframe, then detach when complete.

@@ -32,187 +32,187 @@ namespace dpp {
 
 /**
  * @brief Returns a snowflake id from a json field value, if defined, else returns 0
- * @param j nlohmann::json instance to retrieve value from
+ * @param j json instance to retrieve value from
  * @param keyname key name to check for a value
  * @return found value
  */
-DPP_EXPORT uint64_t DPP_API snowflake_not_null(const nlohmann::json* j, const char *keyname);
+DPP_EXPORT uint64_t DPP_API snowflake_not_null(const json* j, const char *keyname);
 
 /**
  * @brief Sets a snowflake id from a json field value, if defined, else does nothing
- * @param j nlohmann::json instance to retrieve value from
+ * @param j json instance to retrieve value from
  * @param keyname key name to check for a value
  * @param v Value to change
  */
-DPP_EXPORT void DPP_API set_snowflake_not_null(const nlohmann::json* j, const char *keyname, uint64_t &v);
+DPP_EXPORT void DPP_API set_snowflake_not_null(const json* j, const char *keyname, uint64_t &v);
 
 /**
  * @brief Sets an array of snowflakes from a json field value, if defined, else does nothing
- * @param j nlohmann::json instance to retrieve value from
+ * @param j json instance to retrieve value from
  * @param keyname key name to check for the values
  * @param v Value to change
  */
-DPP_EXPORT void DPP_API set_snowflake_array_not_null(const nlohmann::json* j, const char *keyname, std::vector<class snowflake> &v);
+DPP_EXPORT void DPP_API set_snowflake_array_not_null(const json* j, const char *keyname, std::vector<class snowflake> &v);
 
 /**
  * @brief Applies a function to each element of a json array.
- * @param parent nlohmann::json instance to retrieve value from
+ * @param parent json instance to retrieve value from
  * @param key key name to check for the values
  * @param fn function to apply to each element
  */
-DPP_EXPORT void DPP_API for_each_json(nlohmann::json* parent, std::string_view key, const std::function<void(nlohmann::json*)> &fn);
+DPP_EXPORT void DPP_API for_each_json(json* parent, std::string_view key, const std::function<void(json*)> &fn);
 
 /**
  * @brief Sets an array of objects from a json field value, if defined, else does nothing
  * @tparam T The class of which the array consists of. Must be derived from dpp::json_interface
- * @param j nlohmann::json instance to retrieve value from
+ * @param j json instance to retrieve value from
  * @param key key name to check for the values
  * @param v Value to change
  */
-DPP_EXPORT template<class T> void set_object_array_not_null(nlohmann::json* j, std::string_view key, std::vector<T>& v) {
+DPP_EXPORT template<class T> void set_object_array_not_null(json* j, std::string_view key, std::vector<T>& v) {
 	v.clear();
-	for_each_json(j, key, [&v](nlohmann::json* elem) {
+	for_each_json(j, key, [&v](json* elem) {
 		v.push_back(T{}.fill_from_json(elem));
 	});
 }
 
 /**
  * @brief Returns a string from a json field value, if defined, else returns an empty string.
- * @param j nlohmann::json instance to retrieve value from
+ * @param j json instance to retrieve value from
  * @param keyname key name to check for a value
  * @return found value
  */
-DPP_EXPORT std::string DPP_API string_not_null(const nlohmann::json* j, const char *keyname);
+DPP_EXPORT std::string DPP_API string_not_null(const json* j, const char *keyname);
 
 /**
  * @brief Sets a string from a json field value, if defined, else does nothing
- * @param j nlohmann::json instance to retrieve value from
+ * @param j json instance to retrieve value from
  * @param keyname key name to check for a value
  * @param v Value to change
  */
-DPP_EXPORT void DPP_API set_string_not_null(const nlohmann::json* j, const char *keyname, std::string &v);
+DPP_EXPORT void DPP_API set_string_not_null(const json* j, const char *keyname, std::string &v);
 
 /**
  * @brief This is a repeat of set_string_not_null, but takes in a iconhash.
- * @param j nlohmann::json instance to retrieve value from
+ * @param j json instance to retrieve value from
  * @param keyname key name to check for a value
  * @param v Value to change
  */
-DPP_EXPORT void DPP_API set_iconhash_not_null(const nlohmann::json* j, const char *keyname, utility::iconhash &v);
+DPP_EXPORT void DPP_API set_iconhash_not_null(const json* j, const char *keyname, utility::iconhash &v);
 
 /**
  * @brief Returns a double from a json field value, if defined, else returns 0.
- * @param j nlohmann::json instance to retrieve value from
+ * @param j json instance to retrieve value from
  * @param keyname key name to check for a value
  * @return found value
  */
-DPP_EXPORT double DPP_API double_not_null(const nlohmann::json* j, const char *keyname);
+DPP_EXPORT double DPP_API double_not_null(const json* j, const char *keyname);
 
 /**
  * @brief Sets a double from a json field value, if defined, else does nothing
- * @param j nlohmann::json instance to retrieve value from
+ * @param j json instance to retrieve value from
  * @param keyname key name to check for a value
  * @param v Value to change
  */
-DPP_EXPORT void DPP_API set_double_not_null(const nlohmann::json* j, const char *keyname, double &v);
+DPP_EXPORT void DPP_API set_double_not_null(const json* j, const char *keyname, double &v);
 
 /**
  * @brief Returns a 64 bit unsigned integer from a json field value, if defined, else returns 0.
  * DO NOT use this for snowflakes, as usually snowflakes are wrapped in a string!
- * @param j nlohmann::json instance to retrieve value from
+ * @param j json instance to retrieve value from
  * @param keyname key name to check for a value
  * @return found value
  */
-DPP_EXPORT uint64_t DPP_API int64_not_null(const nlohmann::json* j, const char *keyname);
+DPP_EXPORT uint64_t DPP_API int64_not_null(const json* j, const char *keyname);
 
 /**
  * @brief Sets an unsigned 64 bit integer from a json field value, if defined, else does nothing
- * @param j nlohmann::json instance to retrieve value from
+ * @param j json instance to retrieve value from
  * @param keyname key name to check for a value
  * @param v Value to change
  */
-DPP_EXPORT void DPP_API set_int64_not_null(const nlohmann::json* j, const char *keyname, uint64_t &v);
+DPP_EXPORT void DPP_API set_int64_not_null(const json* j, const char *keyname, uint64_t &v);
 
 /**
  * @brief Returns a 32 bit unsigned integer from a json field value, if defined, else returns 0
- * @param j nlohmann::json instance to retrieve value from
+ * @param j json instance to retrieve value from
  * @param keyname key name to check for a value
  * @return found value
  */
-DPP_EXPORT uint32_t DPP_API int32_not_null(const nlohmann::json* j, const char *keyname);
+DPP_EXPORT uint32_t DPP_API int32_not_null(const json* j, const char *keyname);
 
 /**
  * @brief Sets an unsigned 32 bit integer from a json field value, if defined, else does nothing
- * @param j nlohmann::json instance to retrieve value from
+ * @param j json instance to retrieve value from
  * @param keyname key name to check for a value
  * @param v Value to change
  */
-DPP_EXPORT void DPP_API set_int32_not_null(const nlohmann::json* j, const char *keyname, uint32_t &v);
+DPP_EXPORT void DPP_API set_int32_not_null(const json* j, const char *keyname, uint32_t &v);
 
 /**
  * @brief Returns a 16 bit unsigned integer from a json field value, if defined, else returns 0
- * @param j nlohmann::json instance to retrieve value from
+ * @param j json instance to retrieve value from
  * @param keyname key name to check for a value
  * @return found value
  */
-DPP_EXPORT uint16_t DPP_API int16_not_null(const nlohmann::json* j, const char *keyname);
+DPP_EXPORT uint16_t DPP_API int16_not_null(const json* j, const char *keyname);
 
 /**
  * @brief Sets an unsigned 16 bit integer from a json field value, if defined, else does nothing
- * @param j nlohmann::json instance to retrieve value from
+ * @param j json instance to retrieve value from
  * @param keyname key name to check for a value
  * @param v Value to change
  */
-DPP_EXPORT void DPP_API set_int16_not_null(const nlohmann::json* j, const char *keyname, uint16_t &v);
+DPP_EXPORT void DPP_API set_int16_not_null(const json* j, const char *keyname, uint16_t &v);
 
 /**
  * @brief Returns an 8 bit unsigned integer from a json field value, if defined, else returns 0
- * @param j nlohmann::json instance to retrieve value from
+ * @param j json instance to retrieve value from
  * @param keyname key name to check for a value
  * @return found value
  */
-DPP_EXPORT uint8_t DPP_API int8_not_null(const nlohmann::json* j, const char *keyname);
+DPP_EXPORT uint8_t DPP_API int8_not_null(const json* j, const char *keyname);
 
 /**
  * @brief Sets an unsigned 8 bit integer from a json field value, if defined, else does nothing
- * @param j nlohmann::json instance to retrieve value from
+ * @param j json instance to retrieve value from
  * @param keyname key name to check for a value
  * @param v Value to change
  */
-DPP_EXPORT void DPP_API set_int8_not_null(const nlohmann::json* j, const char *keyname, uint8_t &v);
+DPP_EXPORT void DPP_API set_int8_not_null(const json* j, const char *keyname, uint8_t &v);
 
 /**
  * @brief Returns a boolean value from a json field value, if defined, else returns false
- * @param j nlohmann::json instance to retrieve value from
+ * @param j json instance to retrieve value from
  * @param keyname key name to check for a value
  * @return found value
  */
-DPP_EXPORT bool DPP_API bool_not_null(const nlohmann::json* j, const char *keyname);
+DPP_EXPORT bool DPP_API bool_not_null(const json* j, const char *keyname);
 
 /**
  * @brief Sets a boolean from a json field value, if defined, else does nothing
- * @param j nlohmann::json instance to retrieve value from
+ * @param j json instance to retrieve value from
  * @param keyname key name to check for a value
  * @param v Value to change
  */
-DPP_EXPORT void DPP_API set_bool_not_null(const nlohmann::json* j, const char *keyname, bool &v);
+DPP_EXPORT void DPP_API set_bool_not_null(const json* j, const char *keyname, bool &v);
 
 /**
  * @brief Returns a time_t from an ISO8601 timestamp field in a json value, if defined, else returns
  * epoch value of 0.
- * @param j nlohmann::json instance to retrieve value from
+ * @param j json instance to retrieve value from
  * @param keyname key name to check for a value
  * @return found value
  */
-DPP_EXPORT time_t DPP_API ts_not_null(const nlohmann::json* j, const char *keyname);
+DPP_EXPORT time_t DPP_API ts_not_null(const json* j, const char *keyname);
 
 /**
  * @brief Sets an timestamp from a json field value containing an ISO8601 string, if defined, else does nothing
- * @param j nlohmann::json instance to retrieve value from
+ * @param j json instance to retrieve value from
  * @param keyname key name to check for a value
  * @param v Value to change
  */
-DPP_EXPORT void DPP_API set_ts_not_null(const nlohmann::json* j, const char *keyname, time_t &v);
+DPP_EXPORT void DPP_API set_ts_not_null(const json* j, const char *keyname, time_t &v);
 
 /**
  * @brief Base64 encode data into a string.

@@ -451,16 +451,6 @@ else()
 	message("-- ${Green}Coroutines are enabled!${ColourReset}")
 endif()
 
-if (DPP_MODULES)
-	target_compile_features(dpp PRIVATE cxx_std_20)
-	target_compile_definitions(dpp PRIVATE DPP_USE_MODULES)
-	file (GLOB_RECURSE DPP_MODULES_SRC "${modules_dir}/dpp/modules/*.ixx")
-	target_sources(dpp
-		PRIVATE
-			FILE_SET CXX_MODULES BASE_DIRS ${modules_dir} FILES "${DPP_MODULES_SRC}"
-	)
-endif ()
-
 if(DPP_FORMATTERS)
 	target_compile_definitions(dpp PUBLIC DPP_FORMATTERS)
 endif()
@@ -514,6 +504,19 @@ if (DPP_BUILD_TEST)
 		COMMAND unittest
 	)
 endif()
+
+if (DPP_MODULES)
+	target_compile_features(dpp PRIVATE cxx_std_20)
+	target_compile_features(unittest PRIVATE cxx_std_20)
+	target_compile_definitions(dpp PRIVATE DPP_USE_MODULES)
+	target_compile_definitions(unittest PRIVATE DPP_USE_MODULES)
+	set(DPP_CXXMODULES_DIR "${modules_dir}/dpp/modules")
+	file(GLOB_RECURSE DPP_CXXMODULES_SRC "${DPP_CXXMODULES_DIR}/*.ixx")
+	target_sources(dpp
+		PUBLIC
+			FILE_SET CXX_MODULES BASE_DIRS "${DPP_CXXMODULES_DIR}" FILES "${DPP_CXXMODULES_SRC}"
+	)
+endif ()
 
 if (NOT CONAN_EXPORTED)
 	if(WIN32 AND NOT MINGW)

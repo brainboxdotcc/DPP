@@ -19,13 +19,17 @@
  *
  ************************************************************************************/
 #pragma once
+
 #include <dpp/export.h>
+
+#if !DPP_BUILD_MODULES
 #include <dpp/snowflake.h>
 #include <dpp/cluster.h>
 #include <dpp/invite.h>
 #include <dpp/json_fwd.h>
+#endif
 
-namespace dpp {
+DPP_EXPORT namespace dpp {
 
 /**
  * @brief Templated REST request helper to save on typing
