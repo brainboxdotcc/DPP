@@ -63,6 +63,7 @@ struct DPP_EXPORT socket_engine_kqueue : public socket_engine_base {
 
 		int i = kevent(kqueue_handle, nullptr, 0, ke_list.data(), static_cast<int>(ke_list.size()), &ts);
 		if (i < 0) {
+			prune();
 			return;
 		}
 
