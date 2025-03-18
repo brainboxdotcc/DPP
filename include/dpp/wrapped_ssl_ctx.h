@@ -21,6 +21,8 @@
  ************************************************************************************/
 #include <dpp/exception.h>
 #include <openssl/ssl.h>
+#include <openssl/err.h>
+#include <string>
 #pragma once
 
 namespace dpp::detail {
@@ -37,13 +39,27 @@ struct wrapped_ssl_ctx {
 	SSL_CTX *context{nullptr};
 
 	/**
+	 * @brief Get last SSL error message
+	 * @return SSL error message
+	 */
+	std::string get_ssl_error() {
+		unsigned long error_code = ERR_get_error();
+		if (error_code == 0) {
+			return "No error";
+		}
+		char error_buffer[1024]{0};
+		ERR_error_string_n(error_code, error_buffer, sizeof(error_buffer));
+		return std::string(error_buffer);
+	}
+
+	/**
 	 * @brief Create a wrapped SSL context
 	 * @param is_server true to create a server context, false to create a client context
 	 * @throws dpp::connection_exception if context could not be created
 	 */
 	explicit wrapped_ssl_ctx(bool is_server = false) : context(SSL_CTX_new(is_server ? TLS_server_method() : TLS_client_method())) {
 		if (context == nullptr) {
-			throw dpp::connection_exception(err_ssl_context, "Failed to create SSL client context!");
+			throw dpp::connection_exception(err_ssl_context, "Failed to create SSL client context: " + get_ssl_error());
 		}
 	}
 
