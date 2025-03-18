@@ -73,10 +73,10 @@ wrapped_ssl_ctx* generate_ssl_context(uint16_t port, const std::string &private_
 	}
 
 	/* This sets the allowed SSL/TLS versions for the connection.
-	 * Do not allow SSL 3.0, TLS < 1.3
+	 * Do not allow SSL 3.0, TLS 1.0 or 1.1
 	 * https://www.packetlabs.net/posts/tls-1-1-no-longer-secure/
 	 */
-	if (!SSL_CTX_set_min_proto_version(context->context, TLS1_3_VERSION)) {
+	if (!SSL_CTX_set_min_proto_version(context->context, TLS1_2_VERSION)) {
 		throw dpp::connection_exception(err_ssl_version, "Failed to set minimum SSL version!");
 	}
 
