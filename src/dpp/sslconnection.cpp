@@ -107,7 +107,7 @@ bool close_socket(dpp::socket sfd)
 
 bool set_nonblocking(dpp::socket sockfd, bool non_blocking)
 {
-	static int enable{1};
+	const int enable{1};
 #ifdef _WIN32
 	u_long mode = non_blocking ? 1 : 0;
 	int result = ioctlsocket(sockfd, FIONBIO, &mode);
@@ -125,7 +125,7 @@ bool set_nonblocking(dpp::socket sockfd, bool non_blocking)
 		return false;
 	}
 #endif
-	setsockopt(sockfd, IPPROTO_TCP, TCP_NODELAY, reinterpret_cast<char*>(&enable), sizeof(int));
+	setsockopt(sockfd, IPPROTO_TCP, TCP_NODELAY, reinterpret_cast<const char*>(&enable), sizeof(int));
 	return true;
 }
 
