@@ -30,6 +30,7 @@
 	/* Anything other than Windows (e.g. sane OSes) */
 	#include <sys/socket.h>
 	#include <unistd.h>
+	#include <netinet/tcp.h>
 #endif
 #include <csignal>
 #include <sys/types.h>
@@ -106,6 +107,7 @@ bool close_socket(dpp::socket sfd)
 
 bool set_nonblocking(dpp::socket sockfd, bool non_blocking)
 {
+	static int enable{1};
 #ifdef _WIN32
 	u_long mode = non_blocking ? 1 : 0;
 	int result = ioctlsocket(sockfd, FIONBIO, &mode);
@@ -123,6 +125,7 @@ bool set_nonblocking(dpp::socket sockfd, bool non_blocking)
 		return false;
 	}
 #endif
+	setsockopt(sockfd, IPPROTO_TCP, TCP_NODELAY, reinterpret_cast<char*>(&enable), sizeof(int));
 	return true;
 }
 
