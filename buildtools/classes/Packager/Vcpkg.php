@@ -49,7 +49,7 @@ class Vcpkg
         echo GREEN . "Starting vcpkg updater...\n" . WHITE;
             
         /* Get the latest tag from the version of the repository checked out by default into the action */
-        if (count($argv) > 2) {
+        if (count($argv) > 2 && !empty($argv[3])) {
             $this->latestTag = $argv[3];
         } else {
             $this->latestTag = preg_replace("/\n/", "", shell_exec("git describe --tags `git rev-list --tags --max-count=1`"));
@@ -216,7 +216,7 @@ file(COPY "${CMAKE_CURRENT_LIST_DIR}/usage" DESTINATION "${CURRENT_PACKAGES_DIR}
         unlink('/tmp/portfile');
         $buildResults = shell_exec($this->sudo . ' /usr/local/share/vcpkg/vcpkg install dpp:x64-linux');
         $matches = [];
-        if (preg_match('/Actual hash:\s+([0-9a-fA-F]+)/', $buildResults, $matches)) {
+        if (preg_match('/please change the expected SHA512 to:\s+([0-9a-fA-F]+)/', $buildResults, $matches)) {
             echo GREEN . "Obtained SHA512 for first build: " . $matches[1] . "\n" . WHITE;
             $this->firstBuildComplete = true;
             return $matches[1];

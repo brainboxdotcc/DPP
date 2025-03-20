@@ -43,7 +43,7 @@ $sha512 = $vcpkg->firstBuild(
 );
 if (!empty($sha512)) {
     /* Now check out the latest tag or specified tag */
-    if (!$vcpkg->checkoutRepository(count($argv) > 2 ? $argv[3] : "")) {
+    if (!$vcpkg->checkoutRepository(count($argv) > 2 && !empty($argv[3]) ? $argv[3] : "")) {
         exit(1);
     }
 
