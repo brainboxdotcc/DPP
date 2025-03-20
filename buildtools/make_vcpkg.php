@@ -42,8 +42,8 @@ $sha512 = $vcpkg->firstBuild(
     $vcpkg->constructPortAndVersionFile()
 );
 if (!empty($sha512)) {
-    /* Now check out master */
-    if (!$vcpkg->checkoutRepository()) {
+    /* Now check out the latest tag or specified tag */
+    if (!$vcpkg->checkoutRepository(count($argv) > 2 ? $argv[3] : "")) {
         exit(1);
     }
 

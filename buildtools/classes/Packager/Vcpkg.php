@@ -49,12 +49,16 @@ class Vcpkg
         echo GREEN . "Starting vcpkg updater...\n" . WHITE;
             
         /* Get the latest tag from the version of the repository checked out by default into the action */
-        $this->latestTag = preg_replace("/\n/", "", shell_exec("git describe --tags `git rev-list --tags --max-count=1`"));
+        if (count($argv) > 2) {
+            $this->latestTag = $argv[3];
+        } else {
+            $this->latestTag = preg_replace("/\n/", "", shell_exec("git describe --tags `git rev-list --tags --max-count=1`"));
+        }
         $this->version = preg_replace('/^v/', '', $this->getTag());
         echo GREEN . "Latest tag: " . $this->getTag() . " version: " . $this->getVersion() . "\n" . WHITE;
 
-	$this->git = trim(`which git`);
-	$this->sudo = trim(`which sudo`);
+        $this->git = trim(`which git`);
+        $this->sudo = trim(`which sudo`);
     }
 
     /**
@@ -102,9 +106,9 @@ class Vcpkg
             /* Empty tag means use the main branch */
             $tag = `{$this->git} config --get init.defaultBranch || echo master`;
         }
-	$repositoryUrl = 'https://' . urlencode($argv[1]) . ':' . urlencode($argv[2]) . '@github.com/brainboxdotcc/DPP';
+	    $repositoryUrl = 'https://' . urlencode($argv[1]) . ':' . urlencode($argv[2]) . '@github.com/brainboxdotcc/DPP';
 
-        echo GREEN . "Check out repository: $tag (user: ". $argv[1] . " branch: " . $tag . ")\n" . WHITE;
+        echo GREEN . "Check out repository: $tag (user: ". $argv[1] . " default branch: " . $tag . ")\n" . WHITE;
 
         chdir(getenv('HOME'));
         system('rm -rf ./dpp');
@@ -113,11 +117,11 @@ class Vcpkg
         $this->git('clone ' . escapeshellarg($repositoryUrl) . ' ./dpp --depth=1');
         
         /* This is noisy, silence it */
-	$status = chdir(getenv("HOME") . '/dpp');
+        $status = chdir(getenv("HOME") . '/dpp');
         $this->git('fetch -at 2>/dev/null');
         $this->git('checkout ' . escapeshellarg($tag) . ' 2>/dev/null');
 	
-	return $status;
+        return $status;
     }
 
     /**
@@ -218,6 +222,7 @@ file(COPY "${CMAKE_CURRENT_LIST_DIR}/usage" DESTINATION "${CURRENT_PACKAGES_DIR}
             return $matches[1];
         }
         echo RED . "No SHA512 found during first build :(\n" . WHITE;
+        echo "\n\n" . RED . "Build Results:" . WHITE . "\n\n" . $buildResults . "\n\n";
         return '';
     }
 
@@ -278,6 +283,6 @@ file(COPY "${CMAKE_CURRENT_LIST_DIR}/usage" DESTINATION "${CURRENT_PACKAGES_DIR}
             readfile("/usr/local/share/vcpkg/buildtrees/dpp/install-x64-linux-dbg-out.log");
         }
 
-	return $resultCode == 0;
+        return $resultCode == 0;
     }
 };

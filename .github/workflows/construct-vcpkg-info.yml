@@ -4,6 +4,10 @@ on:
   release:
     types: [published]
   workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to package'
+        required: true
 
 permissions:
   contents: read
@@ -41,4 +45,4 @@ jobs:
          - name: Run vcpkg release builder
            run: git fetch -avt &&
                 cd buildtools &&
-                php make_vcpkg.php "${{ github.repository_owner }}" "${{ secrets.PERSONAL_ACCESS_TOKEN }}"
+                php make_vcpkg.php "${{ github.repository_owner }}" "${{ secrets.PERSONAL_ACCESS_TOKEN }}" "${{ inputs.tag }}"
