@@ -119,7 +119,14 @@ class Vcpkg
         /* This is noisy, silence it */
         $status = chdir(getenv("HOME") . '/dpp');
         $this->git('fetch -at 2>/dev/null');
-        $this->git('checkout ' . escapeshellarg($tag) . ' 2>/dev/null');
+        $this->git('checkout master');
+        $this->git('pull');
+        $this->git('checkout ' . escapeshellarg($tag));
+        $this->git('pull');
+        $this->git("remote set-url origin $repositoryUrl");
+        echo GREEN . "Repository remote: " . WHITE;
+        $this->git('remote get-url origin');
+        echo "\n";
 	
         return $status;
     }
