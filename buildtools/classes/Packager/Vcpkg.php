@@ -267,6 +267,7 @@ file(COPY "${CMAKE_CURRENT_LIST_DIR}/usage" DESTINATION "${CURRENT_PACKAGES_DIR}
 
         echo GREEN . "Copy back port files from /usr/local/share...\n" . WHITE;
         chdir(getenv('HOME') . '/dpp');
+        $this->git('checkout master');
         system('cp -v -R /usr/local/share/vcpkg/ports/dpp/vcpkg.json ./vcpkg/ports/dpp/vcpkg.json');
         system('cp -v -R /usr/local/share/vcpkg/versions/baseline.json ./vcpkg/versions/baseline.json');
         system('cp -v -R /usr/local/share/vcpkg/versions/d-/dpp.json ./vcpkg/versions/d-/dpp.json');
