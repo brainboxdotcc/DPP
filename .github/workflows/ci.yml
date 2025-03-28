@@ -46,18 +46,18 @@ jobs:
           - { arch: 'amd64', concurrency: 4, os: ubuntu-22.04, package: clang-11, cpp: clang++, version: 11, cmake-flags: '', cpack: 'no', ctest: 'no', mold: 'yes' }
           - { arch: 'amd64', concurrency: 4, os: ubuntu-22.04, package: clang-12, cpp: clang++, version: 12, cmake-flags: '', cpack: 'no', ctest: 'no', mold: 'yes' }
           - { arch: 'amd64', concurrency: 4, os: ubuntu-22.04, package: clang-13, cpp: clang++, version: 13, cmake-flags: '', cpack: 'no', ctest: 'no', mold: 'yes' }
-          - { arch: 'amd64', concurrency: 4, os: ubuntu-22.04, package: clang-14, cpp: clang++, version: 14, cmake-flags: '-DDPP_CORO=ON', cpack: 'no', ctest: 'no', mold: 'yes' }
-          - { arch: 'amd64', concurrency: 4, os: ubuntu-22.04, package: clang-15, cpp: clang++, version: 15, cmake-flags: '-DDPP_CORO=ON', cpack: 'no', ctest: 'no', mold: 'yes' }
-          - { arch: 'amd64', concurrency: 4, os: ubuntu-24.04, package: clang-16, cpp: clang++, version: 16, cmake-flags: '-DDPP_CORO=ON', cpack: 'no', ctest: 'no', mold: 'yes' }
-          - { arch: 'amd64', concurrency: 4, os: ubuntu-24.04, package: clang-17, cpp: clang++, version: 17, cmake-flags: '-DDPP_CORO=ON', cpack: 'no', ctest: 'no', mold: 'yes' }
-          - { arch: 'amd64', concurrency: 4, os: ubuntu-24.04, package: clang-18, cpp: clang++, version: 18, cmake-flags: '-DDPP_CORO=ON', cpack: 'no', ctest: 'no', mold: 'yes' }
-          - { arch: 'amd64', concurrency: 4, os: ubuntu-24.04, package: 'clang-19 libc++-19-dev libc++abi-19-dev', cpp: clang++, version: 19, cmake-flags: '-DDPP_CORO=ON -DCMAKE_CXX_FLAGS="-stdlib=libc++" -DCMAKE_EXE_LINKER_FLAGS="-stdlib=libc++"', cpack: 'no', ctest: 'no', mold: 'yes', name-extra: ' libc++', llvm-apt: 'yes' }
+          - { arch: 'amd64', concurrency: 4, os: ubuntu-22.04, package: clang-14, cpp: clang++, version: 14, cmake-flags: '', cpack: 'no', ctest: 'no', mold: 'yes' }
+          - { arch: 'amd64', concurrency: 4, os: ubuntu-22.04, package: clang-15, cpp: clang++, version: 15, cmake-flags: '', cpack: 'no', ctest: 'no', mold: 'yes' }
+          - { arch: 'amd64', concurrency: 4, os: ubuntu-24.04, package: clang-16, cpp: clang++, version: 16, cmake-flags: '', cpack: 'no', ctest: 'no', mold: 'yes' }
+          - { arch: 'amd64', concurrency: 4, os: ubuntu-24.04, package: clang-17, cpp: clang++, version: 17, cmake-flags: '', cpack: 'no', ctest: 'no', mold: 'yes' }
+          - { arch: 'amd64', concurrency: 4, os: ubuntu-24.04, package: clang-18, cpp: clang++, version: 18, cmake-flags: '', cpack: 'no', ctest: 'no', mold: 'yes' }
+          - { arch: 'amd64', concurrency: 4, os: ubuntu-24.04, package: 'clang-19 libc++-19-dev libc++abi-19-dev', cpp: clang++, version: 19, cmake-flags: '-DCMAKE_CXX_FLAGS="-stdlib=libc++" -DCMAKE_EXE_LINKER_FLAGS="-stdlib=libc++"', cpack: 'no', ctest: 'no', mold: 'yes', name-extra: ' libc++', llvm-apt: 'yes' }
           # g++
-          - { arch: 'amd64', concurrency: 4, os: ubuntu-24.04, package: g++-13, cpp: g++, version: 13, cmake-flags: '-DDPP_CORO=ON', cpack: 'no', ctest: 'yes', mold: 'yes' }
-          - { arch: 'amd64', concurrency: 4, os: ubuntu-24.04, package: g++-14, cpp: g++, version: 14, cmake-flags: '-DDPP_CORO=ON', cpack: 'no', ctest: 'no', mold: 'yes' }
-          - { arch: 'amd64', concurrency: 4, os: ubuntu-22.04, package: g++-12, cpp: g++, version: 12, cmake-flags: '-DDPP_CORO=ON', cpack: 'no', ctest: 'no', mold: 'yes' }
-          - { arch: 'amd64', concurrency: 4, os: ubuntu-22.04, package: g++-11, cpp: g++, version: 11, cmake-flags: '-DDPP_CORO=ON', cpack: 'no', ctest: 'no', mold: 'yes' }
-          - { arch: 'amd64', concurrency: 4, os: ubuntu-22.04, package: g++-10, cpp: g++, version: 10, cmake-flags: '', cpack: 'yes', ctest: 'no', mold: 'yes' }
+          - { arch: 'amd64', concurrency: 4, os: ubuntu-24.04, package: g++-13, cpp: g++, version: 13, cmake-flags: '', cpack: 'no', ctest: 'yes', mold: 'yes' }
+          - { arch: 'amd64', concurrency: 4, os: ubuntu-24.04, package: g++-14, cpp: g++, version: 14, cmake-flags: '', cpack: 'no', ctest: 'no', mold: 'yes' }
+          - { arch: 'amd64', concurrency: 4, os: ubuntu-22.04, package: g++-12, cpp: g++, version: 12, cmake-flags: '', cpack: 'no', ctest: 'no', mold: 'yes' }
+          - { arch: 'amd64', concurrency: 4, os: ubuntu-22.04, package: g++-11, cpp: g++, version: 11, cmake-flags: '', cpack: 'no', ctest: 'no', mold: 'yes' }
+          - { arch: 'amd64', concurrency: 4, os: ubuntu-22.04, package: g++-10, cpp: g++, version: 10, cmake-flags: '-DDPP_NO_CORO=ON', cpack: 'yes', ctest: 'no', mold: 'yes' }
           # Self hosted
           - { arch: 'arm7hf', concurrency: 4, os: [self-hosted, linux, ARM], package: g++-12, cpp: g++, version: 12, cmake-flags: '', cpack: 'yes', ctest: 'no', mold: 'no' }
           - { arch: 'arm64', concurrency: 4, os: [self-hosted, linux, ARM64], package: g++-12, cpp: g++, version: 12, cmake-flags: '', cpack: 'yes', ctest: 'no', mold: 'yes' }
@@ -168,20 +168,15 @@ jobs:
       fail-fast: false # Don't cancel other matrix jobs if one fails
       matrix:
         cfg:
-        - { name: 'x64',            arch: x64, config: Release, vs: '2019', os: 'windows-2019', vsv: '16', upload: true,  options: '' }
-        - { name: 'x64',            arch: x64, config: Debug,   vs: '2019', os: 'windows-2019', vsv: '16', upload: true,  options: '' }
-        - { name: 'x86',            arch: x86, config: Release, vs: '2019', os: 'windows-2019', vsv: '16', upload: true,  options: '-T host=x86 ' }
-        - { name: 'x86',            arch: x86, config: Debug,   vs: '2019', os: 'windows-2019', vsv: '16', upload: true,  options: '-T host=x86 ' }
+        - { name: 'x64',            arch: x64, config: Release, vs: '2019', os: 'windows-2019', vsv: '16', upload: true,  options: '-DDPP_NO_CORO=ON' }
+        - { name: 'x64',            arch: x64, config: Debug,   vs: '2019', os: 'windows-2019', vsv: '16', upload: true,  options: '-DDPP_NO_CORO=ON' }
+        - { name: 'x86',            arch: x86, config: Release, vs: '2019', os: 'windows-2019', vsv: '16', upload: true,  options: '-T host=x86 -DDPP_NO_CORO=ON' }
+        - { name: 'x86',            arch: x86, config: Debug,   vs: '2019', os: 'windows-2019', vsv: '16', upload: true,  options: '-T host=x86 -DDPP_NO_CORO=ON' }
         - { name: 'x64',            arch: x64, config: Release, vs: '2022', os: 'windows-2022', vsv: '17', upload: true,  options: '' }
         - { name: 'x64',            arch: x64, config: Debug,   vs: '2022', os: 'windows-2022', vsv: '17', upload: true,  options: '' }
         - { name: 'x86',            arch: x86, config: Release, vs: '2022', os: 'windows-2022', vsv: '17', upload: true,  options: '-T host=x86' }
         - { name: 'x86',            arch: x86, config: Debug,   vs: '2022', os: 'windows-2022', vsv: '17', upload: true,  options: '-T host=x86' }
-        - { name: 'x64-Coro',       arch: x64, config: Release, vs: '2022', os: 'windows-2022', vsv: '17', upload: true,  options: '-DDPP_CORO=on' }
-        - { name: 'x64-Coro',       arch: x64, config: Debug,   vs: '2022', os: 'windows-2022', vsv: '17', upload: true,  options: '-DDPP_CORO=on' }
-        - { name: 'x86-Coro',       arch: x86, config: Release, vs: '2022', os: 'windows-2022', vsv: '17', upload: true,  options: '-T host=x86 -DDPP_CORO=on' }
-        - { name: 'x86-Coro',       arch: x86, config: Debug,   vs: '2022', os: 'windows-2022', vsv: '17', upload: true,  options: '-T host=x86 -DDPP_CORO=on' }
         - { name: 'x64-Clang',      arch: x64, config: Debug,   vs: '2022', os: 'windows-2022', vsv: '17', upload: false, options: '-T ClangCL' }
-        - { name: 'x64-Clang-Coro', arch: x64, config: Debug,   vs: '2022', os: 'windows-2022', vsv: '17', upload: false, options: '-T ClangCL -DDPP_CORO=on' }
 
     name: "Windows ${{matrix.cfg.name}}-${{matrix.cfg.config}}-vs${{matrix.cfg.vs}}"
     runs-on: ${{matrix.cfg.os}}
@@ -246,7 +241,7 @@ jobs:
           # - {name: "ARM64", os: ubuntu-20.04, cmake-options: -DCMAKE_TOOLCHAIN_FILE=cmake/ARM64ToolChain.cmake}
           # - {name: "ARMv7 HF", os: ubuntu-20.04, cmake-options: -DCMAKE_TOOLCHAIN_FILE=cmake/ARMv7ToolChain.cmake}
           - {name: "Linux x86", os: ubuntu-24.04, cmake-options: -DCMAKE_TOOLCHAIN_FILE=cmake/LINUXx86ToolChain.cmake -DBUILD_VOICE_SUPPORT=OFF}
-          - {name: "ARMv6", os: ubuntu-20.04, cmake-options: -DCMAKE_TOOLCHAIN_FILE=cmake/ARMv6ToolChain.cmake}
+          - {name: "ARMv6", os: ubuntu-20.04, cmake-options: -DDPP_NO_CORO=ON -DCMAKE_TOOLCHAIN_FILE=cmake/ARMv6ToolChain.cmake}
 
     name: ${{matrix.cfg.name}}
     runs-on: ${{matrix.cfg.os}}
