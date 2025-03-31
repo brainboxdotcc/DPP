@@ -17,7 +17,8 @@
 #
 
 cmake_minimum_required (VERSION 3.16)
-
+set(CMAKE_CXX_STANDARD 17)
+ 
 option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 option(BUILD_VOICE_SUPPORT "Build voice support" ON)
 option(RUN_LDCONFIG "Run ldconfig after installation" ON)
@@ -156,6 +157,5 @@ else()
 endif()
 
 if (NOT WIN32)
-	set(CMAKE_CXX_STANDARD 17)
 	target_link_libraries(dpp PRIVATE std::filesystem)
 endif()
