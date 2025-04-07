@@ -34,7 +34,7 @@ namespace dpp {
  * plaintext or SSL incoming request, and passes that request to a callback
  * to generate the response.
  */
-struct http_server : public socket_listener<http_server_request> {
+struct DPP_EXPORT http_server : public socket_listener<http_server_request> {
 
 	/**
 	 * @brief Request handler callback to use for all incoming HTTP(S) requests
