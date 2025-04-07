@@ -20,6 +20,7 @@
  *
  ************************************************************************************/
 #pragma once
+#include <dpp/export.h>
 #include <string>
 #include <cstdint>
 
