@@ -53,23 +53,23 @@ namespace when_any {
 /**
  * @brief Current state of a when_any object
  */
-enum class await_state {
-	/**
-	 * @brief Object was started but not awaited
-	 */
-	started,
+enum await_state : uint8_t {
 	/**
 	 * @brief Object is being awaited
 	 */
-	waiting,
+	waiting = 1 << 0,
 	/**
 	 * @brief Object was resumed
 	 */
-	done,
+	done = 1 << 1,
+	/**
+	 * @brief Result is ready to retrieve
+	 */
+	ready = 1 << 2,
 	/**
 	 * @brief Object was destroyed
 	 */
-	dangling
+	dangling = 1 << 3
 };
 
 /**
@@ -197,7 +197,7 @@ class when_any {
 		 *
 		 * @see detail::when_any::await_state
 		 */
-		std::atomic<detail::when_any::await_state> owner_state{detail::when_any::await_state::started};
+		std::atomic<uint8_t> owner_state{};
 	};
 
 	/**
@@ -212,15 +212,17 @@ class when_any {
 	 * @return dpp::job Job handling the Nth argument
 	 */
 	template <size_t N>
-	static dpp::job make_job(std::shared_ptr<state_t> shared_state) {
+	static job make_job(std::shared_ptr<state_t> shared_state) {
+		using namespace detail::when_any;
+		
 		/**
 		 * Any exceptions from the awaitable's await_suspend should be thrown to the caller (the coroutine creating the when_any object)
 		 * If the co_await passes, and it is the first one to complete, try construct the result, catch any exceptions to rethrow at resumption, and resume.
 		 */
-		if constexpr (!std::same_as<result_t<N>, detail::when_any::empty>) {
+		if constexpr (!std::same_as<result_t<N>, empty>) {
 			decltype(auto) result = co_await std::get<N>(shared_state->awaitables);
 
-			if (auto s = shared_state->owner_state.load(std::memory_order_relaxed); s == detail::when_any::await_state::dangling || s == detail::when_any::await_state::done) {
+			if (auto s = shared_state->owner_state.fetch_or(await_state::done, std::memory_order_relaxed); (s & (await_state::done | await_state::dangling)) != 0) {
 				co_return;
 			}
 
@@ -238,20 +240,17 @@ class when_any {
 			}
 		} else {
 			co_await std::get<N>(shared_state->awaitables);
-
-			if (auto s = shared_state->owner_state.load(std::memory_order_relaxed); s == detail::when_any::await_state::dangling || s == detail::when_any::await_state::done) {
+			
+			if (auto s = shared_state->owner_state.fetch_or(await_state::done, std::memory_order_relaxed); (s & (await_state::done | await_state::dangling)) != 0) {
 				co_return;
 			}
 
 			shared_state->result.template emplace<N + 1>();
 		}
 
-		if (shared_state->owner_state.exchange(detail::when_any::await_state::done) != detail::when_any::await_state::waiting) {
-			co_return;
-		}
-
-		if (auto handle = shared_state->handle; handle) {
-			shared_state->index_finished = N;
+		shared_state->index_finished = N;
+		if (auto s = shared_state->owner_state.fetch_or(await_state::ready, std::memory_order_acq_rel); (s & (await_state::waiting)) != 0) {
+			assert(shared_state->handle);
 			shared_state->handle.resume();
 		}
 	}
@@ -261,9 +260,12 @@ class when_any {
 	 * Each of them will co_await the awaitable and set the result if they are the first to finish
 	 */
 	void make_jobs() {
-		[]<size_t... Ns>(when_any *self, std::index_sequence<Ns...>) {
-			(make_job<Ns>(self->my_state), ...);
-		}(this, std::index_sequence_for<Args...>{});
+		constexpr auto impl = []<size_t... Ns>(when_any *self, std::index_sequence<Ns...>) {
+			// We create an array to guarantee evaluation order here
+			// https://eel.is/c++draft/dcl.init.aggr#7
+			[[maybe_unused]] dpp::job jobs[] = { make_job<Ns>(self->my_state)... };
+		};
+		impl(this, std::index_sequence_for<Args...>{});
 	}
 
 public:
@@ -417,9 +419,11 @@ public:
 		 * @return bool Returns false if we want to resume immediately.
 		 */
 		bool await_suspend(detail::std_coroutine::coroutine_handle<> caller) noexcept {
-			auto sent = detail::when_any::await_state::started;
+			using namespace detail::when_any;
+	
 			self->my_state->handle = caller;
-			return self->my_state->owner_state.compare_exchange_strong(sent, detail::when_any::await_state::waiting); // true (suspend) if `started` was replaced with `waiting` -- false (resume) if the value was not `started` (`done` is the only other option)
+			auto prev = self->my_state->owner_state.fetch_or(await_state::waiting, std::memory_order_acq_rel);
+			return (prev & await_state::ready) == 0; // true (suspend) if the state was not `ready` -- false (resume) if it was
 		}
 
 		/**
@@ -428,7 +432,7 @@ public:
 		 * @see result
 		 */
 		result await_resume() const noexcept {
-			return {self->my_state};
+			return { self->my_state };
 		}
 	};
 
@@ -448,7 +452,7 @@ public:
 #ifndef _DOXYGEN_
 	requires (sizeof...(Args_) == sizeof...(Args))
 #endif /* _DOXYGEN_ */
-	when_any(Args_&&... args) : my_state{std::make_shared<state_t>(detail::when_any::arg_helper<Args_>::get(std::forward<Args_>(args))...)} {
+	when_any(Args_&&... args) : my_state{ std::make_shared<state_t>(detail::when_any::arg_helper<Args_>::get(std::forward<Args_>(args))...) } {
 		make_jobs();
 	}
 
@@ -506,7 +510,7 @@ public:
 	 * @return bool Whether co_await would suspend
 	 */
 	[[nodiscard]] bool await_ready() const noexcept {
-		return my_state->owner_state == detail::when_any::await_state::done;
+		return (my_state->owner_state.load(std::memory_order_acquire) & detail::when_any::await_state::ready) != 0;
 	}
 
 	/**
@@ -517,7 +521,7 @@ public:
 	 * @return result On resumption, this object returns an object that allows to retrieve the index and result of the awaitable.
 	 */
 	[[nodiscard]] awaiter operator co_await() noexcept {
-		return {this};
+		return { this };
 	}
 };
 
