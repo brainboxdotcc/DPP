@@ -58,6 +58,10 @@ SET(LD_LIBRARY_PATH ${RASPBERRY_KINETIC_PATH}/lib)
 EXECUTE_PROCESS(COMMAND wget -P ${DPP_ROOT_PATH}/rootfs -q http://content.dpp.dev/zlib1g_1.2.11.dfsg-1_armhf.deb http://content.dpp.dev/zlib1g-dev_1.2.11.dfsg-1_armhf.deb http://content.dpp.dev/libssl1.1_1.1.1m-1_armhf.deb http://content.dpp.dev/libssl-dev_1.1.1m-1_armhf.deb https://content.dpp.dev/raspi-toolchain.tar.gz)
 
 EXECUTE_PROCESS(
+	COMMAND sudo apt remove libssl-dev
+)
+
+EXECUTE_PROCESS(
 	COMMAND tar -xzf ${DPP_ROOT_PATH}/rootfs/raspi-toolchain.tar.gz -C /opt
 	COMMAND sudo dpkg-deb -x ${DPP_ROOT_PATH}/rootfs/zlib1g-dev_1.2.11.dfsg-1_armhf.deb ${DPP_ROOT_PATH}/rootfs
 	COMMAND sudo dpkg-deb -x ${DPP_ROOT_PATH}/rootfs/zlib1g_1.2.11.dfsg-1_armhf.deb ${DPP_ROOT_PATH}/rootfs
