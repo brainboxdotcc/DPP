@@ -45,6 +45,7 @@ SET(CMAKE_INCLUDE_DIRECTORIES_BEFORE OFF)
 SET(ZLIB_LIBRARY ${DPP_ROOT_PATH}/rootfs/lib/arm-linux-gnueabihf/libz.so.1.2.11)
 SET(OPENSSL_CRYPTO_LIBRARY ${DPP_ROOT_PATH}/rootfs/usr/lib/arm-linux-gnueabihf/libcrypto.so.1.1)
 SET(OPENSSL_SSL_LIBRARY ${DPP_ROOT_PATH}/rootfs/usr/lib/arm-linux-gnueabihf/libssl.so.1.1)
+set(OPENSSL_VERSION "1.1.1f")
 
 SET(CMAKE_CXX_COMPILER_WORKS 1)
 SET(CMAKE_C_FLAGS " ${CMAKE_C_FLAGS} -nostdinc --sysroot=${RASPBERRY_ROOT_PATH} -Wno-psabi " CACHE INTERNAL "" FORCE)
