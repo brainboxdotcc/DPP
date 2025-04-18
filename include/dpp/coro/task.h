@@ -170,7 +170,7 @@ public:
 	 * @return bool Whether the task is finished.
 	 */
 	[[nodiscard]] bool done() const noexcept {
-		return handle && (!this->valid() || handle.promise().state.load(std::memory_order_relaxed) == state_flags::sf_done);
+		return handle && (!this->valid() || handle.promise().state.load(std::memory_order_acq_rel) == state_flags::sf_done);
 	}
 
 	/**
@@ -246,7 +246,7 @@ struct promise_base : basic_promise<R> {
 	 *
 	 * @return <a href="https://en.cppreference.com/w/cpp/coroutine/suspend_never">std::suspend_never</a> Don't suspend, the coroutine starts immediately.
 	 */
-	[[nodiscard]] std_coroutine::suspend_never initial_suspend() const noexcept {
+	std_coroutine::suspend_never initial_suspend() const noexcept {
 		return {};
 	}
 

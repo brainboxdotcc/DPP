@@ -190,5 +190,7 @@ struct DPP_EXPORT raii_socket {
 	~raii_socket();
 };
 
+extern template DPP_EXPORT bool raii_socket::set_option<int>(int level, int name, int value);
+
 
 }
