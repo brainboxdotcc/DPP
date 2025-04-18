@@ -119,6 +119,13 @@ public:
 	utility::iconhash avatar;
 
 	/**
+	 * @brief Avatar URL to use instead of the default if it is set.
+	 *
+	 * @note This may be empty.
+	 */
+	std::string avatar_url;
+
+	/**
 	 * @brief The secure token of the webhook (returned for Incoming Webhooks).
 	 *
 	 * @note This field is optional.
