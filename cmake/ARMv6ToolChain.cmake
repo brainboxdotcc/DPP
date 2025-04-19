@@ -45,6 +45,8 @@ SET(CMAKE_INCLUDE_DIRECTORIES_BEFORE OFF)
 SET(ZLIB_LIBRARY ${DPP_ROOT_PATH}/rootfs/lib/arm-linux-gnueabihf/libz.so.1.2.11)
 SET(OPENSSL_CRYPTO_LIBRARY ${DPP_ROOT_PATH}/rootfs/usr/lib/arm-linux-gnueabihf/libcrypto.so.1.1)
 SET(OPENSSL_SSL_LIBRARY ${DPP_ROOT_PATH}/rootfs/usr/lib/arm-linux-gnueabihf/libssl.so.1.1)
+SET(OPENSSL_INCLUDE_DIR ${DPP_ROOT_PATH}/rootfs/usr/include)
+set(OPENSSL_VERSION "1.1.1f")
 
 SET(CMAKE_CXX_COMPILER_WORKS 1)
 SET(CMAKE_C_FLAGS " ${CMAKE_C_FLAGS} -nostdinc --sysroot=${RASPBERRY_ROOT_PATH} -Wno-psabi " CACHE INTERNAL "" FORCE)
@@ -55,6 +57,10 @@ SET(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} --sysroot=${RASPBERRY_ROOT_PAT
 SET(LD_LIBRARY_PATH ${RASPBERRY_KINETIC_PATH}/lib)
 
 EXECUTE_PROCESS(COMMAND wget -P ${DPP_ROOT_PATH}/rootfs -q http://content.dpp.dev/zlib1g_1.2.11.dfsg-1_armhf.deb http://content.dpp.dev/zlib1g-dev_1.2.11.dfsg-1_armhf.deb http://content.dpp.dev/libssl1.1_1.1.1m-1_armhf.deb http://content.dpp.dev/libssl-dev_1.1.1m-1_armhf.deb https://content.dpp.dev/raspi-toolchain.tar.gz)
+
+EXECUTE_PROCESS(
+	COMMAND sudo apt remove libssl-dev:amd64
+)
 
 EXECUTE_PROCESS(
 	COMMAND tar -xzf ${DPP_ROOT_PATH}/rootfs/raspi-toolchain.tar.gz -C /opt
