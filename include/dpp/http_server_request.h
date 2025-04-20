@@ -44,17 +44,6 @@ using http_server_request_event = std::function<void(class http_server_request*)
  * @note plaintext HTTP without SSL is also supported via a "downgrade" setting
  */
 class DPP_EXPORT http_server_request : public ssl_connection {
-
-	/**
-	 * @brief The type of the request, e.g. GET, POST
-	 */
-	std::string request_type;
-
-	/**
-	 * @brief Path part of URL for HTTPS connection
-	 */
-	std::string path;
-
 	/**
 	 * @brief The request body, e.g. form data
 	 */
@@ -86,6 +75,16 @@ class DPP_EXPORT http_server_request : public ssl_connection {
 	std::string response_body;
 
 protected:
+
+	/**
+	 * @brief The type of the request, e.g. GET, POST
+	 */
+	std::string request_type;
+
+	/**
+	 * @brief Path part of URL for HTTPS connection
+	 */
+	std::string path;
 
 	/**
 	 * @brief Current connection state

@@ -144,9 +144,11 @@ bool http_server_request::handle_buffer(std::string &buffer)
 						return true;
 					}
 					std::string req_verb = uppercase(verb_path_protocol[0]);
+					request_type = req_verb;
 					std::string req_path = verb_path_protocol[1];
+					path = req_path;
 					std::string protocol = uppercase(verb_path_protocol[2]);
-
+					
 					h.erase(h.begin());
 
 					if (protocol.substr(0, 5) != "HTTP/") {
