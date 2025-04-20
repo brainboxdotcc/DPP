@@ -206,7 +206,7 @@ bool http_server_request::handle_buffer(std::string &buffer)
 }
 
 void http_server_request::on_buffer_drained() {
-	if ( == HTTPS_DONE && status > 0 && !handler) {
+	if (state == HTTPS_DONE && status > 0 && !handler) {
 		this->close();
 	}
 }
