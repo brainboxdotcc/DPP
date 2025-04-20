@@ -114,9 +114,18 @@ public:
 	/**
 	 * @brief The default avatar of the webhook.
 	 *
+	 * @note This value will not have any effect when `avatar_url` is set, they are mutually exclusive.
 	 * @note This may be empty.
 	 */
 	utility::iconhash avatar;
+
+	/**
+	 * @brief Avatar URL to use instead of the default if it is set.
+	 *
+	 * @note This will override `avatar` if it is set, they are mutually exclusive.
+	 * @note This may be empty.
+	 */
+	std::string avatar_url;
 
 	/**
 	 * @brief The secure token of the webhook (returned for Incoming Webhooks).
