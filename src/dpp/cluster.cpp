@@ -445,6 +445,13 @@ void cluster::shutdown() {
 
 	{
 		std::lock_guard<std::mutex> l(timer_guard);
+		while (!this->next_timer.empty()) {
+			timer_t cur_timer = std::move(next_timer.top());
+			if (cur_timer.on_stop) {
+				cur_timer.on_stop(cur_timer.handle);
+			}
+			next_timer.pop();
+		}
 		next_timer = {};
 	}
 
