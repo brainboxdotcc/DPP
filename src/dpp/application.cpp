@@ -123,6 +123,14 @@ application& application::fill_from_json_impl(nlohmann::json* j) {
 	set_string_not_null(j, "interactions_endpoint_url", interactions_endpoint_url);
 	set_string_not_null(j, "role_connections_verification_url", role_connections_verification_url);
 
+	set_string_not_null(j, "event_webhooks_url", event_webhooks_url);
+	if (j->contains("event_webhooks_types")) {
+		for (const auto& event_webhook_type : (*j)["event_webhooks_types"]) {
+			this->event_webhooks_types.push_back(to_string(event_webhook_type));
+		}
+	}
+	this->event_webhooks_status = static_cast<application_event_webhook_status>(int8_not_null(j, "event_webhooks_status"));
+
 	if (j->contains("tags")) {
 		for (const auto& tag : (*j)["tags"]) {
 			this->tags.push_back(to_string(tag));
