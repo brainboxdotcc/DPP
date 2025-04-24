@@ -213,6 +213,24 @@ public:
 };
 
 /**
+ * @brief Status indicating whether event webhooks are enabled or disabled for an application.
+ */
+enum application_event_webhook_status: uint8_t {
+	/**
+	 * @brief Webhook events are disabled by developer
+	 */
+	ews_disabled = 1,
+	/**
+	 * @brief Webhook events are enabled by developer
+	 */
+	ews_enabled = 2,
+	/**
+	 * @brief Webhook events are disabled by Discord, usually due to inactivity
+	 */
+	ews_disabled_by_discord = 3,
+};
+
+/**
  * @brief Configuration object for an app installation
  */
 struct DPP_EXPORT integration_configuration {
@@ -356,6 +374,21 @@ public:
 	 * in the guild role verification configuration.
 	 */
 	std::string role_connections_verification_url;
+
+	/**
+	 * @brief Event webhooks URL for the app to receive webhook events
+	 */
+	std::string event_webhooks_url;
+
+	/**
+	 * @brief List of Webhook event types the app subscribes to.
+	 */
+	std::vector<std::string> event_webhooks_types;
+
+	/**
+	 * If webhook events are enabled for the app.
+	 */
+	application_event_webhook_status event_webhooks_status;
 
 	/**
 	 * @brief Up to 5 tags describing the content and functionality of the application.
