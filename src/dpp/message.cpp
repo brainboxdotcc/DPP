@@ -880,6 +880,12 @@ message& message::add_component(const component& c) {
 	return *this;
 }
 
+message& message::add_json_components(const std::string& json) {
+	set_flags(flags | m_using_components_v2);
+	components_json = json::parse(json);
+	return *this;
+}
+
 message& message::add_component_v2(const component& c) {
 	/* This is just an alias for readability in apps */
 	return add_component(c);
@@ -1378,20 +1384,25 @@ json message::to_json(bool with_id, bool is_interaction_response) const {
 		}
 	}
 
-	if ((flags & m_using_components_v2) == 0) {
-		j["components"] = json::array();
-		for (auto & component : components) {
-			json n;
-			n["type"] = cot_action_row;
-			n["components"] = {};
-			for (auto & subcomponent  : component.components) {
-				json sn = subcomponent;
-				n["components"].push_back(sn);
-			}
-			j["components"].push_back(n);
-		}
+	if (!components_json.empty()) {
+		j["components"] = components_json;
 	} else {
-		recurse_components(j, components);
+
+		if ((flags & m_using_components_v2) == 0) {
+			j["components"] = json::array();
+			for (auto &component: components) {
+				json n;
+				n["type"] = cot_action_row;
+				n["components"] = {};
+				for (auto &subcomponent: component.components) {
+					json sn = subcomponent;
+					n["components"].push_back(sn);
+				}
+				j["components"].push_back(n);
+			}
+		} else {
+			recurse_components(j, components);
+		}
 	}
 
 	j["attachments"] = json::array();

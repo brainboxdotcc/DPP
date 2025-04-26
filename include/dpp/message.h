@@ -2390,6 +2390,12 @@ public:
 	std::vector<dpp::component> components;
 
 	/**
+	 * @brief Pre-generated components as JSON. This overrides the components
+	 * array if it is set.
+	 */
+	json components_json;
+
+	/**
 	 * @brief When this message was sent.
 	 */
 	time_t sent;
@@ -2826,6 +2832,17 @@ public:
 	 * @return message& reference to self
 	 */
 	message& add_component(const component& c);
+
+	/**
+	 * @brief Add pre-generated components to a message
+	 *
+	 * @note This is intended to accept pre-generated component
+	 * json from external tools such as https://discord.builders
+	 *
+	 * @param json components json to add. The JSON will be validated
+	 * @return message& reference to self
+	 */
+	message& add_json_components(const std::string& json);
 
 	/**
 	 * @brief Add a component to a message
