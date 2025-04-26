@@ -2839,7 +2839,7 @@ public:
 	 * @note This is intended to accept pre-generated component
 	 * json from external tools such as https://discord.builders
 	 *
-	 * @param c components json to add. The JSON will be validated
+	 * @param json components json to add. The JSON will be validated
 	 * @return message& reference to self
 	 */
 	message& add_json_components(const std::string& json);
