@@ -41,11 +41,7 @@ emoji& emoji::fill_from_json_impl(nlohmann::json* j) {
 		user_id = snowflake_not_null(&user, "id");
 	}
 
-	if(j->contains("roles")) {
-		for (const auto& role : (*j)["roles"]) {
-			this->roles.emplace_back(to_string(role));
-		}
-	}
+	set_snowflake_array_not_null(j, "roles", this->roles);
 
 	if (bool_not_null(j, "require_colons")) {
 		flags |= e_require_colons;

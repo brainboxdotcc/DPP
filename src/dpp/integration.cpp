@@ -96,7 +96,7 @@ integration& integration::fill_from_json_impl(nlohmann::json* j)
 
 	if(j->contains("scopes")) {
 		for (const auto& scope : (*j)["scopes"]) {
-			this->scopes.push_back(to_string(scope));
+			this->scopes.push_back(scope.get<std::string>());
 		}
 	}
 
