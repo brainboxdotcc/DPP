@@ -49,7 +49,7 @@ int main() {
 				/* Attempt to connect to a voice channel, returns false if we fail to connect. */
 
 				/* The user issuing the command is not on any voice channel, we can't do anything */
-				if (!g->connect_member_voice(event.command.get_issuing_user().id)) {
+				if (!g->connect_member_voice(*event.owner, event.command.get_issuing_user().id)) {
 					event.reply("You don't seem to be in a voice channel!");
 					return;
 				}

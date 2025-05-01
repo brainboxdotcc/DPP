@@ -609,7 +609,7 @@ std::string cluster::get_audit_reason() {
 	return r;
 }
 
-discord_client* cluster::get_shard(uint32_t id) {
+discord_client* cluster::get_shard(uint32_t id) const {
 	auto i = shards.find(id);
 	if (i != shards.end()) {
 		return i->second;

@@ -42,7 +42,7 @@ void voice_state_update::handle(discord_client* client, json &j, const std::stri
 	json& d = j["d"];
 	dpp::voice_state_update_t vsu(client->owner, client->shard_id, raw);
 	vsu.state = dpp::voicestate().fill_from_json(&d);
-	vsu.state.shard = client;
+	vsu.state.shard_id = client->shard_id;
 
 	/* Update guild voice states */
 	dpp::guild* g = dpp::find_guild(vsu.state.guild_id);
