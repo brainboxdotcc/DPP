@@ -22,6 +22,7 @@
 #include <dpp/discordclient.h>
 #include <dpp/discordevents.h>
 #include <dpp/stringops.h>
+#include <dpp/cluster.h>
 #include <dpp/json.h>
 
 namespace dpp {
@@ -733,7 +734,7 @@ guild& guild::fill_from_json(discord_client* shard, nlohmann::json* d) {
 			for (auto & vm : (*d)["voice_states"]) {
 				voicestate vs;
 				vs.fill_from_json(&vm);
-				vs.shard = shard;
+				vs.shard_id = shard->shard_id;
 				vs.guild_id = this->id;
 				this->voice_members[vs.user_id] = vs;
 			}
@@ -945,7 +946,7 @@ permission guild::permission_overwrites(const guild_member &member, const channe
 	return permissions;
 }
 
-bool guild::connect_member_voice(snowflake user_id, bool self_mute, bool self_deaf, bool dave) {
+bool guild::connect_member_voice(const cluster& owner, snowflake user_id, bool self_mute, bool self_deaf, bool dave) {
 	for (auto & c : channels) {
 		channel* ch = dpp::find_channel(c);
 		if (!ch || (!ch->is_voice_channel() && !ch->is_stage_channel())) {
@@ -954,8 +955,9 @@ bool guild::connect_member_voice(snowflake user_id, bool self_mute, bool self_de
 		auto vcmembers = ch->get_voice_members();
 		auto vsi = vcmembers.find(user_id);
 		if (vsi != vcmembers.end()) {
-			if (vsi->second.shard) {
-				vsi->second.shard->connect_voice(this->id, vsi->second.channel_id, self_mute, self_deaf, dave);
+			discord_client* shard = owner.get_shard(vsi->second.shard_id);
+			if (shard) {
+				shard->connect_voice(this->id, vsi->second.channel_id, self_mute, self_deaf, dave);
 				return true;
 			}
 		}

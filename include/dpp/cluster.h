@@ -553,7 +553,7 @@ public:
 	 * @param id Shard ID
 	 * @return discord_client* shard, or null
 	 */
-	discord_client* get_shard(uint32_t id);
+	discord_client* get_shard(uint32_t id) const;
 
 	/**
 	 * @brief Get the list of shards

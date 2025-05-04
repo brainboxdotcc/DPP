@@ -27,7 +27,7 @@ namespace dpp {
 
 using json = nlohmann::json;
 
-voicestate::voicestate() : shard(nullptr), guild_id(0), channel_id(0), user_id(0), request_to_speak(0)
+voicestate::voicestate() : shard_id(0), guild_id(0), channel_id(0), user_id(0), request_to_speak(0)
 {
 }
 

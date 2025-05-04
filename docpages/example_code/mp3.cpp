@@ -66,7 +66,7 @@ int main() {
 			dpp::guild* g = dpp::find_guild(event.command.guild_id);
 
 			/* Attempt to connect to a voice channel, returns false if we fail to connect. */
-			if (!g->connect_member_voice(event.command.get_issuing_user().id)) {
+			if (!g->connect_member_voice(*event.owner, event.command.get_issuing_user().id)) {
 				event.reply("You don't seem to be in a voice channel!");
 				return;
 			}

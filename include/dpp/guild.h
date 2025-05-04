@@ -34,6 +34,7 @@
 namespace dpp {
 
 class channel;
+class cluster;
 
 /* Note from Archie: I'd like to move this soon (dpp::guild::region) and allow users to use a region enum.
  * This would make it easier for people to be able to alter a channel region without having to get the text right.
@@ -1285,6 +1286,7 @@ public:
 	/**
 	 * @brief Connect to a voice channel another guild member is in
 	 *
+	 * @param owner Cluster the user's shard is on
 	 * @param user_id User id to join
 	 * @param self_mute True if the bot should mute itself
 	 * @param self_deaf True if the bot should deafen itself
@@ -1295,7 +1297,7 @@ public:
 	 * as we have to wait for the connection to the voice server to be established!
 	 * e.g. wait for dpp::cluster::on_voice_ready event, and then send the audio within that event.
 	 */
-	bool connect_member_voice(snowflake user_id, bool self_mute = false, bool self_deaf = false, bool dave = false);
+	bool connect_member_voice(const cluster& owner, snowflake user_id, bool self_mute = false, bool self_deaf = false, bool dave = false);
 
 	/**
 	 * @brief Get the banner url of the guild if it have one, otherwise returns an empty string
