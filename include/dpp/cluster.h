@@ -153,6 +153,11 @@ class DPP_EXPORT cluster {
 	std::shared_mutex named_commands_mutex;
 
 	/**
+	 * @brief Mutex for protection of shards list
+	 */
+	mutable std::shared_mutex shards_mutex;
+
+	/**
 	 * @brief Typedef for slashcommand handler type
 	 */
 	using slashcommand_handler_t = std::function<void(const slashcommand_t &)>;
@@ -558,9 +563,9 @@ public:
 	/**
 	 * @brief Get the list of shards
 	 *
-	 * @return shard_list& Reference to map of shards for this cluster
+	 * @return shard_list map of shards for this cluster
 	 */
-	const shard_list& get_shards();
+	shard_list get_shards() const;
 
 	/**
 	 * @brief Sets the request timeout.
