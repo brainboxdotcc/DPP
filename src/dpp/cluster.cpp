@@ -249,6 +249,7 @@ void cluster::start(start_type return_after) {
 							shards[shard_id] = new discord_client(*old, seq_no, session_id);
 						} else {
 							log(ll_trace, "Attempting full reconnection...");
+							shards[shard_id] = nullptr;
 							shards[shard_id] = new discord_client(this, shard_id, numshards, token, intents, compressed, ws_mode);
 						}
 						/* Delete the old one */
