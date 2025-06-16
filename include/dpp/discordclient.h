@@ -232,6 +232,11 @@ public:
 	 * @return reference to self
 	 */
 	voiceconn& disconnect();
+
+	/**
+	 * @brief Reassigns the owner to the given discord_client.
+	 */
+	void reassign_owner(class discord_client* o);
 };
 
 /** @brief Implements a discord client. Each discord_client connects to one shard and derives from a websocket client. */
