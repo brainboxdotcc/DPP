@@ -264,7 +264,7 @@ foreach (fullmodname ${subdirlist})
 	set_target_properties(${modname} 
 		PROPERTIES
 		VERSION ${CMAKE_PROJECT_VERSION}
-		SOVERSION ${CMAKE_PROJECT_VERSION}
+		SOVERSION ${DPP_VERSION_MAJOR}
 		POSITION_INDEPENDENT_CODE true
 	)
 	target_include_directories(${modname} PUBLIC 
