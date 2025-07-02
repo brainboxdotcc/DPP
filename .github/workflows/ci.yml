@@ -167,10 +167,6 @@ jobs:
       fail-fast: false # Don't cancel other matrix jobs if one fails
       matrix:
         cfg:
-        - { name: 'x64',            arch: x64, config: Release, vs: '2019', os: 'windows-2022', vsv: '16', upload: true,  options: '-DDPP_NO_CORO=ON' }
-        - { name: 'x64',            arch: x64, config: Debug,   vs: '2019', os: 'windows-2022', vsv: '16', upload: true,  options: '-DDPP_NO_CORO=ON' }
-        - { name: 'x86',            arch: x86, config: Release, vs: '2019', os: 'windows-2022', vsv: '16', upload: true,  options: '-T host=x86 -DDPP_NO_CORO=ON' }
-        - { name: 'x86',            arch: x86, config: Debug,   vs: '2019', os: 'windows-2022', vsv: '16', upload: true,  options: '-T host=x86 -DDPP_NO_CORO=ON' }
         - { name: 'x64',            arch: x64, config: Release, vs: '2022', os: 'windows-2025', vsv: '17', upload: true,  options: '' }
         - { name: 'x64',            arch: x64, config: Debug,   vs: '2022', os: 'windows-2025', vsv: '17', upload: true,  options: '' }
         - { name: 'x86',            arch: x86, config: Release, vs: '2022', os: 'windows-2025', vsv: '17', upload: true,  options: '-T host=x86' }
