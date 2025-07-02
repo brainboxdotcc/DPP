@@ -58,7 +58,7 @@ jobs:
           # Prefix the list here with "+" to use these queries and those in the config file.
 
       - name: Setup mold
-        uses: rui314/setup-mold@b3958095189f34b95d402a680b6e96b7f194f7b9
+        uses: rui314/setup-mold@85c79d00377f0d32cdbae595a46de6f7c2fa6599
 
       - name: Build
         run: cmake -B build -DDPP_NO_VCPKG=ON -DAVX_TYPE=AVX0 -DCMAKE_BUILD_TYPE=Release && cmake --build build -j4
