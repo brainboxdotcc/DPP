@@ -146,7 +146,11 @@ int ssl_connection::start_connecting(dpp::socket sockfd, const struct sockaddr *
 	int rc = (::connect(sockfd, addr, addrlen));
 	int err = errno;
 #endif
-	if (rc == -1 && err != EWOULDBLOCK && err != EINPROGRESS) {
+	if (rc == -1
+#ifdef _WIN32
+		&& err != WSAEWOULDBLOCK
+#endif
+		&& err != EWOULDBLOCK && err != EINPROGRESS) {
 		throw connection_exception(err_connect_failure, strerror(errno));
 	} else if (rc == 0) {
 		/* We are ready RIGHT NOW, connection already succeeded */
@@ -209,7 +213,7 @@ ssl_connection::ssl_connection(cluster* creator, const std::string &_hostname, c
 	try {
 		ssl_connection::connect();
 	}
-	catch (std::exception&) {
+	catch (const std::exception&) {
 		cleanup();
 		throw;
 	}
