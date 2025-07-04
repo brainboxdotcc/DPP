@@ -162,7 +162,7 @@ int start_connecting(dpp::socket sockfd, const struct sockaddr *addr, socklen_t 
 		throw connection_exception(err_connect_failure, strerror(errno));
 	} else if (rc == 0) {
 		/* We are ready RIGHT NOW, connection already succeeded */
-		on_read(sfd, socket_events{ sfd, WANT_READ | WANT_WRITE | WANT_ERROR });
+		on_write(sockfd, socket_events{ sockfd, WANT_READ | WANT_WRITE | WANT_ERROR });
 	}
 	return 0;
 }
