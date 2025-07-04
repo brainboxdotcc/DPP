@@ -140,7 +140,7 @@ int ssl_connection::start_connecting(dpp::socket sockfd, const struct sockaddr *
 	ULONG non_blocking = 1;
 	ioctlsocket(sockfd, FIONBIO, &non_blocking);
 	int rc = WSAConnect(sockfd, addr, addrlen, nullptr, nullptr, nullptr, nullptr);
-	int err = (rc == SOCKET_ERROR ? WSAGetLastError() : 0);
+	int err = ((rc == SOCKET_ERROR) ? WSAGetLastError() : 0);
 #else
 	/* Standard POSIX connection behaviour */
 	int rc = (::connect(sockfd, addr, addrlen));
