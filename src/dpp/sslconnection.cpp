@@ -152,7 +152,7 @@ int start_connecting(dpp::socket sockfd, const struct sockaddr *addr, socklen_t 
 	ULONG non_blocking = 1;
 	ioctlsocket(sockfd, FIONBIO, &non_blocking);
 	int rc = WSAConnect(sockfd, addr, addrlen, nullptr, nullptr, nullptr, nullptr);
-	int err = EWOULDBLOCK;
+	int err = (rc == SOCKET_ERROR ? WSAGetLastError() : 0);
 #else
 	/* Standard POSIX connection behaviour */
 	int rc = (::connect(sockfd, addr, addrlen));
@@ -160,6 +160,9 @@ int start_connecting(dpp::socket sockfd, const struct sockaddr *addr, socklen_t 
 #endif
 	if (rc == -1 && err != EWOULDBLOCK && err != EINPROGRESS) {
 		throw connection_exception(err_connect_failure, strerror(errno));
+	} else if (rc == 0) {
+		/* We are ready RIGHT NOW, connection already succeeded */
+		on_read(sfd, socket_events{ sfd, WANT_READ | WANT_WRITE | WANT_ERROR });
 	}
 	return 0;
 }
