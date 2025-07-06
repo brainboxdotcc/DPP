@@ -237,6 +237,20 @@ protected:
 
 	virtual void on_buffer_drained();
 
+	/**
+	 * @brief Start connecting to a TCP socket.
+	 * This simply calls connect() and checks for error return, as the timeout is now handled in the main
+	 * IO events for the ssl_connection class.
+	 *
+	 * @param sockfd socket descriptor
+	 * @param addr address to connect to
+	 * @param addrlen address length
+	 * @param timeout_ms timeout in milliseconds
+	 * @return int -1 on error, 0 on success just like POSIX connect()
+	 * @throw dpp::connection_exception on failure
+	 */
+	int start_connecting(dpp::socket sockfd, const struct sockaddr *addr, socklen_t addrlen);
+
 public:
 	/**
 	 * @brief For low-level debugging, calling this function will

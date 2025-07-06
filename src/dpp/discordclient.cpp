@@ -363,8 +363,7 @@ void discord_client::error(uint32_t errorcode)
 	if (i != errortext.end()) {
 		error = i->second;
 	}
-	log(dpp::ll_warning, "OOF! Error from underlying websocket: " + std::to_string(errorcode) + ": " + error);
-	this->close();
+	throw dpp::connection_exception("OOF! Error from underlying websocket: " + std::to_string(errorcode) + ": " + error);
 }
 
 void discord_client::log(dpp::loglevel severity, const std::string &msg) const
