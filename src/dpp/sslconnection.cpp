@@ -105,6 +105,29 @@ bool close_socket(dpp::socket sfd)
 	return false;
 }
 
+std::string get_socket_error() {
+#ifdef _WIN32
+	wchar_t *wide_buffer{nullptr};
+	std::string message{"Unknown error"};
+
+	FormatMessageW(
+		FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+		nullptr, WSAGetLastError(), 0, reinterpret_cast<LPWSTR>(&wide_buffer), 0, nullptr
+	);
+	if (wide_buffer) {
+		int size_needed = WideCharToMultiByte(CP_UTF8, 0, wide_buffer, -1, nullptr, 0, nullptr, nullptr);
+		if (size_needed > 0) {
+			message.resize(size_needed - 1);
+			WideCharToMultiByte(CP_UTF8, 0, wide_buffer, -1, message.data(), size_needed, nullptr, nullptr);
+		}
+		LocalFree(wide_buffer);
+	}
+	return message;
+#else
+	return strerror(errno);
+#endif
+}
+
 bool set_nonblocking(dpp::socket sockfd, bool non_blocking)
 {
 	const int enable{1};
@@ -151,7 +174,7 @@ int ssl_connection::start_connecting(dpp::socket sockfd, const struct sockaddr *
 		&& err != WSAEWOULDBLOCK
 #endif
 		&& err != EWOULDBLOCK && err != EINPROGRESS) {
-		throw connection_exception(err_connect_failure, strerror(errno));
+		throw connection_exception(err_connect_failure, get_socket_error());
 	} else if (rc == 0) {
 		/* We are ready RIGHT NOW, connection already succeeded */
 		socket_events ev;
@@ -258,15 +281,11 @@ void ssl_connection::connect() {
 	const dns_cache_entry* addr = resolve_hostname(hostname, port);
 	sfd = addr->make_connecting_socket();
 	address_t destination = addr->get_connecting_address(from_string<uint16_t>(this->port, std::dec));
-	if (sfd == ERROR_STATUS) {
-		err = errno;
-	} else {
-		start_connecting(sfd, destination.get_socket_address(), destination.size());
-	}
 	/* Check if valid connection started */
 	if (sfd == ERROR_STATUS) {
-		throw dpp::connection_exception(err_connect_failure, strerror(err));
+		throw dpp::connection_exception(err_connect_failure, get_socket_error());
 	}
+	start_connecting(sfd, destination.get_socket_address(), destination.size());
 }
 
 void ssl_connection::socket_write(const std::string_view data) {
