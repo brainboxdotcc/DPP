@@ -343,10 +343,11 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 					this->heartbeat_interval = j["d"]["heartbeat_interval"].get<uint32_t>();
 				}
 
-				/* Reset receive_sequence on HELLO */
-				receive_sequence = -1;
-
 				if (!modes.empty()) {
+					// We will get the modes again when the voice connection is ready,
+					// but more importantly, if we failed to resume, the next time we
+					// shall try a full reconnection.
+					modes.clear();
 					log(dpp::ll_debug, "Resuming voice session " + this->sessionid + "...");
 					json obj = {
 						{ "op", voice_opcode_connection_resume },
@@ -362,6 +363,8 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 					};
 					this->write(obj.dump(-1, ' ', false, json::error_handler_t::replace), OP_TEXT);
 				} else {
+					/* Reset receive_sequence on HELLO */
+					receive_sequence = -1;
 					log(dpp::ll_debug, "Connecting new voice session (DAVE: " + std::string(dave_version == dave_version_1 ? "Enabled" : "Disabled") + ")...");
 					json obj = {
 						{ "op", voice_opcode_connection_identify },
