@@ -230,6 +230,11 @@ private:
  */
 using privacy_code_callback_t = std::function<void(const std::string&)>;
 
+/**
+ * @brief A callback for a full reconnection after the voice client disconnects due to error.
+ */
+using full_reconnection_callback_t = std::function<void()>;
+
 /** @brief Implements a discord voice connection.
  * Each discord_voice_client connects to one voice channel and derives from a websocket client.
  */
@@ -709,6 +714,8 @@ public:
 	 */
 	class dpp::cluster* creator{};
 
+	full_reconnection_callback_t reconnection_callback;
+
 	/**
 	 * @brief True when the thread is shutting down
 	 */
@@ -872,6 +879,7 @@ public:
 
 	/** Constructor takes shard id, max shards and token.
 	 * @param _cluster The cluster which owns this voice connection, for related logging, REST requests etc
+	 * @param _reconnection_callback The callback this voice client calls if the voice connection was closed due to error
 	 * @param _channel_id The channel id to identify the voice connection as
 	 * @param _server_id The server id (guild id) to identify the voice connection as
 	 * @param _token The voice session token to use for identifying to the websocket
@@ -881,7 +889,7 @@ public:
 	 * @throw dpp::voice_exception Opus failed to initialise, or D++ is not compiled with voice support
 	 * @warning DAVE E2EE is an EXPERIMENTAL feature!
 	 */
-	discord_voice_client(dpp::cluster* _cluster, snowflake _channel_id, snowflake _server_id, const std::string &_token, const std::string &_session_id, const std::string &_host, bool enable_dave = false);
+	discord_voice_client(dpp::cluster* _cluster, full_reconnection_callback_t _reconnection_callback, snowflake _channel_id, snowflake _server_id, const std::string &_token, const std::string &_session_id, const std::string &_host, bool enable_dave = false);
 
 	/**
 	 * @brief Destroy the discord voice client object

@@ -49,11 +49,12 @@ void voice_server_update::handle(discord_client* client, json &j, const std::str
 		auto v = client->connecting_voice_channels.find(vsu.guild_id);
 		/* Check to see if there is a connection in progress for a voice channel on this guild */
 		if (v != client->connecting_voice_channels.end()) {
-			if (!v->second->is_ready()) {
-				v->second->token = vsu.token;
-				v->second->websocket_hostname = vsu.endpoint;
-				if (!v->second->is_active()) {
-					v->second->connect(vsu.guild_id);
+			voiceconn& connection = *v->second;
+			if (!connection.is_ready()) {
+				connection.token = vsu.token;
+				connection.websocket_hostname = vsu.endpoint;
+				if (!connection.is_active()) {
+					connection.connect();
 				}
 			}
 		}
