@@ -288,7 +288,7 @@ void from_json(const nlohmann::json& j, user& u) {
 		u.avatar_decoration = string_not_null(&j["avatar_decoration_data"], "asset");
 	}
 
-	u.discriminator = int16_not_null(&j, "discriminator");
+	u.discriminator = (uint16_t)snowflake_not_null(&j, "discriminator");
 
 	u.flags |= bool_not_null(&j, "bot") ? dpp::u_bot : 0;
 	u.flags |= bool_not_null(&j, "system") ? dpp::u_system : 0;
