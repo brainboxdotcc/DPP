@@ -115,9 +115,9 @@ std::string user::get_default_avatar_url() const {
 }
 
 std::string user::get_avatar_decoration_url(uint16_t size) const {
-	if (this->id) {
+	if (!this->avatar_decoration.to_string().empty()) {
 		return utility::cdn_endpoint_url_hash({ i_png },
-			"avatar-decorations/" + std::to_string(this->id), this->avatar_decoration.to_string(),
+			"avatar-decoration-presets", this->avatar_decoration.to_string(),
 			i_png, size);
 	} else {
 		return std::string();
@@ -284,7 +284,9 @@ void from_json(const nlohmann::json& j, user& u) {
 	}
 	u.avatar = av;
 
-	u.avatar_decoration = string_not_null(&j, "avatar_decoration");
+	if (j.contains("avatar_decoration_data") && !j.at("avatar_decoration_data").is_null()) {
+		u.avatar_decoration = string_not_null(&j["avatar_decoration_data"], "asset");
+	}
 
 	u.discriminator = (uint16_t)snowflake_not_null(&j, "discriminator");
 
