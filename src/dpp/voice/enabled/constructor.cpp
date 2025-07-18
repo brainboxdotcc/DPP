@@ -32,7 +32,7 @@
 
 namespace dpp {
 
-discord_voice_client::discord_voice_client(dpp::cluster* _cluster, snowflake _channel_id, snowflake _server_id, const std::string &_token, const std::string &_session_id, const std::string &_host, bool enable_dave)
+discord_voice_client::discord_voice_client(dpp::cluster* _cluster, full_reconnection_callback_t _reconnection_callback, snowflake _channel_id, snowflake _server_id, const std::string &_token, const std::string &_session_id, const std::string &_host, bool enable_dave)
 	: websocket_client(_cluster, _host.substr(0, _host.find(':')), _host.substr(_host.find(':') + 1, _host.length()), "/?v=" + std::to_string(voice_protocol_version), OP_TEXT),
 	connect_time(0),
 	mixer(std::make_unique<audio_mixer>()),
@@ -54,6 +54,7 @@ discord_voice_client::discord_voice_client(dpp::cluster* _cluster, snowflake _ch
 	tracks(0),
 	dave_version(enable_dave ? dave_version_1 : dave_version_none),
 	creator(_cluster),
+	reconnection_callback(std::move(_reconnection_callback)),
 	terminating(false),
 	heartbeat_interval(0),
 	last_heartbeat(time(nullptr)),

@@ -75,9 +75,10 @@ void voice_state_update::handle(discord_client* client, json &j, const std::stri
 			auto v = client->connecting_voice_channels.find(vsu.state.guild_id);
 			/* Check to see if we have a connection to a voice channel in progress on this guild */
 			if (v != client->connecting_voice_channels.end()) {
-				v->second->session_id = vsu.state.session_id;
-				if (v->second->is_ready() && !v->second->is_active()) {
-					v->second->connect(vsu.state.guild_id);
+				voiceconn& connection = *v->second;
+				connection.session_id = vsu.state.session_id;
+				if (connection.is_ready() && !connection.is_active()) {
+					connection.connect();
 				}
 			}
 		}

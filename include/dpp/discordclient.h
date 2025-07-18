@@ -140,16 +140,32 @@ enum shard_frame_type : int {
 };
 
 /**
+ * @brief Callback to send a Gateway request to start a new voice connection.
+ */
+using voice_connection_gateway_request_callback_t = std::function<void(discord_client*)>;
+
+/**
  * @brief Represents a connection to a voice channel.
  * A client can only connect to one voice channel per guild at a time, so these are stored in a map
  * in the dpp::discord_client keyed by guild_id.
  */
-class DPP_EXPORT voiceconn {
+class DPP_EXPORT voiceconn : public std::enable_shared_from_this<voiceconn> {
 	/**
 	 * @brief Owning dpp::discord_client instance
 	 */
 	class discord_client* creator;
+
+	/**
+	 * @brief Function to ask a discord_client instance to make a request to Gateway to connect to a voice channel
+	 */
+	voice_connection_gateway_request_callback_t request_callback;
+
 public:
+	/**
+	 * @brief Guild to connect to the voice channel on
+	 */
+	snowflake guild_id;
+
 	/**
 	 * @brief Voice Channel ID
 	 */
@@ -173,7 +189,7 @@ public:
 	/**
 	 * @brief voice websocket client
 	 */
-	class discord_voice_client* voiceclient;
+	std::unique_ptr<class discord_voice_client> voiceclient;
 
 	/**
 	 * @brief True to enable DAVE E2EE
@@ -183,18 +199,15 @@ public:
 
 	/**
 	 * @brief Construct a new voiceconn object
-	 */
-	voiceconn() = default;
-
-	/**
-	 * @brief Construct a new voiceconn object
 	 * 
 	 * @param o owner
-	 * @param _channel_id voice channel id
+	 * @param request_callback Function to ask a discord_client instance to make a request to Gateway to connect to a voice channel
+	 * @param guild_id Guild to connect to the voice channel on
+	 * @param channel_id voice channel id
 	 * @param enable_dave True to enable DAVE E2EE
 	 * @warn DAVE is an EXPERIMENTAL feature!
 	 */
-	voiceconn(class discord_client* o, snowflake _channel_id, bool enable_dave);
+	voiceconn(class discord_client* o, voice_connection_gateway_request_callback_t request_callback, snowflake guild_id, snowflake channel_id, bool enable_dave);
 
 	/**
 	 * @brief Destroy the voiceconn object
@@ -216,16 +229,17 @@ public:
 	 */
 	bool is_active() const;
 
+	voiceconn& request();
+
 	/**
 	 * @brief Create websocket object and connect it.
 	 * Needs hostname, token and session_id to be set or does nothing.
-	 * 
-	 * @param guild_id Guild to connect to the voice channel on
+	 *
 	 * @return reference to self
 	 * @note It can spawn a thread to establish the connection, so this is NOT a synchronous blocking call!
 	 * You shouldn't call this directly. Use a wrapper function instead. e.g. dpp::guild::connect_member_voice
 	 */
-	voiceconn& connect(snowflake guild_id);
+	voiceconn& connect();
 
 	/**
 	 * @brief Disconnect from the currently connected voice channel
@@ -436,7 +450,7 @@ public:
 	/**
 	 * @brief List of voice channels we are connecting to keyed by guild id
 	 */
-	std::unordered_map<snowflake, std::unique_ptr<voiceconn>> connecting_voice_channels;
+	std::unordered_map<snowflake, std::shared_ptr<voiceconn>> connecting_voice_channels;
 
 	/**
 	 * @brief The gateway address we reconnect to when we resume a session

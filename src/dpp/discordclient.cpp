@@ -514,21 +514,24 @@ discord_client& discord_client::connect_voice(snowflake guild_id, snowflake chan
 			return *this;
 		}
 	}
-	connecting_voice_channels[guild_id] = std::make_unique<voiceconn>(this, channel_id, enable_dave);
-	/* Once sent, this expects two events (in any order) on the websocket:
-	* VOICE_SERVER_UPDATE and VOICE_STATUS_UPDATE
-	*/
-	log(ll_debug, "Sending op 4 to join VC, guild " + std::to_string(guild_id) + " channel " + std::to_string(channel_id) + (enable_dave ? " WITH DAVE" : ""));
-	queue_message(jsonobj_to_string(json({
-		{ "op", ft_voice_state_update },
-		{ "d", {
-				{ "guild_id", std::to_string(guild_id) },
-				{ "channel_id", std::to_string(channel_id) },
-				{ "self_mute", self_mute },
-				{ "self_deaf", self_deaf },
+	connecting_voice_channels[guild_id] = std::make_shared<voiceconn>(this, [guild_id, channel_id, self_mute, self_deaf, enable_dave](discord_client* client) {
+		/* Once sent, this expects two events (in any order) on the websocket:
+		 * VOICE_SERVER_UPDATE and VOICE_STATUS_UPDATE
+		 */
+		// Always honor the given client rather than this because
+		// the owner can change after shard reconnection.
+		client->log(ll_debug, "Sending op 4 to join VC, guild " + std::to_string(guild_id) + " channel " + std::to_string(channel_id) + (enable_dave ? " WITH DAVE" : ""));
+		client->queue_message(client->jsonobj_to_string(json({
+			{ "op", ft_voice_state_update },
+			{ "d", {
+					{ "guild_id", std::to_string(guild_id) },
+					{ "channel_id", std::to_string(channel_id) },
+					{ "self_mute", self_mute },
+					{ "self_deaf", self_deaf },
+				}
 			}
-		}
-	})), false);
+	})), false);}, guild_id, channel_id, enable_dave);
+
 #endif
 	return *this;
 }
@@ -581,7 +584,8 @@ voiceconn* discord_client::get_voice(snowflake guild_id) {
 }
 
 
-voiceconn::voiceconn(discord_client* o, snowflake _channel_id, bool enable_dave) : creator(o), channel_id(_channel_id), voiceclient(nullptr), dave(enable_dave) {
+voiceconn::voiceconn(discord_client* o, voice_connection_gateway_request_callback_t request_callback, snowflake guild_id, snowflake channel_id, bool enable_dave) : creator(o), request_callback(std::move(request_callback)), guild_id(guild_id), channel_id(channel_id), voiceclient(nullptr), dave(enable_dave) {
+	request();
 }
 
 bool voiceconn::is_ready() const {
@@ -594,8 +598,7 @@ bool voiceconn::is_active() const {
 
 voiceconn& voiceconn::disconnect() {
 	if (this->is_active()) {
-		delete voiceclient;
-		voiceclient = nullptr;
+		voiceclient.reset();
 	}
 	return *this;
 }
@@ -604,16 +607,31 @@ voiceconn::~voiceconn() {
 	this->disconnect();
 }
 
-voiceconn& voiceconn::connect(snowflake guild_id) {
+voiceconn& voiceconn::request() {
+	this->token.clear();
+	this->session_id.clear();
+	this->websocket_hostname.clear();
+	this->voiceclient.reset();
+
+	this->request_callback(this->creator);
+	return *this;
+}
+
+voiceconn& voiceconn::connect() {
 	if (this->is_ready() && !this->is_active()) {
 		try {
-			this->creator->log(ll_debug, "Connecting voice for guild " + std::to_string(guild_id) + " channel " + std::to_string(this->channel_id));
-			this->voiceclient = new discord_voice_client(creator->creator, this->channel_id, guild_id, this->token, this->session_id, this->websocket_hostname, this->dave);
+			this->creator->log(ll_debug, "Connecting voice for guild " + std::to_string(this->guild_id) + " channel " + std::to_string(this->channel_id));
+			full_reconnection_callback_t reconnection_callback = [weak_this=weak_from_this()] {
+			if (std::shared_ptr<voiceconn> strong_this = weak_this.lock()) {
+				strong_this->request();
+			}
+		};
+		this->voiceclient = std::make_unique<discord_voice_client>(creator->creator, std::move(reconnection_callback), this->channel_id, this->guild_id, this->token, this->session_id, this->websocket_hostname, this->dave);
 			/* Note: Spawns thread! */
 			this->voiceclient->run();
 		}
 		catch (std::exception &e) {
-			this->creator->log(ll_debug, "Can't connect to voice websocket (guild_id: " + std::to_string(guild_id) + ", channel_id: " + std::to_string(this->channel_id) + "): " + std::string(e.what()));
+			this->creator->log(ll_debug, "Can't connect to voice websocket (guild_id: " + std::to_string(this->guild_id) + ", channel_id: " + std::to_string(this->channel_id) + "): " + std::string(e.what()));
 		}
 	}
 	return *this;
