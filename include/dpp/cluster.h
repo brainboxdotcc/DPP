@@ -1650,7 +1650,7 @@ public:
 	void interaction_response_get_original(const std::string &token, command_completion_event_t callback = utility::log_error());
 
 	/**
-	 * @brief Create a followup message to a slash command
+	 * @brief Create a followup message for an interaction
 	 *
 	 * @see https://discord.com/developers/docs/interactions/receiving-and-responding#create-interaction-response
 	 * @param token Token for the interaction webhook
@@ -1661,7 +1661,7 @@ public:
 	void interaction_followup_create(const std::string &token, const message &m, command_completion_event_t callback = utility::log_error());
 
 	/**
-	 * @brief Edit original followup message to a slash command
+	 * @brief Edit original followup message for an interaction
 	 * This is an alias for cluster::interaction_response_edit
 	 * @see cluster::interaction_response_edit
 	 * 
@@ -1683,7 +1683,7 @@ public:
 	void interaction_followup_delete(const std::string &token, command_completion_event_t callback = utility::log_error());
 
 	/**
-	 * @brief Edit followup message to a slash command
+	 * @brief Edit followup message for an interaction
 	 * The message ID in the message you pass should be correctly set to that of a followup message you previously sent
 	 *
 	 * @see https://discord.com/developers/docs/interactions/receiving-and-responding#edit-followup-message
@@ -1695,7 +1695,7 @@ public:
 	void interaction_followup_edit(const std::string &token, const message &m, command_completion_event_t callback = utility::log_error());
 
 	/**
-	 * @brief Get the followup message to a slash command
+	 * @brief Get the followup message for an interaction
 	 *
 	 * @see https://discord.com/developers/docs/interactions/receiving-and-responding#get-followup-message
 	 * @param token Token for the interaction webhook
@@ -1706,7 +1706,7 @@ public:
 	void interaction_followup_get(const std::string &token, snowflake message_id, command_completion_event_t callback);
 	
 	/**
-	 * @brief Get the original followup message to a slash command
+	 * @brief Get the original followup message for an interaction
 	 * This is an alias for cluster::interaction_response_get_original
 	 * @see cluster::interaction_response_get_original
 	 * 

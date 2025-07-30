@@ -570,6 +570,22 @@ struct DPP_EXPORT interaction_create_t : public event_dispatch_t {
 	void reply(const std::string& mt, command_completion_event_t callback = utility::log_error()) const;
 
 	/**
+	 * @brief Create a follow-up message for this interaction.
+	 * @param m Message object to send. Not all fields are supported by Discord.
+	 * @param callback User function to execute when the api call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void follow_up(const message& m, command_completion_event_t callback = utility::log_error()) const;
+	
+	/**
+	 * @brief Create a follow-up message for this interaction.
+	 * @param mt The string value to send, for simple text only messages
+	 * @param callback User function to execute when the api call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void follow_up(const std::string& mt, command_completion_event_t callback = utility::log_error()) const;
+
+	/**
 	 * @brief Reply to interaction with a dialog box
 	 *
 	 * @param mr Dialog box response to send
@@ -680,6 +696,22 @@ struct DPP_EXPORT interaction_create_t : public event_dispatch_t {
 	 * On success the result will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	dpp::async<dpp::confirmation_callback_t> co_reply(const std::string& mt) const;
+
+	/**
+	 * @brief Create a follow-up message for this interaction.
+	 *
+	 * @param m Message object to send. Not all fields are supported by Discord.
+	 * On success the result will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	dpp::async<dpp::confirmation_callback_t> co_follow_up(const message& m) const;
+
+	/**
+	 * @brief Create a follow-up message for this interaction.
+	 *
+	 * @param mt The string value to send, for simple text only messages
+	 * On success the result will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	dpp::async<dpp::confirmation_callback_t> co_follow_up(const std::string& mt) const;
 
 	/**
 	 * @brief Reply to interaction with a dialog box

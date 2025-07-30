@@ -216,6 +216,14 @@ void interaction_create_t::reply(const std::string& mt, command_completion_event
 	this->reply(ir_channel_message_with_source, dpp::message(this->command.channel_id, mt, mt_application_command), callback);
 }
 
+void interaction_create_t::follow_up(const message& m, command_completion_event_t callback) const {
+	owner->interaction_followup_create(this->command.token, m, std::move(callback));
+}
+
+void interaction_create_t::follow_up(const std::string& mt, command_completion_event_t callback) const {
+	owner->interaction_followup_create(this->command.token, dpp::message(this->command.channel_id, mt, mt_application_command), std::move(callback));
+}
+
 void interaction_create_t::edit_response(const message& m, command_completion_event_t callback) const {
 	owner->interaction_response_edit(this->command.token, m, std::move(callback));
 }
@@ -237,7 +245,7 @@ void interaction_create_t::edit_original_response(const message& m, command_comp
 	std::vector<std::string> file_contents{};
 	std::vector<std::string> file_mimetypes{};
 
-	for(message_file_data data : m.file_data) {
+	for(const message_file_data& data : m.file_data) {
 		file_names.push_back(data.name);
 		file_contents.push_back(data.content);
 		file_mimetypes.push_back(data.mimetype);
@@ -278,6 +286,14 @@ async<confirmation_callback_t> interaction_create_t::co_reply(const message& m) 
 
 async<confirmation_callback_t> interaction_create_t::co_reply(const std::string& mt) const {
 	return dpp::async{[&, this] <typename T> (T&& cb) { this->reply(mt, std::forward<T>(cb)); }};
+}
+
+async<confirmation_callback_t> interaction_create_t::co_follow_up(const message& m) const {
+	return dpp::async{[&, this] <typename T> (T&& cb) { this->follow_up(m, std::forward<T>(cb)); }};
+}
+
+async<confirmation_callback_t> interaction_create_t::co_follow_up(const std::string& mt) const {
+	return dpp::async{[&, this] <typename T> (T&& cb) { this->follow_up(mt, std::forward<T>(cb)); }};
 }
 
 async<confirmation_callback_t> interaction_create_t::co_dialog(const interaction_modal_response& mr) const {
