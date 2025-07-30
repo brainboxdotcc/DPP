@@ -606,6 +606,36 @@ public:
 	interaction_modal_response(const std::string& _custom_id, const std::string& _title, const std::vector<component> _components = {});
 
 	/**
+	 * @brief Copy constructor
+	 *
+	 * @param other The object to copy from
+	 */
+	interaction_modal_response(const interaction_modal_response& other) = default;
+
+	/**
+	 * @brief Copy assignment operator
+	 *
+	 * @param other The object to copy from
+	 * @return interaction_modal_response& reference to self
+	 */
+	interaction_modal_response& operator=(const interaction_modal_response& other) = default;
+
+	/**
+	 * @brief Move constructor
+	 *
+	 * @param other The object to move from
+	 */
+	interaction_modal_response(interaction_modal_response&& other) noexcept = default;
+
+	/**
+	 * @brief Move assignment operator
+	 *
+	 * @param other The object to move from
+	 * @return interaction_modal_response& reference to self
+	 */
+	interaction_modal_response& operator=(interaction_modal_response&& other) noexcept = default;
+
+	/**
 	 * @brief Set the custom id
 	 * 
 	 * @param _custom_id custom id to set
