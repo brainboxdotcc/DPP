@@ -761,6 +761,14 @@ struct DPP_EXPORT interaction_create_t : public event_dispatch_t {
 	dpp::async<dpp::confirmation_callback_t> co_edit_original_response(const message& m) const;
 
 	/**
+	 * @brief Edit original response message for this interaction
+	 *
+	 * @param mt The string value to send, for simple text only messages
+	 * On success the result will contain a dpp::message object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	dpp::async<dpp::confirmation_callback_t> co_edit_original_response(const std::string& mt) const;
+
+	/**
 	 * @brief Delete original response message for this interaction. This cannot be used on an ephemeral interaction response.
 	 *
 	 * On success the result will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
