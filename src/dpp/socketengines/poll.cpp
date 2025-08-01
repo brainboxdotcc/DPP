@@ -20,29 +20,11 @@
  ************************************************************************************/
 
 #include <dpp/cluster.h>
+#include <dpp/compat.h>
 #include <dpp/socketengine.h>
 #include <dpp/exception.h>
 #include <vector>
 #include <shared_mutex>
-#ifdef _WIN32
-/* Windows-specific sockets includes */
-	#include <WinSock2.h>
-	#include <WS2tcpip.h>
-	#include <io.h>
-	/* Windows doesn't have standard poll(), it has WSAPoll.
-	 * It's the same thing with different symbol names.
-	 * Microsoft gotta be different.
-	 */
-	#define poll(fds, nfds, timeout) WSAPoll(fds, nfds, timeout)
-	#define pollfd WSAPOLLFD
-	/* Windows sockets library */
-	#pragma comment(lib, "ws2_32")
-#else
-/* Anything other than Windows (e.g. sane OSes) */
-	#include <poll.h>
-	#include <sys/socket.h>
-	#include <unistd.h>
-#endif
 #include <memory>
 
 namespace dpp {
@@ -81,7 +63,7 @@ struct DPP_EXPORT socket_engine_poll : public socket_engine_base {
 			}
 		}
 
-		int i = poll(out_set, static_cast<unsigned int>(poll_set.size()), poll_delay);
+		int i = dpp::compat::poll(out_set, static_cast<unsigned int>(poll_set.size()), poll_delay);
 		int processed = 0;
 
 		for (size_t index = 0; index < poll_set.size() && processed < i; index++) {
