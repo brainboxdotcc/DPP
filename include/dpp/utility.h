@@ -348,11 +348,6 @@ struct DPP_EXPORT primaryguild {
 	 * @brief The server tag badge
 	 */
 	iconhash badge;
-
-	/**
-	 * Construct empty primary guild
-	 */
-	primaryguild() = default;
 };
 
 /**
