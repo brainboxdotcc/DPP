@@ -306,10 +306,11 @@ void from_json(const nlohmann::json& j, user& u) {
 	}
 
 	if (j.contains("primary_guild") && !j.at("primary_guild").is_null()) {
-		u.primary_guild.id = snowflake_not_null(&j["primary_guild"], "identity_guild_id");
-		u.primary_guild.enabled = bool_not_null(&j["primary_guild"], "identity_enabled");
-		u.primary_guild.tag = string_not_null(&j["primary_guild"], "tag");
-		u.primary_guild.badge = string_not_null(&j["primary_guild"], "badge");
+		const auto *pg = &j["primary_guild"];
+		u.primary_guild.id = snowflake_not_null(pg, "identity_guild_id");
+		u.primary_guild.enabled = bool_not_null(pg, "identity_enabled");
+		u.primary_guild.tag = string_not_null(pg, "tag");
+		u.primary_guild.badge = string_not_null(pg, "badge");
 	}
 }
 
