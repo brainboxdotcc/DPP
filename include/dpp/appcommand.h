@@ -45,6 +45,14 @@ namespace dpp {
 #endif
 
 /**
+ * @brief Discords default attachment size limit is 10MiB, and will be used in case
+ * an interaction does not contain its attachment size limit.
+ */
+#ifndef DEFAULT_ATTACHMENT_SIZE_LIMIT
+	#define DEFAULT_ATTACHMENT_SIZE_LIMIT 10 * 1024 * 1024
+#endif
+
+/**
  * @brief Represents command option types.
  * These are the possible parameter value types.
  */
@@ -1092,6 +1100,11 @@ public:
 	 * @brief Guild's locale (language) - for guild interactions only.
 	 */
 	std::string guild_locale;
+
+	/**
+	 * @brief Attachment size limit in bytes for this interaction. Will be the discord default if not provided by the interaction.
+	 */
+	uint32_t attachment_size_limit;
 
 	/**
 	 * @brief Cache policy from cluster.
