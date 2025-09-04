@@ -465,7 +465,7 @@ slashcommand& slashcommand::add_option(const command_option &o)
 	return *this;
 }
 
-interaction::interaction() : application_id(0), type(0), guild_id(0), channel_id(0), message_id(0), version(0), cache_policy(cache_policy::cpol_default), attachment_size_limit(DEFAULT_ATTACHMENT_SIZE_LIMIT) {
+interaction::interaction() : application_id(0), type(0), guild_id(0), channel_id(0), message_id(0), version(0), attachment_size_limit(DEFAULT_ATTACHMENT_SIZE_LIMIT), cache_policy(cache_policy::cpol_default) {
 }
 
 command_interaction interaction::get_command_interaction() const {
