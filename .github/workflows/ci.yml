@@ -50,13 +50,15 @@ jobs:
           - { arch: 'amd64', concurrency: 4, os: ubuntu-24.04, package: clang-16, cpp: clang++, version: 16, cmake-flags: '', cpack: 'no', ctest: 'no', mold: 'yes' }
           - { arch: 'amd64', concurrency: 4, os: ubuntu-24.04, package: clang-17, cpp: clang++, version: 17, cmake-flags: '', cpack: 'no', ctest: 'no', mold: 'yes' }
           - { arch: 'amd64', concurrency: 4, os: ubuntu-24.04, package: clang-18, cpp: clang++, version: 18, cmake-flags: '', cpack: 'no', ctest: 'no', mold: 'yes' }
-          - { arch: 'amd64', concurrency: 4, os: ubuntu-24.04, package: 'clang-19 libc++-19-dev libc++abi-19-dev', cpp: clang++, version: 19, cmake-flags: '-DCMAKE_CXX_FLAGS="-stdlib=libc++" -DCMAKE_EXE_LINKER_FLAGS="-stdlib=libc++"', cpack: 'no', ctest: 'no', mold: 'yes', name-extra: ' libc++', llvm-apt: 'yes' }
+          - { arch: 'amd64', concurrency: 4, os: ubuntu-24.04, package: clang-19, cpp: clang++, version: 19, cmake-flags: '', cpack: 'no', ctest: 'no', mold: 'yes' }
+          - { arch: 'amd64', concurrency: 4, os: ubuntu-24.04, package: clang-20, cpp: clang++, version: 20, cmake-flags: '', cpack: 'no', ctest: 'no', mold: 'yes' }
+          - { arch: 'amd64', concurrency: 4, os: ubuntu-24.04, package: 'clang-21 libc++-21-dev libc++abi-21-dev', cpp: clang++, version: 21, cmake-flags: '-DCMAKE_CXX_FLAGS="-stdlib=libc++" -DCMAKE_EXE_LINKER_FLAGS="-stdlib=libc++"', cpack: 'no', ctest: 'no', mold: 'yes', name-extra: ' libc++', llvm-apt: 'yes' }
           # g++
+          - { arch: 'amd64', concurrency: 4, os: ubuntu-22.04, package: g++-10, cpp: g++, version: 10, cmake-flags: '-DDPP_NO_CORO=ON', cpack: 'yes', ctest: 'no', mold: 'yes' }
+          - { arch: 'amd64', concurrency: 4, os: ubuntu-22.04, package: g++-11, cpp: g++, version: 11, cmake-flags: '', cpack: 'no', ctest: 'no', mold: 'yes' }
+          - { arch: 'amd64', concurrency: 4, os: ubuntu-22.04, package: g++-12, cpp: g++, version: 12, cmake-flags: '', cpack: 'no', ctest: 'no', mold: 'yes' }
           - { arch: 'amd64', concurrency: 4, os: ubuntu-24.04, package: g++-13, cpp: g++, version: 13, cmake-flags: '', cpack: 'no', ctest: 'yes', mold: 'yes' }
           - { arch: 'amd64', concurrency: 4, os: ubuntu-24.04, package: g++-14, cpp: g++, version: 14, cmake-flags: '', cpack: 'no', ctest: 'no', mold: 'yes' }
-          - { arch: 'amd64', concurrency: 4, os: ubuntu-22.04, package: g++-12, cpp: g++, version: 12, cmake-flags: '', cpack: 'no', ctest: 'no', mold: 'yes' }
-          - { arch: 'amd64', concurrency: 4, os: ubuntu-22.04, package: g++-11, cpp: g++, version: 11, cmake-flags: '', cpack: 'no', ctest: 'no', mold: 'yes' }
-          - { arch: 'amd64', concurrency: 4, os: ubuntu-22.04, package: g++-10, cpp: g++, version: 10, cmake-flags: '-DDPP_NO_CORO=ON', cpack: 'yes', ctest: 'no', mold: 'yes' }
           # Self hosted
           - { arch: 'arm7hf', concurrency: 4, os: [self-hosted, linux, ARM], package: g++-12, cpp: g++, version: 12, cmake-flags: '', cpack: 'yes', ctest: 'no', mold: 'no' }
           - { arch: 'arm64', concurrency: 4, os: [self-hosted, linux, ARM64], package: g++-12, cpp: g++, version: 12, cmake-flags: '', cpack: 'yes', ctest: 'no', mold: 'yes' }
@@ -129,7 +131,7 @@ jobs:
       fail-fast: false # Don't fail everything if one fails. We want to test each OS/Compiler individually
       matrix:
         cfg:
-          - { arch: 'arm64', concurrency: 3, os: macos-latest, cpp: clang++, version: 15, cmake-flags: '', xcode-version: '15.3' }
+          - { arch: 'arm64', concurrency: 3, os: macos-latest, cpp: clang++, version: 16, cmake-flags: '', xcode-version: '16.4' }
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@0634a2670c59f64b4a01f0f96f84700a4088b9f0 # v2.12.0
@@ -145,7 +147,7 @@ jobs:
           xcode-version: ${{ matrix.cfg.xcode-version }}
 
       - name: Install homebrew packages
-        run: brew install cmake make opus openssl
+        run: brew install make opus openssl
 
       - name: Generate CMake
         run: cmake -B build -DDPP_NO_VCPKG=ON -DCMAKE_BUILD_TYPE=Release -DDPP_CORO=ON -DAVX_TYPE=AVX0
