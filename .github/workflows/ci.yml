@@ -147,7 +147,7 @@ jobs:
           xcode-version: ${{ matrix.cfg.xcode-version }}
 
       - name: Install homebrew packages
-        run: brew install cmake make opus openssl
+        run: brew install make opus openssl
 
       - name: Generate CMake
         run: cmake -B build -DDPP_NO_VCPKG=ON -DCMAKE_BUILD_TYPE=Release -DDPP_CORO=ON -DAVX_TYPE=AVX0
