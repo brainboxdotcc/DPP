@@ -40,17 +40,13 @@ namespace dpp {
  * This value represents that maximum. interaction_response::add_autocomplete_choice does not allow
  * adding more than this number of elements to the vector.
  */
-#ifndef AUTOCOMPLETE_MAX_CHOICES
-	#define AUTOCOMPLETE_MAX_CHOICES 25
-#endif
+inline constexpr size_t AUTOCOMPLETE_MAX_CHOICES = 25;
 
 /**
  * @brief Discords default attachment size limit is 10MiB, and will be used in case
  * an interaction does not contain its attachment size limit.
  */
-#ifndef DEFAULT_ATTACHMENT_SIZE_LIMIT
-	#define DEFAULT_ATTACHMENT_SIZE_LIMIT 10 * 1024 * 1024
-#endif
+inline constexpr uint32_t DEFAULT_ATTACHMENT_SIZE_LIMIT = 10 * 1024 * 1024;
 
 /**
  * @brief Represents command option types.
