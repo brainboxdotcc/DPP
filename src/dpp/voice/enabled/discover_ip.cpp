@@ -22,19 +22,8 @@
 
 #include <dpp/exception.h>
 #include <dpp/discordvoiceclient.h>
+#include <dpp/compat.h>
 #include "enabled.h"
-
-#ifdef _WIN32
-	#include <WinSock2.h>
-	#include <WS2tcpip.h>
-	#include <io.h>
-	#define poll(fds, nfds, timeout) WSAPoll(fds, nfds, timeout)
-	#define pollfd WSAPOLLFD
-#else
-	#include <poll.h>
-	#include <netinet/in.h>
-	#include <sys/socket.h>
-#endif
 
 namespace dpp {
 
@@ -164,7 +153,7 @@ std::string discord_voice_client::discover_ip() {
 		pollfd pfd{};
 		pfd.fd = socket.fd;
 		pfd.events = POLLIN;
-		int ret = ::poll(&pfd, 1, discovery_timeout);
+		int ret = dpp::compat::poll(&pfd, 1, discovery_timeout);
 		switch (ret) {
 			case -1:
 				log(ll_warning, "poll() error on IP discovery");

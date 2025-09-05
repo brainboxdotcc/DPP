@@ -22,17 +22,8 @@
 #pragma once
 
 #include <dpp/export.h>
-#ifdef _WIN32
-	#include <WinSock2.h>
-	#include <WS2tcpip.h>
-	#include <io.h>
-	#define poll(fds, nfds, timeout) WSAPoll(fds, nfds, timeout)
-	#define pollfd WSAPOLLFD
-#else
-	#include <netinet/in.h>
-	#include <sys/socket.h>
-	#include <arpa/inet.h>
-#endif
+#include <dpp/compat.h>
+
 #include <string_view>
 #include <cstdint>
 
