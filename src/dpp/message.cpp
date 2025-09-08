@@ -1789,7 +1789,6 @@ message_pin::message_pin() : pinned_at(-1), pinned_message() {
 message_pin::message_pin(time_t _pinned_at, const message& _pinned_message) : pinned_at(_pinned_at), pinned_message(_pinned_message) {
 }
 
-
 message_pin& message_pin::fill_from_json_impl(nlohmann::json *j) {
 	this->pinned_at = ts_not_null(j, "pinned_at");
 	json& j_message = (*j)["message"];
@@ -1804,6 +1803,5 @@ json message_pin::to_json() const {
 	j["message"] = pinned_message.to_json();
 	return j;
 }
-
 
 }// namespace dpp

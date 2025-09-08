@@ -2999,7 +2999,7 @@ public:
 };
 
 /**
- * @brief Represents a discord webhook
+ * @brief Represents a pinned message.
  */
 class DPP_EXPORT message_pin : public json_interface<message_pin> {
 protected:
@@ -3014,7 +3014,7 @@ protected:
 	message_pin& fill_from_json_impl(nlohmann::json* j);
 
 	/** Build JSON from this object.
-	 * @return The JSON text of the message
+	 * @return The JSON text of the message_pin
 	 */
 	virtual json to_json() const;
 
