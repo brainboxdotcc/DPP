@@ -2380,6 +2380,17 @@ public:
 	void channel_pins_get(snowflake channel_id, command_completion_event_t callback);
 
 	/**
+	 * @brief Get a channel's pins
+	 * @see https://discord.com/developers/docs/resources/channel#get-pinned-messages
+	 * @param channel_id Channel ID to get pins for
+	 * @param before Get messages pinned before this timestamp.
+	 * @param limit Max number of pins to return (1-50). Defaults to 50 if not set.
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::message_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void channel_pins_get(snowflake channel_id, std::optional<time_t> before, std::optional<uint64_t> limit, command_completion_event_t callback);
+
+	/**
 	 * @brief Adds a recipient to a Group DM using their access token
 	 * @see https://discord.com/developers/docs/resources/channel#group-dm-add-recipient
 	 * @param channel_id Channel id to add group DM recipients to
