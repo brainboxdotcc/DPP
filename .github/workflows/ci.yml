@@ -73,7 +73,7 @@ jobs:
 
       - name: Setup mold
         if: ${{ matrix.cfg.mold == 'yes' }}
-        uses: rui314/setup-mold@85c79d00377f0d32cdbae595a46de6f7c2fa6599 # v1
+        uses: rui314/setup-mold@7344740a9418dcdcb481c7df83d9fbd1d5072d7d # v1
 
       - name: Add LLVM apt repository
         if: ${{ matrix.cfg.llvm-apt }}
