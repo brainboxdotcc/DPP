@@ -465,7 +465,7 @@ slashcommand& slashcommand::add_option(const command_option &o)
 	return *this;
 }
 
-interaction::interaction() : application_id(0), type(0), guild_id(0), channel_id(0), message_id(0), version(0), cache_policy(cache_policy::cpol_default) {
+interaction::interaction() : application_id(0), type(0), guild_id(0), channel_id(0), message_id(0), version(0), attachment_size_limit(DEFAULT_ATTACHMENT_SIZE_LIMIT), cache_policy(cache_policy::cpol_default) {
 }
 
 command_interaction interaction::get_command_interaction() const {
@@ -625,6 +625,11 @@ void from_json(const nlohmann::json& j, interaction& i) {
 	i.channel_id = snowflake_not_null(&j, "channel_id");
 	i.guild_id = snowflake_not_null(&j, "guild_id");
 	i.app_permissions = snowflake_not_null(&j, "app_permissions");
+	i.attachment_size_limit = int32_not_null(&j, "attachment_size_limit");
+
+	if (i.attachment_size_limit == 0) {
+		i.attachment_size_limit = DEFAULT_ATTACHMENT_SIZE_LIMIT;
+	}
 
 	if (j.contains("channel") && !j.at("channel").is_null()) {
 		const json& c = j["channel"];
