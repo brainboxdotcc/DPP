@@ -211,8 +211,7 @@ void cluster::channel_pins_get(snowflake channel_id, command_completion_event_t 
 }
 
 void cluster::channel_pins_get(snowflake channel_id, std::optional<time_t> before, std::optional<uint64_t> limit, command_completion_event_t callback) {
-	if (!limit.has_value())
-	{
+	if (!limit.has_value()) {
 		limit = GET_CHANNEL_PINS_MAX;
 	}
 
@@ -238,6 +237,7 @@ void cluster::channel_pins_get(snowflake channel_id, std::optional<time_t> befor
 				list[pinned_msg.pinned_message.id] = pinned_msg;
 			}
 		}
+
 		if (callback) {
 			callback(confirmation_callback_t(this, list, http));
 		}
