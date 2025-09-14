@@ -75,6 +75,12 @@ socket_engine_base::socket_engine_base(cluster* creator) : owner(creator) {
 #endif
 }
 
+socket_engine_base::~socket_engine_base() {
+#ifdef _WIN32
+	WSACleanup();
+#endif
+}
+
 time_t last_time = time(nullptr);
 
 socket_events* socket_engine_base::get_fd(dpp::socket fd) {

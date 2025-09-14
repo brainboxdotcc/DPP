@@ -230,7 +230,7 @@ struct DPP_EXPORT socket_engine_base {
 	/**
 	 * @brief Default destructor
 	 */
-	virtual ~socket_engine_base() = default;
+	virtual ~socket_engine_base();
 
 	/**
 	 * @brief Should be called repeatedly in a loop.
