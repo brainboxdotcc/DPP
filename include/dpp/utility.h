@@ -324,6 +324,33 @@ struct DPP_EXPORT iconhash {
 };
 
 /**
+ * @brief User's primary guild (server tag)
+ */
+struct DPP_EXPORT primaryguild {
+	/**
+	 * @brief The id of the user's primary guild
+	 *
+	 * @see guild
+	 */
+	snowflake id;
+
+	/**
+	 * @brief Whether the user is displaying the primary guild's server tag
+	 */
+	bool enabled;
+
+	/**
+	 * @brief The text of the user's server tag. Limited to 4 characters
+	 */
+	std::string tag;
+
+	/**
+	 * @brief The server tag badge
+	 */
+	iconhash badge;
+};
+
+/**
  * @brief Image to be received or sent to API calls.
  *
  * This class is carefully crafted to be 16 bytes,

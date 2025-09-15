@@ -200,6 +200,11 @@ public:
 	utility::iconhash avatar_decoration;
 
 	/**
+	 * @brief Primary guild object (server tag)
+	 */
+	utility::primaryguild primary_guild;
+
+	/**
 	 * @brief Flags built from a bitmask of values in dpp::user_flags.
 	 */
 	uint32_t flags;

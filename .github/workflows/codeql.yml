@@ -41,7 +41,7 @@ jobs:
 
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@0634a2670c59f64b4a01f0f96f84700a4088b9f0 # v2.12.0
+        uses: step-security/harden-runner@ec9f2d5744a09debf3a187a3f4f675c53b671911 # v2.13.0
         with:
           egress-policy: audit
 
@@ -58,7 +58,7 @@ jobs:
           # Prefix the list here with "+" to use these queries and those in the config file.
 
       - name: Setup mold
-        uses: rui314/setup-mold@85c79d00377f0d32cdbae595a46de6f7c2fa6599
+        uses: rui314/setup-mold@7344740a9418dcdcb481c7df83d9fbd1d5072d7d
 
       - name: Build
         run: cmake -B build -DDPP_NO_VCPKG=ON -DAVX_TYPE=AVX0 -DCMAKE_BUILD_TYPE=Release && cmake --build build -j4
