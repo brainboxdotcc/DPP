@@ -135,6 +135,7 @@ typedef std::variant<
 		confirmation,
 		message,
 		message_map,
+		message_pin_map,
 		user,
 		user_identified,
 		user_map,
