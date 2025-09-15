@@ -2334,7 +2334,7 @@ template <typename T> struct message_snapshot {
 	std::vector<T> messages;
 };
 
-	/**
+/**
  * @brief Represents messages sent and received on Discord
  */
 struct DPP_EXPORT message : public managed, json_interface<message> {
@@ -2999,9 +2999,86 @@ public:
 };
 
 /**
+ * @brief Represents a pinned message.
+ */
+class DPP_EXPORT message_pin : public json_interface<message_pin> {
+protected:
+	friend struct json_interface<message_pin>;
+
+	/**
+	 * @brief Fill in object from json data
+	 *
+	 * @param j JSON data
+	 * @return message_pin& Reference to self
+	 */
+	message_pin& fill_from_json_impl(nlohmann::json* j);
+
+	/** Build JSON from this object.
+	 * @return The JSON text of the message_pin
+	 */
+	virtual json to_json() const;
+
+public:
+
+	message_pin();
+
+	message_pin(time_t _pinned_at, const message& _pinned_message);
+
+	/*
+	 * @brief Construct a new message_pin object
+	 * @param msg_pin message_pin to copy
+	 */
+	message_pin(const message_pin& msg_pin) = default;
+
+	/*
+	 * @brief Construct a new message_pin object
+	 * @param msg_pin message_pin to move
+	 */
+	message_pin(message_pin&& msg_pin) = default;
+
+	/**
+	 * @brief Destroy the message_pin object
+	 */
+	~message_pin() = default;
+
+	/**
+	 * @brief Copy a message_pin object
+	 *
+	 * @param msg_pin message_pin to copy
+	 * @return message_pin& Reference to self
+	 */
+	message_pin &operator=(const message_pin& msg_pin) = default;
+
+	/**
+	 * @brief Move a message_pin object
+	 *
+	 * @param msg_pin message_pin to move
+	 * @return message_pin& Reference to self
+	 */
+	message_pin &operator=(message_pin&& msg_pin) = default;
+
+public:
+
+	/**
+	 * @brief The time the message was pinned.
+	 */
+	time_t pinned_at;
+
+	/**
+	 * @brief The pinned message.
+	 */
+	message pinned_message;
+};
+
+/**
  * @brief A group of messages
  */
 typedef std::unordered_map<snowflake, message> message_map;
+
+/**
+ * @brief A group of pinned messages
+ */
+typedef std::unordered_map<snowflake, message_pin> message_pin_map;
 
 /**
  * @brief A group of stickers
