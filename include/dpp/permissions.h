@@ -265,6 +265,11 @@ enum permissions : uint64_t {
 	 * @brief Allows use of Clyde AI.
 	 */
 	p_use_clyde_ai = 0x0000800000000000,
+
+	/**
+	 * @brief Allows pinning and unpinning messages
+	 */
+	p_pin_messages = 0x0008000000000000,
 };
 
 /**
