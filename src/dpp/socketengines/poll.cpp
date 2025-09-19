@@ -82,7 +82,7 @@ struct DPP_EXPORT socket_engine_poll : public socket_engine_base {
 
 			if (fd == wake_read.fd) {
 				if ((revents & POLLIN) != 0) {
-					drain_wakeup();
+					drain_wakeup_socket();
 				}
 				continue;
 			}
@@ -151,7 +151,7 @@ struct DPP_EXPORT socket_engine_poll : public socket_engine_base {
 			}
 			poll_set.push_back(fd_info);
 		}
-		refresh_poll();
+		force_poll_update();
 		return r;
 	}
 
@@ -174,7 +174,6 @@ struct DPP_EXPORT socket_engine_poll : public socket_engine_base {
 				break;
 			}
 		}
-		refresh_poll();
 		return r;
 	}
 
@@ -185,7 +184,10 @@ struct DPP_EXPORT socket_engine_poll : public socket_engine_base {
 
 protected:
 
-	/* Poll wakeup mechanism: UDP loopback socket pair */
+	/* Needed for poll wakeup mechanism: a loopback socket pair
+	 * When request to register new socket arrives we need to wake up the poll immediately, without waiting for timeout.
+	 * This is accomplished by sending a a byte on the loopback socket to exit the poll function early.
+	 */
 	dpp::raii_socket wake_read{dpp::rst_udp};
 	dpp::raii_socket wake_write{dpp::rst_udp};
 
@@ -199,7 +201,6 @@ protected:
 					event.fd = fd;
 					owner->on_socket_close.call(event);
 				}
-				refresh_poll();
 				return true;
 			}
 		}
@@ -208,18 +209,18 @@ protected:
 
 	void init_wakeup_socket() {
 		if (!wake_read.bind(dpp::address_t("127.0.0.1", 0))) {
-			throw dpp::connection_exception("Failed to bind refresh_poll read socket");
+			throw dpp::connection_exception("Failed to bind reading socket of poll wakeup pair");
 		}
 
 		if (!set_nonblocking(wake_read.fd, true)) {
-			throw dpp::connection_exception("Failed to set refresh_poll read socket non-blocking");
+			throw dpp::connection_exception("Failed to set reading socket of poll wakeup pair to non-blocking mode");
 		}
 
 		dpp::address_t tmp;
 		uint16_t port = tmp.get_port(wake_read.fd);
 		dpp::address_t dest("127.0.0.1", port);
 		if (::connect(wake_write.fd, dest.get_socket_address(), static_cast<int>(dest.size())) != 0) {
-			throw dpp::connection_exception("Failed to connect refresh_poll write socket");
+			throw dpp::connection_exception("Failed to connect writing socket of poll wakeup pair");
 		}
 
 		{
@@ -231,7 +232,7 @@ protected:
 		}
 	}
 
-	void drain_wakeup() {
+	void drain_wakeup_socket() {
 		char buf[256];
 		while (true) {
 #if _WIN32
@@ -258,7 +259,7 @@ protected:
 		}
 	}
 
-	void refresh_poll() const {
+	void force_poll_update() const {
 		if (wake_write.fd == INVALID_SOCKET) return;
 		static const char one = 1;
 		(void)::send(wake_write.fd, &one, 1, 0);
