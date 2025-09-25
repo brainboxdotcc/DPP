@@ -2,7 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
- * Copyright 2022 Craig Edwards and D++ contributors 
+ * Copyright 2022 Craig Edwards and D++ contributors
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,7 +30,7 @@ namespace dpp {
  * Use this template like this:
  *
  * ```
- * if (dpp::run_once<struct any_unique_name_you_like_here>()) {
+ * if (dpp::run_once()) {
  *     // Your code here
  * }
  * ```
@@ -38,7 +38,7 @@ namespace dpp {
  * @tparam T any unique 'tag' identifier name
  * @return auto a true/false return to say if we should execute or not
  */
-template <typename T> auto run_once() {
+template <typename T = decltype([]{})> auto run_once() {
 	static auto called = false;
 	return !std::exchange(called, true);
 };
