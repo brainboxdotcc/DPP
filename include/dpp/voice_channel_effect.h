@@ -20,15 +20,11 @@
  *
  ************************************************************************************/
 #pragma once
-#include "emoji.h"
-#include "voicestate.h"
-
-
 #include <dpp/export.h>
 #include <dpp/json_fwd.h>
 #include <dpp/json_interface.h>
 #include <dpp/snowflake.h>
-#include <unordered_map>
+#include <dpp/emoji.h>
 
 namespace dpp {
 
@@ -41,9 +37,7 @@ enum animation_types : uint8_t {
 };
 
 /**
- * @brief Represents the voice state of a user on a guild
- * These are stored in the dpp::guild object, and accessible there,
- * or via dpp::channel::get_voice_members
+ * @brief Represents a voice channel effect e.g. a soundboard sound or an emoji reaction.
  */
 class DPP_EXPORT voice_channel_effect : public json_interface<voice_channel_effect> {
 protected:
@@ -64,20 +58,17 @@ public:
 	int32_t shard_id{0};
 
 	/**
-	 * @brief The channel id this user is connected to.
-	 *
-	 * @note This may be empty.
+	 * @brief The channel id the user who sent the effect is connected to.
 	 */
 	snowflake channel_id{0};
 
 	/**
-	 *
-	 * @brief Optional: The guild id this voice state is for.
+	 * @brief The guild id with the channel this effect was sent in.
 	 */
 	snowflake guild_id{0};
 
 	/**
-	 * @brief The user id this voice state is for.
+	 * @brief The user id who sent the effect.
 	 */
 	snowflake user_id{0};
 
@@ -88,21 +79,29 @@ public:
 
 	/**
 	 * @brief The type of emoji animation, for emoji reaction and soundboard effects.
+	 *
+	 * @note This may be empty.
 	 */
 	uint8_t animation_type{0};
 
 	/**
 	 * @brief The ID of the emoji animation, for emoji reaction and soundboard effects.
+	 *
+	 * @note This may be empty.
 	 */
 	uint32_t animation_id{0};
 
 	/**
 	 * @brief The ID of the soundboard sound, for soundboard effects.
+	 *
+	 * @note This may be empty.
 	 */
 	snowflake sound_id{0};
 
 	/**
 	 * @brief The volume of the soundboard sound, from 0 to 1, for soundboard effects.
+	 *
+	 * @note This may be empty.
 	 */
 	double sound_volume{0};
 
@@ -112,7 +111,7 @@ public:
 	voice_channel_effect();
 
 	/**
-	 * @brief Destroy the voicestate object
+	 * @brief Destroy the voice_channel_effect object
 	 */
 	virtual ~voice_channel_effect() = default;
 };

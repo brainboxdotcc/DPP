@@ -19,14 +19,9 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#include "voice_channel_effect.h"
-
-
 #include <dpp/discordevents.h>
 #include <dpp/json.h>
-#include <dpp/voicestate.h>
-
-#include <iostream>
+#include <dpp/voice_channel_effect.h>
 
 namespace dpp {
 

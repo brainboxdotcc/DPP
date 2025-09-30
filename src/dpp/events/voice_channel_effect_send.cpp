@@ -22,8 +22,6 @@
 #include <dpp/discordevents.h>
 #include <dpp/cluster.h>
 #include <dpp/discordvoiceclient.h>
-#include <dpp/guild.h>
-#include <dpp/voicestate.h>
 #include <dpp/stringops.h>
 #include <dpp/json.h>
 

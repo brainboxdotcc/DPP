@@ -20,9 +20,6 @@
  *
  ************************************************************************************/
 #pragma once
-#include "voice_channel_effect.h"
-
-
 #include <algorithm>
 #include <dpp/appcommand.h>
 #include <dpp/application.h>
@@ -47,6 +44,7 @@
 #include <dpp/thread.h>
 #include <dpp/user.h>
 #include <dpp/utility.h>
+#include <dpp/voice_channel_effect.h>
 #include <dpp/webhook.h>
 #include <exception>
 #include <functional>
