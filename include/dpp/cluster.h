@@ -630,6 +630,15 @@ public:
 	bool unregister_command(const std::string& name);
 
 	/**
+	 * @brief on voice channel effect send event
+	 *
+	 * @see https://discord.com/developers/docs/events/gateway-events#voice-channel-effect-send
+	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
+	 * The function signature for this event takes a single `const` reference of type voice_state_update_t&, and returns void.
+	 */
+	event_router_t<voice_channel_effect_send_t> on_voice_channel_effect_send;
+
+	/**
 	 * @brief on voice state update event
 	 *
 	 * @see https://discord.com/developers/docs/topics/gateway-events#voice-state-update

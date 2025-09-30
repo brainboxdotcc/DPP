@@ -20,35 +20,38 @@
  *
  ************************************************************************************/
 #pragma once
-#include <dpp/export.h>
-#include <dpp/snowflake.h>
-#include <dpp/misc-enum.h>
-#include <dpp/managed.h>
-#include <dpp/utility.h>
-#include <dpp/role.h>
-#include <dpp/user.h>
-#include <dpp/channel.h>
-#include <dpp/thread.h>
-#include <dpp/guild.h>
-#include <dpp/invite.h>
-#include <dpp/emoji.h>
-#include <dpp/ban.h>
-#include <dpp/automod.h>
-#include <dpp/webhook.h>
-#include <dpp/presence.h>
-#include <dpp/message.h>
+#include "voice_channel_effect.h"
+
+
+#include <algorithm>
 #include <dpp/appcommand.h>
 #include <dpp/application.h>
-#include <dpp/scheduled_event.h>
-#include <dpp/stage_instance.h>
-#include <dpp/integration.h>
 #include <dpp/auditlog.h>
+#include <dpp/automod.h>
+#include <dpp/ban.h>
+#include <dpp/channel.h>
+#include <dpp/emoji.h>
 #include <dpp/entitlement.h>
-#include <functional>
-#include <variant>
+#include <dpp/export.h>
+#include <dpp/guild.h>
+#include <dpp/integration.h>
+#include <dpp/invite.h>
+#include <dpp/managed.h>
+#include <dpp/message.h>
+#include <dpp/misc-enum.h>
+#include <dpp/presence.h>
+#include <dpp/role.h>
+#include <dpp/scheduled_event.h>
+#include <dpp/snowflake.h>
+#include <dpp/stage_instance.h>
+#include <dpp/thread.h>
+#include <dpp/user.h>
+#include <dpp/utility.h>
+#include <dpp/webhook.h>
 #include <exception>
-#include <algorithm>
+#include <functional>
 #include <string>
+#include <variant>
 
 #ifndef DPP_NO_CORO
 #include <dpp/coro.h>
@@ -477,6 +480,19 @@ struct DPP_EXPORT stage_instance_delete_t : public event_dispatch_t {
 	 * @brief deleted stage instance
 	 */
 	stage_instance deleted = {};
+};
+
+/**
+ * @brief Voice channel effect send
+ */
+struct DPP_EXPORT voice_channel_effect_send_t : public event_dispatch_t {
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
+	/**
+	 * @brief Voice channel effect
+	 */
+	voice_channel_effect effect = {};
 };
 
 /**
