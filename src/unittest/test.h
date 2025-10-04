@@ -114,8 +114,9 @@ DPP_TEST(CURRENTUSER, "cluster::current_user_get()", tf_online);
 DPP_TEST(GETGUILD, "cluster::guild_get()", tf_online);
 DPP_TEST(GETCHAN, "cluster::channel_get()", tf_online);
 DPP_TEST(GETCHANS, "cluster::channels_get()", tf_online);
+DPP_TEST(GETCHANNELINVS, "cluster::channel_invites_get()", tf_online);
 DPP_TEST(GETROLES, "cluster::roles_get()", tf_online);
-DPP_TEST(GETINVS, "cluster::guild_get_invites()", tf_online);
+DPP_TEST(GETGUILDINVS, "cluster::guild_get_invites()", tf_online);
 DPP_TEST(GETBANS, "cluster::guild_get_bans()", tf_online);
 DPP_TEST(GETPINS, "cluster::channel_pins_get()", tf_online);
 DPP_TEST(GETEVENTS, "cluster::guild_events_get()", tf_online);
@@ -228,6 +229,7 @@ DPP_TEST(EMOJI_DELETE, "cluster::guild_emoji_delete", tf_online);
 DPP_TEST(INVITE_CREATE_EVENT, "cluster::on_invite_create", tf_online);
 DPP_TEST(INVITE_DELETE_EVENT, "cluster::on_invite_delete", tf_online);
 DPP_TEST(INVITE_CREATE, "cluster::channel_invite_create", tf_online);
+DPP_TEST(INVITE_GET, "cluster::invite_get", tf_online);
 DPP_TEST(INVITE_GET, "cluster::invite_get", tf_online);
 DPP_TEST(INVITE_DELETE, "cluster::invite_delete", tf_online);
 

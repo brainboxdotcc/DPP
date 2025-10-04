@@ -1847,6 +1847,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 				set_test(INVITE_CREATE, false);
 				set_test(INVITE_GET, false);
 				set_test(INVITE_DELETE, false);
+				set_test(GETCHANNELINVS, false);
 				if (!offline) {
 					dpp::channel channel;
 					channel.id = TEST_TEXT_CHANNEL_ID;
@@ -1854,7 +1855,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 					invite.max_age = 0;
 					invite.max_uses = 100;
 					set_test(INVITE_CREATE_EVENT, false);
-					bot.channel_invite_create(channel, invite, [&bot, invite](const dpp::confirmation_callback_t &event) {
+					bot.channel_invite_create(channel, invite, [&bot, channel, invite](const dpp::confirmation_callback_t &event) {
 						if (event.is_error()) {
 							return;
 						}
@@ -1863,6 +1864,17 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 						if (!created.code.empty() && created.channel_id == TEST_TEXT_CHANNEL_ID && created.guild_id == TEST_GUILD_ID && created.inviter.id == bot.me.id) {
 							set_test(INVITE_CREATE, true);
 						}
+
+						bot.channel_invites_get(channel, [created](const dpp::confirmation_callback_t &event) {
+							if (event.is_error()) {
+								return;
+							}
+
+							auto invites = event.get<dpp::invite_map>();
+							if (!invites.empty() && invites.contains(created.code)) {
+								set_test(GETCHANNELINVS, true);
+							}
+						});
 
 						bot.invite_get(created.code, [&bot, created](const dpp::confirmation_callback_t &event) {
 							if (!event.is_error()) {
@@ -2422,7 +2434,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 			singleparam_api_test(guild_get, TEST_GUILD_ID, dpp::guild, GETGUILD);
 			singleparam_api_test_list(roles_get, TEST_GUILD_ID, dpp::role_map, GETROLES);
 			singleparam_api_test_list(channels_get, TEST_GUILD_ID, dpp::channel_map, GETCHANS);
-			singleparam_api_test_list(guild_get_invites, TEST_GUILD_ID, dpp::invite_map, GETINVS);
+			singleparam_api_test_list(guild_get_invites, TEST_GUILD_ID, dpp::invite_map, GETGUILDINVS);
 			multiparam_api_test_list(guild_get_bans, TEST_GUILD_ID, dpp::ban_map, GETBANS);
 			singleparam_api_test_list(channel_pins_get, TEST_TEXT_CHANNEL_ID, dpp::message_map, GETPINS);
 			singleparam_api_test_list(guild_events_get, TEST_GUILD_ID, dpp::scheduled_event_map, GETEVENTS);
