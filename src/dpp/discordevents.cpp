@@ -375,6 +375,7 @@ static const std::map<std::string, dpp::events::event*> event_map = {
 	{ "GUILD_ROLE_CREATE", make_static_event<dpp::events::guild_role_create>() },
 	{ "GUILD_ROLE_UPDATE", make_static_event<dpp::events::guild_role_update>() },
 	{ "GUILD_ROLE_DELETE", make_static_event<dpp::events::guild_role_delete>() },
+	{ "VOICE_CHANNEL_EFFECT_SEND", make_static_event<dpp::events::voice_channel_effect_send>() },
 	{ "VOICE_STATE_UPDATE", make_static_event<dpp::events::voice_state_update>() },
 	{ "VOICE_SERVER_UPDATE", make_static_event<dpp::events::voice_server_update>() },
 	{ "WEBHOOKS_UPDATE", make_static_event<dpp::events::webhooks_update>() },

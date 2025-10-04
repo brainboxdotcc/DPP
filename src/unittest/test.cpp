@@ -559,6 +559,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 			DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::stage_instance_create_t, success);
 			DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::stage_instance_update_t, success);
 			DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::stage_instance_delete_t, success);
+			DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::voice_channel_effect_send_t, success);
 			DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::voice_state_update_t, success);
 			DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::interaction_create_t, success);
 			DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::slashcommand_t, success);

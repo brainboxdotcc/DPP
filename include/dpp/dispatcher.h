@@ -20,13 +20,6 @@
  *
  ************************************************************************************/
 #pragma once
-#include <dpp/export.h>
-#include <dpp/snowflake.h>
-#include <dpp/misc-enum.h>
-#include <dpp/managed.h>
-#include <dpp/utility.h>
-#include <dpp/role.h>
-#include <dpp/user.h>
 #include <dpp/channel.h>
 #include <dpp/thread.h>
 #include <dpp/guild.h>
@@ -46,6 +39,7 @@
 #include <dpp/entitlement.h>
 #include <functional>
 #include <variant>
+#include <dpp/voice_channel_effect.h>
 #include <exception>
 #include <algorithm>
 #include <string>
@@ -477,6 +471,19 @@ struct DPP_EXPORT stage_instance_delete_t : public event_dispatch_t {
 	 * @brief deleted stage instance
 	 */
 	stage_instance deleted = {};
+};
+
+/**
+ * @brief Voice channel effect send
+ */
+struct DPP_EXPORT voice_channel_effect_send_t : public event_dispatch_t {
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
+	/**
+	 * @brief Voice channel effect
+	 */
+	voice_channel_effect effect = {};
 };
 
 /**

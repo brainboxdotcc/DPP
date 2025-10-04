@@ -39,6 +39,7 @@
 #include <dpp/managed.h>
 #include <dpp/socketengine.h>
 #include <dpp/utility.h>
+#include <dpp/voice_channel_effect.h>
 #include <dpp/voicestate.h>
 #include <dpp/permissions.h>
 #include <dpp/role.h>
