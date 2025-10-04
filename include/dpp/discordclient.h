@@ -205,7 +205,6 @@ public:
 	 * @param guild_id Guild to connect to the voice channel on
 	 * @param channel_id voice channel id
 	 * @param enable_dave True to enable DAVE E2EE
-	 * @warn DAVE is an EXPERIMENTAL feature!
 	 */
 	voiceconn(class discord_client* o, voice_connection_gateway_request_callback_t request_callback, snowflake guild_id, snowflake channel_id, bool enable_dave);
 
@@ -608,13 +607,13 @@ public:
 	 * @param channel_id Channel ID of the voice channel
 	 * @param self_mute True if the bot should mute itself
 	 * @param self_deaf True if the bot should deafen itself
-	 * @param enable_dave True to enable DAVE E2EE - EXPERIMENTAL
+	 * @param enable_dave True to enable DAVE E2EE
 	 * @return reference to self
 	 * @note This is NOT a synchronous blocking call! The bot isn't instantly ready to send or listen for audio,
 	 * as we have to wait for the connection to the voice server to be established!
 	 * e.g. wait for dpp::cluster::on_voice_ready event, and then send the audio within that event.
 	 */
-	discord_client& connect_voice(snowflake guild_id, snowflake channel_id, bool self_mute = false, bool self_deaf = false, bool enable_dave = false);
+	discord_client& connect_voice(snowflake guild_id, snowflake channel_id, bool self_mute = false, bool self_deaf = false, bool enable_dave = true);
 
 	/**
 	 * @brief Disconnect from the connected voice channel on a guild
