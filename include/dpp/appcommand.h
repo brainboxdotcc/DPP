@@ -40,9 +40,13 @@ namespace dpp {
  * This value represents that maximum. interaction_response::add_autocomplete_choice does not allow
  * adding more than this number of elements to the vector.
  */
-#ifndef AUTOCOMPLETE_MAX_CHOICES
-	#define AUTOCOMPLETE_MAX_CHOICES 25
-#endif
+inline constexpr size_t AUTOCOMPLETE_MAX_CHOICES = 25;
+
+/**
+ * @brief Discords default attachment size limit is 10MiB, and will be used in case
+ * an interaction does not contain its attachment size limit.
+ */
+inline constexpr uint32_t DEFAULT_ATTACHMENT_SIZE_LIMIT = 10 * 1024 * 1024;
 
 /**
  * @brief Represents command option types.
@@ -1092,6 +1096,11 @@ public:
 	 * @brief Guild's locale (language) - for guild interactions only.
 	 */
 	std::string guild_locale;
+
+	/**
+	 * @brief Attachment size limit in bytes for this interaction. Will be the discord default if not provided by the interaction.
+	 */
+	uint32_t attachment_size_limit;
 
 	/**
 	 * @brief Cache policy from cluster.

@@ -122,6 +122,7 @@ event_decl(invite_delete,INVITE_DELETE);
 
 /* Voice */
 event_decl(voice_state_update,VOICE_STATE_UPDATE);
+event_decl(voice_channel_effect_send,VOICE_CHANNEL_EFFECT_SEND);
 event_decl(voice_server_update,VOICE_SERVER_UPDATE);
 
 /* Webhooks */

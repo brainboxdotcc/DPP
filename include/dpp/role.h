@@ -829,6 +829,15 @@ public:
 	bool has_use_clyde_ai() const;
 
 	/**
+	 * @brief True if has permission to use pin messages.
+	 *
+	 * @note Having the administrator permission causes this method to always return true
+	 * Channel specific overrides may apply to permissions.
+	 * @return bool True if user has the Pin Messages permission or is administrator.
+	 */
+	bool has_pin_messages() const;
+
+	/**
 	 * @brief Get guild members who have this role.
 	 *
 	 * @note This method requires user/members cache to be active

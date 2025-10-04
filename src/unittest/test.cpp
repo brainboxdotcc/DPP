@@ -559,6 +559,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 			DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::stage_instance_create_t, success);
 			DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::stage_instance_update_t, success);
 			DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::stage_instance_delete_t, success);
+			DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::voice_channel_effect_send_t, success);
 			DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::voice_state_update_t, success);
 			DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::interaction_create_t, success);
 			DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::slashcommand_t, success);
@@ -2436,7 +2437,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 			singleparam_api_test_list(channels_get, TEST_GUILD_ID, dpp::channel_map, GETCHANS);
 			singleparam_api_test_list(guild_get_invites, TEST_GUILD_ID, dpp::invite_map, GETGUILDINVS);
 			multiparam_api_test_list(guild_get_bans, TEST_GUILD_ID, dpp::ban_map, GETBANS);
-			singleparam_api_test_list(channel_pins_get, TEST_TEXT_CHANNEL_ID, dpp::message_map, GETPINS);
+			singleparam_api_test_list(channel_pins_get, TEST_TEXT_CHANNEL_ID, dpp::message_pin_map, GETPINS);
 			singleparam_api_test_list(guild_events_get, TEST_GUILD_ID, dpp::scheduled_event_map, GETEVENTS);
 			twoparam_api_test(guild_event_get, TEST_GUILD_ID, TEST_EVENT_ID, dpp::scheduled_event, GETEVENT);
 			twoparam_api_test_list(guild_event_users_get, TEST_GUILD_ID, TEST_EVENT_ID, dpp::event_member_map, GETEVENTUSERS);
