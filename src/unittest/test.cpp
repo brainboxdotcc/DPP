@@ -1871,7 +1871,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 							}
 
 							auto invites = event.get<dpp::invite_map>();
-							if (!invites.empty() && invites.contains(created.code)) {
+							if (!invites.empty() && invites.find(created.code) != invites.end()) {
 								set_test(GETCHANNELINVS, true);
 							}
 						});
