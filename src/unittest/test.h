@@ -230,7 +230,6 @@ DPP_TEST(INVITE_CREATE_EVENT, "cluster::on_invite_create", tf_online);
 DPP_TEST(INVITE_DELETE_EVENT, "cluster::on_invite_delete", tf_online);
 DPP_TEST(INVITE_CREATE, "cluster::channel_invite_create", tf_online);
 DPP_TEST(INVITE_GET, "cluster::invite_get", tf_online);
-DPP_TEST(INVITE_GET, "cluster::invite_get", tf_online);
 DPP_TEST(INVITE_DELETE, "cluster::invite_delete", tf_online);
 
 /* Extended set -- Less important, skipped on the master branch due to rate limits and GitHub actions limitations */
