@@ -597,7 +597,6 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	 * @brief DAVE - Discord Audio Visual Encryption
 	 * Used for E2EE encryption. dave_protocol_none is
 	 * the default right now.
-	 * @warning DAVE E2EE is an EXPERIMENTAL feature!
 	 */
 	dave_version_t dave_version;
 
@@ -887,9 +886,8 @@ public:
 	 * @param _host The voice server hostname to connect to (hostname:port format)
 	 * @param enable_dave Enable DAVE E2EE
 	 * @throw dpp::voice_exception Opus failed to initialise, or D++ is not compiled with voice support
-	 * @warning DAVE E2EE is an EXPERIMENTAL feature!
 	 */
-	discord_voice_client(dpp::cluster* _cluster, full_reconnection_callback_t _reconnection_callback, snowflake _channel_id, snowflake _server_id, const std::string &_token, const std::string &_session_id, const std::string &_host, bool enable_dave = false);
+	discord_voice_client(dpp::cluster* _cluster, full_reconnection_callback_t _reconnection_callback, snowflake _channel_id, snowflake _server_id, const std::string &_token, const std::string &_session_id, const std::string &_host, bool enable_dave = true);
 
 	/**
 	 * @brief Destroy the discord voice client object
