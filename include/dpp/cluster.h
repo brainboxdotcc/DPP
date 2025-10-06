@@ -3509,11 +3509,16 @@ public:
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 * @see https://discord.com/developers/docs/resources/guild#modify-current-member
 	 * @param guild_id Guild ID to change on
-	 * @param nickname New nickname, or empty string to clear nickname
+	 * @param nickname New nickname, or empty string to clear nickname.
+	 * @param banner_blob New banner, or empty string to clear banner.
+	 * @param banner_type Type of image for new banner.
+	 * @param avatar_blob New avatar, or empty string to clear avatar.
+	 * @param avatar_type Type of image for new avatar.
+	 * @param bio New bio, or empty string to clear bio
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_current_member_edit(snowflake guild_id, const std::string &nickname, command_completion_event_t callback = utility::log_error());
+	void guild_current_member_edit(snowflake guild_id, const std::string& nickname, const std::string& banner_blob, const image_type banner_type, const std::string& avatar_blob, const image_type avatar_type, const std::string& bio, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get current user's connections (linked accounts, e.g. steam, xbox).

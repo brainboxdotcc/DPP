@@ -23,9 +23,49 @@
 
 namespace dpp {
 
-void cluster::guild_current_member_edit(snowflake guild_id, const std::string &nickname, command_completion_event_t callback) {
-	std::string o = (nickname.empty() ? json({{"nick", json::value_t::null }}) : json({{"nick", nickname }})).dump(-1, ' ', false, json::error_handler_t::replace);
-	rest_request<confirmation>(this, API_PATH "/guilds", std::to_string(guild_id), "members/@me", m_patch, o, callback);
+void cluster::guild_current_member_edit(snowflake guild_id, const std::string &nickname, const std::string& banner_blob, const image_type banner_type, const std::string& avatar_blob, const image_type avatar_type, const std::string& bio, command_completion_event_t callback) {
+	json j = json::object();
+
+	// Cannot use ternary operator, json null isn't compatible with std::string.
+	if (nickname.empty()) {
+		j["nick"] = json::value_t::null;
+	} else {
+		j["nick"] = nickname;
+	}
+
+	static const std::map<image_type, std::string> mimetypes = {
+		{ i_gif, "image/gif" },
+		{ i_jpg, "image/jpeg" },
+		{ i_png, "image/png" },
+		{ i_webp, "image/webp" }, /* Whilst webp isn't supported (as of 13/07/24, confirmed again in 06/10/25, UK date), best to keep this here for when Discord support webp */
+	};
+
+	if (banner_blob.empty()) {
+		j["banner"] = json::value_t::null;
+	} else {
+		if(banner_blob.size() > MAX_AVATAR_SIZE) {
+			throw dpp::length_exception(err_icon_size, "Banner file exceeds discord limit of 10240 kilobytes");
+		}
+		j["banner"] = "data:" + mimetypes.find(banner_type)->second + ";base64," + base64_encode((unsigned char const*)banner_blob.data(), static_cast<unsigned int>(banner_blob.length()));
+	}
+
+	if (avatar_blob.empty()) {
+		j["avatar"] = json::value_t::null;
+	} else {
+		if(avatar_blob.size() > MAX_AVATAR_SIZE) { // Avatar limit is 10240 kb.
+			throw dpp::length_exception(err_icon_size, "Avatar file exceeds discord limit of 10240 kilobytes");
+		}
+		j["avatar"] = "data:" + mimetypes.find(avatar_type)->second + ";base64," + base64_encode((unsigned char const*)avatar_blob.data(), static_cast<unsigned int>(avatar_blob.length()));
+	}
+
+	if (bio.empty()) {
+		j["bio"] = json::value_t::null;
+	} else {
+		j["bio"] = bio;
+	}
+
+	const std::string post_data = j.dump(-1, ' ', false, json::error_handler_t::replace);
+	rest_request<confirmation>(this, API_PATH "/guilds", std::to_string(guild_id), "members/@me", m_patch, post_data, std::move(callback));
 }
 
 
