@@ -252,6 +252,22 @@ enum permissions : uint64_t {
 	p_use_soundboard = 0x40000000000,
 
 	/**
+	 * @brief Allows for creating emojis, stickers, and soundboard sounds, and editing and deleting those created by the current user.
+	 *
+	 * @note Not yet available to developers.
+	 * @see https://discord.com/developers/docs/change-log#clarification-on-permission-splits-for-expressions-and-events
+	 */
+	p_create_guild_expressions = 0x80000000000,
+
+	/**
+	 * @brief Allows for creating scheduled events, and editing and deleting those created by the current user.
+	 *
+	 * @note Not yet available to developers.
+	 * @see https://discord.com/developers/docs/change-log#clarification-on-permission-splits-for-expressions-and-events
+	 */
+	p_create_events = 0x0000100000000000,
+
+	/**
 	 * @brief Allows the usage of custom soundboard sounds from other servers.
 	 */
 	p_use_external_sounds = 0x0000200000000000,
@@ -265,6 +281,19 @@ enum permissions : uint64_t {
 	 * @brief Allows use of Clyde AI.
 	 */
 	p_use_clyde_ai = 0x0000800000000000,
+
+	/**
+	 * @brief Allows sending polls
+	 */
+	p_send_polls = 0x0002000000000000,
+
+	/**
+	 * @brief Allows user-installed apps to send public responses.
+	 * When disabled, users will still be allowed to use their apps but the responses will be ephemeral.
+	 *
+	 * @note This only applies to apps not also installed to the server.
+	 */
+	p_use_external_apps = 0x0004000000000000,
 
 	/**
 	 * @brief Allows pinning and unpinning messages
