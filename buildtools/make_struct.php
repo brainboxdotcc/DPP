@@ -44,8 +44,7 @@ $forcedReturn = [
     'threads_get_public_archived' => 'thread_map',
     'threads_get_active' => 'active_threads',
     'user_get_cached' => 'user_identified',
-    'channel_pins_get' => 'message_pin_map',
-    'application_role_connection_get' => 'application_role_connection'
+    'channel_pins_get' => 'message_pin_map'
 ];
 
 /* Get the contents of cluster.h into an array */
