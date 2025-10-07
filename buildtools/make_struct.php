@@ -44,8 +44,8 @@ $forcedReturn = [
     'threads_get_public_archived' => 'thread_map',
     'threads_get_active' => 'active_threads',
     'user_get_cached' => 'user_identified',
-    'application_role_connection_get' => 'application_role_connection',
-    'application_role_connection_update' => 'application_role_connection'
+    'channel_pins_get' => 'message_pin_map',
+    'application_role_connection_get' => 'application_role_connection'
 ];
 
 /* Get the contents of cluster.h into an array */
@@ -90,6 +90,9 @@ foreach ($clustercpp as $cpp) {
         } elseif (preg_match('/rest_request_list<([^>]+)>/', $cpp, $matches)) {
             /* rest_request_list<T> */
             $returnType = $matches[1] . '_map';
+        } elseif (preg_match('/rest_request_vector<([^>]+)>/', $cpp, $matches)) {
+            /* rest_request_vector<T> */
+            $returnType = $matches[1] . '_list';
         } elseif (preg_match('/callback\(confirmation_callback_t\(\w+, ([^(]+)\(.*, \w+\)\)/', $cpp, $matches)) {
             /* confirmation_callback_t */
             $returnType = $matches[1];
