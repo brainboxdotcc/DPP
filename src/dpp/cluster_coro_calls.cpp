@@ -575,6 +575,10 @@ async<confirmation_callback_t> cluster::co_channel_pins_get(snowflake channel_id
 	return async{ this, static_cast<void (cluster::*)(snowflake, command_completion_event_t)>(&cluster::channel_pins_get), channel_id };
 }
 
+async<confirmation_callback_t> cluster::co_channel_pins_get(snowflake channel_id, std::optional<time_t> before, std::optional<uint64_t> limit) {
+	return async{ this, static_cast<void (cluster::*)(snowflake, std::optional<time_t>, std::optional<uint64_t>, command_completion_event_t)>(&cluster::channel_pins_get), channel_id, before, limit };
+}
+
 async<confirmation_callback_t> cluster::co_role_create(const class role &r) {
 	return async{ this, static_cast<void (cluster::*)(const class role &, command_completion_event_t)>(&cluster::role_create), r };
 }
