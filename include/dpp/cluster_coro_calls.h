@@ -280,7 +280,7 @@
 [[nodiscard]] async<confirmation_callback_t> co_interaction_response_get_original(const std::string &token);
 
 /**
- * @brief Create a followup message to a slash command
+ * @brief Create a followup message for an interaction
  *
  * @see dpp::cluster::interaction_followup_create
  * @see https://discord.com/developers/docs/interactions/receiving-and-responding#create-interaction-response
@@ -292,7 +292,7 @@
 [[nodiscard]] async<confirmation_callback_t> co_interaction_followup_create(const std::string &token, const message &m);
 
 /**
- * @brief Edit original followup message to a slash command
+ * @brief Edit original followup message for an interaction
  * This is an alias for cluster::interaction_response_edit
  * @see dpp::cluster::interaction_followup_edit_original
  * @see cluster::interaction_response_edit
@@ -316,7 +316,7 @@
 [[nodiscard]] async<confirmation_callback_t> co_interaction_followup_delete(const std::string &token);
 
 /**
- * @brief Edit followup message to a slash command
+ * @brief Edit followup message for an interaction
  * The message ID in the message you pass should be correctly set to that of a followup message you previously sent
  *
  * @see dpp::cluster::interaction_followup_edit
@@ -329,7 +329,7 @@
 [[nodiscard]] async<confirmation_callback_t> co_interaction_followup_edit(const std::string &token, const message &m);
 
 /**
- * @brief Get the followup message to a slash command
+ * @brief Get the followup message for an interaction
  *
  * @see dpp::cluster::interaction_followup_get
  * @see https://discord.com/developers/docs/interactions/receiving-and-responding#get-followup-message
@@ -341,7 +341,7 @@
 [[nodiscard]] async<confirmation_callback_t> co_interaction_followup_get(const std::string &token, snowflake message_id);
 
 /**
- * @brief Get the original followup message to a slash command
+ * @brief Get the original followup message for an interaction
  * This is an alias for cluster::interaction_response_get_original
  * @see dpp::cluster::interaction_followup_get_original
  * @see cluster::interaction_response_get_original
@@ -1743,10 +1743,22 @@
  * @see dpp::cluster::channel_pins_get
  * @see https://discord.com/developers/docs/resources/channel#get-pinned-messages
  * @param channel_id Channel ID to get pins for
- * @return message_map returned object on completion
+ * @return message_pin_map returned object on completion
  * \memberof dpp::cluster
  */
 [[nodiscard]] async<confirmation_callback_t> co_channel_pins_get(snowflake channel_id);
+
+/**
+ * @brief Get a channel's pins
+ * @see dpp::cluster::channel_pins_get
+ * @see https://discord.com/developers/docs/resources/channel#get-pinned-messages
+ * @param channel_id Channel ID to get pins for
+ * @param before Get messages pinned before this timestamp.
+ * @param limit Max number of pins to return (1-50). Defaults to 50 if not set.
+ * @return message_pin_map returned object on completion
+ * \memberof dpp::cluster
+ */
+[[nodiscard]] async<confirmation_callback_t> co_channel_pins_get(snowflake channel_id, std::optional<time_t> before, std::optional<uint64_t> limit);
 
 /**
  * @brief Create a role on a guild
@@ -1825,7 +1837,7 @@
  * @see dpp::cluster::application_role_connection_get
  * @see https://discord.com/developers/docs/resources/application-role-connection-metadata#get-application-role-connection-metadata-records
  * @param application_id The application ID
- * @return application_role_connection returned object on completion
+ * @return application_role_connection_metadata_list returned object on completion
  * \memberof dpp::cluster
  */
 [[nodiscard]] async<confirmation_callback_t> co_application_role_connection_get(snowflake application_id);
@@ -1837,7 +1849,7 @@
  * @see https://discord.com/developers/docs/resources/application-role-connection-metadata#update-application-role-connection-metadata-records
  * @param application_id The application ID
  * @param connection_metadata The application role connection metadata to update
- * @return application_role_connection returned object on completion
+ * @return application_role_connection_metadata_list returned object on completion
  * @note An application can have a maximum of 5 metadata records.
  * \memberof dpp::cluster
  */
