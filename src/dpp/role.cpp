@@ -328,9 +328,11 @@ bool role::has_view_creator_monetization_analytics() const {
 bool role::has_use_soundboard() const {
 	return has_administrator() || permissions.has(p_use_soundboard);
 }
+
 bool role::has_create_guild_expressions() const {
 	return has_administrator() || permissions.has(p_create_guild_expressions);
 }
+
 bool role::has_create_events() const {
 	return has_administrator() || permissions.has(p_create_events);
 }
@@ -346,9 +348,11 @@ bool role::has_send_voice_messages() const {
 bool role::has_use_clyde_ai() const {
 	return has_administrator() || permissions.has(p_use_clyde_ai);
 }
+
 bool role::has_send_polls() const {
 	return has_administrator() || permissions.has(p_send_polls);
 }
+
 bool role::has_use_external_apps() const {
 	return has_administrator() || permissions.has(p_use_external_apps);
 }
