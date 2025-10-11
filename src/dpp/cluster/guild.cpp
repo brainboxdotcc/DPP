@@ -43,7 +43,7 @@ void cluster::guild_current_member_edit(snowflake guild_id, const std::string &n
 	if (banner_blob.empty()) {
 		j["banner"] = json::value_t::null;
 	} else {
-		if(banner_blob.size() > MAX_AVATAR_SIZE) {
+		if (banner_blob.size() > MAX_AVATAR_SIZE) {
 			throw dpp::length_exception(err_icon_size, "Banner file exceeds discord limit of 10240 kilobytes");
 		}
 		j["banner"] = "data:" + mimetypes.find(banner_type)->second + ";base64," + base64_encode((unsigned char const*)banner_blob.data(), static_cast<unsigned int>(banner_blob.length()));
@@ -52,7 +52,7 @@ void cluster::guild_current_member_edit(snowflake guild_id, const std::string &n
 	if (avatar_blob.empty()) {
 		j["avatar"] = json::value_t::null;
 	} else {
-		if(avatar_blob.size() > MAX_AVATAR_SIZE) { // Avatar limit is 10240 kb.
+		if (avatar_blob.size() > MAX_AVATAR_SIZE) { // Avatar limit is 10240 kb.
 			throw dpp::length_exception(err_icon_size, "Avatar file exceeds discord limit of 10240 kilobytes");
 		}
 		j["avatar"] = "data:" + mimetypes.find(avatar_type)->second + ";base64," + base64_encode((unsigned char const*)avatar_blob.data(), static_cast<unsigned int>(avatar_blob.length()));
@@ -65,7 +65,7 @@ void cluster::guild_current_member_edit(snowflake guild_id, const std::string &n
 	}
 
 	const std::string post_data = j.dump(-1, ' ', false, json::error_handler_t::replace);
-	rest_request<confirmation>(this, API_PATH "/guilds", std::to_string(guild_id), "members/@me", m_patch, post_data, std::move(callback));
+	rest_request<confirmation>(this, API_PATH "/guilds", std::to_string(guild_id), "members/@me", m_patch, std::move(post_data), std::move(callback));
 }
 
 
