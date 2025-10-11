@@ -23,7 +23,7 @@
 
 namespace dpp {
 
-void cluster::guild_current_member_edit(snowflake guild_id, const std::string &nickname, const std::string& banner_blob, const image_type banner_type, const std::string& avatar_blob, const image_type avatar_type, const std::string& bio, command_completion_event_t callback) {
+void cluster::guild_current_member_edit(snowflake guild_id, const std::string& nickname, const std::string& banner_blob, const image_type banner_type, const std::string& avatar_blob, const image_type avatar_type, const std::string& bio, command_completion_event_t callback) {
 	json j = json::object();
 
 	// Cannot use ternary operator, json null isn't compatible with std::string.
@@ -64,7 +64,7 @@ void cluster::guild_current_member_edit(snowflake guild_id, const std::string &n
 		j["bio"] = bio;
 	}
 
-	const std::string post_data = j.dump(-1, ' ', false, json::error_handler_t::replace);
+	std::string post_data = j.dump(-1, ' ', false, json::error_handler_t::replace);
 	rest_request<confirmation>(this, API_PATH "/guilds", std::to_string(guild_id), "members/@me", m_patch, std::move(post_data), std::move(callback));
 }
 
