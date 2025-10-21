@@ -607,11 +607,12 @@ public:
 	 * @return bool Returns `true` if the command was registered successfully, or `false` if
 	 * the command with the same name already exists.
 	 */
-	template <typename F>
-	std::enable_if_t<std::is_same_v<std::invoke_result_t<F, const slashcommand_handler_t&>, dpp::task<void>>, bool>
-	register_command(const std::string& name, F&& handler){
+    template <std::invocable<const slashcommand_t&> F>
+    requires (dpp::awaitable_type<typename std::invoke_result<F, const slashcommand_t&>::type>)
+	bool register_command(const std::string& name, F&& handler) {
+		co_slashcommand_handler_t wrapped = std::forward<F>(handler);
 		std::unique_lock lk(named_commands_mutex);
-		auto [_, inserted] = named_commands.try_emplace(name, std::forward<F>(handler));
+		auto [_, inserted] = named_commands.try_emplace(name, std::move(wrapped));
 		return inserted;
 	};
 #endif
