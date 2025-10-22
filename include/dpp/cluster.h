@@ -587,7 +587,12 @@ public:
 	 * @return bool Returns `true` if the command was registered successfully, or `false` if
 	 * the command with the same name already exists
 	 */
-	bool register_command(const std::string& name, const slashcommand_handler_t handler);
+	template <typename F>
+	std::enable_if_t<utility::callable_returns_v<F, void, const slashcommand_t&>, bool> register_command(const std::string& name, F&& handler) {
+		std::unique_lock lk(named_commands_mutex);
+		auto [_, inserted] = named_commands.try_emplace(name, std::forward<F>(handler));
+		return inserted;
+	}
 
 	/**
 	 * @brief Get the number of currently active HTTP(S) requests active in the cluster.
@@ -607,14 +612,13 @@ public:
 	 * @return bool Returns `true` if the command was registered successfully, or `false` if
 	 * the command with the same name already exists.
 	 */
-    template <std::invocable<const slashcommand_t&> F>
-    requires (dpp::awaitable_type<typename std::invoke_result<F, const slashcommand_t&>::type>)
+	template <typename F>
+	requires (utility::callable_returns<F, dpp::task<void>, const slashcommand_t&>)
 	bool register_command(const std::string& name, F&& handler) {
-		co_slashcommand_handler_t wrapped = std::forward<F>(handler);
 		std::unique_lock lk(named_commands_mutex);
-		auto [_, inserted] = named_commands.try_emplace(name, std::move(wrapped));
+		auto [_, inserted] = named_commands.try_emplace(name, std::in_place_type<co_slashcommand_handler_t>, std::forward<F>(handler));
 		return inserted;
-	};
+	}
 #endif
 
 	/**
