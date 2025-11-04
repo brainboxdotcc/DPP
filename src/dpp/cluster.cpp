@@ -638,12 +638,6 @@ cluster& cluster::set_request_timeout(uint16_t timeout) {
 	return *this;
 }
 
-bool cluster::register_command(const std::string &name, const slashcommand_handler_t handler) {
-	std::unique_lock lk(named_commands_mutex);
-	auto [_, inserted] = named_commands.try_emplace(name, handler);
-	return inserted;
-}
-
 bool cluster::unregister_command(const std::string &name) {
 	std::unique_lock lk(named_commands_mutex);
 	return named_commands.erase(name) == 1;
