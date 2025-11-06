@@ -835,11 +835,16 @@
  * @see dpp::cluster::guild_current_member_edit
  * @see https://discord.com/developers/docs/resources/guild#modify-current-member
  * @param guild_id Guild ID to change on
- * @param nickname New nickname, or empty string to clear nickname
+ * @param nickname New nickname, or empty string to clear nickname.
+ * @param banner_blob New banner, or empty string to clear banner.
+ * @param banner_type Type of image for new banner.
+ * @param avatar_blob New avatar, or empty string to clear avatar.
+ * @param avatar_type Type of image for new avatar.
+ * @param bio New bio, or empty string to clear bio
  * @return confirmation returned object on completion
  * \memberof dpp::cluster
  */
-[[nodiscard]] async<confirmation_callback_t> co_guild_current_member_edit(snowflake guild_id, const std::string &nickname);
+[[nodiscard]] async<confirmation_callback_t> co_guild_current_member_edit(snowflake guild_id, const std::string& nickname, const std::string& banner_blob, const image_type banner_type, const std::string& avatar_blob, const image_type avatar_type, const std::string& bio);
 
 /**
  * @brief Get the audit log for a guild
