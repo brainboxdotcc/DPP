@@ -123,6 +123,16 @@ enum component_type : uint8_t {
 	 * @note Available in components v2 only
 	 */
 	cot_container = 17,
+
+	/**
+	 * @brief Container associating a label and description with a component
+	 */
+	cot_label = 18,
+
+	/**
+	 * @brief Component for uploading files
+	 */
+	cot_file_upload = 19
 };
 
 /**

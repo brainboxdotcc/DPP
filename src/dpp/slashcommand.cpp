@@ -18,6 +18,7 @@
  * limitations under the License.
  *
  ************************************************************************************/
+#include <dpp/message.h>
 #include <dpp/appcommand.h>
 #include <dpp/discordevents.h>
 #include <dpp/json.h>
@@ -883,14 +884,19 @@ json interaction_modal_response::to_json_impl(bool with_id) const {
 	j["data"]["title"] = this->title;
 	j["data"]["components"] = json::array();
 	for (auto & row : components) {
-		json n;
-		n["type"] = cot_action_row;
-		n["components"] = json::array();
 		for (auto & component : row) {
-			json sn = component;
-			n["components"].push_back(sn);
+			json sn;
+			sn["type"] = cot_label;
+			sn["label"] = component.label;
+			j["data"]["components"].push_back(sn);
+
+			sn = component;
+			auto label_iter = sn.find("label");
+			if (label_iter != sn.end()) {
+				sn.erase(label_iter);
+			}
+			j["data"]["components"].back()["component"] = sn;
 		}
-		j["data"]["components"].push_back(n);
 	}
 	return j;
 }
