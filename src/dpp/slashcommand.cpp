@@ -18,7 +18,7 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#include "message.h"
+#include <dpp/message.h>
 #include <dpp/appcommand.h>
 #include <dpp/discordevents.h>
 #include <dpp/json.h>
