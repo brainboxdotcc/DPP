@@ -890,9 +890,9 @@ json interaction_modal_response::to_json_impl(bool with_id) const {
 			j["data"]["components"].push_back(sn);
 
 			sn = component;
-			auto label_it = sn.find("label");
-			if (label_it != sn.end()) {
-				sn.erase(label_it);
+			auto label_iter = sn.find("label");
+			if (label_iter != sn.end()) {
+				sn.erase(label_iter);
 			}
 			j["data"]["components"].back()["component"] = sn;
 		}
