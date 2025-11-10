@@ -186,10 +186,8 @@ component& component::fill_from_json_impl(nlohmann::json* j) {
 			emoji.animated = bool_not_null(&emo, "animated");
 		}
 	} else if (type == cot_selectmenu) { // string select menu specific fields
-		if (j->find("options") != j->end()) {
+		if (j->contains("options")) {
 			set_object_array_not_null<select_option>(j, "options", options);
-		} else {
-			value = (*j)["values"][0].get<std::string>();
 		}
 	} else if (type == cot_channel_selectmenu) { // channel select menu specific fields
 		if (j->contains("channel_types")) {
@@ -208,7 +206,17 @@ component& component::fill_from_json_impl(nlohmann::json* j) {
 			max_length = j->at("max_length").get<int32_t>();
 		}
 		required = bool_not_null(j, "required");
-		json v = (*j)["value"];
+	}
+
+	if (j->contains("value") || j->contains("values")){ // set value if it exists
+		json v;
+		if(j->contains("values")){ 
+			v = (*j)["values"].at(0);
+		}
+		else {
+			v = (*j)["value"];
+		}
+
 		if (!v.is_null() && v.is_number_integer()) {
 			value = v.get<int64_t>();
 		} else if (!v.is_null() && v.is_number_float()) {
@@ -217,6 +225,7 @@ component& component::fill_from_json_impl(nlohmann::json* j) {
 			value = v.get<std::string>();
 		}
 	}
+
 	return *this;
 }
 
