@@ -186,7 +186,11 @@ component& component::fill_from_json_impl(nlohmann::json* j) {
 			emoji.animated = bool_not_null(&emo, "animated");
 		}
 	} else if (type == cot_selectmenu) { // string select menu specific fields
-		set_object_array_not_null<select_option>(j, "options", options);
+		if (j->find("options") != j->end()) {
+			set_object_array_not_null<select_option>(j, "options", options);
+		} else {
+			value = (*j)["values"][0].get<std::string>();
+		}
 	} else if (type == cot_channel_selectmenu) { // channel select menu specific fields
 		if (j->contains("channel_types")) {
 			for (json &ct : (*j)["channel_types"]) {

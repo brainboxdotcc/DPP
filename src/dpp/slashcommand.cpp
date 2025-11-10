@@ -883,14 +883,19 @@ json interaction_modal_response::to_json_impl(bool with_id) const {
 	j["data"]["title"] = this->title;
 	j["data"]["components"] = json::array();
 	for (auto & row : components) {
-		json n;
-		n["type"] = cot_action_row;
-		n["components"] = json::array();
 		for (auto & component : row) {
-			json sn = component;
-			n["components"].push_back(sn);
+			json sn;
+			sn["type"] = 18;
+			sn["label"] = component.label;
+			j["data"]["components"].push_back(sn);
+
+			sn = component;
+			auto labelIt = sn.find("label");
+			if (labelIt != sn.end()) {
+				sn.erase(labelIt);
+			}
+			j["data"]["components"].back()["component"] = sn;
 		}
-		j["data"]["components"].push_back(n);
 	}
 	return j;
 }
