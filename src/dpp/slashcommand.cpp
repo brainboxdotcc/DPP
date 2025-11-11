@@ -886,6 +886,10 @@ json interaction_modal_response::to_json_impl(bool with_id) const {
 	for (auto & row : components) {
 		for (auto & component : row) {
 			json sn;
+			if(component.type == cot_text_display){
+				j["data"]["components"].push_back("component");
+				continue;
+			}
 			sn["type"] = cot_label;
 			sn["label"] = component.label;
 			j["data"]["components"].push_back(sn);
