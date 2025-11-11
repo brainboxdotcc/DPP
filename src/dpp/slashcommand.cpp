@@ -885,11 +885,11 @@ json interaction_modal_response::to_json_impl(bool with_id) const {
 	j["data"]["components"] = json::array();
 	for (auto & row : components) {
 		for (auto & component : row) {
-			json sn;
 			if(component.type == cot_text_display){
-				j["data"]["components"].push_back("component");
+				j["data"]["components"].push_back(component);
 				continue;
 			}
+			json sn;
 			sn["type"] = cot_label;
 			sn["label"] = component.label;
 			j["data"]["components"].push_back(sn);
