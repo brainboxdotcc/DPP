@@ -169,7 +169,9 @@ std::string internal_handle_interaction(cluster* creator, uint16_t shard_id, jso
 			fs.custom_id = string_not_null(&(d["data"]), "custom_id");
 			fs.command = i;
 			for (auto & c : d["data"]["components"]) {
-				fs.components.push_back(dpp::component().fill_from_json(&c.at("component")));
+				if(c.contains("component")){
+					fs.components.push_back(dpp::component().fill_from_json(&c["component"]));
+				}
 			}
 			if (from_webhook) {
 				fs.from_webhook = true;
