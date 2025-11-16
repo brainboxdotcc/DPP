@@ -1,5 +1,6 @@
 #include <dpp/dpp.h>
 #include <iostream>
+#include <format>
 
 int main() {
 	dpp::cluster bot("token");
@@ -24,18 +25,14 @@ int main() {
 					.set_text_style(dpp::text_short)
 			);
 
-			/* Add another text component in the next row, as required by Discord */
-			modal.add_row();
+			/* Add a channel selection */
 			modal.add_component(
 				dpp::component()
-					.set_label("Type rammel")
-					.set_id("field_id2")
-					.set_type(dpp::cot_text)
-					.set_placeholder("gumf")
-					.set_min_length(1)
-					.set_max_length(2000)
-					.set_text_style(dpp::text_paragraph)
+                    .set_label("Select channel")
+                        .set_id("field_id2")
+                    .set_type(dpp::cot_channel_selectmenu)
 			);
+    
 
 			/* Trigger the dialog box. All dialog boxes are ephemeral */
 			event.dialog(modal);
@@ -44,13 +41,15 @@ int main() {
 
 	/* This event handles form submission for the modal dialog we create above */
 	bot.on_form_submit([](const dpp::form_submit_t & event) {
-		/* For this simple example, we know the first element of the first row ([0][0]) is value type string.
+		/* For this simple example, we know the elements value type is string.
+		 * We also know the indices of each element.
 		 * In the real world, it may not be safe to make such assumptions!
 		 */
-		std::string v = std::get<std::string>(event.components[0].components[0].value);
+		std::string message_text = std::get<std::string>(event.components[0].value);
+		std::string channel_id = std::get<std::string>(event.components[1].value);
 
 		dpp::message m;
-		m.set_content("You entered: " + v).set_flags(dpp::m_ephemeral);
+		m.set_content(std::format("You entered '{}', picked channel: <#{}>", message_text, channel_id)).set_flags(dpp::m_ephemeral);
 
 		/* Emit a reply. Form submission is still an interaction and must generate some form of reply! */
 		event.reply(m);
