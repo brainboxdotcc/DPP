@@ -172,6 +172,9 @@ std::string internal_handle_interaction(cluster* creator, uint16_t shard_id, jso
 				if(c.contains("component")){
 					fs.components.push_back(dpp::component().fill_from_json(&c["component"]));
 				}
+				else {
+					fs.components.push_back(dpp::component().fill_from_json(&c));
+				}
 			}
 			if (from_webhook) {
 				fs.from_webhook = true;
