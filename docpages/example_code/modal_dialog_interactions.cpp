@@ -1,6 +1,5 @@
 #include <dpp/dpp.h>
 #include <iostream>
-#include <format>
 
 int main() {
 	dpp::cluster bot("token");
