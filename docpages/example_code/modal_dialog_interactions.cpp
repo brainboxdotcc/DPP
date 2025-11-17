@@ -49,7 +49,11 @@ int main() {
 		std::string channel_id = std::get<std::string>(event.components[1].value);
 
 		dpp::message m;
-		m.set_content(std::format("You entered '{}', picked channel: <#{}>", message_text, channel_id)).set_flags(dpp::m_ephemeral);
+		m.set_content(
+			std::string("You entered '") + message_text + 
+			"', picked channel: <#" + channel_id + ">"
+		)
+			.set_flags(dpp::m_ephemeral);
 
 		/* Emit a reply. Form submission is still an interaction and must generate some form of reply! */
 		event.reply(m);
