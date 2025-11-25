@@ -47,7 +47,7 @@ struct openssl_bignum {
 	}
 };
 
-bignumber::bignumber(const std::string& number_string) : ssl_bn(std::make_shared<openssl_bignum>()) {
+bignumber::bignumber(const std::string& number_string) : ssl_bn(new openssl_bignum()) {
 	if (dpp::lowercase(number_string.substr(0, 2)) == "0x") {
 		BN_hex2bn(&ssl_bn->bn, number_string.substr(2, number_string.length() - 2).c_str());
 	} else {
@@ -71,12 +71,16 @@ inline uint64_t flip_bytes(uint64_t bytes) {
 	       | (((bytes) & 0x00000000000000ffull) << 56));
 }
 
-bignumber::bignumber(std::vector<uint64_t> bits): ssl_bn(std::make_shared<openssl_bignum>()) {
+bignumber::bignumber(std::vector<uint64_t> bits): ssl_bn(new openssl_bignum()) {
 	std::reverse(bits.begin(), bits.end());
 	for (auto& chunk : bits) {
 		chunk = flip_bytes(chunk);
 	}
 	BN_bin2bn(reinterpret_cast<unsigned char*>(bits.data()), bits.size() * sizeof(uint64_t), ssl_bn->bn);
+}
+
+bignumber::~bignumber() {
+	delete ssl_bn;
 }
 
 std::string bignumber::get_number(bool hex) const {

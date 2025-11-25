@@ -47,7 +47,7 @@ class DPP_EXPORT bignumber {
 	/**
 	 * @brief Internal opaque struct to contain OpenSSL things
 	 */
-	std::shared_ptr<openssl_bignum> ssl_bn{nullptr};
+	openssl_bignum* ssl_bn{nullptr};
 public:
 	/**
 	 * @brief Construct a new bignumber object
@@ -74,9 +74,9 @@ public:
 	bignumber(std::vector<uint64_t> bits);
 
 	/**
-	 * @brief Default destructor
+	 * @brief Deletes pointer to ssl_bn.
 	 */
-	~bignumber() = default;
+	~bignumber();
 
 	/**
 	 * @brief Get the string representation of the bignumber.
