@@ -23,6 +23,7 @@
 #pragma once
 #include <dpp/export.h>
 #include <dpp/snowflake.h>
+#include <memory>
 
 namespace dpp {
 
@@ -44,9 +45,27 @@ struct openssl_bignum;
 */
 class DPP_EXPORT bignumber {
 	/**
+	 * @brief Forward declaration of structure which implements proper destructor for unique_ptr<openssl_bignum> as type is incomplete in header
+	 * custom deleter defined where openssl_bignum is complete
+	 */
+	struct bn_deleter {
+
+		/**
+		 * @brief Deletes an `openssl_bignum` instance.
+		 *
+		 * This operator is invoked automatically by `std::unique_ptr` when the
+		 * managed object needs to be destroyed.
+		 *
+		 * @param p Pointer to the `openssl_bignum` instance to delete.
+		 */
+		void operator()(openssl_bignum *p) const noexcept;
+	};
+
+	/**
 	 * @brief Internal opaque struct to contain OpenSSL things
 	 */
-	openssl_bignum* ssl_bn{nullptr};
+	std::unique_ptr<openssl_bignum, bn_deleter> ssl_bn;
+
 public:
 	/**
 	 * @brief Construct a new bignumber object
@@ -61,7 +80,7 @@ public:
 	 * @note Prefixing number_string with 0x will parse it as hexadecimal.
 	 * This is not case sensitive.
 	 */
-	bignumber(const std::string& number_string);
+	bignumber(const std::string &number_string);
 
 	/**
 	 * @brief Build a bignumber from a vector of 64 bit values.
@@ -73,9 +92,9 @@ public:
 	bignumber(std::vector<uint64_t> bits);
 
 	/**
-	 * @brief Deletes pointer to ssl_bn.
+	 * @brief Default destructor.
 	 */
-	~bignumber();
+	~bignumber() = default;
 
 	/**
 	 * @brief Get the string representation of the bignumber.
@@ -97,4 +116,4 @@ public:
 	[[nodiscard]] std::vector<uint64_t> get_binary() const;
 };
 
-}
+}// namespace dpp
