@@ -45,9 +45,27 @@ struct openssl_bignum;
 */
 class DPP_EXPORT bignumber {
 	/**
+	 * @brief Forward declaration of structure which implements proper destructor for unique_ptr<openssl_bignum> as type is incomplete in header
+	 * custom deleter defined where openssl_bignum is complete
+	 */
+	struct bn_deleter {
+
+		/**
+		 * @brief Deletes an `openssl_bignum` instance.
+		 *
+		 * This operator is invoked automatically by `std::unique_ptr` when the
+		 * managed object needs to be destroyed.
+		 *
+		 * @param p Pointer to the `openssl_bignum` instance to delete.
+		 */
+		void operator()(openssl_bignum* p) const noexcept;
+	};
+
+	/**
 	 * @brief Internal opaque struct to contain OpenSSL things
 	 */
-	std::shared_ptr<openssl_bignum> ssl_bn{nullptr};
+	std::unique_ptr<openssl_bignum, bn_deleter> ssl_bn;
+
 public:
 	/**
 	 * @brief Construct a new bignumber object
