@@ -20,10 +20,10 @@
  *
  ************************************************************************************/
 
-#include <cmath>
 #include <dpp/bignum.h>
 #include <dpp/stringops.h>
 #include <openssl/bn.h>
+#include <cmath>
 
 namespace dpp {
 
@@ -31,13 +31,12 @@ struct openssl_bignum {
 	/**
 	 * @brief OpenSSL BIGNUM pointer
 	 */
-	BIGNUM *bn{nullptr};
+	BIGNUM* bn{nullptr};
 
 	/**
 	 * @brief Construct BIGNUM using RAII
 	 */
-	openssl_bignum()
-	    : bn(BN_new()) {
+	openssl_bignum() : bn(BN_new()) {
 	}
 
 	/**
@@ -48,7 +47,7 @@ struct openssl_bignum {
 	}
 };
 
-void bignumber::bn_deleter::operator()(openssl_bignum *p) const noexcept {
+void bignumber::bn_deleter::operator()(openssl_bignum* p) const noexcept {
 	delete p;
 }
 
@@ -67,21 +66,28 @@ bignumber::bignumber(const std::string &number_string)
  * @return flipped 64 bit value
  */
 inline uint64_t flip_bytes(uint64_t bytes) {
-	return ((((bytes) & 0xff00000000000000ull) >> 56) | (((bytes) & 0x00ff000000000000ull) >> 40) | (((bytes) & 0x0000ff0000000000ull) >> 24) | (((bytes) & 0x000000ff00000000ull) >> 8) | (((bytes) & 0x00000000ff000000ull) << 8) | (((bytes) & 0x0000000000ff0000ull) << 24) | (((bytes) & 0x000000000000ff00ull) << 40) | (((bytes) & 0x00000000000000ffull) << 56));
+	return ((((bytes) & 0xff00000000000000ull) >> 56)
+	       | (((bytes) & 0x00ff000000000000ull) >> 40)
+	       | (((bytes) & 0x0000ff0000000000ull) >> 24)
+	       | (((bytes) & 0x000000ff00000000ull) >> 8)
+	       | (((bytes) & 0x00000000ff000000ull) << 8)
+	       | (((bytes) & 0x0000000000ff0000ull) << 24)
+	       | (((bytes) & 0x000000000000ff00ull) << 40)
+	       | (((bytes) & 0x00000000000000ffull) << 56));
 }
 
 bignumber::bignumber(std::vector<uint64_t> bits)
     : ssl_bn{new openssl_bignum(), bn_deleter{}} {
 	std::reverse(bits.begin(), bits.end());
-	for (auto &chunk: bits) {
+	for (auto& chunk : bits) {
 		chunk = flip_bytes(chunk);
 	}
-	BN_bin2bn(reinterpret_cast<unsigned char *>(bits.data()), bits.size() * sizeof(uint64_t), ssl_bn->bn);
+	BN_bin2bn(reinterpret_cast<unsigned char*>(bits.data()), bits.size() * sizeof(uint64_t), ssl_bn->bn);
 }
 
 
 std::string bignumber::get_number(bool hex) const {
-	char *number_str = hex ? BN_bn2hex(ssl_bn->bn) : BN_bn2dec(ssl_bn->bn);
+	char* number_str = hex ? BN_bn2hex(ssl_bn->bn) : BN_bn2dec(ssl_bn->bn);
 	std::string returned{number_str};
 	OPENSSL_free(number_str);
 	return returned;
@@ -92,12 +98,12 @@ std::vector<uint64_t> bignumber::get_binary() const {
 	auto size_64_bit = static_cast<std::size_t>(ceil(static_cast<double>(size) / sizeof(uint64_t)));
 	std::vector<uint64_t> returned;
 	returned.resize(size_64_bit);
-	BN_bn2binpad(ssl_bn->bn, reinterpret_cast<unsigned char *>(returned.data()), returned.size() * sizeof(uint64_t));
+	BN_bn2binpad(ssl_bn->bn, reinterpret_cast<unsigned char*>(returned.data()), returned.size() * sizeof(uint64_t));
 	std::reverse(returned.begin(), returned.end());
-	for (auto &chunk: returned) {
+	for (auto& chunk : returned) {
 		chunk = flip_bytes(chunk);
 	}
 	return returned;
 }
 
-}// namespace dpp
+}

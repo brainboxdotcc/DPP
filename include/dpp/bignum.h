@@ -58,7 +58,7 @@ class DPP_EXPORT bignumber {
 		 *
 		 * @param p Pointer to the `openssl_bignum` instance to delete.
 		 */
-		void operator()(openssl_bignum *p) const noexcept;
+		void operator()(openssl_bignum* p) const noexcept;
 	};
 
 	/**
@@ -80,7 +80,7 @@ public:
 	 * @note Prefixing number_string with 0x will parse it as hexadecimal.
 	 * This is not case sensitive.
 	 */
-	bignumber(const std::string &number_string);
+	bignumber(const std::string& number_string);
 
 	/**
 	 * @brief Build a bignumber from a vector of 64 bit values.
@@ -92,7 +92,7 @@ public:
 	bignumber(std::vector<uint64_t> bits);
 
 	/**
-	 * @brief Default destructor.
+	 * @brief Default destructor
 	 */
 	~bignumber() = default;
 
@@ -116,4 +116,4 @@ public:
 	[[nodiscard]] std::vector<uint64_t> get_binary() const;
 };
 
-}// namespace dpp
+}
