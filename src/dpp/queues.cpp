@@ -107,7 +107,11 @@ http_request::http_request(const std::string &_url, http_completion_event comple
 {
 }
 
-http_request::~http_request()  = default;
+http_request::~http_request() {
+	while (!completed) {
+		std::this_thread::sleep_for(10ms);
+	}
+}
 
 void http_request::complete(const http_request_completion_t &c) {
 	if (complete_handler) {
