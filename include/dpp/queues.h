@@ -240,6 +240,16 @@ class DPP_EXPORT http_request {
 	 */
 	std::unique_ptr<https_client> cli;
 
+	/**
+	 * @brief Mutex for completion condition variable
+	 */
+	std::mutex completion_mutex;
+
+	/**
+	 * @brief Condition variable to signal completion
+	 */
+	std::condition_variable completion_signal;
+
 public:
 	/**
 	 * @brief Endpoint name
