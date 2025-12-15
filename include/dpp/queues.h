@@ -30,6 +30,7 @@
 #include <vector>
 #include <functional>
 #include <atomic>
+#include <condition_variable>		
 #include <dpp/httpsclient.h>
 
 namespace dpp {
