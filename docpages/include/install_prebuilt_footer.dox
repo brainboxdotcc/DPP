@@ -1,0 +1,2 @@
+\note Compiling your bot with a raw `g++` command is not advised in any real project, and the example above should be used only as a test. From here, you should learn to create a bot in D++ by moving on to \ref buildcmake or if you have not yet created a token for your bot, \ref creating-a-bot-application - If you are having trouble setting up CMake, you can try <a href="https://github.com/brainboxdotcc/templatebot">our template cmake bot project</a>. 
+ 

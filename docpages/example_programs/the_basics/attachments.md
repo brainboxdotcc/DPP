@@ -1,112 +1,21 @@
-\page attach-file Attaching a file to a message
+\page attach-file Attaching a File to a Message
 
-Attached files must be locally stored.
+To attach a local file to an message, you can use dpp::utility::read_file. It's a helper function from D++ that allows you to read the file's content and sent it to discord.
 
-To attach a file to a message, you can upload a local image.
+An example of this:
 
-D++ has this helper function to read a file: `dpp::utility::read_file`.
+\include{cpp} attachments1.cpp
 
-An example program:
+Attachments via URL aren't possible. But there's a workaround for this! You can download the file and then attach it to the message.
 
-@note Because these examples utilizes message content, they require the message content privileged intent.
+Amazingly, D++ also has a function for this! You can use dpp::cluster::request to make HTTP requests, allowing you to go ahead and pull the content from a URL.
 
-~~~~~~~~~~{.cpp}
-#include <dpp/dpp.h>
+The following example program shows how to request a file and attach it to a message:
 
-int main() {
-    dpp::cluster bot("token", dpp::i_default_intents | dpp::i_message_content);
-
-    bot.on_log(dpp::utility::cout_logger());
-
-    /* Message handler to look for a command called !file */
-    bot.on_message_create([&bot](const dpp::message_create_t &event) {
-        if (event.msg.content == "!file") {
-            // create a message
-            dpp::message msg(event.msg.channel_id, "Hey there, i've got a new file!");
-
-            // attach the file to the message
-            msg.add_file("foobar.txt", dpp::utility::read_file("path_to_your_file.txt"));
-
-            // send the message
-            bot.message_create(msg);
-        }
-    });
-
-    bot.start(dpp::st_wait);
-    return 0;
-}
-~~~~~~~~~~
-
-Attachments via an url aren't possible. But there's a workaround for. You can download the file and then attach it to the message.
-
-To make requests, D++ also has a helper function: `dpp::cluster::request`.
-
-The following example program shows how to request a file and attach it to a message.
-
-~~~~~~~~~~{.cpp}
-#include <dpp/dpp.h>
-
-int main() {
-    dpp::cluster bot("token", dpp::i_default_intents | dpp::i_message_content);
-
-    bot.on_log(dpp::utility::cout_logger());
-
-    /* Message handler to look for a command called !file */
-    bot.on_message_create([&bot](const dpp::message_create_t &event) {
-        if (event.msg.content == "!file") {
-            // request an image
-            bot.request("https://dpp.dev/DPP-Logo.png", dpp::m_get, [&bot, channel_id = event.msg.channel_id](const dpp::http_request_completion_t & httpRequestCompletion) {
-
-                // create a message
-                dpp::message msg(channel_id, "This is my new attachment:");
-
-                // attach the image on success
-                if (httpRequestCompletion.status == 200) {
-                    msg.add_file("logo.png", httpRequestCompletion.body);
-                }
-
-                // send the message
-                bot.message_create(msg);
-            });
-        }
-    });
-
-    bot.start(dpp::st_wait);
-    return 0;
-}
-~~~~~~~~~~
+\include{cpp} attachments2.cpp
 
 Here's another example of how to add a local image to an embed.
 
 Upload the image in the same message as the embed and then reference it in the embed.
 
-~~~~~~~~~~{.cpp}
-#include <dpp/dpp.h>
-
-int main() {
-    dpp::cluster bot("token", dpp::i_default_intents | dpp::i_message_content);
-
-    bot.on_log(dpp::utility::cout_logger());
-
-    /* Message handler to look for a command called !file */
-    bot.on_message_create([&bot](const dpp::message_create_t &event) {
-        if (event.msg.content == "!file") {
-            // create a message
-            dpp::message msg(event.msg.channel_id, "");
-
-            // attach the image to the message
-            msg.add_file("image.jpg", dpp::utility::read_file("path_to_your_image.jpg"));
-
-            dpp::embed embed;
-            embed.set_image("attachment://image.jpg"); // reference to the attached file
-            msg.add_embed(embed);
-
-            // send the message
-            bot.message_create(msg);
-        }
-    });
-
-    bot.start(dpp::st_wait);
-    return 0;
-}
-~~~~~~~~~~
+\include{cpp} attachments3.cpp

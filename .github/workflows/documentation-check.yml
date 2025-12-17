@@ -12,14 +12,23 @@ on:
     files:
       - '**/documentation-check.yml'
 
+permissions:
+  contents: read # This only needs to read the contents of a PR.
+
 jobs:
   docs:
     name: Check Documentation Spelling
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
 
     steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@f4a75cfd619ee5ce8d5b864b0d183aff3c69b55a # v2.13.1
+        with:
+          egress-policy: audit
+
       - name: Checkout D++
-        uses: actions/checkout@v2
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 
       - name: Check docs spelling
-        run: npx -y cspell lint --language-id=cpp --no-progress --no-summary --show-context --show-suggestions --relative --color docpages/*.md include/dpp/*.h
+        run: git diff origin/dev --name-only --diff-filter=ACMRTUXB | npx -y cspell lint --language-id=cpp --no-progress --no-summary --show-context --show-suggestions --relative --color --file-list stdin --no-must-find-file
+

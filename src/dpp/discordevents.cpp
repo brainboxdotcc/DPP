@@ -18,20 +18,24 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#ifndef _XOPEN_SOURCE
-	#define _XOPEN_SOURCE
+
+/* OpenBSD errors when xopen_source is defined.
+ * We want to make sure that OpenBSD does not define it.
+ */
+#ifndef __OpenBSD__
+	#ifndef _XOPEN_SOURCE
+		#define _XOPEN_SOURCE
+	#endif
 #endif
+
 #include <string>
 #include <iostream>
 #include <fstream>
 #include <time.h>
 #include <stdlib.h>
+#include <dpp/discordevents.h>
 #include <dpp/discordclient.h>
-#include <dpp/event.h>
-#include <dpp/cache.h>
-#include <dpp/stringops.h>
 #include <dpp/json.h>
-#include <time.h>
 #include <iomanip>
 #include <sstream>
 
@@ -81,6 +85,26 @@ void set_snowflake_not_null(const json* j, const char *keyname, uint64_t &v) {
 	}
 }
 
+void set_snowflake_array_not_null(const json* j, const char *keyname, std::vector<class snowflake> &v) {
+	v.clear();
+	auto k = j->find(keyname);
+	if (k != j->end() && !k->is_null()) {
+		v.reserve(j->at(keyname).size());
+		for (const auto &id : j->at(keyname)) {
+			v.emplace_back(std::strtoull(id.get<std::string>().c_str(), nullptr, 10));
+		}
+	}
+}
+
+void for_each_json(nlohmann::json* parent, std::string_view key, const std::function<void(nlohmann::json*)> &fn) {
+	auto it = parent->find(key);
+	if (it == parent->end() || it->is_null()) {
+		return;
+	}
+	for (nlohmann::json &elem : *it) {
+		fn(&elem);
+	}
+}
 
 std::string string_not_null(const json* j, const char *keyname) {
 	/* Returns empty string if the value is not a string, or is null or not defined */
@@ -93,6 +117,14 @@ std::string string_not_null(const json* j, const char *keyname) {
 }
 
 void set_string_not_null(const json* j, const char *keyname, std::string &v) {
+	/* Returns empty string if the value is not a string, or is null or not defined */
+	auto k = j->find(keyname);
+	if (k != j->end()) {
+		v = !k->is_null() && k->is_string() ? k->get<std::string>() : "";
+	}
+}
+
+void set_iconhash_not_null(const json* j, const char *keyname, utility::iconhash &v) {
 	/* Returns empty string if the value is not a string, or is null or not defined */
 	auto k = j->find(keyname);
 	if (k != j->end()) {
@@ -199,28 +231,38 @@ void set_bool_not_null(const json* j, const char *keyname, bool &v) {
 
 std::string base64_encode(unsigned char const* buf, unsigned int buffer_length) {
 	/* Quick and dirty base64 encode */
-	static const char to_base64[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-	size_t ret_size = buffer_length + 2;
-
-	ret_size = 4 * ret_size / 3;
-
+	static constexpr std::string_view to_base64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+	static constexpr auto push = [](std::string &dst, unsigned char b0, unsigned char b1, unsigned char b2) {
+		dst.push_back(to_base64[ ((b0 & 0xfc) >> 2) ]);
+		dst.push_back(to_base64[ ((b0 & 0x03) << 4) + ((b1 & 0xf0) >> 4) ]);
+		dst.push_back(to_base64[ ((b1 & 0x0f) << 2) + ((b2 & 0xc0) >> 6) ]);
+		dst.push_back(to_base64[ ((b2 & 0x3f)) ]);
+	};
+	size_t ret_size = 4 * ((buffer_length + 2) / 3); // ceil(4*size/3)
+	size_t i = 0;
 	std::string ret;
+
 	ret.reserve(ret_size);
 
-	for (unsigned int i=0; i<ret_size/4; ++i)
-	{
-		size_t index = i*3;
-		unsigned char b3[3];
-		b3[0] = buf[index+0];
-		b3[1] = buf[index+1];
-		b3[2] = buf[index+2];
-
-		ret.push_back(to_base64[ ((b3[0] & 0xfc) >> 2) ]);
-		ret.push_back(to_base64[ ((b3[0] & 0x03) << 4) + ((b3[1] & 0xf0) >> 4) ]);
-		ret.push_back(to_base64[ ((b3[1] & 0x0f) << 2) + ((b3[2] & 0xc0) >> 6) ]);
-		ret.push_back(to_base64[ ((b3[2] & 0x3f)) ]);
+	if (buffer_length > 2) { //    vvvvv avoid unsigned overflow
+		while (i < buffer_length - 2) {
+			push(ret, buf[i], buf[i + 1], buf[i + 2]);
+			i += 3;
+		}
 	}
-
+	size_t left = buffer_length - i;
+	if (left >= 1) { // handle non-multiple of 3s, pad the end with =
+		ret.push_back(to_base64[ ((buf[i] & 0xfc) >> 2) ]);
+		if (left >= 2) {
+			ret.push_back(to_base64[ ((buf[i] & 0x03) << 4) + ((buf[i + 1] & 0xf0) >> 4) ]);
+			ret.push_back(to_base64[ ((buf[i + 1] & 0x0f) << 2) ]);
+			ret.push_back('=');
+		}
+		else {
+			ret.push_back(to_base64[ ((buf[i] & 0x03) << 4) ]);
+			ret += "==";
+		}
+	}
 	return ret;
 }
 
@@ -240,10 +282,18 @@ time_t ts_not_null(const json* j, const char* keyname)
 			}
 			crossplatform_strptime(timedate.substr(0, 19).c_str(), "%Y-%m-%dT%T", &timestamp);
 			timestamp.tm_isdst = 0;
-			retval = mktime(&timestamp);
+			#ifndef _WIN32
+				retval = timegm(&timestamp);
+			#else
+				retval = _mkgmtime(&timestamp);
+			#endif
 		} else {
 			crossplatform_strptime(timedate.substr(0, 19).c_str(), "%Y-%m-%d %T", &timestamp);
-			retval = mktime(&timestamp);
+			#ifndef _WIN32
+				retval = timegm(&timestamp);
+			#else
+				retval = _mkgmtime(&timestamp);
+			#endif
 		}
 	}
 	return retval;
@@ -265,89 +315,115 @@ void set_ts_not_null(const json* j, const char* keyname, time_t &v)
 			}
 			crossplatform_strptime(timedate.substr(0, 19).c_str(), "%Y-%m-%dT%T", &timestamp);
 			timestamp.tm_isdst = 0;
-			retval = mktime(&timestamp);
+			#ifndef _WIN32
+				retval = timegm(&timestamp);
+			#else
+				retval = _mkgmtime(&timestamp);
+			#endif
 		} else {
 			crossplatform_strptime(timedate.substr(0, 19).c_str(), "%Y-%m-%d %T", &timestamp);
-			retval = mktime(&timestamp);
+			#ifndef _WIN32
+				retval = timegm(&timestamp);
+			#else
+				retval = _mkgmtime(&timestamp);
+			#endif
 		}
 		v = retval;
 	}
 }
 
-const std::map<std::string, dpp::events::event*> eventmap = {
-	{ "__LOG__", new dpp::events::logger() },
-	{ "GUILD_CREATE", new dpp::events::guild_create() },
-	{ "GUILD_UPDATE", new dpp::events::guild_update() },
-	{ "GUILD_DELETE", new dpp::events::guild_delete() },
-	{ "GUILD_MEMBER_UPDATE", new dpp::events::guild_member_update() },
-	{ "RESUMED", new dpp::events::resumed() },
-	{ "READY", new dpp::events::ready() },
-	{ "CHANNEL_CREATE", new dpp::events::channel_create() },
-	{ "CHANNEL_UPDATE", new dpp::events::channel_update() },
-	{ "CHANNEL_DELETE", new dpp::events::channel_delete() },
-	{ "PRESENCE_UPDATE", new dpp::events::presence_update() },
-	{ "TYPING_START", new dpp::events::typing_start() },
-	{ "MESSAGE_CREATE", new dpp::events::message_create() },
-	{ "MESSAGE_UPDATE", new dpp::events::message_update() },
-	{ "MESSAGE_DELETE", new dpp::events::message_delete() },
-	{ "MESSAGE_DELETE_BULK", new dpp::events::message_delete_bulk() },
-	{ "MESSAGE_REACTION_ADD", new dpp::events::message_reaction_add() },
-	{ "MESSAGE_REACTION_REMOVE", new dpp::events::message_reaction_remove() },
-	{ "MESSAGE_REACTION_REMOVE_ALL", new dpp::events::message_reaction_remove_all() },
-	{ "MESSAGE_REACTION_REMOVE_EMOJI", new dpp::events::message_reaction_remove_emoji() },
-	{ "CHANNEL_PINS_UPDATE", new dpp::events::channel_pins_update() },
-	{ "GUILD_BAN_ADD", new dpp::events::guild_ban_add() },
-	{ "GUILD_BAN_REMOVE", new dpp::events::guild_ban_remove() },
-	{ "GUILD_EMOJIS_UPDATE", new dpp::events::guild_emojis_update() },
-	{ "GUILD_INTEGRATIONS_UPDATE", new dpp::events::guild_integrations_update() },
-	{ "INTEGRATION_CREATE", new dpp::events::integration_create() },
-	{ "INTEGRATION_UPDATE", new dpp::events::integration_update() },
-	{ "INTEGRATION_DELETE", new dpp::events::integration_delete() },
-	{ "GUILD_MEMBER_ADD", new dpp::events::guild_member_add() },
-	{ "GUILD_MEMBER_REMOVE", new dpp::events::guild_member_remove() },
-	{ "GUILD_MEMBERS_CHUNK", new dpp::events::guild_members_chunk() },
-	{ "GUILD_ROLE_CREATE", new dpp::events::guild_role_create() },
-	{ "GUILD_ROLE_UPDATE", new dpp::events::guild_role_update() },
-	{ "GUILD_ROLE_DELETE", new dpp::events::guild_role_delete() },
-	{ "VOICE_STATE_UPDATE", new dpp::events::voice_state_update() },
-	{ "VOICE_SERVER_UPDATE", new dpp::events::voice_server_update() },
-	{ "WEBHOOKS_UPDATE", new dpp::events::webhooks_update() },
-	{ "INVITE_CREATE", new dpp::events::invite_create() },
-	{ "INVITE_DELETE", new dpp::events::invite_delete() },
-	{ "INTERACTION_CREATE", new dpp::events::interaction_create() },
-	{ "USER_UPDATE", new dpp::events::user_update() },
-	{ "GUILD_JOIN_REQUEST_DELETE", new dpp::events::guild_join_request_delete() },
+template <typename EventType>
+static dpp::events::event* make_static_event() noexcept {
+	static EventType event;
+	return &event;
+}
+
+static const std::map<std::string, dpp::events::event*> event_map = {
+	{ "__LOG__", make_static_event<dpp::events::logger>() },
+	{ "GUILD_CREATE", make_static_event<dpp::events::guild_create>() },
+	{ "GUILD_UPDATE", make_static_event<dpp::events::guild_update>() },
+	{ "GUILD_DELETE", make_static_event<dpp::events::guild_delete>() },
+	{ "GUILD_MEMBER_UPDATE", make_static_event<dpp::events::guild_member_update>() },
+	{ "RESUMED", make_static_event<dpp::events::resumed>() },
+	{ "READY", make_static_event<dpp::events::ready>() },
+	{ "CHANNEL_CREATE", make_static_event<dpp::events::channel_create>() },
+	{ "CHANNEL_UPDATE", make_static_event<dpp::events::channel_update>() },
+	{ "CHANNEL_DELETE", make_static_event<dpp::events::channel_delete>() },
+	{ "PRESENCE_UPDATE", make_static_event<dpp::events::presence_update>() },
+	{ "TYPING_START", make_static_event<dpp::events::typing_start>() },
+	{ "MESSAGE_CREATE", make_static_event<dpp::events::message_create>() },
+	{ "MESSAGE_UPDATE", make_static_event<dpp::events::message_update>() },
+	{ "MESSAGE_DELETE", make_static_event<dpp::events::message_delete>() },
+	{ "MESSAGE_DELETE_BULK", make_static_event<dpp::events::message_delete_bulk>() },
+	{ "MESSAGE_REACTION_ADD", make_static_event<dpp::events::message_reaction_add>() },
+	{ "MESSAGE_REACTION_REMOVE", make_static_event<dpp::events::message_reaction_remove>() },
+	{ "MESSAGE_REACTION_REMOVE_ALL", make_static_event<dpp::events::message_reaction_remove_all>() },
+	{ "MESSAGE_REACTION_REMOVE_EMOJI", make_static_event<dpp::events::message_reaction_remove_emoji>() },
+	{ "MESSAGE_POLL_VOTE_ADD", make_static_event<dpp::events::message_poll_vote_add>() },
+	{ "MESSAGE_POLL_VOTE_REMOVE", make_static_event<dpp::events::message_poll_vote_remove>() },
+	{ "CHANNEL_PINS_UPDATE", make_static_event<dpp::events::channel_pins_update>() },
+	{ "GUILD_BAN_ADD", make_static_event<dpp::events::guild_ban_add>() },
+	{ "GUILD_BAN_REMOVE", make_static_event<dpp::events::guild_ban_remove>() },
+	{ "GUILD_EMOJIS_UPDATE", make_static_event<dpp::events::guild_emojis_update>() },
+	{ "GUILD_INTEGRATIONS_UPDATE", make_static_event<dpp::events::guild_integrations_update>() },
+	{ "INTEGRATION_CREATE", make_static_event<dpp::events::integration_create>() },
+	{ "INTEGRATION_UPDATE", make_static_event<dpp::events::integration_update>() },
+	{ "INTEGRATION_DELETE", make_static_event<dpp::events::integration_delete>() },
+	{ "GUILD_MEMBER_ADD", make_static_event<dpp::events::guild_member_add>() },
+	{ "GUILD_MEMBER_REMOVE", make_static_event<dpp::events::guild_member_remove>() },
+	{ "GUILD_MEMBERS_CHUNK", make_static_event<dpp::events::guild_members_chunk>() },
+	{ "GUILD_ROLE_CREATE", make_static_event<dpp::events::guild_role_create>() },
+	{ "GUILD_ROLE_UPDATE", make_static_event<dpp::events::guild_role_update>() },
+	{ "GUILD_ROLE_DELETE", make_static_event<dpp::events::guild_role_delete>() },
+	{ "VOICE_CHANNEL_EFFECT_SEND", make_static_event<dpp::events::voice_channel_effect_send>() },
+	{ "VOICE_STATE_UPDATE", make_static_event<dpp::events::voice_state_update>() },
+	{ "VOICE_SERVER_UPDATE", make_static_event<dpp::events::voice_server_update>() },
+	{ "WEBHOOKS_UPDATE", make_static_event<dpp::events::webhooks_update>() },
+	{ "INVITE_CREATE", make_static_event<dpp::events::invite_create>() },
+	{ "INVITE_DELETE", make_static_event<dpp::events::invite_delete>() },
+	{ "INTERACTION_CREATE", make_static_event<dpp::events::interaction_create>() },
+	{ "USER_UPDATE", make_static_event<dpp::events::user_update>() },
+	{ "GUILD_JOIN_REQUEST_DELETE", make_static_event<dpp::events::guild_join_request_delete>() },
 	{ "GUILD_JOIN_REQUEST_UPDATE", nullptr },
-	{ "STAGE_INSTANCE_CREATE", new dpp::events::stage_instance_create() },
-	{ "STAGE_INSTANCE_UPDATE", new dpp::events::stage_instance_update() },
-	{ "STAGE_INSTANCE_DELETE", new dpp::events::stage_instance_delete() },
-	{ "THREAD_CREATE", new dpp::events::thread_create() },
-	{ "THREAD_UPDATE", new dpp::events::thread_update() },
-	{ "THREAD_DELETE", new dpp::events::thread_delete() },
-	{ "THREAD_LIST_SYNC", new dpp::events::thread_list_sync() },
-	{ "THREAD_MEMBER_UPDATE", new dpp::events::thread_member_update() },
-	{ "THREAD_MEMBERS_UPDATE", new dpp::events::thread_members_update() },
-	{ "GUILD_STICKERS_UPDATE", new dpp::events::guild_stickers_update() },
+	{ "STAGE_INSTANCE_CREATE", make_static_event<dpp::events::stage_instance_create>() },
+	{ "STAGE_INSTANCE_UPDATE", make_static_event<dpp::events::stage_instance_update>() },
+	{ "STAGE_INSTANCE_DELETE", make_static_event<dpp::events::stage_instance_delete>() },
+	{ "THREAD_CREATE", make_static_event<dpp::events::thread_create>() },
+	{ "THREAD_UPDATE", make_static_event<dpp::events::thread_update>() },
+	{ "THREAD_DELETE", make_static_event<dpp::events::thread_delete>() },
+	{ "THREAD_LIST_SYNC", make_static_event<dpp::events::thread_list_sync>() },
+	{ "THREAD_MEMBER_UPDATE", make_static_event<dpp::events::thread_member_update>() },
+	{ "THREAD_MEMBERS_UPDATE", make_static_event<dpp::events::thread_members_update>() },
+	{ "GUILD_STICKERS_UPDATE", make_static_event<dpp::events::guild_stickers_update>() },
 	{ "GUILD_APPLICATION_COMMAND_COUNTS_UPDATE", nullptr },
 	{ "APPLICATION_COMMAND_PERMISSIONS_UPDATE", nullptr },
 	{ "EMBEDDED_ACTIVITY_UPDATE", nullptr },
 	{ "GUILD_APPLICATION_COMMAND_INDEX_UPDATE", nullptr },
-	{ "GUILD_SCHEDULED_EVENT_CREATE", new dpp::events::guild_scheduled_event_create() },
-	{ "GUILD_SCHEDULED_EVENT_UPDATE", new dpp::events::guild_scheduled_event_update() },
-	{ "GUILD_SCHEDULED_EVENT_DELETE", new dpp::events::guild_scheduled_event_delete() },
-	{ "GUILD_SCHEDULED_EVENT_USER_ADD", new dpp::events::guild_scheduled_event_user_add() },
-	{ "GUILD_SCHEDULED_EVENT_USER_REMOVE", new dpp::events::guild_scheduled_event_user_remove() },
-	{ "AUTO_MODERATION_RULE_CREATE", new dpp::events::automod_rule_create() },
-	{ "AUTO_MODERATION_RULE_UPDATE", new dpp::events::automod_rule_update() },
-	{ "AUTO_MODERATION_RULE_DELETE", new dpp::events::automod_rule_delete() },
-	{ "AUTO_MODERATION_ACTION_EXECUTION", new dpp::events::automod_rule_execute() },
-	{ "GUILD_AUDIT_LOG_ENTRY_CREATE", nullptr }, /* TODO: Implement this event */
+	{ "CHANNEL_TOPIC_UPDATE", nullptr },
+	{ "GUILD_SOUNDBOARD_SOUND_CREATE", nullptr },
+	{ "GUILD_SOUNDBOARD_SOUND_DELETE", nullptr },
+	{ "GUILD_SOUNDBOARD_SOUNDS_UPDATE", nullptr },
+	{ "GUILD_SOUNDBOARD_SOUND_UPDATE", nullptr },
+	{ "VOICE_CHANNEL_STATUS_UPDATE", nullptr },
+	{ "GUILD_SCHEDULED_EVENT_CREATE", make_static_event<dpp::events::guild_scheduled_event_create>() },
+	{ "GUILD_SCHEDULED_EVENT_UPDATE", make_static_event<dpp::events::guild_scheduled_event_update>() },
+	{ "GUILD_SCHEDULED_EVENT_DELETE", make_static_event<dpp::events::guild_scheduled_event_delete>() },
+	{ "GUILD_SCHEDULED_EVENT_USER_ADD", make_static_event<dpp::events::guild_scheduled_event_user_add>() },
+	{ "GUILD_SCHEDULED_EVENT_USER_REMOVE", make_static_event<dpp::events::guild_scheduled_event_user_remove>() },
+	{ "AUTO_MODERATION_RULE_CREATE", make_static_event<dpp::events::automod_rule_create>() },
+	{ "AUTO_MODERATION_RULE_UPDATE", make_static_event<dpp::events::automod_rule_update>() },
+	{ "AUTO_MODERATION_RULE_DELETE", make_static_event<dpp::events::automod_rule_delete>() },
+	{ "AUTO_MODERATION_ACTION_EXECUTION", make_static_event<dpp::events::automod_rule_execute>() },
+	{ "GUILD_AUDIT_LOG_ENTRY_CREATE", make_static_event<dpp::events::guild_audit_log_entry_create>() },
+	{ "ENTITLEMENT_CREATE", make_static_event<dpp::events::entitlement_create>() },
+	{ "ENTITLEMENT_UPDATE", make_static_event<dpp::events::entitlement_update>() },
+	{ "ENTITLEMENT_DELETE", make_static_event<dpp::events::entitlement_delete>() },
 };
 
 void discord_client::handle_event(const std::string &event, json &j, const std::string &raw)
 {
-	auto ev_iter = eventmap.find(event);
-	if (ev_iter != eventmap.end()) {
+	auto ev_iter = event_map.find(event);
+	if (ev_iter != event_map.end()) {
 		/* A handler with nullptr is silently ignored. We don't plan to make a handler for it
 		 * so this usually some user-only thing that's crept into the API and shown to bots
 		 * that we dont care about.
@@ -356,8 +432,8 @@ void discord_client::handle_event(const std::string &event, json &j, const std::
 			ev_iter->second->handle(this, j, raw);
 		}
 	} else {
-		log(dpp::ll_debug, "Unhandled event: " + event + ", " + j.dump());
+		log(dpp::ll_debug, "Unhandled event: " + event + ", " + j.dump(-1, ' ', false, json::error_handler_t::replace));
 	}
 }
 
-};
+}

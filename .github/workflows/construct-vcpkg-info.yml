@@ -4,18 +4,32 @@ on:
   release:
     types: [published]
   workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to package'
+        required: true
+
+permissions:
+  contents: read
 
 jobs:
   Collect-Vcpkg-Info:
+    permissions:
+      contents: write # Allow the creation of a release.
     runs-on: ubuntu-latest
     steps:
+         - name: Harden Runner
+           uses: step-security/harden-runner@f4a75cfd619ee5ce8d5b864b0d183aff3c69b55a # v2.13.1
+           with:
+             egress-policy: audit
+
          - name: Setup PHP
-           uses: shivammathur/setup-php@v2
+           uses: shivammathur/setup-php@bf6b4fbd49ca58e4608c9c89fba0b8d90bd2a39f # v2
            with:
              php-version: '8.1'
 
          - name: Checkout D++
-           uses: actions/checkout@v2
+           uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
            with:
              submodules: recursive
 
@@ -31,4 +45,4 @@ jobs:
          - name: Run vcpkg release builder
            run: git fetch -avt &&
                 cd buildtools &&
-                php make_vcpkg.php "${{ github.repository_owner }}" "${{ secrets.PERSONAL_ACCESS_TOKEN }}"
+                php make_vcpkg.php "${{ github.repository_owner }}" "${{ secrets.PERSONAL_ACCESS_TOKEN }}" "${{ inputs.tag }}"

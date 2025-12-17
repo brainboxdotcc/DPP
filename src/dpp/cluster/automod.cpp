@@ -43,4 +43,4 @@ void cluster::automod_rule_delete(snowflake guild_id, snowflake rule_id, command
 	rest_request<confirmation>(this, API_PATH "/guilds", std::to_string(guild_id), "/auto-moderation/rules/" + std::to_string(rule_id), m_delete, "", callback);
 }
 
-};
+}

@@ -2,6 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
+ * SPDX-License-Identifier: Apache-2.0
  * Copyright 2021 Craig Edwards and D++ contributors 
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
@@ -33,35 +34,36 @@ namespace dpp {
  * 
  */
 class DPP_EXPORT ban : public json_interface<ban> {
-public:
-	/** The ban reason */
-	std::string reason;
-	/** User ID the ban applies to */
-	snowflake user_id;
-	
-	/** Constructor */
-	ban();
-
-	/** Destructor */
-	virtual ~ban() = default;
+protected:
+	friend struct json_interface<ban>;
 
 	/** Read class values from json object
 	 * @param j A json object to read from
 	 * @return A reference to self
 	 */
-	 ban& fill_from_json(nlohmann::json* j);
+	ban& fill_from_json_impl(nlohmann::json* j);
+
+public:
+	/**
+	 * @brief The ban reason.
+	 */
+	std::string reason;
 
 	/**
-	 * @brief Build json representation of a ban
-	 * @param with_id Include ID in json
-	 * 
-	 * @return std::string stringified json
+	 * @brief User ID the ban applies to.
 	 */
-	std::string build_json(bool with_id = false) const;
+	snowflake user_id;
+
+	/** Constructor */
+	ban();
+
+	/** Destructor */
+	virtual ~ban() = default;
 };
 
-/** A group of bans
+/**
+ * @brief A group of bans. The key is the user ID.
  */
 typedef std::unordered_map<snowflake, ban> ban_map;
 
-};
+}

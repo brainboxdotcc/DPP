@@ -4,8 +4,6 @@
 digraph "Thread Model" {
 	graph [ranksep=1];
 	node [colorscheme="blues9",fontname="helvetica"];
-	"Discord Events" -> "Your Program"
-
 	"Your Program" [style=filled, color=1, shape=rect]
 	"Cluster" [style=filled, color=1, shape=rect]
 
@@ -14,68 +12,48 @@ digraph "Thread Model" {
 		color=lightgrey;
 		node [style=filled,color=2]
 		"Your Program"
-		"Cluster"
-		label = "User Code";
+		"Your Program" -> "Cluster"
+		label = "(1)";
 	}
+
+	subgraph cluster_3 {
+		style=filled;
+		color=lightgrey;
+		node [style=filled,color=2]
+		"Cluster" -> "Event Loop"
+		"Event Loop" -> "HTTP(S) requests"
+		"Event Loop" -> "Voice Sessions"
+		"Event Loop" -> "Shards"
+		"Shards" -> "Websocket Events"
+		label = "(2)";
+	}
+
 
 	subgraph cluster_0 {
 		style=filled;
 		color=lightgrey;
 		node [style=filled,color=4]
-		"Shard 1" [style=filled, color=4]
-		"Shard 2"
-		"Shard 3..."
-		label = "Shards (Each is a thread, one per 2500 discord guilds)";
-	}
-
-	subgraph cluster_1 {
-		style=filled
-		color=lightgrey;
-		node [style=filled,color=4]
-        	"REST Requests"
-		"Request In Queue 1"
-		"Request In Queue 2"
-		"Request In Queue 3..."
-        	"Request Out Queue"
-		label = "REST Requests (Each in queue, and the out queue, are threads)"
-	}
-
-	subgraph cluster_3 {
-		style=filled
-		color=lightgrey;
-		node [style=filled,color=4]
-        	"Discord Events" [style=filled,color=4]
-		"User Callback Functions"
-		label = "Events and Callbacks"
+		"Voice Sessions" -> "Websocket Events"
+		"HTTP(S) requests" -> "Thread Pool (4..n threads)"
+		"Websocket Events" -> "Thread Pool (4..n threads)"
+		"Thread Pool (4..n threads)"
+		label = "(3)";
 	}
 
 	"Cluster" [shape=rect]
-	"REST Requests" [shape=rect]
-	"Request In Queue 1" [shape=rect]
-	"Request In Queue 2" [shape=rect]
-	"Request In Queue 3..." [shape=rect]
-	"Shard 1" [shape=rect]
-	"Shard 2" [shape=rect]
-	"Shard 3..." [shape=rect]
-	"Request Out Queue" [shape=rect]
-	"Discord Events" [shape=rect]
-	"User Callback Functions" [shape=rect]
+	"Thread Pool (4..n threads)" [shape=rect]
+	"HTTP(S) requests"  [shape=rect]
+	"Shards"  [shape=rect]
+	"Websocket Events"  [shape=rect]
+	"Event Loop"  [shape=rect]
+	"Voice Sessions"  [shape=rect]
 
-	"Cluster" -> "REST Requests"
-	"Shard 1" -> "Discord Events"
-	"Shard 2" -> "Discord Events"
-	"Shard 3..." -> "Discord Events"
-	"Your Program" -> "Cluster"
-	"Cluster" -> "Shard 1"
-	"Cluster" -> "Shard 2"
-	"Cluster" -> "Shard 3..."
-	"REST Requests" -> "Request In Queue 1"
-	"REST Requests" -> "Request In Queue 2"
-	"REST Requests" -> "Request In Queue 3..."
-	"Request In Queue 1" -> "Request Out Queue"
-	"Request In Queue 2" -> "Request Out Queue"
-	"Request In Queue 3..." -> "Request Out Queue"
-	"Request Out Queue" -> "User Callback Functions"
-	"User Callback Functions" -> "Your Program"
 }
 \enddot
+
+## Details
+
+1. User Code - No assumptions are made about how your program threads, if at all.
+2. The event loop manages all socket IO for the cluster. If you start the cluster with dpp::st_return this will run under its own thread, otherwise if you use dpp::st_wait it will run in the same thread as the caller of the dpp::cluster::start method.
+The event loop will be either poll, epoll or kqueue based depending on your system capabilities. You should always start a cluster after forking, if your program forks, as various types of IO loop cannot be inherited by a forked process.
+3. Set thread pool size via cluster constructor. Thread pool uses a priority queue and defaults in size to half the system concurrency value. Every callback or completed coroutine ends up executing here. The minimum concurrency of this pool is 4.

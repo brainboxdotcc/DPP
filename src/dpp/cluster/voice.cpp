@@ -32,4 +32,4 @@ void cluster::guild_get_voice_regions(snowflake guild_id, command_completion_eve
 	rest_request_list<voiceregion>(this, API_PATH "/guilds", std::to_string(guild_id), "regions", m_get, "", callback);
 }
 
-};
+}

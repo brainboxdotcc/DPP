@@ -32,11 +32,126 @@
 #include <mutex>
 #include <shared_mutex>
 #include <cstring>
-#include <dpp/coro.h>
-
-using  json = nlohmann::json;
+#include <atomic>
+#include <dpp/exception.h>
+#include <dpp/coro/job.h>
+#include <dpp/coro/task.h>
 
 namespace dpp {
+
+#ifndef DPP_NO_CORO
+
+template <typename T>
+class event_router_t;
+
+namespace detail {
+
+/** @brief Internal cogwheels for dpp::event_router_t */
+namespace event_router {
+
+/** @brief State of an owner of an event_router::awaitable */
+enum class awaiter_state {
+	/** @brief Awaitable is not being awaited */
+	none,
+	/** @brief Awaitable is being awaited */
+	waiting,
+	/** @brief Awaitable will be resumed imminently */
+	resuming,
+	/** @brief Awaitable will be cancelled imminently */
+	cancelling
+};
+
+/**
+ * @brief Awaitable object representing an event.
+ * A user can co_await on this object to resume the next time the event is fired,
+ * optionally with a condition.
+ */
+template <typename T>
+class awaitable {
+	friend class event_router_t<T>;
+
+	/** @brief Resume the coroutine waiting on this object */
+	void resume() {
+		std_coroutine::coroutine_handle<>::from_address(handle).resume();
+	}
+
+	/** @brief Event router that will manage this object */
+	event_router_t<T> *self;
+
+	/** @brief Predicate on the event, or nullptr for always match */
+	std::function<bool (const T &)> predicate = nullptr;
+
+	/** @brief Event that triggered a resumption, to give to the resumer */
+	const T *event = nullptr;
+
+	/** @brief Coroutine handle, type-erased */
+	void* handle = nullptr;
+
+	/** @brief The state of the awaiting coroutine */
+	std::atomic<awaiter_state> state = awaiter_state::none;
+
+	/** Default constructor is accessible only to event_router_t */
+	awaitable() = default;
+
+	/** Normal constructor is accessible only to event_router_t */
+	template <typename F>
+	awaitable(event_router_t<T> *router, F&& fun) : self{router}, predicate{std::forward<F>(fun)} {}
+
+public:
+	/** This object is not copyable. */
+	awaitable(const awaitable &) = delete;
+
+	/** Move constructor. */
+	awaitable(awaitable &&rhs) noexcept : self{rhs.self}, predicate{std::move(rhs.predicate)}, event{rhs.event}, handle{std::exchange(rhs.handle, nullptr)}, state{rhs.state.load(std::memory_order_relaxed)} {}
+
+	/** This object is not copyable. */
+	awaitable& operator=(const awaitable &) = delete;
+
+	/** Move assignment operator. */
+	awaitable& operator=(awaitable&& rhs) noexcept {
+		self = rhs.self;
+		predicate = std::move(rhs.predicate);
+		event = rhs.event;
+		handle = std::exchange(rhs.handle, nullptr);
+		state = rhs.state.load(std::memory_order_relaxed);
+		return *this;
+	}
+
+	/**
+	 * @brief Request cancellation. This will detach this object from the event router and resume the awaiter, which will be thrown dpp::task_cancelled::exception.
+	 *
+	 * @throw ??? As this resumes the coroutine, it may throw any exceptions at the caller.
+	 */
+	void cancel();
+
+	/**
+	 * @brief First function called by the standard library when awaiting this object. Returns true if we need to suspend.
+	 *
+	 * @retval false always.
+	 */
+	[[nodiscard]] constexpr bool await_ready() const noexcept;
+
+	/**
+	 * @brief Second function called by the standard library when awaiting this object, after suspension.
+	 * This will attach the object to its event router, to be resumed on the next event that satisfies the predicate.
+	 *
+	 * @return void never resume on call.
+	 */
+	void await_suspend(detail::std_coroutine::coroutine_handle<> caller);
+
+	/**
+	 * @brief Third and final function called by the standard library, called when resuming the coroutine.
+	 *
+	 * @throw @ref task_cancelled_exception if cancel() has been called
+	 * @return const T& __Reference__ to the event that matched
+	 */
+	[[maybe_unused]] const T& await_resume();
+};
+
+}
+
+}
+#endif
 
 /**
  * @brief A returned event handle for an event which was attached
@@ -45,25 +160,24 @@ typedef size_t event_handle;
 
 /**
  * @brief Handles routing of an event to multiple listeners.
+ * Multiple listeners may attach to the event_router_t by means of @ref operator()(F&&) "operator()". Passing a
+ * lambda into @ref operator()(F&&) "operator()" attaches to the event.
  * 
- * Multiple listeners may attach to the event_router_t by means of operator(). Passing a
- * lambda into operator() attaches to the event.
- * 
- * Dispatchers of the event may call the event_router_t::call() method to cause all listeners
+ * @details Dispatchers of the event may call the @ref call() method to cause all listeners
  * to receive the event.
  * 
- * The event_router_t::empty() method will return true if there are no listeners attached
+ * The @ref empty() method will return true if there are no listeners attached
  * to the event_router_t (this can be used to save time by not constructing objects that
  * nobody will ever see).
  * 
- * The event_router_t::detach() method removes an existing listener from the event,
- * using the event_handle ID returned by operator().
+ * The @ref detach() method removes an existing listener from the event,
+ * using the event_handle ID returned by @ref operator()(F&&) "operator()".
  * 
  * This class is used by the library to route all websocket events to listening code.
  * 
  * Example:
  * 
- * ```cpp
+ * @code{cpp}
  * // Declare an event that takes log_t as its parameter
  * event_router_t<log_t> my_event;
  * 
@@ -79,7 +193,7 @@ typedef size_t event_handle;
  * 
  * // Detach from an event using the handle returned by operator()
  * my_event.detach(id);
- * ```
+ * @endcode
  * 
  * @tparam T type of single parameter passed to event lambda derived from event_dispatch_t
  */
@@ -87,33 +201,73 @@ template<class T> class event_router_t {
 private:
 	friend class cluster;
 
+	/**
+	 * @brief Non-coro event handler type
+	 */
+	using regular_handler_t = std::function<void(const T&)>;
+
+	/**
+	 * @brief Type that event handlers will be stored as with DPP_CORO off.
+	 * This is the ABI DPP_CORO has to match.
+	 */
+	using event_handler_abi_t = std::variant<regular_handler_t, std::function<task_dummy(T)>>;
+
+#ifndef DPP_NO_CORO
+	friend class detail::event_router::awaitable<T>;
+
+	/** @brief dpp::task coro event handler */
+	using task_handler_t = std::function<dpp::task<void>(const T&)>;
+
+	/** @brief Type that event handlers are stored as */
+	using event_handler_t = std::variant<regular_handler_t, task_handler_t>;
+
+	DPP_CHECK_ABI_COMPAT(event_handler_t, event_handler_abi_t)
+#else
+	/**
+	 * @brief Type that event handlers are stored as
+	 */
+	using event_handler_t = event_handler_abi_t;
+#endif
+
+	/**
+	 * @brief Identifier for the next event handler, will be given to the user on attaching a handler
+	 */
 	event_handle next_handle = 1;
 
 	/**
 	 * @brief Thread safety mutex
 	 */
-	mutable std::shared_mutex lock;
+	mutable std::shared_mutex mutex;
+
 	/**
 	 * @brief Container of event listeners keyed by handle,
 	 * as handles are handed out sequentially they will always
 	 * be called in they order they are bound to the event
 	 * as std::map is an ordered container.
 	 */
-	std::map<event_handle, std::function<void(const T&)>> dispatch_container;
+	std::map<event_handle, event_handler_t> dispatch_container;
 
-
-#ifdef DPP_CORO
+#ifndef DPP_NO_CORO
 	/**
-	 * @brief Container for event listeners (coroutines only)
+	 * @brief Mutex for messing with coro_awaiters.
 	 */
-	std::map<event_handle, std::function<dpp::task(T)>> coroutine_container;
-#else
-       /**
-        * @brief Dummy container to keep the struct size same
-        */
-       std::map<event_handle, std::function<void(T)>> dummy_container;
-#endif
+	mutable std::shared_mutex coro_mutex;
 
+	/**
+	 * @brief Vector containing the awaitables currently being awaited on for this event router.
+	 */
+	mutable std::vector<detail::event_router::awaitable<T> *> coro_awaiters;
+#else
+	/**
+	 * @brief Dummy for ABI compatibility between DPP_CORO and not
+	 */
+	utility::dummy<std::shared_mutex> definitely_not_a_mutex;
+
+	/**
+	 * @brief Dummy for ABI compatibility between DPP_CORO and not
+	 */
+	utility::dummy<std::vector<void*>> definitely_not_a_vector;
+#endif
 
 	/**
 	 * @brief A function to be called whenever the method is called, to check
@@ -137,6 +291,127 @@ protected:
 		warning = warning_function;
 	}
 
+	/**
+	 * @brief Handle an event. This function should only be used without coro enabled, otherwise use handle_coro.
+	 */
+	void handle(const T& event) const {
+		if (warning) {
+			warning(event);
+		}
+
+		std::shared_lock l(mutex);
+		for (const auto& [_, listener] : dispatch_container) {
+			if (!event.is_cancelled()) {
+				if (std::holds_alternative<regular_handler_t>(listener)) {
+					std::get<regular_handler_t>(listener)(event);
+				} else {
+					throw dpp::logic_exception("cannot handle a coroutine event handler with a library built without DPP_CORO");
+				}
+			}
+		};
+	}
+
+#ifndef DPP_NO_CORO
+	/**
+	 * @brief Handle an event as a coroutine, ensuring the lifetime of the event object.
+	 */
+	dpp::job handle_coro(T event) const {
+		if (warning) {
+			warning(event);
+		}
+
+		resume_awaiters(event);
+
+		std::vector<dpp::task<void>> tasks;
+		{
+			std::shared_lock l(mutex);
+
+			for (const auto& [_, listener] : dispatch_container) {
+				if (!event.is_cancelled()) {
+					if (std::holds_alternative<task_handler_t>(listener)) {
+						tasks.push_back(std::get<task_handler_t>(listener)(event));
+					} else if (std::holds_alternative<regular_handler_t>(listener)) {
+						std::get<regular_handler_t>(listener)(event);
+					}
+				}
+			};
+		}
+
+		for (dpp::task<void>& t : tasks) {
+			co_await t; // keep the event object alive until all tasks finished
+		}
+	}
+
+	/**
+	 * @brief Attach a suspended coroutine to this event router via detail::event_router::awaitable.
+	 * It will be resumed and detached when an event satisfying its condition completes, or it is cancelled.
+	 *
+	 * This is for internal usage only, the user way to do this is to co_await it (which will call this when suspending)
+	 * This guarantees that the coroutine is indeed suspended and thus can be resumed at any time
+	 *
+	 * @param awaiter Awaiter to attach
+	 */
+	void attach_awaiter(detail::event_router::awaitable<T> *awaiter) {
+		std::unique_lock lock{coro_mutex};
+
+		coro_awaiters.emplace_back(awaiter);
+	}
+
+	/**
+	 * @brief Detach an awaiting coroutine handle from this event router.
+	 * This is mostly called when a detail::event_router::awaitable is cancelled.
+	 *
+	 * @param handle Coroutine handle to find in the attached coroutines
+	 */
+	void detach_coro(void *handle) {
+		std::unique_lock lock{coro_mutex};
+
+		coro_awaiters.erase(std::remove_if(coro_awaiters.begin(), coro_awaiters.end(), [handle](detail::event_router::awaitable<T> const *awaiter) { return awaiter->handle == handle; }), coro_awaiters.end());
+	}
+
+	/**
+	 * @brief Resume any awaiter whose predicate matches this event, or is null.
+	 *
+	 * @param event Event to compare and pass to accepting awaiters
+	 */
+	void resume_awaiters(const T& event) const {
+		std::vector<detail::event_router::awaitable<T>*> to_resume;
+		std::unique_lock lock{coro_mutex};
+
+		for (auto it = coro_awaiters.begin(); it != coro_awaiters.end();) {
+			detail::event_router::awaitable<T>* awaiter = *it;
+
+			if (awaiter->predicate && !awaiter->predicate(event)) {
+				++it;
+			} else {
+				using state_t = detail::event_router::awaiter_state;
+
+				/**
+				 * If state == none (was never awaited), do nothing
+				 * If state == waiting, prevent resumption, resume on our end
+				 * If state == resuming || cancelling, ignore
+				 *
+				 * Technically only cancelling || waiting should be possible here
+				 * We do this by trying to exchange "waiting" with "resuming". If that returns false, this is presumed to be "cancelling"
+				 */
+
+				state_t s = state_t::waiting;
+				if (awaiter->state.compare_exchange_strong(s, state_t::resuming)) {
+					to_resume.emplace_back(awaiter);
+					awaiter->event = &event;
+
+					it = coro_awaiters.erase(it);
+				} else {
+					++it;
+				}
+			}
+		}
+		lock.unlock();
+		for (detail::event_router::awaitable<T>* awaiter : to_resume)
+			awaiter->resume();
+	}
+#endif
+
 public:
 	/**
 	 * @brief Construct a new event_router_t object.
@@ -144,103 +419,326 @@ public:
 	event_router_t() = default;
 
 	/**
+	 * @brief Destructor. Will cancel any coroutine awaiting on events.
+	 *
+	 * @throw ! Cancelling a coroutine will throw a dpp::task_cancelled_exception to it.
+	 * This will be caught in this destructor, however, make sure no other exceptions are thrown in the coroutine after that or it will terminate.
+	 */
+	~event_router_t() {
+#ifndef DPP_NO_CORO
+		while (!coro_awaiters.empty()) {
+			// cancel all awaiters. here we cannot do the usual loop as we'd need to lock coro_mutex, and cancel() locks and modifies coro_awaiters
+			try {
+				coro_awaiters.back()->cancel();
+				 /*
+					* will resume coroutines and may throw ANY exception, including dpp::task_cancelled_exception cancel() throws at them.
+					* we catch that one. for the rest, good luck :)
+					* realistically the only way any other exception would pop up here is if someone catches dpp::task_cancelled_exception THEN throws another exception.
+				  */
+			} catch (const dpp::task_cancelled_exception &) {
+				// ok. likely we threw this one
+			}
+		}
+#endif
+	}
+
+	/**
 	 * @brief Call all attached listeners.
 	 * Listeners may cancel, by calling the event.cancel method.
-	 * 
+	 *
 	 * @param event Class to pass as parameter to all listeners.
 	 */
 	void call(const T& event) const {
-		if (warning) {
-			warning(event);
-		}
-		std::shared_lock l(lock);
-		std::for_each(dispatch_container.begin(), dispatch_container.end(), [&](auto &ev) {
-			if (!event.is_cancelled()) {
-				ev.second(event);
-			}
-		});
-#ifdef DPP_CORO
-		std::for_each(coroutine_container.begin(), coroutine_container.end(), [&](auto &ev) {
-			if (!event.is_cancelled()) {
-				ev.second(event);
-			}
-		});
+#ifndef DPP_NO_CORO
+		handle_coro(event);
+#else
+		handle(event);
 #endif
 	};
+
+	/**
+	 * @brief Call all attached listeners.
+	 * Listeners may cancel, by calling the event.cancel method.
+	 *
+	 * @param event Class to pass as parameter to all listeners.
+	 */
+	void call(T&& event) const {
+#ifndef DPP_NO_CORO
+		handle_coro(std::move(event));
+#else
+		handle(std::move(event));
+#endif
+	};
+
+#ifndef DPP_NO_CORO
+	/**
+	 * @brief Obtain an awaitable object that refers to an event with a certain condition.
+	 * It can be co_await-ed to wait for the next event that satisfies this condition.
+	 * On resumption the awaiter will be given __a reference__ to the event,
+	 * saving it in a variable is recommended to avoid variable lifetime issues.
+	 *
+	 * @details Example: @code{cpp}
+	 * dpp::task<> my_handler(const dpp::slashcommand_t& event) {
+	 *	co_await event.co_reply(dpp::message().add_component(dpp::component().add_component().set_label("click me!").set_id("test")));
+	 *
+	 *	dpp::button_click_t b = co_await c->on_button_click.with([](const dpp::button_click_t &event){ return event.custom_id == "test"; });
+	 *
+	 *	// do something on button click
+	 * }
+	 * @endcode
+	 *
+	 * This can be combined with dpp::when_any and other awaitables, for example dpp::cluster::co_sleep to create @ref expiring-buttons "expiring buttons".
+	 *
+	 * @warning On resumption the awaiter will be given <b>a reference</b> to the event.
+	 * This means that variable may become dangling at the next co_await, be careful and save it in a variable
+	 * if you need to.
+	 * @param pred Predicate to check the event against. This should be a callable of the form `bool(const T&)`
+	 * where T is the event type, returning true if the event is to match.
+	 * @return awaitable An awaitable object that can be co_await-ed to await an event matching the condition.
+	 */
+	template <typename Predicate>
+#ifndef _DOXYGEN_
+	requires utility::callable_returns<Predicate, bool, const T&>
+#endif
+	auto when(Predicate&& pred)
+#ifndef _DOXYGEN_
+		noexcept(noexcept(std::function<bool(const T&)>{std::declval<Predicate>()}))
+#endif
+	{
+		return detail::event_router::awaitable<T>{this, std::forward<Predicate>(pred)};
+	}
+
+	/**
+	 * @brief Obtain an awaitable object that refers to any event.
+	 * It can be co_await-ed to wait for the next event.
+	 *
+	 * @details Example: @code{cpp}
+	 * dpp::task<> my_handler(const dpp::slashcommand_t& event) {
+	 *	co_await event.co_reply(dpp::message().add_component(dpp::component().add_component().set_label("click me!").set_id("test")));
+	 *
+	 *	dpp::button_click_t b = co_await c->on_message_create;
+	 *
+	 *	// do something on button click
+	 * }
+	 * @endcode
+	 *
+	 * This can be combined with dpp::when_any and other awaitables, for example dpp::cluster::co_sleep to create expiring buttons.
+	 *
+	 * @warning On resumption the awaiter will be given <b>a reference</b> to the event.
+	 * This means that variable may become dangling at the next co_await, be careful and save it in a variable
+	 * if you need to.
+	 * @return awaitable An awaitable object that can be co_await-ed to await an event matching the condition.
+	 */
+	[[nodiscard]] auto operator co_await() noexcept {
+		return detail::event_router::awaitable<T>{this, nullptr};
+	}
+#endif
 
 	/**
 	 * @brief Returns true if the container of listeners is empty,
 	 * i.e. there is nothing listening for this event right now.
 	 * 
-	 * @return true if there are no listeners
-	 * @return false if there are some listeners
+	 * @retval true  if there are no listeners
+	 * @retval false if there are some listeners
 	 */
-	bool empty() const {
-		std::shared_lock l(lock);
+	[[nodiscard]] bool empty() const {
+#ifndef DPP_NO_CORO
+		std::shared_lock lock{mutex};
+		std::shared_lock coro_lock{coro_mutex};
+
+		return dispatch_container.empty() && coro_awaiters.empty();
+#else
+		std::shared_lock lock{mutex};
+
 		return dispatch_container.empty();
+#endif
 	}
 
 	/**
 	 * @brief Returns true if any listeners are attached.
 	 * 
 	 * This is the boolean opposite of event_router_t::empty().
-	 * @return true if listeners are attached
-	 * @return false if no listeners are attached
+	 * @retval true  if listeners are attached
+	 * @retval false if no listeners are attached
 	 */
 	operator bool() const {
 		return !empty();
 	}
 
+#ifdef _DOXYGEN_
 	/**
-	 * @brief Attach a lambda to the event, adding a listener.
-	 * The lambda should follow the signature specified when declaring
-	 * the event object and should take exactly one parameter derived
-	 * from event_dispatch_t.
-	 * 
-	 * @param func Function lambda to attach to event
+	 * @brief Attach a callable to the event, adding a listener.
+	 * The callable should either be of the form `void(const T&)` or
+	 * `dpp::task<void>(const T&)`,
+	 * where T is the event type for this event router.
+	 *
+	 * This has the exact same behavior as using \ref attach(F&&) "attach".
+	 *
+	 * @see attach
+	 * @param fun Callable to attach to event
 	 * @return event_handle An event handle unique to this event, used to
 	 * detach the listener from the event later if necessary.
 	 */
-	event_handle operator()(std::function<void(const T&)> func) {
-		return this->attach(func);
-	}
+	template <typename F>
+	[[maybe_unused]] event_handle operator()(F&& fun);
 
 	/**
-	 * @brief Attach a lambda to the event, adding a listener.
-	 * The lambda should follow the signature specified when declaring
-	 * the event object and should take exactly one parameter derived
-	 * from event_dispatch_t.
-	 * 
-	 * @param func Function lambda to attach to event
+	 * @brief Attach a callable to the event, adding a listener.
+	 * The callable should either be of the form `void(const T&)` or
+	 * `dpp::task<void>(const T&)`,
+	 * where T is the event type for this event router.
+	 *
+	 * @param fun Callable to attach to event
 	 * @return event_handle An event handle unique to this event, used to
 	 * detach the listener from the event later if necessary.
 	 */
-	event_handle attach(std::function<void(const T&)> func) {
-		std::unique_lock l(lock);
-		event_handle h = next_handle++;
-		dispatch_container.emplace(h, func);
-		return h;		
+	template <typename F>
+	[[maybe_unused]] event_handle attach(F&& fun);
+#else /* not _DOXYGEN_ */
+#  ifndef DPP_NO_CORO
+	/**
+	 * @brief Attach a callable to the event, adding a listener.
+	 * The callable should either be of the form `void(const T&)` or
+	 * `dpp::task<void>(const T&)`, where T is the event type for this event router.
+	 *
+	 * @param fun Callable to attach to event
+	 * @return event_handle An event handle unique to this event, used to
+	 * detach the listener from the event later if necessary.
+	 */
+	template <typename F>
+	requires (utility::callable_returns<F, dpp::task<void>, const T&> || utility::callable_returns<F, void, const T&>)
+	[[maybe_unused]] event_handle operator()(F&& fun) {
+		return this->attach(std::forward<F>(fun));
 	}
 
-#ifdef DPP_CORO
-	event_handle co_attach(std::function<dpp::task(T)> func) {
-		std::unique_lock l(lock);
+	/**
+	 * @brief Attach a callable to the event, adding a listener.
+	 * The callable should either be of the form `void(const T&)` or
+	 * `dpp::task<void>(const T&)`, where T is the event type for this event router.
+	 *
+	 * @param fun Callable to attach to event
+	 * @return event_handle An event handle unique to this event, used to
+	 * detach the listener from the event later if necessary.
+	 */
+	template <typename F>
+	requires (utility::callable_returns<F, void, const T&>)
+	[[maybe_unused]] event_handle attach(F&& fun) {
+		std::unique_lock l(mutex);
 		event_handle h = next_handle++;
-		coroutine_container.emplace(h, func);
-		return h;		
+		dispatch_container.emplace(std::piecewise_construct, std::forward_as_tuple(h), std::forward_as_tuple(std::in_place_type_t<regular_handler_t>{}, std::forward<F>(fun)));
+		return h;
 	}
-#endif
+
+	/**
+	 * @brief Attach a callable to the event, adding a listener.
+	 * The callable should either be of the form `void(const T&)` or
+	 * `dpp::task<void>(const T&)`, where T is the event type for this event router.
+	 *
+	 * @param fun Callable to attach to event
+	 * @return event_handle An event handle unique to this event, used to
+	 * detach the listener from the event later if necessary.
+	 */
+	template <typename F>
+	requires (utility::callable_returns<F, task<void>, const T&>)
+	[[maybe_unused]] event_handle attach(F&& fun) {
+		assert(dpp::utility::is_coro_enabled());
+
+		std::unique_lock l(mutex);
+		event_handle h = next_handle++;
+		dispatch_container.emplace(std::piecewise_construct, std::forward_as_tuple(h), std::forward_as_tuple(std::in_place_type_t<task_handler_t>{}, std::forward<F>(fun)));
+		return h;
+	}
+#  else
+	/**
+	 * @brief Attach a callable to the event, adding a listener.
+	 * The callable should be of the form `void(const T&)`
+	 * where T is the event type for this event router.
+	 *
+	 * @param fun Callable to attach to event
+	 * @return event_handle An event handle unique to this event, used to
+	 * detach the listener from the event later if necessary.
+	 */
+	template <typename F>
+	[[maybe_unused]] std::enable_if_t<utility::callable_returns_v<F, void, const T&>, event_handle> operator()(F&& fun) {
+		return this->attach(std::forward<F>(fun));
+	}
+
+	/**
+	 * @brief Attach a callable to the event, adding a listener.
+	 * The callable should be of the form `void(const T&)`
+	 * where T is the event type for this event router.
+	 *f
+	 * @warning You cannot call this within an event handler.
+	 *
+	 * @param fun Callable to attach to event
+	 * @return event_handle An event handle unique to this event, used to
+	 * detach the listener from the event later if necessary.
+	 */
+	template <typename F>
+	[[maybe_unused]] std::enable_if_t<utility::callable_returns_v<F, void, const T&>, event_handle> attach(F&& fun) {
+		std::unique_lock l(mutex);
+		event_handle h = next_handle++;
+		dispatch_container.emplace(h, std::forward<F>(fun));
+		return h;
+	}
+#  endif /* DPP_NO_CORO */
+#endif /* _DOXYGEN_ */
 	/**
 	 * @brief Detach a listener from the event using a previously obtained ID.
-	 * 
-	 * @param handle An ID obtained from event_router_t::operator()
-	 * @return true The event was successfully detached
-	 * @return false The ID is invalid (possibly already detached, or does not exist)
+	 *
+	 * @warning You cannot call this within an event handler.
+	 *
+	 * @param handle An ID obtained from @ref operator(F&&) "operator()"
+	 * @retval true  The event was successfully detached
+	 * @retval false The ID is invalid (possibly already detached, or does not exist)
 	 */
-	bool detach(const event_handle& handle) {
-		std::unique_lock l(lock);
+	[[maybe_unused]] bool detach(const event_handle& handle) {
+		std::unique_lock l(mutex);
 		return this->dispatch_container.erase(handle);
 	}
 };
 
-};
+#ifndef DPP_NO_CORO
+
+namespace detail::event_router {
+
+template <typename T>
+void awaitable<T>::cancel() {
+	awaiter_state s = awaiter_state::waiting;
+	/**
+		* If state == none (was never awaited), do nothing
+		* If state == waiting, prevent resumption, resume on our end
+		* If state == resuming || cancelling, ignore
+		*/
+	if (state.compare_exchange_strong(s, awaiter_state::cancelling)) {
+		self->detach_coro(handle);
+		resume();
+	}
+}
+
+template <typename T>
+constexpr bool awaitable<T>::await_ready() const noexcept {
+	return false;
+}
+
+template <typename T>
+void awaitable<T>::await_suspend(detail::std_coroutine::coroutine_handle<> caller) {
+	state.store(awaiter_state::waiting);
+	handle = caller.address();
+	self->attach_awaiter(this);
+}
+
+template <typename T>
+const T &awaitable<T>::await_resume() {
+	handle = nullptr;
+	predicate = nullptr;
+	if (state.exchange(awaiter_state::none, std::memory_order_relaxed) == awaiter_state::cancelling) {
+		throw dpp::task_cancelled_exception{"event_router::awaitable was cancelled"};
+	}
+	return *std::exchange(event, nullptr);
+}
+
+}
+#endif
+
+}

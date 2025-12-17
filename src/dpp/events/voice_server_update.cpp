@@ -2,6 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
+ * SPDX-License-Identifier: Apache-2.0
  * Copyright 2021 Craig Edwards and D++ contributors 
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
@@ -25,12 +26,9 @@
 #include <dpp/stringops.h>
 #include <dpp/json.h>
 
-using json = nlohmann::json;
 
-namespace dpp { namespace events {
 
-using namespace dpp;
-
+namespace dpp::events {
 /**
  * @brief Handle event
  * 
@@ -41,7 +39,7 @@ using namespace dpp;
 void voice_server_update::handle(discord_client* client, json &j, const std::string &raw) {
 
 	json &d = j["d"];
-	dpp::voice_server_update_t vsu(client, raw);
+	dpp::voice_server_update_t vsu(client->owner, client->shard_id, raw);
 	vsu.guild_id = snowflake_not_null(&d, "guild_id");
 	vsu.token = string_not_null(&d, "token");
 	vsu.endpoint = string_not_null(&d, "endpoint");
@@ -51,19 +49,22 @@ void voice_server_update::handle(discord_client* client, json &j, const std::str
 		auto v = client->connecting_voice_channels.find(vsu.guild_id);
 		/* Check to see if there is a connection in progress for a voice channel on this guild */
 		if (v != client->connecting_voice_channels.end()) {
-			if (!v->second->is_ready()) {
-				v->second->token = vsu.token;
-				v->second->websocket_hostname = vsu.endpoint;
-				if (!v->second->is_active()) {
-					v->second->connect(vsu.guild_id);
+			voiceconn& connection = *v->second;
+			if (!connection.is_ready()) {
+				connection.token = vsu.token;
+				connection.websocket_hostname = vsu.endpoint;
+				if (!connection.is_active()) {
+					connection.connect();
 				}
 			}
 		}
 	}
 
 	if (!client->creator->on_voice_server_update.empty()) {
-		client->creator->on_voice_server_update.call(vsu);
+		client->creator->queue_work(1, [c = client->creator, vsu]() {
+			c->on_voice_server_update.call(vsu);
+		});
 	}
 }
 
-}};
+};

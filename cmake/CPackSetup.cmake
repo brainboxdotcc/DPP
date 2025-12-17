@@ -17,7 +17,7 @@ if (WIN32)
 		ARCHIVE DESTINATION  ${DPP_INSTALL_LIBRARY_DIR}
 		RUNTIME DESTINATION  ${CMAKE_INSTALL_BINDIR}
 		INCLUDES DESTINATION ${DPP_INSTALL_INCLUDE_DIR})
-	install(DIRECTORY "${CMAKE_SOURCE_DIR}/include/" DESTINATION "${DPP_INSTALL_INCLUDE_DIR}")
+	install(DIRECTORY "${DPP_ROOT_PATH}/include/" DESTINATION "${DPP_INSTALL_INCLUDE_DIR}")
 else()
 	install(TARGETS dpp
 		EXPORT ${DPP_EXPORT_NAME}
@@ -34,7 +34,7 @@ write_basic_package_version_file(${DPP_VERSION_FILE}
 		COMPATIBILITY SameMajorVersion)
 
 ## Include the file which allows `find_package(dpp)` to function.
-install(FILES "${CMAKE_SOURCE_DIR}/cmake/dpp-config.cmake" "${DPP_VERSION_FILE}" DESTINATION "${DPP_CMAKE_DIR}")
+install(FILES "${DPP_ROOT_PATH}/cmake/dpp-config.cmake" "${DPP_VERSION_FILE}" DESTINATION "${DPP_CMAKE_DIR}")
 
 ## Export the targets to allow other projects to easily include this project
 install(EXPORT "${DPP_EXPORT_NAME}" DESTINATION "${DPP_CMAKE_DIR}" NAMESPACE dpp::)
@@ -50,8 +50,8 @@ set(CPACK_FREEBSD_PACKAGE_MAINTAINER "bsd@dpp.dev")
 set(CPACK_FREEBSD_PACKAGE_ORIGIN "misc/libdpp")
 set(CPACK_RPM_PACKAGE_LICENSE "Apache 2.0")
 set(CPACK_PACKAGE_CONTACT "https://discord.gg/dpp") # D++ Development Discord
-set(CPACK_DEBIAN_PACKAGE_DEPENDS "libsodium23 (>= 1.0.17-1), libopus0 (>= 1.3-1)")
-set(CPACK_RPM_PACKAGE_REQUIRES "libsodium >= 1.0.17, opus >= 1.3.1")
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "libopus0 (>= 1.3-1)")
+set(CPACK_RPM_PACKAGE_REQUIRES "opus >= 1.3.1")
 set(CPACK_DEBIAN_PACKAGE_DESCRIPTION "An incredibly lightweight C++ Discord library")
 set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
 set(CPACK_DEBIAN_PACKAGE_SECTION "libs")

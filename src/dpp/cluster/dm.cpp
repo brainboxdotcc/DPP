@@ -23,7 +23,7 @@
 namespace dpp {
 
 void cluster::create_dm_channel(snowflake user_id, command_completion_event_t callback) {
-	rest_request<channel>(this, API_PATH "/users", "@me", "channels", m_post, json({{"recipient_id", std::to_string(user_id)}}).dump(), callback);
+	rest_request<channel>(this, API_PATH "/users", "@me", "channels", m_post, json({{"recipient_id", std::to_string(user_id)}}).dump(-1, ' ', false, json::error_handler_t::replace), callback);
 }
 
 void cluster::current_user_get_dms(command_completion_event_t callback) {
@@ -56,11 +56,11 @@ void cluster::gdm_add(snowflake channel_id, snowflake user_id, const std::string
 	json params;
 	params["access_token"] = access_token;
 	params["nick"] = nick;
-	rest_request<confirmation>(this, API_PATH "/channels", std::to_string(channel_id), "recipients/" + std::to_string(user_id), m_put, params.dump(), callback);
+	rest_request<confirmation>(this, API_PATH "/channels", std::to_string(channel_id), "recipients/" + std::to_string(user_id), m_put, params.dump(-1, ' ', false, json::error_handler_t::replace), callback);
 }
 
 void cluster::gdm_remove(snowflake channel_id, snowflake user_id, command_completion_event_t callback) {
 	rest_request<confirmation>(this, API_PATH "/channels", std::to_string(channel_id), "recipients/" + std::to_string(user_id), m_delete, "", callback);
 }
 
-};
+}

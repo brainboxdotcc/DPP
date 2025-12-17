@@ -2,6 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
+ * SPDX-License-Identifier: Apache-2.0
  * Copyright 2021 Craig Edwards and D++ contributors 
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
@@ -24,11 +25,9 @@
 #include <dpp/stringops.h>
 #include <dpp/json.h>
 
-using json = nlohmann::json;
 
-namespace dpp { namespace events {
+namespace dpp::events {
 
-using namespace dpp;
 
 /**
  * @brief Handle event
@@ -40,13 +39,15 @@ using namespace dpp;
 void message_delete::handle(discord_client* client, json &j, const std::string &raw) {
 	if (!client->creator->on_message_delete.empty()) {
 		json d = j["d"];
-		dpp::message_delete_t msg(client, raw);
-		dpp::message m(client->creator);
-		m.fill_from_json(&d);
-		msg.deleted = &m;
-		client->creator->on_message_delete.call(msg);
+		dpp::message_delete_t msg(client->owner, client->shard_id, raw);
+		msg.id = snowflake_not_null(&d, "id");
+		msg.guild_id = snowflake_not_null(&d, "guild_id");
+		msg.channel_id = snowflake_not_null(&d, "channel_id");
+		client->creator->queue_work(1, [c = client->creator, msg]() {
+			c->on_message_delete.call(msg);
+		});
 	}
 
 }
 
-}};
+};

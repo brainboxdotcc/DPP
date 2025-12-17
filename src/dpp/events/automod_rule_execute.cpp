@@ -2,6 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
+ * SPDX-License-Identifier: Apache-2.0
  * Copyright 2021 Craig Edwards and D++ contributors 
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
@@ -23,11 +24,8 @@
 #include <dpp/stringops.h>
 #include <dpp/json.h>
 
-using json = nlohmann::json;
+namespace dpp::events {
 
-namespace dpp { namespace events {
-
-using namespace dpp;
 
 /**
  * @brief Handle event
@@ -39,7 +37,7 @@ using namespace dpp;
 void automod_rule_execute::handle(discord_client* client, json &j, const std::string &raw) {
 	if (!client->creator->on_automod_rule_execute.empty()) {
 		json& d = j["d"];
-		automod_rule_execute_t are(client, raw);
+		automod_rule_execute_t are(client->owner, client->shard_id, raw);
 		are.guild_id = snowflake_not_null(&d, "guild_id");
 		are.action = dpp::automod_action().fill_from_json(&(d["action"]));
 		are.rule_id = snowflake_not_null(&d, "rule_id");
@@ -51,8 +49,10 @@ void automod_rule_execute::handle(discord_client* client, json &j, const std::st
 		are.content = string_not_null(&d, "content");
 		are.matched_keyword = string_not_null(&d, "matched_keyword");
 		are.matched_content = string_not_null(&d, "matched_content");
-		client->creator->on_automod_rule_execute.call(are);
+		client->creator->queue_work(0, [c = client->creator, are]() {
+			c->on_automod_rule_execute.call(are);
+		});
 	}
 }
 
-}};
+};

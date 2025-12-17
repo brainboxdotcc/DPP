@@ -2,6 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
+ * SPDX-License-Identifier: Apache-2.0
  * Copyright 2021 Craig Edwards and D++ contributors 
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
@@ -20,47 +21,30 @@
  ************************************************************************************/
 #include <dpp/presence.h>
 #include <dpp/discordevents.h>
-#include <dpp/utility.h>
-#include <dpp/emoji.h>
+#include <dpp/discordclient.h>
 #include <dpp/json.h>
-
-using json = nlohmann::json;
 
 namespace dpp {
 
+using json = nlohmann::json;
+
 std::string activity::get_large_asset_url(uint16_t size, const image_type format) const {
-	static const std::map<image_type, std::string> extensions = {
-			{ i_jpg, "jpeg" },
-			{ i_png, "png" },
-			{ i_webp, "webp" },
-	};
-
-	if (extensions.find(format) == extensions.end()) {
-		return std::string();
-	}
-
 	if (!this->assets.large_image.empty() && this->application_id &&
 		this->assets.large_image.find(':') == std::string::npos) { // make sure it's not a prefixed proxy image
-		return utility::cdn_host + "/app-assets/" + std::to_string(this->application_id) + "/" + this->assets.large_image + "." + extensions.find(format)->second + utility::avatar_size(size);
+		return utility::cdn_endpoint_url({ i_jpg, i_png, i_webp },
+			"app-assets/" + std::to_string(this->application_id) + "/" + this->assets.large_image,
+			format, size);
 	} else {
 		return std::string();
 	}
 }
 
 std::string activity::get_small_asset_url(uint16_t size, const image_type format) const {
-	static const std::map<image_type, std::string> extensions = {
-			{ i_jpg, "jpeg" },
-			{ i_png, "png" },
-			{ i_webp, "webp" },
-	};
-
-	if (extensions.find(format) == extensions.end()) {
-		return std::string();
-	}
-
 	if (!this->assets.small_image.empty() && this->application_id &&
 		this->assets.small_image.find(':') == std::string::npos) { // make sure it's not a prefixed proxy image
-		return utility::cdn_host + "/app-assets/" + std::to_string(this->application_id) + "/" + this->assets.small_image + "." + extensions.find(format)->second + utility::avatar_size(size);
+		return utility::cdn_endpoint_url({ i_jpg, i_png, i_webp },
+			"app-assets/" + std::to_string(this->application_id) + "/" + this->assets.small_image,
+			format, size);
 	} else {
 		return std::string();
 	}
@@ -85,34 +69,45 @@ presence::presence() : user_id(0), guild_id(0), flags(0)
 
 presence::presence(presence_status status, activity_type type, const std::string& activity_description) {
 	dpp::activity a;
+
+	/* Even if type is custom, a name is still required.
+	 * We'll just set the name as this activity_description as it won't be used if custom either way. */
 	a.name = activity_description;
+
+	/* If the type is custom, set the state as "activity_description" */
+	if (type == activity_type::at_custom) {
+	    	a.state = activity_description;
+	}
+
 	a.type = type;
 	activities.clear();
 	activities.emplace_back(a);
 	flags &= PF_CLEAR_STATUS;
-	if (status == ps_online)
+	if (status == ps_online) {
 		flags |= p_status_online;
-	else if (status == ps_idle)
+	} else if (status == ps_idle) {
 		flags |= p_status_idle;
-	else if (status == ps_dnd)
+	} else if (status == ps_dnd) {
 		flags |= p_status_dnd;
+	}
 }
 
 presence::presence(presence_status status, const activity &a) {
 	activities.clear();
 	activities.emplace_back(a);
 	flags &= PF_CLEAR_STATUS;
-	if (status == ps_online)
+	if (status == ps_online) {
 		flags |= p_status_online;
-	else if (status == ps_idle)
+	} else if (status == ps_idle) {
 		flags |= p_status_idle;
-	else if (status == ps_dnd)
+	} else if (status == ps_dnd) {
 		flags |= p_status_dnd;
+	}
 }
 
 presence::~presence() = default;
 
-presence& presence::fill_from_json(nlohmann::json* j) {
+presence& presence::fill_from_json_impl(nlohmann::json* j) {
 	guild_id = snowflake_not_null(j, "guild_id");
 	user_id = snowflake_not_null(&((*j)["user"]), "id");
 
@@ -137,44 +132,48 @@ presence& presence::fill_from_json(nlohmann::json* j) {
 
 		if (update_desktop) {
 			flags &= PF_CLEAR_DESKTOP;
-			if (desktop == "online")
+			if (desktop == "online") {
 				flags |= p_desktop_online;
-			else if (desktop == "idle")
+			} else if (desktop == "idle") {
 				flags |= p_desktop_idle;
-			else if (desktop == "dnd")
+			} else if (desktop == "dnd") {
 				flags |= p_desktop_dnd;
+			}
 		}
 
 		if (update_mobile) {
 			flags &= PF_CLEAR_MOBILE;
-			if (mobile == "online")
+			if (mobile == "online") {
 				flags |= p_mobile_online;
-			else if (mobile == "idle")
+			} else if (mobile == "idle") {
 				flags |= p_mobile_idle;
-			else if (mobile == "dnd")
+			} else if (mobile == "dnd") {
 				flags |= p_mobile_dnd;
+			}
 		}
 
 		if (update_web) {
 			flags &= PF_CLEAR_WEB;
-			if (web == "online")
+			if (web == "online") {
 				flags |= p_web_online;
-			else if (web == "idle")
+			} else if (web == "idle") {
 				flags |= p_web_idle;
-			else if (web == "dnd")
+			} else if (web == "dnd") {
 				flags |= p_web_dnd;
+			}
 		}
 	}
 
 	if (j->contains("status")) {
 		flags &= PF_CLEAR_STATUS;
 		std::string main = string_not_null(j, "status");
-		if (main == "online")
+		if (main == "online") {
 			flags |= p_status_online;
-		else if (main == "idle")
+		} else if (main == "idle") {
 			flags |= p_status_idle;
-		else if (main == "dnd")
+		} else if (main == "dnd") {
 			flags |= p_status_dnd;
+		}
 	}
 
 
@@ -208,8 +207,9 @@ presence& presence::fill_from_json(nlohmann::json* j) {
 			if (act.find("emoji") != act.end()) {
 				a.emoji.name = string_not_null(&act["emoji"], "name");
 				a.emoji.id = snowflake_not_null(&act["emoji"], "id");
-				if (bool_not_null(&act["emoji"], "animated"))
+				if (bool_not_null(&act["emoji"], "animated")) {
 					a.emoji.flags |= e_animated;
+				}
 			}
 			if (act.find("party") != act.end()) {
 				a.party.id = snowflake_not_null(&act["party"], "id");
@@ -241,16 +241,17 @@ presence& presence::fill_from_json(nlohmann::json* j) {
 	return *this;
 }
 
-std::string presence::build_json(bool with_id) const {
+json presence::to_json_impl(bool with_id) const {
 	std::map<presence_status, std::string> status_name_mapping = {
 		{ps_online, "online"},
 		{ps_offline, "offline"},
 		{ps_idle, "idle"},
+		{ps_invisible, "invisible"},
 		{ps_dnd, "dnd"}
 	};
 	json j({
 
-		{"op", 3},
+		{"op", ft_presence},
 		{"d",	
 			{
 				{ "status", status_name_mapping[status()] },
@@ -266,7 +267,12 @@ std::string presence::build_json(bool with_id) const {
 				{ "type", i.type }
 			});
 			if (!i.url.empty()) j2["url"] = i.url;
-			if (!i.state.empty()) j2["details"] = i.state; // bot activity is details, not state
+
+			if (i.type == activity_type::at_custom) {
+			    	if (!i.state.empty()) j2["state"] = i.state; /* When type is custom, bot needs to use "state" */
+			} else {
+			    	if (!i.state.empty()) j2["details"] = i.state; /* Otherwise, the bot needs to use "details" */
+			}
 
 			j["d"]["activities"].push_back(j2);
 		}
@@ -276,7 +282,11 @@ std::string presence::build_json(bool with_id) const {
 		});*/
 	}
 
-	return j.dump();
+	return j;
+}
+
+json presence::to_json(bool with_id) const {
+	return to_json_impl(with_id);
 }
 
 presence_status presence::desktop_status() const {
@@ -295,4 +305,4 @@ presence_status presence::status() const {
 	return (presence_status)((flags >> PF_SHIFT_MAIN) & PF_STATUS_MASK);
 }
 
-};
+}

@@ -2,6 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
+ * SPDX-License-Identifier: Apache-2.0
  * Copyright 2021 Craig Edwards and D++ contributors 
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
@@ -24,11 +25,9 @@
 #include <dpp/stringops.h>
 #include <dpp/json.h>
 
-using json = nlohmann::json;
 
-namespace dpp { namespace events {
+namespace dpp::events {
 
-using namespace dpp;
 
 /**
  * @brief Handle event
@@ -40,18 +39,35 @@ using namespace dpp;
 void message_reaction_add::handle(discord_client* client, json &j, const std::string &raw) {
 	if (!client->creator->on_message_reaction_add.empty()) {
 		json &d = j["d"];
-		dpp::message_reaction_add_t mra(client, raw);
-		dpp::snowflake guild_id = snowflake_not_null(&d, "guild_id");
-		mra.reacting_guild = dpp::find_guild(guild_id);
+		dpp::message_reaction_add_t mra(client->owner, client->shard_id, raw);
+		snowflake guild_id = snowflake_not_null(&d, "guild_id");
+		snowflake channel_id = snowflake_not_null(&d, "channel_id");
+		snowflake user_id = snowflake_not_null(&d, "user_id");
+
+		guild* g = find_guild(guild_id);
+		channel* c = find_channel(channel_id);
+
+		mra.reacting_guild = g ? *g : guild{};
+		mra.reacting_guild.id = guild_id;
+
 		mra.reacting_user = dpp::user().fill_from_json(&(d["member"]["user"]));
+		mra.reacting_user.id = user_id;
 		mra.reacting_member = dpp::guild_member().fill_from_json(&(d["member"]), guild_id, mra.reacting_user.id);
-		mra.reacting_channel = dpp::find_channel(snowflake_not_null(&d, "channel_id"));
+
+		mra.channel_id = channel_id;
+		mra.reacting_channel = c ? *c : channel{};
+		mra.reacting_channel.id = channel_id;
+
 		mra.message_id = snowflake_not_null(&d, "message_id");
+		mra.message_author_id = snowflake_not_null(&d, "message_author_id");
 		mra.reacting_emoji = dpp::emoji().fill_from_json(&(d["emoji"]));
-		if (mra.reacting_channel && mra.message_id) {
-			client->creator->on_message_reaction_add.call(mra);
+
+		if (mra.channel_id && mra.message_id) {
+			client->creator->queue_work(1, [c = client->creator, mra]() {
+				c->on_message_reaction_add.call(mra);
+			});
 		}
 	}
 }
 
-}};
+};

@@ -2,6 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
+ * SPDX-License-Identifier: Apache-2.0
  * Copyright 2021 Craig Edwards and D++ contributors 
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
@@ -25,10 +26,10 @@
 #include <dpp/stringops.h>
 #include <dpp/json.h>
 
+
+namespace dpp::events {
+
 using json = nlohmann::json;
-
-namespace dpp { namespace events {
-
 /**
  * @brief Handle event
  * 
@@ -38,37 +39,44 @@ namespace dpp { namespace events {
  */
 void guild_role_delete::handle(discord_client* client, json &j, const std::string &raw) {
 	json &d = j["d"];
-	dpp::guild* g = dpp::find_guild(snowflake_not_null(&d, "guild_id"));
-	if (g) {
-		if (client->creator->cache_policy.role_policy == dpp::cp_none) {
-			dpp::role r;
-			r.fill_from_json(g->id, &d);
-			if (!client->creator->on_guild_role_delete.empty()) {
-				dpp::guild_role_delete_t grd(client, raw);
-				grd.deleting_guild = g;
-				grd.deleted = &r;
-				client->creator->on_guild_role_delete.call(grd);
-			}
-		} else {
-			json& role = d["role"];
-			dpp::snowflake id = snowflake_not_null(&role, "id");
-			dpp::role *r = dpp::find_role(id);
-			if (!client->creator->on_guild_role_delete.empty()) {
-			    dpp::guild_role_delete_t grd(client, raw);
-			    grd.deleting_guild = g;
-			    grd.deleted = r ? r : nullptr;
-			    grd.role_id = id;
-			    client->creator->on_guild_role_delete.call(grd);
-			}
-			if (r) {
+	dpp::snowflake guild_id = snowflake_not_null(&d, "guild_id");
+	dpp::snowflake role_id = snowflake_not_null(&d, "role_id");
+	dpp::guild* g = dpp::find_guild(guild_id);
+	if (client->creator->cache_policy.role_policy == dpp::cp_none) {
+		if (!client->creator->on_guild_role_delete.empty()) {
+			dpp::guild_role_delete_t grd(client->owner, client->shard_id, raw);
+			grd.deleting_guild = g ? *g : guild{};
+			grd.deleting_guild.id = guild_id;
+			grd.deleted = role{};
+			grd.deleted.id = role_id;
+			grd.role_id = role_id;
+			client->creator->queue_work(1, [c = client->creator, grd]() {
+				c->on_guild_role_delete.call(grd);
+			});
+		}
+	} else {
+		dpp::role *r = dpp::find_role(role_id);
+		if (!client->creator->on_guild_role_delete.empty()) {
+			dpp::guild_role_delete_t grd(client->owner, client->shard_id, raw);
+			grd.deleting_guild = g ? *g : guild{};
+			grd.deleting_guild.id = guild_id;
+			grd.deleted = r ? *r : role{};
+			grd.deleted.id = role_id;
+			grd.role_id = role_id;
+			client->creator->queue_work(1, [c = client->creator, grd]() {
+				c->on_guild_role_delete.call(grd);
+			});
+		}
+		if (r) {
+			if (g) {
 				auto i = std::find(g->roles.begin(), g->roles.end(), r->id);
 				if (i != g->roles.end()) {
 					g->roles.erase(i);
 				}
-				dpp::get_role_cache()->remove(r);
 			}
+			dpp::get_role_cache()->remove(r);
 		}
 	}
 }
 
-}};
+};

@@ -2,6 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
+ * SPDX-License-Identifier: Apache-2.0
  * Copyright 2021 Craig Edwards and D++ contributors 
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
@@ -24,12 +25,9 @@
 #include <dpp/stringops.h>
 #include <dpp/json.h>
 
-using json = nlohmann::json;
 
-namespace dpp { namespace events {
 
-using namespace dpp;
-
+namespace dpp::events {
 /**
  * @brief Handle event
  * 
@@ -41,14 +39,25 @@ void channel_pins_update::handle(discord_client* client, json &j, const std::str
 
 	if (!client->creator->on_channel_pins_update.empty()) {
 		json& d = j["d"];
-		dpp::channel_pins_update_t cpu(client, raw);
-		cpu.pin_channel = dpp::find_channel(snowflake_not_null(&d, "channel_id"));
-		cpu.pin_guild = dpp::find_guild(snowflake_not_null(&d, "guild_id"));
+		channel_pins_update_t cpu(client->owner, client->shard_id, raw);
+		snowflake guild_id = snowflake_not_null(&d, "guild_id");
+		snowflake channel_id = snowflake_not_null(&d, "channel_id");
+		guild* g = find_guild(guild_id);
+		channel* c = find_channel(channel_id);
+
+		cpu.pin_channel = c ? *c : channel{};
+		cpu.pin_channel.id = channel_id;
+
+		cpu.pin_guild = g ? *g : guild{};
+		cpu.pin_guild.id = guild_id;
+
 		cpu.timestamp = ts_not_null(&d, "last_pin_timestamp");
 
-		client->creator->on_channel_pins_update.call(cpu);
+		client->creator->queue_work(0, [c = client->creator, cpu]() {
+			c->on_channel_pins_update.call(cpu);
+		});
 	}
 
 }
 
-}};
+};

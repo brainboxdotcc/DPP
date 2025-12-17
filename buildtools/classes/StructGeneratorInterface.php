@@ -38,7 +38,7 @@ interface StructGeneratorInterface
      * @param string $parameterNames Parameter names only
      * @return string header content to append
      */
-    public function generateHeaderDef(string $returnType, string $currentFunction, string $parameters, string $noDefaults, string $parameterNames): string;
+    public function generateHeaderDef(string $returnType, string $currentFunction, string $parameters, string $noDefaults, string $parameterTypes, string $parameterNames): string;
 
     /**
      * Generate cpp definition for a function
@@ -50,7 +50,7 @@ interface StructGeneratorInterface
      * @param string $parameterNames Parameter names only
      * @return string cpp content to append
      */
-    public function generateCppDef(string $returnType, string $currentFunction, string $parameters, string $noDefaults, string $parameterNames): string;
+    public function generateCppDef(string $returnType, string $currentFunction, string $parameters, string $noDefaults, string $parameterTypes, string $parameterNames): string;
     
     /**
      * Return comment lines to add to each header definition

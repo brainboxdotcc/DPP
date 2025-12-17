@@ -2,6 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
+ * SPDX-License-Identifier: Apache-2.0
  * Copyright 2021 Craig Edwards and D++ contributors 
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
@@ -24,11 +25,9 @@
 #include <dpp/stringops.h>
 #include <dpp/json.h>
 
-using json = nlohmann::json;
 
-namespace dpp { namespace events {
+namespace dpp::events {
 
-using namespace dpp;
 
 /**
  * @brief Handle event
@@ -40,10 +39,12 @@ using namespace dpp;
 void invite_delete::handle(discord_client* client, json &j, const std::string &raw) {
 	if (!client->creator->on_invite_delete.empty()) {
 		json& d = j["d"];
-		dpp::invite_delete_t cd(client, raw);
+		dpp::invite_delete_t cd(client->owner, client->shard_id, raw);
 		cd.deleted_invite = dpp::invite().fill_from_json(&d);
-		client->creator->on_invite_delete.call(cd);
+		client->creator->queue_work(1, [c = client->creator, cd]() {
+			c->on_invite_delete.call(cd);
+		});
 	}
 }
 
-}};
+};

@@ -2,6 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
+ * SPDX-License-Identifier: Apache-2.0
  * Copyright 2021 Craig Edwards and D++ contributors 
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
@@ -36,56 +37,122 @@ namespace dpp {
  * @brief Flags for dpp::emoji
  */
 enum emoji_flags : uint8_t {
-	/// Emoji requires colons
+	/**
+	 * @brief Emoji requires colons.
+	 */
 	e_require_colons = 0b00000001,
-	/// Managed (introduced by application)
-	e_managed =        0b00000010,
-	/// Animated
-	e_animated =       0b00000100,
-	/// Available (false if the guild doesn't meet boosting criteria, etc)
-	e_available =      0b00001000,
+
+	/**
+	 * @brief Managed (introduced by application)
+	 */
+	e_managed = 0b00000010,
+
+	/**
+	 * @brief Animated emoji.
+	 */
+	e_animated = 0b00000100,
+
+	/**
+	 * @brief Available (false if the guild doesn't meet boosting criteria, etc)
+	 */
+	e_available = 0b00001000,
 };
 
 /**
  * @brief Represents an emoji for a dpp::guild
  */
-class DPP_EXPORT emoji : public managed, public json_interface<emoji>  {
+class DPP_EXPORT emoji : public managed, public json_interface<emoji> {
+protected:
+	friend struct json_interface<emoji>;
+
+	/**
+	 * @brief Read class values from json object
+	 *
+	 * @param j A json object to read from
+	 * @return A reference to self
+	 */
+	emoji& fill_from_json_impl(nlohmann::json* j);
+
+	/**
+	 * @brief Build the json for this object
+	 *
+	 * @param with_id include the id in the JSON
+	 * @return std::string json data
+	 */
+	json to_json_impl(bool with_id = false) const;
+
 public:
 	/**
-	 * @brief Emoji name
+	 * @brief Emoji name.
 	 */
-	std::string name;
+	std::string name{};
+
 	/**
-	 * @brief User id who uploaded the emoji
+	 * @brief Roles allowed to use this emoji.
+	 */
+	std::vector<snowflake> roles;
+
+	/**
+	 * @brief The id of the user that created this emoji.
 	 */
 	snowflake user_id;
+
 	/**
-	 * @brief Flags for the emoji from dpp::emoji_flags
+	 * @brief Image data for the emoji, if uploading.
 	 */
-	uint8_t flags;
+	utility::image_data image_data;
+
 	/**
-	 * @brief Image data for the emoji if uploading
+	 * @brief Flags for the emoji from dpp::emoji_flags.
 	 */
-	std::string* image_data;
-	
+	uint8_t flags{0};
+
 	/**
 	 * @brief Construct a new emoji object
 	 */
-	emoji();
+	emoji() = default;
 
 	/**
 	 * @brief Construct a new emoji object with name, ID and flags
-	 * 
-	 * @param n The emoji's name
-	 * @param i ID, if it has one (unicode does not)
-	 * @param f Emoji flags (emoji_flags)
+	 *
+	 * @param name The emoji's name
+	 * @param id ID, if it has one (unicode does not)
+	 * @param flags Emoji flags (emoji_flags)
 	 */
-	emoji(const std::string n, const snowflake i = 0, const uint8_t f = 0);
+	emoji(const std::string_view name, const snowflake id = 0, const uint8_t flags = 0);
+
+	/**
+	 * @brief Copy constructor, copies another emoji's data
+	 *
+	 * @param rhs Emoji to copy
+	 */
+	emoji(const emoji &rhs) = default;
+
+	/**
+	 * @brief Move constructor, moves another emoji's data to this
+	 *
+	 * @param rhs Emoji to move from
+	 */
+	emoji(emoji &&rhs) noexcept = default;
 
 	/**
 	 * @brief Destroy the emoji object
 	 */
-	virtual ~emoji();
+	~emoji() override = default;
+
+	/**
+	 * @brief Copy assignment operator, copies another emoji's data
+	 *
+	 * @param rhs Emoji to copy
+	 */
+	emoji &operator=(const emoji &rhs) = default;
+
+	/**
+	 * @brief Move constructor, moves another emoji's data to this
+	 *
+	 * @param rhs Emoji to move from
+	 */
+	emoji &operator=(emoji &&rhs) noexcept = default;
 
 	/**
 	* @brief Create a mentionable emoji
@@ -94,27 +161,11 @@ public:
 	* @param is_animated is emoji animated.
 	* @return std::string The formatted mention of the emoji.
 	*/
-	static std::string get_mention(const std::string& name, const snowflake& id, bool is_animated = false);
-
-	/**
-	 * @brief Read class values from json object
-	 * 
-	 * @param j A json object to read from
-	 * @return A reference to self
-	 */
-	emoji& fill_from_json(nlohmann::json* j);
-
-	/**
-	 * @brief Build the json for this object
-	 * 
-	 * @param with_id include the id in the JSON
-	 * @return std::string json data
-	 */
-	std::string build_json(bool with_id = false) const;
+	static std::string get_mention(std::string_view name, snowflake id, bool is_animated = false);
 
 	/**
 	 * @brief Emoji requires colons
-	 * 
+	 *
 	 * @return true Requires colons
 	 * @return false Does not require colons
 	 */
@@ -122,7 +173,7 @@ public:
 
 	/**
 	 * @brief Emoji is managed
-	 * 
+	 *
 	 * @return true Is managed
 	 * @return false Is not managed
 	 */
@@ -138,25 +189,36 @@ public:
 
 	/**
 	 * @brief Is available
-	 * 
+	 *
 	 * @return true Is available
 	 * @return false Is unavailable
 	 */
 	bool is_available() const;
 
 	/**
-	 * @brief Load an image into the object as base64
-	 * 
+	 * @brief Load an image into the object
+	 *
 	 * @param image_blob Image binary data
 	 * @param type Type of image. It can be one of `i_gif`, `i_jpg` or `i_png`.
 	 * @return emoji& Reference to self
 	 * @throw dpp::length_exception Image content exceeds discord maximum of 256 kilobytes
 	 */
-	emoji& load_image(const std::string &image_blob, const image_type type);
+	emoji& load_image(std::string_view image_blob, const image_type type);
+
+	/**
+	 * @brief Load an image into the object
+	 *
+	 * @param data Image binary data
+	 * @param size Size of the image.
+	 * @param type Type of image. It can be one of `i_gif`, `i_jpg` or `i_png`.
+	 * @return emoji& Reference to self
+	 * @throw dpp::length_exception Image content exceeds discord maximum of 256 kilobytes
+	 */
+	emoji& load_image(const std::byte* data, uint32_t size, const image_type type);
 
 	/**
 	 * @brief Format to name if unicode, name:id if has id or a:name:id if animated
-	 * 
+	 *
 	 * @return Formatted name for reactions
 	 */
 	std::string format() const;
@@ -167,6 +229,19 @@ public:
 	 * @return std::string mention
 	 */
 	std::string get_mention() const;
+
+	/**
+	 * @brief Get the custom emoji url
+	 *
+	 * @param size The size of the emoji in pixels. It can be any power of two between 16 and 4096,
+	 * otherwise the default sized emoji is returned.
+	 * @param format The format to use for the emoji. It can be one of `i_webp`, `i_jpg`, `i_png` or `i_gif`.
+	 * When passing `i_gif`, it returns an empty string for non-animated emojis. Consider using the `prefer_animated` parameter instead.
+	 * @param prefer_animated Whether you prefer gif format.
+	 * If true, it'll return gif format whenever the emoji is available as animated.
+	 * @return std::string emoji url or an empty string, if the id is not set
+	 */
+	std::string get_url(uint16_t size = 0, const image_type format = i_png, bool prefer_animated = true) const;
 };
 
 /**
@@ -174,4 +249,4 @@ public:
  */
 typedef std::unordered_map<snowflake, emoji> emoji_map;
 
-};
+}

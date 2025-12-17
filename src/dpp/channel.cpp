@@ -2,6 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
+ * SPDX-License-Identifier: Apache-2.0
  * Copyright 2021 Craig Edwards and D++ contributors 
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
@@ -21,15 +22,23 @@
 #include <dpp/channel.h>
 #include <dpp/cache.h>
 #include <dpp/guild.h>
-#include <dpp/user.h>
 #include <dpp/role.h>
 #include <dpp/discordevents.h>
 #include <dpp/stringops.h>
 #include <dpp/json.h>
 
-using json = nlohmann::json;
+
 
 namespace dpp {
+
+using json = nlohmann::json;
+
+/* A mapping of discord's flag values to our bitmap (they're different bit positions to fit other stuff in) */
+enum discord_channel_flags {
+	dc_pinned_thread = 1 << 1,
+	dc_require_tag =   1 << 4,
+	dc_hide_media_download_options = 1 << 15,
+};
 
 permission_overwrite::permission_overwrite() : id(0), allow(0), deny(0), type(0) {}
 
@@ -41,11 +50,7 @@ forum_tag::forum_tag(const std::string& name) : forum_tag() {
 	this->set_name(name);
 }
 
-forum_tag::~forum_tag()
-{
-}
-
-forum_tag& forum_tag::fill_from_json(nlohmann::json *j) {
+forum_tag& forum_tag::fill_from_json_impl(nlohmann::json *j) {
 	set_snowflake_not_null(j, "id", this->id);
 	set_string_not_null(j, "name", this->name);
 	set_bool_not_null(j, "moderated", this->moderated);
@@ -59,7 +64,7 @@ forum_tag& forum_tag::fill_from_json(nlohmann::json *j) {
 	return *this;
 }
 
-std::string forum_tag::build_json(bool with_id) const {
+json forum_tag::to_json_impl(bool with_id) const {
 	json j;
 	if (with_id && id) {
 		j["id"] = std::to_string(id);
@@ -71,7 +76,7 @@ std::string forum_tag::build_json(bool with_id) const {
 	} else if (std::holds_alternative<std::string>(emoji)) {
 		j["emoji_name"] = std::get<std::string>(emoji);
 	}
-	return j.dump();
+	return j;
 }
 
 forum_tag &forum_tag::set_name(const std::string &name) {
@@ -79,23 +84,7 @@ forum_tag &forum_tag::set_name(const std::string &name) {
 	return *this;
 }
 
-const uint16_t CHANNEL_TYPE_MASK = 0b0000000000001111;
 const uint16_t DEFAULT_FORUM_LAYOUT_MASK = 0b0000011000000000;
-
-thread_member& thread_member::fill_from_json(nlohmann::json* j) {
-	set_snowflake_not_null(j, "id", this->thread_id);
-	set_snowflake_not_null(j, "user_id", this->user_id);
-	set_ts_not_null(j, "join_timestamp", this->joined);
-	set_int32_not_null(j, "flags", this->flags);
-	return *this;
-}
-
-void to_json(nlohmann::json& j, const thread_metadata& tmdata) {
-	j["archived"] = tmdata.archived;
-	j["auto_archive_duration"] = tmdata.auto_archive_duration;
-	j["locked"] = tmdata.locked;
-	j["invitable"] = tmdata.invitable;
-}
 
 void to_json(nlohmann::json& j, const permission_overwrite& po) {
 	j["id"] = std::to_string(po.id);
@@ -217,9 +206,39 @@ channel& channel::set_user_limit(const uint8_t user_limit) {
 	return *this;
 }
 
-channel& channel::add_permission_overwrite(const snowflake id, const overwrite_type type, const uint64_t allowed_permissions, const uint64_t denied_permissions) {
-	permission_overwrite po {id, allowed_permissions, denied_permissions, type};
+channel& channel::add_permission_overwrite(const snowflake target, const overwrite_type type, const uint64_t allowed_permissions, const uint64_t denied_permissions) {
+	for (auto &o : this->permission_overwrites) {
+		if (o.id == target && o.type == type) {
+			o.allow.remove(denied_permissions);
+			o.allow.add(allowed_permissions);
+			o.deny.remove(allowed_permissions);
+			o.deny.add(denied_permissions);
+			return *this;
+		}
+	}
+	permission_overwrite po {target, allowed_permissions, denied_permissions, type};
 	this->permission_overwrites.push_back(po);
+	return *this;
+}
+
+channel& channel::set_permission_overwrite(const snowflake target, const overwrite_type type, const uint64_t allowed_permissions, const uint64_t denied_permissions) {
+	this->remove_permission_overwrite(target, type);
+	if (allowed_permissions != 0 || denied_permissions != 0) {
+		permission_overwrite po{target, allowed_permissions, denied_permissions, type};
+		this->permission_overwrites.push_back(po);
+	}
+	return *this;
+}
+
+channel& channel::remove_permission_overwrite(const dpp::snowflake target, const dpp::overwrite_type type) {
+	auto it = this->permission_overwrites.begin();
+	while (it != this->permission_overwrites.end()) {
+		if (it->id == target && it->type == type) {
+			it = this->permission_overwrites.erase(it);
+		} else {
+			it++;
+		}
+	}
 	return *this;
 }
 
@@ -255,6 +274,10 @@ bool channel::is_forum() const {
 	return (flags & CHANNEL_TYPE_MASK) == CHANNEL_FORUM;
 }
 
+bool channel::is_media_channel() const {
+	return (flags & CHANNEL_TYPE_MASK) == CHANNEL_MEDIA;
+}
+
 bool channel::is_stage_channel() const {
 	return (flags & CHANNEL_TYPE_MASK) == CHANNEL_STAGE;
 }
@@ -288,55 +311,11 @@ bool channel::is_tag_required() const {
 	return flags & dpp::c_require_tag;
 }
 
-bool thread::is_news_thread() const {
-	return (flags & CHANNEL_TYPE_MASK) == CHANNEL_ANNOUNCEMENT_THREAD;
+bool channel::is_download_options_hidden() const {
+	return flags & dpp::c_hide_media_download_options;
 }
 
-bool thread::is_public_thread() const {
-	return (flags & CHANNEL_TYPE_MASK) == CHANNEL_PUBLIC_THREAD;
-}
-
-bool thread::is_private_thread() const {
-	return (flags & CHANNEL_TYPE_MASK) == CHANNEL_PRIVATE_THREAD;
-}
-
-thread& thread::fill_from_json(json* j) {
-	channel::fill_from_json(j);
-
-	uint8_t type = int8_not_null(j, "type");
-	this->flags |= (type & CHANNEL_TYPE_MASK);
-
-	if (j->contains("applied_tags")) {
-		for (const auto &t : (*j)["applied_tags"]) {
-			this->applied_tags.push_back(t);
-		}
-	}
-
-	set_int32_not_null(j, "total_message_sent", this->total_messages_sent);
-	set_int8_not_null(j, "message_count", this->message_count);
-	set_int8_not_null(j, "member_count", this->member_count);
-	auto json_metadata = (*j)["thread_metadata"];
-	metadata.archived = bool_not_null(&json_metadata, "archived");
-	metadata.archive_timestamp = ts_not_null(&json_metadata, "archive_timestamp");
-	metadata.auto_archive_duration = int16_not_null(&json_metadata, "auto_archive_duration");
-	metadata.locked = bool_not_null(&json_metadata, "locked");
-	metadata.invitable = bool_not_null(&json_metadata, "invitable");
-
-	/* Only certain events set this */
-	if (j->contains("member"))  {
-		member.fill_from_json(&((*j)["member"]));
-	}
-	
-	return *this;
-}
-
-thread::thread() : channel(), total_messages_sent(0), message_count(0), member_count(0) {
-}
-
-thread::~thread() {
-}
-
-channel& channel::fill_from_json(json* j) {
+channel& channel::fill_from_json_impl(json* j) {
 	this->id = snowflake_not_null(j, "id");
 	set_snowflake_not_null(j, "guild_id", this->guild_id);
 	set_int16_not_null(j, "position", this->position);
@@ -369,12 +348,7 @@ channel& channel::fill_from_json(json* j) {
 			break;
 	}
 
-	if (j->contains("available_tags")) {
-		available_tags = {};
-		for (auto & available_tag : (*j)["available_tags"]) {
-			this->available_tags.emplace_back(forum_tag().fill_from_json(&available_tag));
-		}
-	}
+	set_object_array_not_null<forum_tag>(j, "available_tags", available_tags);
 
 	if (j->contains("default_reaction_emoji")) {
 		auto emoji_id = snowflake_not_null(&(*j)["default_reaction_emoji"], "emoji_id");
@@ -395,8 +369,9 @@ channel& channel::fill_from_json(json* j) {
 	this->flags |= ((forum_layout << 9) & DEFAULT_FORUM_LAYOUT_MASK);
 
 	uint8_t dflags = int8_not_null(j, "flags");
-	this->flags |= (dflags & dpp::dc_pinned_thread) ? dpp::c_pinned_thread : 0;
-	this->flags |= (dflags & dpp::dc_require_tag) ? dpp::c_require_tag : 0;
+	this->flags |= (dflags & dc_pinned_thread) ? dpp::c_pinned_thread : 0;
+	this->flags |= (dflags & dc_require_tag) ? dpp::c_require_tag : 0;
+	this->flags |= (dflags & dc_hide_media_download_options) ? dpp::c_hide_media_download_options : 0;
 
 	uint8_t vqm = int8_not_null(j, "video_quality_mode");
 	if (vqm == 2) {
@@ -440,26 +415,11 @@ channel& channel::fill_from_json(json* j) {
 	}
 
 	set_string_not_null(j, "rtc_region", rtc_region);
-	
+
 	return *this;
 }
 
-std::string thread::build_json(bool with_id) const {
-	json j = json::parse(channel::build_json(with_id));
-	j["type"] = (flags & CHANNEL_TYPE_MASK);
-	j["thread_metadata"] = this->metadata;
-	if (!this->applied_tags.empty()) {
-		j["applied_tags"] = json::array();
-		for (auto &tag_id: this->applied_tags) {
-			if (tag_id) {
-				j["applied_tags"].push_back(tag_id);
-			}
-		}
-	}
-	return j.dump();
-}
-
-std::string channel::build_json(bool with_id) const {
+json channel::to_json_impl(bool with_id) const {
 	json j;
 	if (with_id && id) {
 		j["id"] = std::to_string(id);
@@ -491,9 +451,16 @@ std::string channel::build_json(bool with_id) const {
 			j["bitrate"] = bitrate * 1000;
 		}
 	}
+	if (is_forum() || is_media_channel()) {
+		uint32_t _flags = (flags & dpp::c_require_tag) ? dc_require_tag : 0;
+		if (is_media_channel()) {
+			_flags |= (flags & dpp::c_hide_media_download_options) ? dc_hide_media_download_options : 0;
+		}
+		if (_flags) {
+			j["flags"] = _flags;
+		}
+	}
 	if (is_forum()) {
-		j["flags"] = (flags & dpp::c_require_tag) ? dpp::dc_require_tag : 0;
-
 		if (get_default_forum_layout()) {
 			j["default_forum_layout"] = get_default_forum_layout();
 		}
@@ -522,7 +489,7 @@ std::string channel::build_json(bool with_id) const {
 	if (!available_tags.empty()) {
 		j["available_tags"] = json::array();
 		for (const auto &available_tag : this->available_tags) {
-			j["available_tags"].push_back(json::parse(available_tag.build_json()));
+			j["available_tags"].push_back(available_tag.to_json());
 		}
 	}
 	if (std::holds_alternative<snowflake>(this->default_reaction)) {
@@ -536,17 +503,19 @@ std::string channel::build_json(bool with_id) const {
 	if (flags & c_lock_permissions) {
 		j["lock_permissions"] = true;
 	}
-	
-	return j.dump();
+
+	return j;
 }
 
 permission channel::get_user_permissions(const user* user) const {
-	if (user == nullptr)
+	if (user == nullptr) {
 		return 0;
+	}
 
 	guild* g = dpp::find_guild(guild_id);
-	if (g == nullptr)
+	if (g == nullptr) {
 		return 0;
+	}
 
 	return g->permission_overwrites(g->base_permissions(user), user, this);
 }
@@ -554,8 +523,9 @@ permission channel::get_user_permissions(const user* user) const {
 permission channel::get_user_permissions(const guild_member &member) const {
 
 	guild* g = dpp::find_guild(guild_id);
-	if (g == nullptr)
+	if (g == nullptr) {
 		return 0;
+	}
 
 	return g->permission_overwrites(member, *this);
 }
@@ -587,21 +557,17 @@ std::map<snowflake, voicestate> channel::get_voice_members() {
 }
 
 std::string channel::get_icon_url(uint16_t size, const image_type format) const {
-	static const std::map<image_type, std::string> extensions = {
-			{ i_jpg, "jpg" },
-			{ i_png, "png" },
-			{ i_webp, "webp" },
-	};
-
-	if (extensions.find(format) == extensions.end()) {
-		return std::string();
-	}
-
 	if (this->id && !this->icon.to_string().empty()) {
-		return utility::cdn_host + "/channel-icons/" + std::to_string(this->id) + "/" + this->icon.to_string() + "." + extensions.find(format)->second + utility::avatar_size(size);
+		return utility::cdn_endpoint_url({ i_jpg, i_png, i_webp },
+										 "channel-icons/" + std::to_string(this->id) + "/" + this->icon.to_string(),
+										 format, size);
 	} else {
 		return std::string();
 	}
+}
+
+std::string channel::get_url() const{
+	return utility::channel_url(guild_id, id);
 }
 
 channel_type channel::get_type() const {
@@ -613,4 +579,4 @@ forum_layout_type channel::get_default_forum_layout() const {
 }
 
 
-};
+}

@@ -2,6 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
+ * SPDX-License-Identifier: Apache-2.0
  * Copyright 2021 Craig Edwards and D++ contributors 
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
@@ -25,11 +26,9 @@
 #include <dpp/stringops.h>
 #include <dpp/json.h>
 
-using json = nlohmann::json;
 
-namespace dpp { namespace events {
+namespace dpp::events {
 
-using namespace dpp;
 
 
 /**
@@ -42,11 +41,20 @@ using namespace dpp;
 void guild_ban_add::handle(discord_client* client, json &j, const std::string &raw) {
 	if (!client->creator->on_guild_ban_add.empty()) {
 		json &d = j["d"];
-		dpp::guild_ban_add_t gba(client, raw);
-		gba.banning_guild = dpp::find_guild(snowflake_not_null(&d, "guild_id"));
+		dpp::guild_ban_add_t gba(client->owner, client->shard_id, raw);
+		snowflake gid = snowflake_not_null(&d, "guild_id");
+		guild* t = dpp::find_guild(gid);
+		if (t == nullptr) {
+			gba.banning_guild = {};
+			gba.banning_guild.id = gid;
+		} else {
+			gba.banning_guild = *t;
+		}
 		gba.banned = dpp::user().fill_from_json(&(d["user"]));
-		client->creator->on_guild_ban_add.call(gba);
+		client->creator->queue_work(1, [c = client->creator, gba]() {
+			c->on_guild_ban_add.call(gba);
+		});
 	}
 }
 
-}};
+};

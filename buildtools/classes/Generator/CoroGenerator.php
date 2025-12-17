@@ -54,6 +54,7 @@ EOT;
     public function generateCppStart(): string
     {
         return $this->generateHeaderStart() . <<<EOT
+#ifndef DPP_NO_CORO
 
 #include <dpp/export.h>
 #include <dpp/snowflake.h>
@@ -80,27 +81,26 @@ EOT;
         }
 
         echo "-- Autogenerating include/dpp/cluster_coro_calls.h\n";
+        echo "-- Autogenerating src/dpp/cluster_coro_calls.cpp\n";
         return true;
     }
 
     /**
      * @inheritDoc
      */
-    public function generateHeaderDef(string $returnType, string $currentFunction, string $parameters, string $noDefaults, string $parameterNames): string
+    public function generateHeaderDef(string $returnType, string $currentFunction, string $parameters, string $noDefaults, string $parameterTypes, string $parameterNames): string
     {
-        $parameterNames = preg_replace('/^, /', '', $parameterNames);
-        if (!empty($parameterNames)) {
-            $parameterNames .= ', ';
-        }
-        return "auto inline co_{$currentFunction}($noDefaults) {\n\treturn dpp::awaitable(this, [&] (auto cc) { this->$currentFunction({$parameterNames}cc); }); \n}\n\n";
+        return "[[nodiscard]] async<confirmation_callback_t> co_{$currentFunction}($parameters);\n\n";
     }
 
     /**
      * @inheritDoc
      */
-    public function generateCppDef(string $returnType, string $currentFunction, string $parameters, string $noDefaults, string $parameterNames): string
+    public function generateCppDef(string $returnType, string $currentFunction, string $parameters, string $noDefaults, string $parameterTypes, string $parameterNames): string
     {
-        return '';
+        /* if (substr($parameterNames, 0, 2) === ", ")
+            $parameterNames = substr($parameterNames, 2); */
+        return "async<confirmation_callback_t> cluster::co_${currentFunction}($noDefaults) {\n\treturn async{ this, static_cast<void (cluster::*)($parameterTypes". (!empty($parameterTypes) ? ", " : "") . "command_completion_event_t)>(&cluster::$currentFunction)$parameterNames };\n}\n\n";
     }
 
     /**
@@ -116,7 +116,7 @@ EOT;
      */
     public function saveHeader(string $content): void
     {
-		$content .= "auto inline co_request(const std::string &url, http_method method, const std::string &postdata = \"\", const std::string &mimetype = \"text/plain\", const std::multimap<std::string, std::string> &headers = {}) {\n\treturn dpp::awaitable(this, [&] (auto cc) { this->request(url, method, cc, mimetype, headers); }); \n}\n\n";
+        $content .= "[[nodiscard]] async<http_request_completion_t> co_request(const std::string &url, http_method method, const std::string &postdata = \"\", const std::string &mimetype = \"text/plain\", const std::multimap<std::string, std::string> &headers = {}, const std::string &protocol = \"1.1\");\n\n";
         file_put_contents('include/dpp/cluster_coro_calls.h', $content);
     }
 
@@ -125,7 +125,11 @@ EOT;
      */
     public function saveCpp(string $cppcontent): void
     {
-	/* No cpp file to save, code is all inline */
+        $cppcontent .= "dpp::async<dpp::http_request_completion_t> dpp::cluster::co_request(const std::string &url, http_method method, const std::string &postdata, const std::string &mimetype, const std::multimap<std::string, std::string> &headers, const std::string &protocol) {\n\treturn async<http_request_completion_t>{ [&, this] <typename C> (C &&cc) { return this->request(url, method, std::forward<C>(cc), postdata, mimetype, headers, protocol); }};\n}
+
+#endif
+";
+        file_put_contents('src/dpp/cluster_coro_calls.cpp', $cppcontent);
     }
 
 }

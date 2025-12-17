@@ -2,6 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
+ * SPDX-License-Identifier: Apache-2.0
  * Copyright 2021 Craig Edwards and D++ contributors 
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
@@ -24,11 +25,9 @@
 #include <dpp/stringops.h>
 #include <dpp/json.h>
 
-using json = nlohmann::json;
 
-namespace dpp { namespace events {
+namespace dpp::events {
 
-using namespace dpp;
 
 
 /**
@@ -41,10 +40,12 @@ using namespace dpp;
 void integration_create::handle(discord_client* client, json &j, const std::string &raw) {
 	if (!client->creator->on_integration_create.empty()) {
 		json& d = j["d"];
-		dpp::integration_create_t ic(client, raw);
+		dpp::integration_create_t ic(client->owner, client->shard_id, raw);
 		ic.created_integration = dpp::integration().fill_from_json(&d);
-		client->creator->on_integration_create.call(ic);
+		client->creator->queue_work(1, [c = client->creator, ic]() {
+			c->on_integration_create.call(ic);
+		});
 	}
 }
 
-}};
+};

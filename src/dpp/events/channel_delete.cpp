@@ -2,6 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
+ * SPDX-License-Identifier: Apache-2.0
  * Copyright 2021 Craig Edwards and D++ contributors 
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
@@ -24,12 +25,9 @@
 #include <dpp/stringops.h>
 #include <dpp/json.h>
 
-using json = nlohmann::json;
 
+namespace dpp::events {
 
-namespace dpp { namespace events {
-
-using namespace dpp;
 
 /**
  * @brief Handle event
@@ -40,24 +38,24 @@ using namespace dpp;
  */
 void channel_delete::handle(discord_client* client, json &j, const std::string &raw) {
 	json& d = j["d"];
-	dpp::channel* c = dpp::find_channel(snowflake_not_null(&d, "id"));
-	if (c) {
-		dpp::guild* g = dpp::find_guild(c->guild_id);
-		if (g) {
-			auto gc = std::find(g->channels.begin(), g->channels.end(), c->id);
-			if (gc != g->channels.end()) {
-				g->channels.erase(gc);
-			}
-
-			if (!client->creator->on_channel_delete.empty()) {
-				dpp::channel_delete_t cd(client, raw);
-				cd.deleted = c;
-				cd.deleting_guild = g;
-				client->creator->on_channel_delete.call(cd);
-			}
-		}
-		dpp::get_channel_cache()->remove(c);
+	const channel c = channel().fill_from_json(&d);
+	guild* g = find_guild(c.guild_id);
+	if (g) {
+		g->channels.erase(std::remove(g->channels.begin(), g->channels.end(), c.id), g->channels.end());
+	}
+	if (client->creator->cache_policy.channel_policy != cp_none) {
+		/* We must only pass pointers found by find_channel into here, any other ptr is an invalid non-op */
+		get_channel_cache()->remove(find_channel(c.id));
+	}
+	if (!client->creator->on_channel_delete.empty()) {
+		channel_delete_t cd(client->owner, client->shard_id, raw);
+		cd.deleted = c;
+		cd.deleting_guild = g ? *g : guild{};
+		cd.deleting_guild.id = c.guild_id;
+		client->creator->queue_work(1, [c = client->creator, cd]() {
+			c->on_channel_delete.call(cd);
+		});
 	}
 }
 
-}};
+};

@@ -1,0 +1,41 @@
+name: Docs Full Rebuild (dpp.dev)
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  docs:
+    permissions:
+      contents: write # Needs to be able to write to the repo.
+    name: Rebuild all Documentation
+    runs-on: ubuntu-24.04
+
+    concurrency: 
+      group: docs-deployment
+      cancel-in-progress: true
+
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@f4a75cfd619ee5ce8d5b864b0d183aff3c69b55a # v2.13.1
+        with:
+          egress-policy: audit
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@bf6b4fbd49ca58e4608c9c89fba0b8d90bd2a39f # v2
+        with:
+          php-version: '8.3'
+
+      - name: Checkout D++
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          submodules: recursive
+
+      - name: Generate Docs
+        run: cd docpages && php makedocs-gh.php rebuild-old
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}

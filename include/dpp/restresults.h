@@ -38,38 +38,14 @@
 #include <dpp/queues.h>
 #include <dpp/cache.h>
 #include <dpp/intents.h>
-#include <dpp/sync.h>
 #include <algorithm>
 #include <iostream>
 #include <shared_mutex>
 #include <cstring>
-
-using  json = nlohmann::json;
+#include <dpp/entitlement.h>
+#include <dpp/sku.h>
 
 namespace dpp {
-
-#ifdef _WIN32
-	#ifdef _DEBUG
-		extern "C" DPP_EXPORT void you_are_using_a_debug_build_of_dpp_on_a_release_project();
-	#else
-		extern "C" DPP_EXPORT void you_are_using_a_release_build_of_dpp_on_a_debug_project();
-	#endif
-#endif
-
-struct DPP_EXPORT version_checker {
-	version_checker() {
-		#ifdef _WIN32
-			#ifdef _DEBUG
-				you_are_using_a_debug_build_of_dpp_on_a_release_project();
-			#else
-				you_are_using_a_release_build_of_dpp_on_a_debug_project();
-			#endif
-		#endif
-	}
-};
-
-static version_checker dpp_vc;
-
 
 /**
  * @brief A list of shards
@@ -77,25 +53,54 @@ static version_checker dpp_vc;
 typedef std::map<uint32_t, class discord_client*> shard_list;
 
 /**
+ * @brief List of shards awaiting reconnection, by id with earliest possible reconnect time
+ */
+typedef std::map<uint32_t, time_t> reconnect_list;
+
+/**
  * @brief Represents the various information from the 'get gateway bot' api call
  */
-struct DPP_EXPORT gateway {
-	/// Gateway websocket url
+struct DPP_EXPORT gateway : public json_interface<gateway> {
+protected:
+	friend struct json_interface<gateway>;
+
+	/**
+	 * @brief Fill this object from json
+	 * 
+	 * @param j json to fill from
+	 * @return gateway& reference to self
+	 */
+	gateway& fill_from_json_impl(nlohmann::json* j);
+
+public:
+	/**
+	 * @brief Gateway websocket url.
+	 */
 	std::string url;
 
-	/// Number of suggested shards to start
+	/**
+	 * @brief Number of suggested shards to start.
+	 */
 	uint32_t shards;
 
-	/// Total number of sessions that can be started
+	/**
+	 * @brief Total number of sessions that can be started.
+	 */
 	uint32_t session_start_total;
 
-	/// How many sessions are left
+	/**
+	 * @brief How many sessions are left.
+	 */
 	uint32_t session_start_remaining;
 
-	/// How many seconds until the session start quota resets
+	/**
+	 * @brief How many seconds until the session start quota resets.
+	 */
 	uint32_t session_start_reset_after;
 
-	/// How many sessions can be started at the same time
+	/**
+	 * @brief How many sessions can be started at the same time.
+	 */
 	uint32_t session_start_max_concurrency;
 
 	/**
@@ -109,14 +114,6 @@ struct DPP_EXPORT gateway {
 	 * @brief Construct a new gateway object
 	 */
 	gateway();
-
-	/**
-	 * @brief Fill this object from json
-	 * 
-	 * @param j json to fill from
-	 * @return gateway& reference to self
-	 */
-	gateway& fill_from_json(nlohmann::json* j);
 };
 
 /**
@@ -132,11 +129,13 @@ struct DPP_EXPORT confirmation {
  *
  */
 typedef std::variant<
+		active_threads,
 		application_role_connection,
 		application_role_connection_metadata_list,
 		confirmation,
 		message,
 		message_map,
+		message_pin_map,
 		user,
 		user_identified,
 		user_map,
@@ -162,6 +161,7 @@ typedef std::variant<
 		ban_map,
 		voiceregion,
 		voiceregion_map,
+		voicestate,
 		integration,
 		integration_map,
 		webhook,
@@ -190,7 +190,13 @@ typedef std::variant<
 		event_member,
 		event_member_map,
 		automod_rule,
-		automod_rule_map
+		automod_rule_map,
+		onboarding,
+		welcome_screen,
+		entitlement,
+		entitlement_map,
+		sku,
+		sku_map
 	> confirmable_t;
 
 /**
@@ -201,18 +207,26 @@ struct DPP_EXPORT error_detail {
 	 * @brief Object name which is in error
 	 */
 	std::string object;
+
 	/**
 	 * @brief Field name which is in error
 	 */
 	std::string field;
+
 	/**
 	 * @brief Error code
 	 */
 	std::string code;
+
 	/**
 	 * @brief Error reason (full message)
 	 */
 	std::string reason;
+
+	/**
+	 * @brief Object field index
+	 */
+	DPP_DEPRECATED("index is unused and will be removed in a future version") int index = 0;
 };
 
 /**
@@ -223,32 +237,45 @@ struct DPP_EXPORT error_info {
 	 * @brief Error code
 	 */
 	uint32_t code = 0;
+
 	/**
 	 * @brief Error message
 	 *
 	 */
 	std::string message;
+
 	/**
 	 * @brief Field specific error descriptions
 	 */
 	std::vector<error_detail> errors;
+
+	/**
+	 * @brief Human readable error message constructed from the above
+	 */
+	std::string human_readable;
 };
 
 /**
  * @brief The results of a REST call wrapped in a convenient struct
  */
 struct DPP_EXPORT confirmation_callback_t {
-	/** Information about the HTTP call used to make the request */
+	/**
+	 * @brief Information about the HTTP call used to make the request.
+	 */
 	http_request_completion_t http_info;
 
-	/** Value returned, wrapped in variant */
+	/**
+	 * @brief Value returned, wrapped in variant.
+	 */
 	confirmable_t value;
 
-	/** Owner/creator of the callback object */
+	/**
+	 * @brief Owner/creator of the callback object.
+	 */
 	const class cluster* bot;
 
 	/**
-	 * @brief Construct a new confirmation callback t object
+	 * @brief Construct a new confirmation callback t object.
 	 */
 	confirmation_callback_t() = default;
 
@@ -313,4 +340,4 @@ typedef std::function<void(const confirmation_callback_t&)> command_completion_e
  * @brief Automatically JSON encoded HTTP result
  */
 typedef std::function<void(json&, const http_request_completion_t&)> json_encode_t;
-};
+}

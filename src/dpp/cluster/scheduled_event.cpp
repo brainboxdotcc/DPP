@@ -68,4 +68,4 @@ void cluster::guild_event_get(snowflake guild_id, snowflake event_id, command_co
 	rest_request<scheduled_event>(this, API_PATH "/guilds", std::to_string(guild_id), "/scheduled-events/" + std::to_string(event_id) + "?with_user_count=true", m_get, "", callback);
 }
 
-};
+}

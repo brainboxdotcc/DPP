@@ -2,6 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
+ * SPDX-License-Identifier: Apache-2.0
  * Copyright 2021 Craig Edwards and D++ contributors 
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
@@ -25,12 +26,9 @@
 #include <dpp/stringops.h>
 #include <dpp/json.h>
 
-using json = nlohmann::json;
 
-namespace dpp { namespace events {
 
-using namespace dpp;
-
+namespace dpp::events {
 /**
  * @brief Handle event
  * 
@@ -49,20 +47,24 @@ void user_update::handle(discord_client* client, json &j, const std::string &raw
 				u->fill_from_json(&d);
 			}
 			if (!client->creator->on_user_update.empty()) {
-				dpp::user_update_t uu(client, raw);
+				dpp::user_update_t uu(client->owner, client->shard_id, raw);
 				uu.updated = *u;
-				client->creator->on_user_update.call(uu);
+				client->creator->queue_work(1, [c = client->creator, uu]() {
+					c->on_user_update.call(uu);
+				});
 			}
 		} else {
 			if (!client->creator->on_user_update.empty()) {
 				dpp::user u;
 				u.fill_from_json(&d);
-				dpp::user_update_t uu(client, raw);
+				dpp::user_update_t uu(client->owner, client->shard_id, raw);
 				uu.updated = u;
-				client->creator->on_user_update.call(uu);
+				client->creator->queue_work(1, [c = client->creator, uu]() {
+					c->on_user_update.call(uu);
+				});
 			}
 		}
 	}
 }
 
-}};
+};

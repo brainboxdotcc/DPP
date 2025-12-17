@@ -36,10 +36,10 @@ You can find further releases in other architectures and formats or the source c
 * Efficient caching system for guilds, channels, guild members, roles, users
 * Sharding and clustering (Many shards, one process: specify the number of shards, or let the library decide)
 * Highly optimised ETF (Erlang Term Format) support for very fast websocket throughput (*no other C++ Discord library has this!*)
-* [Slash Commands/Interactions support](https://dpp.dev/slashcommands.html)
-* [Voice support](https://dpp.dev/soundboard.html) (sending **and** receiving audio)
+* \ref slashcommands "Slash Commands/Interactions support"
+* \ref soundboard "Voice support" (sending **and** receiving audio)
 * The entire Discord API is available for use in the library
-* Stable [Windows support](https://dpp.dev/buildwindows.html)
+* Stable \ref buildwindows "Windows support"
 * Ready-made compiled packages for Windows, Raspberry Pi (ARM64/ARM7/ARMv6), Debian x86/x64 and RPM based distributions
 * Highly scalable for large amounts of guilds and users
 
@@ -48,8 +48,8 @@ You can find further releases in other architectures and formats or the source c
 ### Linux
 The library runs ideally on **Linux**.
 
-### Mac OS X and FreeBSD
-The library is well-functional and stable on **Mac OS X** and **FreeBSD** too.
+### Mac OS X, FreeBSD, and OpenBSD
+The library is well-functional and stable on **Mac OS X**, **FreeBSD**, and **OpenBSD** too!
 
 ### Raspberry Pi
 For running your bot on a **Raspberry Pi**, we offer a prebuilt .deb package for ARM64, ARM6, and ARM7 so that you do not have to wait for it to compile.
@@ -63,9 +63,10 @@ The library should work fine on other operating systems as well, and if you run 
 ## Getting started
 * [GitHub Repository](https://github.com/brainboxdotcc/DPP)
 * [Discord Server](https://discord.gg/dpp)
-* [Frequently Asked Questions](/md_docpages_01_frequently_asked_questions.html)
-* [Installing D++](/md_docpages_01_installing.html)
-* [Example Programs](/md_docpages_03_example_programs.html)
+* \ref frequently-asked-questions
+* \ref installing
+* \ref example-programs
+* \ref glossary-of-common-discord-terms
 
 ## Architecture
 * \ref clusters-shards-guilds

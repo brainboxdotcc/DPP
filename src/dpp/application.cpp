@@ -2,6 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
+ * SPDX-License-Identifier: Apache-2.0
  * Copyright 2021 Craig Edwards and D++ contributors 
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
@@ -20,13 +21,32 @@
  ************************************************************************************/
 #include <dpp/application.h>
 #include <dpp/discordevents.h>
-#include <dpp/snowflake.h>
-#include <dpp/managed.h>
 #include <dpp/json.h>
 
 namespace dpp {
 
 using json = nlohmann::json;
+
+void from_json(const json &j, application_integration_types& out) {
+	out = static_cast<dpp::application_integration_types>(j.get<int>());
+}
+
+void from_json(const json &j, application_install_params& out) {
+	auto permissions = j.find("permissions");
+	auto scopes = j.find("scopes");
+	if (permissions != j.end() && permissions->is_array()) {
+		out.permissions = permissions->get<uint64_t>();
+	}
+	if (scopes != j.end()) {
+		scopes->get_to(out.scopes);
+	}
+}
+
+void from_json(const json &j, integration_configuration& out) {
+	if (auto it = j.find("oauth2_install_params"); it != j.end()) {
+		it->get_to(out.oauth2_install_params);
+	}
+}
 
 application::application() : managed(0), bot_public(false), bot_require_code_grant(false), guild_id(0), primary_sku_id(0), flags(0)
 {
@@ -34,43 +54,28 @@ application::application() : managed(0), bot_public(false), bot_require_code_gra
 
 application::~application() = default;
 
-application& application::fill_from_json(nlohmann::json* j) {
+application& application::fill_from_json_impl(nlohmann::json* j) {
 	set_snowflake_not_null(j, "id", id);
 	set_string_not_null(j, "name", name);
-	std::string ic = string_not_null(j, "icon");
-	if (!ic.empty()) {
-		icon = ic;
-	}
+	set_iconhash_not_null(j, "icon", icon);
 	set_string_not_null(j, "description", description);
-	set_string_not_null(j, "rpc_origins", rpc_origins);
+
+	if (j->contains("rpc_origins")) {
+		for (const auto& rpc : (*j)["rpc_origins"]) {
+			this->rpc_origins.push_back(to_string(rpc));
+		}
+	}
+
 	set_bool_not_null(j, "bot_public", bot_public);
 	set_bool_not_null(j, "bot_require_code_grant", bot_require_code_grant);
+	bot = user().fill_from_json(&((*j)["bot"]));
 	set_string_not_null(j, "terms_of_service_url", terms_of_service_url);
 	set_string_not_null(j, "privacy_policy_url", privacy_policy_url);
 	owner = user().fill_from_json(&((*j)["owner"]));
+	// TODO: Remove the setting of 'summary' when v11 is released.
 	set_string_not_null(j, "summary", summary);
 	set_string_not_null(j, "verify_key", verify_key);
-	set_snowflake_not_null(j, "guild_id", guild_id);
-	set_snowflake_not_null(j, "primary_sku_id", primary_sku_id);
-	set_string_not_null(j, "slug", slug);
-	std::string ci = string_not_null(j, "cover_image");
-	if (!ci.empty()) {
-		cover_image = ci;
-	}
-	set_int32_not_null(j, "flags", flags);
-	if (j->contains("tags")) {
-		for (const auto& tag : (*j)["tags"]) {
-			this->tags.push_back(to_string(tag));
-		}
-	}
-	if (j->contains("install_params")) {
-		json& p = (*j)["install_params"];
-		set_snowflake_not_null(&p, "permissions", this->install_params.permissions);
-		for (const auto& scope : p["scopes"]) {
-			this->install_params.scopes.push_back(to_string(scope));
-		}
-	}
-	set_string_not_null(j, "custom_install_url", custom_install_url);
+
 	if (j->contains("team")) {
 		json& t = (*j)["team"];
 		std::string i = string_not_null(&t, "icon");
@@ -83,51 +88,122 @@ application& application::fill_from_json(nlohmann::json* j) {
 		for (auto m : t["members"]) {
 			team_member tm;
 			tm.membership_state = (team_member_status)int32_not_null(&m, "membership_state");
+			std::string member_role = string_not_null(&m, "role");
+			if (member_role == "owner") {
+				tm.member_role = tmr_owner;
+			} else if (member_role == "admin") {
+				tm.member_role = tmr_admin;
+			} else if (member_role == "developer") {
+				tm.member_role = tmr_developer;
+			} else {
+				tm.member_role = tmr_readonly;
+			}
 			set_string_not_null(&m, "permissions", tm.permissions);
 			set_snowflake_not_null(&m, "team_id", tm.team_id);
 			tm.member_user = user().fill_from_json(&m["user"]);
 			this->team.members.emplace_back(tm);
 		}
 	}
+
+	set_snowflake_not_null(j, "guild_id", guild_id);
+	guild_obj = guild().fill_from_json(&((*j)["guild"]));
+	set_snowflake_not_null(j, "primary_sku_id", primary_sku_id);
+	set_string_not_null(j, "slug", slug);
+	set_iconhash_not_null(j, "cover_image", cover_image);
+	set_int32_not_null(j, "flags", flags);
+	set_int64_not_null(j, "approximate_guild_count", approximate_guild_count);
+	set_int64_not_null(j, "approximate_user_install_count", approximate_user_install_count);
+
+	if (j->contains("redirect_uris")) {
+		for (const auto& uri : (*j)["redirect_uris"]) {
+			this->redirect_uris.push_back(uri.get<std::string>());
+		}
+	}
+
+	set_string_not_null(j, "interactions_endpoint_url", interactions_endpoint_url);
 	set_string_not_null(j, "role_connections_verification_url", role_connections_verification_url);
+
+	set_string_not_null(j, "event_webhooks_url", event_webhooks_url);
+	if (j->contains("event_webhooks_types")) {
+		for (const auto& event_webhook_type : (*j)["event_webhooks_types"]) {
+			this->event_webhooks_types.push_back(event_webhook_type.get<std::string>());
+		}
+	}
+	this->event_webhooks_status = static_cast<application_event_webhook_status>(int8_not_null(j, "event_webhooks_status"));
+
+	if (j->contains("tags")) {
+		for (const auto& tag : (*j)["tags"]) {
+			this->tags.push_back(tag.get<std::string>());
+		}
+	}
+
+	if (j->contains("install_params")) {
+		json& p = (*j)["install_params"];
+		set_snowflake_not_null(&p, "permissions", this->install_params.permissions);
+		for (const auto& scope : p["scopes"]) {
+			this->install_params.scopes.push_back(scope.get<std::string>());
+		}
+	}
+
+	auto types_config = j->find("integration_types_config");
+	if (types_config != j->end()) {
+		auto guild_config = types_config->find(std::to_string(static_cast<uint8_t>(ait_guild_install)));
+		auto user_config = types_config->find(std::to_string(static_cast<uint8_t>(ait_user_install)));
+		if (guild_config != types_config->end() && guild_config->contains("oauth2_install_params")) {
+			integration_types_config[ait_guild_install] = *guild_config;
+		}
+		if (user_config != types_config->end() && user_config->contains("oauth2_install_params")) {
+			integration_types_config[ait_user_install] = *user_config;
+		}
+	}
+
+	set_string_not_null(j, "custom_install_url", custom_install_url);
+
+	// TODO: Investigate https://discord.com/developers/docs/resources/application#application-resource when v11 releases. See if the variables below are documented.
+
+	set_int8_not_null(j, "discoverability_state", discoverability_state);
+	set_int32_not_null(j, "discovery_eligibility_flags", discovery_eligibility_flags);
+	set_int8_not_null(j, "explicit_content_filter", explicit_content_filter);
+	set_int8_not_null(j, "creator_monetization_state", creator_monetization_state);
+	set_bool_not_null(j, "integration_public", integration_public);
+	set_bool_not_null(j, "integration_require_code_grant", integration_require_code_grant);
+
+	if (j->contains("interactions_event_types")) {
+		for (const auto& event_type : (*j)["interactions_event_types"]) {
+			this->interactions_event_types.push_back(event_type.get<std::string>());
+		}
+	}
+
+	set_int8_not_null(j, "interactions_version", interactions_version);
+	set_bool_not_null(j, "is_monetized", is_monetized);
+	set_int32_not_null(j, "monetization_eligibility_flags", monetization_eligibility_flags);
+	set_int8_not_null(j, "monetization_state", monetization_state);
+	set_bool_not_null(j, "hook", hook);
+	set_int8_not_null(j, "rpc_application_state", rpc_application_state);
+	set_int8_not_null(j, "store_application_state", store_application_state);
+	set_int8_not_null(j, "verification_state", verification_state);
+
 	return *this;
 }
 
 std::string application::get_cover_image_url(uint16_t size, const image_type format) const {
-	static const std::map<image_type, std::string> extensions = {
-			{ i_jpg, "jpg" },
-			{ i_png, "png" },
-			{ i_webp, "webp" },
-	};
-
-	if (extensions.find(format) == extensions.end()) {
-		return std::string();
-	}
-
 	if (!this->cover_image.to_string().empty() && this->id) {
-		return utility::cdn_host + "/app-icons/" + std::to_string(this->id) + "/" + this->cover_image.to_string() + "." + extensions.find(format)->second + utility::avatar_size(size);
-	} else {
-		return std::string();
+		return utility::cdn_endpoint_url({ i_jpg, i_png, i_webp },
+	 		"app-icons/" + std::to_string(this->id) + "/" + this->cover_image.to_string(),
+			format, size);
 	}
+
+	return "";
 }
 
 std::string application::get_icon_url(uint16_t size, const image_type format) const {
-	static const std::map<image_type, std::string> extensions = {
-			{ i_jpg, "jpg" },
-			{ i_png, "png" },
-			{ i_webp, "webp" },
-	};
-
-	if (extensions.find(format) == extensions.end()) {
-		return std::string();
-	}
-
 	if (!this->icon.to_string().empty() && this->id) {
-		return utility::cdn_host + "/app-icons/" + std::to_string(this->id) + "/" + this->icon.to_string() + "." + extensions.find(format)->second + utility::avatar_size(size);
-	} else {
-		return std::string();
+		return utility::cdn_endpoint_url({ i_jpg, i_png, i_webp },
+	 		"app-icons/" + std::to_string(this->id) + "/" + this->icon.to_string(),
+		 	format, size);
 	}
+
+	return "";
 }
 
-};
-
+}

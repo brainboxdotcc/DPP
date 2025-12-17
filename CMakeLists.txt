@@ -17,21 +17,33 @@
 #
 
 cmake_minimum_required (VERSION 3.16)
-
+set(CMAKE_CXX_STANDARD 17)
+ 
 option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 option(BUILD_VOICE_SUPPORT "Build voice support" ON)
 option(RUN_LDCONFIG "Run ldconfig after installation" ON)
 option(DPP_INSTALL "Generate the install target" ON)
 option(DPP_BUILD_TEST "Build the test program" ON)
 option(DPP_NO_VCPKG "No VCPKG" OFF)
-option(DPP_CORO "Experimental support for C++20 coroutines" OFF)
+option(DPP_NO_CONAN "No Conan" OFF)
+option(CONAN_EXPORTED "Exported via Conan - DO NOT SET MANUALLY" OFF)
+option(DPP_NO_CORO "Remove Support for C++20 coroutines" OFF)
+option(DPP_FORMATTERS "Support for C++20 formatters" OFF)
 option(DPP_USE_EXTERNAL_JSON "Use an external installation of nlohmann::json" OFF)
+option(DPP_USE_PCH "Use precompiled headers to speed up compilation" OFF)
+option(AVX_TYPE "Force AVX type for speeding up audio mixing" OFF)
+option(DPP_TEST_VCPKG "Force VCPKG build without VCPKG installed (for development use only!)" OFF)
 
 include(CheckCXXSymbolExists)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 add_compile_definitions(DPP_BUILD)
+add_compile_definitions(NOMINMAX)
 
-file(READ "${CMAKE_CURRENT_SOURCE_DIR}/include/dpp/version.h" version_h)
+include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/colour.cmake")
+
+set(DPP_ROOT_PATH ${CMAKE_CURRENT_SOURCE_DIR})
+
+file(READ "${DPP_ROOT_PATH}/include/dpp/version.h" version_h)
 
 if(NOT version_h MATCHES "DPP_VERSION_SHORT ([0-9][0-9])([0-9][0-9])([0-9][0-9])")
 	message(FATAL_ERROR "Cannot get DPP_VERSION_SHORT from version.h")
@@ -43,40 +55,92 @@ math(EXPR DPP_VERSION_PATCH "${CMAKE_MATCH_3}")
 
 string(CONCAT DPP_VERSION "${DPP_VERSION_MAJOR}.${DPP_VERSION_MINOR}.${DPP_VERSION_PATCH}")
 
-set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_SOURCE_DIR}/cmake/")
+set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${DPP_ROOT_PATH}/cmake/")
 
-if (DPP_NO_VCPKG)
-	message("-- INFO: Explicitly disabling VCPKG as running inside the CI action.")
+if (DPP_TEST_VCPKG)
+	message("-- ${Red}DEVELOPER WARNING${ColourReset}: Running in ${Red}VCPKG test mode${ColourReset}: EMULATING A VCPKG BUILD WITHOUT VCPKG")
 else()
-	message("-- INFO: Using VCPKG if detected")
+	if (DPP_NO_VCPKG)
+		message("${ColourReset}-- INFO: Explicitly disabling VCPKG as running inside the CI action.")
+	else()
+		message("${ColourReset}-- INFO: Using VCPKG if detected")
+	endif()
+endif()
+
+if (DPP_NO_CONAN)
+	message("-- INFO: Explicitly disabling Conan as running inside the CI action.")
 endif()
 
 if (WIN32 AND NOT MINGW AND BUILD_SHARED_LIBS)
 	message("-- INFO: Configuring .rc resource script")
-	configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/dpp/dpp.rc.in" "${CMAKE_CURRENT_SOURCE_DIR}/src/dpp/dpp.rc" NEWLINE_STYLE WIN32)
+	configure_file("${DPP_ROOT_PATH}/src/dpp/dpp.rc.in" "${DPP_ROOT_PATH}/src/dpp/dpp.rc" NEWLINE_STYLE WIN32)
 endif()
 
-if (NOT DPP_NO_VCPKG AND EXISTS "${_VCPKG_ROOT_DIR}")
+if (DPP_TEST_VCPKG)
 	set(PROJECT_NAME "dpp")
 	project(
-		"${PROJECT_NAME}"
-		VERSION "${DPP_VERSION}"
-		LANGUAGES CXX
-		HOMEPAGE_URL "https://dpp.dev/"
-		DESCRIPTION "An incredibly lightweight C++ Discord library."
+			"${PROJECT_NAME}"
+			VERSION "${DPP_VERSION}"
+			LANGUAGES CXX
+			HOMEPAGE_URL "https://dpp.dev/"
+			DESCRIPTION "An incredibly lightweight C++ Discord library."
 	)
-	add_subdirectory(library-vcpkg)	
+
+	if (MSVC AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+		set(DPP_CLANG_CL true)
+	endif()
+
+	# Required before we add any subdirectories.
+	if (DPP_BUILD_TEST)
+		enable_testing(${CMAKE_CURRENT_SOURCE_DIR})
+	endif()
+
+	add_subdirectory(library-vcpkg)
 else()
-	set(PROJECT_NAME "libdpp")
-	project(
-		"${PROJECT_NAME}"
-		VERSION "${DPP_VERSION}"
-		LANGUAGES CXX
-		HOMEPAGE_URL "https://dpp.dev/"
-		DESCRIPTION "An incredibly lightweight C++ Discord library."
-	)
-	add_subdirectory(library)
+	if (NOT DPP_NO_VCPKG AND EXISTS "${_VCPKG_ROOT_DIR}")
+		set(PROJECT_NAME "dpp")
+		project(
+			"${PROJECT_NAME}"
+			VERSION "${DPP_VERSION}"
+			LANGUAGES CXX
+			HOMEPAGE_URL "https://dpp.dev/"
+			DESCRIPTION "An incredibly lightweight C++ Discord library."
+		)
+
+		if (MSVC AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+			set(DPP_CLANG_CL true)
+		endif()
+
+		# Required before we add any subdirectories.
+		if (DPP_BUILD_TEST)
+			enable_testing(${CMAKE_CURRENT_SOURCE_DIR})
+		endif()
+
+		add_subdirectory(library-vcpkg)
+	else()
+		set(PROJECT_NAME "libdpp")
+		project(
+			"${PROJECT_NAME}"
+			VERSION "${DPP_VERSION}"
+			LANGUAGES CXX
+			HOMEPAGE_URL "https://dpp.dev/"
+			DESCRIPTION "An incredibly lightweight C++ Discord library."
+		)
+
+		if (MSVC AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+			set(DPP_CLANG_CL true)
+		endif()
+
+		# Required before we add any subdirectories.
+		if (DPP_BUILD_TEST)
+			enable_testing(${CMAKE_CURRENT_SOURCE_DIR})
+		endif()
+
+		add_subdirectory(library)
+	endif()
 endif()
+
+find_package(Filesystem)
 
 if(DPP_USE_EXTERNAL_JSON)
 	# We do nothing here, we just assume it is on the include path.
@@ -90,4 +154,8 @@ else()
 	# fussy, this is an older version because trying to use v3.11.2 gave a bunch of parse errors
 	# that made no sense, it seems they may have changed their parsing rules somehow.
 	message("-- Using bundled nlohmann::json")
+endif()
+
+if (NOT WIN32)
+	target_link_libraries(dpp PRIVATE std::filesystem)
 endif()

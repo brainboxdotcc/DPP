@@ -2,6 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
+ * SPDX-License-Identifier: Apache-2.0
  * Copyright 2021 Craig Edwards and D++ contributors 
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
@@ -25,11 +26,9 @@
 #include <dpp/stringops.h>
 #include <dpp/json.h>
 
-using json = nlohmann::json;
 
-namespace dpp { namespace events {
+namespace dpp::events {
 
-using namespace dpp;
 
 /**
  * @brief Handle event
@@ -40,35 +39,42 @@ using namespace dpp;
  */
 void guild_role_create::handle(discord_client* client, json &j, const std::string &raw) {
 	json &d = j["d"];
-	dpp::guild* g = dpp::find_guild(snowflake_not_null(&d, "guild_id"));
-	if (g) {
-		if (client->creator->cache_policy.role_policy == dpp::cp_none) {
-			json &role = d["role"];
-			dpp::role r;
-			r.fill_from_json(g->id, &role);
-			if (!client->creator->on_guild_role_create.empty()) {
-				dpp::guild_role_create_t grc(client, raw);
-				grc.creating_guild = g;
-				grc.created = &r;
-				client->creator->on_guild_role_create.call(grc);
-			}
-		} else {
-			json &role = d["role"];
-			dpp::role *r = dpp::find_role(snowflake_not_null(&role, "id"));
-			if (!r) {
-				r = new dpp::role();
-			}
-			r->fill_from_json(g->id, &role);
-			dpp::get_role_cache()->store(r);
+	dpp::snowflake guild_id = snowflake_not_null(&d, "guild_id");
+	dpp::guild* g = dpp::find_guild(guild_id);
+	if (client->creator->cache_policy.role_policy == dpp::cp_none) {
+		json &role = d["role"];
+		dpp::role r;
+		r.fill_from_json(guild_id, &role);
+		if (!client->creator->on_guild_role_create.empty()) {
+			dpp::guild_role_create_t grc(client->owner, client->shard_id, raw);
+			grc.creating_guild = g ? *g : guild{};
+			grc.creating_guild.id = guild_id;
+			grc.created = r;
+			client->creator->queue_work(1, [c = client->creator, grc]() {
+				c->on_guild_role_create.call(grc);
+			});
+		}
+	} else {
+		json &role = d["role"];
+		dpp::role *r = dpp::find_role(snowflake_not_null(&role, "id"));
+		if (!r) {
+			r = new dpp::role();
+		}
+		r->fill_from_json(guild_id, &role);
+		dpp::get_role_cache()->store(r);
+		if (g) {
 			g->roles.push_back(r->id);
-			if (!client->creator->on_guild_role_create.empty()) {
-				dpp::guild_role_create_t grc(client, raw);
-				grc.creating_guild = g;
-				grc.created = r;
-				client->creator->on_guild_role_create.call(grc);
-			}
+		}
+		if (!client->creator->on_guild_role_create.empty()) {
+			dpp::guild_role_create_t grc(client->owner, client->shard_id, raw);
+			grc.creating_guild = g ? *g : guild{};
+			grc.creating_guild.id = guild_id;
+			grc.created = *r;
+			client->creator->queue_work(1, [c = client->creator, grc]() {
+				c->on_guild_role_create.call(grc);
+			});
 		}
 	}
 }
 
-}};
+};

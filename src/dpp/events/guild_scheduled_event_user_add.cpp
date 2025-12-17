@@ -2,6 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
+ * SPDX-License-Identifier: Apache-2.0
  * Copyright 2021 Craig Edwards and D++ contributors 
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
@@ -23,11 +24,9 @@
 #include <dpp/stringops.h>
 #include <dpp/json.h>
 
-using json = nlohmann::json;
 
-namespace dpp { namespace events {
+namespace dpp::events {
 
-using namespace dpp;
 
 
 /**
@@ -40,12 +39,14 @@ using namespace dpp;
 void guild_scheduled_event_user_add::handle(discord_client* client, json &j, const std::string &raw) {
 	json& d = j["d"];
 	if (!client->creator->on_guild_scheduled_event_user_add.empty()) {
-		dpp::guild_scheduled_event_user_add_t eua(client, raw);
+		dpp::guild_scheduled_event_user_add_t eua(client->owner, client->shard_id, raw);
 		eua.guild_id = snowflake_not_null(&d, "guild_id");
 		eua.user_id = snowflake_not_null(&d, "user_id");
 		eua.event_id = snowflake_not_null(&d, "guild_scheduled_event_id");
-		client->creator->on_guild_scheduled_event_user_add.call(eua);
+		client->creator->queue_work(1, [c = client->creator, eua]() {
+			c->on_guild_scheduled_event_user_add.call(eua);
+		});
 	}
 }
 
-}};
+};

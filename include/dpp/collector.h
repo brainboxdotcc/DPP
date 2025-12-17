@@ -1,22 +1,23 @@
-/*
- * Discord erlpack - tidied up for D++, Craig Edwards 2021.
- * 
- * MessagePack system dependencies modified for erlpack.
- * 
- * Copyright (C) 2008-2010 FURUHASHI Sadayuki
+/************************************************************************************
  *
- *    Licensed under the Apache License, Version 2.0 (the "License");
- *    you may not use this file except in compliance with the License.
- *    You may obtain a copy of the License at
+ * D++, A Lightweight C++ library for Discord
  *
- *        http://www.apache.org/licenses/LICENSE-2.0
+ * Copyright 2021 Craig Edwards and D++ contributors
+ * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
- *    Unless required by applicable law or agreed to in writing, software
- *    distributed under the License is distributed on an "AS IS" BASIS,
- *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *    See the License for the specific language governing permissions and
- *    limitations under the License.
- */
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ ************************************************************************************/
 #pragma once
 
 #include <dpp/export.h>
@@ -54,14 +55,24 @@ namespace dpp {
 template<class T, class C> class collector
 {
 protected:
-	/// Owning cluster
+	/**
+	 * @brief Owning cluster.
+	 */
 	class cluster* owner;
 private:
-	/// Timed listener
+	/**
+	 * @brief Timed listener.
+	 */
 	timed_listener<event_router_t<T>, std::function<void(const T&)>>* tl;
-	/// stored list
+
+	/**
+	 * @brief Stored list.
+	 */
 	std::vector<C> stored;
-	/// Trigger flag
+
+	/**
+	 * @brief Trigger flag.
+	 */
 	bool triggered;
 public:
 	/**
@@ -80,7 +91,7 @@ public:
 				stored.push_back(*v);
 			}
 		};
-		tl = new dpp::timed_listener<event_router_t<T>, std::function<void(const T&)>>(cl, duration, event, f, [this](dpp::timer timer_handle) {
+		tl = new dpp::timed_listener<event_router_t<T>, std::function<void(const T&)>>(cl, duration, event, f, [this]([[maybe_unused]] dpp::timer timer_handle) {
 			if (!triggered) {
 				triggered = true;
 				completed(stored);
@@ -152,16 +163,35 @@ public:
  */
 class collected_reaction : public managed {
 public:
-	/// Reacting user
-	user react_user;
-	/// Reacting guild
-	guild* react_guild{};
-	/// Reacting guild member
-	guild_member react_member;
-	/// Reacting channel
-	channel* react_channel{};
-	/// Reacted emoji
-	emoji react_emoji;
+	/**
+	 * @brief Reacting user.
+	 */
+	user react_user{};
+
+	/**
+	 * @brief Reacting guild.
+	 */
+	guild react_guild{};
+
+	/**
+	 * @brief Reacting guild member.
+	 */
+	guild_member react_member{};
+
+	/**
+	 * @brief Reacting channel.
+	 */
+	channel react_channel{};
+
+	/**
+	 * @brief Reacted emoji.
+	 */
+	emoji react_emoji{};
+
+	/**
+	 * @brief Optional: ID of the user who authored the message which was reacted to.
+	 */
+	snowflake message_author_id{};
 };
 
 /**
@@ -236,7 +266,14 @@ public:
  * Collects message reactions during a set timeframe and returns them in a list via the completed() method.
  */
 class reaction_collector : public reaction_collector_t {
+	/**
+	 * @brief The ID of the message.
+	 */
 	snowflake message_id;
+
+	/**
+	 * @brief The reaction.
+	 */
 	collected_reaction react;
 public:
 	/**
@@ -272,6 +309,7 @@ public:
 			react.react_member = element.reacting_member;
 			react.react_channel = element.reacting_channel;
 			react.react_emoji = element.reacting_emoji;
+			react.message_author_id = element.message_author_id;
 			return &react;
 		} else {
 			return nullptr;
@@ -313,7 +351,7 @@ public:
 	 * @param element element to filter
 	 * @return Returned item to add to the list, or nullptr to skip adding this element
 	 */
-	virtual const dpp::channel* filter(const dpp::channel_create_t& element) { return element.created; }
+	virtual const dpp::channel* filter(const dpp::channel_create_t& element) { return &element.created; }
 
 	/**
 	 * @brief Destroy the channel collector object
@@ -387,7 +425,7 @@ public:
 	 * @param element element to filter
 	 * @return Returned item to add to the list, or nullptr to skip adding this element
 	 */
-	virtual const dpp::role* filter(const dpp::guild_role_create_t& element) { return element.created; }
+	virtual const dpp::role* filter(const dpp::guild_role_create_t& element) { return &element.created; }
 
 	/**
 	 * @brief Destroy the role collector object
@@ -432,4 +470,4 @@ public:
 	virtual ~scheduled_event_collector() = default;
 };
 
-};
+}

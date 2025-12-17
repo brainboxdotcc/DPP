@@ -2,6 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
+ * SPDX-License-Identifier: Apache-2.0
  * Copyright 2021 Craig Edwards and D++ contributors 
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
@@ -24,11 +25,9 @@
 #include <dpp/stringops.h>
 #include <dpp/json.h>
 
-using json = nlohmann::json;
 
-namespace dpp { namespace events {
+namespace dpp::events {
 
-using namespace dpp;
 
 
 /**
@@ -40,19 +39,21 @@ using namespace dpp;
  */
 void guild_stickers_update::handle(discord_client* client, json &j, const std::string &raw) {
 	json& d = j["d"];
-	dpp::guild* g = dpp::find_guild(snowflake_not_null(&d, "guild_id"));
-	if (g) {
-		if (!client->creator->on_guild_stickers_update.empty()) {
-			dpp::guild_stickers_update_t gsu(client, raw);
-			for (auto & sticker : d["stickers"]) {
-				dpp::sticker s;
-				s.fill_from_json(&sticker);
-				gsu.stickers.emplace_back(s);
-			}
-			gsu.updating_guild = g;
-			client->creator->on_guild_stickers_update.call(gsu);
+	if (!client->creator->on_guild_stickers_update.empty()) {
+		dpp::snowflake guild_id = snowflake_not_null(&d, "guild_id");
+		dpp::guild* g = dpp::find_guild(guild_id);
+		dpp::guild_stickers_update_t gsu(client->owner, client->shard_id, raw);
+		for (auto & sticker : d["stickers"]) {
+			dpp::sticker s;
+			s.fill_from_json(&sticker);
+			gsu.stickers.emplace_back(s);
 		}
+		gsu.updating_guild = g ? *g : guild{};
+		gsu.updating_guild.id = guild_id;
+		client->creator->queue_work(1, [c = client->creator, gsu]() {
+			c->on_guild_stickers_update.call(gsu);
+		});
 	}
 }
 
-}};
+};

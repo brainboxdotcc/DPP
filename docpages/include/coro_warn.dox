@@ -1,0 +1,1 @@
+\warning D++ Coroutines are currently only supported by D++ on g++ 13, clang/LLVM 14, and MSVC 19.37 or above. Additionally, your program has to support C++20.

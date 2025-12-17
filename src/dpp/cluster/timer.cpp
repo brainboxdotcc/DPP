@@ -21,88 +21,95 @@
 #include <dpp/timer.h>
 #include <dpp/cluster.h>
 #include <dpp/json.h>
+#include <atomic>
 
 namespace dpp {
 
-timer lasthandle = 1;
-std::mutex timer_guard;
+std::atomic<timer> next_handle = 1;
 
 timer cluster::start_timer(timer_callback_t on_tick, uint64_t frequency, timer_callback_t on_stop) {
+	timer_t new_timer;
+
+	new_timer.handle = next_handle++;
+	new_timer.next_tick = time(nullptr) + frequency;
+	new_timer.on_tick = std::move(on_tick);
+	new_timer.on_stop = std::move(on_stop);
+	new_timer.frequency = frequency;
+
 	std::lock_guard<std::mutex> l(timer_guard);
-	timer_t* newtimer = new timer_t();
+	next_timer.emplace(new_timer);
 
-	newtimer->handle = lasthandle++;
-	newtimer->next_tick = time(nullptr) + frequency;
-	newtimer->on_tick = on_tick;
-	newtimer->on_stop = on_stop;
-	newtimer->frequency = frequency;
-	timer_list[newtimer->handle] = newtimer;
-	next_timer.emplace(newtimer->next_tick, newtimer);
-
-	return newtimer->handle;
+	return new_timer.handle;
 }
 
 bool cluster::stop_timer(timer t) {
+	/*
+	 * Because iterating a priority queue is at best O(log n) we don't actually walk the queue
+	 * looking for the timer to remove. Instead, we just insert the timer handle into a std::set
+	 * to inform the tick_timers() function later if it sees a handle in this set, it is to
+	 * have its on_stop() called and it is not to be rescheduled.
+	 */
 	std::lock_guard<std::mutex> l(timer_guard);
-
-	auto i = timer_list.find(t);
-	if (i != timer_list.end()) {
-		timer_t* tptr = i->second;
-		if (tptr->on_stop) {
-			/* If there is an on_stop event, call it */
-			tptr->on_stop(t);
-		}
-		timer_list.erase(i);
-		auto j = next_timer.find(tptr->next_tick);
-		if (j != next_timer.end()) {
-			next_timer.erase(j);
-		}
-		delete tptr;
-		return true;
-	}
-	return false;
-}
-
-void cluster::timer_reschedule(timer_t* t) {
-	std::lock_guard<std::mutex> l(timer_guard);
-	for (auto i = next_timer.begin(); i != next_timer.end(); ++i) {
-		/* Rescheduling the timer means finding it in the next tick map.
-		 * It should be pretty much near the start of the map so this loop
-		 * should only be at most a handful of iterations.
-		 */
-		if (i->second->handle == t->handle) {
-			next_timer.erase(i);
-			t->next_tick = time(nullptr) + t->frequency;
-			next_timer.emplace(t->next_tick, t);
-			break;
-		}
-	}
+	deleted_timers.emplace(t);
+	return true;
 }
 
 void cluster::tick_timers() {
-	std::vector<timer_t*> scheduled;
-	{
-		time_t now = time(nullptr);
-		std::lock_guard<std::mutex> l(timer_guard);
-		for (auto i = next_timer.begin(); i != next_timer.end(); ++i) {
-			if (now >= i->second->next_tick) {
-				scheduled.push_back(i->second);
-			} else {
-				/* The first time we encounter an entry which is not due,
-				 * we can bail out, because std::map is ordered storage so
-				 * we know at this point no more will match either.
-				 */
+	time_t now = time(nullptr);
+
+	if (next_timer.empty()) {
+		return;
+	}
+	do {
+		timer_t cur_timer;
+		{
+			std::lock_guard<std::mutex> l(timer_guard);
+			if (next_timer.top().next_tick > now) {
+				/* Nothing to do */
 				break;
 			}
+			cur_timer = std::move(next_timer.top());
+			next_timer.pop();
 		}
-	}
-	for (auto & t : scheduled) {
-		/* Call handler */
-		t->on_tick(t->handle);
-		/* Reschedule for next tick */
-		timer_reschedule(t);
-	}
+		timers_deleted_t::iterator deleted_iter{};
+		bool deleted{};
+		{
+			std::lock_guard<std::mutex> l(timer_guard);
+			deleted_iter = deleted_timers.find(cur_timer.handle);
+			deleted = deleted_iter != deleted_timers.end();
+		}
+
+		if (!deleted) {
+			cur_timer.on_tick(cur_timer.handle);
+			cur_timer.next_tick += cur_timer.frequency;
+			{
+				std::lock_guard<std::mutex> l(timer_guard);
+				next_timer.emplace(std::move(cur_timer));
+			}
+		} else {
+			/* Deleted timers are not reinserted into the priority queue and their on_stop is called */
+			if (cur_timer.on_stop) {
+				cur_timer.on_stop(cur_timer.handle);
+			}
+			{
+				std::lock_guard<std::mutex> l(timer_guard);
+				deleted_timers.erase(deleted_iter);
+			}
+		}
+
+	} while (true);
 }
+
+#ifndef DPP_NO_CORO
+async<timer> cluster::co_sleep(uint64_t seconds) {
+	return async<timer>{[this, seconds] (auto &&cb) mutable {
+		start_timer([this, cb] (dpp::timer handle) {
+			cb(handle);
+			stop_timer(handle);
+		}, seconds);
+	}};
+}
+#endif
 
 oneshot_timer::oneshot_timer(class cluster* cl, uint64_t duration, timer_callback_t callback) : owner(cl) {
 	/* Create timer */
@@ -124,4 +131,4 @@ oneshot_timer::~oneshot_timer() {
 	cancel();
 }
 
-};
+}

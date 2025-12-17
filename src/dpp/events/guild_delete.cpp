@@ -2,6 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
+ * SPDX-License-Identifier: Apache-2.0
  * Copyright 2021 Craig Edwards and D++ contributors 
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
@@ -25,12 +26,9 @@
 #include <dpp/stringops.h>
 #include <dpp/json.h>
 
-using json = nlohmann::json;
 
-namespace dpp { namespace events {
 
-using namespace dpp;
-
+namespace dpp::events {
 /**
  * @brief Handle event
  * 
@@ -41,7 +39,11 @@ using namespace dpp;
 void guild_delete::handle(discord_client* client, json &j, const std::string &raw) {
 	json& d = j["d"];
 	dpp::guild* g = dpp::find_guild(snowflake_not_null(&d, "id"));
-	if (g) {
+	dpp::guild guild_del;
+	if (!g) {
+		guild_del.fill_from_json(&d);
+	} else {
+		guild_del = *g;
 		if (!bool_not_null(&d, "unavailable")) {
 			dpp::get_guild_cache()->remove(g);
 			if (client->creator->cache_policy.emoji_policy != dpp::cp_none) {
@@ -82,12 +84,16 @@ void guild_delete::handle(discord_client* client, json &j, const std::string &ra
 			g->flags |= dpp::g_unavailable;
 		}
 
-		if (!client->creator->on_guild_delete.empty()) {
-			dpp::guild_delete_t gd(client, raw);
-			gd.deleted = g;
-			client->creator->on_guild_delete.call(gd);
-		}
+	}
+	
+	if (!client->creator->on_guild_delete.empty()) {
+		dpp::guild_delete_t gd(client->owner, client->shard_id, raw);
+		gd.deleted = guild_del;
+		gd.guild_id = guild_del.id;
+		client->creator->queue_work(0, [c = client->creator, gd]() {
+			c->on_guild_delete.call(gd);
+		});
 	}
 }
 
-}};
+};

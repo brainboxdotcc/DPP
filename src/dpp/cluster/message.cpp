@@ -23,6 +23,8 @@
 
 namespace dpp {
 
+constexpr uint8_t GET_CHANNEL_PINS_MAX = 50;
+
 void cluster::message_add_reaction(const struct message &m, const std::string &reaction, command_completion_event_t callback) {
 	rest_request<confirmation>(this, API_PATH "/channels", std::to_string(m.channel_id), "messages/" + std::to_string(m.id) + "/reactions/" + utility::url_encode(reaction) + "/@me", m_put, "", callback);
 }
@@ -40,7 +42,7 @@ void cluster::message_create(const message &m, command_completion_event_t callba
 		if (callback) {
 			callback(confirmation_callback_t(this, message(this).fill_from_json(&j), http));
 		}
-	}, m.filename, m.filecontent);
+	}, m.file_data);
 }
 
 
@@ -66,7 +68,7 @@ void cluster::message_delete_bulk(const std::vector<snowflake>& message_ids, sno
 	for (auto & m : message_ids) {
 		j["messages"].push_back(std::to_string(m));
 	}
-	rest_request<confirmation>(this, API_PATH "/channels", std::to_string(channel_id), "messages/bulk-delete", m_post, j.dump(), callback);
+	rest_request<confirmation>(this, API_PATH "/channels", std::to_string(channel_id), "messages/bulk-delete", m_post, j.dump(-1, ' ', false, json::error_handler_t::replace), callback);
 }
 
 
@@ -116,7 +118,17 @@ void cluster::message_edit(const message &m, command_completion_event_t callback
 		if (callback) {
 			callback(confirmation_callback_t(this, message(this).fill_from_json(&j), http));
 		}
-	}, m.filename, m.filecontent);
+	}, m.file_data);
+}
+
+void cluster::message_edit_flags(const message &m, command_completion_event_t callback) {
+	this->post_rest_multipart(API_PATH "/channels", std::to_string(m.channel_id), "messages/" + std::to_string(m.id), m_patch, nlohmann::json{
+		{"flags", m.flags},
+	}.dump(-1, ' ', false, json::error_handler_t::replace), [this, callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t(this, message(this).fill_from_json(&j), http));
+		}
+	}, m.file_data);
 }
 
 
@@ -143,7 +155,7 @@ void cluster::message_get_reactions(snowflake message_id, snowflake channel_id, 
 
 
 void cluster::message_pin(snowflake channel_id, snowflake message_id, command_completion_event_t callback) {
-	rest_request<confirmation>(this, API_PATH "/channels", std::to_string(channel_id), "pins/" + std::to_string(message_id), m_put, "", callback);
+	rest_request<confirmation>(this, API_PATH "/channels", std::to_string(channel_id), "messages/pins/" + std::to_string(message_id), m_put, "", std::move(callback));
 }
 
 void cluster::messages_get(snowflake channel_id, snowflake around, snowflake before, snowflake after, uint64_t limit, command_completion_event_t callback) {
@@ -158,12 +170,78 @@ void cluster::messages_get(snowflake channel_id, snowflake around, snowflake bef
 
 
 void cluster::message_unpin(snowflake channel_id, snowflake message_id, command_completion_event_t callback) {
-	rest_request<confirmation>(this, API_PATH "/channels", std::to_string(channel_id), "pins/" + std::to_string(message_id), m_delete, "", callback);
+	rest_request<confirmation>(this, API_PATH "/channels", std::to_string(channel_id), "messages/pins/" + std::to_string(message_id), m_delete, "", std::move(callback));
+}
+
+
+void cluster::poll_get_answer_voters(const message& m, uint32_t answer_id, snowflake after, uint64_t limit, command_completion_event_t callback) {
+	std::map<std::string, std::string> parameters {
+		{"limit", std::to_string(limit > 100 ? 100 : limit)}
+	};
+
+	if (after > 0) {
+		parameters["after"] = after;
+	}
+	rest_request_list<user>(this, API_PATH "/channels", std::to_string(m.channel_id), "polls/" + std::to_string(m.id) + "/answers/" + std::to_string(answer_id) + utility::make_url_parameters(parameters), m_get, "", std::move(callback), "id", "users");
+}
+
+void cluster::poll_get_answer_voters(snowflake message_id, snowflake channel_id, uint32_t answer_id, snowflake after, uint64_t limit, command_completion_event_t callback) {
+	std::map<std::string, std::string> parameters {
+		{"limit", std::to_string(limit > 100 ? 100 : limit)}
+	};
+
+	if (after > 0) {
+		parameters["after"] = after;
+	}
+	rest_request_list<user>(this, API_PATH "/channels", std::to_string(channel_id), "polls/" + std::to_string(message_id) + "/answers/" + std::to_string(answer_id) + utility::make_url_parameters(parameters), m_get, "", std::move(callback), "id", "users");
+}
+
+
+void cluster::poll_end(const message &m, command_completion_event_t callback) {
+	rest_request<message>(this, API_PATH "/channels", std::to_string(m.channel_id), "polls/" + std::to_string(m.id) + "/expire", m_post, "", std::move(callback));
+}
+
+void cluster::poll_end(snowflake message_id, snowflake channel_id, command_completion_event_t callback) {
+	rest_request<message>(this, API_PATH "/channels", std::to_string(channel_id), "polls/" + std::to_string(message_id) + "/expire", m_post, "", std::move(callback));
 }
 
 
 void cluster::channel_pins_get(snowflake channel_id, command_completion_event_t callback) {
-	rest_request_list<message>(this, API_PATH "/channels", std::to_string(channel_id), "pins", m_get, "", callback);
+	channel_pins_get(channel_id, {}, {}, callback);
 }
 
-};
+void cluster::channel_pins_get(snowflake channel_id, std::optional<time_t> before, std::optional<uint64_t> limit, command_completion_event_t callback) {
+	if (!limit.has_value()) {
+		limit = GET_CHANNEL_PINS_MAX;
+	}
+
+	std::string parameters = "messages/pins?limit=" + std::to_string(limit.value());
+
+	if (before.has_value()) {
+		parameters.append("&before=" + ts_to_string(before.value()));
+	}
+
+	/* Have to do it like this because this now returns more than just a list.
+	 * It's now a structure containing the pinned items in "items" and then a boolean called "has_more".
+	 */
+	this->post_rest_multipart(API_PATH "/channels", std::to_string(channel_id), parameters, m_get, "", [this, callback](json &j, const http_request_completion_t& http) {
+		std::unordered_map<snowflake, dpp::message_pin> list;
+
+		confirmation_callback_t e(this, confirmation(), http);
+		if (!e.is_error()) {
+			for (auto & curr_item : j["items"]) {
+				dpp::message_pin pinned_msg{};
+				pinned_msg.pinned_at = ts_not_null(&curr_item, "pinned_at");
+				pinned_msg.pinned_message = message().fill_from_json(&curr_item["message"]);
+
+				list[pinned_msg.pinned_message.id] = pinned_msg;
+			}
+		}
+
+		if (callback) {
+			callback(confirmation_callback_t(this, list, http));
+		}
+	});
+}
+
+}

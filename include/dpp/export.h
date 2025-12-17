@@ -33,6 +33,17 @@
 	#error "D++ Requires a C++17 compatible C++ compiler. Please ensure that you have enabled C++17 in your compiler flags."
 #endif
 
+/* If not using c++20, define DPP_CPP17_COMPAT and DPP_NO_CORO if DPP_NO_CORO is not already defined.
+ */
+#if !(defined(__cplusplus) && __cplusplus >= 202002L) && !(defined(_MSVC_LANG) && _MSVC_LANG >= 202002L)
+	#define DPP_CPP17_COMPAT
+	#if !defined(DPP_CORO) || !DPP_CORO // Allow overriding this because why not
+		#ifndef DPP_NO_CORO
+			#define DPP_NO_CORO
+		#endif
+	#endif
+#endif
+
 #ifndef DPP_STATIC
 	/* Dynamic linked build as shared object or dll */
 	#ifdef DPP_BUILD
@@ -59,8 +70,79 @@
 	#define DPP_EXPORT
 #endif
 
-#ifndef _WIN32
-	#define SOCKET int
-#else
+namespace dpp {
+
+/**
+ * @brief Represents a build configuration. On some platforms (e.g. Windows) release isn't compatible with debug, so we use this enum to detect it.
+ */
+enum class build_type {
+	/**
+	 * @brief Universal build, works with both debug and release
+	 */
+	universal,
+
+	/**
+	 * @brief Debug build
+	 */
+	debug,
+
+	/**
+	 * @brief Release build
+	 */
+	release
+};
+
+template <build_type>
+extern bool DPP_EXPORT validate_configuration();
+
+#if defined(UE_BUILD_DEBUG) || defined(UE_BUILD_DEVELOPMENT) || defined(UE_BUILD_TEST) || defined(UE_BUILD_SHIPPING) || defined(UE_GAME) || defined(UE_EDITOR) || defined(UE_BUILD_SHIPPING_WITH_EDITOR) || defined(UE_BUILD_DOCS)
+	/*
+	 * We need to tell DPP to NOT do the version checker if something from Unreal Engine is defined.
+	 * We have to do this because UE is causing some weirdness where the version checker is broken and always errors.
+	 * This is really only for DPP-UE. There is no reason to not do the version checker unless you are in Unreal Engine.
+	 */
+	#define DPP_BYPASS_VERSION_CHECKING
+#endif /* UE */
+
+#ifndef DPP_BUILD /* when including dpp */
+	/**
+	 * Version checking, making sure the program is in a configuration compatible with DPP's.
+	 *
+	 * Do NOT make these variables constexpr.
+	 * We want them to initialize at runtime so the function can be pulled from the shared library object.
+	 */
+	#ifndef DPP_BYPASS_VERSION_CHECKING
+		#if defined(_WIN32)
+			#ifdef _DEBUG
+				inline const bool is_valid_config = validate_configuration<build_type::debug>();
+			#else
+				inline const bool is_valid_config = validate_configuration<build_type::release>();
+			#endif /* _DEBUG */
+		#else
+			inline const bool is_valid_config = validate_configuration<build_type::universal>();
+		#endif /* _WIN32 */
+	#endif /* !DPP_BYPASS_VERSION_CHECKING */
+#endif /* !DPP_BUILD */
+
+}
+
+#ifdef _WIN32
+	#ifndef NOMINMAX
+		#define NOMINMAX
+	#endif
+
 	#include <WinSock2.h>
 #endif
+
+#ifdef _DOXYGEN_
+	/** @brief Macro that expands to [[deprecated(reason)]] when including the library, nothing when building the library */
+	#define DPP_DEPRECATED(reason)
+#else /* !_DOXYGEN_ */
+	#if defined(DPP_BUILD) || defined(DPP_NO_DEPRECATED)
+		/** @brief Macro that expands to [[deprecated(reason)]] when including the library, nothing when building the library */
+		#define DPP_DEPRECATED(reason)
+	#else
+		/** @brief Macro that expands to [[deprecated(reason)]] when including the library, nothing when building the library */
+		#define DPP_DEPRECATED(reason) [[deprecated(reason)]]
+	#endif
+#endif /* _DOXYGEN_ */

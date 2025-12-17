@@ -2,6 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
+ * SPDX-License-Identifier: Apache-2.0
  * Copyright 2021 Craig Edwards and D++ contributors 
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
@@ -23,11 +24,8 @@
 #include <dpp/stringops.h>
 #include <dpp/json.h>
 
-using json = nlohmann::json;
+namespace dpp::events {
 
-namespace dpp { namespace events {
-
-using namespace dpp;
 
 /**
  * @brief Handle event
@@ -38,29 +36,49 @@ using namespace dpp;
  */
 void channel_create::handle(discord_client* client, json &j, const std::string &raw) {
 	json& d = j["d"];
-	
-	dpp::channel* c = dpp::find_channel(snowflake_not_null(&d, "id"));
-	if (!c) {
-		c = new dpp::channel();
-	}
-	c->fill_from_json(&d);
-	dpp::get_channel_cache()->store(c);
-	if (c->recipients.size()) {
-		for (auto & u : c->recipients) {
-			client->creator->set_dm_channel(u, c->id);
-		}
-	}
-	dpp::guild* g = dpp::find_guild(c->guild_id);
-	if (g) {
-		g->channels.push_back(c->id);
+	dpp::channel newchannel;
+	dpp::channel* c = nullptr;
+	dpp::guild* g = nullptr;
+	dpp::guild tmp_guild;
 
-		if (!client->creator->on_channel_create.empty()) {
-			dpp::channel_create_t cc(client, raw);
-			cc.created = c;
-			cc.creating_guild = g;
-			client->creator->on_channel_create.call(cc);
+	if (client->creator->cache_policy.channel_policy == cp_none) {
+		newchannel.fill_from_json(&d);
+		c = &newchannel;
+		g = dpp::find_guild(c->guild_id);
+		if (g == nullptr) {
+			g = &tmp_guild;
+			tmp_guild.id = c->guild_id;
 		}
+		if (c->recipients.size()) {
+			for (auto & u : c->recipients) {
+				client->creator->set_dm_channel(u, c->id);
+			}
+		}
+	} else {
+		c = dpp::find_channel(snowflake_not_null(&d, "id"));
+		if (!c) {
+			c = new dpp::channel();
+		}
+		c->fill_from_json(&d);
+		dpp::get_channel_cache()->store(c);
+		if (c->recipients.size()) {
+			for (auto & u : c->recipients) {
+				client->creator->set_dm_channel(u, c->id);
+			}
+		}
+		g = dpp::find_guild(c->guild_id);
+		if (g) {
+			g->channels.push_back(c->id);
+		}
+	}
+	if (!client->creator->on_channel_create.empty()) {
+		dpp::channel_create_t cc(client->owner, client->shard_id, raw);
+		cc.created = *c;
+		cc.creating_guild = *g;
+		client->creator->queue_work(1, [c = client->creator, cc]() {
+			c->on_channel_create.call(cc);
+		});
 	}
 }
 
-}};
+};

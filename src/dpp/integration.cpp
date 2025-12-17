@@ -2,6 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
+ * SPDX-License-Identifier: Apache-2.0
  * Copyright 2021 Craig Edwards and D++ contributors 
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
@@ -24,76 +25,90 @@
 #include <dpp/json.h>
 #include <dpp/cache.h>
 
-using json = nlohmann::json;
-
 namespace dpp {
 
-integration::integration() :
-	managed(),
-	type(i_twitch),
-	flags(0),
-	role_id(0),
-	user_id(0),
-	expire_grace_period(0),
-	synced_at(0),
-	subscriber_count(0)
-{
-	app.id = 0;
-	app.bot = nullptr;
+using json = nlohmann::json;
+
+integration::integration() : managed(), type(i_twitch), flags(0), role_id(0), expire_grace_period(0), synced_at(0), subscriber_count(0) {
 }
 
-integration::~integration()
-{
-}
-
-integration& integration::fill_from_json(nlohmann::json* j)
+integration& integration::fill_from_json_impl(nlohmann::json* j)
 {
 	std::map<std::string, integration_type> type_map = {
 		{ "", i_discord },
 		{ "youtube", i_youtube },
 		{ "twitch", i_twitch },
-		{ "discord", i_discord }
+		{ "discord", i_discord },
+		{ "guild_subscription", i_guild_subscription }
 	};
-	this->id = snowflake_not_null(j, "id");
-	this->name = string_not_null(j, "name");
+
+	set_snowflake_not_null(j, "id", id);
+	set_string_not_null(j, "name", name);
 	this->type = type_map[string_not_null(j, "type")];
-	if (bool_not_null(j, "enabled"))
+
+	if (bool_not_null(j, "enabled")) {
 		this->flags |= if_enabled;
-	if (bool_not_null(j, "syncing"))
-		this->flags |= if_syncing;
-	if (bool_not_null(j, "enable_emoticons"))
-		this->flags |= if_emoticons;
-	if (bool_not_null(j, "revoked"))
-		this->flags |= if_revoked;
-	if (int8_not_null(j, "expire_behavior"))
-		this->flags |= if_expire_kick;
-	this->expire_grace_period = int32_not_null(j, "expire_grace_period");
-	if (j->contains("user")) {
-		auto t = (*j)["user"];
-		this->user_id = snowflake_not_null(&t, "user_id");
 	}
+	if (bool_not_null(j, "syncing")) {
+		this->flags |= if_syncing;
+	}
+
+	set_snowflake_not_null(j, "role_id", role_id);
+
+	if (bool_not_null(j, "enable_emoticons")) {
+		this->flags |= if_emoticons;
+	}
+	if (int8_not_null(j, "expire_behavior")) {
+		this->flags |= if_expire_kick;
+	}
+
+	set_int32_not_null(j, "expire_grace_period", expire_grace_period);
+
+	if(j->contains("user")) {
+		user_obj = user().fill_from_json(&((*j)["user"]));
+	}
+
+	/* Should never be null, but best to check in-case they maybe change it */
+	if(j->contains("account")) {
+		auto & ac = (*j)["account"];
+		set_snowflake_not_null(&ac, "id", account.id);
+		set_string_not_null(&ac, "name", account.name);
+	}
+
+	set_ts_not_null(j, "synced_at", synced_at);
+	set_int32_not_null(j, "subscriber_count", subscriber_count);
+
+	if (bool_not_null(j, "revoked")) {
+		this->flags |= if_revoked;
+	}
+
 	if (j->contains("application")) {
 		auto & t = (*j)["application"];
-		this->app.id = snowflake_not_null(&t, "id");
+		set_snowflake_not_null(&t, "id", app.id);
+		set_string_not_null(&t, "name", app.name);
+		set_string_not_null(&t, "description", app.description);
+		set_iconhash_not_null(&t, "icon", app.icon);
 		if (t.find("bot") != t.end()) {
 			auto & b = t["bot"];
 			this->app.bot = dpp::find_user(snowflake_not_null(&b, "id"));
 		}
 	}
-	this->subscriber_count = int32_not_null(j, "subscriber_count");
 
-	this->account_id = string_not_null(&((*j)["account"]), "id");
-	this->account_name = string_not_null(&((*j)["account"]), "name");
+	if(j->contains("scopes")) {
+		for (const auto& scope : (*j)["scopes"]) {
+			this->scopes.push_back(scope.get<std::string>());
+		}
+	}
 
 	return *this;
 }
 
-std::string integration::build_json(bool with_id) const {
+json integration::to_json_impl(bool with_id) const {
 	return json({
-		{ "expire_behavior", (flags & if_expire_kick) ? 1 : 0 },
-		{ "expire_grace_period", expire_grace_period },
-		{ "enable_emoticons", emoticons_enabled() }
-	}).dump();
+			    { "expire_behavior", (flags & if_expire_kick) ? 1 : 0 },
+			    { "expire_grace_period", expire_grace_period },
+			    { "enable_emoticons", emoticons_enabled() }
+		    }).dump(-1, ' ', false, json::error_handler_t::replace);
 }
 
 bool integration::emoticons_enabled() const {
@@ -119,7 +134,7 @@ bool integration::expiry_kicks_user() const {
 connection::connection() : id({}), revoked(false), verified(false), friend_sync(false), show_activity(false), visible(false) {
 }
 
-connection& connection::fill_from_json(nlohmann::json* j) {
+connection& connection::fill_from_json_impl(nlohmann::json* j) {
 	this->id = string_not_null(j, "id");
 	this->name = string_not_null(j, "name");
 	this->type = string_not_null(j, "type");
@@ -129,14 +144,8 @@ connection& connection::fill_from_json(nlohmann::json* j) {
 	this->show_activity = bool_not_null(j, "show_activity");
 	this->two_way_link = bool_not_null(j, "two_way_link");
 	this->visible = (int32_not_null(j, "visibility") == 1);
-	if (j->contains("integrations")) {
-		integrations.reserve((*j)["integrations"].size());
-		for (auto & i : (*j)["integrations"]) {
-			integrations.emplace_back(integration().fill_from_json(&i));
-		}
-	}
+	set_object_array_not_null<integration>(j, "integrations", integrations);
 	return *this;
 }
 
-
-};
+}

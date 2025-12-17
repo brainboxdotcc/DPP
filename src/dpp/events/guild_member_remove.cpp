@@ -2,6 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
+ * SPDX-License-Identifier: Apache-2.0
  * Copyright 2021 Craig Edwards and D++ contributors 
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
@@ -24,11 +25,9 @@
 #include <dpp/stringops.h>
 #include <dpp/json.h>
 
-using json = nlohmann::json;
 
-namespace dpp { namespace events {
+namespace dpp::events {
 
-using namespace dpp;
 
 /**
  * @brief Handle event
@@ -40,40 +39,33 @@ using namespace dpp;
 void guild_member_remove::handle(discord_client* client, json &j, const std::string &raw) {
 	json d = j["d"];
 
-	dpp::guild_member_remove_t gmr(client, raw);
+	dpp::guild_member_remove_t gmr(client->owner, client->shard_id, raw);
+	gmr.removed.fill_from_json(&(d["user"]));
+	gmr.guild_id = snowflake_not_null(&d, "guild_id");
+	guild* g = dpp::find_guild(gmr.guild_id);
+	gmr.removing_guild = g ? *g : guild{};
+	gmr.removing_guild.id = gmr.guild_id;
 
-	gmr.removing_guild = dpp::find_guild(snowflake_not_null(&d, "guild_id"));
+	if (!client->creator->on_guild_member_remove.empty()) {
+		client->creator->queue_work(1, [c = client->creator, gmr]() {
+			c->on_guild_member_remove.call(gmr);
+		});
+	}
 
-	if (client->creator->cache_policy.user_policy == dpp::cp_none) {
-		dpp::user u;
-		u.fill_from_json(&(d["user"]));
-		gmr.removed = &u;
-		if (!client->creator->on_guild_member_remove.empty()) {
-			client->creator->on_guild_member_remove.call(gmr);
-		}
-	} else {
-
-		gmr.removed = dpp::find_user(snowflake_not_null(&(d["user"]), "id"));
-
-		if (!client->creator->on_guild_member_remove.empty()) {
-			client->creator->on_guild_member_remove.call(gmr);
-		}
-
-		if (gmr.removing_guild && gmr.removed) {
-			auto i = gmr.removing_guild->members.find(gmr.removed->id);
-			if (i != gmr.removing_guild->members.end()) {
-				dpp::user* u = dpp::find_user(gmr.removed->id);
-				if (u) {
-					u->refcount--;
-					if (u->refcount < 1) {
-						dpp::get_user_cache()->remove(u);
-					}
+	/* NOTE: This operates on the cached pointer of the guild */
+	if (client->creator->cache_policy.user_policy != dpp::cp_none && g) {
+		auto i = g->members.find(gmr.removed.id);
+		if (i != g->members.end()) {
+			dpp::user* u = dpp::find_user(gmr.removed.id);
+			if (u) {
+				u->refcount--;
+				if (u->refcount < 1) {
+					dpp::get_user_cache()->remove(u);
 				}
-				gmr.removing_guild->members.erase(i);
 			}
-
+			g->members.erase(i);
 		}
 	}
 }
 
-}};
+};

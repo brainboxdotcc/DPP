@@ -21,29 +21,12 @@
 #include <map>
 #include <dpp/exception.h>
 #include <dpp/cluster.h>
-#include <dpp/discordclient.h>
-#include <dpp/discordevents.h>
-#include <dpp/message.h>
-#include <dpp/cache.h>
-#include <dpp/once.h>
-#include <dpp/sync.h>
 #include <chrono>
 #include <iostream>
 #include <dpp/json.h>
-#include <utility>
-#include <algorithm>
+#include <dpp/discord_webhook_server.h>
 
 namespace dpp {
-
-#ifdef _WIN32
-	#ifdef _DEBUG
-		extern "C" void you_are_using_a_debug_build_of_dpp_on_a_release_project() {
-		}
-	#else
-		extern "C" void you_are_using_a_release_build_of_dpp_on_a_debug_project() {
-		}
-	#endif
-#endif
 
 /**
  * @brief An audit reason for each thread. These are per-thread to make the cluster
@@ -70,14 +53,53 @@ template<typename T> std::function<void(const T&)> make_intent_warning(cluster* 
 	};
 }
 
-cluster::cluster(const std::string &_token, uint32_t _intents, uint32_t _shards, uint32_t _cluster_id, uint32_t _maxclusters, bool comp, cache_policy_t policy, uint32_t request_threads, uint32_t request_threads_raw)
-	: default_gateway("gateway.discord.gg"), rest(nullptr), raw_rest(nullptr), compressed(comp), start_time(0), token(_token), last_identify(time(NULL) - 5), intents(_intents),
+template <build_type BuildType>
+bool validate_configuration() {
+#ifdef _DEBUG
+	[[maybe_unused]] constexpr build_type expected = build_type::debug;
+#else
+	[[maybe_unused]] constexpr build_type expected = build_type::release;
+#endif
+#ifdef _WIN32
+	if constexpr (BuildType != build_type::universal && BuildType != expected) {
+		MessageBox(
+			nullptr,
+			"Mismatched Debug/Release configurations between project and dpp.dll.\n"
+			"Please ensure both your program and the D++ DLL file are both using the same configuration.\n"
+			"The program will now terminate.",
+			"D++ Debug/Release mismatch",
+			MB_OK | MB_ICONERROR
+		);
+		/* Use std::runtime_rror here because dpp exceptions use std::string and that would crash when catching, because of ABI */
+		throw std::runtime_error("Mismatched Debug/Release configurations between project and dpp.dll");
+	}
+	return true;
+#else
+	return true;
+#endif
+}
+
+template bool DPP_EXPORT validate_configuration<build_type::debug>();
+
+template bool DPP_EXPORT validate_configuration<build_type::release>();
+
+template bool DPP_EXPORT validate_configuration<build_type::universal>();
+
+cluster::cluster(uint32_t pool_threads) : cluster("", 0, NO_SHARDS, 1, 1, false, cache_policy::cpol_none, pool_threads)
+{
+}
+
+cluster::cluster(const std::string &_token, uint32_t _intents, uint32_t _shards, uint32_t _cluster_id, uint32_t _maxclusters, bool comp, cache_policy_t policy, uint32_t pool_threads)
+	: default_gateway("gateway.discord.gg"), rest(nullptr), raw_rest(nullptr), compressed(comp), start_time(0), token(_token), last_identify(time(nullptr) - 5), intents(_intents),
 	numshards(_shards), cluster_id(_cluster_id), maxclusters(_maxclusters), rest_ping(0.0), cache_policy(policy), ws_mode(ws_json)
 {
+	socketengine = create_socket_engine(this);
+	pool = std::make_unique<thread_pool>(this, pool_threads > 4 ? pool_threads : 4);
 	/* Instantiate REST request queues */
 	try {
-		rest = new request_queue(this, request_threads);
-		raw_rest = new request_queue(this, request_threads_raw);
+		/* NOTE: These no longer use threads. This instantiates 16+4 dpp::timer instances. */
+		rest = new request_queue(this, 16);
+		raw_rest = new request_queue(this, 4);
 	}
 	catch (std::bad_alloc&) {
 		delete rest;
@@ -98,20 +120,57 @@ cluster::cluster(const std::string &_token, uint32_t _intents, uint32_t _shards,
 			i_message_content,
 			"You have attached an event to cluster::on_message_update() but have not specified the privileged intent dpp::i_message_content. Message content, embeds, attachments, and components on received guild messages will be empty.")
 	);
+
+	/* Add slashcommand callback for named commands. */
+#ifndef DPP_NO_CORO
+	on_slashcommand([this](const slashcommand_t& event) -> task<void> {
+		slashcommand_handler_variant copy;
+		{
+			std::shared_lock lk(named_commands_mutex);
+			auto it = named_commands.find(event.command.get_command_name());
+			if (it == named_commands.end()) {
+				co_return;
+			}
+			copy = it->second;
+		}
+		if (std::holds_alternative<co_slashcommand_handler_t>(copy)) {
+			co_await std::get<co_slashcommand_handler_t>(copy)(event);
+		} else if (std::holds_alternative<slashcommand_handler_t>(copy)) {
+			std::get<slashcommand_handler_t>(copy)(event);
+		}
+		co_return;
+	});
+#else
+	on_slashcommand([this](const slashcommand_t& event) {
+		slashcommand_handler_t copy;
+		{
+			std::shared_lock lk(named_commands_mutex);
+			auto it = named_commands.find(event.command.get_command_name());
+			if (it == named_commands.end()) {
+				return;
+			}
+			copy = it->second;
+		}
+		copy(event);
+	});
+#endif
 }
 
 cluster::~cluster()
 {
-	this->shutdown();
+	delete webhook_server;
 	delete rest;
 	delete raw_rest;
-#ifdef _WIN32
-	WSACleanup();
-#endif
+	this->shutdown();
 }
 
 request_queue* cluster::get_rest() {
 	return rest;
+}
+
+cluster& cluster::enable_webhook_server(const std::string& discord_public_key, const std::string_view address, uint16_t port,  const std::string& ssl_private_key, const std::string& ssl_public_key) {
+	webhook_server = new discord_webhook_server(this, discord_public_key, address, port, ssl_private_key, ssl_public_key);
+	return *this;
 }
 
 request_queue* cluster::get_raw_rest() {
@@ -119,131 +178,294 @@ request_queue* cluster::get_raw_rest() {
 }
 
 cluster& cluster::set_websocket_protocol(websocket_protocol_t mode) {
+	if (start_time > 0) {
+		throw dpp::logic_exception(err_websocket_proto_already_set, "Cannot change websocket protocol on a started cluster!");
+	}
 	ws_mode = mode;
 	return *this;
+}
+
+void cluster::queue_work(int priority, work_unit task) {
+	pool->enqueue({priority, task});
 }
 
 void cluster::log(dpp::loglevel severity, const std::string &msg) const {
 	if (!on_log.empty()) {
 		/* Pass to user if they've hooked the event */
-		dpp::log_t logmsg(nullptr, msg);
+		dpp::log_t logmsg(nullptr, 0, msg);
 		logmsg.severity = severity;
 		logmsg.message = msg;
+		size_t pos{0};
+		while ((pos = logmsg.message.find(token, pos)) != std::string::npos) {
+			logmsg.message.replace(pos, token.length(), "*****");
+			pos += 5;
+		}
 		on_log.call(logmsg);
 	}
 }
 
 dpp::utility::uptime cluster::uptime()
 {
-	return dpp::utility::uptime(time(NULL) - start_time);
+	return dpp::utility::uptime(time(nullptr) - start_time);
 }
 
-void cluster::start(bool return_after) {
+void cluster::add_reconnect(uint32_t shard_id) {
+	reconnections[shard_id] = time(nullptr) + RECONNECT_INTERVAL;
+	log(ll_trace, "Reconnecting shard " + std::to_string(shard_id) + " in " + std::to_string(RECONNECT_INTERVAL) + " seconds...");
+}
 
-	auto block_calling_thread = [this]() {
-		std::mutex thread_mutex;
-		std::unique_lock thread_lock(thread_mutex);
-		this->terminating.wait(thread_lock);
+void cluster::start(start_type return_after) {
+
+	if (start_time != 0) {
+		throw dpp::logic_exception("Cluster already started");
+	}
+
+	auto event_loop = [this]() -> void {
+		auto reconnect_monitor = numshards != NO_SHARDS ? start_timer([this](auto t) {
+			time_t now = time(nullptr);
+			for (auto reconnect = reconnections.begin(); reconnect != reconnections.end(); ++reconnect) {
+				auto shard_id = reconnect->first;
+				auto shard_reconnect_time = reconnect->second;
+				if (now >= shard_reconnect_time) {
+					/* This shard needs to be reconnected */
+					reconnections.erase(reconnect);
+					discord_client* old = nullptr;
+					{
+						std::shared_lock lk(shards_mutex);
+						old = shards[shard_id];
+					}
+					/* These values must be copied to the new connection
+					 * to attempt to resume it
+					 */
+					auto seq_no = old->last_seq;
+					auto session_id = old->sessionid;
+					log(ll_info, "Reconnecting shard " + std::to_string(shard_id));
+					/* Make a new resumed connection based off the old one */
+					try {
+						std::unique_lock lk(shards_mutex);
+						if (shards[shard_id] != nullptr) {
+							log(ll_trace, "Attempting resume...");
+							shards[shard_id] = nullptr;
+							shards[shard_id] = new discord_client(*old, seq_no, session_id);
+						} else {
+							log(ll_trace, "Attempting full reconnection...");
+							shards[shard_id] = nullptr;
+							shards[shard_id] = new discord_client(this, shard_id, numshards, token, intents, compressed, ws_mode);
+						}
+						/* Delete the old one */
+						log(ll_trace, "Attempting to delete old connection...");
+						delete old;
+						old = nullptr;
+						/* Set up the new shard's IO events */
+						log(ll_trace, "Running new connection...");
+						shards[shard_id]->run();
+					}
+					catch (const std::exception& e) {
+						std::unique_lock lk(shards_mutex);
+						log(ll_info, "Exception when reconnecting shard " + std::to_string(shard_id) + ": " + std::string(e.what()));
+						delete shards[shard_id];
+						delete old;
+						old = nullptr;
+						shards[shard_id] = nullptr;
+						add_reconnect(shard_id);
+					}
+					/* It is not possible to reconnect another shard within the same 5-second window,
+					 * due to discords strict rate limiting on shard connections, so we bail out here
+					 * and only try another reconnect in the next timer interval. Do not try and make
+					 * this support multiple reconnects per loop iteration or Discord will smack us
+					 * with the rate limiting clue-by-four.
+					 */
+					return;
+				} else {
+					log(ll_trace, "Shard " + std::to_string(shard_id) + " not ready to reconnect yet.");
+				}
+			}
+		}, 5) : 0;
+		while (!this->terminating && socketengine.get()) {
+			socketengine->process_events();
+		}
+		if (reconnect_monitor) {
+			stop_timer(reconnect_monitor);
+		}
 	};
 
-	/* Start up all shards */
-	gateway g;
-	try {
-		g = dpp::sync<gateway>(this, &cluster::get_gateway_bot);
-		log(ll_debug, "Cluster: " + std::to_string(g.session_start_remaining) + " of " + std::to_string(g.session_start_total) + " session starts remaining");
-		if (g.session_start_remaining < g.shards) {
-			throw dpp::connection_exception("Discord indicates you cannot start enough sessions to boot this cluster! Cluster startup aborted. Try again later.");
-		}
-		if (g.session_start_max_concurrency > 1) {
-			log(ll_debug, "Cluster: Large bot sharding; Using session concurrency: " + std::to_string(g.session_start_max_concurrency));
-		}
-		if (numshards == 0) {
-			if (g.shards) {
-				log(ll_info, "Auto Shard: Bot requires " + std::to_string(g.shards) + std::string(" shard") + ((g.shards > 1) ? "s" : ""));
-			} else {
-				throw dpp::connection_exception("Auto Shard: Cannot determine number of shards. Cluster startup aborted. Check your connection.");
-			}
-			numshards = g.shards;
-		}
-	}
-	catch (const dpp::rest_exception& e) {
-		if (std::string(e.what()) == "401: Unauthorized") {
-			/* Throw special form of exception for invalid token */
-			throw dpp::invalid_token_exception("Invalid bot token (401: Unauthorized when getting gateway shard count)");
-		} else {
-			/* Rethrow */
-			throw e;
-		}
+	if (on_guild_member_add && !(intents & dpp::i_guild_members)) {
+		log(ll_warning, "You have attached an event to cluster::on_guild_member_add() but have not specified the privileged intent dpp::i_guild_members. This event will not fire.");
 	}
 
-	start_time = time(NULL);
+	if (on_guild_member_remove && !(intents & dpp::i_guild_members)) {
+		log(ll_warning, "You have attached an event to cluster::on_guild_member_remove() but have not specified the privileged intent dpp::i_guild_members. This event will not fire.");
+	}
 
-	log(ll_debug, "Starting with " + std::to_string(numshards) + " shards...");
+	if (on_guild_member_update && !(intents & dpp::i_guild_members)) {
+		log(ll_warning, "You have attached an event to cluster::on_guild_member_update() but have not specified the privileged intent dpp::i_guild_members. This event will not fire.");
+	}
 
-	for (uint32_t s = 0; s < numshards; ++s) {
-		/* Filter out shards that aren't part of the current cluster, if the bot is clustered */
-		if (s % maxclusters == cluster_id) {
-			/* Each discord_client spawns its own thread in its run() */
-			try {
-				this->shards[s] = new discord_client(this, s, numshards, token, intents, compressed, ws_mode);
-				this->shards[s]->run();
-			}
-			catch (const std::exception &e) {
-				log(dpp::ll_critical, "Could not start shard " + std::to_string(s) + ": " + std::string(e.what()));
-			}
-			/* Stagger the shard startups, pausing every 'session_start_max_concurrency' shards for 5 seconds.
-			 * This means that for bots that don't have large bot sharding, any number % 1 is always 0,
-			 * so it will pause after every shard. For any with non-zero concurrency it'll pause 5 seconds
-			 * after every batch.
-			 */
-			if (((s + 1) % g.session_start_max_concurrency) == 0) {
-				size_t wait_time = 5;
-				if (g.session_start_max_concurrency > 1) {
-					/* If large bot sharding, be sure to give the batch of shards time to settle */
-					bool all_connected = true;
-					do {
-						all_connected = true;
-						for (auto& shard : this->shards) {
-							if (!shard.second->ready) {
-								all_connected = false;
-								std::this_thread::sleep_for(std::chrono::milliseconds(100));
-								break;
-							}
-						}
-					} while (all_connected);
+	if (on_presence_update && !(intents & dpp::i_guild_presences)) {
+		log(ll_warning, "You have attached an event to cluster::on_presence_update() but have not specified the privileged intent dpp::i_guild_presences. This event will not fire.");
+	}
+
+	if (numshards != NO_SHARDS) {
+		/* Start up all shards */
+		get_gateway_bot([this, return_after](const auto &response) {
+
+			auto throw_if_not_threaded = [this, return_after](exception_error_code error_id, const std::string &msg) {
+				log(ll_critical, msg);
+				if (return_after == st_wait) {
+					throw dpp::connection_exception(error_id, msg);
 				}
-				std::this_thread::sleep_for(std::chrono::seconds(wait_time));
+			};
+
+			if (response.is_error()) {
+				if (response.http_info.status == 401) {
+					throw_if_not_threaded(err_unauthorized, "Invalid bot token (401: Unauthorized when getting gateway shard count)");
+				} else {
+					throw_if_not_threaded(err_auto_shard, "get_gateway_bot: " + response.http_info.body);
+				}
+				return;
 			}
+			auto g = std::get<gateway>(response.value);
+			log(ll_debug, "Cluster: " + std::to_string(g.session_start_remaining) + " of " + std::to_string(g.session_start_total) + " session starts remaining");
+			if (g.session_start_remaining < g.shards || g.shards == 0) {
+				throw_if_not_threaded(err_no_sessions_left, "Discord indicates you cannot start enough sessions to boot this cluster! Cluster startup aborted. Try again later.");
+				return;
+			} else if (g.session_start_max_concurrency == 0) {
+				throw_if_not_threaded(err_auto_shard, "Cluster: Could not determine concurrency, startup aborted!");
+				return;
+			} else if (g.session_start_max_concurrency > 1) {
+				log(ll_debug, "Cluster: Large bot sharding; Using session concurrency: " + std::to_string(g.session_start_max_concurrency));
+			}
+			if (numshards == 0) {
+				log(ll_info, "Auto Shard: Bot requires " + std::to_string(g.shards) + std::string(" shard") + ((g.shards > 1) ? "s" : ""));
+				numshards = g.shards;
+			}
+			log(ll_debug, "Starting with " + std::to_string(numshards) + " shards...");
+			start_time = time(nullptr);
+
+			for (uint32_t s = 0; s < numshards; ++s) {
+				/* Filter out shards that aren't part of the current cluster, if the bot is clustered */
+				if (s % maxclusters == cluster_id) {
+					/* Each discord_client is inserted into the socket engine when we call run() */
+					try {
+						std::unique_lock lk(shards_mutex);
+						this->shards[s] = new discord_client(this, s, numshards, token, intents, compressed, ws_mode);
+						this->shards[s]->run();
+					}
+					catch (const std::exception &e) {
+						throw_if_not_threaded(err_cant_start_shard, "Could not start shard " + std::to_string(s) + ": " + std::string(e.what()));
+						return;
+					}
+					/* Stagger the shard startups, pausing every 'session_start_max_concurrency' shards for 5 seconds.
+					 * This means that for bots that don't have large bot sharding, any number % 1 is always 0,
+					 * so it will pause after every shard. For any with non-zero concurrency it'll pause 5 seconds
+					 * after every batch.
+					 */
+					if (((s + 1) % g.session_start_max_concurrency) == 0) {
+						size_t wait_time = 5;
+						if (g.session_start_max_concurrency > 1) {
+							/* If large bot sharding, be sure to give the batch of shards time to settle */
+							bool all_connected = true;
+							do {
+								all_connected = true;
+								for (auto &shard: this->shards) {
+									if (!shard.second->ready) {
+										all_connected = false;
+										std::this_thread::sleep_for(std::chrono::milliseconds(100));
+										break;
+									}
+								}
+							} while (all_connected);
+						}
+						std::this_thread::sleep_for(std::chrono::seconds(wait_time));
+					}
+				}
+			}
+
+			log(ll_debug, "Shards started.");
+		});
+
+	} else {
+		log(ll_debug, "Starting shardless cluster...");
+		/* Without the ready event, we have no user information. This is needed
+		 * to register commands etc., so we request it via the API.
+		 */
+		if (!token.empty()) {
+			current_user_get([this](const auto &reply) {
+				if (reply.is_error()) {
+					throw dpp::connection_exception("Could not fetch user information");
+				}
+				/* We can implicitly upcast here from user_identified to its parent class, user */
+				this->me = std::get<user_identified>(reply.value);
+				ready_t r(this, 0, "");
+				log(ll_debug, "Shardless cluster started.");
+				/* Without shards, on_ready must be manually fired here if it has consumers */
+				if (!on_ready.empty()) {
+					on_ready.call(r);
+				}
+			});
 		}
 	}
 
-	/* Get all active DM channels and map them to user id -> dm id */
-	this->current_user_get_dms([this](const dpp::confirmation_callback_t& completion) {
-		dpp::channel_map dmchannels = std::get<channel_map>(completion.value);
-		for (auto & c : dmchannels) {
-			for (auto & u : c.second.recipients) {
-				this->set_dm_channel(u, c.second.id);
+	if (!token.empty()) {
+		/* Get all active DM channels and map them to user id -> dm id */
+		current_user_get_dms([this](const dpp::confirmation_callback_t &completion) {
+			if (completion.is_error()) {
+				log(dpp::ll_debug, "Failed to get bot DM list");
+				return;
 			}
-		}
-	});
+			dpp::channel_map dmchannels = std::get<channel_map>(completion.value);
+			for (auto &c: dmchannels) {
+				for (auto &u: c.second.recipients) {
+					set_dm_channel(u, c.second.id);
+				}
+			}
+		});
+	}
 
-	log(ll_debug, "Shards started.");
-	
-	if (!return_after)
-		block_calling_thread();
+	if (return_after == st_return) {
+		engine_thread = std::thread([this, event_loop]() {
+			try {
+				dpp::utility::set_thread_name("event_loop");
+				event_loop();
+			}
+			catch (const std::exception& e) {
+				log(ll_critical, "Event loop unhandled exception: " + std::string(e.what()));
+			}
+		});
+	} else {
+		try {
+			event_loop();
+		}
+		catch (const std::exception& e) {
+			log(ll_critical, "Event loop unhandled exception: " + std::string(e.what()));
+		}
+	}
 }
 
 void cluster::shutdown() {
-	/* Signal condition variable to terminate */
-	terminating.notify_all();
-	/* Free memory for active timers */
-	for (auto & t : timer_list) {
-		delete t.second;
+	/* Signal termination */
+	terminating = true;
+
+	if (engine_thread.joinable()) {
+		/* Join engine_thread if it ever started */
+		engine_thread.join();
 	}
-	timer_list.clear();
+
+	{
+		std::lock_guard<std::mutex> l(timer_guard);
+		while (!this->next_timer.empty()) {
+			timer_t cur_timer = std::move(next_timer.top());
+			if (cur_timer.on_stop) {
+				cur_timer.on_stop(cur_timer.handle);
+			}
+			next_timer.pop();
+		}
+		next_timer = {};
+	}
+
+	std::unique_lock lk(shards_mutex);
 	/* Terminate shards */
 	for (const auto& sh : shards) {
-		log(ll_info, "Terminating shard id " + std::to_string(sh.second->shard_id));
 		delete sh.second;
 	}
 	shards.clear();
@@ -291,13 +513,12 @@ json error_response(const std::string& message, http_request_completion_t& rv)
 		}},
 		{"message", message}
 	});
-	rv.body = j.dump();
+	rv.body = j.dump(-1, ' ', false, json::error_handler_t::replace);
 	return j;
 }
 
-void cluster::post_rest(const std::string &endpoint, const std::string &major_parameters, const std::string &parameters, http_method method, const std::string &postdata, json_encode_t callback, const std::string &filename, const std::string &filecontent) {
-	/* NOTE: This is not a memory leak! The request_queue will free the http_request once it reaches the end of its lifecycle */
-	rest->post_request(new http_request(endpoint + "/" + major_parameters, parameters, [endpoint, callback](http_request_completion_t rv) {
+void cluster::post_rest(const std::string &endpoint, const std::string &major_parameters, const std::string &parameters, http_method method, const std::string &postdata, json_encode_t callback, const std::string &filename, const std::string &filecontent, const std::string &filemimetype, const std::string &protocol) {
+	rest->post_request(std::make_unique<http_request>(endpoint + (!major_parameters.empty() ? "/" : "") + major_parameters, parameters, [endpoint, callback](http_request_completion_t rv) {
 		json j;
 		if (rv.error == h_success && !rv.body.empty()) {
 			try {
@@ -310,12 +531,21 @@ void cluster::post_rest(const std::string &endpoint, const std::string &major_pa
 		if (callback) {
 			callback(j, rv);
 		}
-	}, postdata, method, get_audit_reason(), filename, filecontent));
+	}, postdata, method, get_audit_reason(), filename, filecontent, filemimetype, protocol));
 }
 
-void cluster::post_rest_multipart(const std::string &endpoint, const std::string &major_parameters, const std::string &parameters, http_method method, const std::string &postdata, json_encode_t callback, const std::vector<std::string> &filename, const std::vector<std::string> &filecontent) {
-	/* NOTE: This is not a memory leak! The request_queue will free the http_request once it reaches the end of its lifecycle */
-	rest->post_request(new http_request(endpoint + "/" + major_parameters, parameters, [endpoint, callback](http_request_completion_t rv) {
+void cluster::post_rest_multipart(const std::string &endpoint, const std::string &major_parameters, const std::string &parameters, http_method method, const std::string &postdata, json_encode_t callback, const std::vector<message_file_data> &file_data) {
+	std::vector<std::string> file_names{};
+	std::vector<std::string> file_contents{};
+	std::vector<std::string> file_mimetypes{};
+
+	for(const message_file_data& data : file_data) {
+		file_names.push_back(data.name);
+		file_contents.push_back(data.content);
+		file_mimetypes.push_back(data.mimetype);
+	}
+
+	rest->post_request(std::make_unique<http_request>(endpoint + (!major_parameters.empty() ? "/" : "") + major_parameters, parameters, [endpoint, callback](http_request_completion_t rv) {
 		json j;
 		if (rv.error == h_success && !rv.body.empty()) {
 			try {
@@ -328,19 +558,18 @@ void cluster::post_rest_multipart(const std::string &endpoint, const std::string
 		if (callback) {
 			callback(j, rv);
 		}
-	}, postdata, method, get_audit_reason(), filename, filecontent));
+	}, postdata, method, get_audit_reason(), file_names, file_contents, file_mimetypes));
 }
 
 
-void cluster::request(const std::string &url, http_method method, http_completion_event callback, const std::string &postdata, const std::string &mimetype, const std::multimap<std::string, std::string> &headers) {
-	/* NOTE: This is not a memory leak! The request_queue will free the http_request once it reaches the end of its lifecycle */
-	raw_rest->post_request(new http_request(url, callback, method, postdata, mimetype, headers));
+void cluster::request(const std::string &url, http_method method, http_completion_event callback, const std::string &postdata, const std::string &mimetype, const std::multimap<std::string, std::string> &headers, const std::string &protocol) {
+	raw_rest->post_request(std::make_unique<http_request>(url, callback, method, postdata, mimetype, headers, protocol));
 }
 
 gateway::gateway() : shards(0), session_start_total(0), session_start_remaining(0), session_start_reset_after(0), session_start_max_concurrency(0) {
 }
 
-gateway& gateway::fill_from_json(nlohmann::json* j) {
+gateway& gateway::fill_from_json_impl(nlohmann::json* j) {
 	url = string_not_null(j, "url");
 	shards = int32_not_null(j, "shards");
 	session_start_total = int32_not_null(&((*j)["session_start_limit"]), "total");
@@ -355,7 +584,13 @@ gateway::gateway(nlohmann::json* j) {
 }
 
 void cluster::set_presence(const dpp::presence &p) {
-	json pres = json::parse(p.build_json());
+	if(p.activities.empty()) {
+		log(ll_warning, "An empty presence was passed to set_presence.");
+		return;
+	}
+
+	json pres = p.to_json();
+	std::shared_lock lk(shards_mutex);
 	for (auto& s : shards) {
 		if (s.second->is_connected()) {
 			s.second->queue_message(s.second->jsonobj_to_string(pres));
@@ -373,7 +608,7 @@ cluster& cluster::clear_audit_reason() {
 	return *this;
 }
 
-cluster& cluster::set_default_gateway(std::string &default_gateway_new) {
+cluster& cluster::set_default_gateway(const std::string &default_gateway_new) {
 	default_gateway = default_gateway_new;
 	return *this;
 }
@@ -384,17 +619,32 @@ std::string cluster::get_audit_reason() {
 	return r;
 }
 
-discord_client* cluster::get_shard(uint32_t id) {
+discord_client* cluster::get_shard(uint32_t id) const {
+	std::shared_lock lk(shards_mutex);
 	auto i = shards.find(id);
 	if (i != shards.end()) {
 		return i->second;
-	} else {
-		return nullptr;
 	}
+	return nullptr;
 }
 
-const shard_list& cluster::get_shards() {
+shard_list cluster::get_shards() const {
+	std::shared_lock lk(shards_mutex);
 	return shards;
+}
+
+cluster& cluster::set_request_timeout(uint16_t timeout) {
+	request_timeout = timeout;
+	return *this;
+}
+
+bool cluster::unregister_command(const std::string &name) {
+	std::unique_lock lk(named_commands_mutex);
+	return named_commands.erase(name) == 1;
+}
+
+size_t cluster::active_requests() {
+	return rest->get_active_request_count() + raw_rest->get_active_request_count();
 }
 
 };

@@ -2,6 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
+ * SPDX-License-Identifier: Apache-2.0
  * Copyright 2021 Craig Edwards and D++ contributors 
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
@@ -24,24 +25,25 @@
 #include <dpp/stringops.h>
 #include <dpp/json.h>
 
-using json = nlohmann::json;
 
-namespace dpp { namespace events {
 
-using namespace dpp;
+namespace dpp::events {
 void thread_update::handle(discord_client* client, json& j, const std::string& raw) {
 	json& d = j["d"];
 
 	dpp::thread t;
 	t.fill_from_json(&d);
 	dpp::guild* g = dpp::find_guild(t.guild_id);
-	if (g) {
-		if (!client->creator->on_thread_update.empty()) {
-			dpp::thread_update_t tu(client, raw);
-			tu.updated = t;
-			tu.updating_guild = g;
-			client->creator->on_thread_update.call(tu);
-		}
+	if (!client->creator->on_thread_update.empty()) {
+		dpp::thread_update_t tu(client->owner, client->shard_id, raw);
+
+		tu.updated = t;
+		tu.updating_guild = g ? *g : guild{};
+		tu.updating_guild.id = t.guild_id;
+
+		client->creator->queue_work(1, [c = client->creator, tu]() {
+			c->on_thread_update.call(tu);
+		});
 	}
 }
-}};
+};

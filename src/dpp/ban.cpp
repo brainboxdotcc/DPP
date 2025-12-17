@@ -2,6 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
+ * SPDX-License-Identifier: Apache-2.0
  * Copyright 2021 Craig Edwards and D++ contributors 
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
@@ -30,7 +31,7 @@ ban::ban() : user_id(0)
 {
 }
 
-ban& ban::fill_from_json(nlohmann::json* j) {
+ban& ban::fill_from_json_impl(nlohmann::json* j) {
 	reason = string_not_null(j, "reason");
 	if (j->contains("user")) {
 		json & user = (*j)["user"];
@@ -39,10 +40,5 @@ ban& ban::fill_from_json(nlohmann::json* j) {
 	return *this;
 }
 
-std::string ban::build_json(bool with_id) const {
-	/* This is an unused stub, because sending a ban is simple as a user id and a reason */
-	return "{}";
 }
-
-};
 

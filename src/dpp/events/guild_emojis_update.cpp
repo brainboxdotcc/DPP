@@ -2,6 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
+ * SPDX-License-Identifier: Apache-2.0
  * Copyright 2021 Craig Edwards and D++ contributors 
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
@@ -26,11 +27,9 @@
 #include <dpp/stringops.h>
 #include <dpp/json.h>
 
-using json = nlohmann::json;
 
-namespace dpp { namespace events {
+namespace dpp::events {
 
-using namespace dpp;
 
 
 /**
@@ -42,33 +41,44 @@ using namespace dpp;
  */
 void guild_emojis_update::handle(discord_client* client, json &j, const std::string &raw) {
 	json& d = j["d"];
-	dpp::guild* g = dpp::find_guild(snowflake_not_null(&d, "guild_id"));
-	if (g) {
-		if (client->creator->cache_policy.emoji_policy != dpp::cp_none) {
+	dpp::snowflake guild_id = snowflake_not_null(&d, "guild_id");
+	dpp::guild* g = dpp::find_guild(guild_id);
+	std::vector<dpp::snowflake> emojis;
+	if (client->creator->cache_policy.emoji_policy != dpp::cp_none) {
+		if (g) {
 			for (auto & ee : g->emojis) {
 				dpp::emoji* fe = dpp::find_emoji(ee);
 				if (fe) {
 					dpp::get_emoji_cache()->remove(fe);
 				}
 			}
-			g->emojis.clear();
-			for (auto & emoji : d["emojis"]) {
-				dpp::emoji* e = dpp::find_emoji(snowflake_not_null(&emoji, "id"));
-				if (!e) {
-					e = new dpp::emoji();
-					e->fill_from_json(&emoji);
-					dpp::get_emoji_cache()->store(e);
-				}
-				g->emojis.push_back(e->id);
+		}
+		for (auto & emoji : d["emojis"]) {
+			dpp::emoji* e = dpp::find_emoji(snowflake_not_null(&emoji, "id"));
+			if (!e) {
+				e = new dpp::emoji();
+				e->fill_from_json(&emoji);
+				dpp::get_emoji_cache()->store(e);
 			}
+			emojis.push_back(e->id);
 		}
-		if (!client->creator->on_guild_emojis_update.empty()) {
-			dpp::guild_emojis_update_t geu(client, raw);
-			geu.emojis = g->emojis;
-			geu.updating_guild = g;
-			client->creator->on_guild_emojis_update.call(geu);
+		if (g) {
+			g->emojis = emojis;
 		}
+	} else {
+		for (auto & emoji : d["emojis"]) {
+			emojis.push_back(snowflake_not_null(&emoji, "id"));
+		}
+	}
+	if (!client->creator->on_guild_emojis_update.empty()) {
+		dpp::guild_emojis_update_t geu(client->owner, client->shard_id, raw);
+		geu.emojis = emojis;
+		geu.updating_guild = g ? *g : guild{};
+		geu.updating_guild.id = guild_id;
+		client->creator->queue_work(1, [c = client->creator, geu]() {
+			c->on_guild_emojis_update.call(geu);
+		});
 	}
 }
 
-}};
+};

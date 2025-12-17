@@ -2,6 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
+ * SPDX-License-Identifier: Apache-2.0
  * Copyright 2021 Craig Edwards and D++ contributors 
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
@@ -30,37 +31,141 @@
 #include <dpp/event.h>
 #include <queue>
 #include <thread>
+#include <memory>
 #include <deque>
+#include <dpp/etf.h>
 #include <mutex>
 #include <shared_mutex>
+#include <dpp/zlibcontext.h>
 
-using json = nlohmann::json;
-
-#define DISCORD_API_VERSION	"10"
-#define API_PATH	        "/api/v" DISCORD_API_VERSION
 namespace dpp {
 
-// Forward declarations
+/**
+ * @brief Discord API version for shard websockets and HTTPS API requests
+ */
+#define DISCORD_API_VERSION "10"
+
+/**
+ * @brief HTTPS Request base path for API calls
+ */
+#define API_PATH "/api/v" DISCORD_API_VERSION
+
+/* Forward declarations */
 class cluster;
 
 /**
- * @brief This is an opaque class containing zlib library specific structures.
- * We define it this way so that the public facing D++ library doesn't require
- * the zlib headers be available to build against it.
+ * @brief How many seconds to wait between (re)connections. DO NOT change this.
+ * It is mandated by the Discord API spec!
  */
-class zlibcontext;
+constexpr time_t RECONNECT_INTERVAL = 5;
+
+/**
+ * @brief Represents different event opcodes sent and received on a shard websocket
+ *
+ * These are used internally to route frames.
+ */
+enum shard_frame_type : int {
+
+	/**
+	 * @brief An event was dispatched.
+	 * @note Receive only
+	 */
+	ft_dispatch = 0,
+
+	/**
+	 * @brief Fired periodically by the client to keep the connection alive.
+	 * @note Send/Receive
+	 */
+	ft_heartbeat = 1,
+
+	/**
+	 * @brief Starts a new session during the initial handshake.
+	 * @note Send only
+	 */
+	ft_identify = 2,
+
+	/**
+	 * @brief Update the client's presence.
+	 * @note Send only
+	 */
+	ft_presence = 3,
+
+	/**
+	 * @brief Used to join/leave or move between voice channels.
+	 * @note Send only
+	 */
+	ft_voice_state_update = 4,
+
+	/**
+	 * @brief Resume a previous session that was disconnected.
+	 * @note Send only
+	 */
+	ft_resume = 6,
+
+	/**
+	 * @brief You should attempt to reconnect and resume immediately.
+	 * @note Receive only
+	 */
+	ft_reconnect = 7,
+
+	/**
+	 * @brief Request information about offline guild members in a large guild.
+	 * @note Send only
+	 */
+	ft_request_guild_members = 8,
+
+	/**
+	 * @brief The session has been invalidated. You should reconnect and identify/resume accordingly.
+	 * @note Receive only
+	 */
+	ft_invalid_session = 9,
+
+	/**
+	 * @brief Sent immediately after connecting, contains the heartbeat interval to use.
+	 * @note Receive only
+	 */
+	ft_hello = 10,
+
+	/**
+	 * @brief Sent in response to receiving a heartbeat to acknowledge that it has been received.
+	 * @note Receive only
+	 */
+	ft_heartbeat_ack = 11,
+
+	/**
+	 * @brief Request information about soundboard sounds in a set of guilds.
+	 * @note Send only
+	 */
+	ft_request_soundboard_sounds = 31,
+};
+
+/**
+ * @brief Callback to send a Gateway request to start a new voice connection.
+ */
+using voice_connection_gateway_request_callback_t = std::function<void(discord_client*)>;
 
 /**
  * @brief Represents a connection to a voice channel.
  * A client can only connect to one voice channel per guild at a time, so these are stored in a map
  * in the dpp::discord_client keyed by guild_id.
  */
-class DPP_EXPORT voiceconn {
+class DPP_EXPORT voiceconn : public std::enable_shared_from_this<voiceconn> {
 	/**
 	 * @brief Owning dpp::discord_client instance
 	 */
 	class discord_client* creator;
+
+	/**
+	 * @brief Function to ask a discord_client instance to make a request to Gateway to connect to a voice channel
+	 */
+	voice_connection_gateway_request_callback_t request_callback;
+
 public:
+	/**
+	 * @brief Guild to connect to the voice channel on
+	 */
+	snowflake guild_id;
+
 	/**
 	 * @brief Voice Channel ID
 	 */
@@ -84,20 +189,24 @@ public:
 	/**
 	 * @brief voice websocket client
 	 */
-	class discord_voice_client* voiceclient;
+	std::unique_ptr<class discord_voice_client> voiceclient;
 
 	/**
-	 * @brief Construct a new voiceconn object
+	 * @brief True to enable DAVE E2EE
+	 * @warning This is an EXPERIMENTAL feature!
 	 */
-	voiceconn() = default;
+	bool dave;
 
 	/**
 	 * @brief Construct a new voiceconn object
 	 * 
 	 * @param o owner
-	 * @param _channel_id voice channel id
+	 * @param request_callback Function to ask a discord_client instance to make a request to Gateway to connect to a voice channel
+	 * @param guild_id Guild to connect to the voice channel on
+	 * @param channel_id voice channel id
+	 * @param enable_dave True to enable DAVE E2EE
 	 */
-	voiceconn(class discord_client* o, snowflake _channel_id);
+	voiceconn(class discord_client* o, voice_connection_gateway_request_callback_t request_callback, snowflake guild_id, snowflake channel_id, bool enable_dave);
 
 	/**
 	 * @brief Destroy the voiceconn object
@@ -110,31 +219,37 @@ public:
 	 * 
 	 * @return true if ready to connect
 	 */
-	bool is_ready();
+	bool is_ready() const;
 	
 	/**
 	 * @brief return true if the connection is active (websocket exists)
 	 * 
 	 * @return true if has an active websocket
 	 */
-	bool is_active();
+	bool is_active() const;
+
+	voiceconn& request();
 
 	/**
 	 * @brief Create websocket object and connect it.
 	 * Needs hostname, token and session_id to be set or does nothing.
-	 * 
-	 * @param guild_id Guild to connect to the voice channel on
+	 *
 	 * @return reference to self
 	 * @note It can spawn a thread to establish the connection, so this is NOT a synchronous blocking call!
 	 * You shouldn't call this directly. Use a wrapper function instead. e.g. dpp::guild::connect_member_voice
 	 */
-	voiceconn& connect(snowflake guild_id);
+	voiceconn& connect();
 
 	/**
 	 * @brief Disconnect from the currently connected voice channel
 	 * @return reference to self
 	 */
 	voiceconn& disconnect();
+
+	/**
+	 * @brief Reassigns the owner to the given discord_client.
+	 */
+	void reassign_owner(class discord_client* o);
 };
 
 /** @brief Implements a discord client. Each discord_client connects to one shard and derives from a websocket client. */
@@ -157,11 +272,6 @@ protected:
 	friend class dpp::cluster;
 
 	/**
-	 * @brief True if the shard is terminating
-	 */
-	bool terminating;
-
-	/**
 	 * @brief Disconnect from the connected voice channel on a guild
 	 * 
 	 * @param guild_id The guild who's voice channel you wish to disconnect from
@@ -169,6 +279,19 @@ protected:
 	 * Should be set to false if we already receive this message in an event.
 	 */
 	void disconnect_voice_internal(snowflake guild_id, bool send_json = true);
+
+	/**
+	 * @brief Start connecting the websocket
+	 *
+	 * Called from the constructor, or during reconnection
+	 */
+	void start_connecting();
+
+	/**
+	 * @brief Stores the most recent ping message on this shard, which we check
+	 * for to monitor latency
+	 */
+	std::string last_ping_message;
 
 private:
 
@@ -178,30 +301,19 @@ private:
 	std::shared_mutex queue_mutex;
 
 	/**
+	 * @brief Mutex for zlib pointer
+	 */
+	std::mutex zlib_mutex;
+
+	/**
 	 * @brief Queue of outbound messages
 	 */
 	std::deque<std::string> message_queue;
 
 	/**
-	 * @brief Thread this shard is executing on
-	 */
-	std::thread* runner;
-
-	/**
-	 * @brief Run shard loop under a thread.
-	 * Calls discord_client::run() from within a std::thread.
-	 */
-	void thread_run();
-
-	/**
 	 * @brief If true, stream compression is enabled
 	 */
 	bool compressed;
-
-	/**
-	 * @brief ZLib decompression buffer
-	 */
-	unsigned char* decomp_buffer;
 
 	/**
 	 * @brief Decompressed string
@@ -214,12 +326,7 @@ private:
 	 * are wrapped within this opaque object so that this header
 	 * file does not bring in a dependency on zlib.h.
 	 */
-	zlibcontext* zlib;
-
-	/**
-	 * @brief Total decompressed received bytes
-	 */
-	uint64_t decompressed_total;
+	std::unique_ptr<zlibcontext> zlib{};
 
 	/**
 	 * @brief Last connect time of cluster
@@ -234,7 +341,7 @@ private:
 	/**
 	 * @brief ETF parser for when in ws_etf mode
 	 */
-	class etf_parser* etf;
+	std::unique_ptr<etf_parser> etf;
 
 	/**
 	 * @brief Convert a JSON object to string.
@@ -245,17 +352,6 @@ private:
 	 * @return std::string string output in the correct format
 	 */
 	std::string jsonobj_to_string(const nlohmann::json& json);
-
-	/**
-	 * @brief Initialise ZLib (websocket compression)
-	 * @throw dpp::exception if ZLib cannot be initialised
-	 */
-	void setup_zlib();
-
-	/**
-	 * @brief Shut down ZLib (websocket compression)
-	 */
-	void end_zlib();
 
 	/**
 	 * @brief Update the websocket hostname with the resume url
@@ -293,11 +389,6 @@ public:
 	 * @brief Total number of shards
 	 */
 	uint32_t max_shards;
-
-	/**
-	 * @brief Thread ID
-	 */
-	std::thread::native_handle_type thread_id;
 
 	/**
 	 * @brief Last sequence number received, for resumes and pings
@@ -358,7 +449,7 @@ public:
 	/**
 	 * @brief List of voice channels we are connecting to keyed by guild id
 	 */
-	std::unordered_map<snowflake, voiceconn*> connecting_voice_channels;
+	std::unordered_map<snowflake, std::shared_ptr<voiceconn>> connecting_voice_channels;
 
 	/**
 	 * @brief The gateway address we reconnect to when we resume a session
@@ -372,7 +463,7 @@ public:
 	 * @param severity The log level from dpp::loglevel
 	 * @param msg The log message to output
 	 */
-	virtual void log(dpp::loglevel severity, const std::string &msg) const;
+	virtual void log(dpp::loglevel severity, const std::string &msg) const override;
 
 	/**
 	 * @brief Handle an event (opcode 0)
@@ -403,8 +494,11 @@ public:
 	 */
 	uint64_t get_channel_count();
 
-	/** Fires every second from the underlying socket I/O loop, used for sending heartbeats */
-	virtual void one_second_timer();
+	/**
+	 * @brief Fires every second from the underlying socket I/O loop, used for sending heartbeats
+	 * and any queued outbound websocket frames.
+	 */
+	virtual void one_second_timer() override;
 
 	/**
 	 * @brief Queue a message to be sent via the websocket
@@ -459,35 +553,52 @@ public:
 	discord_client(dpp::cluster* _cluster, uint32_t _shard_id, uint32_t _max_shards, const std::string &_token, uint32_t intents = 0, bool compressed = true, websocket_protocol_t ws_protocol = ws_json);
 
 	/**
-	 * @brief Destroy the discord client object
+	 * @brief Construct a discord_client object from another discord_client object
+	 * Used when resuming, the url to connect to will be taken from the resume url of the
+	 * other object, along with the seq number.
+	 *
+	 * @param old Previous connection to resume from
+	 * @param sequence Sequence number of previous session
+	 * @param session_id Session ID of previous session
 	 */
-	virtual ~discord_client();
+	explicit discord_client(discord_client& old, uint64_t sequence, const std::string& session_id);
 
 	/**
-	 * @brief Get the decompressed bytes in objectGet decompressed total bytes received
-	 * @return uint64_t bytes received
+	 * @brief Destroy the discord client object
+	 */
+	virtual ~discord_client() = default;
+
+	/**
+	 * @brief Get decompressed total bytes received
+	 *
+	 * This will always return 0 if the connection is not compressed
+	 * @return uint64_t compressed bytes received
 	 */
 	uint64_t get_decompressed_bytes_in();
 
 	/**
 	 * @brief Handle JSON from the websocket.
 	 * @param buffer The entire buffer content from the websocket client
+	 * @param opcode The type of frame, e.g. text or binary
 	 * @returns True if a frame has been handled
 	 */
-	virtual bool handle_frame(const std::string &buffer);
+	virtual bool handle_frame(const std::string &buffer, ws_opcode opcode) override;
 
 	/**
 	 * @brief Handle a websocket error.
 	 * @param errorcode The error returned from the websocket
 	 */
-	virtual void error(uint32_t errorcode);
+	virtual void error(uint32_t errorcode) override;
 
 	/**
 	 * @brief Start and monitor I/O loop.
-	 * @note this is a blocking call and is usually executed within a
-	 * thread by whatever creates the object.
 	 */
 	void run();
+
+	/**
+	 * @brief Called when the HTTP socket is closed
+	 */
+	virtual void on_disconnect() override;
 
 	/**
 	 * @brief Connect to a voice channel
@@ -496,12 +607,13 @@ public:
 	 * @param channel_id Channel ID of the voice channel
 	 * @param self_mute True if the bot should mute itself
 	 * @param self_deaf True if the bot should deafen itself
+	 * @param enable_dave True to enable DAVE E2EE
 	 * @return reference to self
 	 * @note This is NOT a synchronous blocking call! The bot isn't instantly ready to send or listen for audio,
 	 * as we have to wait for the connection to the voice server to be established!
 	 * e.g. wait for dpp::cluster::on_voice_ready event, and then send the audio within that event.
 	 */
-	discord_client& connect_voice(snowflake guild_id, snowflake channel_id, bool self_mute = false, bool self_deaf = false);
+	discord_client& connect_voice(snowflake guild_id, snowflake channel_id, bool self_mute = false, bool self_deaf = false, bool enable_dave = true);
 
 	/**
 	 * @brief Disconnect from the connected voice channel on a guild
@@ -522,4 +634,4 @@ public:
 	voiceconn* get_voice(snowflake guild_id);
 };
 
-};
+}

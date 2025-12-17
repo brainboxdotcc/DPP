@@ -39,4 +39,4 @@ void cluster::stage_instance_delete(const snowflake channel_id, command_completi
 	rest_request<confirmation>(this, API_PATH "/stage-instances", std::to_string(channel_id), "", m_delete, "", callback);
 }
 
-};
+}

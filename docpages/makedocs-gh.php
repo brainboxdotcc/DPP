@@ -71,36 +71,38 @@ if ($nodeploy) {
 	exit(0);
 }
 
-/* Create old version docs */
-chdir("/home/runner/work/DPP/DPP");
-system("rm -rf " . sys_get_temp_dir() . "/dpp-old");
-mkdir(sys_get_temp_dir() . "/dpp-old");
+if (count($argv) > 1 && $argv[1] === 'rebuild-old') {
+    /* Create old version docs */
+    chdir("/home/runner/work/DPP/DPP");
+    system("rm -rf " . sys_get_temp_dir() . "/dpp-old");
+    mkdir(sys_get_temp_dir() . "/dpp-old");
 
-/* Fire up async tasks to run instances of doxygen for each past version */
-$asyncRunners = [];
-foreach ($tags as $tag) {
-	$orig_tag = $tag;
-	$tag = preg_replace("/^v/", "", $tag);
-	if (!empty($tag)) {
-		$asyncRunners[$tag] = true;
-		$pid = pcntl_fork();
-		if ($pid == 0) {
-			posix_setsid();
-			pcntl_exec(PHP_BINARY, ["docpages/makedocs-gh-single.php", $tag, $orig_tag], $_ENV);
-			exit(0);
-		}
-	}
-}
+    /* Fire up async tasks to run instances of doxygen for each past version */
+    $asyncRunners = [];
+    foreach ($tags as $tag) {
+        $orig_tag = $tag;
+        $tag = preg_replace("/^v/", "", $tag);
+        if (!empty($tag)) {
+            $asyncRunners[$tag] = true;
+            $pid = pcntl_fork();
+            if ($pid == 0) {
+                posix_setsid();
+                pcntl_exec(PHP_BINARY, ["docpages/makedocs-gh-single.php", $tag, $orig_tag], $_ENV);
+                exit(0);
+            }
+        }
+    }
 
-/* Wait for all async tasks to complete */
-while (count($asyncRunners)) {
-	foreach ($asyncRunners as $tag => $discarded) {
-		if (file_exists("/tmp/completion_$tag") && file_get_contents("/tmp/completion_$tag") == $tag) {
-			unset($asyncRunners[$tag]);
-			echo "Runner for $tag is completed.\n";
-		}
-	}
-	sleep(1);
+    /* Wait for all async tasks to complete */
+    while (count($asyncRunners)) {
+        foreach ($asyncRunners as $tag => $discarded) {
+            if (file_exists("/tmp/completion_$tag") && file_get_contents("/tmp/completion_$tag") == $tag) {
+                unset($asyncRunners[$tag]);
+                echo "Runner for $tag is completed.\n";
+            }
+        }
+        sleep(1);
+    }
 }
 
 /* Commit and push everything to the github pages repo */

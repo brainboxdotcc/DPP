@@ -2,6 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
+ * SPDX-License-Identifier: Apache-2.0
  * Copyright 2021 Craig Edwards and D++ contributors 
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
@@ -23,11 +24,9 @@
 #include <dpp/stringops.h>
 #include <dpp/json.h>
 
-using json = nlohmann::json;
 
-namespace dpp { namespace events {
+namespace dpp::events {
 
-using namespace dpp;
 
 /**
  * @brief Handle event
@@ -38,11 +37,11 @@ using namespace dpp;
  */
 void logger::handle(discord_client* client, json &j, const std::string &raw) {
 	if (!client->creator->on_log.empty()) {
-		dpp::log_t logmsg(client, raw);
+		dpp::log_t logmsg(client->owner, client->shard_id, raw);
 		logmsg.severity = (dpp::loglevel)from_string<uint32_t>(raw.substr(0, raw.find(';')));
 		logmsg.message = raw.substr(raw.find(';') + 1, raw.length());
 		client->creator->on_log.call(logmsg);
 	}
 }
 
-}};
+};

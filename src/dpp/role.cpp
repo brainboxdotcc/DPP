@@ -2,6 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
+ * SPDX-License-Identifier: Apache-2.0
  * Copyright 2021 Craig Edwards and D++ contributors 
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
@@ -22,37 +23,22 @@
 #include <dpp/role.h>
 #include <dpp/cache.h>
 #include <dpp/discordevents.h>
-#include <dpp/permissions.h>
-#include <dpp/stringops.h>
 #include <dpp/json.h>
-
-using json = nlohmann::json;
 
 namespace dpp {
 
-role::role() :
-	managed(),
-	guild_id(0),
-	colour(0),
-	position(0),
-	permissions(0),
-	flags(0),
-	integration_id(0),
-	bot_id(0),
-	image_data(nullptr)
-{
-}
+using json = nlohmann::json;
 
-role::~role()
-{
-	delete image_data;
-}
+/* A mapping of discord's flag values to our bitmap (they're different bit positions to fit other stuff in) */
+std::map<uint8_t, dpp::role_flags> rolemap = {
+		{ 1 << 0,       dpp::r_in_prompt },
+};
 
 std::string role::get_mention(const snowflake& id){
 	return utility::role_mention(id);
 }
 
-role& role::fill_from_json(nlohmann::json* j)
+role& role::fill_from_json_impl(nlohmann::json* j)
 {
 	return fill_from_json(0, j);
 }
@@ -61,12 +47,21 @@ role& role::fill_from_json(snowflake _guild_id, nlohmann::json* j)
 {
 	this->guild_id = _guild_id;
 	this->name = string_not_null(j, "name");
-	this->icon = string_not_null(j, "icon");
+	if (auto it = j->find("icon"); it != j->end() && !it->is_null())
+		this->icon = utility::iconhash{it->get<std::string>()};
 	this->unicode_emoji = string_not_null(j, "unicode_emoji");
 	this->id = snowflake_not_null(j, "id");
 	this->colour = int32_not_null(j, "color");
 	this->position = int8_not_null(j, "position");
 	this->permissions = snowflake_not_null(j, "permissions");
+
+	uint8_t f = int8_not_null(j, "flags");
+	for (auto & flag : rolemap) {
+		if (f & flag.first) {
+			this->flags |= flag.second;
+		}
+	}
+
 	this->flags |= bool_not_null(j, "hoist") ? dpp::r_hoist : 0;
 	this->flags |= bool_not_null(j, "managed") ? dpp::r_managed : 0;
 	this->flags |= bool_not_null(j, "mentionable") ? dpp::r_mentionable : 0;
@@ -80,13 +75,20 @@ role& role::fill_from_json(snowflake _guild_id, nlohmann::json* j)
 		if (t.find("premium_subscriber") != t.end()) {
 			this->flags |= dpp::r_premium_subscriber;
 		}
+		if (t.find("available_for_purchase") != t.end()) {
+			this->flags |= dpp::r_available_for_purchase;
+		}
+		if (t.find("guild_connections") != t.end()) {
+			this->flags |= dpp::r_guild_connections;
+		}
 		this->bot_id = snowflake_not_null(&t, "bot_id");
 		this->integration_id = snowflake_not_null(&t, "integration_id");
+		this->subscription_listing_id = snowflake_not_null(&t, "subscription_listing_id");
 	}
 	return *this;
 }
 
-std::string role::build_json(bool with_id) const {
+json role::to_json_impl(bool with_id) const {
 	json j;
 
 	if (with_id) {
@@ -102,33 +104,27 @@ std::string role::build_json(bool with_id) const {
 	j["permissions"] = permissions;
 	j["hoist"] = is_hoisted();
 	j["mentionable"] = is_mentionable();
-	if (image_data) {
-		j["icon"] = *image_data;
+	if (icon.is_image_data()) {
+		j["icon"] = icon.as_image_data().to_nullable_json();
 	}
 	if (!unicode_emoji.empty()) {
 		j["unicode_emoji"] = unicode_emoji;
 	}
 
-	return j.dump();
+	return j;
 }
 
 std::string role::get_mention() const {
 	return utility::role_mention(id);
 }
 
-role& role::load_image(const std::string &image_blob, const image_type type) {
-	static const std::map<image_type, std::string> mimetypes = {
-		{ i_gif, "image/gif" },
-		{ i_jpg, "image/jpeg" },
-		{ i_png, "image/png" },
-		{ i_webp, "image/webp" },
-	};
+role& role::load_image(std::string_view image_blob, const image_type type) {
+	icon = utility::image_data{type, image_blob};
+	return *this;
+}
 
-	/* If there's already image data defined, free the old data, to prevent a memory leak */
-	delete image_data;
-
-	image_data = new std::string("data:" + mimetypes.find(type)->second + ";base64," + base64_encode((unsigned char const*)image_blob.data(), (unsigned int)image_blob.length()));
-
+role& role::load_image(const std::byte* data, uint32_t size, const image_type type) {
+	icon = utility::image_data{type, data, size};
 	return *this;
 }
 
@@ -143,6 +139,22 @@ bool role::is_mentionable() const {
 
 bool role::is_managed() const {
 	return this->flags & dpp::r_managed;
+}
+
+bool role::is_premium_subscriber() const {
+	return this->flags & dpp::r_premium_subscriber;
+}
+
+bool role::is_available_for_purchase() const {
+	return this->flags & dpp::r_available_for_purchase;
+}
+
+bool role::is_linked() const {
+	return this->flags & dpp::r_guild_connections;
+}
+
+bool role::is_selectable_in_prompt() const {
+	return this->flags & dpp::r_in_prompt;
 }
 
 bool role::has_create_instant_invite() const {
@@ -309,6 +321,46 @@ bool role::has_moderate_members() const {
 	return has_administrator() || permissions.has(p_moderate_members);
 }
 
+bool role::has_view_creator_monetization_analytics() const {
+	return has_administrator() || permissions.has(p_view_creator_monetization_analytics);
+}
+
+bool role::has_use_soundboard() const {
+	return has_administrator() || permissions.has(p_use_soundboard);
+}
+
+bool role::has_create_guild_expressions() const {
+	return has_administrator() || permissions.has(p_create_guild_expressions);
+}
+
+bool role::has_create_events() const {
+	return has_administrator() || permissions.has(p_create_events);
+}
+
+bool role::has_use_external_sounds() const {
+	return has_administrator() || permissions.has(p_use_external_sounds);
+}
+
+bool role::has_send_voice_messages() const {
+	return has_administrator() || permissions.has(p_send_voice_messages);
+}
+
+bool role::has_use_clyde_ai() const {
+	return has_administrator() || permissions.has(p_use_clyde_ai);
+}
+
+bool role::has_send_polls() const {
+	return has_administrator() || permissions.has(p_send_polls);
+}
+
+bool role::has_use_external_apps() const {
+	return has_administrator() || permissions.has(p_use_external_apps);
+}
+
+bool role::has_pin_messages() const {
+	return has_administrator() || permissions.has(p_pin_messages);
+}
+
 role& role::set_name(const std::string& n) {
 	name = utility::validate(n, 1, 100, "Role name too short");
 	return *this;
@@ -353,8 +405,9 @@ members_container role::get_members() const {
 		}
 		for (auto & m : g->members) {
 			/* Iterate all members and use std::find on their role list to see who has this role */
-			auto i = std::find(m.second.roles.begin(), m.second.roles.end(), this->id);
-			if (i != m.second.roles.end()) {
+			const auto& r = m.second.get_roles();
+			auto i = std::find(r.begin(), r.end(), this->id);
+			if (i != r.end()) {
 				gm[m.second.user_id] = m.second;
 			}
 		}
@@ -363,27 +416,22 @@ members_container role::get_members() const {
 }
 
 std::string role::get_icon_url(uint16_t size, const image_type format) const {
-	static const std::map<image_type, std::string> extensions = {
-			{ i_jpg, "jpg" },
-			{ i_png, "png" },
-			{ i_webp, "webp" },
-	};
+	if (this->icon.is_iconhash() && this->id) {
+		std::string as_str = this->icon.as_iconhash().to_string();
 
-	if (extensions.find(format) == extensions.end()) {
-		return std::string();
+		if (!as_str.empty()) {
+			return utility::cdn_endpoint_url({ i_jpg, i_png, i_webp },
+				"role-icons/" + std::to_string(this->id) + "/" + as_str,
+				format, size);
+		}
 	}
-
-	if (!this->icon.to_string().empty() && this->id) {
-		return utility::cdn_host + "/role-icons/" + std::to_string(this->id) + "/" + this->icon.to_string() + "." + extensions.find(format)->second + utility::avatar_size(size);
-	} else {
-		return std::string();
-	}
+	return std::string{};
 }
 
 application_role_connection_metadata::application_role_connection_metadata() : key(""), name(""), description("") {
 }
 
-application_role_connection_metadata &application_role_connection_metadata::fill_from_json(nlohmann::json *j) {
+application_role_connection_metadata &application_role_connection_metadata::fill_from_json_impl(nlohmann::json *j) {
 	type = (application_role_connection_metadata_type)int8_not_null(j, "type");
 	key = string_not_null(j, "key");
 	name = string_not_null(j, "name");
@@ -401,7 +449,7 @@ application_role_connection_metadata &application_role_connection_metadata::fill
 	return *this;
 }
 
-std::string application_role_connection_metadata::build_json(bool with_id) const {
+json application_role_connection_metadata::to_json_impl(bool with_id) const {
 	json j;
 	j["type"] = type;
 	j["key"] = key;
@@ -419,21 +467,21 @@ std::string application_role_connection_metadata::build_json(bool with_id) const
 			j["description_localizations"][loc.first] = loc.second;
 		}
 	}
-	return j.dump();
+	return j;
 }
 
 
 application_role_connection::application_role_connection() : platform_name(""), platform_username("") {
 }
 
-application_role_connection &application_role_connection::fill_from_json(nlohmann::json *j) {
+application_role_connection &application_role_connection::fill_from_json_impl(nlohmann::json *j) {
 	platform_name = string_not_null(j, "platform_name");
 	platform_username = string_not_null(j, "platform_username");
 	metadata = application_role_connection_metadata().fill_from_json(&((*j)["metadata"]));
 	return *this;
 }
 
-std::string application_role_connection::build_json(bool with_id) const {
+json application_role_connection::to_json_impl(bool with_id) const {
 	json j;
 	if (!platform_name.empty()) {
 		j["platform_name"] = platform_name;
@@ -442,10 +490,15 @@ std::string application_role_connection::build_json(bool with_id) const {
 		j["platform_username"] = platform_username;
 	}
 	if (std::holds_alternative<application_role_connection_metadata>(metadata)) {
-		j["metadata"] = json::parse(std::get<application_role_connection_metadata>(metadata).build_json());
+		try {
+			j["metadata"] = json::parse(std::get<application_role_connection_metadata>(metadata).build_json());
+		}
+		catch (const std::exception &e) {
+			/* Protection against malformed json in metadata */
+		}
 	}
-	return j.dump();
+	return j;
 }
 
 
-};
+}

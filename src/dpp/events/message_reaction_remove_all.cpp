@@ -2,6 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
+ * SPDX-License-Identifier: Apache-2.0
  * Copyright 2021 Craig Edwards and D++ contributors 
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
@@ -24,11 +25,9 @@
 #include <dpp/stringops.h>
 #include <dpp/json.h>
 
-using json = nlohmann::json;
 
-namespace dpp { namespace events {
+namespace dpp::events {
 
-using namespace dpp;
 
 /**
  * @brief Handle event
@@ -40,14 +39,29 @@ using namespace dpp;
 void message_reaction_remove_all::handle(discord_client* client, json &j, const std::string &raw) {
 	if (!client->creator->on_message_reaction_remove_all.empty()) {
 		json &d = j["d"];
-		dpp::message_reaction_remove_all_t mrra(client, raw);
-		mrra.reacting_guild = dpp::find_guild(snowflake_not_null(&d, "guild_id"));
-		mrra.reacting_channel = dpp::find_channel(snowflake_not_null(&d, "channel_id"));
+		message_reaction_remove_all_t mrra(client->owner, client->shard_id, raw);
+
+		snowflake guild_id = snowflake_not_null(&d, "guild_id");
+		snowflake channel_id = snowflake_not_null(&d, "channel_id");
+
+		guild* g = find_guild(guild_id);
+		channel* c = find_channel(channel_id);
+
+		mrra.reacting_guild = g ? *g : guild{};
+		mrra.reacting_guild.id = guild_id;
+
+		mrra.channel_id = channel_id;
+		mrra.reacting_channel = c ? *c : channel{};
+		mrra.reacting_channel.id = channel_id;
+
 		mrra.message_id = snowflake_not_null(&d, "message_id");
-		if (mrra.reacting_channel && mrra.message_id) {
-			client->creator->on_message_reaction_remove_all.call(mrra);
+
+		if (mrra.channel_id && mrra.message_id) {
+			client->creator->queue_work(1, [c = client->creator, mrra]() {
+				c->on_message_reaction_remove_all.call(mrra);
+			});
 		}
 	}
 }
 
-}};
+};

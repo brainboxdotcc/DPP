@@ -2,6 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
+ * SPDX-License-Identifier: Apache-2.0
  * Copyright 2021 Craig Edwards and D++ contributors 
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
@@ -24,11 +25,9 @@
 #include <dpp/stringops.h>
 #include <dpp/json.h>
 
-using json = nlohmann::json;
 
-namespace dpp { namespace events {
+namespace dpp::events {
 
-using namespace dpp;
 
 /**
  * @brief Handle event
@@ -39,42 +38,46 @@ using namespace dpp;
  */
 void guild_member_add::handle(discord_client* client, json &j, const std::string &raw) {
 	json d = j["d"];
-
-	dpp::guild* g = dpp::find_guild(snowflake_not_null(&d, "guild_id"));
-	dpp::guild_member_add_t gmr(client, raw);
-	if (g) {
-		if (client->creator->cache_policy.user_policy == dpp::cp_none) {
-			dpp::guild_member gm;
-			gm.fill_from_json(&d, g->id, snowflake_not_null(&(d["user"]), "id"));
-			gmr.added = gm;
-			if (!client->creator->on_guild_member_add.empty()) {
-				gmr.adding_guild = g;
-				client->creator->on_guild_member_add.call(gmr);
-			}
+	dpp::snowflake guild_id = snowflake_not_null(&d, "guild_id");
+	dpp::guild* g = dpp::find_guild(guild_id);
+	dpp::guild_member_add_t gmr(client->owner, client->shard_id, raw);
+	if (client->creator->cache_policy.user_policy == dpp::cp_none) {
+		dpp::guild_member gm;
+		gm.fill_from_json(&d, guild_id, snowflake_not_null(&(d["user"]), "id"));
+		gmr.added = gm;
+		if (!client->creator->on_guild_member_add.empty()) {
+			gmr.adding_guild = g ? *g : guild{};
+			gmr.adding_guild.id = guild_id;
+			client->creator->queue_work(1, [c = client->creator, gmr]() {
+				c->on_guild_member_add.call(gmr);
+			});
+		}
+	} else {
+		dpp::user* u = dpp::find_user(snowflake_not_null(&(d["user"]), "id"));
+		if (!u) {
+			u = new dpp::user();
+			u->fill_from_json(&(d["user"]));
+			dpp::get_user_cache()->store(u);
 		} else {
-			dpp::user* u = dpp::find_user(snowflake_not_null(&(d["user"]), "id"));
-			if (!u) {
-				u = new dpp::user();
-				u->fill_from_json(&(d["user"]));
-				dpp::get_user_cache()->store(u);
-			} else {
-				u->refcount++;
-			}
-			dpp::guild_member gm;
-			gmr.added = {};
-			if (u && u->id && g->members.find(u->id) == g->members.end()) {
-				gm.fill_from_json(&d, g->id, u->id);
-				g->members[u->id] = gm;
-				gmr.added = gm;
-			} else if (u && u->id) {
-				gmr.added = g->members.find(u->id)->second;
-			}
-			if (!client->creator->on_guild_member_add.empty()) {
-				gmr.adding_guild = g;
-				client->creator->on_guild_member_add.call(gmr);
-			}
+			u->refcount++;
+		}
+		dpp::guild_member gm;
+		gmr.added = {};
+		if (g && u && u->id && g->members.find(u->id) == g->members.end()) {
+			gm.fill_from_json(&d, g->id, u->id);
+			g->members[u->id] = gm;
+			gmr.added = gm;
+		} else if (g && u && u->id) {
+			gmr.added = g->members.find(u->id)->second;
+		}
+		if (!client->creator->on_guild_member_add.empty()) {
+			gmr.adding_guild = g ? *g : guild{};
+			gmr.adding_guild.id = guild_id;
+			client->creator->queue_work(1, [c = client->creator, gmr]() {
+				c->on_guild_member_add.call(gmr);
+			});
 		}
 	}
 }
 
-}};
+};
