@@ -33,6 +33,7 @@ D++ is a lightweight and efficient library for **Discord** written in **modern C
 * Stable [Windows support](https://dpp.dev/buildwindows.html)
 * Ready-made compiled packages for Windows, Raspberry Pi (ARM64/ARM7/ARMv6), Debian x86/x64, and RPM based distributions
 * Highly scalable for large amounts of guilds and users
+* Support for C++ modules
 
 Want to help? Drop me a line or send a PR.
 
