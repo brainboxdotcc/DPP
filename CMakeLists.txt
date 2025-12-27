@@ -162,9 +162,36 @@ if (NOT WIN32)
 endif()
 
 if (DPP_MODULES)
-	add_subdirectory(src/modules)
-	target_compile_definitions(dpp PUBLIC DPP_MODULES)
 	message("-- C++20 Modules support: ${Green}ENABLED${ColourReset}")
+	add_library(dpp_module)
+
+	target_sources(dpp_module
+		PUBLIC
+			FILE_SET CXX_MODULES
+			FILES "${CMAKE_CURRENT_SOURCE_DIR}/include/dpp/dpp.cppm"
+	)
+
+	target_compile_features(dpp_module PUBLIC cxx_std_20)
+
+	target_include_directories(dpp_module PUBLIC
+		$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+		$<INSTALL_INTERFACE:include>
+	)
+
+	target_link_libraries(dpp_module PUBLIC dpp)
+
+	add_library(dpp::module ALIAS dpp_module)
+
+	# Installation
+	install(TARGETS dpp_module
+		EXPORT ${PROJECT_NAME}Targets
+		LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+		ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+		RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+		FILE_SET CXX_MODULES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dpp/include
+	)
+
+	target_compile_definitions(dpp PUBLIC DPP_MODULES)
 else()
 	message("-- C++20 Modules support: ${Red}DISABLED${ColourReset} (enable with -DDPP_MODULES=ON)")
 endif()
