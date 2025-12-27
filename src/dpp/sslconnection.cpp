@@ -277,7 +277,6 @@ void ssl_connection::on_buffer_drained() {
 /* SSL Client constructor throws std::runtime_error if it can't allocate a socket or call connect() */
 void ssl_connection::connect() {
 	/* Resolve hostname to IP */
-	int err = 0;
 	const dns_cache_entry* addr = resolve_hostname(hostname, port);
 	sfd = addr->make_connecting_socket();
 	address_t destination = addr->get_connecting_address(from_string<uint16_t>(this->port, std::dec));
