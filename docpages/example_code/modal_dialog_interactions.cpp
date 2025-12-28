@@ -6,7 +6,7 @@ int main() {
 
 	bot.on_log(dpp::utility::cout_logger());
 
-	bot.on_slashcommand([&bot](const dpp::slashcommand_t& event) {
+	bot.on_slashcommand([](const dpp::slashcommand_t& event) {
 		/* Check for our /dialog command */
 		if (event.command.get_command_name() == "dialog") {
 			/* Instantiate an interaction_modal_response object */

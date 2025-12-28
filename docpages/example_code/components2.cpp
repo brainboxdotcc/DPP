@@ -6,7 +6,7 @@ int main() {
 	bot.on_log(dpp::utility::cout_logger());
 
 	/* The event is fired when someone issues your commands */
-	bot.on_slashcommand([&bot](const dpp::slashcommand_t& event) {
+	bot.on_slashcommand([](const dpp::slashcommand_t& event) {
 		/* Check which command they ran */
 		if (event.command.get_command_name() == "math") {
 
@@ -40,7 +40,7 @@ int main() {
 		}
 	});
 
-	bot.on_button_click([&bot](const dpp::button_click_t & event) {
+	bot.on_button_click([](const dpp::button_click_t & event) {
 		if (event.custom_id == "10") {
 			event.reply(dpp::message("You got it right!").set_flags(dpp::m_ephemeral));
 		} else {
