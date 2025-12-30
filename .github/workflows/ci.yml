@@ -239,7 +239,7 @@ jobs:
           DONT_RUN_VCPKG: true
 
       - name: Run offline unit tests
-        run: cd build/library && ./unittest
+        run: cd main\build\library\${{matrix.cfg.config}} && ./unittest
 
       - name: Move debug files for packaging
         if: ${{ matrix.cfg.config == 'Debug' }}
