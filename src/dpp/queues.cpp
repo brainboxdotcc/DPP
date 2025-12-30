@@ -277,6 +277,7 @@ http_request_completion_t http_request::run(request_concurrency_queue* processor
 					catch (...) {
 						owner->log(ll_error, "Uncaught exception thrown in HTTPS callback for " + std::string(request_verb[method]) + " "  + hci.hostname + ":" + std::to_string(hci.port) + _url + ": <non exception value>");
 					}
+					completed = true;
 					{
 						std::lock_guard<std::mutex> lock(this_captured_mutex);
 						this_captured = false;
