@@ -246,13 +246,9 @@ jobs:
 
       - name: Run offline unit tests
         if: ${{ matrix.cfg.unittest }}
-        run: cd main\build\library\${{matrix.cfg.config}} && .\unittest.exe | cat output.txt
+        run: main\build\library\${{matrix.cfg.config}}\unittest.exe
         env:
           TEST_DATA_DIR: '${{github.workspace}}\testdata\'
-
-      - name: Print Unit Test logs
-        if: ${{ matrix.cfg.unittest && (success() || failure()) }}
-        run: cd main\build\library\${{matrix.cfg.config}} && tee output.txt
 
       - name: Move debug files for packaging
         if: ${{ matrix.cfg.config == 'Debug' }}
