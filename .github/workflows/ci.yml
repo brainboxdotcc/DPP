@@ -27,6 +27,36 @@ permissions:
   contents: read
 
 jobs:
+  linux-prebuild:
+    permissions:
+      contents: write
+    name: Linux Pre-Build Check ${{ matrix.cfg.arch }} (${{ matrix.cfg.cpp }}-${{ matrix.cfg.version }}${{ matrix.cfg.name-extra }})
+    runs-on: ${{ matrix.cfg.os }}
+    strategy:
+      fail-fast: false # Don't fail everything if one fails. We want to test each OS/Compiler individually
+      matrix:
+        cfg:
+          - { arch: 'amd64', concurrency: 4, os: ubuntu-24.04, package: clang-18, cpp: clang++, version: 18, cmake-flags: '-DDPP_CORO=ON' }
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@91182cccc01eb5e619899d80e4e971d6181294a7 # v2.10.1
+        with:
+          egress-policy: audit
+
+      - name: Checkout D++
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Setup mold
+        uses: rui314/setup-mold@b015f7e3f2938ad3a5ed6e5111a8c6c7c1d6db6e # v1
+
+      - name: Install apt packages
+        run: sudo sed -i 's/azure\.//' /etc/apt/sources.list && sudo apt update && sudo apt-get install -y ${{ matrix.cfg.package }} pkg-config libopus-dev zlib1g-dev rpm
+
+      - name: Generate CMake
+        run: cmake -B build -DDPP_NO_VCPKG=ON -DAVX_TYPE=AVX0 -DCMAKE_BUILD_TYPE=Release ${{matrix.cfg.cmake-flags}}
+        env:
+          CXX: ${{ matrix.cfg.cpp }}-${{ matrix.cfg.version }}
+
   linux:
     permissions:
       contents: write
@@ -34,6 +64,7 @@ jobs:
       group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.cfg.arch }}-(${{ matrix.cfg.cpp }}-${{ matrix.cfg.version }})
       cancel-in-progress: true
     name: Linux ${{ matrix.cfg.arch }} (${{ matrix.cfg.cpp }}-${{ matrix.cfg.version }}${{ matrix.cfg.name-extra }})
+    needs: linux-prebuild
     runs-on: ${{ matrix.cfg.os }}
     strategy:
       fail-fast: false # Don't fail everything if one fails. We want to test each OS/Compiler individually
@@ -126,6 +157,7 @@ jobs:
     permissions:
       contents: write
     name: macOS ${{ matrix.cfg.arch }} (${{ matrix.cfg.cpp }}-${{ matrix.cfg.version }})
+    needs: linux-prebuild
     runs-on: ${{ matrix.cfg.os }}
     strategy:
       fail-fast: false # Don't fail everything if one fails. We want to test each OS/Compiler individually
@@ -176,6 +208,7 @@ jobs:
         - { name: 'x64-Clang',      arch: x64, config: Debug,   vs: '2022', os: 'windows-2025', vsv: '17', upload: false, options: '-T ClangCL' }
 
     name: "Windows ${{matrix.cfg.name}}-${{matrix.cfg.config}}-vs${{matrix.cfg.vs}}"
+    needs: linux-prebuild
     runs-on: ${{matrix.cfg.os}}
     steps:
       - name: Harden Runner
@@ -211,6 +244,9 @@ jobs:
         env:
           DONT_RUN_VCPKG: true
 
+      - name: Run offline unit tests
+        run: cd build/library && ./unittest
+
       - name: Move debug files for packaging
         if: ${{ matrix.cfg.config == 'Debug' }}
         run: xcopy main\build\library\Debug\* main\build\library\Release\ /s /q
@@ -239,6 +275,7 @@ jobs:
           - {name: "ARMv6", os: ubuntu-24.04, cmake-options: -DDPP_NO_CORO=ON -DCMAKE_TOOLCHAIN_FILE=cmake/ARMv6ToolChain.cmake}
 
     name: ${{matrix.cfg.name}}
+    needs: linux-prebuild
     runs-on: ${{matrix.cfg.os}}
     steps:
       - name: Harden Runner
