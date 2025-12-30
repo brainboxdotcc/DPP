@@ -36,7 +36,7 @@ jobs:
       fail-fast: false # Don't fail everything if one fails. We want to test each OS/Compiler individually
       matrix:
         cfg:
-          - { arch: 'amd64', concurrency: 4, os: ubuntu-24.04, package: clang-18, cpp: clang++, version: 18, cmake-flags: '-DDPP_CORO=ON' }
+          - { arch: 'amd64', concurrency: 4, os: ubuntu-24.04, package: clang-18, cpp: clang++, version: 18, cmake-flags: '' }
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@91182cccc01eb5e619899d80e4e971d6181294a7 # v2.10.1
@@ -74,14 +74,8 @@ jobs:
         cfg:
           # clang++
           - { arch: 'amd64', concurrency: 4, os: ubuntu-22.04, package: clang-11, cpp: clang++, version: 11, cmake-flags: '', cpack: 'no', ctest: 'no', mold: 'yes' }
-          - { arch: 'amd64', concurrency: 4, os: ubuntu-22.04, package: clang-12, cpp: clang++, version: 12, cmake-flags: '', cpack: 'no', ctest: 'no', mold: 'yes' }
-          - { arch: 'amd64', concurrency: 4, os: ubuntu-22.04, package: clang-13, cpp: clang++, version: 13, cmake-flags: '', cpack: 'no', ctest: 'no', mold: 'yes' }
-          - { arch: 'amd64', concurrency: 4, os: ubuntu-22.04, package: clang-14, cpp: clang++, version: 14, cmake-flags: '', cpack: 'no', ctest: 'no', mold: 'yes' }
           - { arch: 'amd64', concurrency: 4, os: ubuntu-22.04, package: clang-15, cpp: clang++, version: 15, cmake-flags: '', cpack: 'no', ctest: 'no', mold: 'yes' }
           - { arch: 'amd64', concurrency: 4, os: ubuntu-24.04, package: clang-16, cpp: clang++, version: 16, cmake-flags: '', cpack: 'no', ctest: 'no', mold: 'yes' }
-          - { arch: 'amd64', concurrency: 4, os: ubuntu-24.04, package: clang-17, cpp: clang++, version: 17, cmake-flags: '', cpack: 'no', ctest: 'no', mold: 'yes' }
-          - { arch: 'amd64', concurrency: 4, os: ubuntu-24.04, package: clang-18, cpp: clang++, version: 18, cmake-flags: '', cpack: 'no', ctest: 'no', mold: 'yes' }
-          - { arch: 'amd64', concurrency: 4, os: ubuntu-24.04, package: clang-19, cpp: clang++, version: 19, cmake-flags: '', cpack: 'no', ctest: 'no', mold: 'yes' }
           - { arch: 'amd64', concurrency: 4, os: ubuntu-24.04, package: clang-20, cpp: clang++, version: 20, cmake-flags: '', cpack: 'no', ctest: 'no', mold: 'yes' }
           - { arch: 'amd64', concurrency: 4, os: ubuntu-24.04, package: 'clang-21 libc++-21-dev libc++abi-21-dev', cpp: clang++, version: 21, cmake-flags: '-DCMAKE_CXX_FLAGS="-stdlib=libc++" -DCMAKE_EXE_LINKER_FLAGS="-stdlib=libc++"', cpack: 'no', ctest: 'no', mold: 'yes', name-extra: ' libc++', llvm-apt: 'yes' }
           # g++
@@ -182,7 +176,7 @@ jobs:
         run: brew install make opus openssl
 
       - name: Generate CMake
-        run: cmake -B build -DDPP_NO_VCPKG=ON -DCMAKE_BUILD_TYPE=Release -DDPP_CORO=ON -DAVX_TYPE=AVX0
+        run: cmake -B build -DDPP_NO_VCPKG=ON -DCMAKE_BUILD_TYPE=Release -DAVX_TYPE=AVX0
         env:
           DONT_RUN_VCPKG: true
 
