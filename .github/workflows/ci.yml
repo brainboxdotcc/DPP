@@ -195,8 +195,8 @@ jobs:
       fail-fast: false # Don't cancel other matrix jobs if one fails
       matrix:
         cfg:
-        - { name: 'x64',            arch: x64, config: Release, vs: '2022', os: 'windows-2025', vsv: '17', upload: true,  options: '', unittest: true }
-        - { name: 'x64',            arch: x64, config: Debug,   vs: '2022', os: 'windows-2025', vsv: '17', upload: true,  options: '' }
+        - { name: 'x64',            arch: x64, config: Release, vs: '2022', os: 'windows-2025', vsv: '17', upload: true,  options: ''}
+        - { name: 'x64',            arch: x64, config: Debug,   vs: '2022', os: 'windows-2025', vsv: '17', upload: true,  options: '', unittest: true }
         - { name: 'x86',            arch: x86, config: Release, vs: '2022', os: 'windows-2025', vsv: '17', upload: true,  options: '-T host=x86' }
         - { name: 'x86',            arch: x86, config: Debug,   vs: '2022', os: 'windows-2025', vsv: '17', upload: true,  options: '-T host=x86' }
         - { name: 'x64-Clang',      arch: x64, config: Debug,   vs: '2022', os: 'windows-2025', vsv: '17', upload: false, options: '-T ClangCL', unittest: true }
@@ -246,7 +246,11 @@ jobs:
 
       - name: Run offline unit tests
         if: ${{ matrix.cfg.unittest }}
-        run: cd main\build\library\${{matrix.cfg.config}} && .\unittest.exe
+        run: cd main\build\library\${{matrix.cfg.config}} && .\unittest.exe | cat output.txt
+
+      - name: Print Unit Test logs
+        if: ${{ matrix.cfg.unittest && (success() || failure()) }}
+        run: cd main\build\library\${{matrix.cfg.config}} && tee output.txt
 
       - name: Move debug files for packaging
         if: ${{ matrix.cfg.config == 'Debug' }}
