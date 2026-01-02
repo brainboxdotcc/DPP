@@ -48,7 +48,7 @@ class DPP_EXPORT bignumber {
 	 * @brief Forward declaration of structure which implements proper destructor for unique_ptr<openssl_bignum> as type is incomplete in header
 	 * custom deleter defined where openssl_bignum is complete
 	 */
-	struct bn_deleter {
+	struct DPP_EXPORT bn_deleter {
 
 		/**
 		 * @brief Deletes an `openssl_bignum` instance.
