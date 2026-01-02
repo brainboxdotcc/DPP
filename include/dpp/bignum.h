@@ -58,7 +58,7 @@ class DPP_EXPORT bignumber {
 		 *
 		 * @param p Pointer to the `openssl_bignum` instance to delete.
 		 */
-		void operator()(openssl_bignum* p) const noexcept;
+		DPP_EXPORT void operator()(openssl_bignum* p) const noexcept;
 	};
 
 	/**
