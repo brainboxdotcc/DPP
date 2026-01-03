@@ -30,6 +30,7 @@
 #include <vector>
 #include <functional>
 #include <atomic>
+#include <condition_variable>		
 #include <dpp/httpsclient.h>
 
 namespace dpp {
@@ -239,6 +240,22 @@ class DPP_EXPORT http_request {
 	 * @brief HTTPS client
 	 */
 	std::unique_ptr<https_client> cli;
+
+	/**
+	 * @brief Mutex for this_captured_signal and this_captured
+	 */
+	std::mutex this_captured_mutex;
+
+	/**
+	 * @brief Condition variable to signal this is no longer captured by an ongoing lambda
+	 */
+	std::condition_variable this_captured_signal;
+
+
+	/**
+	 * @brief True if this is currently captured in a lambda and cannot be deleted
+	 */
+	bool this_captured{false};
 
 public:
 	/**
