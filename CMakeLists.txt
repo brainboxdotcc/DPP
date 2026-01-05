@@ -18,7 +18,7 @@
 
 cmake_minimum_required (VERSION 3.16)
 set(CMAKE_CXX_STANDARD 17)
- 
+
 option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 option(BUILD_VOICE_SUPPORT "Build voice support" ON)
 option(RUN_LDCONFIG "Run ldconfig after installation" ON)
@@ -33,6 +33,7 @@ option(DPP_USE_EXTERNAL_JSON "Use an external installation of nlohmann::json" OF
 option(DPP_USE_PCH "Use precompiled headers to speed up compilation" OFF)
 option(AVX_TYPE "Force AVX type for speeding up audio mixing" OFF)
 option(DPP_TEST_VCPKG "Force VCPKG build without VCPKG installed (for development use only!)" OFF)
+option(DPP_MODULES "Support for C++20 modules (experimental)" OFF)
 
 include(CheckCXXSymbolExists)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -159,3 +160,4 @@ endif()
 if (NOT WIN32)
 	target_link_libraries(dpp PRIVATE std::filesystem)
 endif()
+

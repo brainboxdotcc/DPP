@@ -459,17 +459,53 @@ if (NOT BUILD_SHARED_LIBS)
 	endif()
 endif()
 
+if (DPP_MODULES)
+	message("-- ${Green}Modules are enabled!${ColourReset}")
+	add_library(dpp_module)
+
+	target_sources(dpp_module
+		PUBLIC
+			FILE_SET CXX_MODULES
+			BASE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/../include"
+			FILES "${CMAKE_CURRENT_SOURCE_DIR}/../include/dpp/dpp.cppm"
+	)
+
+	target_compile_features(dpp_module PUBLIC cxx_std_20)
+
+	target_include_directories(dpp_module PUBLIC
+		$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+		$<INSTALL_INTERFACE:include>
+	)
+
+	target_link_libraries(dpp_module PUBLIC dpp)
+
+	add_library(dpp::module ALIAS dpp_module)
+
+	target_compile_definitions(dpp PUBLIC DPP_MODULES)
+
+	# Installation
+	install(TARGETS dpp_module
+		EXPORT ${PROJECT_NAME}Targets
+		LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+		ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+		RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+		FILE_SET CXX_MODULES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dpp/include
+	)
+else()
+	message("-- ${Yellow}Modules are disabled.${ColourReset}")
+endif()
+
 if (DPP_BUILD_TEST)
 	enable_testing(${CMAKE_CURRENT_SOURCE_DIR}/..)
 	file(GLOB testnamelist "${CMAKE_CURRENT_SOURCE_DIR}/../src/*")
 	foreach (fulltestname ${testnamelist})
 		get_filename_component(testname ${fulltestname} NAME)
-		if (NOT "${testname}" STREQUAL "dpp")
+		if (NOT "${testname}" STREQUAL "dpp" AND NOT "${testname}" STREQUAL "modules")
 			message("-- Configuring test: ${Green}${testname}${ColourReset} with source: ${modules_dir}/${testname}/*.cpp")
 			set (testsrc "")
 			file(GLOB testsrc "${modules_dir}/${testname}/*.cpp")
 			add_executable(${testname} ${testsrc})
-			if ((NOT DPP_NO_CORO) OR DPP_FORMATTERS)
+			if ((NOT DPP_NO_CORO) OR DPP_FORMATTERS OR DPP_MODULES)
 				target_compile_features(${testname} PRIVATE cxx_std_20)
 			else()
 				target_compile_features(${testname} PRIVATE cxx_std_17)
@@ -477,7 +513,16 @@ if (DPP_BUILD_TEST)
 			if (MSVC)
 				target_compile_options(${testname} PRIVATE /utf-8)
 			endif()
-			if(BUILD_SHARED_LIBS)
+			if (DPP_MODULES)
+				target_link_libraries(${testname} PUBLIC dpp_module)
+				add_dependencies(${testname} dpp_module)
+				if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+					target_compile_options(${testname} PRIVATE -fmodules-ts)
+				elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+					target_compile_options(${testname} PRIVATE -fmodules)
+				endif()
+				set_target_properties(${testname} PROPERTIES CXX_SCAN_FOR_MODULES ON)
+			elseif(BUILD_SHARED_LIBS)
 				target_link_libraries(${testname} PUBLIC ${modname})
 			else()
 				target_link_libraries(${testname} PUBLIC dppstatic)

@@ -334,6 +334,11 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 			set_test(WEBHOOK, false);
 		}
 
+		// Test C++ module import
+		#ifdef DPP_MODULES
+		run_module_tests();
+		#endif
+
 		{ // test dpp::snowflake
 			start_test(SNOWFLAKE);
 			bool success = true;
