@@ -58,7 +58,7 @@ namespace dpp {
  * requests to Discord. This is useful for bots that do not need to receive websocket events as it will save a lot of
  * resources.
  */
-constexpr uint32_t NO_SHARDS = ~0U;
+inline constexpr uint32_t NO_SHARDS = ~0U;
 
 /**
  * @brief Types of startup for cluster::start()

@@ -2010,37 +2010,37 @@ namespace embed_type {
 	/**
 	 * @brief Rich text
 	 */
-	const std::string emt_rich = "rich";
+	inline const std::string emt_rich = "rich";
 
 	/**
 	 * @brief Image
 	 */
-	const std::string emt_image = "image";
+	inline const std::string emt_image = "image";
 
 	/**
 	 * @brief Video link
 	 */
-	const std::string emt_video = "video";
+	inline const std::string emt_video = "video";
 
 	/**
 	 * @brief Animated gif
 	 */
-	const std::string emt_gifv = "gifv";
+	inline const std::string emt_gifv = "gifv";
 
 	/**
 	 * @brief Article
 	 */
-	const std::string emt_article = "article";
+	inline const std::string emt_article = "article";
 
 	/**
 	 * @brief Link URL
 	 */
-	const std::string emt_link = "link";
+	inline const std::string emt_link = "link";
 
 	/**
 	 * @brief Auto moderation filter
 	 */
-	const std::string emt_automod = "auto_moderation_message";
+	inline const std::string emt_automod = "auto_moderation_message";
 } // namespace embed_type
 
 /**

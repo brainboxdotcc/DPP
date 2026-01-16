@@ -7,7 +7,7 @@ int main() {
 	bot.on_log(dpp::utility::cout_logger());
 
 	/* The event is fired when someone issues your commands */
-	bot.on_slashcommand([&bot](const dpp::slashcommand_t& event) {
+	bot.on_slashcommand([](const dpp::slashcommand_t& event) {
 		/* Check which command they ran */
 		if (event.command.get_command_name() == "button") {
 			/* Create a message */
@@ -33,7 +33,7 @@ int main() {
 	/* When a user clicks your button, the on_button_click event will fire,
 	 * containing the custom_id you defined in your button.
 	 */
-	bot.on_button_click([&bot](const dpp::button_click_t& event) {
+	bot.on_button_click([](const dpp::button_click_t& event) {
 		/* Button clicks are still interactions, and must be replied to in some form to
 		 * prevent the "this interaction has failed" message from Discord to the user.
  		 */
