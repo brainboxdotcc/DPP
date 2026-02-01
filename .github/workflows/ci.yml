@@ -64,7 +64,7 @@ jobs:
           - { arch: 'arm64', concurrency: 4, os: [self-hosted, linux, ARM64], package: g++-12, cpp: g++, version: 12, cmake-flags: '', cpack: 'yes', ctest: 'no', mold: 'yes' }
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # v2.14.0
+        uses: step-security/harden-runner@e3f713f2d8f53843e71c69a996d56f51aa9adfb9 # v2.14.1
         with:
           egress-policy: audit
 
@@ -134,7 +134,7 @@ jobs:
           - { arch: 'arm64', concurrency: 3, os: macos-latest, cpp: clang++, version: 16, cmake-flags: '', xcode-version: '16.4' }
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # v2.14.0
+        uses: step-security/harden-runner@e3f713f2d8f53843e71c69a996d56f51aa9adfb9 # v2.14.1
         with:
           egress-policy: audit
 
@@ -179,7 +179,7 @@ jobs:
     runs-on: ${{matrix.cfg.os}}
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # v2.14.0
+        uses: step-security/harden-runner@e3f713f2d8f53843e71c69a996d56f51aa9adfb9 # v2.14.1
         with:
           egress-policy: audit
 
@@ -242,7 +242,7 @@ jobs:
     runs-on: ${{matrix.cfg.os}}
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # v2.14.0
+        uses: step-security/harden-runner@e3f713f2d8f53843e71c69a996d56f51aa9adfb9 # v2.14.1
         with:
           egress-policy: audit
 
