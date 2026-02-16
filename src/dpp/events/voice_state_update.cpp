@@ -70,6 +70,19 @@ void voice_state_update::handle(discord_client* client, json &j, const std::stri
 		if (vsu.state.channel_id.empty()) {
 			/* Instruction to disconnect from vc */
 			client->disconnect_voice_internal(vsu.state.guild_id, false);
+		} else if (client->get_voice(vsu.state.guild_id)->channel_id != 0 &&
+		           vsu.state.channel_id != client->get_voice(vsu.state.guild_id)->channel_id) {
+			/* Instruction to connect to a different channel */
+			std::shared_lock lock(client->voice_mutex);
+			auto v = client->connecting_voice_channels.find(vsu.state.guild_id);
+			if (v != client->connecting_voice_channels.end()) {
+				voiceconn& connection = *v->second;
+				connection.disconnect();
+				connection.session_id = vsu.state.session_id;
+				connection.channel_id = vsu.state.channel_id;
+				connection.token = "";
+				connection.websocket_hostname = "";
+			}
 		} else {
 			std::shared_lock lock(client->voice_mutex);
 			auto v = client->connecting_voice_channels.find(vsu.state.guild_id);
