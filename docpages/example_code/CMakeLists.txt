@@ -28,19 +28,31 @@
 # libmpg123-dev
 # dpp latest master with -DDPP_CORO=ON installed sytemwide
 
-cmake_minimum_required (VERSION 3.16)
+cmake_minimum_required (VERSION 3.28)
 project(documentation_tests)
 
 string(ASCII 27 Esc)
 
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DDPP_CORO -DDPP_MODULES -std=c++20 -pthread -O0 -fPIC -DFMT_HEADER_ONLY -Wall -Wextra -Wpedantic -Werror -Wno-unused-parameter -Wno-deprecated-declarations")
+option(DPP_MODULES "Build examples with C++20 modules support" ON)
+
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DDPP_CORO -std=c++20 -pthread -O0 -fPIC -DFMT_HEADER_ONLY -Wall -Wextra -Wpedantic -Werror -Wno-unused-parameter -Wno-deprecated-declarations")
 set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0")
 
 file(GLOB example_list ./*.cpp)
 foreach (example ${example_list})
 	get_filename_component(examplename ${example} NAME)
+	
 	message(STATUS "Found example '${Esc}[1;34m${examplename}${Esc}[m'")
 	add_executable(${examplename}_out ${example})
 	target_link_libraries(${examplename}_out dl dpp mpg123 oggz ogg opusfile opus)
 	include_directories(/usr/include/opus)
+	
+	target_compile_definitions(${examplename}_out PRIVATE DPP_MODULES)
+	set_target_properties(${examplename}_out PROPERTIES CXX_SCAN_FOR_MODULES ON)
+	
+	if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+		target_compile_options(${examplename}_out PRIVATE -fmodules-ts)
+	elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+		target_compile_options(${examplename}_out PRIVATE -fmodules)
+	endif()
 endforeach(example)

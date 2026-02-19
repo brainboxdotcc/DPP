@@ -465,7 +465,7 @@ if (DPP_MODULES)
 	# Add module file set directly to the dpp target
 	target_sources(dpp
 		PUBLIC
-			FILE_SET CXX_MODULES
+			FILE_SET CXX_MODULES TYPE CXX_MODULES
 			BASE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/../include"
 			FILES "${CMAKE_CURRENT_SOURCE_DIR}/../include/dpp/dpp.cppm"
 	)
