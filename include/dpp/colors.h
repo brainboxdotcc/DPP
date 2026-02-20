@@ -31,7 +31,7 @@ namespace dpp {
  * @brief predefined color constants.
  */
 namespace colors {
-	const uint32_t
+	static constexpr uint32_t
 		white = 0xFFFFFF,
 		discord_white = 0xFFFFFE,
 		light_gray = 0xC0C0C0,

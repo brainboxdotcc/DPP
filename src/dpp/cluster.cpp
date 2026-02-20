@@ -195,10 +195,12 @@ void cluster::log(dpp::loglevel severity, const std::string &msg) const {
 		dpp::log_t logmsg(nullptr, 0, msg);
 		logmsg.severity = severity;
 		logmsg.message = msg;
-		size_t pos{0};
-		while ((pos = logmsg.message.find(token, pos)) != std::string::npos) {
-			logmsg.message.replace(pos, token.length(), "*****");
-			pos += 5;
+		if (!token.empty()) {
+			size_t pos{0};
+			while ((pos = logmsg.message.find(token, pos)) != std::string::npos) {
+				logmsg.message.replace(pos, token.length(), "*****");
+				pos += 5;
+			}
 		}
 		on_log.call(logmsg);
 	}
@@ -636,12 +638,6 @@ shard_list cluster::get_shards() const {
 cluster& cluster::set_request_timeout(uint16_t timeout) {
 	request_timeout = timeout;
 	return *this;
-}
-
-bool cluster::register_command(const std::string &name, const slashcommand_handler_t handler) {
-	std::unique_lock lk(named_commands_mutex);
-	auto [_, inserted] = named_commands.try_emplace(name, handler);
-	return inserted;
 }
 
 bool cluster::unregister_command(const std::string &name) {

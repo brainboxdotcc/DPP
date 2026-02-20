@@ -303,8 +303,8 @@ async<confirmation_callback_t> cluster::co_get_gateway_bot() {
 	return async{ this, static_cast<void (cluster::*)(command_completion_event_t)>(&cluster::get_gateway_bot) };
 }
 
-async<confirmation_callback_t> cluster::co_guild_current_member_edit(snowflake guild_id, const std::string &nickname) {
-	return async{ this, static_cast<void (cluster::*)(snowflake, const std::string &, command_completion_event_t)>(&cluster::guild_current_member_edit), guild_id, nickname };
+async<confirmation_callback_t> cluster::co_guild_current_member_edit(snowflake guild_id, const std::string& nickname, const std::string& banner_blob, const image_type banner_type, const std::string& avatar_blob, const image_type avatar_type, const std::string& bio) {
+	return async{ this, static_cast<void (cluster::*)(snowflake, const std::string &, const std::string&, const image_type, const std::string&, const image_type, const std::string&, command_completion_event_t)>(&cluster::guild_current_member_edit), guild_id, nickname, banner_blob, banner_type, avatar_blob, avatar_type, bio };
 }
 
 async<confirmation_callback_t> cluster::co_guild_auditlog_get(snowflake guild_id, snowflake user_id, uint32_t action_type, snowflake before, snowflake after, uint32_t limit) {
@@ -573,6 +573,10 @@ async<confirmation_callback_t> cluster::co_poll_end(snowflake message_id, snowfl
 
 async<confirmation_callback_t> cluster::co_channel_pins_get(snowflake channel_id) {
 	return async{ this, static_cast<void (cluster::*)(snowflake, command_completion_event_t)>(&cluster::channel_pins_get), channel_id };
+}
+
+async<confirmation_callback_t> cluster::co_channel_pins_get(snowflake channel_id, std::optional<time_t> before, std::optional<uint64_t> limit) {
+	return async{ this, static_cast<void (cluster::*)(snowflake, std::optional<time_t>, std::optional<uint64_t>, command_completion_event_t)>(&cluster::channel_pins_get), channel_id, before, limit };
 }
 
 async<confirmation_callback_t> cluster::co_role_create(const class role &r) {

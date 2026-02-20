@@ -465,7 +465,7 @@ void exec(const std::string& cmd, std::vector<std::string> parameters, cmd_resul
 			}
 			/* Capture stderr */
 			cmd_and_parameters << " 2>&1";
-			std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd_and_parameters.str().c_str(), "r"), pclose);
+			std::unique_ptr<FILE, int(*)(FILE*)> pipe(popen(cmd_and_parameters.str().c_str(), "r"), pclose);
 			if (!pipe) {
 				return;
 			}
