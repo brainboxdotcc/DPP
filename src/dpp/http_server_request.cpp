@@ -235,6 +235,10 @@ http_server_request& http_server_request::set_response_header(const std::string&
 	return *this;
 }
 
+std::string http_server_request::get_path() const {
+	return this->path;
+}
+
 http_state http_server_request::get_state() const {
 	return this->state;
 }
