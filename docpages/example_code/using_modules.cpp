@@ -1,3 +1,6 @@
+#include <string>
+#include <typeinfo>
+
 import dpp;
 
 int main() {
@@ -9,7 +12,7 @@ int main() {
 		}
 	});
 
-	bot.on_ready([&bot](const std::ready_t& event) -> void {
+	bot.on_ready([&bot](const dpp::ready_t& event) -> void {
 		if (dpp::run_once<struct register_bot_commands>()) {
 			bot.global_command_create(
 				dpp::slashcommand("ping", "Ping pong!", bot.me.id)

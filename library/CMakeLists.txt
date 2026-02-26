@@ -461,7 +461,9 @@ endif()
 
 if (DPP_MODULES)
 	message("-- ${Green}Modules are enabled!${ColourReset}")
-	
+
+	set_target_properties(dpp PROPERTIES CXX_EXTENSIONS OFF)
+
 	# Add module file set directly to the dpp target
 	target_sources(dpp
 		PUBLIC
@@ -500,7 +502,7 @@ if (DPP_BUILD_TEST)
 				elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 					target_compile_options(${testname} PRIVATE -fmodules)
 				endif()
-				set_target_properties(${testname} PROPERTIES CXX_SCAN_FOR_MODULES ON)
+				set_target_properties(${testname} PROPERTIES CXX_SCAN_FOR_MODULES ON CXX_EXTENSIONS OFF)
 			elseif(BUILD_SHARED_LIBS)
 				target_link_libraries(${testname} PUBLIC ${modname})
 			else()

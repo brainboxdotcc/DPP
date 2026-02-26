@@ -38,6 +38,13 @@ option(DPP_MODULES "Build examples with C++20 modules support" ON)
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DDPP_CORO -std=c++20 -pthread -O0 -fPIC -DFMT_HEADER_ONLY -Wall -Wextra -Wpedantic -Werror -Wno-unused-parameter -Wno-deprecated-declarations")
 set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0")
 
+# Create gcm.cache directory and symlink to the main build's dpp.gcm
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+	file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/gcm.cache")
+	file(CREATE_LINK "${CMAKE_SOURCE_DIR}/../../build/library/CMakeFiles/dpp.dir/dpp.gcm"
+		"${CMAKE_BINARY_DIR}/gcm.cache/dpp.gcm" SYMBOLIC)
+endif()
+
 file(GLOB example_list ./*.cpp)
 foreach (example ${example_list})
 	get_filename_component(examplename ${example} NAME)
@@ -53,6 +60,10 @@ foreach (example ${example_list})
 	if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 		target_compile_options(${examplename}_out PRIVATE -fmodules-ts)
 	elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-		target_compile_options(${examplename}_out PRIVATE -fmodules)
+		target_compile_options(${examplename}_out PRIVATE 
+			-fmodules
+			-mavx2
+			-fprebuilt-module-path=${CMAKE_SOURCE_DIR}/../../build/library/CMakeFiles/dpp.dir
+		)
 	endif()
 endforeach(example)
