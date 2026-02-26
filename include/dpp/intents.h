@@ -127,6 +127,16 @@ enum intents {
 	i_auto_moderation_execution	= (1 << 21),
 
 	/**
+	 * @brief Intent for receipt of guild message poll votes.
+	 */
+	i_guild_message_polls		= (1 << 24),
+
+	/**
+	 * @brief Intent for receipt of direct message poll votes.
+	 */
+	i_direct_message_polls		= (1 << 25),
+
+	/**
 	 * @brief Default D++ intents (all non-privileged intents).
 	 */
 	i_default_intents		= dpp::i_guilds | dpp::i_guild_bans | dpp::i_guild_emojis | dpp::i_guild_integrations |
@@ -134,7 +144,7 @@ enum intents {
 					dpp::i_guild_messages | dpp::i_guild_message_reactions | dpp::i_guild_message_typing |
 					dpp::i_direct_messages | dpp::i_direct_message_typing | dpp::i_direct_message_reactions |
 					dpp::i_guild_scheduled_events | dpp::i_auto_moderation_configuration |
-					dpp::i_auto_moderation_execution,
+					dpp::i_auto_moderation_execution | dpp::i_guild_message_polls | dpp::i_direct_message_polls,
 
 	/**
 	 * @brief Privileged intents requiring ID.

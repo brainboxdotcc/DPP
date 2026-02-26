@@ -802,6 +802,28 @@ public:
 	bool has_use_soundboard() const;
 
 	/**
+	 * @brief True if has the create guild expressions permission.
+	 *
+	 * @note Having the administrator permission causes this method to always return true
+	 * Channel specific overrides may apply to permissions.
+	 *
+	 * @note Not yet available to developers.
+	 * @return bool True if user has the create guild expressions permission or is administrator.
+	 */
+	bool has_create_guild_expressions() const;
+
+	/**
+	 * @brief True if has the create events permission.
+	 *
+	 * @note Having the administrator permission causes this method to always return true
+	 * Channel specific overrides may apply to permissions.
+	 *
+	 * @note Not yet available to developers.
+	 * @return bool True if user has the create events permission or is administrator.
+	 */
+	bool has_create_events() const;
+
+	/**
 	 * @brief True if has the use external sounds permission.
 	 *
 	 * @note Having the administrator permission causes this method to always return true
@@ -827,6 +849,24 @@ public:
 	 * @return bool True if user has the clyde AI permission or is administrator.
 	 */
 	bool has_use_clyde_ai() const;
+
+	/**
+	 * @brief True if has the send polls permission.
+	 *
+	 * @note Having the administrator permission causes this method to always return true
+	 * Channel specific overrides may apply to permissions.
+	 * @return bool True if user has the send polls permission or is administrator.
+	 */
+	bool has_send_polls() const;
+
+	/**
+	 * @brief True if has the use external apps permission.
+	 *
+	 * @note Having the administrator permission causes this method to always return true
+	 * Channel specific overrides may apply to permissions.
+	 * @return bool True if user has the use external apps permission or is administrator.
+	 */
+	bool has_use_external_apps() const;
 
 	/**
 	 * @brief True if has permission to use pin messages.

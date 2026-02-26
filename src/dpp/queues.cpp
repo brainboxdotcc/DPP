@@ -107,7 +107,10 @@ http_request::http_request(const std::string &_url, http_completion_event comple
 {
 }
 
-http_request::~http_request()  = default;
+http_request::~http_request() {
+	std::unique_lock<std::mutex> lock(this_captured_mutex);
+	this_captured_signal.wait(lock, [this] { return !this_captured; });
+}
 
 void http_request::complete(const http_request_completion_t &c) {
 	if (complete_handler) {
@@ -260,6 +263,10 @@ http_request_completion_t http_request::run(request_concurrency_queue* processor
 				processor->buckets[this->endpoint] = newbucket;
 
 				/* Transfer it to completed requests */
+				{
+					std::lock_guard<std::mutex> lock(this_captured_mutex);
+					this_captured = true;
+				}
 				owner->queue_work(0, [owner, this, result, hci, _url]() {
 					try {
 						complete(result);
@@ -271,6 +278,11 @@ http_request_completion_t http_request::run(request_concurrency_queue* processor
 						owner->log(ll_error, "Uncaught exception thrown in HTTPS callback for " + std::string(request_verb[method]) + " "  + hci.hostname + ":" + std::to_string(hci.port) + _url + ": <non exception value>");
 					}
 					completed = true;
+					{
+						std::lock_guard<std::mutex> lock(this_captured_mutex);
+						this_captured = false;
+					}
+					this_captured_signal.notify_all();
 				});
 			}
 		);

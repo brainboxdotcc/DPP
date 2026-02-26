@@ -130,6 +130,12 @@ public:
 	bool timed_out;
 
 	/**
+	 * Get request path
+	 * @return request path
+	 */
+	std::string get_path() const;
+
+	/**
 	 * @brief Get request state
 	 * @return request state
 	 */

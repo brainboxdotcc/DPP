@@ -282,8 +282,8 @@ struct promise_base : basic_promise<R> {
 
 		/** @brief Wrapper for the awaitable's await_suspend */
 		template <typename T>
-		[[nodiscard]] decltype(auto) await_suspend(T&& handle) noexcept(noexcept(awaitable.await_suspend(std::forward<T>(handle)))) {
-			return awaitable.await_suspend(std::forward<T>(handle));
+		[[nodiscard]] decltype(auto) await_suspend(T handle) noexcept(noexcept(awaitable.await_suspend(std::move(handle)))) {
+			return awaitable.await_suspend(std::move(handle));
 		}
 
 		/**
