@@ -67,21 +67,22 @@ void voice_state_update::handle(discord_client* client, json &j, const std::stri
 	}
 
 	if (vsu.state.user_id == client->creator->me.id) {
+		auto current_vc = client->get_voice(vsu.state.guild_id);
 		if (vsu.state.channel_id.empty()) {
 			/* Instruction to disconnect from vc */
 			client->disconnect_voice_internal(vsu.state.guild_id, false);
-		} else if (client->get_voice(vsu.state.guild_id)->channel_id != 0 &&
-		           vsu.state.channel_id != client->get_voice(vsu.state.guild_id)->channel_id) {
+		} else if (current_vc && vsu.state.channel_id != current_vc->channel_id) {
+			/* When there is a active vc and will be moved to a different channel (by user) */
 			/* Instruction to connect to a different channel */
 			std::shared_lock lock(client->voice_mutex);
 			auto v = client->connecting_voice_channels.find(vsu.state.guild_id);
 			if (v != client->connecting_voice_channels.end()) {
-				voiceconn& connection = *v->second;
-				connection.disconnect();
-				connection.session_id = vsu.state.session_id;
-				connection.channel_id = vsu.state.channel_id;
-				connection.token = "";
-				connection.websocket_hostname = "";
+				auto enable_dave = v->second->dave;
+				client->connecting_voice_channels.erase(v);
+				client->connecting_voice_channels[vsu.state.guild_id] = std::make_shared<voiceconn>(client,
+					[](discord_client* client) {
+						/* do nothing, discord will handle reconnection*/
+					}, vsu.state.guild_id, vsu.state.channel_id, enable_dave);
 			}
 		} else {
 			std::shared_lock lock(client->voice_mutex);
