@@ -18,7 +18,7 @@ jobs:
         with:
           egress-policy: audit
 
-      - uses: actions/stale@997185467fa4f803885201cee163a9f38240193d # v10.1.1
+      - uses: actions/stale@b5d41d4e1d5dceea10e7104786b73624c18a190f # v10.2.0
         with:
           stale-issue-message: 'This issue has had no activity and is being marked as stale. If you still wish to continue with this issue please comment to reopen it.'
           stale-pr-message: 'This pull request has had no activity and is being marked as stale. If you still wish to continue with this pull request please comment to reopen it.'
