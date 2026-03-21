@@ -226,7 +226,7 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 					dave_mls_pending_remove_list.erase(dpp::snowflake(user));
 				}
 
-				log(ll_debug, "New of clients in voice channel: " + std::to_string(joining_dave_users.size()) + " total is " + std::to_string(dave_mls_user_list.size()));
+				log(ll_debug, "New number of clients in voice channel: " + std::to_string(joining_dave_users.size()) + " total is " + std::to_string(dave_mls_user_list.size()));
 			}
 			break;
 			case voice_client_dave_mls_invalid_commit_welcome: {

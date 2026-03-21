@@ -263,7 +263,7 @@ public:
 	void enable_raw_tracing();
 
 	/**
-	 * @brief Get the bytes out objectGet total bytes sent
+	 * @brief Get total bytes sent
 	 * @return uint64_t bytes sent
 	 */
 	uint64_t get_bytes_out();
