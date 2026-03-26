@@ -1817,4 +1817,137 @@ json message_pin::to_json() const {
 	return j;
 }
 
+std::string message_search_params::build_url_params() const {
+	std::string params = "?";
+	bool first = true;
+
+	auto append = [&](const std::string& key, const std::string& value) {
+		if (!first) {
+			params += '&';
+		}
+		params += utility::url_encode(key) + "=" + utility::url_encode(value);
+		first = false;
+	};
+
+	if (!content.empty()) {
+		append("content", content);
+	}
+	for (const auto& id : author_id) {
+		if (id) {
+			append("author_id", std::to_string(id));
+		}
+	}
+	for (const auto& id : mentions) {
+		if (id) {
+			append("mentions", std::to_string(id));
+		}
+	}
+	for (const auto& id : channel_id) {
+		if (id) {
+			append("channel_id", std::to_string(id));
+		}
+	}
+	for (const auto& id : mentions_role_id) {
+		if (id) {
+			append("mentions_role_id", std::to_string(id));
+		}
+	}
+	for (const auto& id : replied_to_user_id) {
+		if (id) {
+			append("replied_to_user_id", std::to_string(id));
+		}
+	}
+	for (const auto& id : replied_to_message_id) {
+		if (id) {
+			append("replied_to_message_id", std::to_string(id));
+		}
+	}
+	for (const auto& t : author_type) {
+		if (!t.empty()) {
+			append("author_type", t);
+		}
+	}
+	for (const auto& h : has) {
+		static constexpr const char* has_names[] = {
+			"image", "sound", "video", "file", "sticker", "embed", "link", "poll", "snapshot"
+		};
+		append("has", has_names[static_cast<uint8_t>(h)]);
+	}
+	for (const auto& t : embed_type) {
+		if (!t.empty()) {
+			append("embed_type", t);
+		}
+	}
+	for (const auto& p : embed_provider) {
+		if (!p.empty()) {
+			append("embed_provider", p);
+		}
+	}
+	for (const auto& h : link_hostname) {
+		if (!h.empty()) {
+			append("link_hostname", h);
+		}
+	}
+	for (const auto& f : attachment_filename) {
+		if (!f.empty()) {
+			append("attachment_filename", f);
+		}
+	}
+	for (const auto& e : attachment_extension) {
+		if (!e.empty()) {
+			append("attachment_extension", e);
+		}
+	}
+	if (max_id) {
+		append("max_id", std::to_string(max_id));
+	}
+	if (min_id) {
+		append("min_id", std::to_string(min_id));
+	}
+	if (pinned.has_value()) {
+		append("pinned", pinned.value() ? "true" : "false");
+	}
+	if (mention_everyone.has_value()) {
+		append("mention_everyone", mention_everyone.value() ? "true" : "false");
+	}
+	if (include_nsfw.has_value()) {
+		append("include_nsfw", include_nsfw.value() ? "true" : "false");
+	}
+	if (limit.has_value()) {
+		append("limit", std::to_string(limit.value()));
+	}
+	if (offset.has_value()) {
+		append("offset", std::to_string(offset.value()));
+	}
+	if (slop.has_value()) {
+		append("slop", std::to_string(slop.value()));
+	}
+	if (sort_by.has_value()) {
+		append("sort_by", sort_by.value() == sort_relevance ? "relevance" : "timestamp");
+	}
+	if (sort_order.has_value()) {
+		append("sort_order", sort_order.value() == sort_asc ? "asc" : "desc");
+	}
+
+	return first ? "" : params;
+}
+
+message_search_result& message_search_result::fill_from_json_impl(nlohmann::json* j) {
+	total_results = int32_not_null(j, "total_results");
+	doing_deep_historical_index = bool_not_null(j, "doing_deep_historical_index");
+	if (j->contains("documents_indexed") && !(*j)["documents_indexed"].is_null()) {
+		documents_indexed = int32_not_null(j, "documents_indexed");
+	}
+	if (j->contains("messages")) {
+		for (auto& group : (*j)["messages"]) {
+			std::vector<message> msg_group;
+			for (auto& m : group) {
+				msg_group.emplace_back(message().fill_from_json(&m));
+			}
+			messages.push_back(std::move(msg_group));
+		}
+	}
+	return *this;
+}
+
 }// namespace dpp

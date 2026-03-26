@@ -551,6 +551,10 @@ async<confirmation_callback_t> cluster::co_messages_get(snowflake channel_id, sn
 	return async{ this, static_cast<void (cluster::*)(snowflake, snowflake, snowflake, snowflake, uint64_t, command_completion_event_t)>(&cluster::messages_get), channel_id, around, before, after, limit };
 }
 
+async<confirmation_callback_t> cluster::co_guild_messages_search(snowflake guild_id, const message_search_params& params) {
+	return async{ this, static_cast<void (cluster::*)(snowflake, const message_search_params&, command_completion_event_t)>(&cluster::guild_messages_search), guild_id, params };
+}
+
 async<confirmation_callback_t> cluster::co_message_unpin(snowflake channel_id, snowflake message_id) {
 	return async{ this, static_cast<void (cluster::*)(snowflake, snowflake, command_completion_event_t)>(&cluster::message_unpin), channel_id, message_id };
 }
