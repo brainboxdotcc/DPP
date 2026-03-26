@@ -1984,6 +1984,17 @@ public:
 	void messages_get(snowflake channel_id, snowflake around, snowflake before, snowflake after, uint64_t limit, command_completion_event_t callback);
 
 	/**
+	 * @brief Search for messages in a guild
+	 *
+	 * @see https://discord.com/developers/docs/resources/message#search-guild-messages
+	 * @param guild_id Guild ID to search in
+	 * @param params Search parameters
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::message_search_result object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void guild_messages_search(snowflake guild_id, const message_search_params& params, command_completion_event_t callback);
+
+	/**
 	 * @brief Send a message to a channel. The callback function is called when the message has been sent
 	 *
 	 * @see https://discord.com/developers/docs/resources/channel#create-message

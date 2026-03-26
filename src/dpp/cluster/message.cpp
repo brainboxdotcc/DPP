@@ -206,6 +206,15 @@ void cluster::poll_end(snowflake message_id, snowflake channel_id, command_compl
 }
 
 
+void cluster::guild_messages_search(snowflake guild_id, const message_search_params& params, command_completion_event_t callback) {
+	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "messages/search" + params.build_url_params(), m_get, "", [this, callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t(this, message_search_result().fill_from_json(&j), http));
+		}
+	});
+}
+
+
 void cluster::channel_pins_get(snowflake channel_id, command_completion_event_t callback) {
 	channel_pins_get(channel_id, {}, {}, callback);
 }

@@ -196,7 +196,8 @@ typedef std::variant<
 		entitlement,
 		entitlement_map,
 		sku,
-		sku_map
+		sku_map,
+		message_search_result
 	> confirmable_t;
 
 /**
