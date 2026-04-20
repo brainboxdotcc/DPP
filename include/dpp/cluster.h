@@ -476,16 +476,29 @@ public:
 	 * @return timer A handle to the timer, used to remove that timer later
 	 */
 	template <std::invocable<timer> T, std::invocable<timer> U = std::function<void(timer)>>
-	requires (dpp::awaitable_type<typename std::invoke_result<T, timer>::type>)
+	requires (
+		dpp::awaitable_type<typename std::invoke_result<T, timer>::type> &&
+		std::copy_constructible<std::decay_t<T>> && // N4988 [func.wrap.func.con]/10.1 - std::function requires a copy constructible argument
+		std::copy_constructible<std::decay_t<U>>
+	)
 	timer start_timer(T&& on_tick, uint64_t frequency, U&& on_stop = {}) {
-		std::function<void(timer)> ticker = [fun = std::forward<T>(on_tick)](timer t) mutable -> dpp::job {
+		using tick_fun = std::decay_t<T>;
+		using stop_fun = std::decay_t<U>;
+
+		// We want to ship the function object on the coroutine frame to allow for lambda captures
+		// See https://discord.com/channels/825407338755653642/825411707521728512/1495801839827030067
+		// and https://discord.com/channels/825407338755653642/825411707521728512/1492502683444052109
+		// Now we can only realistically do that by copying the lambda on each invocation, I think...
+		// People should be avoiding lambda captures to begin with (see https://dpp.dev/coro-introduction.html),
+		// so while this isn't super efficient, it's practically zero-cost with no capture anyways
+		std::function<void(timer)> ticker = std::bind_front([](tick_fun fun, timer t) -> dpp::job {
 			co_await std::invoke(fun, t);
-		};
+		}, static_cast<tick_fun>(std::forward<T>(on_tick)));
 		std::function<void(timer)> stopper;
 		if constexpr (dpp::awaitable_type<typename std::invoke_result<U, timer>::type>) {
-			stopper = [fun = std::forward<U>(on_stop)](timer t) mutable -> dpp::job {
+			stopper = std::bind_front([](stop_fun fun, timer t) -> dpp::job {
 				co_await std::invoke(fun, t);
-			};
+			}, static_cast<stop_fun>(std::forward<U>(on_stop)));
 		} else {
 			stopper = std::forward<U>(on_stop);
 		}
