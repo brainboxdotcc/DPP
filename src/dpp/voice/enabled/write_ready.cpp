@@ -31,12 +31,18 @@
 namespace dpp {
 
 void discord_voice_client::write_ready() {
-	/* 
-	 * WANT_WRITE has been reset everytime this method is being called,
-	 * ALWAYS set it again no matter what we're gonna do.
-	 */
-	udp_events.flags = WANT_READ | WANT_WRITE | WANT_ERROR;
-	owner->socketengine->update_socket(udp_events);
+	bool needs_write = false;
+	{
+		std::lock_guard<std::mutex> lock(this->stream_mutex);
+		const bool needs_stop_frames = this->paused && !this->sent_stop_frames;
+		const bool has_audio = !outbuf.empty();
+		needs_write = needs_stop_frames || has_audio;
+	}
+
+	if (needs_write) {
+		udp_events.flags = WANT_READ | WANT_WRITE | WANT_ERROR;
+		owner->socketengine->update_socket(udp_events);
+	}
 
 	uint64_t duration = 0;
 	bool track_marker_found = false;
