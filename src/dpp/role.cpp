@@ -361,6 +361,10 @@ bool role::has_pin_messages() const {
 	return has_administrator() || permissions.has(p_pin_messages);
 }
 
+bool role::has_bypass_slowmode() const {
+	return has_administrator() || permissions.has(p_bypass_slowmode);
+}
+
 role& role::set_name(const std::string& n) {
 	name = utility::validate(n, 1, 100, "Role name too short");
 	return *this;

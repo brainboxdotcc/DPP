@@ -31,7 +31,7 @@
 cmake_minimum_required (VERSION 3.28)
 project(documentation_tests)
 
-string(ASCII 27 Esc)
+include("${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/colour.cmake")
 
 option(DPP_MODULES "Build examples with C++20 modules support" ON)
 
@@ -48,8 +48,7 @@ endif()
 file(GLOB example_list ./*.cpp)
 foreach (example ${example_list})
 	get_filename_component(examplename ${example} NAME)
-	
-	message(STATUS "Found example '${Esc}[1;34m${examplename}${Esc}[m'")
+	message(STATUS "Found example '${BoldBlue}${examplename}${ColourReset}'")
 	add_executable(${examplename}_out ${example})
 	target_link_libraries(${examplename}_out dl dpp mpg123 oggz ogg opusfile opus)
 	include_directories(/usr/include/opus)

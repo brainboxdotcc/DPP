@@ -34,8 +34,17 @@ void discord_voice_client::send(const char* packet, size_t len, uint64_t duratio
 		frame.packet.assign(packet, packet + len);
 		frame.duration = duration;
 
-		std::lock_guard<std::mutex> lock(this->stream_mutex);
-		outbuf.emplace_back(frame);
+		bool was_empty = false;
+		{
+			std::lock_guard<std::mutex> lock(this->stream_mutex);
+			was_empty = outbuf.empty();
+			outbuf.emplace_back(frame);
+		}
+
+		if (was_empty) {
+			udp_events.flags = WANT_READ | WANT_WRITE | WANT_ERROR;
+			owner->socketengine->update_socket(udp_events);
+		}
 	} else [[unlikely]] {
 		this->udp_send(packet, len);
 	}

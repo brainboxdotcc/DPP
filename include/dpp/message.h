@@ -3091,6 +3091,209 @@ typedef std::unordered_map<snowflake, message> message_map;
 typedef std::unordered_map<snowflake, message_pin> message_pin_map;
 
 /**
+ * @brief Possible values for the "has" filter in message search
+ */
+enum message_search_has : uint8_t {
+	has_image,
+	has_sound,
+	has_video,
+	has_file,
+	has_sticker,
+	has_embed,
+	has_link,
+	has_poll,
+	has_snapshot,
+};
+
+/**
+ * @brief Sort mode for message search results
+ */
+enum message_search_sort : uint8_t {
+	sort_timestamp,
+	sort_relevance,
+};
+
+/**
+ * @brief Sort order for message search results
+ */
+enum message_search_order : uint8_t {
+	sort_desc,
+	sort_asc,
+};
+
+/**
+ * @brief Parameters for searching messages within a guild
+ * @see https://discord.com/developers/docs/resources/message#search-guild-messages
+ */
+struct DPP_EXPORT message_search_params {
+	/**
+	 * @brief Filter messages by content (max 1024 characters)
+	 */
+	std::string content;
+
+	/**
+	 * @brief Filter by author IDs (max 100)
+	 */
+	std::vector<snowflake> author_id;
+
+	/**
+	 * @brief Filter messages that mention these users (max 100)
+	 */
+	std::vector<snowflake> mentions;
+
+	/**
+	 * @brief Filter by channel IDs (max 500)
+	 */
+	std::vector<snowflake> channel_id;
+
+	/**
+	 * @brief Filter messages that mention these roles (max 100)
+	 */
+	std::vector<snowflake> mentions_role_id;
+
+	/**
+	 * @brief Filter messages that reply to these users (max 100)
+	 */
+	std::vector<snowflake> replied_to_user_id;
+
+	/**
+	 * @brief Filter messages that reply to these messages (max 100)
+	 */
+	std::vector<snowflake> replied_to_message_id;
+
+	/**
+	 * @brief Filter by author type (user, bot, webhook; prefix with - to negate)
+	 */
+	std::vector<std::string> author_type;
+
+	/**
+	 * @brief Filter by presence of element types
+	 */
+	std::vector<message_search_has> has;
+
+	/**
+	 * @brief Filter messages by embed type
+	 */
+	std::vector<std::string> embed_type;
+
+	/**
+	 * @brief Filter messages by embed provider (case-sensitive, max 100)
+	 */
+	std::vector<std::string> embed_provider;
+
+	/**
+	 * @brief Filter messages by link hostname (max 100)
+	 */
+	std::vector<std::string> link_hostname;
+
+	/**
+	 * @brief Filter messages by attachment filename (max 100)
+	 */
+	std::vector<std::string> attachment_filename;
+
+	/**
+	 * @brief Filter messages by attachment extension (max 100)
+	 */
+	std::vector<std::string> attachment_extension;
+
+	/**
+	 * @brief Get messages before this message ID
+	 */
+	snowflake max_id;
+
+	/**
+	 * @brief Get messages after this message ID
+	 */
+	snowflake min_id;
+
+	/**
+	 * @brief Filter messages by whether they are pinned
+	 */
+	std::optional<bool> pinned;
+
+	/**
+	 * @brief Filter by @everyone mention presence
+	 */
+	std::optional<bool> mention_everyone;
+
+	/**
+	 * @brief Whether to include results from age-restricted channels (default false)
+	 */
+	std::optional<bool> include_nsfw;
+
+	/**
+	 * @brief Max number of messages to return (1-25, default 25)
+	 */
+	std::optional<uint32_t> limit;
+
+	/**
+	 * @brief Pagination offset (max 9975)
+	 */
+	std::optional<uint32_t> offset;
+
+	/**
+	 * @brief Max number of words to skip between matching tokens (max 100, default 2)
+	 */
+	std::optional<uint32_t> slop;
+
+	/**
+	 * @brief Sorting algorithm to use (default: sort_timestamp)
+	 */
+	std::optional<message_search_sort> sort_by;
+
+	/**
+	 * @brief Direction to sort (default: sort_desc)
+	 */
+	std::optional<message_search_order> sort_order;
+
+	/**
+	 * @brief Build the query string for the REST request
+	 * @return URL query string starting with '?'
+	 */
+	std::string build_url_params() const;
+};
+
+/**
+ * @brief Represents the result of a guild message search
+ * @see https://discord.com/developers/docs/resources/message#search-guild-messages
+ */
+struct DPP_EXPORT message_search_result : public json_interface<message_search_result> {
+protected:
+	friend struct json_interface<message_search_result>;
+
+	/**
+	 * @brief Fill from JSON
+	 * @param j JSON data
+	 * @return Reference to self
+	 */
+	message_search_result& fill_from_json_impl(nlohmann::json* j);
+
+public:
+	message_search_result() = default;
+
+	/**
+	 * @brief Total number of results matching the query
+	 */
+	uint32_t total_results{0};
+
+	/**
+	 * @brief Whether a deep historical index is being performed
+	 */
+	bool doing_deep_historical_index{false};
+
+	/**
+	 * @brief Number of documents indexed so far (only present during deep indexing)
+	 */
+	std::optional<uint32_t> documents_indexed;
+
+	/**
+	 * @brief Matched messages grouped by context.
+	 * Each inner vector contains the matched message followed by context messages.
+	 */
+	std::vector<std::vector<message>> messages;
+};
+
+/**
  * @brief A group of stickers
  */
 typedef std::unordered_map<snowflake, sticker> sticker_map;

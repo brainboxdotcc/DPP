@@ -1,6 +1,6 @@
 if(NOT WIN32)
   string(ASCII 27 Esc)
-  set(ColourReset "${Esc}[m")
+  set(ColourReset "${Esc}[0m")
   set(ColourBold  "${Esc}[1m")
   set(Red         "${Esc}[31m")
   set(Green       "${Esc}[32m")

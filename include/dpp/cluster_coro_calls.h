@@ -1744,6 +1744,18 @@
 [[nodiscard]] async<confirmation_callback_t> co_poll_end(snowflake message_id, snowflake channel_id);
 
 /**
+ * @brief Search for messages in a guild
+ *
+ * @see dpp::cluster::guild_messages_search
+ * @see https://discord.com/developers/docs/resources/message#search-guild-messages
+ * @param guild_id Guild ID to search in
+ * @param params Search parameters
+ * @return message_search_result returned object on completion
+ * \memberof dpp::cluster
+ */
+[[nodiscard]] async<confirmation_callback_t> co_guild_messages_search(snowflake guild_id, const message_search_params& params);
+
+/**
  * @brief Get a channel's pins
  * @see dpp::cluster::channel_pins_get
  * @see https://discord.com/developers/docs/resources/channel#get-pinned-messages

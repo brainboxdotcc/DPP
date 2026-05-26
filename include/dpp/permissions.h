@@ -299,6 +299,11 @@ enum permissions : uint64_t {
 	 * @brief Allows pinning and unpinning messages
 	 */
 	p_pin_messages = 0x0008000000000000,
+
+	/**
+	 * @brief Allows members to bypass the slow mode rate limit for sending messages in a channel.
+	 */
+	p_bypass_slowmode = 0x0010000000000000,
 };
 
 /**

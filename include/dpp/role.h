@@ -878,6 +878,15 @@ public:
 	bool has_pin_messages() const;
 
 	/**
+	 * @brief True if has the bypass slow mode permission.
+	 *
+	 * @note Having the administrator permission causes this method to always return true
+	 * Channel specific overrides may apply to permissions.
+	 * @return bool True if user has the bypass slow mode permission or is administrator.
+	 */
+	bool has_bypass_slowmode() const;
+
+	/**
 	 * @brief Get guild members who have this role.
 	 *
 	 * @note This method requires user/members cache to be active
