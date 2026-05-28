@@ -229,12 +229,17 @@ class DPP_EXPORT http_request {
 	/**
 	 * @brief True if request has been made.
 	 */
-	bool completed;
+	std::atomic<bool> completed;
 
 	/**
 	 * @brief True for requests that are not going to discord (rate limits code skipped).
 	 */
 	bool non_discord;
+
+	/**
+	 * @brief Client mutex
+	 */
+	std::mutex cli_mutex;
 
 	/**
 	 * @brief HTTPS client
@@ -461,6 +466,11 @@ public:
 	std::shared_mutex in_mutex;
 
 	/**
+	 * @brief Removals queue mutex thread safety.
+	 */
+	std::mutex	rem_mutex;
+
+	/**
 	 * @brief Inbound queue timer. The timer is called every second,
 	 * and when it wakes up it checks for requests pending to be sent in the queue.
 	 * If there are any requests and we are not waiting on rate limit, it will send them,
@@ -589,7 +599,7 @@ public:
 	 * When globally rate limited the concurrency queues associated with this request queue
 	 * will not process any requests in their timers until the global rate limit expires.
 	 */
-	bool globally_ratelimited;
+	std::atomic<bool> globally_ratelimited;
 
 	/**
 	 * @brief When we are globally rate limited until (unix epoch)

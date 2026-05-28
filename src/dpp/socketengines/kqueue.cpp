@@ -108,6 +108,7 @@ struct DPP_EXPORT socket_engine_kqueue : public socket_engine_base {
 
 			if ((eh->flags & WANT_DELETION) != 0L) {
 				remove_socket(kev.ident);
+				std::lock_guard<std::shared_mutex>	lg(this->fds_mutex);
 				fds.erase(kev.ident);
 			}
 		}

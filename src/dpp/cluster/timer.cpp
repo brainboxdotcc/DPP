@@ -57,8 +57,11 @@ bool cluster::stop_timer(timer t) {
 void cluster::tick_timers() {
 	time_t now = time(nullptr);
 
-	if (next_timer.empty()) {
-		return;
+	{
+		std::lock_guard<std::mutex> l(timer_guard);
+		if (next_timer.empty()) {
+			return;
+		}
 	}
 	do {
 		timer_t cur_timer;
