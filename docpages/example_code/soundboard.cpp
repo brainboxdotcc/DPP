@@ -31,7 +31,7 @@ int main() {
 	bot.on_log(dpp::utility::cout_logger());
 
 	/* The event is fired when someone issues your commands */
-	bot.on_slashcommand([&bot, robot, robot_size](const dpp::slashcommand_t& event) {
+	bot.on_slashcommand([robot, robot_size](const dpp::slashcommand_t& event) {
 		/* Check which command they ran */
 		if (event.command.get_command_name() == "join") {
 			/* Get the guild */

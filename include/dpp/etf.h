@@ -42,7 +42,7 @@ namespace dpp {
 /**
  * @brief Current ETF format version in use
  */
-const uint8_t FORMAT_VERSION = 131;
+inline const uint8_t FORMAT_VERSION = 131;
 
 /**
  * @brief Represents a token which identifies the type of value which follows it

@@ -28,13 +28,22 @@
 # libmpg123-dev
 # dpp latest master with -DDPP_CORO=ON installed sytemwide
 
-cmake_minimum_required (VERSION 3.16)
+cmake_minimum_required (VERSION 3.28)
 project(documentation_tests)
 
 include("${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/colour.cmake")
 
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DDPP_CORO -std=c++20 -pthread -O0 -fPIC -rdynamic -DFMT_HEADER_ONLY -Wall -Wextra -Wpedantic -Werror -Wno-unused-parameter -Wno-deprecated-declarations")
+option(DPP_MODULES "Build examples with C++20 modules support" ON)
+
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DDPP_CORO -std=c++20 -pthread -O0 -fPIC -DFMT_HEADER_ONLY -Wall -Wextra -Wpedantic -Werror -Wno-unused-parameter -Wno-deprecated-declarations")
 set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0")
+
+# Create gcm.cache directory and symlink to the main build's dpp.gcm
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+	file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/gcm.cache")
+	file(CREATE_LINK "${CMAKE_SOURCE_DIR}/../../build/library/CMakeFiles/dpp.dir/dpp.gcm"
+		"${CMAKE_BINARY_DIR}/gcm.cache/dpp.gcm" SYMBOLIC)
+endif()
 
 file(GLOB example_list ./*.cpp)
 foreach (example ${example_list})
@@ -43,4 +52,17 @@ foreach (example ${example_list})
 	add_executable(${examplename}_out ${example})
 	target_link_libraries(${examplename}_out dl dpp mpg123 oggz ogg opusfile opus)
 	include_directories(/usr/include/opus)
+	
+	target_compile_definitions(${examplename}_out PRIVATE DPP_MODULES)
+	set_target_properties(${examplename}_out PROPERTIES CXX_SCAN_FOR_MODULES ON)
+	
+	if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+		target_compile_options(${examplename}_out PRIVATE -fmodules-ts)
+	elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+		target_compile_options(${examplename}_out PRIVATE 
+			-fmodules
+			-mavx2
+			-fprebuilt-module-path=${CMAKE_SOURCE_DIR}/../../build/library/CMakeFiles/dpp.dir
+		)
+	endif()
 endforeach(example)

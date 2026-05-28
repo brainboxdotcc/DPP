@@ -7,7 +7,7 @@ int main() {
 	bot.on_log(dpp::utility::cout_logger());
 
 	/* Use the on_slashcommand event to look for commands */
-	bot.on_slashcommand([&bot](const dpp::slashcommand_t & event) {
+	bot.on_slashcommand([](const dpp::slashcommand_t & event) {
 		dpp::command_interaction cmd_data = event.command.get_command_interaction();
 
 		/* Check if the command is the image command. */
