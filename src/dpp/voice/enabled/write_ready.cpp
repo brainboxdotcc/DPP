@@ -35,8 +35,8 @@ void discord_voice_client::write_ready() {
 	{
 		std::lock_guard<std::mutex> lock(this->stream_mutex);
 		const bool needs_stop_frames = this->paused && !this->sent_stop_frames;
-		const bool has_audio = !outbuf.empty();
-		needs_write = needs_stop_frames || has_audio;
+		const bool needs_send_audio = !this->paused && !outbuf.empty();
+		needs_write = needs_stop_frames || needs_send_audio;
 	}
 
 	if (needs_write) {
