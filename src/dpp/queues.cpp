@@ -225,7 +225,7 @@ http_request_completion_t http_request::run(request_concurrency_queue* processor
 	}
 	http_connect_info hci = https_client::get_host_info(_host);
 	try {
-		cli = std::make_unique<https_client>(
+		std::unique_ptr<https_client> tmp = std::make_unique<https_client>(
 			owner,
 			hci.hostname,
 			hci.port,
@@ -286,6 +286,10 @@ http_request_completion_t http_request::run(request_concurrency_queue* processor
 				});
 			}
 		);
+		{
+			std::lock_guard<std::mutex>	client(this->cli_mutex);
+			cli = std::move(tmp);
+		}
 	}
 	catch (const std::exception& e) {
 		owner->log(ll_error, "HTTP(S) error on " + hci.scheme + " connection to " + hci.hostname + ":" + std::to_string(hci.port) + ": " + std::string(e.what()));
@@ -313,7 +317,7 @@ request_concurrency_queue::request_concurrency_queue(class cluster* owner, class
 		tick_and_deliver_requests(in_index);
 		/* Clear pending removals in the removals queue */
 		if (time(nullptr) % 90 == 0) {
-			std::scoped_lock lock1{in_mutex};
+			std::scoped_lock lock1{rem_mutex};
 			for (auto it = removals.cbegin(); it != removals.cend();) {
 				if ((*it)->is_completed()) {
 					it = removals.erase(it);
@@ -404,7 +408,8 @@ void request_concurrency_queue::tick_and_deliver_requests(uint32_t index)
 			std::unique_ptr<http_request> rq;
 			{
 				/* Find the owned pointer in requests_in */
-				std::scoped_lock lock1{in_mutex};
+				std::scoped_lock requests_in_lock{in_mutex};
+				std::scoped_lock removals_queue_lock{rem_mutex};
 
 				const std::string &key = request_view->endpoint;
 				auto [begin, end] = std::equal_range(requests_in.begin(), requests_in.end(), key, compare_request{});

@@ -141,6 +141,9 @@ discord_voice_client& discord_voice_client::pause_audio(bool pause) {
 	this->paused = pause;
 	if (!this->paused) {
 		this->sent_stop_frames = false;
+
+		udp_events.flags = WANT_READ | WANT_WRITE | WANT_ERROR;
+		owner->socketengine->update_socket(udp_events);
 	}
 	return *this;
 }
