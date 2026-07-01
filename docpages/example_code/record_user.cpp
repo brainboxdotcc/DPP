@@ -21,7 +21,7 @@ int main() {
 	bot.on_log(dpp::utility::cout_logger());
 
 	/* The event is fired when someone issues your commands */
-	bot.on_slashcommand([&bot, &fd](const dpp::slashcommand_t& event) {
+	bot.on_slashcommand([&fd](const dpp::slashcommand_t& event) {
 		/* Check which command they ran */
 		if (event.command.get_command_name() == "record") {
 			/* Get the guild */
@@ -43,7 +43,7 @@ int main() {
 		}
 	});
 
-	bot.on_voice_receive([&bot, &fd, &user_id](const dpp::voice_receive_t &event) {
+	bot.on_voice_receive([&fd, &user_id](const dpp::voice_receive_t &event) {
 		if (event.user_id == user_id) {
 			fwrite((char *)event.audio, 1, event.audio_size, fd);
 		}

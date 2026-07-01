@@ -75,7 +75,7 @@ int main() {
 			 * This code assumes the current directory is writeable. The file will have a
 			 * unique name made from the user's id and the message id.
 			 */
-        		std::string source_filename = std::to_string(event.msg.author.id) + "_" + std::to_string(event.msg.id) + ".cpp";
+			std::string source_filename = std::to_string(event.msg.author.id) + "_" + std::to_string(event.msg.id) + ".cpp";
 			std::fstream code_file(source_filename, std::fstream::binary | std::fstream::out);
 			if (!code_file.is_open()) {
 				bot.message_create(dpp::message(event.msg.channel_id, "Unable to create source file for `eval`"));
@@ -96,7 +96,7 @@ int main() {
 				std::to_string(event.msg.author.id) + "_" + std::to_string(event.msg.id) + ".cpp",
 				"-ldpp",
 				"-ldl"
-			}, [event, &bot, source_filename, compile_start](const std::string &output) {
+			}, [event, &bot, compile_start](const std::string &output) {
 
 				/* After g++ is ran we end up inside this lambda with the output as a string */
 				double compile_time = dpp::utility::time_f() - compile_start;
