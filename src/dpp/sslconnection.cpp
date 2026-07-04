@@ -680,6 +680,7 @@ void ssl_connection::close() {
 	 * that is done often.
 	 */
 	if (!plaintext) {
+		std::unique_lock lock(ssl_close_mutex);
 		if (ssl != nullptr && ssl->ssl != nullptr) {
 			SSL_free(ssl->ssl);
 			ssl->ssl = nullptr;

@@ -236,19 +236,22 @@ void cluster::start(start_type return_after) {
 						std::shared_lock lk(shards_mutex);
 						old = shards[shard_id];
 					}
-					/* These values must be copied to the new connection
-					 * to attempt to resume it
-					 */
-					auto seq_no = old->last_seq;
-					auto session_id = old->sessionid;
 					log(ll_info, "Reconnecting shard " + std::to_string(shard_id));
 					/* Make a new resumed connection based off the old one */
 					try {
+						bool resume = false;
 						std::unique_lock lk(shards_mutex);
 						if (shards[shard_id] != nullptr) {
+							/* These values must be copied to the new connection
+							 * to attempt to resume it
+							 */
+							auto seq_no = old->last_seq;
+							auto session_id = old->sessionid;
+
 							log(ll_trace, "Attempting resume...");
 							shards[shard_id] = nullptr;
 							shards[shard_id] = new discord_client(*old, seq_no, session_id);
+							resume = true;
 						} else {
 							log(ll_trace, "Attempting full reconnection...");
 							shards[shard_id] = nullptr;
@@ -260,6 +263,14 @@ void cluster::start(start_type return_after) {
 						old = nullptr;
 						/* Set up the new shard's IO events */
 						log(ll_trace, "Running new connection...");
+						if (resume) {
+							/* Start connecting only after the old client is destroyed */
+							shards[shard_id]->start_connecting();
+							std::unique_lock lock(shards[shard_id]->voice_mutex);
+							for (auto &c : shards[shard_id]->connecting_voice_channels) {
+								c.second->connect();
+							}
+						}
 						shards[shard_id]->run();
 					}
 					catch (const std::exception& e) {

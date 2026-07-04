@@ -228,7 +228,7 @@ public:
 	 */
 	bool is_active() const;
 
-	voiceconn& request();
+	voiceconn& request(bool failed_resume = false);
 
 	/**
 	 * @brief Create websocket object and connect it.

@@ -143,6 +143,14 @@ protected:
 	openssl_connection* ssl;
 
 	/**
+	 * @brief Protects openssl opaque contexts when closing
+	 *
+	 * There's data races when reconnecting severed connection.
+	 * This makes sure we don't double free our contexts.
+	 */
+	std::mutex ssl_close_mutex;
+
+	/**
 	 * @brief SSL cipher in use
 	 */
 	std::string cipher;
