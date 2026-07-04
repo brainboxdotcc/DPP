@@ -127,6 +127,7 @@ void discord_client::on_disconnect()
 		log(dpp::ll_debug, "Lost connection to websocket on shard " + std::to_string(shard_id) + ", reconnecting...");
 	}
 	ssl_connection::close();
+	owner->stop_timer(timer_handle);
 	owner->add_reconnect(this->shard_id);
 }
 
