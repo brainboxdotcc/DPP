@@ -40,7 +40,7 @@ int main() {
 		}
 	});
 
-	bot.on_button_click([](const dpp::button_click_t & event) {
+	bot.on_button_click([](const dpp::button_click_t& event) {
 		if (event.custom_id == "10") {
 			event.reply(dpp::message("You got it right!").set_flags(dpp::m_ephemeral));
 		} else {

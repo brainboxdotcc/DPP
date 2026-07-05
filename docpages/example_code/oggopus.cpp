@@ -7,7 +7,7 @@
 #include <ogg/ogg.h>
 #include <opus/opusfile.h>
 
-int main(int argc, char const *argv[]) {
+int main() {
 	/* Load an ogg opus file into memory.
 	 * The bot expects opus packets to be 2 channel stereo, 48000Hz.
 	 * 
@@ -155,7 +155,7 @@ int main(int argc, char const *argv[]) {
 		}
 	});
 
-	bot.on_ready([&bot](const dpp::ready_t & event) {
+	bot.on_ready([&bot](const dpp::ready_t& event) {
 		if (dpp::run_once<struct register_bot_commands>()) {
 			/* Create a new command. */
 			dpp::slashcommand joincommand("join", "Joins your voice channel.", bot.me.id);

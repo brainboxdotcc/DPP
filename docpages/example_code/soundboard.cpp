@@ -16,7 +16,7 @@ int main() {
 	 */
 	uint8_t* robot = nullptr;
 	size_t robot_size = 0;
-	std::ifstream input ("../testdata/Robot.pcm", std::ios::in|std::ios::binary|std::ios::ate);
+	std::ifstream input ("../testdata/Robot.pcm", std::ios::in | std::ios::binary | std::ios::ate);
 	if (input.is_open()) {
 		robot_size = input.tellg();
 		robot = new uint8_t[robot_size];
@@ -62,7 +62,7 @@ int main() {
 		}
 	});
 
-	bot.on_ready([&bot](const dpp::ready_t & event) {
+	bot.on_ready([&bot](const dpp::ready_t& event) {
 		if (dpp::run_once<struct register_bot_commands>()) {
 			/* Create a new command. */
 			dpp::slashcommand joincommand("join", "Joins your voice channel.", bot.me.id);
