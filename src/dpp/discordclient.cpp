@@ -126,7 +126,7 @@ void discord_client::on_disconnect()
 	set_resume_hostname();
 	if (sfd != INVALID_SOCKET) {
 		log(dpp::ll_debug, "Lost connection to websocket on shard " + std::to_string(shard_id) + ", reconnecting...");
-		owner->socketengine->delete_socket(sfd);
+		sfd = INVALID_SOCKET;
 	}
 	ssl_connection::close();
 	owner->stop_timer(timer_handle);
