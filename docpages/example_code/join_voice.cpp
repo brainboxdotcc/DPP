@@ -71,7 +71,7 @@ int main() {
 		}
 	});
 
-	bot.on_ready([&bot](const dpp::ready_t & event) {
+	bot.on_ready([&bot](const dpp::ready_t& event) {
 		if (dpp::run_once<struct register_bot_commands>()) {
 			/* Create a new command. */
 			bot.global_command_create(dpp::slashcommand("join", "Joins your voice channel.", bot.me.id));

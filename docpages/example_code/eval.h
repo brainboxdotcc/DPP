@@ -3,7 +3,7 @@
 /* This is the snowflake ID of the bot's developer.
  * The eval command will be restricted to this user.
  */
-#define MY_DEVELOPER 189759562910400512ULL
+constexpr unsigned long long MY_DEVELOPER = 189759562910400512ULL;
 
 /* Any functions you want to be usable from within an eval,
  * that are not part of D++ itself or the message event, you

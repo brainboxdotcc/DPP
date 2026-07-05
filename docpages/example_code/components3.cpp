@@ -33,7 +33,7 @@ int main() {
 	/* When a user clicks your select menu , the on_select_click event will fire,
 	 * containing the custom_id you defined in your select menu.
 	 */
-	bot.on_select_click([](const dpp::select_click_t & event) {
+	bot.on_select_click([](const dpp::select_click_t& event) {
 		/* Select clicks are still interactions, and must be replied to in some form to
 		 * prevent the "this interaction has failed" message from Discord to the user.
 		 */

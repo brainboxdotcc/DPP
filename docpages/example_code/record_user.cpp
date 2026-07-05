@@ -43,13 +43,13 @@ int main() {
 		}
 	});
 
-	bot.on_voice_receive([&fd, &user_id](const dpp::voice_receive_t &event) {
+	bot.on_voice_receive([&fd, &user_id](const dpp::voice_receive_t& event) {
 		if (event.user_id == user_id) {
 			fwrite((char *)event.audio, 1, event.audio_size, fd);
 		}
 	});
 
-	bot.on_ready([&bot](const dpp::ready_t & event) {
+	bot.on_ready([&bot](const dpp::ready_t& event) {
 		if (dpp::run_once<struct register_bot_commands>()) {
 			/* Create a new command. */
 			dpp::slashcommand recordcommand("record", "Joins your voice channel and records you.", bot.me.id);

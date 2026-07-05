@@ -11,7 +11,7 @@ int main() {
 		if (event.command.get_command_name() == "file") {
 
 			/* Request the image from the URL specified and capture the event in a lambda. */
-			bot.request("https://dpp.dev/DPP-Logo.png", dpp::m_get, [event](const dpp::http_request_completion_t & httpRequestCompletion) {
+			bot.request("https://dpp.dev/DPP-Logo.png", dpp::m_get, [event](const dpp::http_request_completion_t& httpRequestCompletion) {
 
 				/* Create a message */
 				dpp::message msg(event.command.channel_id, "This is my new attachment:");
