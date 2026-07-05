@@ -249,12 +249,12 @@ void cluster::start(start_type return_after) {
 							auto session_id = old->sessionid;
 
 							log(ll_trace, "Attempting resume...");
-							shards.erase(shard_id);
+							shards[shard_id] = nullptr;
 							shards[shard_id] = new discord_client(*old, seq_no, session_id);
 							resume = true;
 						} else {
 							log(ll_trace, "Attempting full reconnection...");
-							shards.erase(shard_id);
+							shards[shard_id] = nullptr;
 							shards[shard_id] = new discord_client(this, shard_id, numshards, token, intents, compressed, ws_mode);
 						}
 						/* Delete the old one */
@@ -279,7 +279,7 @@ void cluster::start(start_type return_after) {
 						delete shards[shard_id];
 						delete old;
 						old = nullptr;
-						shards.erase(shard_id);
+						shards[shard_id] = nullptr;
 						add_reconnect(shard_id);
 					}
 					/* It is not possible to reconnect another shard within the same 5-second window,
