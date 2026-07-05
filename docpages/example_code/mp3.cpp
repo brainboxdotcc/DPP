@@ -41,8 +41,8 @@ int main() {
 	mpg123_open(mh, MUSIC_FILE);
 	mpg123_getformat(mh, &rate, &channels, &encoding);
 
-	[[maybe_unused]] unsigned int counter = 0;
-	for ([[maybe_unused]] int totalBytes = 0; mpg123_read(mh, buffer, buffer_size, &done) == MPG123_OK; ) {
+	unsigned int counter = 0;
+	for (int totalBytes = 0; mpg123_read(mh, buffer, buffer_size, &done) == MPG123_OK; ) {
 		for (size_t i = 0; i < buffer_size; i++) {
 			pcmdata.push_back(buffer[i]);
 		}
