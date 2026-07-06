@@ -97,13 +97,6 @@ private:
 	std::mutex out_mutex;
 
 	/**
-	 * @brief Event handlers mutex
-	 *
-	 * Only one thread can call event handlers at a time
-	 */
-	std::mutex event_mutex;
-
-	/**
 	 * @brief Start offset into internal ring buffer for client to server IO
 	 */
 	size_t client_to_server_length = 0;
@@ -148,6 +141,14 @@ protected:
 	 * @brief Openssl opaque contexts
 	 */
 	openssl_connection* ssl;
+
+	/**
+	 * @brief Protects openssl opaque contexts when closing
+	 *
+	 * There's data races when reconnecting severed connection.
+	 * This makes sure we don't double free our contexts.
+	 */
+	std::mutex ssl_close_mutex;
 
 	/**
 	 * @brief SSL cipher in use
