@@ -136,6 +136,8 @@ bool socket_engine_base::delete_socket(dpp::socket fd) {
 	if (iter == fds.end() || ((iter->second->flags & WANT_DELETION) != 0L)) {
 		return false;
 	}
+	/* Remove any other flag to let the engine delete it immediately */
+	iter->second->flags &= ~(WANT_WRITE | WANT_READ | WANT_ERROR);
 	iter->second->flags |= WANT_DELETION;
 	stats.deletions++;
 	stats.active_fds--;
