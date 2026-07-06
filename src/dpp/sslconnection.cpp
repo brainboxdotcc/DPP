@@ -21,6 +21,7 @@
  ************************************************************************************/
 #include <dpp/export.h>
 #include <cerrno>
+#include <mutex>
 #ifdef _WIN32
 	/* Windows-specific sockets includes */
 	#include <WinSock2.h>
@@ -610,6 +611,7 @@ void ssl_connection::read_loop() {
 			sfd,
 			WANT_READ | WANT_WRITE | WANT_ERROR,
 			[this](socket fd, const struct socket_events &e) {
+				std::unique_lock lock(event_mutex);
 				if (this->sfd == INVALID_SOCKET) {
 					close_socket(fd);
 					owner->socketengine->delete_socket(fd);
@@ -618,6 +620,7 @@ void ssl_connection::read_loop() {
 				on_read(fd, e);
 			},
 			[this](socket fd, const struct socket_events &e) {
+				std::unique_lock lock(event_mutex);
 				if (this->sfd == INVALID_SOCKET) {
 					close_socket(fd);
 					owner->socketengine->delete_socket(fd);
@@ -626,6 +629,7 @@ void ssl_connection::read_loop() {
 				on_write(fd, e);
 			},
 			[this](socket fd, const struct socket_events &e, int error_code) {
+				std::unique_lock lock(event_mutex);
 				do_raw_trace("on_error");
 				on_error(fd, e, error_code);
 			}
@@ -680,7 +684,6 @@ void ssl_connection::close() {
 	 * that is done often.
 	 */
 	if (!plaintext) {
-		std::unique_lock lock(ssl_close_mutex);
 		if (ssl != nullptr && ssl->ssl != nullptr) {
 			SSL_free(ssl->ssl);
 			ssl->ssl = nullptr;
