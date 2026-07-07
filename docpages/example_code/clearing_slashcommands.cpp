@@ -7,7 +7,7 @@ int main() {
 
 	/* We won't be performing any commands, so we don't need to add the event here! */
 
-	bot.on_ready([&bot](const dpp::ready_t & event) {
+	bot.on_ready([&bot](const dpp::ready_t& event) {
 		if (dpp::run_once<struct clear_bot_commands>()) {
 			/* Now, we're going to wipe our commands */
 			bot.global_bulk_command_delete();

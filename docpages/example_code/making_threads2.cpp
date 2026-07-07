@@ -7,7 +7,7 @@ int main() {
 	bot.on_log(dpp::utility::cout_logger());
 
 	/* The event is fired when the bot detects a message in any server and any channel it has access to. */
-	bot.on_slashcommand([&bot](const dpp::slashcommand_t & event) {
+	bot.on_slashcommand([&bot](const dpp::slashcommand_t& event) {
 		/* Check which command they ran */
 		if (event.command.get_command_name() == "message-thread") {
 			/* Get all active threads in a guild. */

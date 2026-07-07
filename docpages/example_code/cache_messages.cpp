@@ -11,7 +11,7 @@ int main() {
 	bot.on_log(dpp::utility::cout_logger());
 
 	/* Message handler */
-	bot.on_message_create([&message_cache](const dpp::message_create_t &event) {
+	bot.on_message_create([&message_cache](const dpp::message_create_t& event) {
 		/* Make a permanent pointer using new, for each message to be cached */
 		dpp::message* m = new dpp::message();
 
@@ -23,7 +23,7 @@ int main() {
 	});
 
 	/* The event is fired when someone issues your commands */
-	bot.on_slashcommand([&bot, &message_cache](const dpp::slashcommand_t& event) {
+	bot.on_slashcommand([&message_cache](const dpp::slashcommand_t& event) {
 		/* Check which command they ran */
 		if (event.command.get_command_name() == "get") {
 

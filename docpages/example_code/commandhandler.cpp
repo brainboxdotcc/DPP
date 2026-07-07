@@ -12,7 +12,7 @@ int main() {
 	command_handler.add_prefix(".")
 		.add_prefix("/");
 
-	bot.on_ready([&command_handler](const dpp::ready_t &event) {
+	bot.on_ready([&command_handler](const dpp::ready_t& event) {
 
 		command_handler.add_command(
 			/* Command name */

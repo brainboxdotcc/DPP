@@ -20,7 +20,7 @@ int main() {
 	bot.on_log(dpp::utility::cout_logger());
 
 	/* The event is fired when someone issues your commands */
-	bot.on_slashcommand([&bot](const dpp::slashcommand_t& event) {
+	bot.on_slashcommand([](const dpp::slashcommand_t& event) {
 
 		/* Check which command they ran */
 		if (event.command.get_command_name() == "join") {
@@ -97,7 +97,7 @@ int main() {
 		}
 	});
 
-	bot.on_ready([&bot](const dpp::ready_t & event) {
+	bot.on_ready([&bot](const dpp::ready_t& event) {
 		if (dpp::run_once<struct register_bot_commands>()) {
 			/* Create a new command. */
 			dpp::slashcommand joincommand("join", "Joins your voice channel.", bot.me.id);

@@ -8,7 +8,7 @@ int main() {
 	bot.on_slashcommand([](const dpp::slashcommand_t& event) -> dpp::task<void> {
 		if (event.command.get_command_name() == "avatar") {
 			// Make a nested coroutine to fetch the guild member requested, that returns it as an optional
-			constexpr auto resolve_member = [](const dpp::slashcommand_t &event) -> dpp::task<std::optional<dpp::guild_member>> {
+			constexpr auto resolve_member = [](const dpp::slashcommand_t& event) -> dpp::task<std::optional<dpp::guild_member>> {
 				const dpp::command_value &user_param = event.get_parameter("user");
 				dpp::snowflake user_id;
 				if (std::holds_alternative<std::monostate>(user_param)) {
