@@ -231,17 +231,17 @@ void cluster::start(start_type return_after) {
 				if (now >= shard_reconnect_time) {
 					/* This shard needs to be reconnected */
 					reconnections.erase(reconnect);
-					discord_client* old = nullptr;
+					std::unique_ptr<discord_client> old = nullptr;
 					{
 						std::shared_lock lk(shards_mutex);
-						old = shards[shard_id];
+						old = std::move(shards[shard_id]);
 					}
 					log(ll_info, "Reconnecting shard " + std::to_string(shard_id));
 					/* Make a new resumed connection based off the old one */
 					try {
 						bool resume = false;
 						std::unique_lock lk(shards_mutex);
-						if (shards[shard_id] != nullptr) {
+						if (old != nullptr) {
 							/* These values must be copied to the new connection
 							 * to attempt to resume it
 							 */
@@ -250,16 +250,16 @@ void cluster::start(start_type return_after) {
 
 							log(ll_trace, "Attempting resume...");
 							shards[shard_id] = nullptr;
-							shards[shard_id] = new discord_client(*old, seq_no, session_id);
+							shards[shard_id] = std::make_unique<class discord_client>(*old, seq_no, session_id);
 							resume = true;
 						} else {
 							log(ll_trace, "Attempting full reconnection...");
 							shards[shard_id] = nullptr;
-							shards[shard_id] = new discord_client(this, shard_id, numshards, token, intents, compressed, ws_mode);
+							shards[shard_id] = std::make_unique<class discord_client>(this, shard_id, numshards, token, intents, compressed, ws_mode);
 						}
 						/* Delete the old one */
 						log(ll_trace, "Attempting to delete old connection...");
-						delete old;
+						old.reset();
 						old = nullptr;
 						/* Set up the new shard's IO events */
 						log(ll_trace, "Running new connection...");
@@ -276,8 +276,8 @@ void cluster::start(start_type return_after) {
 					catch (const std::exception& e) {
 						std::unique_lock lk(shards_mutex);
 						log(ll_info, "Exception when reconnecting shard " + std::to_string(shard_id) + ": " + std::string(e.what()));
-						delete shards[shard_id];
-						delete old;
+						shards[shard_id].reset();
+						old.reset();
 						old = nullptr;
 						shards[shard_id] = nullptr;
 						add_reconnect(shard_id);
@@ -361,7 +361,7 @@ void cluster::start(start_type return_after) {
 					/* Each discord_client is inserted into the socket engine when we call run() */
 					try {
 						std::unique_lock lk(shards_mutex);
-						this->shards[s] = new discord_client(this, s, numshards, token, intents, compressed, ws_mode);
+						this->shards[s] = std::make_unique<class discord_client>(this, s, numshards, token, intents, compressed, ws_mode);
 						this->shards[s]->run();
 					}
 					catch (const std::exception &e) {
@@ -478,8 +478,8 @@ void cluster::shutdown() {
 
 	std::unique_lock lk(shards_mutex);
 	/* Terminate shards */
-	for (const auto& sh : shards) {
-		delete sh.second;
+	for (auto& sh : shards) {
+		sh.second.reset();
 	}
 	shards.clear();
 }
@@ -636,12 +636,13 @@ discord_client* cluster::get_shard(uint32_t id) const {
 	std::shared_lock lk(shards_mutex);
 	auto i = shards.find(id);
 	if (i != shards.end()) {
-		return i->second;
+		/* How do we tell user when the shard is going to be deleted? */
+		return i->second.get();
 	}
 	return nullptr;
 }
 
-shard_list cluster::get_shards() const {
+const shard_list& cluster::get_shards() const {
 	std::shared_lock lk(shards_mutex);
 	return shards;
 }

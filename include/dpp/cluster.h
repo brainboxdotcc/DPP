@@ -576,9 +576,9 @@ public:
 	/**
 	 * @brief Get the list of shards
 	 *
-	 * @return shard_list map of shards for this cluster
+	 * @return const shard_list& map of shards for this cluster
 	 */
-	shard_list get_shards() const;
+	const shard_list& get_shards() const;
 
 	/**
 	 * @brief Sets the request timeout.
