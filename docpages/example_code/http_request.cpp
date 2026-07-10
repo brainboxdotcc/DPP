@@ -11,7 +11,7 @@ int main() {
 		std::string mypostdata = "{\"value\": 42}";
 		// Make a HTTP POST request. HTTP and HTTPS are supported here.
 		bot.request(
-			"http://www.somebotlist.com/api/servers", dpp::m_post, [](const dpp::http_request_completion_t & cc) {
+			"http://www.somebotlist.com/api/servers", dpp::m_post, [](const dpp::http_request_completion_t& cc) {
 				// This callback is called when the HTTP request completes. See documentation of
 				// dpp::http_request_completion_t for information on the fields in the parameter.
 				std::cout << "I got reply: " << cc.body << " with HTTP status code: " << cc.status << "\n";

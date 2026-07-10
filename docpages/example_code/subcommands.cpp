@@ -7,7 +7,7 @@ int main() {
 	bot.on_log(dpp::utility::cout_logger());
 
 	/* Use the on_slashcommand event to look for commands */
-	bot.on_slashcommand([&bot](const dpp::slashcommand_t & event) {
+	bot.on_slashcommand([](const dpp::slashcommand_t& event) {
 		dpp::command_interaction cmd_data = event.command.get_command_interaction();
 
 		/* Check if the command is the image command. */
@@ -40,7 +40,7 @@ int main() {
 	});
 
 	/* Executes on ready. */
-	bot.on_ready([&bot](const dpp::ready_t & event) {
+	bot.on_ready([&bot](const dpp::ready_t& event) {
 		if (dpp::run_once<struct register_bot_commands>()) {
 			/* Define a slash command. */
 			dpp::slashcommand image("image", "Send a specific image.", bot.me.id);

@@ -41,13 +41,10 @@ int main() {
 	mpg123_open(mh, MUSIC_FILE);
 	mpg123_getformat(mh, &rate, &channels, &encoding);
 
-	unsigned int counter = 0;
-	for (int totalBytes = 0; mpg123_read(mh, buffer, buffer_size, &done) == MPG123_OK; ) {
+	while (mpg123_read(mh, buffer, buffer_size, &done) == MPG123_OK) {
 		for (size_t i = 0; i < buffer_size; i++) {
 			pcmdata.push_back(buffer[i]);
 		}
-		counter += buffer_size;
-		totalBytes += done;
 	}
 	delete[] buffer;
 	mpg123_close(mh);
@@ -59,7 +56,7 @@ int main() {
 	bot.on_log(dpp::utility::cout_logger());
 
 	/* The event is fired when someone issues your commands */
-	bot.on_slashcommand([&bot, &pcmdata](const dpp::slashcommand_t& event) {
+	bot.on_slashcommand([&pcmdata](const dpp::slashcommand_t& event) {
 		/* Check which command they ran */
 		if (event.command.get_command_name() == "join") {
 			/* Get the guild */
@@ -90,7 +87,7 @@ int main() {
 		}
 	});
 
-	bot.on_ready([&bot](const dpp::ready_t & event) {
+	bot.on_ready([&bot](const dpp::ready_t& event) {
 		if (dpp::run_once<struct register_bot_commands>()) {
 			/* Create a new command. */
 			dpp::slashcommand joincommand("join", "Joins your voice channel.", bot.me.id);

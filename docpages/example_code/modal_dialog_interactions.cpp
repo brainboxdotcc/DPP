@@ -6,7 +6,7 @@ int main() {
 
 	bot.on_log(dpp::utility::cout_logger());
 
-	bot.on_slashcommand([&bot](const dpp::slashcommand_t& event) {
+	bot.on_slashcommand([](const dpp::slashcommand_t& event) {
 		/* Check for our /dialog command */
 		if (event.command.get_command_name() == "dialog") {
 			/* Instantiate an interaction_modal_response object */
@@ -39,7 +39,7 @@ int main() {
 	});
 
 	/* This event handles form submission for the modal dialog we create above */
-	bot.on_form_submit([](const dpp::form_submit_t & event) {
+	bot.on_form_submit([](const dpp::form_submit_t& event) {
 		/* For this simple example, we know the elements value type is string.
 		 * We also know the indices of each element.
 		 * In the real world, it may not be safe to make such assumptions!
@@ -58,7 +58,7 @@ int main() {
 		event.reply(m);
 	});
 
-	bot.on_ready([&bot](const dpp::ready_t & event) {
+	bot.on_ready([&bot](const dpp::ready_t& event) {
 		if (dpp::run_once<struct register_bot_commands>()) {
 			/* Create a slash command and register it as a global command */
 			bot.global_command_create(dpp::slashcommand("dialog", "Make a modal dialog box", bot.me.id));

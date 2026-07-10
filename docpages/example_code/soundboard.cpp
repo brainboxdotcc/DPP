@@ -16,7 +16,7 @@ int main() {
 	 */
 	uint8_t* robot = nullptr;
 	size_t robot_size = 0;
-	std::ifstream input ("../testdata/Robot.pcm", std::ios::in|std::ios::binary|std::ios::ate);
+	std::ifstream input ("../testdata/Robot.pcm", std::ios::in | std::ios::binary | std::ios::ate);
 	if (input.is_open()) {
 		robot_size = input.tellg();
 		robot = new uint8_t[robot_size];
@@ -31,7 +31,7 @@ int main() {
 	bot.on_log(dpp::utility::cout_logger());
 
 	/* The event is fired when someone issues your commands */
-	bot.on_slashcommand([&bot, robot, robot_size](const dpp::slashcommand_t& event) {
+	bot.on_slashcommand([robot, robot_size](const dpp::slashcommand_t& event) {
 		/* Check which command they ran */
 		if (event.command.get_command_name() == "join") {
 			/* Get the guild */
@@ -62,7 +62,7 @@ int main() {
 		}
 	});
 
-	bot.on_ready([&bot](const dpp::ready_t & event) {
+	bot.on_ready([&bot](const dpp::ready_t& event) {
 		if (dpp::run_once<struct register_bot_commands>()) {
 			/* Create a new command. */
 			dpp::slashcommand joincommand("join", "Joins your voice channel.", bot.me.id);

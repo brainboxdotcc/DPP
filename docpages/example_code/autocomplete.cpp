@@ -6,7 +6,7 @@ int main()
 
 	bot.on_log(dpp::utility::cout_logger());
 
-	bot.on_ready([&bot](const dpp::ready_t & event) {
+	bot.on_ready([&bot](const dpp::ready_t& event) {
 		if (dpp::run_once<struct register_bot_commands>()) {
 
 			/* Create a new global command once on ready event */
@@ -23,7 +23,7 @@ int main()
 	});
 
 	/* The interaction create event is fired when someone issues your commands */
-	bot.on_slashcommand([&bot](const dpp::slashcommand_t & event) {
+	bot.on_slashcommand([](const dpp::slashcommand_t& event) {
 		
 		/* Check which command they ran */
 		if (event.command.get_command_name() == "blep") {
@@ -39,7 +39,7 @@ int main()
 	/* The on_autocomplete event is fired whenever discord needs information to fill in a command options's choices.
 	 * You must reply with a REST event within 500ms, so make it snappy!
 	 */
-	bot.on_autocomplete([&bot](const dpp::autocomplete_t & event) {
+	bot.on_autocomplete([&bot](const dpp::autocomplete_t& event) {
 		for (auto & opt : event.options) {
 			/* The option which has focused set to true is the one the user is typing in */
 			if (opt.focused) {
