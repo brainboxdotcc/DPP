@@ -41,13 +41,10 @@ int main() {
 	mpg123_open(mh, MUSIC_FILE);
 	mpg123_getformat(mh, &rate, &channels, &encoding);
 
-	unsigned int counter = 0;
-	for (int totalBytes = 0; mpg123_read(mh, buffer, buffer_size, &done) == MPG123_OK; ) {
+	while (mpg123_read(mh, buffer, buffer_size, &done) == MPG123_OK) {
 		for (size_t i = 0; i < buffer_size; i++) {
 			pcmdata.push_back(buffer[i]);
 		}
-		counter += buffer_size;
-		totalBytes += done;
 	}
 	delete[] buffer;
 	mpg123_close(mh);
