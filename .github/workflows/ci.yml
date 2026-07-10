@@ -131,7 +131,7 @@ jobs:
       fail-fast: false # Don't fail everything if one fails. We want to test each OS/Compiler individually
       matrix:
         cfg:
-          - { arch: 'arm64', concurrency: 3, os: macos-latest, cpp: clang++, version: 16, cmake-flags: '', xcode-version: '16.4' }
+          - { arch: 'arm64', concurrency: 3, os: macos-latest, cpp: clang++, version: 26, cmake-flags: '', xcode-version: '26.4.1' }
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
