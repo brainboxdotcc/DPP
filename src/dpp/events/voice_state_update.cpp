@@ -83,6 +83,8 @@ void voice_state_update::handle(discord_client* client, json &j, const std::stri
 					[](discord_client* client) {
 						/* do nothing, discord will handle reconnection*/
 					}, vsu.state.guild_id, vsu.state.channel_id, enable_dave);
+				/* Should set the session_id here, did this ever work before without setting session_id?? */
+				client->connecting_voice_channels[vsu.state.guild_id]->session_id = vsu.state.session_id;
 			}
 		} else {
 			std::shared_lock lock(client->voice_mutex);

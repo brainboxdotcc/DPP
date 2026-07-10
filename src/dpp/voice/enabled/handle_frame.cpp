@@ -441,6 +441,7 @@ bool discord_voice_client::handle_frame(const std::string &data, ws_opcode opcod
 				destination = address_t(this->ip, this->port);
 
 				// Modes
+				modes.clear();
 				for (auto & m : d["modes"]) {
 					this->modes.push_back(m.get<std::string>());
 				}

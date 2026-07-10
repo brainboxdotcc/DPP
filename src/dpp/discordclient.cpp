@@ -3,7 +3,7 @@
  * D++, A Lightweight C++ library for Discord
  *
  * SPDX-License-Identifier: Apache-2.0
-#include <dpp/zlibcontext.h> * Copyright 2021 Craig Edwards and D++ contributors
+ * Copyright 2021 Craig Edwards and D++ contributors
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,6 +29,7 @@
 #include <dpp/json.h>
 #include <dpp/etf.h>
 #include <utility>
+#include <dpp/zlibcontext.h>
 
 #define PATH_UNCOMPRESSED_JSON "/?v=" DISCORD_API_VERSION "&encoding=json"
 #define PATH_COMPRESSED_JSON "/?v=" DISCORD_API_VERSION "&encoding=json&compress=zlib-stream"
@@ -79,7 +80,6 @@ discord_client::discord_client(discord_client &old, uint64_t sequence, const std
 	for (auto& [shard_id, vconn] : connecting_voice_channels) {
 		vconn->reassign_owner(this);
 	}
-	start_connecting();
 }
 
 discord_client::discord_client(dpp::cluster* _cluster, uint32_t _shard_id, uint32_t _max_shards, const std::string &_token, uint32_t _intents, bool comp, websocket_protocol_t ws_proto)
@@ -607,10 +607,15 @@ voiceconn::~voiceconn() {
 	this->disconnect();
 }
 
-voiceconn& voiceconn::request() {
-	this->token.clear();
-	this->session_id.clear();
-	this->websocket_hostname.clear();
+voiceconn& voiceconn::request(bool failed_resume) {
+	/* Creating new connection from previously failed Opcode 7 Resume doesn't guarantee */
+	/* to receive voice_state_update AND voice_server_update event */
+	/* Keep previous session data so we can reconnect */
+	if (!failed_resume) {
+		this->token.clear();
+		this->session_id.clear();
+		this->websocket_hostname.clear();
+	}
 	this->voiceclient.reset();
 
 	this->request_callback(this->creator);
@@ -623,7 +628,7 @@ voiceconn& voiceconn::connect() {
 			this->creator->log(ll_debug, "Connecting voice for guild " + std::to_string(this->guild_id) + " channel " + std::to_string(this->channel_id));
 			full_reconnection_callback_t reconnection_callback = [weak_this=weak_from_this()] {
 			if (std::shared_ptr<voiceconn> strong_this = weak_this.lock()) {
-				strong_this->request();
+				strong_this->request(true);
 			}
 		};
 		this->voiceclient = std::make_unique<discord_voice_client>(creator->creator, std::move(reconnection_callback), this->channel_id, this->guild_id, this->token, this->session_id, this->websocket_hostname, this->dave);

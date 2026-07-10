@@ -674,12 +674,21 @@ bool ssl_connection::handle_buffer(std::string &buffer) {
 }
 
 void ssl_connection::close() {
+	/* Notify socketengine first before deleting ssl contexts */
+	if (sfd != INVALID_SOCKET) {
+		log(ll_trace, "ssl_connection::close() with sfd");
+		owner->socketengine->delete_socket(sfd);
+		close_socket(sfd);
+		sfd = INVALID_SOCKET;
+	}
+
 	/**
 	 * Many of the values here are reset to initial values in the case
 	 * we want to reconnect the socket after closing it. This is not something
 	 * that is done often.
 	 */
 	if (!plaintext) {
+		std::unique_lock lock(ssl_close_mutex);
 		if (ssl != nullptr && ssl->ssl != nullptr) {
 			SSL_free(ssl->ssl);
 			ssl->ssl = nullptr;
@@ -689,12 +698,6 @@ void ssl_connection::close() {
 	client_to_server_length = client_to_server_offset = 0;
 	last_tick = time(nullptr);
 	bytes_in = bytes_out = 0;
-	if (sfd != INVALID_SOCKET) {
-		log(ll_trace, "ssl_connection::close() with sfd");
-		owner->socketengine->delete_socket(sfd);
-		close_socket(sfd);
-		sfd = INVALID_SOCKET;
-	}
 	obuffer.clear();
 	buffer.clear();
 }
