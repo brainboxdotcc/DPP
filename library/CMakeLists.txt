@@ -457,6 +457,12 @@ if (NOT BUILD_SHARED_LIBS)
 	        )
 		target_link_libraries(dppstatic ${ZLIB_LIBRARIES} ${OPENSSL_LIBRARIES})
 	endif()
+
+	target_include_directories(dppstatic PUBLIC
+		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
+		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include/dpp>
+	)
+	target_compile_definitions(dppstatic PUBLIC $<TARGET_PROPERTY:dpp,INTERFACE_COMPILE_DEFINITIONS>)
 endif()
 
 if (DPP_BUILD_TEST)
