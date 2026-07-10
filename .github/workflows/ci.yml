@@ -131,7 +131,7 @@ jobs:
       fail-fast: false # Don't fail everything if one fails. We want to test each OS/Compiler individually
       matrix:
         cfg:
-          - { arch: 'arm64', concurrency: 3, os: macos-latest, cpp: clang++, version: 16, cmake-flags: '', xcode-version: '16.4' }
+          - { arch: 'arm64', concurrency: 3, os: macos-latest, cpp: clang++, version: 26, cmake-flags: '', xcode-version: '26' }
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
@@ -272,3 +272,89 @@ jobs:
         with:
           name: "libdpp - RPM Package ${{matrix.cfg.name}}"
           path: "${{github.workspace}}/build/*.rpm"
+
+  # Static library build (BUILD_SHARED_LIBS=OFF)
+  static-linux:
+    permissions:
+      contents: read
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}-static-${{ matrix.cfg.cpp }}-${{ matrix.cfg.version }}
+      cancel-in-progress: true
+    name: Static Linux (${{ matrix.cfg.cpp }}-${{ matrix.cfg.version }})
+    runs-on: ${{ matrix.cfg.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        cfg:
+          - { os: ubuntu-24.04, package: g++-13, cpp: g++, version: 13, concurrency: 4 }
+          - { os: ubuntu-24.04, package: clang-20, cpp: clang++, version: 20, concurrency: 4 }
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+        with:
+          egress-policy: audit
+
+      - name: Checkout D++
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Setup mold
+        uses: rui314/setup-mold@9c9c13bf4c3f1adef0cc596abc155580bcb04444 # v1
+
+      - name: Install apt packages
+        run: sudo sed -i 's/azure\.//' /etc/apt/sources.list && sudo apt update && sudo apt-get install -y ${{ matrix.cfg.package }} pkg-config libopus-dev zlib1g-dev libssl-dev rpm
+
+      - name: Generate CMake
+        run: cmake -B build -DBUILD_SHARED_LIBS=OFF -DDPP_NO_VCPKG=ON -DAVX_TYPE=AVX0 -DCMAKE_BUILD_TYPE=Release
+        env:
+          CXX: ${{ matrix.cfg.cpp }}-${{ matrix.cfg.version }}
+
+      - name: Build Project
+        run: cd build && make -j${{ matrix.cfg.concurrency }}
+
+  # Install D++ and consume it from a separate project via find_package(dpp)
+  install-consumer:
+    permissions:
+      contents: read
+    name: Install & find_package(dpp)
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+        with:
+          egress-policy: audit
+
+      - name: Checkout D++
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Setup mold
+        uses: rui314/setup-mold@9c9c13bf4c3f1adef0cc596abc155580bcb04444 # v1
+
+      - name: Install apt packages
+        run: sudo sed -i 's/azure\.//' /etc/apt/sources.list && sudo apt update && sudo apt-get install -y g++-13 pkg-config libopus-dev zlib1g-dev libssl-dev
+
+      - name: Build and install D++
+        run: |
+          cmake -B build -DDPP_NO_VCPKG=ON -DAVX_TYPE=AVX0 -DCMAKE_BUILD_TYPE=Release -DDPP_BUILD_TEST=OFF -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/_install"
+          cmake --build build -j$(nproc)
+          cmake --install build
+        env:
+          CXX: g++-13
+
+      - name: Consume D++ via find_package
+        run: |
+          mkdir -p consumer && cd consumer
+          cat > CMakeLists.txt <<'EOF'
+          cmake_minimum_required(VERSION 3.16)
+          project(dpp_consumer CXX)
+          find_package(dpp REQUIRED)
+          add_executable(consumer main.cpp)
+          target_link_libraries(consumer dpp::dpp)
+          EOF
+          cat > main.cpp <<'EOF'
+          #include <dpp/dpp.h>
+          int main() { dpp::cluster bot("token"); return 0; }
+          EOF
+          cmake -B build -DCMAKE_PREFIX_PATH="$GITHUB_WORKSPACE/_install" -DCMAKE_BUILD_TYPE=Release
+          cmake --build build -j$(nproc)
+        env:
+          CXX: g++-13
