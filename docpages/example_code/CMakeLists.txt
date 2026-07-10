@@ -38,6 +38,8 @@ option(DPP_MODULES "Build examples with C++20 modules support" ON)
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DDPP_CORO -std=c++20 -pthread -O0 -fPIC -DFMT_HEADER_ONLY -Wall -Wextra -Wpedantic -Werror -Wno-unused-parameter -Wno-deprecated-declarations")
 set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0")
 
+set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -rdynamic")
+
 # Create gcm.cache directory and symlink to the main build's dpp.gcm
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 	file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/gcm.cache")
