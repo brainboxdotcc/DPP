@@ -51,3 +51,33 @@ jobs:
         run: cd docpages/example_code && mkdir build && cd build && cmake -G Ninja -DDPP_MODULES=ON .. && cmake --build . -j2
         env:
           CXX: clang++-20
+
+  test_docs_module_windows:
+    name: Test build module (Windows)
+    runs-on: windows-2022
+    concurrency:
+      group: ${{ github.workflow }}-windows-${{ github.ref }}
+      cancel-in-progress: true
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+        with:
+          egress-policy: audit
+
+      - name: Checkout D++
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          submodules: recursive
+
+      - name: Add MSBuild to PATH
+        uses: microsoft/setup-msbuild@30375c66a4eea26614e0d39710365f22f8b0af57 # v3.0.0
+
+      - name: Generate CMake
+        run: cmake -B build -G "Visual Studio 17 2022" -DDPP_NO_VCPKG=ON -DDPP_MODULES=ON -DDPP_BUILD_TEST=OFF -DAVX_TYPE=AVX0
+        env:
+          DONT_RUN_VCPKG: true
+
+      - name: Build module example
+        run: cmake --build build --target using_modules_example --config Release --parallel 2
+        env:
+          DONT_RUN_VCPKG: true
