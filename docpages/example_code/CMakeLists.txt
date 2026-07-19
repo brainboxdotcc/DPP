@@ -61,9 +61,8 @@ foreach (example ${example_list})
 	if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 		target_compile_options(${examplename}_out PRIVATE -fmodules-ts)
 	elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-		target_compile_options(${examplename}_out PRIVATE 
+		target_compile_options(${examplename}_out PRIVATE
 			-fmodules
-			-mavx2
 			-fprebuilt-module-path=${CMAKE_SOURCE_DIR}/../../build/library/CMakeFiles/dpp.dir
 		)
 	endif()

@@ -1,5 +1,4 @@
 #include <string>
-#include <typeinfo>
 
 import dpp;
 

@@ -1,0 +1,1 @@
+\warning D++ modules are currently only supported by D++ on g++ 15, clang/LLVM 17, and MSVC 17.6 or above. Additionally, your program has to support C++20.
