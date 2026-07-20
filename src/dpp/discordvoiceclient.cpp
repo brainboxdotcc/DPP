@@ -235,6 +235,7 @@ void discord_voice_client::error(uint32_t errorcode)
 		log(dpp::ll_error, "This is a non-recoverable error, giving up on voice connection");
 	}
 
+	this->session_invalid = errorcode == 4006;
 	this->close();
 }
 

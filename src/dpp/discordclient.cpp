@@ -607,11 +607,11 @@ voiceconn::~voiceconn() {
 	this->disconnect();
 }
 
-voiceconn& voiceconn::request(bool failed_resume) {
+voiceconn& voiceconn::request(bool session_invalid) {
 	/* Creating new connection from previously failed Opcode 7 Resume doesn't guarantee */
 	/* to receive voice_state_update AND voice_server_update event */
-	/* Keep previous session data so we can reconnect */
-	if (!failed_resume) {
+	/* Keep previous session data if still valid so we can reconnect */
+	if (session_invalid) {
 		this->token.clear();
 		this->session_id.clear();
 		this->websocket_hostname.clear();
@@ -626,9 +626,9 @@ voiceconn& voiceconn::connect() {
 	if (this->is_ready() && !this->is_active()) {
 		try {
 			this->creator->log(ll_debug, "Connecting voice for guild " + std::to_string(this->guild_id) + " channel " + std::to_string(this->channel_id));
-			full_reconnection_callback_t reconnection_callback = [weak_this=weak_from_this()] {
+			full_reconnection_callback_t reconnection_callback = [weak_this=weak_from_this()] (bool session_invalid) {
 			if (std::shared_ptr<voiceconn> strong_this = weak_this.lock()) {
-				strong_this->request(true);
+				strong_this->request(session_invalid);
 			}
 		};
 		this->voiceclient = std::make_unique<discord_voice_client>(creator->creator, std::move(reconnection_callback), this->channel_id, this->guild_id, this->token, this->session_id, this->websocket_hostname, this->dave);

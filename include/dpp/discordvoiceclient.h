@@ -233,7 +233,7 @@ using privacy_code_callback_t = std::function<void(const std::string&)>;
 /**
  * @brief A callback for a full reconnection after the voice client disconnects due to error.
  */
-using full_reconnection_callback_t = std::function<void()>;
+using full_reconnection_callback_t = std::function<void(bool)>;
 
 /** @brief Implements a discord voice connection.
  * Each discord_voice_client connects to one voice channel and derives from a websocket client.
@@ -440,6 +440,13 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	 * This is to avoid unintended Opus interpolation with subsequent transmissions.
 	 */
 	bool sent_stop_frames{};
+
+	/**
+	 * @brief Whether we got 4006 session invalid error code
+	 *
+	 * This is to tell reconnect callback to clear session data for the next reconnect attempt
+	 */
+	bool session_invalid{};
 
 	/**
 	 * @brief Number of times we have tried to reconnect in the last few seconds
