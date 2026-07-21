@@ -34,6 +34,17 @@ using json = nlohmann::json;
 slashcommand::slashcommand() : managed(), application_id(0), type(ctxm_chat_input), default_permission(true), version(1), default_member_permissions(p_use_application_commands), dm_permission(false), nsfw(false) {
 }
 
+slashcommand::slashcommand(const slashcommand&) = default;
+slashcommand& slashcommand::operator=(const slashcommand&) = default;
+slashcommand::~slashcommand() = default;
+
+command_resolved::command_resolved() = default;
+command_resolved::command_resolved(const command_resolved&) = default;
+command_resolved::command_resolved(command_resolved&&) noexcept = default;
+command_resolved& command_resolved::operator=(const command_resolved&) = default;
+command_resolved& command_resolved::operator=(command_resolved&&) noexcept = default;
+command_resolved::~command_resolved() = default;
+
 slashcommand::slashcommand(const std::string &_name, const std::string &_description, const dpp::snowflake _application_id) : slashcommand() {
 	set_name(_name);
 	set_description(_description);
@@ -366,6 +377,10 @@ command_option::command_option(command_option_type t, const std::string &n, cons
 	}
 }
 
+command_option::command_option(const command_option&) = default;
+command_option& command_option::operator=(const command_option&) = default;
+command_option::~command_option() = default;
+
 command_option& command_option::add_choice(const command_option_choice &o)
 {
 	if (this->autocomplete) {
@@ -468,6 +483,10 @@ slashcommand& slashcommand::add_option(const command_option &o)
 
 interaction::interaction() : application_id(0), type(0), guild_id(0), channel_id(0), message_id(0), version(0), attachment_size_limit(DEFAULT_ATTACHMENT_SIZE_LIMIT), cache_policy(cache_policy::cpol_default) {
 }
+
+interaction::interaction(const interaction&) = default;
+interaction& interaction::operator=(const interaction&) = default;
+interaction::~interaction() = default;
 
 command_interaction interaction::get_command_interaction() const {
 	if (std::holds_alternative<command_interaction>(data)) {

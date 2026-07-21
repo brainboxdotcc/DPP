@@ -297,10 +297,15 @@ public:
 	 */
 	command_option() = default;
 
+#ifndef _DOXYGEN_
+	command_option(const command_option&);
+	command_option& operator=(const command_option&);
+#endif
+
 	/**
 	 * @brief Destroy the command option object
 	 */
-	virtual ~command_option() = default;
+	virtual ~command_option();
 
 	/**
 	 * @brief Add a localisation for this slash command option
@@ -716,6 +721,19 @@ struct DPP_EXPORT command_resolved {
 	 * @see interaction::get_resolved_attachment
 	 */
 	std::map<dpp::snowflake, dpp::attachment> attachments;
+
+	/**
+	 * @brief Construct a new command resolved object
+	 */
+	command_resolved();
+
+#ifndef _DOXYGEN_
+	command_resolved(const command_resolved&);
+	command_resolved(command_resolved&&) noexcept;
+	command_resolved& operator=(const command_resolved&);
+	command_resolved& operator=(command_resolved&&) noexcept;
+	~command_resolved();
+#endif
 };
 
 /**
@@ -1117,10 +1135,15 @@ public:
 	 */
 	interaction();
 
+#ifndef _DOXYGEN_
+	interaction(const interaction&);
+	interaction& operator=(const interaction&);
+#endif
+
 	/**
 	 * @brief Destroy the interaction object
 	 */
-	virtual ~interaction() = default;
+	virtual ~interaction();
 
 	/**
 	 * @brief Get a user associated with the slash command from the resolved list.
@@ -1561,10 +1584,15 @@ public:
 	 */
 	slashcommand(const std::string &_name, const slashcommand_contextmenu_type _type, const dpp::snowflake _application_id);
 
+#ifndef _DOXYGEN_
+	slashcommand(const slashcommand&);
+	slashcommand& operator=(const slashcommand&);
+#endif
+
 	/**
 	 * @brief Destroy the slashcommand object
 	 */
-	virtual ~slashcommand() = default;
+	virtual ~slashcommand();
 
 	/**
 	 * @brief Add a localisation for this slash command

@@ -677,10 +677,15 @@ public:
 	 */
 	component();
 
+#ifndef _DOXYGEN_
+	component(const component&);
+	component& operator=(const component&);
+#endif
+
 	/**
 	 * @brief Destructor
 	 */
-	virtual ~component() = default;
+	virtual ~component();
 
 	/**
 	 * @brief Add a channel type to include in the channel select component (dpp::cot_channel_selectmenu)
@@ -1169,6 +1174,11 @@ struct DPP_EXPORT embed {
 	 * @param j JSON to read content from
 	 */
 	embed(nlohmann::json* j);
+
+#ifndef _DOXYGEN_
+	embed(const embed&);
+	embed& operator=(const embed&);
+#endif
 
 	/**
 	 * @brief Destructor
@@ -2620,13 +2630,13 @@ public:
 	 * @brief Construct a new message object
 	 * @param m Message to copy
 	 */
-	message(const message& m) = default;
+	message(const message& m);
 
 	/*
 	 * @brief Construct a new message object
 	 * @param m Message to move
 	 */
-	message(message&& m) = default;
+	message(message&& m) noexcept;
 
 	/**
 	 * @brief Construct a new message object
@@ -2671,7 +2681,7 @@ public:
 	/**
 	 * @brief Destroy the message object
 	 */
-	~message() override = default;
+	~message() override;
 
 	/**
 	 * @brief Copy a message object
@@ -2679,7 +2689,7 @@ public:
 	 * @param m Message to copy
 	 * @return message& Reference to self
 	 */
-	message &operator=(const message& m) = default;
+	message &operator=(const message& m);
 
 	/**
 	 * @brief Move a message object
@@ -2687,7 +2697,7 @@ public:
 	 * @param m Message to move
 	 * @return message& Reference to self
 	 */
-	message &operator=(message&& m) = default;
+	message &operator=(message&& m) noexcept;
 
 	/**
 	 * @brief Set the original message reference for replies/crossposts

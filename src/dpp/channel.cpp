@@ -115,6 +115,9 @@ channel::channel() :
 channel::~channel(){
 }
 
+channel::channel(const channel&) = default;
+channel& channel::operator=(const channel&) = default;
+
 std::string channel::get_mention(const snowflake &id) {
 	return utility::channel_mention(id);
 }

@@ -93,6 +93,10 @@ guild::guild() :
 {
 }
 
+guild::guild(const guild&) = default;
+guild& guild::operator=(const guild&) = default;
+guild::~guild() = default;
+
 
 guild_member::guild_member() :
 	flags(0),

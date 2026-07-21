@@ -1212,10 +1212,15 @@ public:
 	/** Default constructor, zeroes all values */
 	guild();
 
+#ifndef _DOXYGEN_
+	guild(const guild&);
+	guild& operator=(const guild&);
+#endif
+
 	/**
 	 * @brief Destroy the guild object
 	 */
-	virtual ~guild() = default;
+	virtual ~guild();
 
 	/** Read class values from json object
 	 * @param shard originating shard
