@@ -240,10 +240,12 @@ void cluster::start(start_type return_after) {
 					}
 					log(ll_info, "Reconnecting shard " + std::to_string(shard_id));
 					/* Make a new resumed connection based off the old one */
+					bool resume = false;
 					try {
 						if (cl_old != nullptr) {
 							log(ll_trace, "Attempting resume...");
 							cl_new = std::make_unique<class discord_client>(*cl_old);
+							resume = true;
 						} else {
 							log(ll_trace, "Attempting full reconnection...");
 							cl_new = std::make_unique<class discord_client>(this, shard_id, numshards, token, intents, compressed, ws_mode);
@@ -268,6 +270,14 @@ void cluster::start(start_type return_after) {
 					log(ll_trace, "Installing new connection...");
 					std::unique_lock lk(shards_mutex);
 					shards[shard_id] = std::move(cl_new);
+					if (resume) {
+						/* Start connecting only after the old client is destroyed */
+						shards[shard_id]->start_connecting();
+						std::unique_lock lock(shards[shard_id]->voice_mutex);
+						for (auto &c : shards[shard_id]->connecting_voice_channels) {
+							c.second->connect();
+						}
+					}
 					/* It is not possible to reconnect another shard within the same 5-second window,
 					 * due to discords strict rate limiting on shard connections, so we bail out here
 					 * and only try another reconnect in the next timer interval. Do not try and make
