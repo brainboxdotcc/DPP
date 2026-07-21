@@ -282,9 +282,9 @@ struct DPP_EXPORT confirmation_callback_t {
 
 #ifndef _DOXYGEN_
     confirmation_callback_t(const confirmation_callback_t&);
-    confirmation_callback_t(confirmation_callback_t&&) noexcept;
+    confirmation_callback_t(confirmation_callback_t&&);
     confirmation_callback_t& operator=(const confirmation_callback_t&);
-    confirmation_callback_t& operator=(confirmation_callback_t&&) noexcept;
+    confirmation_callback_t& operator=(confirmation_callback_t&&);
     ~confirmation_callback_t();
 #endif
 	/**
