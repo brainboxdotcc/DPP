@@ -511,6 +511,10 @@ public:
 	 * @brief Construct a new interaction response object
 	 */
 	interaction_response() = default;
+	interaction_response(const interaction_response&);
+	interaction_response(interaction_response&&) noexcept;
+	interaction_response& operator=(const interaction_response&);
+	interaction_response& operator=(interaction_response&&) noexcept;
 
 	/**
 	 * @brief Construct a new interaction response object
@@ -546,7 +550,7 @@ public:
 	/**
 	 * @brief Destroy the interaction response object
 	 */
-	virtual ~interaction_response() = default;
+	virtual ~interaction_response();
 
 };
 
@@ -569,7 +573,7 @@ protected:
 	 * @param j JSON to fill from
 	 * @return interaction_response& Reference to self
 	 */
-	virtual interaction_modal_response& fill_from_json_impl(nlohmann::json* j);
+	interaction_modal_response& fill_from_json_impl(nlohmann::json* j) override;
 
 	/**
 	 * @brief Build a json for this object
@@ -577,7 +581,7 @@ protected:
 	 *
 	 * @return json JSON object
 	 */
-	virtual json to_json_impl(bool with_id = false) const;
+	json to_json_impl(bool with_id = false) const override;
 
 public:
 	using json_interface<interaction_modal_response>::fill_from_json;
@@ -679,7 +683,7 @@ public:
 	/**
 	 * @brief Destroy the interaction modal response object
 	 */
-	virtual ~interaction_modal_response() = default;
+	~interaction_modal_response() override = default;
 };
 
 /**
