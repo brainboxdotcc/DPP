@@ -52,7 +52,7 @@ constexpr int LARGE_THRESHOLD = 250;
 /**
  * @brief Resume constructor for websocket client
  */
-discord_client::discord_client(discord_client &old, uint64_t sequence, const std::string& session_id)
+discord_client::discord_client(discord_client &old)
 	: websocket_client(old.owner, old.resume_gateway_url, "443", old.compressed ? (old.protocol == ws_json ? PATH_COMPRESSED_JSON : PATH_COMPRESSED_ETF) : (old.protocol == ws_json ? PATH_UNCOMPRESSED_JSON : PATH_UNCOMPRESSED_ETF)),
 	  compressed(old.compressed),
 	  zlib(nullptr),
@@ -64,10 +64,10 @@ discord_client::discord_client(discord_client &old, uint64_t sequence, const std
 	  last_heartbeat(time(nullptr)),
 	  shard_id(old.shard_id),
 	  max_shards(old.max_shards),
-	  last_seq(sequence),
+	  last_seq(old.last_seq),
 	  token(old.token),
 	  intents(old.intents),
-	  sessionid(session_id),
+	  sessionid(old.sessionid),
 	  resumes(old.resumes),
 	  reconnects(old.reconnects),
 	  websocket_ping(old.websocket_ping),
