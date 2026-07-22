@@ -2,7 +2,10 @@
 
 namespace dpp {
 
-confirmation_callback_t::confirmation_callback_t() = default;
+confirmation_callback_t::confirmation_callback_t()
+	: http_info{}, value{}, bot(nullptr)
+{
+}
 confirmation_callback_t::confirmation_callback_t(const confirmation_callback_t &) = default;
 confirmation_callback_t::confirmation_callback_t(confirmation_callback_t &&) = default;
 confirmation_callback_t &confirmation_callback_t::operator=(const confirmation_callback_t &) = default;
