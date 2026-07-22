@@ -17,10 +17,9 @@
       perSystem =
         { pkgs, ... }:
         {
-          devShells.default = pkgs.mkShell.override { stdenv = pkgs.llvmPackages.libcxxStdenv; } {
+          devShells.default = pkgs.mkShell {
             packages = with pkgs; [
               llvmPackages.clang-tools
-              llvmPackages.lldb
               cmake
               cmake-language-server
               ninja
@@ -32,8 +31,6 @@
 
             CMAKE_EXPORT_COMPILE_COMMANDS = "1";
             CMAKE_GENERATOR = "Ninja";
-            CC = "clang";
-            CXX = "clang++";
           };
         };
     };
