@@ -725,17 +725,6 @@ struct DPP_EXPORT command_resolved {
 	 * @see interaction::get_resolved_attachment
 	 */
 	std::map<dpp::snowflake, dpp::attachment> attachments;
-
-	/**
-	 * @brief Construct a new command resolved object
-	 */
-	command_resolved();
-
-	command_resolved(const command_resolved&);
-	command_resolved(command_resolved&&) noexcept;
-	command_resolved& operator=(const command_resolved&);
-	command_resolved& operator=(command_resolved&&) noexcept;
-	~command_resolved();
 };
 
 /**

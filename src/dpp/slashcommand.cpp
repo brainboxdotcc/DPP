@@ -40,13 +40,6 @@ slashcommand& slashcommand::operator=(const slashcommand&) = default;
 slashcommand& slashcommand::operator=(slashcommand&&) noexcept = default;
 slashcommand::~slashcommand() = default;
 
-command_resolved::command_resolved() = default;
-command_resolved::command_resolved(const command_resolved&) = default;
-command_resolved::command_resolved(command_resolved&&) noexcept = default;
-command_resolved& command_resolved::operator=(const command_resolved&) = default;
-command_resolved& command_resolved::operator=(command_resolved&&) noexcept = default;
-command_resolved::~command_resolved() = default;
-
 slashcommand::slashcommand(const std::string &_name, const std::string &_description, const dpp::snowflake _application_id) : slashcommand() {
 	set_name(_name);
 	set_description(_description);
