@@ -677,10 +677,8 @@ public:
 	 */
 	component();
 
-#ifndef _DOXYGEN_
 	component(const component&);
 	component& operator=(const component&);
-#endif
 
 	/**
 	 * @brief Destructor
@@ -1175,10 +1173,8 @@ struct DPP_EXPORT embed {
 	 */
 	embed(nlohmann::json* j);
 
-#ifndef _DOXYGEN_
 	embed(const embed&);
 	embed& operator=(const embed&);
-#endif
 
 	/**
 	 * @brief Destructor

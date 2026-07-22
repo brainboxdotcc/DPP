@@ -278,15 +278,14 @@ struct DPP_EXPORT confirmation_callback_t {
 	/**
 	 * @brief Construct a new confirmation callback t object.
 	 */
-    confirmation_callback_t();
+	confirmation_callback_t();
 
-#ifndef _DOXYGEN_
-    confirmation_callback_t(const confirmation_callback_t&);
-    confirmation_callback_t(confirmation_callback_t&&);
-    confirmation_callback_t& operator=(const confirmation_callback_t&);
-    confirmation_callback_t& operator=(confirmation_callback_t&&);
-    ~confirmation_callback_t();
-#endif
+	confirmation_callback_t(const confirmation_callback_t&);
+	confirmation_callback_t(confirmation_callback_t&&);
+	confirmation_callback_t& operator=(const confirmation_callback_t&);
+	confirmation_callback_t& operator=(confirmation_callback_t&&);
+	~confirmation_callback_t();
+
 	/**
 	 * @brief Construct a new confirmation callback t object
 	 * 

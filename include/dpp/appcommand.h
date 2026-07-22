@@ -297,10 +297,8 @@ public:
 	 */
 	command_option() = default;
 
-#ifndef _DOXYGEN_
 	command_option(const command_option&);
 	command_option& operator=(const command_option&);
-#endif
 
 	/**
 	 * @brief Destroy the command option object
@@ -727,13 +725,11 @@ struct DPP_EXPORT command_resolved {
 	 */
 	command_resolved();
 
-#ifndef _DOXYGEN_
 	command_resolved(const command_resolved&);
 	command_resolved(command_resolved&&) noexcept;
 	command_resolved& operator=(const command_resolved&);
 	command_resolved& operator=(command_resolved&&) noexcept;
 	~command_resolved();
-#endif
 };
 
 /**
@@ -1135,10 +1131,8 @@ public:
 	 */
 	interaction();
 
-#ifndef _DOXYGEN_
 	interaction(const interaction&);
 	interaction& operator=(const interaction&);
-#endif
 
 	/**
 	 * @brief Destroy the interaction object
@@ -1584,10 +1578,8 @@ public:
 	 */
 	slashcommand(const std::string &_name, const slashcommand_contextmenu_type _type, const dpp::snowflake _application_id);
 
-#ifndef _DOXYGEN_
 	slashcommand(const slashcommand&);
 	slashcommand& operator=(const slashcommand&);
-#endif
 
 	/**
 	 * @brief Destroy the slashcommand object

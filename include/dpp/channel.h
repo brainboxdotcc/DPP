@@ -480,10 +480,8 @@ public:
 	/** Constructor */
 	channel();
 
-#ifndef _DOXYGEN_
 	channel(const channel&);
 	channel& operator=(const channel&);
-#endif
 
 	/** Destructor */
 	virtual ~channel();
