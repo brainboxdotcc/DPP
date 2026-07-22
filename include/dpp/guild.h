@@ -1218,7 +1218,7 @@ public:
 	/**
 	 * @brief Destroy the guild object
 	 */
-	virtual ~guild();
+	~guild() override;
 
 	/** Read class values from json object
 	 * @param shard originating shard

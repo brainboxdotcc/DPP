@@ -235,7 +235,7 @@ public:
 	/**
 	 * @brief Destroy the user object
 	 */
-	virtual ~user();
+	~user() override;
 
 	/**
 	 * @brief Create a mentionable user.

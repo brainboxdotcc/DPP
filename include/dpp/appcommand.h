@@ -1137,7 +1137,7 @@ public:
 	/**
 	 * @brief Destroy the interaction object
 	 */
-	virtual ~interaction();
+	~interaction() override;
 
 	/**
 	 * @brief Get a user associated with the slash command from the resolved list.
@@ -1584,7 +1584,7 @@ public:
 	/**
 	 * @brief Destroy the slashcommand object
 	 */
-	virtual ~slashcommand();
+	~slashcommand() override;
 
 	/**
 	 * @brief Add a localisation for this slash command
