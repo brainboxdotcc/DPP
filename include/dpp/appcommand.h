@@ -298,7 +298,9 @@ public:
 	command_option() = default;
 
 	command_option(const command_option&);
+	command_option(command_option&&) noexcept;
 	command_option& operator=(const command_option&);
+	command_option& operator=(command_option&&) noexcept;
 
 	/**
 	 * @brief Destroy the command option object
@@ -1132,7 +1134,9 @@ public:
 	interaction();
 
 	interaction(const interaction&);
+	interaction(interaction&&) noexcept;
 	interaction& operator=(const interaction&);
+	interaction& operator=(interaction&&) noexcept;
 
 	/**
 	 * @brief Destroy the interaction object
@@ -1579,7 +1583,9 @@ public:
 	slashcommand(const std::string &_name, const slashcommand_contextmenu_type _type, const dpp::snowflake _application_id);
 
 	slashcommand(const slashcommand&);
+	slashcommand(slashcommand&&) noexcept;
 	slashcommand& operator=(const slashcommand&);
+	slashcommand& operator=(slashcommand&&) noexcept;
 
 	/**
 	 * @brief Destroy the slashcommand object

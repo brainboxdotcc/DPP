@@ -678,7 +678,9 @@ public:
 	component();
 
 	component(const component&);
+	component(component&&) noexcept;
 	component& operator=(const component&);
+	component& operator=(component&&) noexcept;
 
 	/**
 	 * @brief Destructor
@@ -1174,7 +1176,9 @@ struct DPP_EXPORT embed {
 	embed(nlohmann::json* j);
 
 	embed(const embed&);
+	embed(embed&&) noexcept;
 	embed& operator=(const embed&);
+	embed& operator=(embed&&) noexcept;
 
 	/**
 	 * @brief Destructor

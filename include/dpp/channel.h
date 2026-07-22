@@ -481,7 +481,9 @@ public:
 	channel();
 
 	channel(const channel&);
+	channel(channel&&) noexcept;
 	channel& operator=(const channel&);
+	channel& operator=(channel&&) noexcept;
 
 	/** Destructor */
 	~channel() override;

@@ -35,7 +35,9 @@ slashcommand::slashcommand() : managed(), application_id(0), type(ctxm_chat_inpu
 }
 
 slashcommand::slashcommand(const slashcommand&) = default;
+slashcommand::slashcommand(slashcommand&&) noexcept = default;
 slashcommand& slashcommand::operator=(const slashcommand&) = default;
+slashcommand& slashcommand::operator=(slashcommand&&) noexcept = default;
 slashcommand::~slashcommand() = default;
 
 command_resolved::command_resolved() = default;
@@ -378,7 +380,9 @@ command_option::command_option(command_option_type t, const std::string &n, cons
 }
 
 command_option::command_option(const command_option&) = default;
+command_option::command_option(command_option&&) noexcept = default;
 command_option& command_option::operator=(const command_option&) = default;
+command_option& command_option::operator=(command_option&&) noexcept = default;
 command_option::~command_option() = default;
 
 command_option& command_option::add_choice(const command_option_choice &o)
@@ -485,7 +489,9 @@ interaction::interaction() : application_id(0), type(0), guild_id(0), channel_id
 }
 
 interaction::interaction(const interaction&) = default;
+interaction::interaction(interaction&&) noexcept = default;
 interaction& interaction::operator=(const interaction&) = default;
+interaction& interaction::operator=(interaction&&) noexcept = default;
 interaction::~interaction() = default;
 
 command_interaction interaction::get_command_interaction() const {

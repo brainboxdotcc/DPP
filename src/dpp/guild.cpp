@@ -94,7 +94,9 @@ guild::guild() :
 }
 
 guild::guild(const guild&) = default;
+guild::guild(guild&&) noexcept = default;
 guild& guild::operator=(const guild&) = default;
+guild& guild::operator=(guild&&) noexcept = default;
 guild::~guild() = default;
 
 
@@ -369,6 +371,12 @@ bool guild_member::has_bypasses_verification() const {
 
 welcome_channel::welcome_channel(): channel_id(0), emoji_id(0) {
 }
+
+welcome_screen::welcome_screen(const welcome_screen&) = default;
+welcome_screen::welcome_screen(welcome_screen&&) noexcept = default;
+welcome_screen& welcome_screen::operator=(const welcome_screen&) = default;
+welcome_screen& welcome_screen::operator=(welcome_screen&&) noexcept = default;
+welcome_screen::~welcome_screen() = default;
 
 welcome_channel &welcome_channel::fill_from_json_impl(nlohmann::json *j) {
 	channel_id = snowflake_not_null(j, "channel_id");

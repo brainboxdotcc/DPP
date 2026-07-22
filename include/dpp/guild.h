@@ -803,11 +803,15 @@ public:
 	 * @brief Construct a new welcome screen object
 	 */
 	welcome_screen() = default;
+	welcome_screen(const welcome_screen&);
+	welcome_screen(welcome_screen&&) noexcept;
+	welcome_screen& operator=(const welcome_screen&);
+	welcome_screen& operator=(welcome_screen&&) noexcept;
 
 	/**
 	 * @brief Destroy the welcome screen object
 	 */
-	virtual ~welcome_screen() = default;
+	virtual ~welcome_screen();
 
 	/**
 	 * @brief Set the server description for this welcome screen object shown in the welcome screen
@@ -1213,7 +1217,9 @@ public:
 	guild();
 
 	guild(const guild&);
+	guild(guild&&) noexcept;
 	guild& operator=(const guild&);
+	guild& operator=(guild&&) noexcept;
 
 	/**
 	 * @brief Destroy the guild object
