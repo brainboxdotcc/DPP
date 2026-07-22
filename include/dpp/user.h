@@ -227,10 +227,17 @@ public:
 	 */
 	user();
 
+#ifndef _DOXYGEN_
+	user(const user&);
+	user(user&&) noexcept;
+	user& operator=(const user&);
+	user& operator=(user&&) noexcept;
+#endif
+
 	/**
 	 * @brief Destroy the user object
 	 */
-	virtual ~user() = default;
+	virtual ~user();
 
 	/**
 	 * @brief Create a mentionable user.

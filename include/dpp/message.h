@@ -2636,7 +2636,7 @@ public:
 	 * @brief Construct a new message object
 	 * @param m Message to move
 	 */
-	message(message&& m);
+	message(message&& m) noexcept;
 
 	/**
 	 * @brief Construct a new message object
@@ -2697,7 +2697,7 @@ public:
 	 * @param m Message to move
 	 * @return message& Reference to self
 	 */
-	message &operator=(message&& m);
+	message &operator=(message&& m) noexcept;
 
 	/**
 	 * @brief Set the original message reference for replies/crossposts

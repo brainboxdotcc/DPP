@@ -843,9 +843,9 @@ embed::embed(const embed&) = default;
 embed& embed::operator=(const embed&) = default;
 
 message::message(const message&) = default;
-message::message(message&&) = default;
+message::message(message&&) noexcept = default;
 message& message::operator=(const message&) = default;
-message& message::operator=(message&&) = default;
+message& message::operator=(message&&) noexcept = default;
 message::~message() = default;
 
 embed::embed() : timestamp(0) {
