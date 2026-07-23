@@ -200,6 +200,7 @@ typedef std::variant<
 		message_search_result
 	> confirmable_t;
 
+
 /**
  * @brief The details of a field in an error response
  */
@@ -278,7 +279,13 @@ struct DPP_EXPORT confirmation_callback_t {
 	/**
 	 * @brief Construct a new confirmation callback t object.
 	 */
-	confirmation_callback_t() = default;
+	confirmation_callback_t();
+
+	confirmation_callback_t(const confirmation_callback_t&);
+	confirmation_callback_t(confirmation_callback_t&&);
+	confirmation_callback_t& operator=(const confirmation_callback_t&);
+	confirmation_callback_t& operator=(confirmation_callback_t&&);
+	~confirmation_callback_t();
 
 	/**
 	 * @brief Construct a new confirmation callback t object
