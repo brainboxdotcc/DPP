@@ -92,11 +92,6 @@ public:
 	voiceregion();
 
 	/**
-	 * @brief Destroy the voiceregion object
-	 */
-	virtual ~voiceregion() = default;
-
-	/**
 	 * @brief True if is the optimal voice server
 	 * 
 	 * @return true if optimal 

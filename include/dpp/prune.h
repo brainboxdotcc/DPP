@@ -48,11 +48,6 @@ protected:
 
 public:
 	/**
-	 * @brief Destroy this prune object
-	 */
-	virtual ~prune() = default;
-
-	/**
 	 * @brief Number of days to include in the prune.
 	 */
 	uint32_t days = 0;

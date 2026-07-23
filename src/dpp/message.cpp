@@ -835,12 +835,6 @@ void from_json(const json& j, interaction_metadata_type& i) {
 
 embed::~embed() = default;
 
-component::component(const component&) = default;
-component::component(component&&) noexcept = default;
-component& component::operator=(const component&) = default;
-component& component::operator=(component&&) noexcept = default;
-component::~component() = default;
-
 embed::embed(const embed&) = default;
 embed::embed(embed&&) noexcept = default;
 embed& embed::operator=(const embed&) = default;

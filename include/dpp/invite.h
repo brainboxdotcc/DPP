@@ -184,11 +184,6 @@ public:
 	invite();
 
 	/**
-	 * @brief Destructor.
-	 */
-	virtual ~invite() = default;
-
-	/**
 	 * @brief Set the max age after which the invite expires
 	 *
 	 * @param max_age_ The duration in seconds, or 0 for no expiration. Must be between 0 and 604800 (7 days)

@@ -372,12 +372,6 @@ command_option::command_option(command_option_type t, const std::string &n, cons
 	}
 }
 
-command_option::command_option(const command_option&) = default;
-command_option::command_option(command_option&&) noexcept = default;
-command_option& command_option::operator=(const command_option&) = default;
-command_option& command_option::operator=(command_option&&) noexcept = default;
-command_option::~command_option() = default;
-
 command_option& command_option::add_choice(const command_option_choice &o)
 {
 	if (this->autocomplete) {

@@ -100,11 +100,6 @@ public:
 	 * @brief Construct a new dtemplate object
 	 */
 	dtemplate();
-
-	/**
-	 * @brief Destroy the dtemplate object
-	 */
-	virtual ~dtemplate() = default;
 };
 
 /**

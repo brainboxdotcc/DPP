@@ -326,11 +326,6 @@ public:
 	select_option();
 
 	/**
-	 * @brief Destructs the select option object.
-	 */
-	virtual ~select_option() = default;
-
-	/**
 	 * @brief Construct a new select option object
 	 * 
 	 * @param label Label of option
@@ -676,16 +671,6 @@ public:
 	 * @brief Constructor
 	 */
 	component();
-
-	component(const component&);
-	component(component&&) noexcept;
-	component& operator=(const component&);
-	component& operator=(component&&) noexcept;
-
-	/**
-	 * @brief Destructor
-	 */
-	virtual ~component();
 
 	/**
 	 * @brief Add a channel type to include in the channel select component (dpp::cot_channel_selectmenu)

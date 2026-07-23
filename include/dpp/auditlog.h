@@ -447,9 +447,6 @@ public:
 
 	/** Constructor */
 	audit_entry();
-
-	/** Destructor */
-	virtual ~audit_entry() = default;
 };
 
 /**
@@ -473,9 +470,6 @@ public:
 
 	/** Constructor */
 	auditlog() = default;
-
-	/** Destructor */
-	virtual ~auditlog() = default;
 };
 
 }

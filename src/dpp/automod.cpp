@@ -31,8 +31,6 @@ automod_action::automod_action() : channel_id(0), duration_seconds(0)
 {
 }
 
-automod_action::~automod_action() = default;
-
 automod_action& automod_action::fill_from_json_impl(nlohmann::json* j) {
 	type = (automod_action_type)int8_not_null(j, "type");
 	switch (type) {
@@ -81,8 +79,6 @@ json automod_action::to_json_impl(bool with_id) const {
 }
 
 automod_metadata::automod_metadata() : mention_total_limit(0) {}
-
-automod_metadata::~automod_metadata() = default;
 
 automod_metadata& automod_metadata::fill_from_json_impl(nlohmann::json* j) {
 	for (auto k : (*j)["keyword_filter"]) {

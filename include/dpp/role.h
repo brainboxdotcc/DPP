@@ -1001,8 +1001,6 @@ public:
 	 * @brief Constructor
 	 */
 	application_role_connection_metadata();
-
-	virtual ~application_role_connection_metadata() = default;
 };
 
 /**
@@ -1047,8 +1045,6 @@ public:
 	 * @brief Constructor
 	 */
 	application_role_connection();
-
-	virtual ~application_role_connection() = default;
 };
 
 /**

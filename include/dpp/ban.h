@@ -56,9 +56,6 @@ public:
 
 	/** Constructor */
 	ban();
-
-	/** Destructor */
-	virtual ~ban() = default;
 };
 
 /**

@@ -743,11 +743,6 @@ public:
 	welcome_channel();
 
 	/**
-	 * @brief Destroy the welcome channel object
-	 */
-	virtual ~welcome_channel() = default;
-
-	/**
 	 * @brief Set the channel ID of this welcome channel object
 	 *
 	 * @param _channel_id The channel ID to set
@@ -803,16 +798,6 @@ public:
 	 * @brief Construct a new welcome screen object
 	 */
 	welcome_screen() = default;
-	welcome_screen(const welcome_screen&);
-	welcome_screen(welcome_screen&&) noexcept;
-	welcome_screen& operator=(const welcome_screen&);
-	welcome_screen& operator=(welcome_screen&&) noexcept;
-
-	/**
-	 * @brief Destroy the welcome screen object
-	 */
-	virtual ~welcome_screen();
-
 	/**
 	 * @brief Set the server description for this welcome screen object shown in the welcome screen
 	 *
@@ -2001,11 +1986,6 @@ public:
 	 * @brief Construct a new onboarding object
 	 */
 	onboarding();
-
-	/**
-	 * @brief Destroy the onboarding object
-	 */
-	virtual ~onboarding() = default;
 
 	/**
 	 * @brief Set guild_id of this onboarding object

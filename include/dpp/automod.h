@@ -246,11 +246,6 @@ public:
 	 * @brief Construct a new automod metadata object
 	 */
 	automod_metadata();
-
-	/**
-	 * @brief Destroy the automod metadata object
-	 */
-	virtual ~automod_metadata();
 };
 
 /**
@@ -300,11 +295,6 @@ public:
 	 * @brief Construct a new automod action object
 	 */
 	automod_action();
-
-	/**
-	 * @brief Destroy the automod action object
-	 */
-	virtual ~automod_action();
 };
 
 /**

@@ -131,11 +131,6 @@ public:
 	voicestate();
 
 	/**
-	 * @brief Destroy the voicestate object
-	 */
-	virtual ~voicestate() = default;
-
-	/**
 	 * @brief Return true if the user is deafened by the server.
 	 */
 	bool is_deaf() const;

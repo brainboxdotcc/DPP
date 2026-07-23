@@ -161,8 +161,6 @@ public:
 	 */
 	command_option_choice() = default;
 
-	virtual ~command_option_choice() = default;
-
 	/**
 	 * @brief Add a localisation for this command option choice
 	 * @see https://discord.com/developers/docs/reference#locales
@@ -296,16 +294,6 @@ public:
 	 * @brief Construct a new command option object
 	 */
 	command_option() = default;
-
-	command_option(const command_option&);
-	command_option(command_option&&) noexcept;
-	command_option& operator=(const command_option&);
-	command_option& operator=(command_option&&) noexcept;
-
-	/**
-	 * @brief Destroy the command option object
-	 */
-	virtual ~command_option();
 
 	/**
 	 * @brief Add a localisation for this slash command option
@@ -1366,8 +1354,6 @@ public:
 	 */
 	command_permission() = default;
 
-	virtual ~command_permission() = default;
-
 	/**
 	 * @brief Construct a new command permission object
 	 *
@@ -1428,9 +1414,6 @@ public:
 	 * @brief Construct a new guild command permissions object
 	 */
 	guild_command_permissions();
-
-	virtual ~guild_command_permissions() = default;
-
 };
 
 /**

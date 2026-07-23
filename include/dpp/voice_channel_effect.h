@@ -109,11 +109,6 @@ public:
 	 * @brief Construct a new voice_channel_effect object
 	 */
 	voice_channel_effect();
-
-	/**
-	 * @brief Destroy the voice_channel_effect object
-	 */
-	virtual ~voice_channel_effect() = default;
 };
 
 }
