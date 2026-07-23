@@ -2002,6 +2002,11 @@ public:
 	 */
 	onboarding();
 
+	onboarding(const onboarding&) = default;
+	onboarding(onboarding&&) = default;
+	onboarding& operator=(const onboarding&) = default;
+	onboarding& operator=(onboarding&&) = default;
+
 	/**
 	 * @brief Destroy the onboarding object
 	 */

@@ -57,6 +57,11 @@ public:
 	/** Constructor */
 	ban();
 
+	ban(const ban&) = default;
+	ban(ban&&) = default;
+	ban& operator=(const ban&) = default;
+	ban& operator=(ban&&) = default;
+
 	/** Destructor */
 	virtual ~ban() = default;
 };

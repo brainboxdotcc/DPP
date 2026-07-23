@@ -474,6 +474,11 @@ public:
 	/** Constructor */
 	auditlog() = default;
 
+	auditlog(const auditlog&) = default;
+	auditlog(auditlog&&) = default;
+	auditlog& operator=(const auditlog&) = default;
+	auditlog& operator=(auditlog&&) = default;
+
 	/** Destructor */
 	virtual ~auditlog() = default;
 };

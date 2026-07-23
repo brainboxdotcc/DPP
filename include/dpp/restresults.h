@@ -25,6 +25,7 @@
 #include <string>
 #include <map>
 #include <variant>
+#include <type_traits>
 #include <dpp/snowflake.h>
 #include <dpp/dispatcher.h>
 #include <dpp/misc-enum.h>
@@ -200,6 +201,20 @@ typedef std::variant<
 		message_search_result
 	> confirmable_t;
 
+// confirmation_callback_t declares its move ops noexcept, and a default function with a mismatched noexcept spec
+// is silently accepted rather than warned, so we assert as noexcept to avoid runtime std::terminate
+static_assert(std::is_nothrow_move_constructible_v<confirmable_t>,
+	"a confirmable_t alternative is not nothrow move constructible; "
+	"confirmation_callback_t's noexcept move would be incorrect");
+static_assert(std::is_nothrow_move_assignable_v<confirmable_t>,
+	"a confirmable_t alternative is not nothrow move assignable; "
+	"confirmation_callback_t's noexcept move assignment would be incorrect");
+static_assert(std::is_nothrow_move_constructible_v<http_request_completion_t>,
+	"http_request_completion_t is not nothrow move constructible; "
+	"confirmation_callback_t's noexcept move would be a lie");
+static_assert(std::is_nothrow_move_assignable_v<http_request_completion_t>,
+	"http_request_completion_t is not nothrow move assignable; "
+	"confirmation_callback_t's noexcept move assignment would be incorrect");
 
 /**
  * @brief The details of a field in an error response
@@ -282,9 +297,9 @@ struct DPP_EXPORT confirmation_callback_t {
 	confirmation_callback_t();
 
 	confirmation_callback_t(const confirmation_callback_t&);
-	confirmation_callback_t(confirmation_callback_t&&);
+	confirmation_callback_t(confirmation_callback_t&&) noexcept;
 	confirmation_callback_t& operator=(const confirmation_callback_t&);
-	confirmation_callback_t& operator=(confirmation_callback_t&&);
+	confirmation_callback_t& operator=(confirmation_callback_t&&) noexcept;
 	~confirmation_callback_t();
 
 	/**

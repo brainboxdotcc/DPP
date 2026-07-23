@@ -91,6 +91,11 @@ public:
 	 */
 	voiceregion();
 
+	voiceregion(const voiceregion&) = default;
+	voiceregion(voiceregion&&) = default;
+	voiceregion& operator=(const voiceregion&) = default;
+	voiceregion& operator=(voiceregion&&) = default;
+
 	/**
 	 * @brief Destroy the voiceregion object
 	 */

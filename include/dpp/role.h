@@ -1002,6 +1002,11 @@ public:
 	 */
 	application_role_connection_metadata();
 
+	application_role_connection_metadata(const application_role_connection_metadata&) = default;
+	application_role_connection_metadata(application_role_connection_metadata&&) = default;
+	application_role_connection_metadata& operator=(const application_role_connection_metadata&) = default;
+	application_role_connection_metadata& operator=(application_role_connection_metadata&&) = default;
+
 	virtual ~application_role_connection_metadata() = default;
 };
 
@@ -1047,6 +1052,11 @@ public:
 	 * @brief Constructor
 	 */
 	application_role_connection();
+
+	application_role_connection(const application_role_connection&) = default;
+	application_role_connection(application_role_connection&&) = default;
+	application_role_connection& operator=(const application_role_connection&) = default;
+	application_role_connection& operator=(application_role_connection&&) = default;
 
 	virtual ~application_role_connection() = default;
 };

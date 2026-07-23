@@ -247,6 +247,11 @@ public:
 	 */
 	automod_metadata();
 
+	automod_metadata(const automod_metadata&) = default;
+	automod_metadata(automod_metadata&&) = default;
+	automod_metadata& operator=(const automod_metadata&) = default;
+	automod_metadata& operator=(automod_metadata&&) = default;
+
 	/**
 	 * @brief Destroy the automod metadata object
 	 */
@@ -389,11 +394,6 @@ public:
 	 * @brief Construct a new automod rule object
 	 */
 	automod_rule();
-
-	/**
-	 * @brief Destroy the automod rule object
-	 */
-	virtual ~automod_rule();
 };
 
 /** A group of automod rules.

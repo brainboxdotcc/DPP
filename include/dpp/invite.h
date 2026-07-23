@@ -183,6 +183,11 @@ public:
 	 */
 	invite();
 
+	invite(const invite&) = default;
+	invite(invite&&) = default;
+	invite& operator=(const invite&) = default;
+	invite& operator=(invite&&) = default;
+
 	/**
 	 * @brief Destructor.
 	 */

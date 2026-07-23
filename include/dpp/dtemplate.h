@@ -101,6 +101,11 @@ public:
 	 */
 	dtemplate();
 
+	dtemplate(const dtemplate&) = default;
+	dtemplate(dtemplate&&) = default;
+	dtemplate& operator=(const dtemplate&) = default;
+	dtemplate& operator=(dtemplate&&) = default;
+
 	/**
 	 * @brief Destroy the dtemplate object
 	 */

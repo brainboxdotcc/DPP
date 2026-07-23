@@ -1442,6 +1442,11 @@ public:
 	 */
 	guild_command_permissions();
 
+	guild_command_permissions(const guild_command_permissions&) = default;
+	guild_command_permissions(guild_command_permissions&&) = default;
+	guild_command_permissions& operator=(const guild_command_permissions&) = default;
+	guild_command_permissions& operator=(guild_command_permissions&&) = default;
+
 	virtual ~guild_command_permissions() = default;
 
 };

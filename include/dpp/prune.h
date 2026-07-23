@@ -47,6 +47,13 @@ protected:
 	virtual json to_json_impl(bool with_prune_count = false) const;
 
 public:
+	prune() = default;
+
+	prune(const prune&) = default;
+	prune(prune&&) = default;
+	prune& operator=(const prune&) = default;
+	prune& operator=(prune&&) = default;
+
 	/**
 	 * @brief Destroy this prune object
 	 */

@@ -130,6 +130,11 @@ public:
 	 */
 	voicestate();
 
+	voicestate(const voicestate&) = default;
+	voicestate(voicestate&&) = default;
+	voicestate& operator=(const voicestate&) = default;
+	voicestate& operator=(voicestate&&) = default;
+
 	/**
 	 * @brief Destroy the voicestate object
 	 */
