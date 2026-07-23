@@ -68,7 +68,7 @@ protected:
 	 * @param with_id Add ID to output
 	 * @return json JSON string
 	 */
-	virtual json to_json_impl(bool with_id = false) const;
+	json to_json_impl(bool with_id = false) const;
 
 public:
 	/**

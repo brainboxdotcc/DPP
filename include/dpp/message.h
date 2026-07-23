@@ -1612,8 +1612,6 @@ public:
 	 */
 	sticker();
 
-	virtual ~sticker() = default;
-
 	/**
 	 * @brief Get the sticker url.
 	 *

@@ -964,7 +964,7 @@ protected:
 	 * @param with_id include ID in output
 	 * @return json JSON output
 	 */
-	virtual json to_json_impl(bool with_id = false) const;
+	json to_json_impl(bool with_id = false) const;
 
 public:
 	/**
@@ -1023,7 +1023,7 @@ protected:
 	 * @param with_id include ID in output
 	 * @return json JSON output
 	 */
-	virtual json to_json_impl(bool with_id = false) const;
+	json to_json_impl(bool with_id = false) const;
 
 public:
 	/**

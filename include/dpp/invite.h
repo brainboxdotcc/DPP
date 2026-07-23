@@ -69,7 +69,7 @@ protected:
 	 * @param with_id Include ID in JSON
 	 * @return The JSON of the invite
 	 */
-	virtual json to_json_impl(bool with_id = false) const;
+	 json to_json_impl(bool with_id = false) const;
 
 public:
 	/**

@@ -44,7 +44,7 @@ protected:
 	 * @param with_prune_count True if the prune count boolean is to be set in the built JSON
 	 * @return The JSON of the prune object
 	 */
-	virtual json to_json_impl(bool with_prune_count = false) const;
+	 json to_json_impl(bool with_prune_count = false) const;
 
 public:
 	/**

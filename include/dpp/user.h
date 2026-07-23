@@ -535,11 +535,6 @@ public:
 	 */
 	user_identified(const user& u);
 
-	/**
-	 * @brief Destroy the user identified object
-	 */
-	virtual ~user_identified() = default;
-
 	using json_interface<user_identified>::fill_from_json;
 	using json_interface<user_identified>::build_json;
 	using json_interface<user_identified>::to_json;

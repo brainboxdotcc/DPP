@@ -505,7 +505,7 @@ protected:
 	 * @param with_id Add ID to output
 	 * @return The JSON text of the presence
 	 */
-	virtual json to_json_impl(bool with_id = false) const;
+	 json to_json_impl(bool with_id = false) const;
 
 public:
 	/**

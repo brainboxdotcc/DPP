@@ -133,7 +133,7 @@ protected:
 	 *
 	 * @return json JSON object
 	 */
-	virtual json to_json_impl(bool with_id = false) const;
+	 json to_json_impl(bool with_id = false) const;
 
 public:
 	/**
@@ -268,7 +268,7 @@ protected:
 	 *
 	 * @return json JSON object
 	 */
-	virtual json to_json_impl(bool with_id = false) const;
+	 json to_json_impl(bool with_id = false) const;
 
 public:
 	/**
@@ -379,11 +379,6 @@ public:
 	 * @brief Construct a new automod rule object
 	 */
 	automod_rule();
-
-	/**
-	 * @brief Destroy the automod rule object
-	 */
-	virtual ~automod_rule();
 };
 
 /** A group of automod rules.
