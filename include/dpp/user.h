@@ -227,10 +227,15 @@ public:
 	 */
 	user();
 
+	user(const user&);
+	user(user&&) noexcept;
+	user& operator=(const user&);
+	user& operator=(user&&) noexcept;
+
 	/**
 	 * @brief Destroy the user object
 	 */
-	virtual ~user() = default;
+	~user() override;
 
 	/**
 	 * @brief Create a mentionable user.
