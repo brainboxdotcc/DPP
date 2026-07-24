@@ -29,9 +29,9 @@ confirmation_callback_t::confirmation_callback_t()
 }
 
 confirmation_callback_t::confirmation_callback_t(const confirmation_callback_t &) = default;
-confirmation_callback_t::confirmation_callback_t(confirmation_callback_t &&) noexcept = default;
+confirmation_callback_t::confirmation_callback_t(confirmation_callback_t &&) noexcept(std::is_nothrow_move_constructible_v<http_request_completion_t> && std::is_nothrow_move_constructible_v<confirmable_t>) = default;
 confirmation_callback_t &confirmation_callback_t::operator=(const confirmation_callback_t &) = default;
-confirmation_callback_t &confirmation_callback_t::operator=(confirmation_callback_t &&) noexcept = default;
+confirmation_callback_t &confirmation_callback_t::operator=(confirmation_callback_t &&) noexcept(std::is_nothrow_move_assignable_v<http_request_completion_t> && std::is_nothrow_move_assignable_v<confirmable_t>) = default;
 confirmation_callback_t::~confirmation_callback_t() = default;
 
 }

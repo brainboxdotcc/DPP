@@ -480,10 +480,10 @@ public:
 	/** Constructor */
 	channel();
 
-	channel(const channel&);
-	channel(channel&&) noexcept;
-	channel& operator=(const channel&);
-	channel& operator=(channel&&) noexcept;
+	channel(const channel&) = default;
+	channel(channel&&) = default;
+	channel& operator=(const channel&) = default;
+	channel& operator=(channel&&) = default;
 
 	/** Destructor */
 	~channel() override;

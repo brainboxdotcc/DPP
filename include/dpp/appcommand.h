@@ -302,10 +302,10 @@ public:
 	 */
 	command_option() = default;
 
-	command_option(const command_option&);
-	command_option(command_option&&) noexcept;
-	command_option& operator=(const command_option&);
-	command_option& operator=(command_option&&) noexcept;
+	command_option(const command_option&) = default;
+	command_option(command_option&&) = default;
+	command_option& operator=(const command_option&) = default;
+	command_option& operator=(command_option&&) = default;
 
 	/**
 	 * @brief Destroy the command option object
@@ -1139,10 +1139,10 @@ public:
 	 */
 	interaction();
 
-	interaction(const interaction&);
-	interaction(interaction&&) noexcept;
-	interaction& operator=(const interaction&);
-	interaction& operator=(interaction&&) noexcept;
+	interaction(const interaction&) = default;
+	interaction(interaction&&) = default;
+	interaction& operator=(const interaction&) = default;
+	interaction& operator=(interaction&&) = default;
 
 	/**
 	 * @brief Destroy the interaction object
@@ -1593,10 +1593,10 @@ public:
 	 */
 	slashcommand(const std::string &_name, const slashcommand_contextmenu_type _type, const dpp::snowflake _application_id);
 
-	slashcommand(const slashcommand&);
-	slashcommand(slashcommand&&) noexcept;
-	slashcommand& operator=(const slashcommand&);
-	slashcommand& operator=(slashcommand&&) noexcept;
+	slashcommand(const slashcommand&) = default;
+	slashcommand(slashcommand&&) = default;
+	slashcommand& operator=(const slashcommand&) = default;
+	slashcommand& operator=(slashcommand&&) = default;
 
 	/**
 	 * @brief Destroy the slashcommand object

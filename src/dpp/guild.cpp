@@ -93,10 +93,6 @@ guild::guild() :
 {
 }
 
-guild::guild(const guild&) = default;
-guild::guild(guild&&) noexcept = default;
-guild& guild::operator=(const guild&) = default;
-guild& guild::operator=(guild&&) noexcept = default;
 guild::~guild() = default;
 
 

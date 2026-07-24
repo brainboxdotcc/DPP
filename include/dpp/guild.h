@@ -1216,10 +1216,10 @@ public:
 	/** Default constructor, zeroes all values */
 	guild();
 
-	guild(const guild&);
-	guild(guild&&) noexcept;
-	guild& operator=(const guild&);
-	guild& operator=(guild&&) noexcept;
+	guild(const guild&) = default;
+	guild(guild&&) = default;
+	guild& operator=(const guild&) = default;
+	guild& operator=(guild&&) = default;
 
 	/**
 	 * @brief Destroy the guild object
