@@ -41,7 +41,7 @@ void message_update::handle(discord_client* client, json &j, const std::string &
 		json d = j["d"];
 		dpp::message_update_t msg(client->owner, client->shard_id, raw);
 		dpp::message m(client->creator);
-		m.fill_from_json(&d);
+		m.fill_from_json(&d, client->creator->cache_policy);
 	      	msg.msg = m;
 		client->creator->queue_work(1, [c = client->creator, msg]() {
 			c->on_message_update.call(msg);
