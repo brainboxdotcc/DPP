@@ -18,6 +18,7 @@
  * limitations under the License.
  *
  ************************************************************************************/
+#include "discordclient.h"
 #include <map>
 #include <dpp/exception.h>
 #include <dpp/cluster.h>
@@ -231,56 +232,51 @@ void cluster::start(start_type return_after) {
 				if (now >= shard_reconnect_time) {
 					/* This shard needs to be reconnected */
 					reconnections.erase(reconnect);
-					std::unique_ptr<discord_client> old = nullptr;
+					std::unique_ptr<discord_client> cl_old = {};
+					std::unique_ptr<discord_client> cl_new = {};
 					{
 						std::shared_lock lk(shards_mutex);
-						old = std::move(shards[shard_id]);
+						cl_old = std::move(shards[shard_id]);
 					}
 					log(ll_info, "Reconnecting shard " + std::to_string(shard_id));
 					/* Make a new resumed connection based off the old one */
+					bool resume = false;
 					try {
-						bool resume = false;
-						std::unique_lock lk(shards_mutex);
-						if (old != nullptr) {
-							/* These values must be copied to the new connection
-							 * to attempt to resume it
-							 */
-							auto seq_no = old->last_seq;
-							auto session_id = old->sessionid;
-
+						if (cl_old != nullptr) {
 							log(ll_trace, "Attempting resume...");
-							shards[shard_id] = nullptr;
-							shards[shard_id] = std::make_unique<class discord_client>(*old, seq_no, session_id);
+							cl_new = std::make_unique<class discord_client>(*cl_old);
 							resume = true;
 						} else {
 							log(ll_trace, "Attempting full reconnection...");
-							shards[shard_id] = nullptr;
-							shards[shard_id] = std::make_unique<class discord_client>(this, shard_id, numshards, token, intents, compressed, ws_mode);
+							cl_new = std::make_unique<class discord_client>(this, shard_id, numshards, token, intents, compressed, ws_mode);
 						}
-						/* Delete the old one */
-						log(ll_trace, "Attempting to delete old connection...");
-						old.reset();
-						old = nullptr;
 						/* Set up the new shard's IO events */
 						log(ll_trace, "Running new connection...");
-						if (resume) {
-							/* Start connecting only after the old client is destroyed */
-							shards[shard_id]->start_connecting();
-							std::unique_lock lock(shards[shard_id]->voice_mutex);
-							for (auto &c : shards[shard_id]->connecting_voice_channels) {
-								c.second->connect();
-							}
-						}
-						shards[shard_id]->run();
+						cl_new->run();
 					}
 					catch (const std::exception& e) {
 						std::unique_lock lk(shards_mutex);
 						log(ll_info, "Exception when reconnecting shard " + std::to_string(shard_id) + ": " + std::string(e.what()));
-						shards[shard_id].reset();
-						old.reset();
-						old = nullptr;
-						shards[shard_id] = nullptr;
 						add_reconnect(shard_id);
+						shards[shard_id] = std::move(cl_old);
+						return;
+					}
+					/* Delete the old one */
+					if (cl_old != nullptr) {
+						log(ll_trace, "Deleting old connection...");
+						std::unique_lock lk(shards_mutex);
+						cl_old = nullptr;
+					}
+					log(ll_trace, "Installing new connection...");
+					std::unique_lock lk(shards_mutex);
+					shards[shard_id] = std::move(cl_new);
+					if (resume) {
+						/* Start connecting only after the old client is destroyed */
+						shards[shard_id]->start_connecting();
+						std::unique_lock lock(shards[shard_id]->voice_mutex);
+						for (auto &c : shards[shard_id]->connecting_voice_channels) {
+							c.second->connect();
+						}
 					}
 					/* It is not possible to reconnect another shard within the same 5-second window,
 					 * due to discords strict rate limiting on shard connections, so we bail out here

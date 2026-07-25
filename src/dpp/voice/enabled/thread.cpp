@@ -46,7 +46,9 @@ void discord_voice_client::on_disconnect() {
 	/* If we've looped 5 or more times, abort the loop. */
 	if (terminating || times_looped >= 5) {
 		log(dpp::ll_warning, "Reached max loops whilst attempting to read from the websocket. Starting a full reconnection.");
-		owner->queue_work(1, reconnection_callback);
+		bool si = this->session_invalid;
+		auto rc = reconnection_callback;
+		owner->queue_work(1, [rc, si]() { rc(si) ;});
 		return;
 	}
 	last_loop_time = current_time;
