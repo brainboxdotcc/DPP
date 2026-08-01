@@ -650,6 +650,11 @@ component& component::set_max_values(uint32_t _max_values) {
 	return *this;
 }
 
+component& component::add_file_type(std::string_view const file_type) {
+	this->file_types.emplace_back(file_type);
+	return *this;
+}
+
 component& component::add_select_option(const select_option &option) {
 	if (options.size() <= 25) {
 		options.emplace_back(option);
