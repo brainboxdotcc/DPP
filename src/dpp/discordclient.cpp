@@ -596,15 +596,22 @@ bool voiceconn::is_active() const {
 	return voiceclient != nullptr;
 }
 
-voiceconn& voiceconn::disconnect() {
+voiceconn& voiceconn::disconnect(bool close) {
 	if (this->is_active()) {
-		voiceclient.reset();
+		this->voiceclient->terminating = true;
+		this->voiceclient->pause_audio (true);
+		this->voiceclient->stop_audio ();
+		std::this_thread::sleep_for (std::chrono::milliseconds (100));
+		if (close) {
+			this->voiceclient->close ();
+		}
+		this->voiceclient.reset ();
 	}
 	return *this;
 }
 
 voiceconn::~voiceconn() {
-	this->disconnect();
+	this->disconnect(true);
 }
 
 voiceconn& voiceconn::request(bool session_invalid) {
@@ -616,7 +623,7 @@ voiceconn& voiceconn::request(bool session_invalid) {
 		this->session_id.clear();
 		this->websocket_hostname.clear();
 	}
-	this->voiceclient.reset();
+	this->disconnect(false);
 
 	this->request_callback(this->creator);
 	return *this;
