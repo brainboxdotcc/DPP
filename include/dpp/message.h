@@ -570,7 +570,7 @@ public:
 	/**
 	 * @brief File types (dpp::cot_file_upload) to filter for; can be "image", "video", "audio", or any dot-prefixed extension such as ".pdf" (0-10).
 	 */
-	std::vector <std::string> file_types;
+	std::vector<std::string> file_types;
 
 	/**
 	 * @brief Minimum length for text input (0-4000)
