@@ -497,11 +497,10 @@ json etf_parser::decode_compressed() {
 	std::vector<uint8_t> outBuffer(uncompressedSize);
 	const int ret = uncompress((Bytef*)outBuffer.data(), &destinationSize, (const unsigned char*)(data + offset), (uLong)(size - offset));
 
+	offset += destinationSize;
 	if (ret != Z_OK) {
 		throw dpp::parse_exception(err_etf, "ETF compressed value: decompresson error");
 	}
-	/* uncompress() was handed the rest of the buffer as its input, so the term ends there */
-	offset = size;
 
 	uint8_t* old_data = data;
 	size_t old_size = size;

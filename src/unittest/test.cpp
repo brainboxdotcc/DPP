@@ -25,7 +25,6 @@
 #include <dpp/unicode_emoji.h>
 #include <dpp/restrequest.h>
 #include <dpp/json.h>
-#include <zlib.h>
 
 /**
  * @brief global lock for log output
@@ -269,29 +268,23 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 
 		set_test(ETF_COMPRESSED_SHORT, false);
 		{
-			/* An ett_binary announcing 4080 bytes of payload that were never encoded */
-			const uint8_t truncated_term[]{'m', 0x00, 0x00, 0x0F, 0xF0};
-			uLongf deflated_length = compressBound((uLong)sizeof(truncated_term));
-			std::vector<uint8_t> deflated_term(deflated_length);
-			bool etf_result = compress(deflated_term.data(), &deflated_length, truncated_term, (uLong)sizeof(truncated_term)) == Z_OK;
-
-			/* Version, ett_compressed, then a declared uncompressed size of 4096 */
-			std::string payload;
-			payload.push_back((char)131);
-			payload.push_back('P');
-			payload.push_back(0);
-			payload.push_back(0);
-			payload.push_back(0x10);
-			payload.push_back(0);
-			payload.append((const char*)deflated_term.data(), deflated_length);
-
-			/* zlib only writes five bytes, so the announced payload is not there and
-			 * decoding must yield null rather than a 4080 byte string assembled from
-			 * memory it never filled in.
+			/* Version, ett_compressed, a declared uncompressed size of 4096, then a
+			 * deflate stream that only inflates to five bytes: an ett_binary announcing
+			 * 4080 bytes of payload that were never encoded.
 			 */
+			const char truncated_term[]{
+				(char)131, 'P', 0x00, 0x00, 0x10, 0x00,
+				(char)0x78, (char)0x9c, (char)0xcb, 0x65, 0x60, (char)0xe0,
+				(char)0xff, 0x00, 0x00, 0x03, 0x34, 0x01, 0x6d
+			};
+
+			/* The announced payload is not there, so decoding must yield null rather
+			 * than a 4080 character string assembled from memory that was never written.
+			 */
+			bool etf_result;
 			dpp::etf_parser etf;
 			try {
-				etf_result = etf_result && etf.parse(payload).is_null();
+				etf_result = etf.parse(std::string(truncated_term, sizeof(truncated_term))).is_null();
 			}
 			catch (const dpp::parse_exception&) {
 				etf_result = false;
