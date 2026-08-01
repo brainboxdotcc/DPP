@@ -293,6 +293,11 @@ public:
 	std::map<std::string, std::string> description_localizations;
 
 	/**
+	 * @brief File types (dpp::co_attachment) to filter for; can be "image", "video", "audio", or any dot-prefixed extension such as ".pdf" (0-10).
+	 */
+	std::vector<std::string> file_types;
+
+	/**
 	 * @brief Construct a new command option object
 	 */
 	command_option() = default;
@@ -301,6 +306,14 @@ public:
 	 * @brief Destroy the command option object
 	 */
 	virtual ~command_option() = default;
+
+	/**
+	 * @brief Add a file type (dpp::co_attachment) to filter for.
+	 *
+	 * @param file_type The type to filter for ("image"/"video"/"audio" or the file extension (begins with ".")).
+	 * @return command_option& Reference to self
+	 */
+	command_option& add_file_type(std::string_view file_type);
 
 	/**
 	 * @brief Add a localisation for this slash command option

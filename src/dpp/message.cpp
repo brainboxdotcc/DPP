@@ -574,6 +574,20 @@ void to_json(json& j, const component& cp) {
 				j["default_values"].push_back(o);
 			}
 		}
+	} else if (cp.type == cot_file_upload) {
+		j["custom_id"] = cp.custom_id;
+		if (cp.min_values >= 0) {
+			j["min_values"] = cp.min_values;
+		}
+		if (cp.max_values >= 0) {
+			j["max_values"] = cp.max_values;
+		}
+		if (cp.required) {
+			j["required"] = cp.required;
+		}
+		if (!cp.file_types.empty()) {
+			j["file_types"] = cp.file_types;
+		}
 	}
 }
 
@@ -647,6 +661,11 @@ component& component::set_min_values(uint32_t _min_values) {
 
 component& component::set_max_values(uint32_t _max_values) {
 	max_values = static_cast<int32_t>(_max_values);
+	return *this;
+}
+
+component& component::add_file_type(std::string_view const file_type) {
+	this->file_types.emplace_back(file_type);
 	return *this;
 }
 
