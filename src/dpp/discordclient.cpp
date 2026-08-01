@@ -599,13 +599,13 @@ bool voiceconn::is_active() const {
 voiceconn& voiceconn::disconnect(bool close) {
 	if (this->is_active()) {
 		this->voiceclient->terminating = true;
-		this->voiceclient->pause_audio (true);
-		this->voiceclient->stop_audio ();
-		std::this_thread::sleep_for (std::chrono::milliseconds (100));
+		this->voiceclient->pause_audio(true);
+		this->voiceclient->stop_audio();
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
 		if (close) {
-			this->voiceclient->close ();
+			this->voiceclient->close();
 		}
-		this->voiceclient.reset ();
+		this->voiceclient.reset();
 	}
 	return *this;
 }
