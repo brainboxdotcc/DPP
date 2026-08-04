@@ -480,9 +480,16 @@ public:
 	/** Constructor */
 	channel();
 
+	/** Copy constructor */
 	channel(const channel&) = default;
+
+	/** Move constructor */
 	channel(channel&&) = default;
+
+	/** Copy assignment operator */
 	channel& operator=(const channel&) = default;
+
+	/** Move assignment operator */
 	channel& operator=(channel&&) = default;
 
 	/** Destructor */

@@ -101,9 +101,16 @@ public:
 	 */
 	dtemplate();
 
+	/** Copy constructor */
 	dtemplate(const dtemplate&) = default;
+
+	/** Move constructor */
 	dtemplate(dtemplate&&) = default;
+
+	/** Copy assignment operator */
 	dtemplate& operator=(const dtemplate&) = default;
+
+	/** Move assignment operator */
 	dtemplate& operator=(dtemplate&&) = default;
 
 	/**

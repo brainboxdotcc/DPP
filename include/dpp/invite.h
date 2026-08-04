@@ -183,9 +183,16 @@ public:
 	 */
 	invite();
 
+	/** Copy constructor */
 	invite(const invite&) = default;
+
+	/** Move constructor */
 	invite(invite&&) = default;
+
+	/** Copy assignment operator */
 	invite& operator=(const invite&) = default;
+
+	/** Move assignment operator */
 	invite& operator=(invite&&) = default;
 
 	/**

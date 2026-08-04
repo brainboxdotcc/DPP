@@ -130,9 +130,16 @@ public:
 	 */
 	voicestate();
 
+	/** Copy constructor */
 	voicestate(const voicestate&) = default;
+
+	/** Move constructor */
 	voicestate(voicestate&&) = default;
+
+	/** Copy assignment operator */
 	voicestate& operator=(const voicestate&) = default;
+
+	/** Move assignment operator */
 	voicestate& operator=(voicestate&&) = default;
 
 	/**

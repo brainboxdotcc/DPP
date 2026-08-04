@@ -247,9 +247,16 @@ public:
 	 */
 	automod_metadata();
 
+	/** Copy constructor */
 	automod_metadata(const automod_metadata&) = default;
+
+	/** Move constructor */
 	automod_metadata(automod_metadata&&) = default;
+
+	/** Copy assignment operator */
 	automod_metadata& operator=(const automod_metadata&) = default;
+
+	/** Move assignment operator */
 	automod_metadata& operator=(automod_metadata&&) = default;
 
 	/**

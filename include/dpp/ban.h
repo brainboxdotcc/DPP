@@ -57,9 +57,16 @@ public:
 	/** Constructor */
 	ban();
 
+	/** Copy constructor */
 	ban(const ban&) = default;
+
+	/** Move constructor */
 	ban(ban&&) = default;
+
+	/** Copy assignment operator */
 	ban& operator=(const ban&) = default;
+
+	/** Move assignment operator */
 	ban& operator=(ban&&) = default;
 
 	/** Destructor */

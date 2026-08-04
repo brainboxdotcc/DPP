@@ -303,9 +303,16 @@ public:
 	 */
 	command_option() = default;
 
+	/** Copy constructor */
 	command_option(const command_option&) = default;
+
+	/** Move constructor */
 	command_option(command_option&&) = default;
+
+	/** Copy assignment operator */
 	command_option& operator=(const command_option&) = default;
+
+	/** Move assignment operator */
 	command_option& operator=(command_option&&) = default;
 
 	/**
@@ -525,9 +532,17 @@ public:
 	 * @brief Construct a new interaction response object
 	 */
 	interaction_response() = default;
+
+	/** Copy constructor */
 	interaction_response(const interaction_response&);
+
+	/** Move constructor, noexcept mirrors dpp::message's move */
 	interaction_response(interaction_response&&) noexcept(std::is_nothrow_move_constructible_v<message>);
+
+	/** Copy assignment operator */
 	interaction_response& operator=(const interaction_response&);
+
+	/** Move assignment operator */
 	interaction_response& operator=(interaction_response&&) noexcept(std::is_nothrow_move_assignable_v<message>);
 
 	/**
@@ -1140,9 +1155,16 @@ public:
 	 */
 	interaction();
 
+	/** Copy constructor */
 	interaction(const interaction&) = default;
+
+	/** Move constructor */
 	interaction(interaction&&) = default;
+
+	/** Copy assignment operator */
 	interaction& operator=(const interaction&) = default;
+
+	/** Move assignment operator */
 	interaction& operator=(interaction&&) = default;
 
 	/**
@@ -1443,9 +1465,16 @@ public:
 	 */
 	guild_command_permissions();
 
+	/** Copy constructor */
 	guild_command_permissions(const guild_command_permissions&) = default;
+
+	/** Move constructor */
 	guild_command_permissions(guild_command_permissions&&) = default;
+
+	/** Copy assignment operator */
 	guild_command_permissions& operator=(const guild_command_permissions&) = default;
+
+	/** Move assignment operator */
 	guild_command_permissions& operator=(guild_command_permissions&&) = default;
 
 	virtual ~guild_command_permissions() = default;
@@ -1594,9 +1623,16 @@ public:
 	 */
 	slashcommand(const std::string &_name, const slashcommand_contextmenu_type _type, const dpp::snowflake _application_id);
 
+	/** Copy constructor */
 	slashcommand(const slashcommand&) = default;
+
+	/** Move constructor */
 	slashcommand(slashcommand&&) = default;
+
+	/** Copy assignment operator */
 	slashcommand& operator=(const slashcommand&) = default;
+
+	/** Move assignment operator */
 	slashcommand& operator=(slashcommand&&) = default;
 
 	/**

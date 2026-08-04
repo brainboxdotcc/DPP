@@ -227,9 +227,16 @@ public:
 	 */
 	user();
 
+	/** Copy constructor */
 	user(const user&);
+
+	/** Move constructor */
 	user(user&&) noexcept;
+
+	/** Copy assignment operator */
 	user& operator=(const user&);
+
+	/** Move assignment operator */
 	user& operator=(user&&) noexcept;
 
 	/**

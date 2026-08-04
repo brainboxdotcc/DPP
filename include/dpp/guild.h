@@ -803,9 +803,17 @@ public:
 	 * @brief Construct a new welcome screen object
 	 */
 	welcome_screen() = default;
+
+	/** Copy constructor */
 	welcome_screen(const welcome_screen&);
+
+	/** Move constructor */
 	welcome_screen(welcome_screen&&) noexcept;
+
+	/** Copy assignment operator */
 	welcome_screen& operator=(const welcome_screen&);
+
+	/** Move assignment operator */
 	welcome_screen& operator=(welcome_screen&&) noexcept;
 
 	/**
@@ -1216,9 +1224,16 @@ public:
 	/** Default constructor, zeroes all values */
 	guild();
 
+	/** Copy constructor */
 	guild(const guild&) = default;
+
+	/** Move constructor */
 	guild(guild&&) = default;
+
+	/** Copy assignment operator */
 	guild& operator=(const guild&) = default;
+
+	/** Move assignment operator */
 	guild& operator=(guild&&) = default;
 
 	/**
@@ -2002,9 +2017,16 @@ public:
 	 */
 	onboarding();
 
+	/** Copy constructor */
 	onboarding(const onboarding&) = default;
+
+	/** Move constructor */
 	onboarding(onboarding&&) = default;
+
+	/** Copy assignment operator */
 	onboarding& operator=(const onboarding&) = default;
+
+	/** Move assignment operator */
 	onboarding& operator=(onboarding&&) = default;
 
 	/**

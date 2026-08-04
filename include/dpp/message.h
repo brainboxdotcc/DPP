@@ -683,9 +683,16 @@ public:
 	 */
 	component();
 
+	/** Copy constructor */
 	component(const component&);
+
+	/** Move constructor */
 	component(component&&) noexcept;
+
+	/** Copy assignment operator */
 	component& operator=(const component&);
+
+	/** Move assignment operator */
 	component& operator=(component&&) noexcept;
 
 	/**
@@ -1189,9 +1196,16 @@ struct DPP_EXPORT embed {
 	 */
 	embed(nlohmann::json* j);
 
+	/** Copy constructor */
 	embed(const embed&);
+
+	/** Move constructor */
 	embed(embed&&) noexcept;
+
+	/** Copy assignment operator */
 	embed& operator=(const embed&);
+
+	/** Move assignment operator */
 	embed& operator=(embed&&) noexcept;
 
 	/**
@@ -2638,15 +2652,16 @@ public:
 	 */
 	message();
 
-	/*
+	/**
 	 * @brief Construct a new message object
 	 * @param m Message to copy
 	 */
 	message(const message& m);
 
-	/*
+	/**
 	 * @brief Construct a new message object
 	 * @param m Message to move
+	 * @note noexcept mirrors the implicit spec: attached_poll is the only member whose move can throw (std::map, on MSVC)
 	 */
 	message(message&& m) noexcept(std::is_nothrow_move_constructible_v<std::optional<poll>>);
 
