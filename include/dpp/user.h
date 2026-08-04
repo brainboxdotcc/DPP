@@ -228,16 +228,16 @@ public:
 	user();
 
 	/** Copy constructor */
-	user(const user&);
+	user(const user&) = default;
 
 	/** Move constructor */
-	user(user&&) noexcept;
+	user(user&&) = default;
 
 	/** Copy assignment operator */
-	user& operator=(const user&);
+	user& operator=(const user&) = default;
 
 	/** Move assignment operator */
-	user& operator=(user&&) noexcept;
+	user& operator=(user&&) = default;
 
 	/**
 	 * @brief Destroy the user object

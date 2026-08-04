@@ -49,10 +49,6 @@ std::map<uint32_t, dpp::user_flags> usermap = {
 user::user() : managed(), flags(0), discriminator(0), refcount(1) {
 }
 
-user::user(const user&) = default;
-user::user(user&&) noexcept = default;
-user& user::operator=(const user&) = default;
-user& user::operator=(user&&) noexcept = default;
 user::~user() = default;
 
 std::string user::get_mention(const snowflake& id) {

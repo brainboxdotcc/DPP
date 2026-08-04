@@ -805,16 +805,16 @@ public:
 	welcome_screen() = default;
 
 	/** Copy constructor */
-	welcome_screen(const welcome_screen&);
+	welcome_screen(const welcome_screen&) = default;
 
 	/** Move constructor */
-	welcome_screen(welcome_screen&&) noexcept;
+	welcome_screen(welcome_screen&&) = default;
 
 	/** Copy assignment operator */
-	welcome_screen& operator=(const welcome_screen&);
+	welcome_screen& operator=(const welcome_screen&) = default;
 
 	/** Move assignment operator */
-	welcome_screen& operator=(welcome_screen&&) noexcept;
+	welcome_screen& operator=(welcome_screen&&) = default;
 
 	/**
 	 * @brief Destroy the welcome screen object
@@ -1225,16 +1225,16 @@ public:
 	guild();
 
 	/** Copy constructor */
-	guild(const guild&) = default;
+	guild(const guild&);
 
 	/** Move constructor */
-	guild(guild&&) = default;
+	guild(guild&&) noexcept(std::is_nothrow_move_constructible_v<std::map<snowflake, voicestate>>);
 
 	/** Copy assignment operator */
-	guild& operator=(const guild&) = default;
+	guild& operator=(const guild&);
 
 	/** Move assignment operator */
-	guild& operator=(guild&&) = default;
+	guild& operator=(guild&&) noexcept(std::is_nothrow_move_assignable_v<std::map<snowflake, voicestate>>);
 
 	/**
 	 * @brief Destroy the guild object

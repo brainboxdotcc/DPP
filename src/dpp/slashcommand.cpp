@@ -477,6 +477,10 @@ slashcommand& slashcommand::add_option(const command_option &o)
 interaction::interaction() : application_id(0), type(0), guild_id(0), channel_id(0), message_id(0), version(0), attachment_size_limit(DEFAULT_ATTACHMENT_SIZE_LIMIT), cache_policy(cache_policy::cpol_default) {
 }
 
+interaction::interaction(const interaction&) = default;
+interaction::interaction(interaction&&) noexcept(std::is_nothrow_move_constructible_v<command_resolved> && std::is_nothrow_move_constructible_v<message> && std::is_nothrow_move_constructible_v<std::map<application_integration_types, snowflake>>) = default;
+interaction& interaction::operator=(const interaction&) = default;
+interaction& interaction::operator=(interaction&&) noexcept(std::is_nothrow_move_assignable_v<command_resolved> && std::is_nothrow_move_assignable_v<message> && std::is_nothrow_move_assignable_v<std::map<application_integration_types, snowflake>>) = default;
 interaction::~interaction() = default;
 
 command_interaction interaction::get_command_interaction() const {

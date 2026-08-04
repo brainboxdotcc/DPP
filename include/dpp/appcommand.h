@@ -1156,16 +1156,16 @@ public:
 	interaction();
 
 	/** Copy constructor */
-	interaction(const interaction&) = default;
+	interaction(const interaction&);
 
 	/** Move constructor */
-	interaction(interaction&&) = default;
+	interaction(interaction&&) noexcept(std::is_nothrow_move_constructible_v<command_resolved> && std::is_nothrow_move_constructible_v<message> && std::is_nothrow_move_constructible_v<std::map<application_integration_types, snowflake>>);
 
 	/** Copy assignment operator */
-	interaction& operator=(const interaction&) = default;
+	interaction& operator=(const interaction&);
 
 	/** Move assignment operator */
-	interaction& operator=(interaction&&) = default;
+	interaction& operator=(interaction&&) noexcept(std::is_nothrow_move_assignable_v<command_resolved> && std::is_nothrow_move_assignable_v<message> && std::is_nothrow_move_assignable_v<std::map<application_integration_types, snowflake>>);
 
 	/**
 	 * @brief Destroy the interaction object
