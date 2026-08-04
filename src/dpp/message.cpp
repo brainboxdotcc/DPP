@@ -866,9 +866,9 @@ embed& embed::operator=(const embed&) = default;
 embed& embed::operator=(embed&&) noexcept = default;
 
 message::message(const message&) = default;
-message::message(message&&) noexcept = default;
+message::message(message&&) noexcept(std::is_nothrow_move_constructible_v<std::optional<poll>>) = default;
 message& message::operator=(const message&) = default;
-message& message::operator=(message&&) noexcept = default;
+message& message::operator=(message&&) noexcept(std::is_nothrow_move_assignable_v<std::optional<poll>>) = default;
 message::~message() = default;
 
 embed::embed() : timestamp(0) {

@@ -828,9 +828,9 @@ interaction_response& interaction_response::add_autocomplete_choice(const comman
 
 
 interaction_response::interaction_response(const interaction_response&) = default;
-interaction_response::interaction_response(interaction_response&&) noexcept = default;
+interaction_response::interaction_response(interaction_response&&) noexcept(std::is_nothrow_move_constructible_v<message>) = default;
 interaction_response& interaction_response::operator=(const interaction_response&) = default;
-interaction_response& interaction_response::operator=(interaction_response&&) noexcept = default;
+interaction_response& interaction_response::operator=(interaction_response&&) noexcept(std::is_nothrow_move_assignable_v<message>) = default;
 interaction_response::~interaction_response() = default;
 
 interaction_response::interaction_response(interaction_response_type t, const message& m) : type{t}, msg{m} {}

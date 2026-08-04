@@ -30,6 +30,7 @@
 #include <dpp/entitlement.h>
 #include <variant>
 #include <map>
+#include <type_traits>
 #include <dpp/json_fwd.h>
 #include <dpp/json_interface.h>
 
@@ -525,9 +526,9 @@ public:
 	 */
 	interaction_response() = default;
 	interaction_response(const interaction_response&);
-	interaction_response(interaction_response&&) noexcept;
+	interaction_response(interaction_response&&) noexcept(std::is_nothrow_move_constructible_v<message>);
 	interaction_response& operator=(const interaction_response&);
-	interaction_response& operator=(interaction_response&&) noexcept;
+	interaction_response& operator=(interaction_response&&) noexcept(std::is_nothrow_move_assignable_v<message>);
 
 	/**
 	 * @brief Construct a new interaction response object

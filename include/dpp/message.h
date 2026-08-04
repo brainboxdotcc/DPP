@@ -28,6 +28,7 @@
 #include <dpp/guild.h>
 #include <optional>
 #include <variant>
+#include <type_traits>
 #include <dpp/json_fwd.h>
 #include <dpp/json_interface.h>
 
@@ -2647,7 +2648,7 @@ public:
 	 * @brief Construct a new message object
 	 * @param m Message to move
 	 */
-	message(message&& m) noexcept;
+	message(message&& m) noexcept(std::is_nothrow_move_constructible_v<std::optional<poll>>);
 
 	/**
 	 * @brief Construct a new message object
@@ -2708,7 +2709,7 @@ public:
 	 * @param m Message to move
 	 * @return message& Reference to self
 	 */
-	message &operator=(message&& m) noexcept;
+	message &operator=(message&& m) noexcept(std::is_nothrow_move_assignable_v<std::optional<poll>>);
 
 	/**
 	 * @brief Set the original message reference for replies/crossposts
