@@ -70,6 +70,18 @@ wrapped_ssl_ctx* generate_ssl_context(uint16_t port, const std::string &private_
 		if (SSL_CTX_use_PrivateKey_file(context->context, private_key.c_str(), SSL_FILETYPE_PEM) <= 0) {
 			throw dpp::connection_exception(err_ssl_context, "Failed to set private key certificate");
 		}
+	} else {
+		/* Set client connections to validate certificates. Note known OpenSSL bug applies here. these
+		 * settings are OK.
+		 *
+		 * "In client mode, it is not checked whether the SSL_VERIFY_PEER flag is set, but whether any
+		 * flags other than SSL_VERIFY_NONE are set. This can lead to unexpected behaviour if SSL_VERIFY_PEER
+		 * and other flags are not used as required."
+		 */
+		SSL_CTX_set_verify(context->context, SSL_VERIFY_PEER, nullptr);
+		if (SSL_CTX_set_default_verify_paths(context->context) != 1) {
+			throw dpp::connection_exception(err_ssl_context, "Failed to load default CA verify paths");
+		}
 	}
 
 	/* This sets the allowed SSL/TLS versions for the connection.

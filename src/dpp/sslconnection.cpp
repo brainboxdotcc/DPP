@@ -339,6 +339,13 @@ void ssl_connection::complete_handshake(const socket_events* ev)
 			}
 		}
 	} else {
+		if (!this->is_server) {
+			/* Because we have set VERIFY_PEER when creating the context this should not strictly be neccessary. We perform this anyway just to be sure. */
+			const long verify_result = SSL_get_verify_result(ssl->ssl);
+			if (verify_result != X509_V_OK) {
+				throw dpp::connection_exception(err_ssl_connect, "SSL_get_verify_result: " + std::string(X509_verify_cert_error_string(verify_result)));
+			}
+		}
 		do_raw_trace("(SSL): <complete handshake>");
 		socket_events se{*ev};
 		se.flags = dpp::WANT_WRITE | dpp::WANT_READ | dpp::WANT_ERROR;
@@ -480,7 +487,12 @@ void ssl_connection::on_write(socket fd, const struct socket_events& e) {
 				 * This is needed for modern HTTPS and tells SSL which virtual host to connect a
 				 * socket to: https://www.cloudflare.com/en-gb/learning/ssl/what-is-sni/
 				 */
-				SSL_set_tlsext_host_name(ssl->ssl, hostname.c_str());
+				if (SSL_set_tlsext_host_name(ssl->ssl, hostname.c_str()) != 1) {
+					throw dpp::connection_exception(err_ssl_connect, "Failed to set TLS SNI hostname");
+				}
+				if (SSL_set1_host(ssl->ssl, hostname.c_str()) != 1) {
+					throw dpp::connection_exception(err_ssl_connect, "Failed to set TLS verification hostname");
+				}
 			}
 		}
 
