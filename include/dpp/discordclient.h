@@ -242,9 +242,10 @@ public:
 
 	/**
 	 * @brief Disconnect from the currently connected voice channel
+	 * @param close Whether to close connection
 	 * @return reference to self
 	 */
-	voiceconn& disconnect();
+	voiceconn& disconnect(bool close = true);
 
 	/**
 	 * @brief Reassigns the owner to the given discord_client.

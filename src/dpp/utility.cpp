@@ -451,6 +451,18 @@ uint32_t hsl(double h, double s, double l) {
 	return rgb(r, g, b);
 }
 
+static std::string shell_quote(const std::string& value) {
+	std::string out = "'";
+	for (const char c : value) {
+		if (c == '\'') {
+			out += "'\\''";
+		} else {
+			out += c;
+		}
+	}
+	return out + "'";
+}
+
 void exec(const std::string& cmd, std::vector<std::string> parameters, cmd_result_t callback) {
 	auto t = std::thread([cmd, parameters, callback]() {
 		try {
@@ -461,7 +473,11 @@ void exec(const std::string& cmd, std::vector<std::string> parameters, cmd_resul
 			std::stringstream cmd_and_parameters;
 			cmd_and_parameters << cmd;
 			for (auto &parameter: my_parameters) {
+#ifndef _WIN32
+				cmd_and_parameters << " " << shell_quote(parameter);
+#else
 				cmd_and_parameters << " " << std::quoted(parameter);
+#endif
 			}
 			/* Capture stderr */
 			cmd_and_parameters << " 2>&1";

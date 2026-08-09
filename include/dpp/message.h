@@ -568,6 +568,11 @@ public:
 	int32_t max_values;
 
 	/**
+	 * @brief File types (dpp::cot_file_upload) to filter for; can be "image", "video", "audio", or any dot-prefixed extension such as ".pdf" (0-10).
+	 */
+	std::vector<std::string> file_types;
+
+	/**
 	 * @brief Minimum length for text input (0-4000)
 	 */
 	int32_t min_length;
@@ -896,6 +901,14 @@ public:
 	 * @return component& Reference to self
 	 */
 	component& set_max_values(uint32_t max_values);
+
+	/**
+	 * @brief Add a file type (dpp::cot_file_upload) to filter for.
+	 *
+	 * @param file_type The type to filter for ("image"/"video"/"audio" or the file extension (begins with ".")).
+	 * @return component& Reference to self
+	 */
+	component& add_file_type(std::string_view file_type);
 
 	/**
 	 * @brief Set the minimum input length for a text input

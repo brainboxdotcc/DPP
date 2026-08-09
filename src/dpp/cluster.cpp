@@ -18,7 +18,6 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#include "discordclient.h"
 #include <map>
 #include <dpp/exception.h>
 #include <dpp/cluster.h>

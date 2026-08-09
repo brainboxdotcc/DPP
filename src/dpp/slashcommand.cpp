@@ -201,6 +201,10 @@ void to_json(json& j, const command_option& opt) {
 			j["channel_types"].push_back(ch_type);
 		}
 	}
+
+	if (!opt.file_types.empty()) {
+		j["file_types"] = opt.file_types;
+	}
 }
 
 void to_json(nlohmann::json& j, const command_permission& cp) {
@@ -510,6 +514,17 @@ interaction& interaction::fill_from_json_impl(nlohmann::json* j) {
 json interaction::to_json_impl(bool with_id) const {
 	/* There is no facility to build the json of an interaction as bots don't send them, only the API sends them as an event payload */
 	return "";
+}
+
+/**
+ * @brief Add a file type (dpp::co_attachment) to filter for.
+ *
+ * @param file_type The type to filter for ("image"/"video"/"audio" or the file extension (begins with ".")).
+ * @return command_option& Reference to self
+*/
+command_option& command_option::add_file_type(std::string_view const file_type) {
+	this->file_types.emplace_back(file_type);
+	return *this;
 }
 
 slashcommand& slashcommand::add_localization(const std::string& language, const std::string& _name, const std::string& _description) {
