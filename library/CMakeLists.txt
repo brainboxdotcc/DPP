@@ -241,9 +241,6 @@ file(GLOB subdirlist ${modules_dir}/dpp)
 
 if (HAVE_VOICE)
 	add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/../mlspp" "mlspp")
-	include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../mlspp/include")
-	include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../mlspp/lib/bytes/include")
-	include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../mlspp/lib/hpke/include")
 endif()
 
 foreach (fullmodname ${subdirlist})
@@ -267,10 +264,22 @@ foreach (fullmodname ${subdirlist})
 		SOVERSION ${CMAKE_PROJECT_VERSION}
 		POSITION_INDEPENDENT_CODE true
 	)
-	target_include_directories(${modname} PUBLIC 
+	target_include_directories(${modname} PUBLIC
 		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
 		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include/dpp>
 	)
+
+	if (HAVE_VOICE)
+		# mlspp headers are only needed to compile D++'s own voice/DAVE sources.
+		# Keep them PRIVATE and build-tree-only so their absolute paths never leak
+		# into the installed target's usage requirements - in particular the
+		# exported C++20 module's include directories (no public header pulls them).
+		target_include_directories(${modname} PRIVATE
+			$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../mlspp/include>
+			$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../mlspp/lib/bytes/include>
+			$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../mlspp/lib/hpke/include>
+		)
+	endif()
 
 	if (DPP_USE_PCH)
 		target_precompile_headers(${modname} PRIVATE
@@ -479,6 +488,19 @@ if (DPP_MODULES)
 	)
 
 	target_compile_definitions(dpp PUBLIC DPP_MODULES)
+
+	# When building the tests, also compile docpages/example_code/using_modules.cpp
+	# against the in-tree dpp module using CMake's native module resolution
+	if (DPP_BUILD_TEST)
+		add_executable(using_modules_example "${CMAKE_CURRENT_SOURCE_DIR}/../docpages/example_code/using_modules.cpp")
+		target_link_libraries(using_modules_example PRIVATE dpp)
+		set_target_properties(using_modules_example PROPERTIES
+			CXX_STANDARD 20
+			CXX_STANDARD_REQUIRED ON
+			CXX_SCAN_FOR_MODULES ON
+			CXX_EXTENSIONS OFF
+		)
+	endif()
 else()
 	message("-- ${Yellow}Modules are disabled.${ColourReset}")
 endif()

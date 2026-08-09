@@ -54,7 +54,13 @@ write_basic_package_version_file(${DPP_VERSION_FILE}
 		COMPATIBILITY SameMajorVersion)
 
 ## Include the file which allows `find_package(dpp)` to function.
-install(FILES "${DPP_ROOT_PATH}/cmake/dpp-config.cmake" "${DPP_VERSION_FILE}" DESTINATION "${DPP_CMAKE_DIR}")
+## FindFilesystem.cmake is shipped alongside it because dpp-config.cmake calls
+## find_dependency(Filesystem) (the C++20 module links std::filesystem).
+install(FILES
+	"${DPP_ROOT_PATH}/cmake/dpp-config.cmake"
+	"${DPP_ROOT_PATH}/cmake/FindFilesystem.cmake"
+	"${DPP_VERSION_FILE}"
+	DESTINATION "${DPP_CMAKE_DIR}")
 
 ## Export the targets to allow other projects to easily include this project
 install(EXPORT "${DPP_EXPORT_NAME}" DESTINATION "${DPP_CMAKE_DIR}" NAMESPACE dpp::)

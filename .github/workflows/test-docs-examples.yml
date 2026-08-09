@@ -73,7 +73,7 @@ jobs:
         uses: microsoft/setup-msbuild@30375c66a4eea26614e0d39710365f22f8b0af57 # v3.0.0
 
       - name: Generate CMake
-        run: cmake -B build -G "Visual Studio 17 2022" -DDPP_NO_VCPKG=ON -DDPP_MODULES=ON -DDPP_BUILD_TEST=OFF -DAVX_TYPE=AVX0
+        run: cmake -B build -G "Visual Studio 17 2022" -DDPP_NO_VCPKG=ON -DDPP_MODULES=ON -DDPP_BUILD_TEST=ON -DAVX_TYPE=AVX0
         env:
           DONT_RUN_VCPKG: true
 

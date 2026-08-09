@@ -57,11 +57,27 @@ module;
 #include <dpp/export.h>
 #include <dpp/compat.h>
 
+#ifdef DPP_USE_EXTERNAL_JSON
+	#include <nlohmann/json.hpp>
+#else
+	#include <dpp/nlohmann/json.hpp>
+#endif
+
 export module dpp;
 
 export extern "C++" {
+    #if defined(__clang__)
+        #pragma clang diagnostic push
+        #pragma clang diagnostic ignored "-Wunknown-warning-option"
+        #pragma clang diagnostic ignored "-Winclude-angled-in-module-purview"
+    #endif
+
     #include <dpp/dpp.h>
     #include <dpp/dns.h>
     #include <dpp/restrequest.h>
     #include <dpp/unicode_emoji.h>
+
+    #if defined(__clang__)
+        #pragma clang diagnostic pop
+    #endif
 }
