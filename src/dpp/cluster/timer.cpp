@@ -67,7 +67,7 @@ void cluster::tick_timers() {
 		timer_t cur_timer;
 		{
 			std::lock_guard<std::mutex> l(timer_guard);
-			if (next_timer.top().next_tick > now) {
+			if (next_timer.empty() || next_timer.top().next_tick > now) {
 				/* Nothing to do */
 				break;
 			}
