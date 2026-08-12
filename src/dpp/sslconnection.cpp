@@ -174,7 +174,8 @@ int ssl_connection::start_connecting(dpp::socket sockfd, const struct sockaddr *
 		&& err != WSAEWOULDBLOCK
 #endif
 		&& err != EWOULDBLOCK && err != EINPROGRESS) {
-		throw connection_exception(err_connect_failure, get_socket_error());
+		error_message = get_socket_error();
+		throw connection_exception(err_connect_failure, error_message);
 	} else if (rc == 0) {
 		/* We are ready RIGHT NOW, connection already succeeded */
 		socket_events ev;
@@ -335,7 +336,26 @@ void ssl_connection::complete_handshake(const socket_events* ev)
 				break;
 			}
 			default: {
-				throw dpp::connection_exception(err_ssl_connect, "SSL_do_handshake error: " + std::to_string(status)  +";" + std::to_string(code));
+				unsigned long error_code;
+				error_message = "";
+
+				while ((error_code = ERR_get_error()) != 0) {
+					char buffer[256];
+					ERR_error_string_n(error_code, buffer, sizeof(buffer));
+
+					if (!error_message.empty()) {
+						error_message += "; ";
+					}
+
+					error_message += buffer;
+				}
+
+				if (error_message.empty()) {
+					error_message = "No OpenSSL error details available";
+				}
+
+				error_message = "SSL handshake exception: " + error_message;
+				throw dpp::connection_exception(err_ssl_connect, error_message);
 			}
 		}
 	} else {
@@ -343,7 +363,8 @@ void ssl_connection::complete_handshake(const socket_events* ev)
 			/* Because we have set VERIFY_PEER when creating the context this should not strictly be neccessary. We perform this anyway just to be sure. */
 			const long verify_result = SSL_get_verify_result(ssl->ssl);
 			if (verify_result != X509_V_OK) {
-				throw dpp::connection_exception(err_ssl_connect, "SSL_get_verify_result: " + std::string(X509_verify_cert_error_string(verify_result)));
+				this->error_message = std::string(X509_verify_cert_error_string(verify_result));
+				throw dpp::connection_exception(err_ssl_connect, "SSL handshake exception: " + error_message);
 			}
 		}
 		do_raw_trace("(SSL): <complete handshake>");
@@ -423,11 +444,20 @@ void ssl_connection::on_read(socket fd, const struct socket_events& ev) {
 			}
 			case SSL_ERROR_SYSCALL: {
 				if (errno != 0) {
+					error_message = "SSL read syscall exception: " + get_socket_error();
 					this->close();
 				}
 				break;
 			}
 			default: {
+				unsigned long error_code = ERR_get_error();
+				if (error_code != 0) {
+					char buffer[256];
+					ERR_error_string_n(error_code, buffer, sizeof(buffer));
+					error_message = "SSL read exception: " + std::string(buffer);
+				} else {
+					error_message = "SSL read exception";
+				}
 				this->close();
 				return;
 			}
@@ -599,12 +629,21 @@ void ssl_connection::on_write(socket fd, const struct socket_events& e) {
 					do_raw_trace("(OUT,SSL): <SYSCALL ERROR>");
 					if (errno != 0) {
 						/* If errno != 0, it was a socket error, close socket */
+						error_message = "SSL write syscall exception: " + get_socket_error();
 						this->close();
 					}
 					break;
 				}
 				/* Some other error, these are not valid here, so we do nothing! */
 				default: {
+					unsigned long error_code = ERR_get_error();
+					if (error_code != 0) {
+						char buffer[256];
+						ERR_error_string_n(error_code, buffer, sizeof(buffer));
+						error_message = "SSL write exception: " + std::string(buffer);
+					} else {
+						error_message = "SSL write exception";
+					}
 					return;
 				}
 			}
@@ -639,6 +678,7 @@ void ssl_connection::read_loop() {
 			},
 			[this](socket fd, const struct socket_events &e, int error_code) {
 				do_raw_trace("on_error");
+				error_message = get_socket_error();
 				on_error(fd, e, error_code);
 			}
 		);
@@ -726,6 +766,10 @@ ssl_connection::~ssl_connection() {
 	}
 	delete ssl;
 	ssl = nullptr;
+}
+
+const std::string& ssl_connection::get_error() const {
+	return error_message;
 }
 
 }

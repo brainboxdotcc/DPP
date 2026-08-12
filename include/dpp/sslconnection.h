@@ -238,6 +238,11 @@ protected:
 	bool raw_trace{false};
 
 	/**
+	 * @brief Error message from an asynchronous connection failure.
+	 */
+	std::string error_message;
+
+	/**
 	 * @brief If raw_trace is set to true, log a debug message for this connection
 	 * @param message debug message
 	 */
@@ -406,6 +411,13 @@ public:
 	 * @param error_code Error code
 	 */
 	void on_error(dpp::socket fd, const struct dpp::socket_events&, int error_code);
+
+	/**
+	 * @brief Get the error message from an asynchronous connection failure.
+	 *
+	 * @return Error message, or an empty string if no error occurred.
+	 */
+	const std::string& get_error() const;
 };
 
 }
