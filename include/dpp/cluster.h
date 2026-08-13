@@ -229,6 +229,13 @@ public:
 	uint32_t intents;
 
 	/**
+	 * @brief Current bitmask of gateway capabilities
+	 * 
+	 * @note As discord plans to immediately roll out their only capability to apply automatically soon, we'll just always send default unless bot creators specifically edit this.
+	 */
+	uint32_t capabilities = dpp::c_default_capabilities;
+
+	/**
 	 * @brief Total number of shards across all clusters
 	 */
 	uint32_t numshards;

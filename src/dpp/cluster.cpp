@@ -247,7 +247,7 @@ void cluster::start(start_type return_after) {
 							resume = true;
 						} else {
 							log(ll_trace, "Attempting full reconnection...");
-							cl_new = std::make_unique<class discord_client>(this, shard_id, numshards, token, intents, compressed, ws_mode);
+							cl_new = std::make_unique<class discord_client>(this, shard_id, numshards, token, intents, capabilities, compressed, ws_mode);
 						}
 						/* Set up the new shard's IO events */
 						log(ll_trace, "Running new connection...");

@@ -408,6 +408,12 @@ public:
 	uint32_t intents;
 
 	/**
+	 * @brief Bot Capabilities (A way to opt a bot into gateway behaviors)
+	 * @see dpp::capabilities
+	 */
+	uint32_t capabilities;
+
+	/**
 	 * @brief Discord session id
 	 */
 	std::string sessionid;
@@ -546,12 +552,13 @@ public:
 	 * @param _max_shards The total number of shards across all clusters
 	 * @param _token The bot token to use for identifying to the websocket
 	 * @param intents Privileged intents to use, a bitmask of values from dpp::intents
+	 * @param capabilities Gateway Capabilities to use, a bitmask of values from dpp::capabilities
 	 * @param compressed True if the received data will be gzip compressed
 	 * @param ws_protocol Websocket protocol to use for the connection, JSON or ETF
 	 * 
 	 * @throws std::bad_alloc Passed up to the caller if any internal objects fail to allocate, after cleanup has completed
 	 */
-	discord_client(dpp::cluster* _cluster, uint32_t _shard_id, uint32_t _max_shards, const std::string &_token, uint32_t intents = 0, bool compressed = true, websocket_protocol_t ws_protocol = ws_json);
+	discord_client(dpp::cluster* _cluster, uint32_t _shard_id, uint32_t _max_shards, const std::string &_token, uint32_t intents = 0, uint32_t capabilities = dpp::c_default_capabilities, bool compressed = true, websocket_protocol_t ws_protocol = ws_json);
 
 	/**
 	 * @brief Construct a discord_client object from another discord_client object

@@ -263,7 +263,8 @@ bool discord_client::handle_frame(const std::string &buffer, ws_opcode opcode)
 								       {"shard", json::array({shard_id, max_shards})},
 								       {"compress", false},
 								       {"large_threshold", LARGE_THRESHOLD},
-								       {"intents", this->intents}
+								       {"intents", this->intents},
+									   {"capabilities", this->capabilities}
 							       }
 							}
 						};
