@@ -55,6 +55,10 @@ jobs:
   test_docs_module_windows:
     name: Test build module (Windows)
     runs-on: windows-2022
+    # Experimental: clang-cl C++20 module scanning is only supported from
+    # CMake 4.4 onwards, and cl.exe cannot consume the nlohmann::json-wrapping
+    # module. Keep this non-blocking while the toolchain support matures.
+    continue-on-error: true
     concurrency:
       group: ${{ github.workflow }}-windows-${{ github.ref }}
       cancel-in-progress: true
@@ -69,15 +73,21 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Add MSBuild to PATH
-        uses: microsoft/setup-msbuild@30375c66a4eea26614e0d39710365f22f8b0af57 # v3.0.0
+      - name: Set up MSVC developer environment
+        uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
+
+      - name: Set up CMake
+        uses: jwlawson/actions-setup-cmake@0d6a7d60b009d01c9e7523be22153ff8f19460d3 # v2.2.0
+        with:
+          cmake-version: '4.4.x'
+          github-api-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Generate CMake
-        run: cmake -B build -G "Visual Studio 17 2022" -DDPP_NO_VCPKG=ON -DDPP_MODULES=ON -DDPP_BUILD_TEST=ON -DAVX_TYPE=AVX0
+        run: cmake -B build -G Ninja -DCMAKE_C_COMPILER=clang-cl -DCMAKE_CXX_COMPILER=clang-cl -DCMAKE_BUILD_TYPE=Release -DDPP_NO_VCPKG=ON -DDPP_MODULES=ON -DDPP_BUILD_TEST=ON -DAVX_TYPE=AVX0
         env:
           DONT_RUN_VCPKG: true
 
       - name: Build module example
-        run: cmake --build build --target using_modules_example --config Release --parallel 2
+        run: cmake --build build --target using_modules_example --parallel 2
         env:
           DONT_RUN_VCPKG: true
