@@ -33,13 +33,12 @@ namespace dpp {
 void discord_voice_client::write_ready() {
 	std::chrono::nanoseconds latency{0};
 	if (send_audio_type != satype_live_audio) {
-		auto now = std::chrono::high_resolution_clock::now();
+		const auto now = std::chrono::high_resolution_clock::now();
 
-		auto minimum = std::chrono::nanoseconds(last_duration);
-		auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(now - last_timestamp);
+		const auto minimum = std::chrono::nanoseconds(last_duration);
+		const auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(now - last_timestamp);
 
-		bool should_send_now = elapsed >= minimum;
-		if (!should_send_now) {
+		if (elapsed >= minimum) {
 			std::this_thread::sleep_for(minimum - elapsed);
 			udp_events.flags = WANT_READ | WANT_WRITE | WANT_ERROR;
 			owner->socketengine->update_socket(udp_events);
