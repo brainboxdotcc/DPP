@@ -43,20 +43,16 @@ void discord_voice_client::write_ready() {
 			std::this_thread::sleep_for(minimum - elapsed);
 			udp_events.flags = WANT_READ | WANT_WRITE | WANT_ERROR;
 			owner->socketengine->update_socket(udp_events);
-			std::cout << "FALSE: elapsed(" << elapsed << ") < minimum(" << minimum << ")\n";
 			return;
 		}
 
 		latency = elapsed - minimum;
 		last_timestamp = now;
-
-		std::cout << "TRUE: elapsed(" << elapsed << ") >= minimum(" << minimum << ") latency(" << latency << ")\n";
 	}
 
 	uint64_t duration = 0;
 	bool track_marker_found = false;
 	uint64_t bufsize = 0;
-	send_audio_type_t type = satype_recorded_audio;
 	{
 		std::lock_guard<std::mutex> lock(this->stream_mutex);
 		if (this->paused) {
@@ -67,7 +63,6 @@ void discord_voice_client::write_ready() {
 
 			/* Fallthrough if paused */
 		} else if (!outbuf.empty()) {
-			type = send_audio_type;
 			if (outbuf[0].packet.size() == sizeof(uint16_t) && (*(reinterpret_cast<uint16_t*>(outbuf[0].packet.data()))) == AUDIO_TRACK_MARKER) {
 				outbuf.erase(outbuf.begin());
 				track_marker_found = true;
