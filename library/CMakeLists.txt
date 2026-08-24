@@ -258,6 +258,8 @@ foreach (fullmodname ${subdirlist})
 	else()
 		add_library(${modname} STATIC ${modsrc})
 	endif()
+
+	add_library(dpp::${modname} ALIAS ${modname})
 	set_target_properties(${modname} 
 		PROPERTIES
 		VERSION ${CMAKE_PROJECT_VERSION}
