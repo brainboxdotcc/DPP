@@ -804,12 +804,11 @@ public:
 	 * audio data because Discord does not expect to receive, say, 3 minutes'
 	 * worth of audio data in 1 second.
 	 *
-	 * There are some inaccuracies in the throttling method used by the recorded
+	 * There was some inaccuracies in the throttling method used by the recorded
 	 * audio mode on some systems (mainly Windows) which causes gaps and stutters
 	 * in the resulting audio stream. The overlap audio mode provides a different 
-	 * implementation that fixes the issue. This method is slightly more CPU 
-	 * intensive, and should only be used if you encounter issues with recorded audio 
-	 * on your system.
+	 * implementation that fixes the issue in the past. This method is not used
+	 * anymore and behave the same as the recorded audio mode.
 	 * 
 	 * Use discord_voice_client::set_send_audio_type to change this value as
 	 * it ensures thread safety.
