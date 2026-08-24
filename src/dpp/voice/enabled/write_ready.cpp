@@ -43,11 +43,14 @@ void discord_voice_client::write_ready() {
 			std::this_thread::sleep_for(minimum - elapsed);
 			udp_events.flags = WANT_READ | WANT_WRITE | WANT_ERROR;
 			owner->socketengine->update_socket(udp_events);
+			std::cout << "FALSE: elapsed(" << elapsed << ") < minimum(" << minimum << ")\n";
 			return;
 		}
 
 		latency = elapsed - minimum;
 		last_timestamp = now;
+
+		std::cout << "TRUE: elapsed(" << elapsed << ") >= minimum(" << minimum << ") latency(" << latency << ")\n";
 	}
 
 	uint64_t duration = 0;
