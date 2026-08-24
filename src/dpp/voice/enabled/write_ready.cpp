@@ -84,7 +84,7 @@ void discord_voice_client::write_ready() {
 		}
 	}
 	if (duration) {
-		auto latcount = latency.count();
+		const auto latcount = latency.count();
 		last_duration = duration > latcount ? duration - latcount : duration;
 		if (!creator->on_voice_buffer_send.empty()) {
 			voice_buffer_send_t snd(owner, 0, "");
