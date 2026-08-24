@@ -561,6 +561,11 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	std::chrono::high_resolution_clock::time_point last_timestamp;
 
 	/**
+	 * @brief Last sent packet duration
+	 */
+	uint64_t last_duration;
+
+	/**
 	 * @brief Fraction of the sleep that was not executed after the last audio packet was sent
 	 */
 	std::chrono::nanoseconds last_sleep_remainder{};
