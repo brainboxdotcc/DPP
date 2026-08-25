@@ -566,11 +566,6 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	uint64_t last_duration;
 
 	/**
-	 * @brief Fraction of the sleep that was not executed after the last audio packet was sent
-	 */
-	std::chrono::nanoseconds last_sleep_remainder{};
-
-	/**
 	 * @brief Maps receiving ssrc to user id
 	 */
 	std::unordered_map<uint32_t, snowflake> ssrc_map;
