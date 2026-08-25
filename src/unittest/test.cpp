@@ -266,6 +266,32 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 			 dpp::base64_encode(reinterpret_cast<unsigned char const *>("vwxyz12"), 7) == "dnd4eXoxMg=="
 		);
 
+		set_test(ETF_COMPRESSED_SHORT, false);
+		{
+			/* Version, ett_compressed, a declared uncompressed size of 4096, then a
+			 * deflate stream that only inflates to five bytes: an ett_binary announcing
+			 * 4080 bytes of payload that were never encoded.
+			 */
+			const char truncated_term[]{
+				(char)131, 'P', 0x00, 0x00, 0x10, 0x00,
+				(char)0x78, (char)0x9c, (char)0xcb, 0x65, 0x60, (char)0xe0,
+				(char)0xff, 0x00, 0x00, 0x03, 0x34, 0x01, 0x6d
+			};
+
+			/* The announced payload is not there, so decoding must yield null rather
+			 * than a 4080 character string assembled from memory that was never written.
+			 */
+			bool etf_result;
+			dpp::etf_parser etf;
+			try {
+				etf_result = etf.parse(std::string(truncated_term, sizeof(truncated_term))).is_null();
+			}
+			catch (const dpp::parse_exception&) {
+				etf_result = false;
+			}
+			set_test(ETF_COMPRESSED_SHORT, etf_result);
+		}
+
 		dpp::http_connect_info hci;
 		set_test(HOSTINFO, false);
 
