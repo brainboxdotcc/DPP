@@ -49,6 +49,8 @@ std::map<uint32_t, dpp::user_flags> usermap = {
 user::user() : managed(), flags(0), discriminator(0), refcount(1) {
 }
 
+user::~user() = default;
+
 std::string user::get_mention(const snowflake& id) {
 	return utility::user_mention(id);
 }

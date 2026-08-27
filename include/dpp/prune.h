@@ -47,6 +47,22 @@ protected:
 	virtual json to_json_impl(bool with_prune_count = false) const;
 
 public:
+
+	/** Default constructor */
+	prune() = default;
+
+	/** Copy constructor */
+	prune(const prune&) = default;
+
+	/** Move constructor */
+	prune(prune&&) = default;
+
+	/** Copy assignment operator */
+	prune& operator=(const prune&) = default;
+
+	/** Move assignment operator */
+	prune& operator=(prune&&) = default;
+
 	/**
 	 * @brief Destroy this prune object
 	 */

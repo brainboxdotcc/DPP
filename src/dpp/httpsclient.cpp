@@ -336,11 +336,11 @@ void https_client::one_second_timer() {
 		timed_out = true;
 		this->close();
 	} else if (tcp_connect_done && !connected && time(nullptr) >= timeout && this->state != HTTPS_DONE) {
-		this->close();
 		timed_out = true;
+		this->close();
 	} else if (time(nullptr) >= timeout && this->state != HTTPS_DONE) {
-		this->close();
 		timed_out = true;
+		this->close();
 	}
 }
 

@@ -242,9 +242,12 @@ http_request_completion_t http_request::run(request_concurrency_queue* processor
 				if (client->timed_out) {
 					result.error = h_connection;
 					owner->log(ll_error, "HTTP(S) error on " + hci.scheme + " connection to " + request_verb[method] + " "  + hci.hostname + ":" + std::to_string(hci.port) + _url + ": Timed out while waiting for the response");
+				} else if (!client->get_error().empty()) {
+					result.error = h_ssl_connection;
+					owner->log(ll_error, "HTTP(S) error on " + hci.scheme + " connection to " + request_verb[method] + " " + hci.hostname + ":" +std::to_string(hci.port) + _url + ": " + client->get_error());
 				} else if (client->get_status() < 100) {
 					result.error = h_connection;
-					owner->log(ll_error, "HTTP(S) error on " + hci.scheme + " connection to " + request_verb[method] + " "  + hci.hostname + ":" + std::to_string(hci.port) + _url + ": Malformed HTTP response");
+					owner->log(ll_error, "HTTP(S) error on " + hci.scheme + " connection to " + request_verb[method] + " " + hci.hostname + ":" + std::to_string(hci.port) + _url + ": Malformed HTTP response (" + std::to_string(client->get_bytes_in()) + " bytes received)");
 				}
 				populate_result(_url, owner, result, *client);
 				/* Set completion flag */
