@@ -186,8 +186,12 @@ void discord_voice_client::voice_courier_loop(discord_voice_client& client, cour
 						 * trailing nonce, otherwise ciphertext_len below underflows.
 						 */
 						if (packet_size < static_cast<size_t>(offset_to_data) + nonce_size) {
-							/* Invalid Discord RTP payload. */
-							return;
+							/*
+							 * Invalid Discord RTP payload. Consume it and move on to the
+							 * next parked payload, like the pop at the end of this iteration.
+							 */
+							d.parked_payloads.pop();
+							continue;
 						}
 
 						size_t total_header_len = offset_to_data;
@@ -202,8 +206,12 @@ void discord_voice_client::voice_courier_loop(discord_voice_client& client, cour
 							 * it is present before reading it and subtracting it from ciphertext_len.
 							 */
 							if (ciphertext_len < sizeof(uint16_t) * 2) {
-								/* Invalid Discord RTP payload. */
-								return;
+								/*
+								 * Invalid Discord RTP payload. Consume it and move on to the
+								 * next parked payload, like the pop at the end of this iteration.
+								 */
+								d.parked_payloads.pop();
+								continue;
 							}
 							/**
 							 * Get the RTP Extensions size, we only get the size here because
