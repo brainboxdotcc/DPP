@@ -28,19 +28,31 @@
 # libmpg123-dev
 # dpp latest master with -DDPP_CORO=ON installed sytemwide
 
-cmake_minimum_required (VERSION 3.16)
+cmake_minimum_required (VERSION 3.28)
 project(documentation_tests)
 
 include("${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/colour.cmake")
 
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DDPP_CORO -std=c++20 -pthread -O0 -fPIC -rdynamic -DFMT_HEADER_ONLY -Wall -Wextra -Wpedantic -Werror -Wno-unused-parameter -Wno-deprecated-declarations")
+option(DPP_MODULES "Build examples with C++20 modules support" ON)
+
+find_package(dpp REQUIRED)
+
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DDPP_CORO -std=c++20 -pthread -O0 -fPIC -DFMT_HEADER_ONLY -Wall -Wextra -Wpedantic -Werror -Wno-unused-parameter -Wno-deprecated-declarations -Wno-unused-command-line-argument")
 set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0")
+
+set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -rdynamic")
 
 file(GLOB example_list ./*.cpp)
 foreach (example ${example_list})
 	get_filename_component(examplename ${example} NAME)
 	message(STATUS "Found example '${BoldBlue}${examplename}${ColourReset}'")
 	add_executable(${examplename}_out ${example})
-	target_link_libraries(${examplename}_out dl dpp mpg123 oggz ogg opusfile opus)
+	target_link_libraries(${examplename}_out dl dpp::dpp mpg123 oggz ogg opusfile opus)
 	include_directories(/usr/include/opus)
+
+	if (DPP_MODULES)
+		set_target_properties(${examplename}_out PROPERTIES CXX_SCAN_FOR_MODULES ON)
+	endif()
 endforeach(example)

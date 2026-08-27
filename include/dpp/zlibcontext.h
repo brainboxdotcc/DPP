@@ -35,7 +35,7 @@ namespace dpp {
 /**
  * @brief Size of decompression buffer for zlib compressed traffic
  */
-constexpr size_t DECOMP_BUFFER_SIZE = 512 * 1024;
+inline constexpr size_t DECOMP_BUFFER_SIZE = 512 * 1024;
 
 /**
  * @brief This is an opaque class containing zlib library specific structures.

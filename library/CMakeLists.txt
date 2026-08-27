@@ -241,9 +241,6 @@ file(GLOB subdirlist ${modules_dir}/dpp)
 
 if (HAVE_VOICE)
 	add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/../mlspp" "mlspp")
-	include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../mlspp/include")
-	include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../mlspp/lib/bytes/include")
-	include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../mlspp/lib/hpke/include")
 endif()
 
 foreach (fullmodname ${subdirlist})
@@ -261,16 +258,30 @@ foreach (fullmodname ${subdirlist})
 	else()
 		add_library(${modname} STATIC ${modsrc})
 	endif()
+
+	add_library(dpp::${modname} ALIAS ${modname})
 	set_target_properties(${modname} 
 		PROPERTIES
 		VERSION ${CMAKE_PROJECT_VERSION}
 		SOVERSION ${CMAKE_PROJECT_VERSION}
 		POSITION_INDEPENDENT_CODE true
 	)
-	target_include_directories(${modname} PUBLIC 
+	target_include_directories(${modname} PUBLIC
 		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
 		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include/dpp>
 	)
+
+	if (HAVE_VOICE)
+		# mlspp headers are only needed to compile D++'s own voice/DAVE sources.
+		# Keep them PRIVATE and build-tree-only so their absolute paths never leak
+		# into the installed target's usage requirements - in particular the
+		# exported C++20 module's include directories (no public header pulls them).
+		target_include_directories(${modname} PRIVATE
+			$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../mlspp/include>
+			$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../mlspp/lib/bytes/include>
+			$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../mlspp/lib/hpke/include>
+		)
+	endif()
 
 	if (DPP_USE_PCH)
 		target_precompile_headers(${modname} PRIVATE
@@ -330,20 +341,20 @@ if (HAVE_VOICE)
 	# Private statically linked dependencies
 	if(NOT BUILD_SHARED_LIBS AND NOT APPLE)
 		target_link_libraries(dpp PRIVATE
-				mlspp.a
-				mls_vectors.a
-				bytes.a
-				tls_syntax.a
-				hpke.a
+				$<BUILD_INTERFACE:mlspp.a>
+				$<BUILD_INTERFACE:mls_vectors.a>
+				$<BUILD_INTERFACE:bytes.a>
+				$<BUILD_INTERFACE:tls_syntax.a>
+				$<BUILD_INTERFACE:hpke.a>
 		)
 		message("-- INFO: Linking static dependencies")
 	else()
 		target_link_libraries(dpp PRIVATE
-				mlspp
-				mls_vectors
-				bytes
-				tls_syntax
-				hpke
+				$<BUILD_INTERFACE:mlspp>
+				$<BUILD_INTERFACE:mls_vectors>
+				$<BUILD_INTERFACE:bytes>
+				$<BUILD_INTERFACE:tls_syntax>
+				$<BUILD_INTERFACE:hpke>
 		)
 		message("-- INFO: Linking dynamic dependencies")
 	endif()
@@ -465,17 +476,48 @@ if (NOT BUILD_SHARED_LIBS)
 	target_compile_definitions(dppstatic PUBLIC $<TARGET_PROPERTY:dpp,INTERFACE_COMPILE_DEFINITIONS>)
 endif()
 
+if (DPP_MODULES)
+	message("-- ${Green}Modules are enabled!${ColourReset}")
+
+	set_target_properties(dpp PROPERTIES CXX_EXTENSIONS OFF)
+
+	# Add module file set directly to the dpp target
+	target_sources(dpp
+		PUBLIC
+			FILE_SET CXX_MODULES TYPE CXX_MODULES
+			BASE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/../include"
+			FILES "${CMAKE_CURRENT_SOURCE_DIR}/../include/dpp/dpp.cppm"
+	)
+
+	target_compile_definitions(dpp PUBLIC DPP_MODULES)
+
+	# When building the tests, also compile docpages/example_code/using_modules.cpp
+	# against the in-tree dpp module using CMake's native module resolution
+	if (DPP_BUILD_TEST)
+		add_executable(using_modules_example "${CMAKE_CURRENT_SOURCE_DIR}/../docpages/example_code/using_modules.cpp")
+		target_link_libraries(using_modules_example PRIVATE dpp)
+		set_target_properties(using_modules_example PROPERTIES
+			CXX_STANDARD 20
+			CXX_STANDARD_REQUIRED ON
+			CXX_SCAN_FOR_MODULES ON
+			CXX_EXTENSIONS OFF
+		)
+	endif()
+else()
+	message("-- ${Yellow}Modules are disabled.${ColourReset}")
+endif()
+
 if (DPP_BUILD_TEST)
 	enable_testing(${CMAKE_CURRENT_SOURCE_DIR}/..)
 	file(GLOB testnamelist "${CMAKE_CURRENT_SOURCE_DIR}/../src/*")
 	foreach (fulltestname ${testnamelist})
 		get_filename_component(testname ${fulltestname} NAME)
-		if (NOT "${testname}" STREQUAL "dpp")
+		if (NOT "${testname}" STREQUAL "dpp" AND NOT "${testname}" STREQUAL "modules")
 			message("-- Configuring test: ${Green}${testname}${ColourReset} with source: ${modules_dir}/${testname}/*.cpp")
 			set (testsrc "")
 			file(GLOB testsrc "${modules_dir}/${testname}/*.cpp")
 			add_executable(${testname} ${testsrc})
-			if ((NOT DPP_NO_CORO) OR DPP_FORMATTERS)
+			if ((NOT DPP_NO_CORO) OR DPP_FORMATTERS OR DPP_MODULES)
 				target_compile_features(${testname} PRIVATE cxx_std_20)
 			else()
 				target_compile_features(${testname} PRIVATE cxx_std_17)
@@ -483,7 +525,15 @@ if (DPP_BUILD_TEST)
 			if (MSVC)
 				target_compile_options(${testname} PRIVATE /utf-8)
 			endif()
-			if(BUILD_SHARED_LIBS)
+			if (DPP_MODULES)
+				target_link_libraries(${testname} PUBLIC dpp)
+				if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+					target_compile_options(${testname} PRIVATE -fmodules-ts)
+				elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+					target_compile_options(${testname} PRIVATE -fmodules)
+				endif()
+				set_target_properties(${testname} PROPERTIES CXX_SCAN_FOR_MODULES ON CXX_EXTENSIONS OFF)
+			elseif(BUILD_SHARED_LIBS)
 				target_link_libraries(${testname} PUBLIC ${modname})
 			else()
 				target_link_libraries(${testname} PUBLIC dppstatic)
@@ -519,7 +569,6 @@ if(DPP_INSTALL)
 		# Installation
 
 		include(GNUInstallDirs)
-		install(TARGETS dpp LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 		message("Library install directory at ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
 		install(DIRECTORY ../include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 		message("Include files install directory at ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR}")

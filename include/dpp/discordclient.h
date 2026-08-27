@@ -57,7 +57,7 @@ class cluster;
  * @brief How many seconds to wait between (re)connections. DO NOT change this.
  * It is mandated by the Discord API spec!
  */
-constexpr time_t RECONNECT_INTERVAL = 5;
+inline constexpr time_t RECONNECT_INTERVAL = 5;
 
 /**
  * @brief Represents different event opcodes sent and received on a shard websocket

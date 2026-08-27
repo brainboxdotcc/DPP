@@ -157,6 +157,11 @@ DPP_TEST(FORUM_CHANNEL_DELETE, "delete the created forum channel", tf_online);
 DPP_TEST(ERRORS, "Human readable error translation", tf_offline);
 DPP_TEST(INVALIDUTF8, "Invalid UTF-8 handling", tf_online);
 
+#ifdef DPP_MODULES
+DPP_TEST(MODULE_IMPORT_BASIC, "C++ module import: basic types", tf_offline);
+DPP_TEST(MODULE_IMPORT_CORO, "C++ module import: coroutines", tf_offline);
+#endif
+
 DPP_TEST(GUILD_EDIT, "cluster::guild_edit", tf_online);
 DPP_TEST(GUILD_BAN_CREATE, "cluster::guild_ban_add ban three well-known discord accounts", tf_online);
 DPP_TEST(GUILD_BAN_GET, "cluster::guild_get_ban getting one of the banned accounts", tf_online);
@@ -569,6 +574,13 @@ inline constexpr user_project_id_t get_user_snowflake;
 inline constexpr auto is_owner = [](auto &&user) noexcept {
 	return get_user_snowflake(user) == TEST_USER_ID;
 };
+
+#ifdef DPP_MODULES
+/**
+ * @brief Main entry point for module tests
+ */
+void run_module_tests();
+#endif
 
 #define DPP_RUNTIME_CHECK(test, check, var) if (!check) { var = false; set_status(test, ts_failed, "check failed: " #check); }
 #define DPP_COMPILETIME_CHECK(test, check, var) static_assert(check, #test ": " #check)
