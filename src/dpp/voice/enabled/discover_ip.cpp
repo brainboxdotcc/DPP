@@ -168,7 +168,7 @@ std::string discord_voice_client::discover_ip() {
 					return "";
 				}
 				ip_discovery_packet inbound_packet(buffer);
-				return {inbound_packet.address};
+				return std::string(inbound_packet.address, strnlen(inbound_packet.address, ip_discovery_packet::ADDRESS_BUFFER_SIZE));
 		}
 	}
 	return {};
