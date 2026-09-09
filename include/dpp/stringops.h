@@ -24,6 +24,7 @@
 
 #pragma once
 #include <string>
+#include <cctype>
 #include <iomanip>
 #include <locale>
 #include <algorithm>
@@ -42,7 +43,7 @@ namespace dpp {
 template <typename T> std::basic_string<T> lowercase(const std::basic_string<T>& s)
 {
 	std::basic_string<T> s2 = s;
-	std::transform(s2.begin(), s2.end(), s2.begin(), tolower);
+	std::transform(s2.begin(), s2.end(), s2.begin(), [](unsigned char c){ return std::tolower(c); });
 	return s2;
 }
 
@@ -56,7 +57,7 @@ template <typename T> std::basic_string<T> lowercase(const std::basic_string<T>&
 template <typename T> std::basic_string<T> uppercase(const std::basic_string<T>& s)
 {
 	std::basic_string<T> s2 = s;
-	std::transform(s2.begin(), s2.end(), s2.begin(), toupper);
+	std::transform(s2.begin(), s2.end(), s2.begin(), [](unsigned char c){ return std::toupper(c); });
 	return s2;
 }
 
