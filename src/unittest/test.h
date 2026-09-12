@@ -20,7 +20,7 @@
  *
  ************************************************************************************/
 #undef DPP_BUILD
-#ifdef _WIN32
+#ifdef DPP_USE_MSVC
 _Pragma("warning( disable : 4251 )"); // 4251 warns when we export classes or structures with stl member variables
 _Pragma("warning( disable : 5105 )"); // 4251 warns when we export classes or structures with stl member variables
 #endif
@@ -29,7 +29,7 @@ _Pragma("warning( disable : 5105 )"); // 4251 warns when we export classes or st
 #include <iomanip>
 #include <type_traits>
 
-#ifdef _WIN32
+#ifdef DPP_USE_WINDOWS
 #define SHARED_OBJECT "dpp.dll"
 #elif __APPLE__
 #define SHARED_OBJECT "libdpp.dylib"

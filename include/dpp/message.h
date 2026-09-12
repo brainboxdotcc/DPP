@@ -2342,7 +2342,7 @@ struct DPP_EXPORT interaction_metadata_type {
 /**
  * @brief Message Reference type
  */
-enum DPP_EXPORT message_ref_type : uint8_t {
+enum message_ref_type : uint8_t {
 	/**
 	 * A reply or crosspost
 	 */

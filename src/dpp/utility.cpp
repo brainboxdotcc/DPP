@@ -34,9 +34,9 @@
 #include <array>
 #include <dpp/cluster.h>
 
-#ifdef _WIN32
-	#include <stdio.h>
-	#include <stdlib.h>
+#ifdef DPP_USE_WINDOWS
+	#include <cstdio>
+	#include <cstdlib>
 	#define popen _popen
 	#define pclose _pclose
 #endif
@@ -127,11 +127,10 @@ bool is_coro_enabled() {
 }
 
 std::string current_date_time() {
-#ifdef _WIN32
-	std::time_t curr_time = time(nullptr);
+	auto curr_time = std::time(nullptr);
+#ifdef DPP_USE_WINDOWS
 	return trim(std::ctime(&curr_time));
 #else
-	auto t = std::time(nullptr);
 	struct tm timedata;
 	localtime_r(&t, &timedata);
 	std::stringstream s;

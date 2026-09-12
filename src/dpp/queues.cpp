@@ -23,7 +23,7 @@
 #include <dpp/queues.h>
 #include <dpp/cluster.h>
 #include <dpp/httpsclient.h>
-#ifdef _WIN32
+#ifdef DPP_USE_WINDOWS
 	#include <io.h>
 #endif
 
