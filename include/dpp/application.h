@@ -487,9 +487,6 @@ public:
 	/** Constructor */
 	application();
 
-	/** Destructor */
-	~application();
-
 	/**
 	 * @brief Get the application's cover image url if they have one, otherwise returns an empty string
 	 *

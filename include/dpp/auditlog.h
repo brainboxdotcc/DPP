@@ -474,6 +474,18 @@ public:
 	/** Constructor */
 	auditlog() = default;
 
+	/** Copy constructor */
+	auditlog(const auditlog&) = default;
+
+	/** Move constructor */
+	auditlog(auditlog&&) = default;
+
+	/** Copy assignment operator */
+	auditlog& operator=(const auditlog&) = default;
+
+	/** Move assignment operator */
+	auditlog& operator=(auditlog&&) = default;
+
 	/** Destructor */
 	virtual ~auditlog() = default;
 };

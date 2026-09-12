@@ -804,10 +804,22 @@ public:
 	 */
 	welcome_screen() = default;
 
+	/** Copy constructor */
+	welcome_screen(const welcome_screen&) = default;
+
+	/** Move constructor */
+	welcome_screen(welcome_screen&&) = default;
+
+	/** Copy assignment operator */
+	welcome_screen& operator=(const welcome_screen&) = default;
+
+	/** Move assignment operator */
+	welcome_screen& operator=(welcome_screen&&) = default;
+
 	/**
 	 * @brief Destroy the welcome screen object
 	 */
-	virtual ~welcome_screen() = default;
+	virtual ~welcome_screen();
 
 	/**
 	 * @brief Set the server description for this welcome screen object shown in the welcome screen
@@ -1212,10 +1224,22 @@ public:
 	/** Default constructor, zeroes all values */
 	guild();
 
+	/** Copy constructor */
+	guild(const guild&);
+
+	/** Move constructor */
+	guild(guild&&) noexcept(std::is_nothrow_move_constructible_v<std::map<snowflake, voicestate>>);
+
+	/** Copy assignment operator */
+	guild& operator=(const guild&);
+
+	/** Move assignment operator */
+	guild& operator=(guild&&) noexcept(std::is_nothrow_move_assignable_v<std::map<snowflake, voicestate>>);
+
 	/**
 	 * @brief Destroy the guild object
 	 */
-	virtual ~guild() = default;
+	~guild() override;
 
 	/** Read class values from json object
 	 * @param shard originating shard
@@ -1992,6 +2016,18 @@ public:
 	 * @brief Construct a new onboarding object
 	 */
 	onboarding();
+
+	/** Copy constructor */
+	onboarding(const onboarding&) = default;
+
+	/** Move constructor */
+	onboarding(onboarding&&) = default;
+
+	/** Copy assignment operator */
+	onboarding& operator=(const onboarding&) = default;
+
+	/** Move assignment operator */
+	onboarding& operator=(onboarding&&) = default;
 
 	/**
 	 * @brief Destroy the onboarding object

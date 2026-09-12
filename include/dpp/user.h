@@ -227,10 +227,22 @@ public:
 	 */
 	user();
 
+	/** Copy constructor */
+	user(const user&) = default;
+
+	/** Move constructor */
+	user(user&&) = default;
+
+	/** Copy assignment operator */
+	user& operator=(const user&) = default;
+
+	/** Move assignment operator */
+	user& operator=(user&&) = default;
+
 	/**
 	 * @brief Destroy the user object
 	 */
-	virtual ~user() = default;
+	~user() override;
 
 	/**
 	 * @brief Create a mentionable user.
@@ -529,11 +541,6 @@ public:
 	 * @param u user object
 	 */
 	user_identified(const user& u);
-
-	/**
-	 * @brief Destroy the user identified object
-	 */
-	virtual ~user_identified() = default;
 
 	using json_interface<user_identified>::fill_from_json;
 	using json_interface<user_identified>::build_json;
