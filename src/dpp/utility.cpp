@@ -132,7 +132,7 @@ std::string current_date_time() {
 	return trim(std::ctime(&curr_time));
 #else
 	struct tm timedata;
-	localtime_r(&t, &timedata);
+	localtime_r(&curr_time, &timedata);
 	std::stringstream s;
 	s << std::put_time(&timedata, "%Y-%m-%d %H:%M:%S");
 	return trim(s.str());

@@ -37,8 +37,13 @@ compiler, CMake, Ninja, Git, and the matching native dependencies first:
 For `UCRT64`:
 
 ```sh
-pacman -S --needed cmake ninja git mingw-w64-ucrt-x86_64-toolchain \
-	mingw-w64-ucrt-x86_64-openssl mingw-w64-ucrt-x86_64-zlib \
+pacman -S \
+    git \
+    mingw-w64-ucrt-x86_64-cmake \
+    mingw-w64-ucrt-x86_64-ninja \
+    mingw-w64-ucrt-x86_64-toolchain \
+	mingw-w64-ucrt-x86_64-openssl \
+    mingw-w64-ucrt-x86_64-zlib \
 	mingw-w64-ucrt-x86_64-opus
 ```
 
@@ -48,6 +53,6 @@ For `CLANG64`, replace the `ucrt-x86_64` package prefix with
 Run these commands from the repository root in the matching shell:
 
 ```sh
-cmake -S . -B build-ucrt64 -G Ninja
-cmake --build build-ucrt64
+cmake -S . -B build -G Ninja
+cmake --build build
 ```
