@@ -127,12 +127,13 @@ bool is_coro_enabled() {
 }
 
 std::string current_date_time() {
-	auto curr_time = std::time(nullptr);
-#ifdef DPP_USE_WINDOWS
+#ifdef _WIN32
+	std::time_t curr_time = time(nullptr);
 	return trim(std::ctime(&curr_time));
 #else
+	auto t = std::time(nullptr);
 	struct tm timedata;
-	localtime_r(&curr_time, &timedata);
+	localtime_r(&t, &timedata);
 	std::stringstream s;
 	s << std::put_time(&timedata, "%Y-%m-%d %H:%M:%S");
 	return trim(s.str());

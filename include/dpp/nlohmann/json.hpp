@@ -20277,15 +20277,13 @@ class basic_json // NOLINT(cppcoreguidelines-special-member-functions,hicpp-spec
         result["version"]["minor"] = NLOHMANN_JSON_VERSION_MINOR;
         result["version"]["patch"] = NLOHMANN_JSON_VERSION_PATCH;
 
-#if defined(DPP_USE_MINGW)
-        result["platform"] = "mingw";
-#elif defined(DPP_USE_WINDOWS)
+#ifdef _WIN32
         result["platform"] = "win32";
-#elif defined(DPP_USE_LINUX)
+#elif defined __linux__
         result["platform"] = "linux";
-#elif defined(DPP_USE_MACOS)
+#elif defined __APPLE__
         result["platform"] = "apple";
-#elif defined(DPP_USE_UNIX)
+#elif defined __unix__
         result["platform"] = "unix";
 #else
         result["platform"] = "unknown";
@@ -20293,9 +20291,9 @@ class basic_json // NOLINT(cppcoreguidelines-special-member-functions,hicpp-spec
 
 #if defined(__ICC) || defined(__INTEL_COMPILER)
         result["compiler"] = {{"family", "icc"}, {"version", __INTEL_COMPILER}};
-#elif defined(DPP_USE_CLANG)
+#elif defined(__clang__)
         result["compiler"] = {{"family", "clang"}, {"version", __clang_version__}};
-#elif defined(DPP_USE_GCC)
+#elif defined(__GNUC__) || defined(__GNUG__)
         result["compiler"] = {{"family", "gcc"}, {"version", detail::concat(
                     std::to_string(__GNUC__), '.',
                     std::to_string(__GNUC_MINOR__), '.',
@@ -20306,7 +20304,7 @@ class basic_json // NOLINT(cppcoreguidelines-special-member-functions,hicpp-spec
         result["compiler"] = "hp"
 #elif defined(__IBMCPP__)
         result["compiler"] = {{"family", "ilecpp"}, {"version", __IBMCPP__}};
-#elif defined(DPP_USE_MSVC)
+#elif defined(_MSC_VER)
         result["compiler"] = {{"family", "msvc"}, {"version", _MSC_VER}};
 #elif defined(__PGI)
         result["compiler"] = {{"family", "pgcpp"}, {"version", __PGI}};
@@ -20316,8 +20314,10 @@ class basic_json // NOLINT(cppcoreguidelines-special-member-functions,hicpp-spec
         result["compiler"] = {{"family", "unknown"}, {"version", "unknown"}};
 #endif
 
-#if defined(DPP_USE_CPP)
-        result["compiler"]["c++"] = std::to_string(DPP_USE_CPP_VERSION);
+#if defined(_MSVC_LANG)
+        result["compiler"]["c++"] = std::to_string(_MSVC_LANG);
+#elif defined(__cplusplus)
+        result["compiler"]["c++"] = std::to_string(__cplusplus);
 #else
         result["compiler"]["c++"] = "unknown";
 #endif

@@ -11,10 +11,10 @@
 #	define DPP_USE_WINDOWS
 #elif defined(__linux__) || defined(__linux) || defined(linux)
 #	define DPP_USE_LINUX
-#elif defined(__unix__) || defined(__unix) || defined(unix)
-#	define DPP_USE_UNIX
 #elif defined(__APPLE__) || defined(__MACH__)
 #	define DPP_USE_MACOS
+#elif defined(__unix__) || defined(__unix) || defined(unix)
+#	define DPP_USE_UNIX
 #else
 #	error "Unknown platform"
 #endif

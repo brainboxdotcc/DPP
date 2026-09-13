@@ -29,6 +29,7 @@
 #include <mutex>
 #include <functional>
 #include <iostream>
+#include <dpp/system.h>
 #ifdef DPP_USE_WINDOWS
 	#include <io.h>
 #else

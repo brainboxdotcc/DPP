@@ -20,6 +20,7 @@
  *
  ************************************************************************************/
 #undef DPP_BUILD
+#include <dpp/system.h>
 #ifdef DPP_USE_MSVC
 _Pragma("warning( disable : 4251 )"); // 4251 warns when we export classes or structures with stl member variables
 _Pragma("warning( disable : 5105 )"); // 4251 warns when we export classes or structures with stl member variables
