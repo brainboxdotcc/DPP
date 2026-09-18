@@ -138,7 +138,12 @@ enum component_type : uint8_t {
 	/**
 	 * @brief Component for a radio button group
 	 */
-	cot_radio_group = 21
+	cot_radio_group = 21,
+
+	/**
+	 * @brief Component for a checkbox group
+	 */
+	cot_checkbox_group = 22
 };
 
 /**
@@ -715,6 +720,12 @@ public:
 	 * Filled or valid when populated from an on_form_submit event, or from the set_value function.
 	 */
 	std::variant<std::monostate, std::string, int64_t, double> value;
+
+	/**
+	 * @brief Values of the selected options for dpp::cot_checkbox_group.
+	 * Filled when populated from an on_form_submit event.
+	 */
+	std::vector<std::string> values;
 
 	/**
 	 * @brief The emoji for this component.

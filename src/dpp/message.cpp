@@ -216,14 +216,27 @@ component& component::fill_from_json_impl(nlohmann::json* j) {
 			options = std::move(opts);
 		}
 		required = bool_not_null(j, "required");
+	} else if (type == cot_checkbox_group) { // checkbox group (modal) specific fields
+		if (j->contains("options")) {
+			std::vector<group_option> opts;
+			set_object_array_not_null<group_option>(j, "options", opts);
+			options = std::move(opts);
+		}
+		required = bool_not_null(j, "required");
+		if (j->contains("values") && j->at("values").is_array()) {
+			for (auto &v : j->at("values")) {
+				if (v.is_string()) {
+					values.push_back(v.get<std::string>());
+				}
+			}
+		}
 	}
 
 	if (j->contains("value") || j->contains("values")){ // set value if it exists
 		json v;
-		if(j->contains("values")){ 
+		if (j->contains("values") && !j->at("values").empty()) {
 			v = (*j)["values"].at(0);
-		}
-		else {
+		} else if (j->contains("value")) {
 			v = (*j)["value"];
 		}
 
@@ -615,6 +628,30 @@ void to_json(json& j, const component& cp) {
 	} else if (cp.type == cot_radio_group) {
 		j["custom_id"] = cp.custom_id;
 		j["required"] = cp.required;
+		j["options"] = json::array();
+		if (auto *group_options = std::get_if<std::vector<group_option>>(&cp.options)) {
+			for (auto &opt : *group_options) {
+				json o;
+				o["value"] = opt.value;
+				o["label"] = opt.label;
+				if (!opt.description.empty()) {
+					o["description"] = opt.description;
+				}
+				if (opt.is_default) {
+					o["default"] = true;
+				}
+				j["options"].push_back(o);
+			}
+		}
+	} else if (cp.type == cot_checkbox_group) {
+		j["custom_id"] = cp.custom_id;
+		j["required"] = cp.required;
+		if (cp.min_values >= 0) {
+			j["min_values"] = cp.min_values;
+		}
+		if (cp.max_values >= 0) {
+			j["max_values"] = cp.max_values;
+		}
 		j["options"] = json::array();
 		if (auto *group_options = std::get_if<std::vector<group_option>>(&cp.options)) {
 			for (auto &opt : *group_options) {
