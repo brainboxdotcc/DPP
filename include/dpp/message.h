@@ -133,7 +133,12 @@ enum component_type : uint8_t {
 	/**
 	 * @brief Component for uploading files
 	 */
-	cot_file_upload = 19
+	cot_file_upload = 19,
+
+	/**
+	 * @brief Component for a radio button group
+	 */
+	cot_radio_group = 21
 };
 
 /**
@@ -392,6 +397,92 @@ public:
 };
 
 /**
+ * @brief An option for a component that presents a group of choices
+ */
+struct DPP_EXPORT group_option : public json_interface<group_option> {
+protected:
+	friend struct json_interface<group_option>;
+
+	/** Read class values from json object
+	 * @param j A json object to read from
+	 * @return A reference to self
+	 */
+	group_option& fill_from_json_impl(nlohmann::json* j);
+
+public:
+	/**
+	 * @brief Dev-defined value of the option
+	 */
+	std::string value;
+
+	/**
+	 * @brief User-facing name of the option
+	 */
+	std::string label;
+
+	/**
+	 * @brief Additional description of the option
+	 */
+	std::string description;
+
+	/**
+	 * @brief True if option is selected by default
+	 */
+	bool is_default;
+
+	/**
+	 * @brief Construct a new group option object
+	 */
+	group_option();
+
+	/**
+	 * @brief Destructs the group option object
+	 */
+	virtual ~group_option() = default;
+
+	/**
+	 * @brief Construct a new group option object
+	 *
+	 * @param label Label of option
+	 * @param value Value of option
+	 * @param description Description of option
+	 */
+	group_option(std::string_view label, std::string_view value, std::string_view description = "");
+
+	/**
+	 * @brief Set the label
+	 *
+	 * @param l the user-facing name of the option. It will be truncated to the maximum length of 100 UTF-8 characters.
+	 * @return group_option& reference to self for chaining
+	 */
+	group_option& set_label(std::string_view l);
+
+	/**
+	 * @brief Set the value
+	 *
+	 * @param v value to set. It will be truncated to the maximum length of 100 UTF-8 characters.
+	 * @return group_option& reference to self for chaining
+	 */
+	group_option& set_value(std::string_view v);
+
+	/**
+	 * @brief Set the description
+	 *
+	 * @param d description to set. It will be truncated to the maximum length of 100 UTF-8 characters.
+	 * @return group_option& reference to self for chaining
+	 */
+	group_option& set_description(std::string_view d);
+
+	/**
+	 * @brief Set the option as default
+	 *
+	 * @param def true to set the option as default
+	 * @return group_option& reference to self for chaining
+	 */
+	group_option& set_default(bool def);
+};
+
+/**
  * @brief Loading state for "unfurled" media, e.g. thumbnails and images in a message or component
  */
 enum media_loading_state : uint8_t {
@@ -590,11 +681,9 @@ public:
 	int32_t max_length;
 
 	/**
-	 * @brief Select options for select menus.
-	 *
-	 * @warning Only required and available for select menus of type dpp::cot_selectmenu
+	 * @brief Options to pick for select menus or group menus.
 	 */
-	std::vector<select_option> options;
+	std::variant<std::vector<select_option>, std::vector<group_option>> options;
 
 	/**
 	 * @brief List of channel types (dpp::channel_type) to include in the channel select component (dpp::cot_channel_selectmenu)
@@ -962,6 +1051,14 @@ public:
 	 * @return component& Reference to self
 	 */
 	component& add_select_option(const select_option &option);
+
+	/**
+	 * @brief Add a group option
+	 * 
+	 * @param option option to add
+	 * @return component& Reference to self
+	 */
+	component& add_group_option(const group_option &option);
 
 	/**
 	 * @brief Add a sub-component, only valid for action rows.

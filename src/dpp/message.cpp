@@ -188,7 +188,9 @@ component& component::fill_from_json_impl(nlohmann::json* j) {
 		}
 	} else if (type == cot_selectmenu) { // string select menu specific fields
 		if (j->contains("options")) {
-			set_object_array_not_null<select_option>(j, "options", options);
+			std::vector<select_option> opts;
+			set_object_array_not_null<select_option>(j, "options", opts);
+			options = std::move(opts);
 		}
 	} else if (type == cot_channel_selectmenu) { // channel select menu specific fields
 		if (j->contains("channel_types")) {
@@ -205,6 +207,13 @@ component& component::fill_from_json_impl(nlohmann::json* j) {
 		}
 		if (j->contains("max_length") && j->at("max_length").is_number_integer()) {
 			max_length = j->at("max_length").get<int32_t>();
+		}
+		required = bool_not_null(j, "required");
+	} else if (type == cot_radio_group) { // radio group (modal) specific fields
+		if (j->contains("options")) {
+			std::vector<group_option> opts;
+			set_object_array_not_null<group_option>(j, "options", opts);
+			options = std::move(opts);
 		}
 		required = bool_not_null(j, "required");
 	}
@@ -499,31 +508,33 @@ void to_json(json& j, const component& cp) {
 			j["max_values"] = cp.max_values;
 		}
 		j["options"] = json::array();
-		for (auto opt : cp.options) {
-			json o;
-			if (!opt.description.empty()) {
-				o["description"] = opt.description;
-			}
-			if (!opt.label.empty()) {
-				o["label"] = opt.label;
-			}
-			if (!opt.value.empty()) {
-				o["value"] = opt.value;
-			}
-			if (opt.is_default) {
-				o["default"] = true;
-			}
-			if (!opt.emoji.name.empty()) {
-				o["emoji"] = json::object();
-				o["emoji"]["name"] = opt.emoji.name;
-				if (opt.emoji.id) {
-					o["emoji"]["id"] = std::to_string(opt.emoji.id);
+		if (auto *select_options = std::get_if<std::vector<select_option>>(&cp.options)) {
+			for (auto &opt : *select_options) {
+				json o;
+				if (!opt.description.empty()) {
+					o["description"] = opt.description;
 				}
-				if (opt.emoji.animated) {
-					o["emoji"]["animated"] = true;
+				if (!opt.label.empty()) {
+					o["label"] = opt.label;
 				}
+				if (!opt.value.empty()) {
+					o["value"] = opt.value;
+				}
+				if (opt.is_default) {
+					o["default"] = true;
+				}
+				if (!opt.emoji.name.empty()) {
+					o["emoji"] = json::object();
+					o["emoji"]["name"] = opt.emoji.name;
+					if (opt.emoji.id) {
+						o["emoji"]["id"] = std::to_string(opt.emoji.id);
+					}
+					if (opt.emoji.animated) {
+						o["emoji"]["animated"] = true;
+					}
+				}
+				j["options"].push_back(o);
 			}
-			j["options"].push_back(o);
 		}
 	} else if (cp.type == cot_user_selectmenu || cp.type == cot_role_selectmenu || cp.type == cot_mentionable_selectmenu) {
 		j["custom_id"] = cp.custom_id;
@@ -601,6 +612,24 @@ void to_json(json& j, const component& cp) {
 		if (!cp.file_types.empty()) {
 			j["file_types"] = cp.file_types;
 		}
+	} else if (cp.type == cot_radio_group) {
+		j["custom_id"] = cp.custom_id;
+		j["required"] = cp.required;
+		j["options"] = json::array();
+		if (auto *group_options = std::get_if<std::vector<group_option>>(&cp.options)) {
+			for (auto &opt : *group_options) {
+				json o;
+				o["value"] = opt.value;
+				o["label"] = opt.label;
+				if (!opt.description.empty()) {
+					o["description"] = opt.description;
+				}
+				if (opt.is_default) {
+					o["default"] = true;
+				}
+				j["options"].push_back(o);
+			}
+		}
 	}
 }
 
@@ -656,6 +685,40 @@ select_option& select_option::fill_from_json_impl(nlohmann::json* j) {
 	return *this;
 }
 
+group_option::group_option() : is_default(false) {
+}
+
+group_option::group_option(std::string_view _label, std::string_view _value, std::string_view _description) : value(_value), label(_label), description(_description), is_default(false) {
+}
+
+group_option& group_option::set_label(std::string_view l) {
+	label = dpp::utility::utf8substr(l, 0, 100);
+	return *this;
+}
+
+group_option& group_option::set_value(std::string_view v) {
+	value = dpp::utility::utf8substr(v, 0, 100);
+	return *this;
+}
+
+group_option& group_option::set_description(std::string_view d) {
+	description = dpp::utility::utf8substr(d, 0, 100);
+	return *this;
+}
+
+group_option& group_option::set_default(bool def) {
+	is_default = def;
+	return *this;
+}
+
+group_option& group_option::fill_from_json_impl(nlohmann::json* j) {
+	value = string_not_null(j, "value");
+	label = string_not_null(j, "label");
+	description = string_not_null(j, "description");
+	is_default = bool_not_null(j, "default");
+	return *this;
+}
+
 component& component::set_placeholder(std::string_view _placeholder) {
 	if (type == cot_text) {
 		placeholder = dpp::utility::utf8substr(_placeholder, 0, 100);
@@ -683,8 +746,23 @@ component& component::add_file_type(std::string_view const file_type) {
 }
 
 component& component::add_select_option(const select_option &option) {
-	if (options.size() <= 25) {
-		options.emplace_back(option);
+	if (!std::holds_alternative<std::vector<select_option>>(options)) {
+		options = std::vector<select_option>{};
+	}
+	auto &opts = std::get<std::vector<select_option>>(options);
+	if (opts.size() <= 25) {
+		opts.emplace_back(option);
+	}
+	return *this;
+}
+
+component& component::add_group_option(const group_option &option) {
+	if (!std::holds_alternative<std::vector<group_option>>(options)) {
+		options = std::vector<group_option>{};
+	}
+	auto &opts = std::get<std::vector<group_option>>(options);
+	if (opts.size() < 10) {
+		opts.emplace_back(option);
 	}
 	return *this;
 }
