@@ -907,6 +907,9 @@ json interaction_modal_response::to_json_impl(bool with_id) const {
 			json sn;
 			sn["type"] = cot_label;
 			sn["label"] = component.label;
+			if (!component.description.empty()) {
+				sn["description"] = component.description;
+			}
 			j["data"]["components"].push_back(sn);
 
 			sn = component;
