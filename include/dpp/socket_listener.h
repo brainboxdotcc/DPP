@@ -138,7 +138,7 @@ struct socket_listener {
 	 */
 	virtual void handle_accept(socket sfd, const struct socket_events &e) {
 		socket new_fd{fd.accept()};
-		if (new_fd >= 0) {
+		if (new_fd != INVALID_SOCKET) {
 			emplace(new_fd);
 		}
 	}
