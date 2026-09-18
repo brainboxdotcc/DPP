@@ -41,7 +41,7 @@ std::set<component_type> components_v2_only_types = {
 };
 
 component::component() :
-	type(cot_action_row), label(""), style(cos_primary), custom_id(""),
+	type(cot_action_row), component_id(0), label(""), style(cos_primary), custom_id(""),
 	min_values(-1), max_values(-1), min_length(0), max_length(0), disabled(false),
 	required(false), spoiler(false), is_divider(false), spacing(sep_small)
 {
@@ -111,6 +111,7 @@ component& component::add_media_gallery_item(const component& media_gallery_item
 
 component& component::fill_from_json_impl(nlohmann::json* j) {
 	type = static_cast<component_type>(int8_not_null(j, "type"));
+	component_id = int32_not_null(j, "id");
 	label = string_not_null(j, "label");
 	custom_id = string_not_null(j, "custom_id");
 	disabled = bool_not_null(j, "disabled");
@@ -339,6 +340,12 @@ component& component::set_required(bool require)
 	return *this;
 }
 
+component& component::set_component_id(uint32_t id)
+{
+	component_id = id;
+	return *this;
+}
+
 component& component::set_emoji(std::string_view name, dpp::snowflake id, bool animated)
 {
 	if (type == cot_action_row) {
@@ -386,6 +393,9 @@ void to_json(json& j, const attachment& a) {
 
 void to_json(json& j, const component& cp) {
 	j["type"] = cp.type;
+	if (cp.component_id) {
+		j["id"] = cp.component_id;
+	}
 	if (cp.accessory) {
 		j["accessory"] = *cp.accessory;
 	}
@@ -478,6 +488,7 @@ void to_json(json& j, const component& cp) {
 	} else if (cp.type == cot_selectmenu) {
 		j["custom_id"] = cp.custom_id;
 		j["disabled"] = cp.disabled;
+		j["required"] = cp.required;
 		if (!cp.placeholder.empty()) {
 			j["placeholder"] = cp.placeholder;
 		}
@@ -517,6 +528,7 @@ void to_json(json& j, const component& cp) {
 	} else if (cp.type == cot_user_selectmenu || cp.type == cot_role_selectmenu || cp.type == cot_mentionable_selectmenu) {
 		j["custom_id"] = cp.custom_id;
 		j["disabled"] = cp.disabled;
+		j["required"] = cp.required;
 		if (!cp.placeholder.empty()) {
 			j["placeholder"] = cp.placeholder;
 		}
@@ -544,6 +556,7 @@ void to_json(json& j, const component& cp) {
 	} else if (cp.type == cot_channel_selectmenu) {
 		j["custom_id"] = cp.custom_id;
 		j["disabled"] = cp.disabled;
+		j["required"] = cp.required;
 		if (!cp.placeholder.empty()) {
 			j["placeholder"] = cp.placeholder;
 		}
