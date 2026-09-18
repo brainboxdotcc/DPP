@@ -511,6 +511,12 @@ public:
 	component_type type;
 
 	/**
+	 * @brief Optional identifier for this component, distinct from
+	 * custom_id.
+	 */
+	uint32_t component_id;
+
+	/**
 	 * @brief Sub components, buttons on an action row
 	 */
 	std::vector<component> components;
@@ -857,6 +863,16 @@ public:
 	 * @return component& Reference to self
 	 */
 	component& set_id(std::string_view id);
+
+	/**
+	 * @brief Set the optional numeric identifier of the component,
+	 * distinct from custom_id.
+	 *
+	 * @param id Identifier to set. Must be unique within the message
+	 * or modal.
+	 * @return component& Reference to self
+	 */
+	component& set_component_id(uint32_t id);
 
 	/**
 	 * @brief Set the component to disabled.
