@@ -478,6 +478,7 @@ void to_json(json& j, const component& cp) {
 	} else if (cp.type == cot_selectmenu) {
 		j["custom_id"] = cp.custom_id;
 		j["disabled"] = cp.disabled;
+		j["required"] = cp.required;
 		if (!cp.placeholder.empty()) {
 			j["placeholder"] = cp.placeholder;
 		}
@@ -517,6 +518,7 @@ void to_json(json& j, const component& cp) {
 	} else if (cp.type == cot_user_selectmenu || cp.type == cot_role_selectmenu || cp.type == cot_mentionable_selectmenu) {
 		j["custom_id"] = cp.custom_id;
 		j["disabled"] = cp.disabled;
+		j["required"] = cp.required;
 		if (!cp.placeholder.empty()) {
 			j["placeholder"] = cp.placeholder;
 		}
@@ -544,6 +546,7 @@ void to_json(json& j, const component& cp) {
 	} else if (cp.type == cot_channel_selectmenu) {
 		j["custom_id"] = cp.custom_id;
 		j["disabled"] = cp.disabled;
+		j["required"] = cp.required;
 		if (!cp.placeholder.empty()) {
 			j["placeholder"] = cp.placeholder;
 		}
