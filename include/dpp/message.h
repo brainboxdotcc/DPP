@@ -143,7 +143,12 @@ enum component_type : uint8_t {
 	/**
 	 * @brief Component for a checkbox group
 	 */
-	cot_checkbox_group = 22
+	cot_checkbox_group = 22,
+
+	/**
+	 * @brief Component for a single checkbox
+	 */
+	cot_checkbox = 23
 };
 
 /**
@@ -716,10 +721,15 @@ public:
 	bool required;
 
 	/**
+	 * @brief Whether a dpp::cot_checkbox is selected by default
+	 */
+	bool is_default;
+
+	/**
 	 * @brief Value of the modal.
 	 * Filled or valid when populated from an on_form_submit event, or from the set_value function.
 	 */
-	std::variant<std::monostate, std::string, int64_t, double> value;
+	std::variant<std::monostate, std::string, int64_t, double, bool> value;
 
 	/**
 	 * @brief Values of the selected options for dpp::cot_checkbox_group.
@@ -1004,6 +1014,14 @@ public:
 	 * @return component& Reference to self
 	 */
 	component& set_required(bool require);
+
+	/**
+	 * @brief Set whether a dpp::cot_checkbox is selected by default.
+	 *
+	 * @param def true to select the checkbox by default
+	 * @return component& Reference to self
+	 */
+	component& set_default(bool def);
 
 	/**
 	 * @brief Set the placeholder

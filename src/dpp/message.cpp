@@ -43,7 +43,7 @@ std::set<component_type> components_v2_only_types = {
 component::component() :
 	type(cot_action_row), component_id(0), label(""), style(cos_primary), custom_id(""),
 	min_values(-1), max_values(-1), min_length(0), max_length(0), disabled(false),
-	required(false), spoiler(false), is_divider(false), spacing(sep_small)
+	required(false), is_default(false), spoiler(false), is_divider(false), spacing(sep_small)
 {
 	emoji.animated = false;
 	emoji.id = 0;
@@ -230,6 +230,8 @@ component& component::fill_from_json_impl(nlohmann::json* j) {
 				}
 			}
 		}
+	} else if (type == cot_checkbox) { // checkbox (modal) specific fields
+		is_default = bool_not_null(j, "default");
 	}
 
 	if (j->contains("value") || j->contains("values")){ // set value if it exists
@@ -244,6 +246,8 @@ component& component::fill_from_json_impl(nlohmann::json* j) {
 			value = v.get<int64_t>();
 		} else if (!v.is_null() && v.is_number_float()) {
 			value = v.get<double>();
+		} else if (!v.is_null() && v.is_boolean()) {
+			value = v.get<bool>();
 		} else if (!v.is_null() && v.is_string()) {
 			value = v.get<std::string>();
 		}
@@ -365,6 +369,15 @@ component& component::set_required(bool require)
 component& component::set_component_id(uint32_t id)
 {
 	component_id = id;
+	return *this;
+}
+
+component& component::set_default(bool def)
+{
+	if (type == cot_action_row) {
+		set_type(cot_checkbox);
+	}
+	is_default = def;
 	return *this;
 }
 
@@ -666,6 +679,11 @@ void to_json(json& j, const component& cp) {
 				}
 				j["options"].push_back(o);
 			}
+		}
+	} else if (cp.type == cot_checkbox) {
+		j["custom_id"] = cp.custom_id;
+		if (cp.is_default) {
+			j["default"] = true;
 		}
 	}
 }
