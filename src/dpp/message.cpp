@@ -188,9 +188,7 @@ component& component::fill_from_json_impl(nlohmann::json* j) {
 		}
 	} else if (type == cot_selectmenu) { // string select menu specific fields
 		if (j->contains("options")) {
-			std::vector<select_option> opts;
-			set_object_array_not_null<select_option>(j, "options", opts);
-			options = std::move(opts);
+			set_object_array_not_null<choice_option>(j, "options", options);
 		}
 	} else if (type == cot_channel_selectmenu) { // channel select menu specific fields
 		if (j->contains("channel_types")) {
@@ -211,16 +209,12 @@ component& component::fill_from_json_impl(nlohmann::json* j) {
 		required = bool_not_null(j, "required");
 	} else if (type == cot_radio_group) { // radio group (modal) specific fields
 		if (j->contains("options")) {
-			std::vector<group_option> opts;
-			set_object_array_not_null<group_option>(j, "options", opts);
-			options = std::move(opts);
+			set_object_array_not_null<choice_option>(j, "options", options);
 		}
 		required = bool_not_null(j, "required");
 	} else if (type == cot_checkbox_group) { // checkbox group (modal) specific fields
 		if (j->contains("options")) {
-			std::vector<group_option> opts;
-			set_object_array_not_null<group_option>(j, "options", opts);
-			options = std::move(opts);
+			set_object_array_not_null<choice_option>(j, "options", options);
 		}
 		required = bool_not_null(j, "required");
 		if (j->contains("values") && j->at("values").is_array()) {
@@ -534,33 +528,31 @@ void to_json(json& j, const component& cp) {
 			j["max_values"] = cp.max_values;
 		}
 		j["options"] = json::array();
-		if (auto *select_options = std::get_if<std::vector<select_option>>(&cp.options)) {
-			for (auto &opt : *select_options) {
-				json o;
-				if (!opt.description.empty()) {
-					o["description"] = opt.description;
-				}
-				if (!opt.label.empty()) {
-					o["label"] = opt.label;
-				}
-				if (!opt.value.empty()) {
-					o["value"] = opt.value;
-				}
-				if (opt.is_default) {
-					o["default"] = true;
-				}
-				if (!opt.emoji.name.empty()) {
-					o["emoji"] = json::object();
-					o["emoji"]["name"] = opt.emoji.name;
-					if (opt.emoji.id) {
-						o["emoji"]["id"] = std::to_string(opt.emoji.id);
-					}
-					if (opt.emoji.animated) {
-						o["emoji"]["animated"] = true;
-					}
-				}
-				j["options"].push_back(o);
+		for (auto &opt : cp.options) {
+			json o;
+			if (!opt.description.empty()) {
+				o["description"] = opt.description;
 			}
+			if (!opt.label.empty()) {
+				o["label"] = opt.label;
+			}
+			if (!opt.value.empty()) {
+				o["value"] = opt.value;
+			}
+			if (opt.is_default) {
+				o["default"] = true;
+			}
+			if (!opt.emoji.name.empty()) {
+				o["emoji"] = json::object();
+				o["emoji"]["name"] = opt.emoji.name;
+				if (opt.emoji.id) {
+					o["emoji"]["id"] = std::to_string(opt.emoji.id);
+				}
+				if (opt.emoji.animated) {
+					o["emoji"]["animated"] = true;
+				}
+			}
+			j["options"].push_back(o);
 		}
 	} else if (cp.type == cot_user_selectmenu || cp.type == cot_role_selectmenu || cp.type == cot_mentionable_selectmenu) {
 		j["custom_id"] = cp.custom_id;
@@ -642,19 +634,18 @@ void to_json(json& j, const component& cp) {
 		j["custom_id"] = cp.custom_id;
 		j["required"] = cp.required;
 		j["options"] = json::array();
-		if (auto *group_options = std::get_if<std::vector<group_option>>(&cp.options)) {
-			for (auto &opt : *group_options) {
-				json o;
-				o["value"] = opt.value;
-				o["label"] = opt.label;
-				if (!opt.description.empty()) {
-					o["description"] = opt.description;
-				}
-				if (opt.is_default) {
-					o["default"] = true;
-				}
-				j["options"].push_back(o);
+		for (size_t i = 0; i < cp.options.size() && i < 10; ++i) {
+			const auto &opt = cp.options[i];
+			json o;
+			o["value"] = opt.value;
+			o["label"] = opt.label;
+			if (!opt.description.empty()) {
+				o["description"] = opt.description;
 			}
+			if (opt.is_default) {
+				o["default"] = true;
+			}
+			j["options"].push_back(o);
 		}
 	} else if (cp.type == cot_checkbox_group) {
 		j["custom_id"] = cp.custom_id;
@@ -666,19 +657,18 @@ void to_json(json& j, const component& cp) {
 			j["max_values"] = cp.max_values;
 		}
 		j["options"] = json::array();
-		if (auto *group_options = std::get_if<std::vector<group_option>>(&cp.options)) {
-			for (auto &opt : *group_options) {
-				json o;
-				o["value"] = opt.value;
-				o["label"] = opt.label;
-				if (!opt.description.empty()) {
-					o["description"] = opt.description;
-				}
-				if (opt.is_default) {
-					o["default"] = true;
-				}
-				j["options"].push_back(o);
+		for (size_t i = 0; i < cp.options.size() && i < 10; ++i) {
+			const auto &opt = cp.options[i];
+			json o;
+			o["value"] = opt.value;
+			o["label"] = opt.label;
+			if (!opt.description.empty()) {
+				o["description"] = opt.description;
 			}
+			if (opt.is_default) {
+				o["default"] = true;
+			}
+			j["options"].push_back(o);
 		}
 	} else if (cp.type == cot_checkbox) {
 		j["custom_id"] = cp.custom_id;
@@ -688,45 +678,45 @@ void to_json(json& j, const component& cp) {
 	}
 }
 
-select_option::select_option() : is_default(false) {
+choice_option::choice_option() : is_default(false) {
 }
 
-select_option::select_option(std::string_view _label, std::string_view _value, std::string_view _description) : label(_label), value(_value), description(_description), is_default(false) {
+choice_option::choice_option(std::string_view _label, std::string_view _value, std::string_view _description) : label(_label), value(_value), description(_description), is_default(false) {
 }
 
-select_option& select_option::set_label(std::string_view l) {
+choice_option& choice_option::set_label(std::string_view l) {
 	label = dpp::utility::utf8substr(l, 0, 100);
 	return *this;
 }
 
-select_option& select_option::set_default(bool def) {
+choice_option& choice_option::set_default(bool def) {
 	is_default = def;
 	return *this;
 }
 
-select_option& select_option::set_value(std::string_view v) {
+choice_option& choice_option::set_value(std::string_view v) {
 	value = dpp::utility::utf8substr(v, 0, 100);
 	return *this;
 }
 
-select_option& select_option::set_description(std::string_view d) {
+choice_option& choice_option::set_description(std::string_view d) {
 	description = dpp::utility::utf8substr(d, 0, 100);
 	return *this;
 }
 
-select_option& select_option::set_emoji(std::string_view n, dpp::snowflake id, bool animated) {
+choice_option& choice_option::set_emoji(std::string_view n, dpp::snowflake id, bool animated) {
 	emoji.name = n;
 	emoji.id = id;
 	emoji.animated = animated;
 	return *this;
 }
 
-select_option& select_option::set_animated(bool anim) {
+choice_option& choice_option::set_animated(bool anim) {
 	emoji.animated = anim;
 	return *this;
 }
 
-select_option& select_option::fill_from_json_impl(nlohmann::json* j) {
+choice_option& choice_option::fill_from_json_impl(nlohmann::json* j) {
 	label = string_not_null(j, "label");
 	value = string_not_null(j, "value");
 	description = string_not_null(j, "description");
@@ -736,40 +726,6 @@ select_option& select_option::fill_from_json_impl(nlohmann::json* j) {
 		emoji.name = string_not_null(&emoj, "name");
 		emoji.id = snowflake_not_null(&emoj, "id");
 	}
-	is_default = bool_not_null(j, "default");
-	return *this;
-}
-
-group_option::group_option() : is_default(false) {
-}
-
-group_option::group_option(std::string_view _label, std::string_view _value, std::string_view _description) : value(_value), label(_label), description(_description), is_default(false) {
-}
-
-group_option& group_option::set_label(std::string_view l) {
-	label = dpp::utility::utf8substr(l, 0, 100);
-	return *this;
-}
-
-group_option& group_option::set_value(std::string_view v) {
-	value = dpp::utility::utf8substr(v, 0, 100);
-	return *this;
-}
-
-group_option& group_option::set_description(std::string_view d) {
-	description = dpp::utility::utf8substr(d, 0, 100);
-	return *this;
-}
-
-group_option& group_option::set_default(bool def) {
-	is_default = def;
-	return *this;
-}
-
-group_option& group_option::fill_from_json_impl(nlohmann::json* j) {
-	value = string_not_null(j, "value");
-	label = string_not_null(j, "label");
-	description = string_not_null(j, "description");
 	is_default = bool_not_null(j, "default");
 	return *this;
 }
@@ -800,26 +756,15 @@ component& component::add_file_type(std::string_view const file_type) {
 	return *this;
 }
 
-component& component::add_select_option(const select_option &option) {
-	if (!std::holds_alternative<std::vector<select_option>>(options)) {
-		options = std::vector<select_option>{};
-	}
-	auto &opts = std::get<std::vector<select_option>>(options);
-	if (opts.size() <= 25) {
-		opts.emplace_back(option);
+component& component::add_option(const choice_option &option) {
+	if (options.size() <= 25) {
+		options.emplace_back(option);
 	}
 	return *this;
 }
 
-component& component::add_group_option(const group_option &option) {
-	if (!std::holds_alternative<std::vector<group_option>>(options)) {
-		options = std::vector<group_option>{};
-	}
-	auto &opts = std::get<std::vector<group_option>>(options);
-	if (opts.size() < 10) {
-		opts.emplace_back(option);
-	}
-	return *this;
+component& component::add_select_option(const select_option &option) {
+	return add_option(option);
 }
 
 component &component::add_default_value(const snowflake id, const component_default_value_type type) {
