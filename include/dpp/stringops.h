@@ -31,6 +31,7 @@
 #include <sstream>
 #include <iostream>
 #include <charconv>
+#include <type_traits>
 
 namespace dpp {
 /**
@@ -43,7 +44,7 @@ namespace dpp {
 template <typename T> std::basic_string<T> lowercase(const std::basic_string<T>& s)
 {
 	std::basic_string<T> s2 = s;
-	std::transform(s2.begin(), s2.end(), s2.begin(), [](unsigned char c){ return std::tolower(c); });
+	std::transform(s2.begin(), s2.end(), s2.begin(), [](T c){ return static_cast<T>(std::tolower(static_cast<std::make_unsigned_t<T>>(c))); });
 	return s2;
 }
 
@@ -57,7 +58,7 @@ template <typename T> std::basic_string<T> lowercase(const std::basic_string<T>&
 template <typename T> std::basic_string<T> uppercase(const std::basic_string<T>& s)
 {
 	std::basic_string<T> s2 = s;
-	std::transform(s2.begin(), s2.end(), s2.begin(), [](unsigned char c){ return std::toupper(c); });
+	std::transform(s2.begin(), s2.end(), s2.begin(), [](T c){ return static_cast<T>(std::toupper(static_cast<std::make_unsigned_t<T>>(c))); });
 	return s2;
 }
 
