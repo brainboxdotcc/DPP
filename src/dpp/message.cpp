@@ -43,7 +43,7 @@ std::set<component_type> components_v2_only_types = {
 component::component() :
 	type(cot_action_row), component_id(0), label(""), style(cos_primary), custom_id(""),
 	min_values(-1), max_values(-1), min_length(0), max_length(0), disabled(false),
-	required(false), spoiler(false), is_divider(false), spacing(sep_small)
+	required(false), is_default(false), spoiler(false), is_divider(false), spacing(sep_small)
 {
 	emoji.animated = false;
 	emoji.id = 0;
@@ -188,7 +188,7 @@ component& component::fill_from_json_impl(nlohmann::json* j) {
 		}
 	} else if (type == cot_selectmenu) { // string select menu specific fields
 		if (j->contains("options")) {
-			set_object_array_not_null<select_option>(j, "options", options);
+			set_object_array_not_null<choice_option>(j, "options", options);
 		}
 	} else if (type == cot_channel_selectmenu) { // channel select menu specific fields
 		if (j->contains("channel_types")) {
@@ -207,14 +207,32 @@ component& component::fill_from_json_impl(nlohmann::json* j) {
 			max_length = j->at("max_length").get<int32_t>();
 		}
 		required = bool_not_null(j, "required");
+	} else if (type == cot_radio_group) { // radio group (modal) specific fields
+		if (j->contains("options")) {
+			set_object_array_not_null<choice_option>(j, "options", options);
+		}
+		required = bool_not_null(j, "required");
+	} else if (type == cot_checkbox_group) { // checkbox group (modal) specific fields
+		if (j->contains("options")) {
+			set_object_array_not_null<choice_option>(j, "options", options);
+		}
+		required = bool_not_null(j, "required");
+		if (j->contains("values") && j->at("values").is_array()) {
+			for (auto &v : j->at("values")) {
+				if (v.is_string()) {
+					values.push_back(v.get<std::string>());
+				}
+			}
+		}
+	} else if (type == cot_checkbox) { // checkbox (modal) specific fields
+		is_default = bool_not_null(j, "default");
 	}
 
 	if (j->contains("value") || j->contains("values")){ // set value if it exists
 		json v;
-		if(j->contains("values")){ 
+		if (j->contains("values") && !j->at("values").empty()) {
 			v = (*j)["values"].at(0);
-		}
-		else {
+		} else if (j->contains("value")) {
 			v = (*j)["value"];
 		}
 
@@ -222,6 +240,8 @@ component& component::fill_from_json_impl(nlohmann::json* j) {
 			value = v.get<int64_t>();
 		} else if (!v.is_null() && v.is_number_float()) {
 			value = v.get<double>();
+		} else if (!v.is_null() && v.is_boolean()) {
+			value = v.get<bool>();
 		} else if (!v.is_null() && v.is_string()) {
 			value = v.get<std::string>();
 		}
@@ -343,6 +363,15 @@ component& component::set_required(bool require)
 component& component::set_component_id(uint32_t id)
 {
 	component_id = id;
+	return *this;
+}
+
+component& component::set_default(bool def)
+{
+	if (type == cot_action_row) {
+		set_type(cot_checkbox);
+	}
+	is_default = def;
 	return *this;
 }
 
@@ -499,7 +528,7 @@ void to_json(json& j, const component& cp) {
 			j["max_values"] = cp.max_values;
 		}
 		j["options"] = json::array();
-		for (auto opt : cp.options) {
+		for (auto &opt : cp.options) {
 			json o;
 			if (!opt.description.empty()) {
 				o["description"] = opt.description;
@@ -601,48 +630,93 @@ void to_json(json& j, const component& cp) {
 		if (!cp.file_types.empty()) {
 			j["file_types"] = cp.file_types;
 		}
+	} else if (cp.type == cot_radio_group) {
+		j["custom_id"] = cp.custom_id;
+		j["required"] = cp.required;
+		j["options"] = json::array();
+		for (size_t i = 0; i < cp.options.size() && i < 10; ++i) {
+			const auto &opt = cp.options[i];
+			json o;
+			o["value"] = opt.value;
+			o["label"] = opt.label;
+			if (!opt.description.empty()) {
+				o["description"] = opt.description;
+			}
+			if (opt.is_default) {
+				o["default"] = true;
+			}
+			j["options"].push_back(o);
+		}
+	} else if (cp.type == cot_checkbox_group) {
+		j["custom_id"] = cp.custom_id;
+		j["required"] = cp.required;
+		if (cp.min_values >= 0) {
+			j["min_values"] = cp.min_values;
+		}
+		if (cp.max_values >= 0) {
+			j["max_values"] = cp.max_values;
+		}
+		j["options"] = json::array();
+		for (size_t i = 0; i < cp.options.size() && i < 10; ++i) {
+			const auto &opt = cp.options[i];
+			json o;
+			o["value"] = opt.value;
+			o["label"] = opt.label;
+			if (!opt.description.empty()) {
+				o["description"] = opt.description;
+			}
+			if (opt.is_default) {
+				o["default"] = true;
+			}
+			j["options"].push_back(o);
+		}
+	} else if (cp.type == cot_checkbox) {
+		j["custom_id"] = cp.custom_id;
+		if (cp.is_default) {
+			j["default"] = true;
+		}
 	}
 }
 
-select_option::select_option() : is_default(false) {
+choice_option::choice_option() : is_default(false) {
 }
 
-select_option::select_option(std::string_view _label, std::string_view _value, std::string_view _description) : label(_label), value(_value), description(_description), is_default(false) {
+choice_option::choice_option(std::string_view _label, std::string_view _value, std::string_view _description) : label(_label), value(_value), description(_description), is_default(false) {
 }
 
-select_option& select_option::set_label(std::string_view l) {
+choice_option& choice_option::set_label(std::string_view l) {
 	label = dpp::utility::utf8substr(l, 0, 100);
 	return *this;
 }
 
-select_option& select_option::set_default(bool def) {
+choice_option& choice_option::set_default(bool def) {
 	is_default = def;
 	return *this;
 }
 
-select_option& select_option::set_value(std::string_view v) {
+choice_option& choice_option::set_value(std::string_view v) {
 	value = dpp::utility::utf8substr(v, 0, 100);
 	return *this;
 }
 
-select_option& select_option::set_description(std::string_view d) {
+choice_option& choice_option::set_description(std::string_view d) {
 	description = dpp::utility::utf8substr(d, 0, 100);
 	return *this;
 }
 
-select_option& select_option::set_emoji(std::string_view n, dpp::snowflake id, bool animated) {
+choice_option& choice_option::set_emoji(std::string_view n, dpp::snowflake id, bool animated) {
 	emoji.name = n;
 	emoji.id = id;
 	emoji.animated = animated;
 	return *this;
 }
 
-select_option& select_option::set_animated(bool anim) {
+choice_option& choice_option::set_animated(bool anim) {
 	emoji.animated = anim;
 	return *this;
 }
 
-select_option& select_option::fill_from_json_impl(nlohmann::json* j) {
+choice_option& choice_option::fill_from_json_impl(nlohmann::json* j) {
 	label = string_not_null(j, "label");
 	value = string_not_null(j, "value");
 	description = string_not_null(j, "description");
@@ -682,11 +756,15 @@ component& component::add_file_type(std::string_view const file_type) {
 	return *this;
 }
 
-component& component::add_select_option(const select_option &option) {
+component& component::add_option(const choice_option &option) {
 	if (options.size() <= 25) {
 		options.emplace_back(option);
 	}
 	return *this;
+}
+
+component& component::add_select_option(const select_option &option) {
+	return add_option(option);
 }
 
 component &component::add_default_value(const snowflake id, const component_default_value_type type) {
