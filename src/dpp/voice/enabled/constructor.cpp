@@ -50,6 +50,7 @@ discord_voice_client::discord_voice_client(dpp::cluster* _cluster, full_reconnec
 	timestamp(0),
 	packet_nonce(1),
 	last_timestamp(std::chrono::high_resolution_clock::now()),
+	last_duration(0),
 	sending(false),
 	tracks(0),
 	dave_version(enable_dave ? dave_version_1 : dave_version_none),
