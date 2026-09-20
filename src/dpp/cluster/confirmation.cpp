@@ -93,7 +93,7 @@ std::vector<error_detail> find_errors_in_object(const std::string& obj, const st
 
 			if (obj.empty()) {
 				field = current_field;
-			} else if (isdigit(*current_field.c_str())) {
+			} else if (isdigit(static_cast<unsigned char>(*current_field.c_str()))) {
 				/* An element of an array, e.g. an element of a slash command vector for global_bulk_slash_command_create */
 				field = obj;
 				field += '[';
@@ -130,7 +130,7 @@ error_info confirmation_callback_t::get_error() const {
 			json &errors = j["errors"];
 			for (auto obj = errors.begin(); obj != errors.end(); ++obj) {
 				std::vector<error_detail> sub_errors;
-				std::string field = isdigit(*obj.key().c_str()) ? "<array>[" + obj.key() + "]" : obj.key();
+				std::string field = isdigit(static_cast<unsigned char>(*obj.key().c_str())) ? "<array>[" + obj.key() + "]" : obj.key();
 
 				sub_errors = find_errors_in_object({}, field, *obj);
 
