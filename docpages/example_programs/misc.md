@@ -13,3 +13,4 @@ This section lists examples that do not fit neatly into any of the categories ab
 * \subpage setting_status
 * \subpage using-emojis
 * \subpage using_timers
+* \subpage using_modules
