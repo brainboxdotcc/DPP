@@ -76,7 +76,7 @@ socket_engine_base::socket_engine_base(cluster* creator) : owner(creator) {
 }
 
 socket_engine_base::~socket_engine_base() {
-#ifdef _WIN32
+#ifdef DPP_USE_WINDOWS
 	WSACleanup();
 #endif
 }

@@ -20,7 +20,9 @@
 ************************************************************************************/
 #pragma once
 
-#ifdef _WIN32
+#include <dpp/system.h>
+
+#ifdef DPP_USE_WINDOWS
 	#include <WinSock2.h>
 	#include <WS2tcpip.h>
 	#include <io.h>
@@ -30,7 +32,9 @@
 			return WSAPoll(fds, nfds, timeout);
 		}
 	} // namespace dpp::compat
-	#pragma comment(lib, "ws2_32")
+	#ifdef DPP_USE_MSVC
+		#pragma comment(lib, "ws2_32")
+	#endif
 #else
 	#include <poll.h>
 	#include <netinet/in.h>

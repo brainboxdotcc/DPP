@@ -23,40 +23,40 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
-#if defined(__linux__)
-#include <endian.h>
+#ifdef DPP_USE_LINUX
+    #include <endian.h>
 #endif
 
-#ifdef _WIN32
+#ifdef DPP_USE_WINDOWS
 
-#ifdef __cplusplus
+    #ifdef DPP_USE_CPP
 /* numeric_limits<T>::min,max */
-#ifdef max
-#undef max
-#endif
-#ifdef min
-#undef min
-#endif
-#endif
+        #ifdef max
+            #undef max
+        #endif
+        #ifdef min
+            #undef min
+        #endif
+    #endif
 
 #else
-#include <arpa/inet.h>  /* __BYTE_ORDER */
+    #include <arpa/inet.h>  /* __BYTE_ORDER */
 #endif
 
 #if !defined(__LITTLE_ENDIAN__) && !defined(__BIG_ENDIAN__)
-#if __BYTE_ORDER == __LITTLE_ENDIAN
-#define __LITTLE_ENDIAN__
-#elif __BYTE_ORDER == __BIG_ENDIAN
-#define __BIG_ENDIAN__
-#elif _WIN32
-#define __LITTLE_ENDIAN__
-#endif
+    #if __BYTE_ORDER == __LITTLE_ENDIAN
+        #define __LITTLE_ENDIAN__
+    #elif __BYTE_ORDER == __BIG_ENDIAN
+        #define __BIG_ENDIAN__
+    #elif defined(DPP_USE_WINDOWS)
+        #define __LITTLE_ENDIAN__
+    #endif
 #endif
 
 
 #ifdef __LITTLE_ENDIAN__
 
-#ifdef _WIN32
+#ifdef DPP_USE_WINDOWS
 #  if defined(ntohs)
 #    define etf_byte_order_16(x) ntohs(x)
 #  elif defined(_byteswap_ushort) || (defined(_MSC_VER) && _MSC_VER >= 1400)
@@ -70,7 +70,7 @@
 #  define etf_byte_order_16(x) ntohs(x)
 #endif
 
-#ifdef _WIN32
+#ifdef DPP_USE_WINDOWS
 #  if defined(ntohl)
 #    define etf_byte_order_32(x) ntohl(x)
 #  elif defined(_byteswap_ulong) || (defined(_MSC_VER) && _MSC_VER >= 1400)
