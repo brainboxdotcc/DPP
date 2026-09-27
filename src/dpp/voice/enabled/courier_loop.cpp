@@ -179,6 +179,21 @@ void discord_voice_client::voice_courier_loop(discord_voice_client& client, cour
 						const size_t csrc_count = buffer[0] & 0b0000'1111;
 						/* Skip to the encrypted voice data */
 						const ptrdiff_t offset_to_data = header_size + sizeof(uint32_t) * csrc_count;
+
+						/*
+						 * csrc_count comes from the first byte of the datagram, so the packet
+						 * has to actually be long enough to hold the header it describes plus the
+						 * trailing nonce, otherwise ciphertext_len below underflows.
+						 */
+						if (packet_size < static_cast<size_t>(offset_to_data) + nonce_size) {
+							/*
+							 * Invalid Discord RTP payload. Consume it and move on to the
+							 * next parked payload, like the pop at the end of this iteration.
+							 */
+							d.parked_payloads.pop();
+							continue;
+						}
+
 						size_t total_header_len = offset_to_data;
 
 						uint8_t *ciphertext = buffer + offset_to_data;
@@ -186,6 +201,18 @@ void discord_voice_client::voice_courier_loop(discord_voice_client& client, cour
 
 						size_t ext_len = 0;
 						if ([[maybe_unused]] const bool uses_extension = (buffer[0] >> 4) & 0b0001) {
+							/*
+							 * The 4 byte extension header sits past offset_to_data, so make sure
+							 * it is present before reading it and subtracting it from ciphertext_len.
+							 */
+							if (ciphertext_len < sizeof(uint16_t) * 2) {
+								/*
+								 * Invalid Discord RTP payload. Consume it and move on to the
+								 * next parked payload, like the pop at the end of this iteration.
+								 */
+								d.parked_payloads.pop();
+								continue;
+							}
 							/**
 							 * Get the RTP Extensions size, we only get the size here because
 							 * the extension itself is encrypted along with the opus packet
