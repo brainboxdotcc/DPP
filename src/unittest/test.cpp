@@ -435,6 +435,19 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 			set_test(JSON_INTERFACE, success);
 		}
 
+		{ // A compressed gateway frame shorter than the 4 byte zlib flush trailer must not be read out of bounds
+			set_test(WS_SHORT_COMPRESSED_FRAME, false);
+			dpp::cluster cluster("");
+			/* compressed defaults to true, matching a live zlib-stream gateway connection */
+			dpp::discord_client client(&cluster, 1, 1, "");
+			/* A three byte data frame has no room for the 00 00 FF FF trailer. Before the length
+			 * check, buffer.size() - 4 wrapped past zero and buffer[...] read out of bounds. Such a
+			 * frame should be treated as incomplete and return false. */
+			bool no_crash = client.handle_frame(std::string("\x00\x00\xff", 3), dpp::OP_BINARY) == false;
+			no_crash = no_crash && client.handle_frame(std::string(), dpp::OP_BINARY) == false;
+			set_test(WS_SHORT_COMPRESSED_FRAME, no_crash);
+		}
+
 		{ // test interaction_create_t::get_parameter
 			// create a fake interaction
 			dpp::cluster cluster("");

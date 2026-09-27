@@ -154,8 +154,12 @@ bool discord_client::handle_frame(const std::string &buffer, ws_opcode opcode)
 
 	/* gzip compression is a special case */
 	if (compressed) {
-		/* Check that we have a complete compressed frame */
-		if ((uint8_t)buffer[buffer.size() - 4] == 0x00 && (uint8_t)buffer[buffer.size() - 3] == 0x00 && (uint8_t)buffer[buffer.size() - 2] == 0xFF
+		/* Check that we have a complete compressed frame. A complete zlib-stream frame ends with
+		 * the four byte flush marker 00 00 FF FF, so a payload shorter than four bytes cannot be
+		 * one. Testing the length first also stops buffer.size() - 4 from wrapping around and
+		 * indexing out of bounds on a short frame. */
+		if (buffer.size() >= 4
+		&& (uint8_t)buffer[buffer.size() - 4] == 0x00 && (uint8_t)buffer[buffer.size() - 3] == 0x00 && (uint8_t)buffer[buffer.size() - 2] == 0xFF
 		&& (uint8_t)buffer[buffer.size() - 1] == 0xFF) {
 			auto result = zlib->decompress(buffer, decompressed);
 			if (result != err_no_code_specified) {
