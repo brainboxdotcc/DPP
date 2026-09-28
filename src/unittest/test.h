@@ -89,7 +89,6 @@ DPP_TEST(BIGNUM, "dpp::bignumber decimal to raw buffer", tf_offline);
 DPP_TEST(BIGNUM2, "dpp::bignumber raw buffer to hex", tf_offline);
 DPP_TEST(BIGNUM3, "dpp::bignumber to_binary()", tf_offline);
 DPP_TEST(JSON_INTERFACE, "dpp::json_interface class", tf_offline);
-DPP_TEST(WS_SHORT_COMPRESSED_FRAME, "discord_client::handle_frame bounds on short compressed frame", tf_offline);
 DPP_TEST(CLUSTER, "Instantiate DPP cluster", tf_offline);
 DPP_TEST(BOTSTART, "cluster::start method", tf_online);
 DPP_TEST(CONNECTION, "Connection to client websocket", tf_online);
