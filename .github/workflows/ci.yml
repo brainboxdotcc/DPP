@@ -120,8 +120,6 @@ jobs:
           name: "libdpp - RPM Package ${{matrix.cfg.arch}}"
           path: '${{github.workspace}}/build/*.rpm'
 
-
-  # ARMv7 hard-float build. Run a native 32-bit Debian userspace on the ARM64 runner.
   linux-arm7hf:
     permissions:
       contents: write
@@ -139,35 +137,41 @@ jobs:
       - name: Checkout D++
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
-      - name: Build and package in Debian armhf chroot
+      - name: Build and package in Debian armhf
         run: |
-          sudo rm -rf /srv/chroot/debian-armhf/build/dpp
-          sudo mkdir -p /srv/chroot/debian-armhf/build/dpp
-          sudo cp -a "$GITHUB_WORKSPACE/." /srv/chroot/debian-armhf/build/dpp/
-          sudo chroot /srv/chroot/debian-armhf /bin/bash -lc '
+          root=/tmp/dpp-armhf-root
+          sudo rm -rf "$root"
+          sudo apt-get update
+          sudo apt-get install -y debootstrap
+          sudo debootstrap --arch=armhf bookworm "$root" http://deb.debian.org/debian
+          sudo mkdir -p "$root/work"
+          sudo cp -a "${GITHUB_WORKSPACE}/." "$root/work/"
+          sudo chroot "$root" /bin/bash -c '
             set -e
-            cd /build/dpp
+            apt-get update
+            apt-get install -y g++-12 cmake make pkg-config libopus-dev zlib1g-dev rpm
+            cd /work
             CXX=g++-12 cmake -B build -DDPP_NO_VCPKG=ON -DAVX_TYPE=AVX0 -DCMAKE_BUILD_TYPE=Release
-            cmake --build build --parallel 4
+            cmake --build build -j4
             cd build
             cpack --verbose
           '
-          mkdir -p "$GITHUB_WORKSPACE/build-arm7hf"
-          sudo cp /srv/chroot/debian-armhf/build/dpp/build/*.deb "$GITHUB_WORKSPACE/build-arm7hf/"
-          sudo cp /srv/chroot/debian-armhf/build/dpp/build/*.rpm "$GITHUB_WORKSPACE/build-arm7hf/"
-          sudo chown -R "$(id -u):$(id -g)" "$GITHUB_WORKSPACE/build-arm7hf"
+          sudo cp "$root"/work/build/*.deb "${GITHUB_WORKSPACE}/"
+          sudo cp "$root"/work/build/*.rpm "${GITHUB_WORKSPACE}/"
+          sudo chown "$(id -u):$(id -g)" "${GITHUB_WORKSPACE}"/*.deb "${GITHUB_WORKSPACE}"/*.rpm
+          sudo rm -rf "$root"
 
       - name: Upload Binary (DEB)
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: "libdpp - Debian Package arm7hf"
-          path: '${{github.workspace}}/build-arm7hf/*.deb'
+          path: '${{github.workspace}}/*.deb'
 
       - name: Upload Binary (RPM)
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: "libdpp - RPM Package arm7hf"
-          path: '${{github.workspace}}/build-arm7hf/*.rpm'
+          path: '${{github.workspace}}/*.rpm'
 
   macos:
     permissions:
