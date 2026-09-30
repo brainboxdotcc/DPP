@@ -292,6 +292,22 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 			set_test(ETF_COMPRESSED_SHORT, etf_result);
 		}
 
+		set_test(DAVE_BINARY_HEADER, false);
+		{
+			/* Big endian seq 128, opcode 30 (voice_client_dave_mls_welcome), big endian
+			 * transition id 32896, then one byte of payload. Every byte with its high bit set
+			 * is negative when read through a plain char and sign extends into the field.
+			 */
+			const char frame[]{ 0x00, (char)0x80, 0x1e, (char)0x80, (char)0x80, 0x2a };
+			dpp::dave_binary_header_t header(std::string(frame, sizeof(frame)));
+			set_test(DAVE_BINARY_HEADER,
+				header.seq == 128 &&
+				header.opcode == dpp::voice_client_dave_mls_welcome &&
+				header.get_transition_id() == 32896 &&
+				header.get_data() == std::vector<uint8_t>{ 0x2a }
+			);
+		}
+
 		dpp::http_connect_info hci;
 		set_test(HOSTINFO, false);
 
