@@ -28,6 +28,7 @@
 #include <dpp/guild.h>
 #include <optional>
 #include <variant>
+#include <type_traits>
 #include <dpp/json_fwd.h>
 #include <dpp/json_interface.h>
 
@@ -132,7 +133,22 @@ enum component_type : uint8_t {
 	/**
 	 * @brief Component for uploading files
 	 */
-	cot_file_upload = 19
+	cot_file_upload = 19,
+
+	/**
+	 * @brief Component for a radio button group
+	 */
+	cot_radio_group = 21,
+
+	/**
+	 * @brief Component for a checkbox group
+	 */
+	cot_checkbox_group = 22,
+
+	/**
+	 * @brief Component for a single checkbox
+	 */
+	cot_checkbox = 23
 };
 
 /**
@@ -282,17 +298,17 @@ struct DPP_EXPORT component_default_value {
 };
 
 /**
- * @brief An option for a select component
+ * @brief An option for a select menu, or group of choices
  */
-struct DPP_EXPORT select_option : public json_interface<select_option> {
+struct DPP_EXPORT choice_option : public json_interface<choice_option> {
 protected:
-	friend struct json_interface<select_option>;
+	friend struct json_interface<choice_option>;
 
 	/** Read class values from json object
 	 * @param j A json object to read from
 	 * @return A reference to self
 	 */
-	select_option& fill_from_json_impl(nlohmann::json* j);
+	choice_option& fill_from_json_impl(nlohmann::json* j);
 
 public:
 	/**
@@ -316,79 +332,86 @@ public:
 	bool is_default;
 
 	/**
-	 * @brief The emoji for the select option.
+	 * @brief The emoji for the option
+	 *
+	 * @note Only applicable to select menu options
 	 */
 	partial_emoji emoji;
 
 	/**
-	 * @brief Construct a new select option object
+	 * @brief Construct a new choice option object
 	 */
-	select_option();
+	choice_option();
 
 	/**
-	 * @brief Destructs the select option object.
+	 * @brief Destructs the choice option object.
 	 */
-	virtual ~select_option() = default;
+	virtual ~choice_option() = default;
 
 	/**
-	 * @brief Construct a new select option object
-	 * 
+	 * @brief Construct a new choice option object
+	 *
 	 * @param label Label of option
 	 * @param value Value of option
 	 * @param description Description of option
 	 */
-	select_option(std::string_view label, std::string_view value, std::string_view description = "");
+	choice_option(std::string_view label, std::string_view value, std::string_view description = "");
 
 	/**
 	 * @brief Set the label
-	 * 
+	 *
 	 * @param l the user-facing name of the option. It will be truncated to the maximum length of 100 UTF-8 characters.
-	 * @return select_option& reference to self for chaining
+	 * @return choice_option& reference to self for chaining
 	 */
-	select_option& set_label(std::string_view l);
+	choice_option& set_label(std::string_view l);
 
 	/**
 	 * @brief Set the value
-	 * 
+	 *
 	 * @param v value to set. It will be truncated to the maximum length of 100 UTF-8 characters.
-	 * @return select_option& reference to self for chaining
+	 * @return choice_option& reference to self for chaining
 	 */
-	select_option& set_value(std::string_view v);
+	choice_option& set_value(std::string_view v);
 
 	/**
 	 * @brief Set the description
-	 * 
+	 *
 	 * @param d description to set. It will be truncated to the maximum length of 100 UTF-8 characters.
-	 * @return select_option& reference to self for chaining
+	 * @return choice_option& reference to self for chaining
 	 */
-	select_option& set_description(std::string_view d);
+	choice_option& set_description(std::string_view d);
 
 	/**
 	 * @brief Set the emoji
-	 * 
+	 *
 	 * @param n emoji name
 	 * @param id emoji id for custom emojis
 	 * @param animated true if animated emoji
-	 * @return select_option& reference to self for chaining
+	 * @return choice_option& reference to self for chaining
 	 */
-	select_option& set_emoji(std::string_view n, dpp::snowflake id = 0, bool animated = false);
+	choice_option& set_emoji(std::string_view n, dpp::snowflake id = 0, bool animated = false);
 
 	/**
 	 * @brief Set the option as default
-	 * 
+	 *
 	 * @param def true to set the option as default
-	 * @return select_option& reference to self for chaining
+	 * @return choice_option& reference to self for chaining
 	 */
-	select_option& set_default(bool def);
+	choice_option& set_default(bool def);
 
 	/**
 	 * @brief Set the emoji as animated
-	 * 
+	 *
 	 * @param anim true if animated
-	 * @return select_option& reference to self for chaining
+	 * @return choice_option& reference to self for chaining
 	 */
-	select_option& set_animated(bool anim);
+	choice_option& set_animated(bool anim);
 };
+
+/**
+ * @brief Alias of dpp::choice_option, for backwards compatibility.
+ */
+using select_option = choice_option;
 
 /**
  * @brief Loading state for "unfurled" media, e.g. thumbnails and images in a message or component
@@ -511,6 +534,12 @@ public:
 	component_type type;
 
 	/**
+	 * @brief Optional identifier for this component, distinct from
+	 * custom_id.
+	 */
+	uint32_t component_id;
+
+	/**
 	 * @brief Sub components, buttons on an action row
 	 */
 	std::vector<component> components;
@@ -583,11 +612,9 @@ public:
 	int32_t max_length;
 
 	/**
-	 * @brief Select options for select menus.
-	 *
-	 * @warning Only required and available for select menus of type dpp::cot_selectmenu
+	 * @brief Options to pick for select menus, radio groups, and checkbox groups.
 	 */
-	std::vector<select_option> options;
+	std::vector<choice_option> options;
 
 	/**
 	 * @brief List of channel types (dpp::channel_type) to include in the channel select component (dpp::cot_channel_selectmenu)
@@ -615,10 +642,21 @@ public:
 	bool required;
 
 	/**
+	 * @brief Whether a dpp::cot_checkbox is selected by default
+	 */
+	bool is_default;
+
+	/**
 	 * @brief Value of the modal.
 	 * Filled or valid when populated from an on_form_submit event, or from the set_value function.
 	 */
-	std::variant<std::monostate, std::string, int64_t, double> value;
+	std::variant<std::monostate, std::string, int64_t, double, bool> value;
+
+	/**
+	 * @brief Values of the selected options for dpp::cot_checkbox_group.
+	 * Filled when populated from an on_form_submit event.
+	 */
+	std::vector<std::string> values;
 
 	/**
 	 * @brief The emoji for this component.
@@ -682,10 +720,22 @@ public:
 	 */
 	component();
 
+	/** Copy constructor */
+	component(const component&);
+
+	/** Move constructor */
+	component(component&&) noexcept;
+
+	/** Copy assignment operator */
+	component& operator=(const component&);
+
+	/** Move assignment operator */
+	component& operator=(component&&) noexcept;
+
 	/**
 	 * @brief Destructor
 	 */
-	virtual ~component() = default;
+	virtual ~component();
 
 	/**
 	 * @brief Add a channel type to include in the channel select component (dpp::cot_channel_selectmenu)
@@ -859,6 +909,16 @@ public:
 	component& set_id(std::string_view id);
 
 	/**
+	 * @brief Set the optional numeric identifier of the component,
+	 * distinct from custom_id.
+	 *
+	 * @param id Identifier to set. Must be unique within the message
+	 * or modal.
+	 * @return component& Reference to self
+	 */
+	component& set_component_id(uint32_t id);
+
+	/**
 	 * @brief Set the component to disabled.
 	 * Defaults to false on all created components.
 	 *
@@ -875,6 +935,14 @@ public:
 	 * @return component& Reference to self
 	 */
 	component& set_required(bool require);
+
+	/**
+	 * @brief Set whether a dpp::cot_checkbox is selected by default.
+	 *
+	 * @param def true to select the checkbox by default
+	 * @return component& Reference to self
+	 */
+	component& set_default(bool def);
 
 	/**
 	 * @brief Set the placeholder
@@ -927,8 +995,20 @@ public:
 	component& set_max_length(uint32_t max_l);
 
 	/**
-	 * @brief Add a select option
-	 * 
+	 * @brief Add an option to a select menu, radio group, or checkbox group.
+	 *
+	 * @note Select menus support up to 25 options while radio groups and checkbox
+	 * groups only support 10. options past the first 10 will not be serialized
+         * in such components.
+	 *
+	 * @param option option to add
+	 * @return component& Reference to self
+	 */
+	component& add_option(const choice_option &option);
+
+	/**
+	 * @brief Add a select option. Alias of dpp::component::add_option.
+	 *
 	 * @param option option to add
 	 * @return component& Reference to self
 	 */
@@ -1182,6 +1262,18 @@ struct DPP_EXPORT embed {
 	 * @param j JSON to read content from
 	 */
 	embed(nlohmann::json* j);
+
+	/** Copy constructor */
+	embed(const embed&);
+
+	/** Move constructor */
+	embed(embed&&) noexcept;
+
+	/** Copy assignment operator */
+	embed& operator=(const embed&);
+
+	/** Move assignment operator */
+	embed& operator=(embed&&) noexcept;
 
 	/**
 	 * @brief Destructor
@@ -1629,8 +1721,6 @@ public:
 	 * @brief Construct a new sticker object
 	 */
 	sticker();
-
-	virtual ~sticker() = default;
 
 	/**
 	 * @brief Get the sticker url.
@@ -2629,17 +2719,18 @@ public:
 	 */
 	message();
 
-	/*
+	/**
 	 * @brief Construct a new message object
 	 * @param m Message to copy
 	 */
-	message(const message& m) = default;
+	message(const message& m);
 
-	/*
+	/**
 	 * @brief Construct a new message object
 	 * @param m Message to move
+	 * @note noexcept mirrors the implicit spec: attached_poll is the only member whose move can throw (std::map, on MSVC)
 	 */
-	message(message&& m) = default;
+	message(message&& m) noexcept(std::is_nothrow_move_constructible_v<std::optional<poll>>);
 
 	/**
 	 * @brief Construct a new message object
@@ -2684,7 +2775,7 @@ public:
 	/**
 	 * @brief Destroy the message object
 	 */
-	~message() override = default;
+	~message() override;
 
 	/**
 	 * @brief Copy a message object
@@ -2692,7 +2783,7 @@ public:
 	 * @param m Message to copy
 	 * @return message& Reference to self
 	 */
-	message &operator=(const message& m) = default;
+	message &operator=(const message& m);
 
 	/**
 	 * @brief Move a message object
@@ -2700,7 +2791,7 @@ public:
 	 * @param m Message to move
 	 * @return message& Reference to self
 	 */
-	message &operator=(message&& m) = default;
+	message &operator=(message&& m) noexcept(std::is_nothrow_move_assignable_v<std::optional<poll>>);
 
 	/**
 	 * @brief Set the original message reference for replies/crossposts

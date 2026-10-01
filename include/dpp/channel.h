@@ -480,8 +480,20 @@ public:
 	/** Constructor */
 	channel();
 
+	/** Copy constructor */
+	channel(const channel&) = default;
+
+	/** Move constructor */
+	channel(channel&&) = default;
+
+	/** Copy assignment operator */
+	channel& operator=(const channel&) = default;
+
+	/** Move assignment operator */
+	channel& operator=(channel&&) = default;
+
 	/** Destructor */
-	virtual ~channel();
+	~channel() override;
 
 	/**
 	* @brief Create a mentionable channel.
@@ -893,4 +905,3 @@ void to_json(nlohmann::json& j, const permission_overwrite& po);
 typedef std::unordered_map<snowflake, channel> channel_map;
 
 }
-

@@ -1002,6 +1002,18 @@ public:
 	 */
 	application_role_connection_metadata();
 
+	/** Copy constructor */
+	application_role_connection_metadata(const application_role_connection_metadata&) = default;
+
+	/** Move constructor */
+	application_role_connection_metadata(application_role_connection_metadata&&) = default;
+
+	/** Copy assignment operator */
+	application_role_connection_metadata& operator=(const application_role_connection_metadata&) = default;
+
+	/** Move assignment operator */
+	application_role_connection_metadata& operator=(application_role_connection_metadata&&) = default;
+
 	virtual ~application_role_connection_metadata() = default;
 };
 
@@ -1047,6 +1059,18 @@ public:
 	 * @brief Constructor
 	 */
 	application_role_connection();
+
+	/** Copy constructor */
+	application_role_connection(const application_role_connection&) = default;
+
+	/** Move constructor */
+	application_role_connection(application_role_connection&&) = default;
+
+	/** Copy assignment operator */
+	application_role_connection& operator=(const application_role_connection&) = default;
+
+	/** Move assignment operator */
+	application_role_connection& operator=(application_role_connection&&) = default;
 
 	virtual ~application_role_connection() = default;
 };

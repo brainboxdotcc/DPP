@@ -30,6 +30,7 @@
 #include <dpp/entitlement.h>
 #include <variant>
 #include <map>
+#include <type_traits>
 #include <dpp/json_fwd.h>
 #include <dpp/json_interface.h>
 
@@ -302,10 +303,22 @@ public:
 	 */
 	command_option() = default;
 
+	/** Copy constructor */
+	command_option(const command_option&) = default;
+
+	/** Move constructor */
+	command_option(command_option&&) = default;
+
+	/** Copy assignment operator */
+	command_option& operator=(const command_option&) = default;
+
+	/** Move assignment operator */
+	command_option& operator=(command_option&&) = default;
+
 	/**
 	 * @brief Destroy the command option object
 	 */
-	virtual ~command_option() = default;
+	virtual ~command_option();
 
 	/**
 	 * @brief Add a file type (dpp::co_attachment) to filter for.
@@ -520,6 +533,18 @@ public:
 	 */
 	interaction_response() = default;
 
+	/** Copy constructor */
+	interaction_response(const interaction_response&);
+
+	/** Move constructor, noexcept mirrors dpp::message's move */
+	interaction_response(interaction_response&&) noexcept(std::is_nothrow_move_constructible_v<message>);
+
+	/** Copy assignment operator */
+	interaction_response& operator=(const interaction_response&);
+
+	/** Move assignment operator */
+	interaction_response& operator=(interaction_response&&) noexcept(std::is_nothrow_move_assignable_v<message>);
+
 	/**
 	 * @brief Construct a new interaction response object
 	 *
@@ -554,7 +579,7 @@ public:
 	/**
 	 * @brief Destroy the interaction response object
 	 */
-	virtual ~interaction_response() = default;
+	virtual ~interaction_response();
 
 };
 
@@ -577,7 +602,7 @@ protected:
 	 * @param j JSON to fill from
 	 * @return interaction_response& Reference to self
 	 */
-	virtual interaction_modal_response& fill_from_json_impl(nlohmann::json* j);
+	interaction_modal_response& fill_from_json_impl(nlohmann::json* j) override;
 
 	/**
 	 * @brief Build a json for this object
@@ -585,7 +610,7 @@ protected:
 	 *
 	 * @return json JSON object
 	 */
-	virtual json to_json_impl(bool with_id = false) const;
+	json to_json_impl(bool with_id = false) const override;
 
 public:
 	using json_interface<interaction_modal_response>::fill_from_json;
@@ -687,7 +712,7 @@ public:
 	/**
 	 * @brief Destroy the interaction modal response object
 	 */
-	virtual ~interaction_modal_response() = default;
+	~interaction_modal_response() override = default;
 };
 
 /**
@@ -1130,10 +1155,22 @@ public:
 	 */
 	interaction();
 
+	/** Copy constructor */
+	interaction(const interaction&);
+
+	/** Move constructor */
+	interaction(interaction&&) noexcept(std::is_nothrow_move_constructible_v<command_resolved> && std::is_nothrow_move_constructible_v<message> && std::is_nothrow_move_constructible_v<std::map<application_integration_types, snowflake>>);
+
+	/** Copy assignment operator */
+	interaction& operator=(const interaction&);
+
+	/** Move assignment operator */
+	interaction& operator=(interaction&&) noexcept(std::is_nothrow_move_assignable_v<command_resolved> && std::is_nothrow_move_assignable_v<message> && std::is_nothrow_move_assignable_v<std::map<application_integration_types, snowflake>>);
+
 	/**
 	 * @brief Destroy the interaction object
 	 */
-	virtual ~interaction() = default;
+	~interaction() override;
 
 	/**
 	 * @brief Get a user associated with the slash command from the resolved list.
@@ -1428,6 +1465,18 @@ public:
 	 */
 	guild_command_permissions();
 
+	/** Copy constructor */
+	guild_command_permissions(const guild_command_permissions&) = default;
+
+	/** Move constructor */
+	guild_command_permissions(guild_command_permissions&&) = default;
+
+	/** Copy assignment operator */
+	guild_command_permissions& operator=(const guild_command_permissions&) = default;
+
+	/** Move assignment operator */
+	guild_command_permissions& operator=(guild_command_permissions&&) = default;
+
 	virtual ~guild_command_permissions() = default;
 
 };
@@ -1574,10 +1623,22 @@ public:
 	 */
 	slashcommand(const std::string &_name, const slashcommand_contextmenu_type _type, const dpp::snowflake _application_id);
 
+	/** Copy constructor */
+	slashcommand(const slashcommand&) = default;
+
+	/** Move constructor */
+	slashcommand(slashcommand&&) = default;
+
+	/** Copy assignment operator */
+	slashcommand& operator=(const slashcommand&) = default;
+
+	/** Move assignment operator */
+	slashcommand& operator=(slashcommand&&) = default;
+
 	/**
 	 * @brief Destroy the slashcommand object
 	 */
-	virtual ~slashcommand() = default;
+	~slashcommand() override;
 
 	/**
 	 * @brief Add a localisation for this slash command

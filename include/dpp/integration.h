@@ -234,9 +234,6 @@ public:
 	/** Default constructor */
 	integration();
 
-	/** Default destructor */
-	~integration() = default;
-
 	/**
 	 * Are emoticons enabled for this integration?
 	 * @warning This is not provided for discord bot integrations.

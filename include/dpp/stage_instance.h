@@ -97,11 +97,6 @@ public:
 	 * @brief Create a stage_instance object
 	 */
 	stage_instance();
-
-	/**
-	 * @brief Destroy the stage_instance object
-	 */
-	~stage_instance() = default;
 };
 
 /**

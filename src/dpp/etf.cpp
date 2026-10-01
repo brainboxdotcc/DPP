@@ -492,12 +492,12 @@ json etf_parser::decode_tuple_large() {
 
 json etf_parser::decode_compressed() {
 	const uint32_t uncompressedSize = read_32_bits();
-	unsigned long sourceSize = uncompressedSize;
-	std::vector<uint8_t> outBuffer;
-	outBuffer.reserve(uncompressedSize);
-	const int ret = uncompress((Bytef*)outBuffer.data(), &sourceSize, (const unsigned char*)(data + offset), (uLong)(size - offset));
+	/* zlib takes this as the capacity of outBuffer and returns the number of bytes it actually wrote */
+	unsigned long destinationSize = uncompressedSize;
+	std::vector<uint8_t> outBuffer(uncompressedSize);
+	const int ret = uncompress((Bytef*)outBuffer.data(), &destinationSize, (const unsigned char*)(data + offset), (uLong)(size - offset));
 
-	offset += sourceSize;
+	offset += destinationSize;
 	if (ret != Z_OK) {
 		throw dpp::parse_exception(err_etf, "ETF compressed value: decompresson error");
 	}
@@ -506,7 +506,7 @@ json etf_parser::decode_compressed() {
 	size_t old_size = size;
 	size_t old_offset = offset;
 	data = outBuffer.data();
-	size = uncompressedSize;
+	size = destinationSize;
 	offset = 0;
 	json j = inner_parse();
 	data = old_data;

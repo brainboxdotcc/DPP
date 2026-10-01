@@ -91,6 +91,18 @@ public:
 	 */
 	voiceregion();
 
+	/** Copy constructor */
+	voiceregion(const voiceregion&) = default;
+
+	/** Move constructor */
+	voiceregion(voiceregion&&) = default;
+
+	/** Copy assignment operator */
+	voiceregion& operator=(const voiceregion&) = default;
+
+	/** Move assignment operator */
+	voiceregion& operator=(voiceregion&&) = default;
+
 	/**
 	 * @brief Destroy the voiceregion object
 	 */
