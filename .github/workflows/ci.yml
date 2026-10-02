@@ -39,7 +39,6 @@ jobs:
       fail-fast: false # Don't fail everything if one fails. We want to test each OS/Compiler individually
       matrix:
         # GitHub hosted runners on Azure
-        # arm7hf is a self-hosted docker-based runner at Brainbox.cc. Raspberry Pi 4, 8gb 4-core with NEON
         cfg:
           # clang++
           - { arch: 'amd64', concurrency: 4, os: ubuntu-22.04, package: clang-11, cpp: clang++, version: 11, cmake-flags: '', cpack: 'no', ctest: 'no', mold: 'yes' }
@@ -60,7 +59,6 @@ jobs:
           - { arch: 'amd64', concurrency: 4, os: ubuntu-24.04, package: g++-13, cpp: g++, version: 13, cmake-flags: '', cpack: 'yes', ctest: 'yes', mold: 'yes' }
           - { arch: 'amd64', concurrency: 4, os: ubuntu-24.04, package: g++-14, cpp: g++, version: 14, cmake-flags: '', cpack: 'no', ctest: 'no', mold: 'yes' }
           # Self hosted
-          - { arch: 'arm7hf', concurrency: 4, os: [self-hosted, linux, ARM], package: g++-12, cpp: g++, version: 12, cmake-flags: '', cpack: 'yes', ctest: 'no', mold: 'no' }
           - { arch: 'arm64', concurrency: 4, os: [self-hosted, linux, ARM64], package: g++-12, cpp: g++, version: 12, cmake-flags: '', cpack: 'yes', ctest: 'no', mold: 'yes' }
     steps:
       - name: Harden Runner
@@ -121,6 +119,59 @@ jobs:
         with:
           name: "libdpp - RPM Package ${{matrix.cfg.arch}}"
           path: '${{github.workspace}}/build/*.rpm'
+
+  linux-arm7hf:
+    permissions:
+      contents: write
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}-arm7hf-g++-12
+      cancel-in-progress: true
+    name: Linux arm7hf (g++-12)
+    runs-on: [self-hosted, linux, ARM64]
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+        with:
+          egress-policy: audit
+
+      - name: Checkout D++
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Build and package in Debian armhf
+        run: |
+          root=/tmp/dpp-armhf-root
+          sudo rm -rf "$root"
+          sudo apt-get update
+          sudo apt-get install -y debootstrap
+          sudo debootstrap --arch=armhf bookworm "$root" http://deb.debian.org/debian
+          sudo mkdir -p "$root/work"
+          sudo cp -a "${GITHUB_WORKSPACE}/." "$root/work/"
+          sudo chroot "$root" /bin/bash -c '
+            set -e
+            apt-get update
+            apt-get install -y g++-12 cmake make pkg-config libssl-dev libopus-dev zlib1g-dev rpm git
+            cd /work
+            CXX=g++-12 cmake -B build -DDPP_NO_VCPKG=ON -DAVX_TYPE=AVX0 -DCMAKE_BUILD_TYPE=Release
+            cmake --build build -j4
+            cd build
+            cpack --verbose
+          '
+          sudo cp "$root"/work/build/*.deb "${GITHUB_WORKSPACE}/"
+          sudo cp "$root"/work/build/*.rpm "${GITHUB_WORKSPACE}/"
+          sudo chown "$(id -u):$(id -g)" "${GITHUB_WORKSPACE}"/*.deb "${GITHUB_WORKSPACE}"/*.rpm
+          sudo rm -rf "$root"
+
+      - name: Upload Binary (DEB)
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: "libdpp - Debian Package arm7hf"
+          path: '${{github.workspace}}/*.deb'
+
+      - name: Upload Binary (RPM)
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: "libdpp - RPM Package arm7hf"
+          path: '${{github.workspace}}/*.rpm'
 
   macos:
     permissions:
