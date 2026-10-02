@@ -34,9 +34,9 @@
 #include <array>
 #include <dpp/cluster.h>
 
-#ifdef _WIN32
-	#include <stdio.h>
-	#include <stdlib.h>
+#ifdef DPP_USE_WINDOWS
+	#include <cstdio>
+	#include <cstdlib>
 	#define popen _popen
 	#define pclose _pclose
 #endif

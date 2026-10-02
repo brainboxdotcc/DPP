@@ -34,10 +34,10 @@ namespace dpp
  * @brief Represents a socket file descriptor.
  * This is used to ensure parity between windows and unix-like systems.
  */
-#ifndef _WIN32
-	using socket = int;
-#else
+#ifdef DPP_USE_WINDOWS
 	using socket = SOCKET;
+#else
+	using socket = int;
 #endif
 
 #ifndef SOCKET_ERROR

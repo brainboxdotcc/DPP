@@ -20,6 +20,8 @@
  ************************************************************************************/
 #pragma once
 
+#include <dpp/system.h>
+
 /* Compile-time check for C++17.
  * Either one of the following causes a compile time error:
  * __cplusplus not defined at all (this means we are being compiled on a C compiler)
@@ -29,13 +31,13 @@
  * which is hugely non-standard, but apparently "it broke stuff" so they dont ever change it
  * from C++98. Ugh.
  */
-#if (!defined(__cplusplus) || (defined(_MSC_VER) && (!defined(_MSVC_LANG) || _MSVC_LANG < 201703L)) || (!defined(_MSC_VER) && __cplusplus < 201703L))
+#if !defined(DPP_USE_CPP) || DPP_USE_CPP_VERSION < 201703L
 	#error "D++ Requires a C++17 compatible C++ compiler. Please ensure that you have enabled C++17 in your compiler flags."
 #endif
 
 /* If not using c++20, define DPP_CPP17_COMPAT and DPP_NO_CORO if DPP_NO_CORO is not already defined.
  */
-#if !(defined(__cplusplus) && __cplusplus >= 202002L) && !(defined(_MSVC_LANG) && _MSVC_LANG >= 202002L)
+#if DPP_USE_CPP_VERSION < 202002L
 	#define DPP_CPP17_COMPAT
 	#if !defined(DPP_CORO) || !DPP_CORO // Allow overriding this because why not
 		#ifndef DPP_NO_CORO
@@ -48,7 +50,7 @@
 	/* Dynamic linked build as shared object or dll */
 	#ifdef DPP_BUILD
 		/* Building the library */
-		#ifdef _WIN32
+		#ifdef DPP_USE_WINDOWS
 			#include <dpp/win32_safe_warnings.h>
 			#define DPP_EXPORT __declspec(dllexport)
 		#else
@@ -56,7 +58,7 @@
 		#endif
 	#else
 		/* Including the library */
-		#ifdef _WIN32
+		#ifdef DPP_USE_WINDOWS
 			#define DPP_EXPORT __declspec(dllimport)
 		#else
 			#define DPP_EXPORT
@@ -64,7 +66,7 @@
 	#endif
 #else
 	/* Static linked build */
-	#if defined(_WIN32) && defined(DPP_BUILD)
+	#if defined(DPP_USE_WINDOWS) && defined(DPP_BUILD)
 		#include <dpp/win32_safe_warnings.h>
 	#endif
 	#define DPP_EXPORT
@@ -112,7 +114,7 @@ extern bool DPP_EXPORT validate_configuration();
 	 * We want them to initialize at runtime so the function can be pulled from the shared library object.
 	 */
 	#ifndef DPP_BYPASS_VERSION_CHECKING
-		#if defined(_WIN32)
+		#if defined(DPP_USE_WINDOWS)
 			#ifdef _DEBUG
 				inline const bool is_valid_config = validate_configuration<build_type::debug>();
 			#else
@@ -126,7 +128,7 @@ extern bool DPP_EXPORT validate_configuration();
 
 }
 
-#ifdef _WIN32
+#ifdef DPP_USE_WINDOWS
 	#ifndef NOMINMAX
 		#define NOMINMAX
 	#endif

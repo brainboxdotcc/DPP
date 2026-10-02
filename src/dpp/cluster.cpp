@@ -60,7 +60,7 @@ bool validate_configuration() {
 #else
 	[[maybe_unused]] constexpr build_type expected = build_type::release;
 #endif
-#ifdef _WIN32
+#ifdef DPP_USE_WINDOWS
 	if constexpr (BuildType != build_type::universal && BuildType != expected) {
 		MessageBox(
 			nullptr,
@@ -73,10 +73,8 @@ bool validate_configuration() {
 		/* Use std::runtime_rror here because dpp exceptions use std::string and that would crash when catching, because of ABI */
 		throw std::runtime_error("Mismatched Debug/Release configurations between project and dpp.dll");
 	}
-	return true;
-#else
-	return true;
 #endif
+	return true;
 }
 
 template bool DPP_EXPORT validate_configuration<build_type::debug>();

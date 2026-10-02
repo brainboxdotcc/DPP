@@ -28,3 +28,31 @@ To build on Windows follow these steps *exactly*. The build process depends on s
 After compilation you can directly reference the compiled project in your own `CMakeLists.txt` as a library or use the `lib/dll/headers` as you wish. Note that `openssl` and `zlib` will also be an indirect dependency of your program (as `DLL` files) and should be copied alongside `dpp.dll`.
 
 **Have fun!**
+
+## Building with MSYS2
+
+D++ can also be built from the MSYS2 `UCRT64` or `CLANG64` shell. Install the
+compiler, CMake, Ninja, Git, and the matching native dependencies first:
+
+For `UCRT64`:
+
+```sh
+pacman -S \
+    git \
+    mingw-w64-ucrt-x86_64-cmake \
+    mingw-w64-ucrt-x86_64-ninja \
+    mingw-w64-ucrt-x86_64-toolchain \
+	mingw-w64-ucrt-x86_64-openssl \
+    mingw-w64-ucrt-x86_64-zlib \
+	mingw-w64-ucrt-x86_64-opus
+```
+
+For `CLANG64`, replace the `ucrt-x86_64` package prefix with
+`clang-x86_64` and install `mingw-w64-clang-x86_64-clang`.
+
+Run these commands from the repository root in the matching shell:
+
+```sh
+cmake -S . -B build -G Ninja
+cmake --build build
+```

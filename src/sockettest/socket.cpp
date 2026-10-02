@@ -24,15 +24,17 @@
 #include <iostream>
 #include <dpp/dns.h>
 #include <string_view>
-#ifndef _WIN32
-	#include <unistd.h>
-#else
+#ifdef DPP_USE_WINDOWS
 	/* Windows-specific sockets includes */
 	#include <WinSock2.h>
 	#include <WS2tcpip.h>
 	#include <io.h>
-	/* Windows sockets library */
-	#pragma comment(lib, "ws2_32")
+	#ifdef DPP_USE_MSVC
+		/* Windows sockets library */
+		#pragma comment(lib, "ws2_32")
+	#endif
+#else
+	#include <unistd.h>
 #endif
 
 int main() {
