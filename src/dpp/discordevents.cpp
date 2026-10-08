@@ -54,7 +54,7 @@ namespace dpp {
 std::string ts_to_string(time_t ts) {
 	std::ostringstream ss;
 	struct tm t;
-	#ifdef _WIN32
+	#ifdef DPP_USE_WINDOWS
 		gmtime_s(&t, &ts);
 	#else
 		gmtime_r(&ts, &t);

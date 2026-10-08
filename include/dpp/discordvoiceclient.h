@@ -815,7 +815,7 @@ public:
 		satype_live_audio,
 		satype_overlap_audio
 	} send_audio_type =
-#ifdef _WIN32
+#ifdef DPP_USE_WINDOWS
 	satype_overlap_audio;
 #else
 	satype_recorded_audio;
