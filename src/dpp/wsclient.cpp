@@ -125,7 +125,7 @@ void websocket_client::write(const std::string_view data, ws_opcode _opcode)
 		/* Simple write */
 		ssl_connection::socket_write(data);
 	} else {
-		unsigned char out[MAXHEADERSIZE];
+		unsigned char out[MAXHEADERSIZE]{};
 		size_t s = this->fill_header(out, data.length(), _opcode == OP_AUTO ? this->data_opcode : _opcode);
 		std::string header((const char*)out, s);
 		ssl_connection::socket_write(header);
@@ -300,7 +300,7 @@ void websocket_client::one_second_timer()
 
 	if (((now % 20) == 0) && (state == CONNECTED)) {
 		/* For sending pings, we send with payload */
-		unsigned char out[MAXHEADERSIZE];
+		unsigned char out[MAXHEADERSIZE]{};
 		std::string payload = "keepalive";
 		size_t s = this->fill_header(out, payload.length(), OP_PING);
 		std::string header((const char*)out, s);
@@ -329,7 +329,7 @@ void websocket_client::one_second_timer()
 void websocket_client::handle_ping(const std::string &payload)
 {
 	/* For receiving pings we echo back their payload with the type OP_PONG */
-	unsigned char out[MAXHEADERSIZE];
+	unsigned char out[MAXHEADERSIZE]{};
 	size_t s = this->fill_header(out, payload.length(), OP_PONG);
 	std::string header((const char*)out, s);
 	ssl_connection::socket_write(header);
@@ -343,7 +343,7 @@ void websocket_client::send_close_packet()
 	 * and the header. We do this on shutdown of a websocket for graceful close.
 	 */
 	std::string payload = "\x03\xE8";
-	unsigned char out[MAXHEADERSIZE];
+	unsigned char out[MAXHEADERSIZE]{};
 
 	size_t s = this->fill_header(out, payload.length(), OP_CLOSE);
 	std::string header((const char*)out, s);
