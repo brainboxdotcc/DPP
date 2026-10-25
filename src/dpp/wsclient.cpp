@@ -36,7 +36,8 @@ constexpr unsigned char WS_PAYLOAD_LENGTH_MAGIC_LARGE = 126;
 constexpr unsigned char WS_PAYLOAD_LENGTH_MAGIC_HUGE = 127;
 constexpr size_t WS_MAX_PAYLOAD_LENGTH_SMALL = 125;
 constexpr size_t WS_MAX_PAYLOAD_LENGTH_LARGE = 65535;
-constexpr size_t MAXHEADERSIZE = sizeof(uint64_t) + 2;
+/* opcode + length + 64-bit extended length + 4-byte mask */
+constexpr size_t MAXHEADERSIZE = 2 + sizeof(uint64_t) + 4;
 
 websocket_client::websocket_client(cluster* creator, const std::string& hostname, const std::string& port, const std::string& urlpath, ws_opcode opcode)
 	: ssl_connection(creator, hostname, port),
