@@ -36,7 +36,8 @@ constexpr unsigned char WS_PAYLOAD_LENGTH_MAGIC_LARGE = 126;
 constexpr unsigned char WS_PAYLOAD_LENGTH_MAGIC_HUGE = 127;
 constexpr size_t WS_MAX_PAYLOAD_LENGTH_SMALL = 125;
 constexpr size_t WS_MAX_PAYLOAD_LENGTH_LARGE = 65535;
-constexpr size_t MAXHEADERSIZE = sizeof(uint64_t) + 2;
+/* opcode + length byte + 64-bit extended length + 4-byte mask */
+constexpr size_t MAXHEADERSIZE = 1 + 1 + sizeof(uint64_t) + 4;
 
 websocket_client::websocket_client(cluster* creator, const std::string& hostname, const std::string& port, const std::string& urlpath, ws_opcode opcode)
 	: ssl_connection(creator, hostname, port),
@@ -125,7 +126,7 @@ void websocket_client::write(const std::string_view data, ws_opcode _opcode)
 		/* Simple write */
 		ssl_connection::socket_write(data);
 	} else {
-		unsigned char out[MAXHEADERSIZE]{};
+		unsigned char out[MAXHEADERSIZE];
 		size_t s = this->fill_header(out, data.length(), _opcode == OP_AUTO ? this->data_opcode : _opcode);
 		std::string header((const char*)out, s);
 		ssl_connection::socket_write(header);
@@ -300,7 +301,7 @@ void websocket_client::one_second_timer()
 
 	if (((now % 20) == 0) && (state == CONNECTED)) {
 		/* For sending pings, we send with payload */
-		unsigned char out[MAXHEADERSIZE]{};
+		unsigned char out[MAXHEADERSIZE];
 		std::string payload = "keepalive";
 		size_t s = this->fill_header(out, payload.length(), OP_PING);
 		std::string header((const char*)out, s);
@@ -329,7 +330,7 @@ void websocket_client::one_second_timer()
 void websocket_client::handle_ping(const std::string &payload)
 {
 	/* For receiving pings we echo back their payload with the type OP_PONG */
-	unsigned char out[MAXHEADERSIZE]{};
+	unsigned char out[MAXHEADERSIZE];
 	size_t s = this->fill_header(out, payload.length(), OP_PONG);
 	std::string header((const char*)out, s);
 	ssl_connection::socket_write(header);
@@ -343,7 +344,7 @@ void websocket_client::send_close_packet()
 	 * and the header. We do this on shutdown of a websocket for graceful close.
 	 */
 	std::string payload = "\x03\xE8";
-	unsigned char out[MAXHEADERSIZE]{};
+	unsigned char out[MAXHEADERSIZE];
 
 	size_t s = this->fill_header(out, payload.length(), OP_CLOSE);
 	std::string header((const char*)out, s);
