@@ -30,5 +30,5 @@ jobs:
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       - name: Check docs spelling
-        run: git diff origin/dev --name-only --diff-filter=ACMRTUXB | npx -y cspell lint --language-id=cpp --no-progress --no-summary --show-context --show-suggestions --relative --color --file-list stdin --no-must-find-file
+        run: git diff origin/dev --name-only --diff-filter=ACMRTUXB | npx -y cspell@9 lint --language-id=cpp --no-progress --no-summary --show-context --show-suggestions --relative --color --file-list stdin --no-must-find-file
 

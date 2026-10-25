@@ -155,6 +155,9 @@ bool discord_client::handle_frame(const std::string &buffer, ws_opcode opcode)
 	/* gzip compression is a special case */
 	if (compressed) {
 		/* Check that we have a complete compressed frame */
+		if (buffer.size() < 4) {
+			return false;
+		}
 		if ((uint8_t)buffer[buffer.size() - 4] == 0x00 && (uint8_t)buffer[buffer.size() - 3] == 0x00 && (uint8_t)buffer[buffer.size() - 2] == 0xFF
 		&& (uint8_t)buffer[buffer.size() - 1] == 0xFF) {
 			auto result = zlib->decompress(buffer, decompressed);
