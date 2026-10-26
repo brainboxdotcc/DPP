@@ -68,7 +68,7 @@ inline constexpr uint16_t DPP_BUFSIZE{16 * 1024};
 /**
  * @brief Represents a failed socket system call, e.g. connect() failure
  */
-inline constexpr int ERROR_STATUS{-1};
+constexpr dpp::socket ERROR_STATUS{INVALID_SOCKET};
 
 /**
  * @brief Maximum number of internal connect() retries on TCP connections
