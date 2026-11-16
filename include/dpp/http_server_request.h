@@ -31,6 +31,7 @@
 #include <dpp/stringops.h>
 #include <dpp/httpsclient.h>
 #include <climits>
+#include <memory>
 
 namespace dpp {
 
@@ -39,11 +40,13 @@ namespace dpp {
  */
 using http_server_request_event = std::function<void(class http_server_request*)>;
 
-/*
+/**
  * @brief Implements a HTTPS socket client based on the SSL client.
  * @note plaintext HTTP without SSL is also supported via a "downgrade" setting
+ * @note A request must be owned by a std::shared_ptr (as socket_listener::connections does),
+ * because the work it queues for its handler holds a reference to it.
  */
-class DPP_EXPORT http_server_request : public ssl_connection {
+class DPP_EXPORT http_server_request : public ssl_connection, public std::enable_shared_from_this<http_server_request> {
 	/**
 	 * @brief The request body, e.g. form data
 	 */
@@ -68,6 +71,19 @@ class DPP_EXPORT http_server_request : public ssl_connection {
 	 * @brief Handler to handle the inbound request
 	 */
 	http_server_request_event handler{};
+
+	/**
+	 * @brief True once the handler has been queued to run on the thread pool.
+	 * A request is handled once, however much more the client sends after it.
+	 */
+	bool handler_queued{false};
+
+	/**
+	 * @brief Queue the handler and the response to run on the thread pool, once.
+	 * The queued work holds a reference to this request, so the request stays
+	 * alive until the handler has finished even if the client disconnects first.
+	 */
+	void queue_handler();
 
 	/**
 	 * @brief Response body

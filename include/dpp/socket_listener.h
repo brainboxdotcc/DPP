@@ -51,9 +51,11 @@ struct socket_listener {
 	raii_socket fd;
 
 	/**
-	 * @brief Active connections for the server of type T
+	 * @brief Active connections for the server of type T.
+	 * Shared pointers, so that work queued for a connection, such as a request
+	 * handler on the thread pool, keeps it alive after it is removed from this map.
 	 */
-	std::unordered_map<socket, std::unique_ptr<T>> connections;
+	std::unordered_map<socket, std::shared_ptr<T>> connections;
 
 	/**
 	 * @brief Cluster creator
