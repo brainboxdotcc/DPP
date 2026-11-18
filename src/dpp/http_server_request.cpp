@@ -96,13 +96,26 @@ uint64_t http_server_request::get_max_header_size() const {
 }
 
 void http_server_request::generate_error(uint16_t error_code, const std::string& message) {
-	status = HTTPS_DONE;
-	owner->queue_work(1, [this, error_code, message]() {
+	state = HTTPS_DONE;
+	if (!handler_queued) {
 		status = error_code;
 		response_body = message;
-		handler(this);
-		socket_write(get_response());
-		handler = {};
+		queue_handler();
+	}
+}
+
+void http_server_request::queue_handler() {
+	if (handler_queued) {
+		return;
+	}
+	handler_queued = true;
+	owner->queue_work(1, [self = shared_from_this()]() {
+		if (self->handler) {
+			self->handler(self.get());
+		}
+		/* Cleared before the write, so on_buffer_drained() on the socket thread sees it */
+		self->handler = {};
+		self->socket_write(self->get_response());
 	});
 }
 
@@ -190,12 +203,8 @@ bool http_server_request::handle_buffer(std::string &buffer)
 				}
 			break;
 			case HTTPS_DONE:
-				if (handler) {
-					owner->queue_work(1, [this]() {
-						handler(this);
-						socket_write(get_response());
-						handler = {};
-					});
+				if (!handler_queued && handler) {
+					queue_handler();
 				}
 				return true;
 			default:
@@ -273,6 +282,13 @@ std::string http_server_request::get_response() {
 
 void http_server_request::close() {
 	state = HTTPS_DONE;
+	/* Once closed, the request can be freed on the thread pool when its handler
+	 * finishes, so its timer must not fire again on the socket thread.
+	 */
+	if (timer_handle) {
+		owner->stop_timer(timer_handle);
+		timer_handle = 0;
+	}
 	ssl_connection::close();
 }
 

@@ -30,7 +30,7 @@ http_server::http_server(cluster* owner, const std::string_view address, uint16_
 }
 
 void http_server::emplace(socket newfd) {
-	connections.emplace(newfd, std::make_unique<http_server_request>(creator, newfd, bound_port, plaintext, private_key_file, public_key_file, request_handler));
+	connections.emplace(newfd, std::make_shared<http_server_request>(creator, newfd, bound_port, plaintext, private_key_file, public_key_file, request_handler));
 }
 
 }
