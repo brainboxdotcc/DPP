@@ -7,5 +7,6 @@ The way you build D++ varies from system to system. Please follow the guide belo
 * \subpage buildosx
 * \subpage buildfreebsd
 * \subpage buildopenbsd
+* \subpage buildhaiku
 
 \warning Note that you most likely don't need to build D++ from source if you're on Linux or Windows. We offer prebuilt binaries for these platforms and are listed in package managers! Check the downloads in the releases section on GitHub.
