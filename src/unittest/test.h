@@ -148,6 +148,8 @@ DPP_TEST(MD_ESC_1, "Markdown escaping (ignore code block contents)", tf_offline)
 DPP_TEST(MD_ESC_2, "Markdown escaping (escape code block contents)", tf_offline);
 DPP_TEST(URLENC, "URL encoding", tf_offline);
 DPP_TEST(BASE64ENC, "Base 64 encoding", tf_offline);
+DPP_TEST(ETF_COMPRESSED_SHORT, "etf_parser: compressed term shorter than its declared size", tf_offline);
+DPP_TEST(DAVE_BINARY_HEADER, "dave_binary_header_t: seq and transition id with the high bit set", tf_offline);
 DPP_TEST(COMPARISON, "manged object comparison", tf_offline);
 DPP_TEST(CHANNELCACHE, "find_channel()", tf_online);
 DPP_TEST(CHANNELTYPES, "channel type flags", tf_online);
@@ -156,6 +158,11 @@ DPP_TEST(FORUM_CHANNEL_GET, "retrieve the created forum channel", tf_online);
 DPP_TEST(FORUM_CHANNEL_DELETE, "delete the created forum channel", tf_online);
 DPP_TEST(ERRORS, "Human readable error translation", tf_offline);
 DPP_TEST(INVALIDUTF8, "Invalid UTF-8 handling", tf_online);
+
+#ifdef DPP_MODULES
+DPP_TEST(MODULE_IMPORT_BASIC, "C++ module import: basic types", tf_offline);
+DPP_TEST(MODULE_IMPORT_CORO, "C++ module import: coroutines", tf_offline);
+#endif
 
 DPP_TEST(GUILD_EDIT, "cluster::guild_edit", tf_online);
 DPP_TEST(GUILD_BAN_CREATE, "cluster::guild_ban_add ban three well-known discord accounts", tf_online);
@@ -569,6 +576,13 @@ inline constexpr user_project_id_t get_user_snowflake;
 inline constexpr auto is_owner = [](auto &&user) noexcept {
 	return get_user_snowflake(user) == TEST_USER_ID;
 };
+
+#ifdef DPP_MODULES
+/**
+ * @brief Main entry point for module tests
+ */
+void run_module_tests();
+#endif
 
 #define DPP_RUNTIME_CHECK(test, check, var) if (!check) { var = false; set_status(test, ts_failed, "check failed: " #check); }
 #define DPP_COMPILETIME_CHECK(test, check, var) static_assert(check, #test ": " #check)

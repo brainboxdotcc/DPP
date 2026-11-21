@@ -52,8 +52,6 @@ application::application() : managed(0), bot_public(false), bot_require_code_gra
 {
 }
 
-application::~application() = default;
-
 application& application::fill_from_json_impl(nlohmann::json* j) {
 	set_snowflake_not_null(j, "id", id);
 	set_string_not_null(j, "name", name);

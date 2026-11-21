@@ -85,9 +85,9 @@ dave_binary_header_t::dave_binary_header_t(const std::string& buffer) {
 	if (buffer.length() < 5) {
 		throw dpp::length_exception("DAVE binary buffer too short (<5)");
 	}
-	seq = (buffer[0] << 8) | buffer[1];
+	seq = (static_cast<uint8_t>(buffer[0]) << 8) | static_cast<uint8_t>(buffer[1]);
 	opcode = buffer[2];
-	transition_id = (buffer[3] << 8) | buffer[4];
+	transition_id = (static_cast<uint8_t>(buffer[3]) << 8) | static_cast<uint8_t>(buffer[4]);
 
 	bool has_transition_id = opcode == voice_client_dave_mls_welcome || opcode == voice_client_dave_announce_commit_transition;
 	package.assign(buffer.begin() + (has_transition_id ? 5 : 3), buffer.end());

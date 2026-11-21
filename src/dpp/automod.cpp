@@ -130,8 +130,6 @@ automod_rule::automod_rule() : managed(), guild_id(0), creator_id(0), event_type
 {
 }
 
-automod_rule::~automod_rule() = default;
-
 automod_rule& automod_rule::fill_from_json_impl(nlohmann::json* j) {
 	id = snowflake_not_null(j, "id");
 	guild_id = snowflake_not_null(j, "guild_id");
