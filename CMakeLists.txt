@@ -158,4 +158,10 @@ endif()
 
 if (NOT WIN32)
 	target_link_libraries(dpp PRIVATE std::filesystem)
+	
+		
+	# make sure CMake picks up the haiku network library
+	if (CMAKE_SYSTEM_NAME STREQUAL "Haiku")
+		target_link_libraries(sockettest PRIVATE network)
+	endif()
 endif()
