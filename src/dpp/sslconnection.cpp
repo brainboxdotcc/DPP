@@ -21,7 +21,7 @@
  ************************************************************************************/
 #include <dpp/export.h>
 #include <cerrno>
-#ifdef _WIN32
+#ifdef DPP_USE_WINDOWS
 	/* Windows-specific sockets includes */
 	#include <WinSock2.h>
 	#include <WS2tcpip.h>
@@ -96,7 +96,7 @@ bool close_socket(dpp::socket sfd)
 	/* close_socket on an error socket is a non-op */
 	if (sfd != INVALID_SOCKET) {
 		shutdown(sfd, 2);
-#ifdef _WIN32
+#ifdef DPP_USE_WINDOWS
 		return closesocket(sfd) == 0;
 #else
 		return ::close(sfd) == 0;
@@ -106,7 +106,7 @@ bool close_socket(dpp::socket sfd)
 }
 
 std::string get_socket_error() {
-#ifdef _WIN32
+#ifdef DPP_USE_WINDOWS
 	wchar_t *wide_buffer{nullptr};
 	std::string message{"Unknown error"};
 
@@ -131,7 +131,7 @@ std::string get_socket_error() {
 bool set_nonblocking(dpp::socket sockfd, bool non_blocking)
 {
 	const int enable{1};
-#ifdef _WIN32
+#ifdef DPP_USE_WINDOWS
 	u_long mode = non_blocking ? 1 : 0;
 	int result = ioctlsocket(sockfd, FIONBIO, &mode);
 	if (result != NO_ERROR) {
@@ -156,7 +156,7 @@ int ssl_connection::start_connecting(dpp::socket sockfd, const struct sockaddr *
 	if (!set_nonblocking(sockfd, true)) {
 		throw dpp::connection_exception(err_nonblocking_failure, "Can't switch socket to non-blocking mode!");
 	}
-#ifdef _WIN32
+#ifdef DPP_USE_WINDOWS
 	/* Windows connect returns -1 and sets its error value to 0 for successfull blocking connection -
 	 * This is equivalent to EWOULDBLOCK on POSIX
 	 */
@@ -170,7 +170,7 @@ int ssl_connection::start_connecting(dpp::socket sockfd, const struct sockaddr *
 	int err = errno;
 #endif
 	if (rc == -1
-#ifdef _WIN32
+#ifdef DPP_USE_WINDOWS
 		&& err != WSAEWOULDBLOCK
 #endif
 		&& err != EWOULDBLOCK && err != EINPROGRESS) {
@@ -186,7 +186,7 @@ int ssl_connection::start_connecting(dpp::socket sockfd, const struct sockaddr *
 	return 0;
 }
 
-#ifndef _WIN32
+#ifndef DPP_USE_WINDOWS
 /**
  * @brief Some old Linux and UNIX variants (BSDs) can raise signals for socket
  * errors, such as SIGPIPE etc. We filter these out so we can just concern ourselves

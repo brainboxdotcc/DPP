@@ -57,8 +57,8 @@
 #include "../../dave/decryptor.h"
 #include "../../dave/encryptor.h"
 
-#ifdef _WIN32
-#include <WinSock2.h>
+#ifdef DPP_USE_WINDOWS
+	#include <WinSock2.h>
 	#include <WS2tcpip.h>
 	#include <io.h>
 #else

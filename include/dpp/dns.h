@@ -20,13 +20,13 @@
  ************************************************************************************/
 #pragma once
 #include <dpp/export.h>
-#ifdef _WIN32
-#include <WinSock2.h>
-#include <WS2tcpip.h>
+#ifdef DPP_USE_WINDOWS
+	#include <WinSock2.h>
+	#include <WS2tcpip.h>
 #else
-#include <netinet/in.h>
-#include <netdb.h>
-#include <sys/socket.h>
+	#include <netinet/in.h>
+	#include <netdb.h>
+	#include <sys/socket.h>
 #endif
 #include <sys/types.h>
 #include <string>
