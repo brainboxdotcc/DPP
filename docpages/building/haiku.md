@@ -33,7 +33,7 @@ Then once the build is complete, run `make install` to install to the location y
 
 Once installed to the `/boot/system/non-packaged` directory, you can make use of the library in standalone programs simply by including it and linking to it:
 
-\note We manually tell the compiler to search in `/boot/system/non-packaged` to make sure that even if `/boot/system/non-packaged` isn't searched by default, our program still compiles.
+\note We explicitely tell the compiler to search in `/boot/system/non-packaged` to make sure that even if `/boot/system/non-packaged` isn't searched by default, our program still compiles.
 
 ```bash
 g++ -std=c++20 mydppbot.cpp -o dppbot -I/boot/system/non-packaged/include -L/boot/system/non-packaged/lib -ldpp
@@ -42,10 +42,15 @@ g++ -std=c++20 mydppbot.cpp -o dppbot -I/boot/system/non-packaged/include -L/boo
 The important flags in this command-line are:
 
 * `-std=c++20` - Required to compile the headers
+* `-I/boot/system/non-packaged/include` and `-L/boot/system/non-packaged/lib` - Explicitely tell the compiler to search for libraries in `/boot/system/non-packaged`
 * `-ldpp` - Link to libdpp.so
 * `mydppbot.cpp` - Your source code
 * `dppbot` - The name of the executable to make
 
 \include{doc} install_prebuilt_footer.dox
+
+> on the quiet server
+> a new announcement is made,
+> the library builds
 
 **Have fun!**
