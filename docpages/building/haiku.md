@@ -49,8 +49,8 @@ The important flags in this command-line are:
 
 \include{doc} install_prebuilt_footer.dox
 
-> on the quiet server
-> a new announcement is made,
-> the library builds
+> on the quiet server <br>
+> a new announcement is made, <br>
+> the library builds <br>
 
 **Have fun!**
