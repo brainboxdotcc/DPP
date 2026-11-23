@@ -29,7 +29,9 @@ int main() {
 					// Look in guild's member cache
 					auto member = guild->members.read([&](const auto& members) -> std::optional<dpp::guild_member> {
 						auto it = members.find(user_id);
-						if (it != members.end()) return it->second;
+						if (it != members.end()) {
+							return it->second;
+						}
 						return std::nullopt;
 					});
 					if (member) co_return *member;

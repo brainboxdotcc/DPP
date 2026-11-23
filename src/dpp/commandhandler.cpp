@@ -255,7 +255,9 @@ void commandhandler::route(const struct dpp::message_create_t& event)
 								dpp::guild* g = dpp::find_guild(event.msg.guild_id);
 								g->members.read([&](const auto& members) {
 									auto it = members.find(uid);
-									if (it != members.end()) m.member = it->second;
+									if (it != members.end()) {
+										m.member = it->second;
+									}
 								});
 								param = m;
 							}
@@ -364,7 +366,9 @@ void commandhandler::route(const struct slashcommand_t & event)
 						dpp::guild* g = dpp::find_guild(event.command.guild_id);
 						g->members.read([&](const auto& members) {
 							auto it = members.find(uid);
-							if (it != members.end()) m.member = it->second;
+							if (it != members.end()) {
+								m.member = it->second;
+							}
 						});
 						param = m;
 					} else {

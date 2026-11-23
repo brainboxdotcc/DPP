@@ -795,7 +795,9 @@ permission guild::base_permissions(const user* user) const {
 	guild_member gm;
 	if (!members.read([&](const auto& map) {
 		auto mi = map.find(user->id);
-		if (mi == map.end()) return false;
+		if (mi == map.end()) {
+			return false;
+		}
 		gm = mi->second;
 		return true;
 	})) return 0;
@@ -858,7 +860,9 @@ permission guild::permission_overwrites(const uint64_t base_permissions, const u
 	guild_member gm;
 	if (!members.read([&](const auto& map) {
 		auto mi = map.find(user->id);
-		if (mi == map.end()) return false;
+		if (mi == map.end()) {
+			return false;
+		}
 		gm = mi->second;
 		return true;
 	})) return 0;
@@ -1030,10 +1034,14 @@ guild_member find_guild_member(const snowflake guild_id, const snowflake user_id
 	if (g) {
 		auto gm = g->members.read([&](const auto& map) -> std::optional<guild_member> {
 			auto it = map.find(user_id);
-			if (it != map.end()) return it->second;
+			if (it != map.end()) {
+				return it->second;
+			}
 			return std::nullopt;
 		});
-		if (gm) return *gm;
+		if (gm) {
+			return *gm;
+		}
 
 		throw dpp::cache_exception(err_cache, "Requested member not found in the guild cache!");
 	}
