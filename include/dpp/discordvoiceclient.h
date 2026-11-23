@@ -175,7 +175,7 @@ enum voice_websocket_opcode_t : uint8_t {
 /**
  * @brief DAVE E2EE Binary frame header
  */
-struct dave_binary_header_t {
+struct DPP_EXPORT dave_binary_header_t {
 	/**
 	 * @brief Sequence number
 	 */
