@@ -234,7 +234,7 @@ void cluster::start(start_type return_after) {
 					std::unique_ptr<discord_client> cl_old = {};
 					std::unique_ptr<discord_client> cl_new = {};
 					{
-						std::shared_lock lk(shards_mutex);
+						std::unique_lock lk(shards_mutex);
 						cl_old = std::move(shards[shard_id]);
 					}
 					log(ll_info, "Reconnecting shard " + std::to_string(shard_id));

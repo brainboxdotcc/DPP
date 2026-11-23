@@ -74,10 +74,11 @@ discord_client::discord_client(discord_client &old)
 	  ready(false),
 	  last_heartbeat_ack(time(nullptr)),
 	  protocol(old.protocol),
-	  connecting_voice_channels(std::move(old.connecting_voice_channels)),
 	  resume_gateway_url(old.resume_gateway_url)
 {
-	for (auto& [shard_id, vconn] : connecting_voice_channels) {
+	std::unique_lock lock(old.voice_mutex);
+	connecting_voice_channels = std::move(old.connecting_voice_channels);
+	for (auto& [guild_id, vconn] : connecting_voice_channels) {
 		vconn->reassign_owner(this);
 	}
 }
