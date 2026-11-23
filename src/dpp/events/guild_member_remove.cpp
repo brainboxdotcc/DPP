@@ -54,17 +54,19 @@ void guild_member_remove::handle(discord_client* client, json &j, const std::str
 
 	/* NOTE: This operates on the cached pointer of the guild */
 	if (client->creator->cache_policy.user_policy != dpp::cp_none && g) {
-		auto i = g->members.find(gmr.removed.id);
-		if (i != g->members.end()) {
-			dpp::user* u = dpp::find_user(gmr.removed.id);
-			if (u) {
-				u->refcount--;
-				if (u->refcount < 1) {
-					dpp::get_user_cache()->remove(u);
+		g->members.write([&](auto& members) {
+			auto i = members.find(gmr.removed.id);
+			if (i != members.end()) {
+				dpp::user* u = dpp::find_user(gmr.removed.id);
+				if (u) {
+					u->refcount--;
+					if (u->refcount < 1) {
+						dpp::get_user_cache()->remove(u);
+					}
 				}
+				members.erase(i);
 			}
-			g->members.erase(i);
-		}
+		});
 	}
 }
 

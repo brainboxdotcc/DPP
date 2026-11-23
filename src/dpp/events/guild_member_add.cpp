@@ -63,12 +63,17 @@ void guild_member_add::handle(discord_client* client, json &j, const std::string
 		}
 		dpp::guild_member gm;
 		gmr.added = {};
-		if (g && u && u->id && g->members.find(u->id) == g->members.end()) {
-			gm.fill_from_json(&d, g->id, u->id);
-			g->members[u->id] = gm;
-			gmr.added = gm;
-		} else if (g && u && u->id) {
-			gmr.added = g->members.find(u->id)->second;
+		if (g && u && u->id) {
+			g->members.write([&](auto& members) {
+				auto it = members.find(u->id);
+				if (it == members.end()) {
+					gm.fill_from_json(&d, g->id, u->id);
+					members[u->id] = gm;
+					gmr.added = gm;
+				} else {
+					gmr.added = it->second;
+				}
+			});
 		}
 		if (!client->creator->on_guild_member_add.empty()) {
 			gmr.adding_guild = g ? *g : guild{};

@@ -483,7 +483,7 @@ uint64_t discord_client::get_member_count() {
 		if (gp->shard_id == this->shard_id) {
 			if (creator->cache_policy.user_policy == dpp::cp_aggressive) {
 				/* We can use actual member count if we are using full user caching */
-				total += gp->members.size();
+				total += gp->members.read([](const auto& members) { return members.size(); });
 			} else {
 				/* Otherwise we use approximate guild member counts from guild_create */
 				total += gp->member_count;
