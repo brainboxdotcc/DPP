@@ -53,14 +53,16 @@ void guild_members_chunk::handle(discord_client* client, json &j, const std::str
 					u->fill_from_json(&userspart);
 					dpp::get_user_cache()->store(u);
 				}
-				if (g->members.find(u->id) == g->members.end()) {
-					dpp::guild_member gm;
-					gm.fill_from_json(&userrec, g->id, u->id);
-					g->members[u->id] = gm;
-					if (!client->creator->on_guild_members_chunk.empty()) {
-						um[u->id] = gm;
+				g->members.write([&](auto& members) {
+					if (members.find(u->id) == members.end()) {
+						dpp::guild_member gm;
+						gm.fill_from_json(&userrec, g->id, u->id);
+						members[u->id] = gm;
+						if (!client->creator->on_guild_members_chunk.empty()) {
+							um[u->id] = gm;
+						}
 					}
-				}
+				});
 			}
 		}
 	}

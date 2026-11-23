@@ -74,10 +74,11 @@ discord_client::discord_client(discord_client &old)
 	  ready(false),
 	  last_heartbeat_ack(time(nullptr)),
 	  protocol(old.protocol),
-	  connecting_voice_channels(std::move(old.connecting_voice_channels)),
 	  resume_gateway_url(old.resume_gateway_url)
 {
-	for (auto& [shard_id, vconn] : connecting_voice_channels) {
+	std::unique_lock lock(old.voice_mutex);
+	connecting_voice_channels = std::move(old.connecting_voice_channels);
+	for (auto& [guild_id, vconn] : connecting_voice_channels) {
 		vconn->reassign_owner(this);
 	}
 }
@@ -483,7 +484,7 @@ uint64_t discord_client::get_member_count() {
 		if (gp->shard_id == this->shard_id) {
 			if (creator->cache_policy.user_policy == dpp::cp_aggressive) {
 				/* We can use actual member count if we are using full user caching */
-				total += gp->members.size();
+				total += gp->members.read([](const auto& members) { return members.size(); });
 			} else {
 				/* Otherwise we use approximate guild member counts from guild_create */
 				total += gp->member_count;

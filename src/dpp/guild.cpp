@@ -1,3 +1,4 @@
+#include <optional>
 /************************************************************************************
  *
  * D++, A Lightweight C++ library for Discord
@@ -94,9 +95,9 @@ guild::guild() :
 }
 
 guild::guild(const guild&) = default;
-guild::guild(guild&&) noexcept(std::is_nothrow_move_constructible_v<std::map<snowflake, voicestate>>) = default;
+guild::guild(guild&&) = default;
 guild& guild::operator=(const guild&) = default;
-guild& guild::operator=(guild&&) noexcept(std::is_nothrow_move_assignable_v<std::map<snowflake, voicestate>>) = default;
+guild& guild::operator=(guild&&) = default;
 guild::~guild() = default;
 
 
@@ -636,12 +637,7 @@ json guild::to_json_impl(bool with_id) const {
 }
 
 void guild::rehash_members() {
-	members_container n;
-	n.reserve(members.size());
-	for (auto t = members.begin(); t != members.end(); ++t) {
-		n.insert(*t);
-	}
-	members = n;
+	members.write([](auto& map) { map.rehash(map.bucket_count()); });
 }
 
 guild& guild::fill_from_json_impl(nlohmann::json* d) {
@@ -796,11 +792,15 @@ permission guild::base_permissions(const user* user) const {
 		return 0;
 	}
 
-	auto mi = members.find(user->id);
-	if (mi == members.end()) {
-		return 0;
-	}
-	guild_member gm = mi->second;
+	guild_member gm;
+	if (!members.read([&](const auto& map) {
+		auto mi = map.find(user->id);
+		if (mi == map.end()) {
+			return false;
+		}
+		gm = mi->second;
+		return true;
+	})) return 0;
 
 	return base_permissions(gm);
 }
@@ -857,11 +857,15 @@ permission guild::permission_overwrites(const uint64_t base_permissions, const u
 		}
 	}
 
-	auto mi = members.find(user->id);
-	if (mi == members.end()) {
-		return 0;
-	}
-	guild_member gm = mi->second;
+	guild_member gm;
+	if (!members.read([&](const auto& map) {
+		auto mi = map.find(user->id);
+		if (mi == map.end()) {
+			return false;
+		}
+		gm = mi->second;
+		return true;
+	})) return 0;
 
 	// Apply role specific overwrites.
 	uint64_t allow = 0;
@@ -1028,9 +1032,15 @@ std::string guild::get_splash_url(uint16_t size, const image_type format) const 
 guild_member find_guild_member(const snowflake guild_id, const snowflake user_id) {
 	guild* g = find_guild(guild_id);
 	if (g) {
-		auto gm = g->members.find(user_id);
-		if (gm != g->members.end()) {
-			return gm->second;
+		auto gm = g->members.read([&](const auto& map) -> std::optional<guild_member> {
+			auto it = map.find(user_id);
+			if (it != map.end()) {
+				return it->second;
+			}
+			return std::nullopt;
+		});
+		if (gm) {
+			return *gm;
 		}
 
 		throw dpp::cache_exception(err_cache, "Requested member not found in the guild cache!");

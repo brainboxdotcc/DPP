@@ -61,7 +61,7 @@ void voice_state_update::handle(discord_client* client, json &j, const std::stri
 				auto& member = d["member"];
 				guild_member m;
 				m.fill_from_json(&member, g->id, vsu.state.user_id);
-				g->members[m.user_id] = m;
+				g->members.write([&](auto& members) { members[m.user_id] = m; });
 			}
 		}
 	}

@@ -27,8 +27,9 @@ int main() {
 				dpp::guild *guild = dpp::find_guild(event.command.guild_id);
 				if (guild) {
 					// Look in guild's member cache
-					if (auto member = guild->members.find(user_id); member != guild->members.end()) {
-						co_return member->second;
+					auto member = guild->members.get(user_id);
+					if (member) {
+						co_return *member;
 					}
 				}
 				// Finally if everything else failed, request API

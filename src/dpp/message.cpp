@@ -1738,22 +1738,24 @@ message& message::fill_from_json(json* d, cache_policy_t cp) {
 			this->member.fill_from_json(&mi, this->guild_id, uid);
 		} else if (g) {
 			/* User caching on, lazy or aggressive - cache the member information */
-			auto thismember = g->members.find(uid);
-			if (thismember == g->members.end()) {
-				if (!uid.empty() && author.id) {
-					guild_member gm;
-					gm.fill_from_json(&mi, this->guild_id, uid);
-					g->members[author.id] = gm;
-					this->member = gm;
+			g->members.write([&](auto& members) {
+				auto thismember = members.find(uid);
+				if (thismember == members.end()) {
+					if (!uid.empty() && author.id) {
+						guild_member gm;
+						gm.fill_from_json(&mi, this->guild_id, uid);
+						members[author.id] = gm;
+						this->member = gm;
+					}
+				} else {
+					/* Update roles etc */
+					this->member = thismember->second;
+					if (author.id) {
+						this->member.fill_from_json(&mi, this->guild_id, author.id);
+						members[author.id] = this->member;
+					}
 				}
-			} else {
-				/* Update roles etc */
-				this->member = thismember->second;
-				if (author.id) {
-					this->member.fill_from_json(&mi, this->guild_id, author.id);
-					g->members[author.id] = this->member;
-				}
-			}
+			});
 		}
 	}
 	if (d->find("embeds") != d->end()) {

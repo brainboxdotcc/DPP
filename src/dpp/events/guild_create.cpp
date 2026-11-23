@@ -100,24 +100,26 @@ void guild_create::handle(discord_client* client, json &j, const std::string &ra
 
 			/* Store guild members */
 			if (client->creator->cache_policy.user_policy == cp_aggressive) {
-				g->members.reserve(d["members"].size());
-				for (auto & user : d["members"]) {
-					snowflake userid = snowflake_not_null(&(user["user"]), "id");
-					/* Only store ones we don't have already otherwise gm will leak */
-					if (g->members.find(userid) == g->members.end()) {
-						dpp::user* u = dpp::find_user(userid);
-						if (!u) {
-							u = new dpp::user();
-							u->fill_from_json(&(user["user"]));
-							dpp::get_user_cache()->store(u);
-						} else {
-							u->refcount++;
+				g->members.write([&](auto& members) {
+					members.reserve(d["members"].size());
+					for (auto & user : d["members"]) {
+						snowflake userid = snowflake_not_null(&(user["user"]), "id");
+						/* Only store ones we don't have already otherwise gm will leak */
+						if (members.find(userid) == members.end()) {
+							dpp::user* u = dpp::find_user(userid);
+							if (!u) {
+								u = new dpp::user();
+								u->fill_from_json(&(user["user"]));
+								dpp::get_user_cache()->store(u);
+							} else {
+								u->refcount++;
+							}
+							dpp::guild_member gm;
+							gm.fill_from_json(&user, g->id, userid);
+							members[userid] = gm;
 						}
-						dpp::guild_member gm;
-						gm.fill_from_json(&user, g->id, userid);
-						g->members[userid] = gm;
 					}
-				}
+				});
 			}
 			if (client->creator->cache_policy.emoji_policy != dpp::cp_none) {
 				/* Store emojis */

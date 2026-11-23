@@ -29,6 +29,7 @@
 #include <dpp/permissions.h>
 #include <string>
 #include <unordered_map>
+#include <dpp/thread_safe_unordered_map.h>
 #include <dpp/json_interface.h>
 
 namespace dpp {
@@ -1003,7 +1004,7 @@ enum guild_afk_timeout_t : uint8_t {
 /**
  * @brief Guild members container
  */
-typedef std::unordered_map<snowflake, guild_member> members_container;
+typedef thread_safe_unordered_map<snowflake, guild_member> members_container;
 
 /**
  * @brief Represents a guild on Discord (AKA a server)
@@ -1228,13 +1229,13 @@ public:
 	guild(const guild&);
 
 	/** Move constructor */
-	guild(guild&&) noexcept(std::is_nothrow_move_constructible_v<std::map<snowflake, voicestate>>);
+	guild(guild&&);
 
 	/** Copy assignment operator */
 	guild& operator=(const guild&);
 
 	/** Move assignment operator */
-	guild& operator=(guild&&) noexcept(std::is_nothrow_move_assignable_v<std::map<snowflake, voicestate>>);
+	guild& operator=(guild&&);
 
 	/**
 	 * @brief Destroy the guild object

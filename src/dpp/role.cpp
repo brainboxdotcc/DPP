@@ -407,14 +407,16 @@ members_container role::get_members() const {
 			/* Special shortcircuit for everyone-role. Always includes all users. */
 			return g->members;
 		}
-		for (auto & m : g->members) {
-			/* Iterate all members and use std::find on their role list to see who has this role */
-			const auto& r = m.second.get_roles();
-			auto i = std::find(r.begin(), r.end(), this->id);
-			if (i != r.end()) {
-				gm[m.second.user_id] = m.second;
+		g->members.read([&](const auto& members) {
+			for (const auto& m : members) {
+				/* Iterate all members and use std::find on their role list to see who has this role */
+				const auto& r = m.second.get_roles();
+				auto i = std::find(r.begin(), r.end(), this->id);
+				if (i != r.end()) {
+					gm[m.second.user_id] = m.second;
+				}
 			}
-		}
+		});
 	}
 	return gm;
 }

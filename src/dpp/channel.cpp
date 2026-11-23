@@ -534,11 +534,13 @@ std::map<snowflake, guild_member*> channel::get_members() {
 	std::map<snowflake, guild_member*> rv;
 	guild* g = dpp::find_guild(guild_id);
 	if (g) {
-		for (auto m = g->members.begin(); m != g->members.end(); ++m) {
-			if (g->permission_overwrites(m->second, *this) & p_view_channel) {
-				rv[m->second.user_id] = &(m->second);
+		g->members.read([&](const auto& members) {
+			for (const auto& m : members) {
+				if (g->permission_overwrites(m.second, *this) & p_view_channel) {
+					rv[m.second.user_id] = const_cast<guild_member*>(&m.second);
+				}
 			}
-		}
+		});
 	}
 	return rv;
 }

@@ -693,7 +693,7 @@ void from_json(const nlohmann::json& j, interaction& i) {
 			/* User caching on, lazy or aggressive - cache or update the member information */
 			guild* g = dpp::find_guild(i.guild_id);
 			if (g) {
-				g->members[i.member.user_id] = i.member;
+				g->members.write([&](auto& members) { members[i.member.user_id] = i.member; });
 			}
 		}
 		/* store the included permissions of this member in the resolved set */
