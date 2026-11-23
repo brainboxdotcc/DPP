@@ -4,6 +4,7 @@
 #include <mutex>
 #include <utility>
 #include <functional>
+#include <optional>
 
 namespace dpp {
 
@@ -88,6 +89,23 @@ public:
     decltype(auto) read(F&& fn) const {
         std::shared_lock lock(mutex);
         return std::forward<F>(fn)(static_cast<const base&>(*this));
+    }
+
+    /**
+     * @brief Safely retrieve a copy of a value by key.
+     * @details Returns a snapshot of the mapped value while holding a shared lock.
+     * Modifying the returned value does not modify the map.
+     *
+     * @param key Key to look up
+     * @return A copy of the value, or std::nullopt if the key does not exist
+     */
+    std::optional<T> get(const Key& key) const {
+        std::shared_lock lock(mutex);
+        auto it = base::find(key);
+        if (it != base::end()) {
+            return it->second;
+        }
+        return std::nullopt;
     }
 
     /**

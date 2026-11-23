@@ -27,14 +27,10 @@ int main() {
 				dpp::guild *guild = dpp::find_guild(event.command.guild_id);
 				if (guild) {
 					// Look in guild's member cache
-					auto member = guild->members.read([&](const auto& members) -> std::optional<dpp::guild_member> {
-						auto it = members.find(user_id);
-						if (it != members.end()) {
-							return it->second;
-						}
-						return std::nullopt;
-					});
-					if (member) co_return *member;
+					auto member = guild->members.get(user_id);
+					if (member) {
+						co_return *member;
+					}
 				}
 				// Finally if everything else failed, request API
 				dpp::confirmation_callback_t confirmation = co_await event.owner->co_guild_get_member(event.command.guild_id, user_id);
