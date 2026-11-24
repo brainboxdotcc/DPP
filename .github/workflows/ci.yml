@@ -257,6 +257,43 @@ jobs:
           ulimit -n
           cmake --build build -j4
 
+      - name: Create HPKG
+        run: |
+          VERSION="${GITHUB_SHA}"
+          rm -rf staging && mkdir -p staging dist
+          DESTDIR="$PWD/staging" cmake --install build
+
+          cat > staging/.PackageInfo <<EOF
+          name dpp
+          version ${VERSION}-1
+          architecture x86_64
+                summary "D++ - The C++ Discord API Library"
+                description "a lightweight and simple library for Discord written in modern C++"
+                packager "DPP CI"
+                vendor "brainboxdotcc"
+                copyrights { "2021-2026 D++ contributors" }
+                licenses { "Apache v2" }
+                provides {
+                    dpp = ${VERSION}
+                }
+                requires {
+                    haiku
+                    lib:libssl
+                    lib:libcrypto
+                    lib:libopus
+                    lib:libz
+                }
+                EOF
+
+                package create -C staging "$PWD/dist/dpp-${VERSION}-1-x86_64.hpkg"
+                package list "dist/dpp-${VERSION}-1-x86_64.hpkg"   # sanity check
+      - name: Upload HPKG artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dpp-haiku-x86_64-hpkg
+          path: dist/*.hpkg
+          if-no-files-found: error
+
   windows: # Windows x64 and x86 build matrix
     permissions:
       contents: write
