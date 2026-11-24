@@ -259,7 +259,7 @@ jobs:
 
       - name: Create HPKG
         run: |
-          VERSION="${GITHUB_SHA}"
+          VERSION="latest"
           rm -rf staging && mkdir -p staging dist
           DESTDIR="$PWD/staging" cmake --install build
 
