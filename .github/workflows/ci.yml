@@ -283,10 +283,10 @@ jobs:
                     lib:libopus
                     lib:libz
                 }
-                EOF
+          EOF
 
-                package create -C staging "$PWD/dist/dpp-${VERSION}-1-x86_64.hpkg"
-                package list "dist/dpp-${VERSION}-1-x86_64.hpkg"   # sanity check
+          package create -C staging "$PWD/dist/dpp-${VERSION}-1-x86_64.hpkg"
+          package list "dist/dpp-${VERSION}-1-x86_64.hpkg"   # sanity check
 
       - name: Sync files back to runner
         shell: bash
