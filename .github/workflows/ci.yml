@@ -287,6 +287,11 @@ jobs:
 
                 package create -C staging "$PWD/dist/dpp-${VERSION}-1-x86_64.hpkg"
                 package list "dist/dpp-${VERSION}-1-x86_64.hpkg"   # sanity check
+
+      - name: Sync files back to runner
+        shell: bash
+        run: cpa.sh --sync-files
+
       - name: Upload HPKG artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
