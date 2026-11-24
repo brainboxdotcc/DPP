@@ -213,14 +213,14 @@ jobs:
       - name: Run offline unit tests
         run: cd build/library && ./unittest
 
-   haiku: # x64 only because 32-bit Haiku requires an ancient GCC build
+  haiku: # x64 only because 32-bit Haiku requires an ancient GCC build
     permissions:
       contents: write
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}-haiku-x86_64
       cancel-in-progress: true
     name: Haiku x86_64
-    runs-on: ${{ matrix.cfg.os }}
+    runs-on: ubuntu-latest
     continue-on-error: true # TODO: Make sure to remove once builds are stable
     timeout-minutes: 90
     defaults:
@@ -242,7 +242,7 @@ jobs:
           architecture: x86-64
           version: 'r1beta6'
           memory: 4G
-          cpu_count: ${{ matrix.cfg.concurrency }}
+          cpu_count: 4
 
       - name: Install packages
         run: pkgman install -y cmake make gcc pkgconfig openssl3_devel opus_devel zlib_devel
