@@ -245,7 +245,7 @@ jobs:
           cpu_count: 4
 
       - name: Install packages
-        run: pkgman install -y cmake make gcc pkgconfig openssl3_devel opus_devel zlib_devel
+        run: pkgman refresh && pkgman install -y cmake make gcc pkgconfig openssl3_devel opus_devel zlib_devel
 
       - name: Generate CMake
         run: cmake -B build -DDPP_NO_VCPKG=ON -DCMAKE_BUILD_TYPE=Release -DAVX_TYPE=AVX0
