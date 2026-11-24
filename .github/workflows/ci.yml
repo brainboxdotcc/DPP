@@ -297,6 +297,7 @@ jobs:
         with:
           name: libdpp-haiku-x86_64-hpkg
           path: dist/*.hpkg
+          archive: 'false'
           if-no-files-found: error
 
   windows: # Windows x64 and x86 build matrix
