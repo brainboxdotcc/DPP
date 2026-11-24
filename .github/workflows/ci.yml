@@ -219,7 +219,7 @@ jobs:
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}-haiku-x86_64
       cancel-in-progress: true
-    name: Haiku x86_64
+    name: Haiku x86_64 (g++-15)
     runs-on: ubuntu-latest
     continue-on-error: true # TODO: Make sure to remove once builds are stable
     timeout-minutes: 90
