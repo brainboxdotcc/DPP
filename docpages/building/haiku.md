@@ -1,5 +1,6 @@
 \page buildhaiku Building on Haiku
 
+\note You might not need to build a copy of the library for Haiku - a precompiled hpkg binary for x86_64 is provided in the GitHub version releases. Unless you wish to submit fixes and enhancements to the library itself you should have an easier time installing the precompiled version instead.
 
 ## 1. Build Source Code
 
