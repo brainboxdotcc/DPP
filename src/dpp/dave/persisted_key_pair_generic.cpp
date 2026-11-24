@@ -29,7 +29,8 @@
 #include <mutex>
 #include <functional>
 #include <iostream>
-#ifdef _WIN32
+#include <dpp/system.h>
+#ifdef DPP_USE_WINDOWS
 	#include <io.h>
 #else
 	#include <unistd.h>
@@ -131,7 +132,7 @@ std::shared_ptr<::mlspp::SignaturePrivateKey> get_generic_persisted_key_pair(dpp
 		std::filesystem::path tmpfile = file;
 		tmpfile += ".tmp";
 
-#ifdef _WIN32
+#ifdef DPP_USE_WINDOWS
 		int fd = _wopen(tmpfile.c_str(), _O_WRONLY | _O_CREAT | _O_TRUNC, _S_IREAD | _S_IWRITE);
 #else
 		int fd = open(tmpfile.c_str(), O_WRONLY | O_CLOEXEC | O_NOFOLLOW | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
@@ -141,7 +142,7 @@ std::shared_ptr<::mlspp::SignaturePrivateKey> get_generic_persisted_key_pair(dpp
 			return nullptr;
 		}
 
-#ifdef _WIN32
+#ifdef DPP_USE_WINDOWS
 		int written = _write(fd, newstr.c_str(), static_cast<unsigned int>(newstr.size()));
 		_close(fd);
 #else

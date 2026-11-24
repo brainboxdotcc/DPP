@@ -74,7 +74,6 @@ template <typename T> bool raii_socket::set_option(int level, int name, T value)
 
 template bool raii_socket::set_option<int>(int, int, int);
 template bool raii_socket::set_option<bool>(int, int, bool);
-template bool raii_socket::set_option<socklen_t>(int, int, socklen_t);
 
 bool raii_socket::listen() {
 	return ::listen(fd, SOMAXCONN) >= 0;

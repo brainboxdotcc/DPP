@@ -79,7 +79,7 @@ wrapped_ssl_ctx* generate_ssl_context(uint16_t port, const std::string &private_
 		 * and other flags are not used as required."
 		 */
 		SSL_CTX_set_verify(context->context, SSL_VERIFY_PEER, nullptr);
-#ifdef _WIN32
+#ifdef DPP_USE_WINDOWS
 		/* Load certificates from windows certificate storage */
 		if (SSL_CTX_load_verify_store(context->context, "org.openssl.winstore:") != 1) {
 			throw dpp::connection_exception(err_ssl_context, "Failed to load Windows CA verify store");
