@@ -269,7 +269,7 @@ jobs:
 
       - name: Create HPKG
         run: |
-          VERSION="git~${{ github.sha }}~${{ matrix.build_type }}"
+          VERSION="${{ github.sha }}"
           PKG_NAME="${{ matrix.pkg_name }}"
           rm -rf staging && mkdir -p staging dist
           DESTDIR="$PWD/staging" cmake --install build
