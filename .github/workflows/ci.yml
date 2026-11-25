@@ -296,8 +296,8 @@ jobs:
                 }
           EOF
 
-          package create -C staging "$PWD/dist/lib${PKG_NAME}-${VERSION}-1-x86_64.hpkg"
-          package list "dist/lib${PKG_NAME}-${VERSION}-1-x86_64.hpkg"   # sanity check
+          package create -C staging "$PWD/dist/lib${PKG_NAME}-x86_64.hpkg"
+          package list "dist/lib${PKG_NAME}-x86_64.hpkg"   # sanity check
 
       - name: Sync files back to runner
         shell: bash
