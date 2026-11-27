@@ -253,9 +253,12 @@ void commandhandler::route(const struct dpp::message_create_t& event)
 								dpp::resolved_user m;
 								m.user = *u;
 								dpp::guild* g = dpp::find_guild(event.msg.guild_id);
-								if (g->members.find(uid) != g->members.end()) {
-									m.member = g->members[uid];
-								}
+								g->members.read([&](const auto& members) {
+									auto it = members.find(uid);
+									if (it != members.end()) {
+										m.member = it->second;
+									}
+								});
 								param = m;
 							}
 
@@ -361,9 +364,12 @@ void commandhandler::route(const struct slashcommand_t & event)
 						dpp::resolved_user m;
 						m.user = *u;
 						dpp::guild* g = dpp::find_guild(event.command.guild_id);
-						if (g->members.find(uid) != g->members.end()) {
-							m.member = g->members[uid];
-						}
+						g->members.read([&](const auto& members) {
+							auto it = members.find(uid);
+							if (it != members.end()) {
+								m.member = it->second;
+							}
+						});
 						param = m;
 					} else {
 						/* Otherwise use interaction resolved fields */
