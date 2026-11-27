@@ -213,6 +213,103 @@ jobs:
       - name: Run offline unit tests
         run: cd build/library && ./unittest
 
+  haiku: # x64 only because 32-bit Haiku requires an ancient GCC build
+    permissions:
+      contents: write
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}-haiku-x86_64-${{ matrix.build_type }}
+      cancel-in-progress: true
+    name: Haiku x86_64 (g++-15)
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - build_type: Release
+            suffix: release
+            pkg_name: dpp
+          - build_type: Debug
+            suffix: debug
+            pkg_name: dpp_dbg
+    defaults:
+      run:
+        shell: cpa.sh {0}
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43 # v2.22.3
+        with:
+          egress-policy: audit
+
+      - name: Checkout D++
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Start VM
+        uses: cross-platform-actions/action@v1.8.0
+        with:
+          operating_system: haiku
+          architecture: x86-64
+          version: 'r1beta6'
+          memory: 4G
+          cpu_count: 4
+
+      - name: Install packages
+        run: pkgman refresh && pkgman install -y cmake make gcc pkgconfig openssl3_devel opus_devel zlib_devel
+
+      - name: Generate CMake
+        run: cmake -B build -DDPP_NO_VCPKG=ON -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DAVX_TYPE=AVX0
+
+      - name: Build Project
+        run: |
+          ulimit -a | grep -i "open files" || true
+          ulimit -n 8192 || ulimit -n $(ulimit -Hn)
+          ulimit -n
+          cmake --build build -j4
+
+      - name: Create HPKG
+        run: |
+          VERSION="${{ github.sha }}"
+          PKG_NAME="${{ matrix.pkg_name }}_${{ matrix.suffix }}"
+          rm -rf staging && mkdir -p staging dist
+          DESTDIR="$PWD/staging" cmake --install build
+
+          cat > staging/.PackageInfo <<EOF
+          name ${PKG_NAME}
+          version ${VERSION}-1
+          architecture x86_64
+                summary "D++ - The C++ Discord API Library (${{ matrix.build_type }})"
+                description "a lightweight and simple library for Discord written in modern C++"
+                packager "DPP CI"
+                vendor "brainboxdotcc"
+                copyrights { "2021-2026 D++ contributors" }
+                licenses { "Apache v2" }
+                provides {
+                    ${PKG_NAME} = ${VERSION}
+                }
+                requires {
+                    haiku
+                    lib:libssl
+                    lib:libcrypto
+                    lib:libopus
+                    lib:libz
+                }
+          EOF
+
+          package create -C staging "$PWD/dist/lib${PKG_NAME}-x86_64.hpkg"
+          package list "dist/lib${PKG_NAME}-x86_64.hpkg"   # sanity check
+
+      - name: Sync files back to runner
+        shell: bash
+        run: cpa.sh --sync-files
+
+      - name: Upload HPKG artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: libdpp-haiku-x86_64-${{ matrix.suffix }}-hpkg
+          path: dist/*.hpkg
+          archive: 'false'
+          if-no-files-found: error
+
   windows: # Windows x64 and x86 build matrix
     permissions:
       contents: write
